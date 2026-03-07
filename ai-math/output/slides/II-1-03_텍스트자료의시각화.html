@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>03 텍스트 자료의 시각화 | Ⅱ-1 텍스트 자료의 표현</title>
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css" />
+
+  <!-- Google Fonts: Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+
+  <!-- MathJax -->
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ===== GLOBAL RESET & FONT ===== */
+    :root {
+      --bg:        #0a0f1e;
+      --text:      #e8f4fd;
+      --cyan:      #00d4ff;
+      --amber:     #ffb347;
+      --green:     #39d98a;
+      --pink:      #ff6b9d;
+      --purple:    #a78bfa;
+      --red:       #ff4757;
+      --blue:      #45b7d1;
+      --sage:      #96ceb4;
+      --card-bg:   rgba(255,255,255,0.07);
+      --card-border: rgba(255,255,255,0.15);
+    }
+
+    html, body {
+      background: var(--bg) !important;
+      font-family: 'Noto Sans KR', sans-serif !important;
+    }
+
+    .reveal {
+      font-family: 'Noto Sans KR', sans-serif !important;
+      font-size: 28px;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    /* Override theme background */
+    .reveal .backgrounds {
+      background: var(--bg);
+    }
+
+    /* ===== HEADINGS ===== */
+    .reveal h1 {
+      font-family: 'Noto Sans KR', sans-serif !important;
+      font-size: 1.8em;
+      font-weight: 900;
+      color: var(--cyan);
+      line-height: 1.3;
+      text-shadow: 0 0 30px rgba(0,212,255,0.4);
+    }
+
+    .reveal h2 {
+      font-family: 'Noto Sans KR', sans-serif !important;
+      font-size: 1.4em;
+      font-weight: 700;
+      color: var(--cyan);
+      border-bottom: 2px solid rgba(0,212,255,0.4);
+      padding-bottom: 0.3em;
+      margin-bottom: 0.6em;
+      text-shadow: 0 0 20px rgba(0,212,255,0.3);
+    }
+
+    .reveal h3 {
+      font-family: 'Noto Sans KR', sans-serif !important;
+      font-size: 1.1em;
+      font-weight: 700;
+      color: var(--amber);
+    }
+
+    .reveal p, .reveal li, .reveal td, .reveal th {
+      font-family: 'Noto Sans KR', sans-serif !important;
+      font-size: 1em;
+      line-height: 1.7;
+    }
+
+    /* ===== SLIDE BASE ===== */
+    .reveal .slides section {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 0.5em 1em;
+    }
+
+    /* ===== CARD / BOX ===== */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 0.8em 1.2em;
+    }
+
+    .card-cyan {
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.35);
+      border-radius: 12px;
+      padding: 0.8em 1.2em;
+    }
+
+    .card-amber {
+      background: rgba(255,179,71,0.08);
+      border: 1px solid rgba(255,179,71,0.35);
+      border-radius: 12px;
+      padding: 0.8em 1.2em;
+    }
+
+    .card-green {
+      background: rgba(57,217,138,0.08);
+      border: 1px solid rgba(57,217,138,0.35);
+      border-radius: 12px;
+      padding: 0.8em 1.2em;
+    }
+
+    /* ===== DEFINITION BOX ===== */
+    .def-box {
+      background: rgba(0,212,255,0.06);
+      border-left: 5px solid var(--cyan);
+      border-radius: 0 12px 12px 0;
+      padding: 0.9em 1.4em;
+      margin: 0.6em 0;
+    }
+
+    .def-box .def-label {
+      font-size: 0.75em;
+      font-weight: 700;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 0.3em;
+    }
+
+    .def-box .def-text {
+      font-size: 1.05em;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ===== GRID LAYOUTS ===== */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.8em;
+    }
+
+    .grid-2x3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 0.8em;
+    }
+
+    /* ===== VIZ TYPE CARD ===== */
+    .viz-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 0.8em;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .viz-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--cyan);
+    }
+
+    .viz-card .viz-icon {
+      font-size: 2em;
+      margin-bottom: 0.2em;
+    }
+
+    .viz-card .viz-name {
+      font-size: 0.85em;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 0.2em;
+    }
+
+    .viz-card .viz-sub {
+      font-size: 0.65em;
+      color: rgba(232,244,253,0.7);
+      line-height: 1.4;
+    }
+
+    /* ===== TABLE ===== */
+    .reveal table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.9em;
+    }
+
+    .reveal table th {
+      background: rgba(0,212,255,0.15);
+      color: var(--cyan);
+      font-weight: 700;
+      padding: 0.25em 0.6em;
+      border: 1px solid var(--card-border);
+      text-align: center;
+    }
+
+    .reveal table td {
+      padding: 0.25em 0.6em;
+      border: 1px solid var(--card-border);
+      text-align: center;
+      color: var(--text);
+    }
+
+    .reveal table td, .reveal table th { line-height: 1.45; }
+
+    .reveal table tr:nth-child(even) td {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .reveal table tr.highlight td {
+      background: rgba(0,212,255,0.12);
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    .reveal table tr.total-row td {
+      background: rgba(57,217,138,0.1);
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    /* ===== BADGE ===== */
+    .badge {
+      display: inline-block;
+      padding: 0.2em 0.7em;
+      border-radius: 20px;
+      font-size: 0.7em;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .badge-cyan  { background: rgba(0,212,255,0.2);  color: var(--cyan);   border: 1px solid var(--cyan); }
+    .badge-amber { background: rgba(255,179,71,0.2); color: var(--amber);  border: 1px solid var(--amber); }
+    .badge-green { background: rgba(57,217,138,0.2); color: var(--green);  border: 1px solid var(--green); }
+
+    /* ===== CHART CONTAINERS ===== */
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      max-height: 380px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .chart-wrapper canvas {
+      max-height: 360px !important;
+    }
+
+    /* ===== WORD CLOUD ===== */
+    .word-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6em 1em;
+      padding: 1em;
+      min-height: 220px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+    }
+
+    .wc-word {
+      display: inline-block;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 900;
+      line-height: 1.2;
+      transition: transform 0.3s ease;
+      cursor: default;
+      animation: wc-float 4s ease-in-out infinite;
+    }
+
+    .wc-word:hover {
+      transform: scale(1.15);
+      filter: brightness(1.3);
+    }
+
+    @keyframes wc-float {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-6px); }
+    }
+
+    .wc-tf4-a { font-size: 3.2em; color: var(--cyan);   animation-delay: 0.0s; }
+    .wc-tf4-b { font-size: 3.2em; color: var(--green);  animation-delay: 0.5s; }
+    .wc-tf3-a { font-size: 2.2em; color: var(--amber);  animation-delay: 1.0s; }
+    .wc-tf3-b { font-size: 2.2em; color: var(--purple); animation-delay: 1.5s; }
+    .wc-tf2   { font-size: 1.7em; color: var(--pink);   animation-delay: 2.0s; }
+    .wc-tf1   { font-size: 1.25em; color: #8db4d4;      animation-delay: 2.3s; }
+
+    /* ===== STEP BOX ===== */
+    .step-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8em;
+      padding: 0.6em 1em;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      margin-bottom: 0.5em;
+    }
+
+    .step-num {
+      font-size: 1.3em;
+      min-width: 2em;
+      text-align: center;
+    }
+
+    .step-desc {
+      font-size: 0.9em;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ===== TITLE SLIDE ===== */
+    .title-slide {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+    }
+
+    .title-slide .chapter-label {
+      font-size: 0.75em;
+      color: rgba(232,244,253,0.6);
+      margin-bottom: 0.5em;
+      letter-spacing: 1px;
+    }
+
+    .title-slide .main-title {
+      font-size: 2em;
+      font-weight: 900;
+      color: var(--cyan);
+      text-shadow: 0 0 40px rgba(0,212,255,0.5);
+      margin: 0.3em 0;
+      line-height: 1.3;
+    }
+
+    .title-slide .subtitle {
+      font-size: 0.85em;
+      color: var(--amber);
+      margin-top: 0.5em;
+    }
+
+    .title-slide .achievement {
+      margin-top: 1.2em;
+      padding: 0.6em 1.5em;
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 30px;
+      font-size: 0.72em;
+      color: rgba(232,244,253,0.8);
+    }
+
+    /* ===== OBJECTIVE SLIDE ===== */
+    .objective-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8em;
+      padding: 0.7em 1.1em;
+      background: var(--card-bg);
+      border-left: 4px solid var(--cyan);
+      border-radius: 0 10px 10px 0;
+      margin-bottom: 0.7em;
+      font-size: 0.95em;
+    }
+
+    .objective-item .obj-icon {
+      font-size: 1.3em;
+    }
+
+    /* ===== COMPARE TABLE ===== */
+    .compare-table th:first-child { width: 18%; }
+    .compare-table td:first-child { font-weight: 700; color: var(--amber); text-align: left; }
+
+    /* ===== BLANK QUIZ ===== */
+    .quiz-item {
+      padding: 0.5em 1em;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      margin-bottom: 0.4em;
+      font-size: 0.92em;
+      line-height: 1.6;
+    }
+
+    .blank { color: var(--amber); font-weight: 700; }
+    .answer { color: var(--green); font-weight: 700; font-size: 1.05em; }
+
+    /* ===== MATH ===== */
+    .math-box {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 0.6em 1.2em;
+      text-align: center;
+      font-size: 0.9em;
+    }
+
+    /* ===== NOTES STYLING ===== */
+    .reveal aside.notes {
+      font-size: 0.9em;
+    }
+
+    /* ===== HIGHLIGHT TEXT ===== */
+    .hl-cyan   { color: var(--cyan);   font-weight: 700; }
+    .hl-amber  { color: var(--amber);  font-weight: 700; }
+    .hl-green  { color: var(--green);  font-weight: 700; }
+    .hl-pink   { color: var(--pink);   font-weight: 700; }
+    .hl-purple { color: var(--purple); font-weight: 700; }
+
+    /* ===== PROGRESS DOTS ===== */
+    .slide-progress {
+      font-size: 0.65em;
+      color: rgba(232,244,253,0.4);
+      text-align: right;
+      margin-bottom: 0.2em;
+    }
+
+    /* ===== NOTE BOX ===== */
+    .note-box {
+      background: rgba(255,179,71,0.08);
+      border: 1px solid rgba(255,179,71,0.3);
+      border-radius: 8px;
+      padding: 0.5em 1em;
+      font-size: 0.82em;
+      color: rgba(232,244,253,0.85);
+      margin-top: 0.6em;
+    }
+
+    .note-box .note-label {
+      font-weight: 700;
+      color: var(--amber);
+      margin-right: 0.5em;
+    }
+
+    /* Summary list */
+    .summary-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .summary-list li {
+      padding: 0.4em 0;
+      padding-left: 1.5em;
+      position: relative;
+    }
+
+    .summary-list li::before {
+      content: '▶';
+      position: absolute;
+      left: 0;
+      color: var(--cyan);
+      font-size: 0.7em;
+      top: 0.55em;
+    }
+
+    /* Two column sub layout */
+    .col-label {
+      font-size: 0.72em;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 0.4em;
+      padding: 0.2em 0.7em;
+      border-radius: 4px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================================================
+         SLIDE 1 — TITLE
+         ============================================================ -->
+    <section id="title-slide" data-background-gradient="radial-gradient(ellipse at 30% 50%, rgba(0,212,255,0.08) 0%, transparent 60%), radial-gradient(ellipse at 70% 20%, rgba(57,217,138,0.06) 0%, transparent 50%), #0a0f1e">
+      <div class="title-slide">
+        <div class="chapter-label">고등학교 인공지능 수학 &nbsp;|&nbsp; 미래엔</div>
+        <div class="chapter-label" style="margin-top:0.2em;">Ⅱ. 자료의 표현 &gt; 1. 텍스트 자료의 표현</div>
+        <div class="main-title">03&nbsp; 텍스트 자료의 시각화</div>
+        <div class="subtitle">텍스트 자료를 목적에 맞는 시각화 방법으로 표현하기</div>
+        <div class="achievement">
+          성취기준&nbsp;&nbsp;<span class="badge badge-cyan">12인수02-01</span>&nbsp;&nbsp;
+          수와 수학 기호로 표현된 텍스트 자료를 시각화할 수 있다.
+        </div>
+      </div>
+      <aside class="notes">
+        교수자 안내: 오늘은 텍스트 자료를 다양한 방법으로 시각화하는 방법을 배웁니다.
+        이전 차시에서 학습한 TF(단어 빈도수) 개념을 활용합니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 2 — 학습목표
+         ============================================================ -->
+    <section id="objectives-slide">
+      <div class="slide-progress">Slide 2 / 15</div>
+      <h2>학습 목표</h2>
+      <br/>
+      <div class="objective-item fragment fade-up">
+        <span class="obj-icon">①</span>
+        <span>시각화의 <span class="hl-cyan">의미</span>와 <span class="hl-cyan">6가지 유형</span>을 설명할 수 있다.</span>
+      </div>
+      <div class="objective-item fragment fade-up">
+        <span class="obj-icon">②</span>
+        <span>텍스트 자료를 <span class="hl-amber">표</span>, <span class="hl-amber">막대그래프</span>, <span class="hl-amber">원그래프</span>, <span class="hl-amber">단어 구름</span>으로 시각화할 수 있다.</span>
+      </div>
+      <div class="objective-item fragment fade-up">
+        <span class="obj-icon">③</span>
+        <span>텍스트 자료에 가장 <span class="hl-green">적합한 시각화 방법</span>을 선택하고 그 이유를 설명할 수 있다.</span>
+      </div>
+      <aside class="notes">
+        학습 목표를 하나씩 클릭하며 소개합니다. 학생들에게 오늘 수업이 끝나면 이 세 가지를 할 수 있을 것이라고 안내하세요.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 3 — 시각화란?
+         ============================================================ -->
+    <section id="viz-intro-slide">
+      <div class="slide-progress">Slide 3 / 15</div>
+      <h2>시각화(Visualization)란?</h2>
+
+      <div class="def-box">
+        <div class="def-label">정의 (Definition)</div>
+        <div class="def-text">
+          자료의 분석 결과를 <span class="hl-cyan">쉽게 이해할 수 있도록 시각적으로 표현</span>하여
+          효과적으로 전달하는 과정
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:0.9em; gap:0.8em;">
+        <div class="card" style="padding:0.9em 1.2em;">
+          <h3 style="font-size:0.9em; margin-bottom:0.4em;">왜 시각화가 필요할까?</h3>
+          <ul class="summary-list" style="font-size:0.82em;">
+            <li>방대한 데이터를 빠르게 이해</li>
+            <li>숫자만으로는 보이지 않는 패턴 발견</li>
+            <li>다양한 청중에게 직관적으로 전달</li>
+            <li>의사결정 속도 향상</li>
+          </ul>
+        </div>
+        <div class="card" style="padding:0.9em 1.2em;">
+          <h3 style="font-size:0.9em; margin-bottom:0.4em;">교과서 핵심 문장</h3>
+          <div style="font-size:0.82em; line-height:1.7; color:rgba(232,244,253,0.85); font-style:italic; border-left:3px solid var(--amber); padding-left:0.8em;">
+            "양이 많고 정돈되지 않은 자료로부터 필요한 정보를 효율적으로 제공하기 위해
+            <span class="hl-amber">시각화를 많이 이용한다.</span>"
+          </div>
+          <div style="font-size:0.68em; margin-top:0.5em; color:rgba(232,244,253,0.5);">— 미래엔 고등 인공지능 수학, p.39</div>
+        </div>
+      </div>
+
+      <div class="note-box" style="margin-top:0.8em;">
+        <span class="note-label">핵심 키워드</span>
+        데이터 &rarr; <span class="hl-cyan">시각화</span> &rarr; 정보 &rarr; 인사이트 &rarr; 의사결정
+      </div>
+
+      <aside class="notes">
+        비유: "시각화는 지도와 같습니다. 숫자만 나열된 거리표보다 지도 한 장이 목적지를 찾는 데 훨씬 빠릅니다."
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 4 — 시각화 6유형 (grid)
+         ============================================================ -->
+    <section id="viz-types-slide">
+      <div class="slide-progress">Slide 4 / 15</div>
+      <h2>시각화 방법의 6가지 유형</h2>
+
+      <div class="grid-2x3">
+        <div class="viz-card fragment fade-up" data-fragment-index="1">
+          <div class="viz-icon">🕐</div>
+          <div class="viz-name">시간 시각화</div>
+          <div class="viz-sub">시간에 따른 변화 표현<br/>막대그래프, 선 그래프</div>
+        </div>
+        <div class="viz-card fragment fade-up" data-fragment-index="2">
+          <div class="viz-icon">🥧</div>
+          <div class="viz-name">분포 시각화</div>
+          <div class="viz-sub">전체 대비 각 부분의 비율<br/>원그래프, 도넛그래프, 단어 구름</div>
+        </div>
+        <div class="viz-card fragment fade-up" data-fragment-index="3">
+          <div class="viz-icon">🔵</div>
+          <div class="viz-name">관계 시각화</div>
+          <div class="viz-sub">두 변수 사이 관계 표현<br/>산점도, 버블그래프</div>
+        </div>
+        <div class="viz-card fragment fade-up" data-fragment-index="4">
+          <div class="viz-icon">📊</div>
+          <div class="viz-name">비교 시각화</div>
+          <div class="viz-sub">여러 변수 비교 표현<br/>레이더그래프, 다차원 척도법</div>
+        </div>
+        <div class="viz-card fragment fade-up" data-fragment-index="5">
+          <div class="viz-icon">🗺️</div>
+          <div class="viz-name">공간 시각화</div>
+          <div class="viz-sub">지도 등 공간 정보 표현<br/>지도 매핑</div>
+        </div>
+        <div class="viz-card fragment fade-up" data-fragment-index="6">
+          <div class="viz-icon">🌳</div>
+          <div class="viz-name">구조 시각화</div>
+          <div class="viz-sub">계층적 정보 한눈에 파악<br/>의사 결정 나무, 표</div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        각 카드를 클릭할 때마다 하나씩 나타납니다. 학생들에게 어떤 유형이 텍스트 자료에 어울릴지 생각해 보도록 질문하세요.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 5 — 시간 시각화 & 분포 시각화 상세
+         ============================================================ -->
+    <section id="viz-types-1-slide">
+      <div class="slide-progress">Slide 5 / 15</div>
+      <h2>시각화 유형 상세 ① — 시간 / 분포</h2>
+
+      <div class="grid-2" style="gap:1em; margin-top:0.3em;">
+        <!-- 시간 시각화 -->
+        <div style="display:flex; flex-direction:column; gap:0.6em;">
+          <div class="card-cyan" style="text-align:center;">
+            <h3 style="font-size:0.95em; color:var(--cyan); margin:0 0 0.3em;">🕐 시간 시각화</h3>
+            <p style="font-size:0.78em; margin:0 0 0.5em; color:rgba(232,244,253,0.8);">시간에 따른 자료의 <span class="hl-cyan">변화량</span>을 표현</p>
+            <div style="display:flex; gap:0.5em; justify-content:center; flex-wrap:wrap;">
+              <span class="badge badge-cyan">막대그래프</span>
+              <span class="badge badge-cyan">선 그래프</span>
+            </div>
+          </div>
+          <!-- Mini bar chart illustration -->
+          <div style="background:rgba(0,0,0,0.2); border-radius:10px; padding:0.8em; font-size:0.75em; color:rgba(232,244,253,0.7);">
+            <div style="margin-bottom:0.4em; font-weight:700; color:var(--cyan); font-size:0.9em;">예: 월별 판매량</div>
+            <div style="display:flex; align-items:flex-end; gap:6px; height:80px;">
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+                <div style="background:var(--cyan); width:100%; height:40px; border-radius:3px 3px 0 0;"></div>
+                <span style="font-size:0.8em;">1월</span>
+              </div>
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+                <div style="background:var(--cyan); width:100%; height:55px; border-radius:3px 3px 0 0;"></div>
+                <span style="font-size:0.8em;">2월</span>
+              </div>
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+                <div style="background:var(--cyan); width:100%; height:70px; border-radius:3px 3px 0 0;"></div>
+                <span style="font-size:0.8em;">3월</span>
+              </div>
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+                <div style="background:var(--cyan); width:100%; height:50px; border-radius:3px 3px 0 0;"></div>
+                <span style="font-size:0.8em;">4월</span>
+              </div>
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+                <div style="background:var(--cyan); width:100%; height:62px; border-radius:3px 3px 0 0;"></div>
+                <span style="font-size:0.8em;">5월</span>
+              </div>
+            </div>
+            <div style="margin-top:0.5em; font-size:0.85em;">→ 시간 흐름에 따른 <span class="hl-cyan">증감 패턴</span> 파악 용이</div>
+          </div>
+        </div>
+
+        <!-- 분포 시각화 -->
+        <div style="display:flex; flex-direction:column; gap:0.6em;">
+          <div class="card-amber" style="text-align:center;">
+            <h3 style="font-size:0.95em; color:var(--amber); margin:0 0 0.3em;">🥧 분포 시각화</h3>
+            <p style="font-size:0.78em; margin:0 0 0.5em; color:rgba(232,244,253,0.8);">전체 대비 각 부분의 <span class="hl-amber">비율</span>을 표현</p>
+            <div style="display:flex; gap:0.5em; justify-content:center; flex-wrap:wrap;">
+              <span class="badge badge-amber">원그래프</span>
+              <span class="badge badge-amber">도넛그래프</span>
+              <span class="badge badge-amber">단어 구름</span>
+            </div>
+          </div>
+          <!-- Mini pie illustration -->
+          <div style="background:rgba(0,0,0,0.2); border-radius:10px; padding:0.8em; font-size:0.75em; color:rgba(232,244,253,0.7);">
+            <div style="margin-bottom:0.4em; font-weight:700; color:var(--amber); font-size:0.9em;">예: 반 학생 선호 과목 비율</div>
+            <div style="display:flex; align-items:center; gap:1em;">
+              <div style="width:80px; height:80px; border-radius:50%; background:conic-gradient(var(--cyan) 0% 35%, var(--amber) 35% 60%, var(--green) 60% 80%, var(--pink) 80% 100%); flex-shrink:0;"></div>
+              <div style="font-size:0.88em; display:flex; flex-direction:column; gap:3px;">
+                <span><span style="color:var(--cyan);">■</span> 수학 35%</span>
+                <span><span style="color:var(--amber);">■</span> 과학 25%</span>
+                <span><span style="color:var(--green);">■</span> 영어 20%</span>
+                <span><span style="color:var(--pink);">■</span> 기타 20%</span>
+              </div>
+            </div>
+            <div style="margin-top:0.5em; font-size:0.85em;">→ 전체에 대한 <span class="hl-amber">비율 파악</span> 용이</div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        시간 시각화: "X축은 시간, Y축은 값" — 변화 추이를 보고 싶을 때 사용합니다.
+        분포 시각화: "전체 파이 중 내 몫이 얼마?" — 비율을 보고 싶을 때 사용합니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 6 — 관계 / 비교 / 공간 / 구조 시각화
+         ============================================================ -->
+    <section id="viz-types-2-slide">
+      <div class="slide-progress">Slide 6 / 15</div>
+      <h2>시각화 유형 상세 ② — 관계 / 비교 / 공간 / 구조</h2>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.7em; margin-top:0.3em;">
+        <div class="card" style="padding:0.8em 1em;">
+          <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <span style="font-size:1.5em;">🔵</span>
+            <h3 style="font-size:0.88em; margin:0; color:var(--cyan);">관계 시각화</h3>
+          </div>
+          <ul class="summary-list" style="font-size:0.76em;">
+            <li>두 변수 사이의 <span class="hl-cyan">관계·패턴</span> 표현</li>
+            <li>산점도: 두 변수를 x·y 좌표로 표시</li>
+            <li>버블그래프: 크기로 제3 변수 표현</li>
+          </ul>
+        </div>
+        <div class="card" style="padding:0.8em 1em;">
+          <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <span style="font-size:1.5em;">📊</span>
+            <h3 style="font-size:0.88em; margin:0; color:var(--amber);">비교 시각화</h3>
+          </div>
+          <ul class="summary-list" style="font-size:0.76em;">
+            <li>여러 변수를 동시에 <span class="hl-amber">비교</span></li>
+            <li>레이더그래프: 다각형으로 다변수 표현</li>
+            <li>다차원 척도법: 복잡한 관계를 2D로</li>
+          </ul>
+        </div>
+        <div class="card" style="padding:0.8em 1em;">
+          <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <span style="font-size:1.5em;">🗺️</span>
+            <h3 style="font-size:0.88em; margin:0; color:var(--green);">공간 시각화</h3>
+          </div>
+          <ul class="summary-list" style="font-size:0.76em;">
+            <li>지도 등 <span class="hl-green">공간에 정보</span> 표현</li>
+            <li>점·선의 색상과 크기 활용</li>
+            <li>예: 인구 분포 지도, 열지도(heatmap)</li>
+          </ul>
+        </div>
+        <div class="card" style="padding:0.8em 1em;">
+          <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <span style="font-size:1.5em;">🌳</span>
+            <h3 style="font-size:0.88em; margin:0; color:var(--purple);">구조 시각화</h3>
+          </div>
+          <ul class="summary-list" style="font-size:0.76em;">
+            <li>계층적 정보를 <span class="hl-purple">구조화</span>하여 표현</li>
+            <li>의사 결정 나무: 분류 기준 시각화</li>
+            <li>표: 행·열로 정보 정리</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="note-box" style="margin-top:0.6em;">
+        <span class="note-label">오늘의 핵심</span>
+        텍스트 자료의 시각화에는 주로 <span class="hl-cyan">분포 시각화</span>(원그래프, 단어 구름)와 <span class="hl-amber">시간/비교 시각화</span>(막대그래프)가 활용됩니다.
+      </div>
+
+      <aside class="notes">
+        6가지 유형 중 오늘 수업의 핵심은 분포 시각화입니다. 특히 텍스트 자료에서 단어 빈도수를 표현하는 단어 구름이 분포 시각화의 대표적 예입니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 7 — 텍스트 자료 시각화 도입
+         ============================================================ -->
+    <section id="data-intro-slide">
+      <div class="slide-progress">Slide 7 / 15</div>
+      <h2>텍스트 자료를 어떻게 시각화할까?</h2>
+
+      <div class="card-cyan" style="margin-bottom:0.8em;">
+        <h3 style="font-size:0.9em; color:var(--cyan); margin:0 0 0.5em;">복습: 의류 쇼핑몰 후기 말뭉치 데이터</h3>
+        <div class="math-box" style="margin-bottom:0.6em;">
+          <div style="font-size:0.85em; margin-bottom:0.3em; color:rgba(232,244,253,0.7);">단어 사전</div>
+          <div style="font-size:0.95em; color:var(--text);">
+            \( U = \{ \text{청바지, 추천, 예쁘다, 저렴하다, 가격, 디자인, 좋다, 신축성} \} \)
+          </div>
+        </div>
+        <div class="math-box">
+          <div style="font-size:0.85em; margin-bottom:0.3em; color:rgba(232,244,253,0.7);">말뭉치 벡터 (TF)</div>
+          <div style="font-size:1em; color:var(--cyan); font-weight:700;">
+            \( \vec{U} = (4,\ 4,\ 1,\ 1,\ 2,\ 3,\ 3,\ 1) \)
+          </div>
+        </div>
+      </div>
+
+      <div class="note-box" style="margin-bottom:0.6em;">
+        <span class="note-label">이전 단원 연결</span>
+        단어의 등장 횟수 = <span class="hl-cyan">TF (Term Frequency)</span> = 빈도수
+      </div>
+
+      <div style="text-align:center; font-size:0.9em; padding:0.6em; background:rgba(57,217,138,0.07); border-radius:10px; border:1px solid rgba(57,217,138,0.25);">
+        이 벡터 데이터를 <span class="hl-green">표 → 막대그래프 → 원그래프 → 단어 구름</span> 순으로 시각화해 봅시다!
+      </div>
+
+      <aside class="notes">
+        이전 단원에서 배운 TF 개념과 연결합니다. 벡터 (4,4,1,1,2,3,3,1)은 각각 청바지:4, 추천:4, 예쁘다:1, 저렴하다:1, 가격:2, 디자인:3, 좋다:3, 신축성:1 을 의미합니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 8 — 표로 시각화
+         ============================================================ -->
+    <section id="table-slide">
+      <div class="slide-progress">Slide 8 / 15</div>
+      <h2>표로 시각화하기</h2>
+
+      <table style="margin: 0.3em auto; font-size:0.88em; width:85%;">
+        <thead>
+          <tr>
+            <th>단어</th>
+            <th>빈도수 (TF)</th>
+            <th>상대도수</th>
+            <th>상대도수 (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="highlight">
+            <td>청바지</td>
+            <td>4</td>
+            <td>0.21</td>
+            <td>21%</td>
+          </tr>
+          <tr class="highlight">
+            <td>추천</td>
+            <td>4</td>
+            <td>0.21</td>
+            <td>21%</td>
+          </tr>
+          <tr>
+            <td>예쁘다</td>
+            <td>1</td>
+            <td>0.05</td>
+            <td>5%</td>
+          </tr>
+          <tr>
+            <td>저렴하다</td>
+            <td>1</td>
+            <td>0.05</td>
+            <td>5%</td>
+          </tr>
+          <tr>
+            <td>가격</td>
+            <td>2</td>
+            <td>0.11</td>
+            <td>11%</td>
+          </tr>
+          <tr>
+            <td>디자인</td>
+            <td>3</td>
+            <td>0.16</td>
+            <td>16%</td>
+          </tr>
+          <tr>
+            <td>좋다</td>
+            <td>3</td>
+            <td>0.16</td>
+            <td>16%</td>
+          </tr>
+          <tr>
+            <td>신축성</td>
+            <td>1</td>
+            <td>0.05</td>
+            <td>5%</td>
+          </tr>
+          <tr class="total-row">
+            <td><strong>합계</strong></td>
+            <td><strong>19</strong></td>
+            <td><strong>1.00</strong></td>
+            <td><strong>100%</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note-box" style="margin-top:0.6em;">
+        <span class="note-label">표의 특징</span>
+        수량을 <span class="hl-cyan">정확하게</span> 알 수 있다.
+        상대도수로 비율도 동시에 확인 가능하다.
+        단, 한눈에 <span class="hl-amber">패턴을 파악하기 어렵다</span>는 단점이 있다.
+      </div>
+
+      <aside class="notes">
+        표는 가장 정확하지만 직관성이 낮습니다. 청바지와 추천이 각각 4회로 빈도가 가장 높음을 확인합니다.
+        상대도수 = (해당 단어 빈도수) ÷ (전체 빈도수 19)
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 9 — 막대그래프
+         ============================================================ -->
+    <section id="bar-slide">
+      <div class="slide-progress">Slide 9 / 15</div>
+      <h2>막대그래프로 시각화하기</h2>
+
+      <div class="chart-wrapper" style="max-height:370px;">
+        <canvas id="barChart" style="max-height:350px;"></canvas>
+      </div>
+
+      <div class="note-box" style="margin-top:0.5em;">
+        <span class="note-label">막대그래프 특징</span>
+        범주별 빈도를 <span class="hl-cyan">막대의 길이</span>로 나타냄 →
+        <span class="hl-amber">청바지</span>와 <span class="hl-amber">추천</span>이 각각 4회로 빈도수가 가장 크다.
+        상대적 크기 비교가 용이하다.
+      </div>
+
+      <aside class="notes">
+        막대그래프는 범주형 데이터의 크기를 비교하기에 가장 적합합니다.
+        Chart.js 애니메이션이 슬라이드 진입 시 자동으로 실행됩니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 10 — 원그래프
+         ============================================================ -->
+    <section id="pie-slide">
+      <div class="slide-progress">Slide 10 / 15</div>
+      <h2>원그래프로 시각화하기</h2>
+
+      <div class="grid-2" style="gap:1em; align-items:center;">
+        <div class="chart-wrapper" style="max-height:330px;">
+          <canvas id="pieChart" style="max-height:320px;"></canvas>
+        </div>
+        <div>
+          <div class="card-cyan" style="margin-bottom:0.7em;">
+            <h3 style="font-size:0.85em; margin:0 0 0.4em;">원그래프 특징</h3>
+            <ul class="summary-list" style="font-size:0.78em;">
+              <li>전체에 대한 각 부분의 <span class="hl-cyan">비율</span> 파악에 최적</li>
+              <li>부채꼴 넓이로 비율 직관적 표현</li>
+            </ul>
+          </div>
+          <div class="card-amber">
+            <h3 style="font-size:0.85em; margin:0 0 0.4em; color:var(--amber);">핵심 분석 결과</h3>
+            <div style="font-size:0.78em; line-height:1.8;">
+              <div><span class="hl-cyan">청바지(21%)</span> + <span class="hl-green">추천(21%)</span></div>
+              <div>+ <span class="hl-purple">디자인(16%)</span> + <span class="hl-amber">좋다(16%)</span></div>
+              <div style="margin-top:0.3em; padding-top:0.3em; border-top:1px solid var(--card-border);">
+                = <span class="hl-pink" style="font-size:1.2em; font-weight:900;">74%</span>
+              </div>
+              <div style="font-size:0.85em; color:rgba(232,244,253,0.7); margin-top:0.2em;">
+                → 쇼핑몰 후기의 핵심 키워드
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        원그래프는 비율을 한눈에 보여줍니다. 74%가 4개 단어에 집중되어 있어 이 쇼핑몰 후기의 핵심은 청바지의 디자인과 추천도임을 알 수 있습니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 11 — 단어 구름
+         ============================================================ -->
+    <section id="wordcloud-slide">
+      <div class="slide-progress">Slide 11 / 15</div>
+      <h2>단어 구름(Word Cloud)으로 시각화하기</h2>
+
+      <div class="word-cloud">
+        <span class="wc-word wc-tf4-a">청바지</span>
+        <span class="wc-word wc-tf4-b">추천</span>
+        <span class="wc-word wc-tf3-a">디자인</span>
+        <span class="wc-word wc-tf3-b">좋다</span>
+        <span class="wc-word wc-tf2">가격</span>
+        <span class="wc-word wc-tf1" style="animation-delay:2.5s;">예쁘다</span>
+        <span class="wc-word wc-tf1" style="animation-delay:2.8s;">저렴하다</span>
+        <span class="wc-word wc-tf1" style="animation-delay:3.1s;">신축성</span>
+      </div>
+
+      <div class="grid-2" style="gap:0.7em; margin-top:0.6em;">
+        <div class="def-box" style="padding:0.6em 1em;">
+          <div class="def-label">단어 구름이란?</div>
+          <div class="def-text" style="font-size:0.82em;">
+            빈도수에 <span class="hl-cyan">비례</span>하여 단어의 <span class="hl-cyan">크기</span>를 나타낸 시각화 방법
+          </div>
+        </div>
+        <div class="note-box" style="margin-top:0;">
+          <span class="note-label">특징</span>
+          빈도 클수록 크게 표시 →
+          <span class="hl-cyan">핵심 내용</span>을 한눈에 파악 가능.
+          <span class="hl-amber">청바지, 추천</span>이 가장 크게 표시됨.
+        </div>
+      </div>
+
+      <aside class="notes">
+        단어 구름은 문서의 핵심 주제를 시각적으로 즉시 파악할 수 있게 해줍니다.
+        글자 크기: 청바지=추천(3.2em) > 디자인=좋다(2.2em) > 가격(1.7em) > 나머지(1.25em)
+        이것이 TF = (4,4,3,3,2,1,1,1)에 비례합니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 12 — 시각화 방법 비교
+         ============================================================ -->
+    <section id="compare-slide">
+      <div class="slide-progress">Slide 12 / 15</div>
+      <h2>어떤 시각화 방법을 선택할까?</h2>
+
+      <table class="compare-table" style="font-size:0.8em; width:100%;">
+        <thead>
+          <tr>
+            <th>방법</th>
+            <th>특징 (장점)</th>
+            <th>적합한 상황</th>
+            <th>한계</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="fragment fade-in" data-fragment-index="1">
+            <td>표</td>
+            <td style="text-align:left;">정확한 수치 확인, 상대도수 병기 가능</td>
+            <td style="text-align:left;">정확한 값이 중요할 때</td>
+            <td style="text-align:left; color:rgba(232,244,253,0.6);">패턴 파악 어려움</td>
+          </tr>
+          <tr class="fragment fade-in" data-fragment-index="2">
+            <td style="color:var(--cyan);">막대그래프</td>
+            <td style="text-align:left;">범주별 <span class="hl-cyan">크기 비교</span> 용이</td>
+            <td style="text-align:left;">빈도수 비교, 순위 파악</td>
+            <td style="text-align:left; color:rgba(232,244,253,0.6);">비율 직관성 낮음</td>
+          </tr>
+          <tr class="fragment fade-in" data-fragment-index="3">
+            <td style="color:var(--amber);">원그래프</td>
+            <td style="text-align:left;">전체 대비 <span class="hl-amber">비율</span> 직관적</td>
+            <td style="text-align:left;">구성 비율 파악</td>
+            <td style="text-align:left; color:rgba(232,244,253,0.6);">항목 많으면 복잡</td>
+          </tr>
+          <tr class="fragment fade-in" data-fragment-index="4">
+            <td style="color:var(--green);">단어 구름</td>
+            <td style="text-align:left;"><span class="hl-green">핵심 단어</span> 즉시 파악</td>
+            <td style="text-align:left;">텍스트 분석, 주제 파악</td>
+            <td style="text-align:left; color:rgba(232,244,253,0.6);">정확한 수치 알 수 없음</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="card-green" style="margin-top:0.7em; font-size:0.82em;">
+        <span style="color:var(--green); font-weight:700;">결론 &rarr;</span>
+        목적에 따라 방법을 선택하라. 텍스트 자료의 <span class="hl-green">주제 파악</span>에는 <strong>단어 구름</strong>,
+        <span class="hl-amber">비율 확인</span>에는 <strong>원그래프</strong>,
+        <span class="hl-cyan">크기 비교</span>에는 <strong>막대그래프</strong>가 효과적이다.
+      </div>
+
+      <aside class="notes">
+        각 행은 클릭할 때마다 나타납니다. 학생들에게 "어떤 상황에서 어떤 그래프를 사용할지" 질문하면서 진행하세요.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 13 — 공학적 도구
+         ============================================================ -->
+    <section id="tool-slide">
+      <div class="slide-progress">Slide 13 / 15</div>
+      <h2>공학적 도구로 단어 구름 만들기</h2>
+
+      <div class="grid-2" style="gap:1em; align-items:start;">
+        <div>
+          <h3 style="font-size:0.85em; margin-bottom:0.5em;">워드클라우드 생성기 사용 절차</h3>
+          <div class="step-box">
+            <div class="step-num">1️⃣</div>
+            <div class="step-desc">
+              <span class="hl-cyan">워드클라우드 생성기</span> 사이트에 접속한다.<br/>
+              <span style="font-size:0.75em; color:rgba(232,244,253,0.6);">(예: wordcloud.kr, wordclouds.com 등)</span>
+            </div>
+          </div>
+          <div class="step-box">
+            <div class="step-num">2️⃣</div>
+            <div class="step-desc">
+              <span class="hl-amber">글자색, 폰트, 배경색, 마스크(모양)</span> 등을 설정한다.
+            </div>
+          </div>
+          <div class="step-box">
+            <div class="step-num">3️⃣</div>
+            <div class="step-desc">
+              <span class="hl-green">크기, 단어수</span>를 설정하고 분석할 텍스트를 붙여넣는다.
+            </div>
+          </div>
+          <div class="step-box">
+            <div class="step-num">4️⃣</div>
+            <div class="step-desc">
+              <span style="font-size:1.1em;">⚡</span> <strong>생성</strong> 버튼을 클릭하면 <span class="hl-cyan">단어 구름 완성!</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card-amber" style="margin-bottom:0.7em;">
+            <h3 style="font-size:0.85em; color:var(--amber); margin:0 0 0.4em;">결과 확인</h3>
+            <div style="font-size:0.8em; line-height:1.7;">
+              빈도수가 가장 큰 단어인<br/>
+              <span class="hl-cyan" style="font-size:1.3em;">청바지</span>와
+              <span class="hl-green" style="font-size:1.3em;">추천</span>이<br/>
+              가장 크게 표시된다.
+            </div>
+          </div>
+          <div class="card" style="padding:0.8em 1em;">
+            <h3 style="font-size:0.85em; margin:0 0 0.4em;">활용 분야</h3>
+            <ul class="summary-list" style="font-size:0.75em;">
+              <li>뉴스 기사 핵심어 분석</li>
+              <li>소셜미디어 트렌드 파악</li>
+              <li>설문 응답 텍스트 분석</li>
+              <li>독후감·에세이 주제 파악</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        실제 워드클라우드 생성기 사이트를 실습으로 보여주면 효과적입니다.
+        wordcloud.kr 또는 영어 사이트의 경우 wordclouds.com을 추천합니다.
+        마스크 기능: 원하는 모양(하트, 별 등)에 맞게 단어를 배치할 수 있습니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 14 — 활동
+         ============================================================ -->
+    <section id="activity-slide" data-background-gradient="radial-gradient(ellipse at 50% 0%, rgba(57,217,138,0.08) 0%, transparent 60%), #0a0f1e">
+      <div class="slide-progress">Slide 14 / 15</div>
+      <h2>활동 — 기사 검색 &rarr; 단어 구름 만들기</h2>
+
+      <div class="card-green" style="margin-bottom:0.8em;">
+        <h3 style="font-size:0.9em; color:var(--green); margin:0 0 0.4em;">활동 주제</h3>
+        <p style="font-size:0.88em; margin:0;">
+          <span class="hl-amber">자율 주행</span> 관련 뉴스 기사를 검색하여 단어 구름을 만들고,
+          기사의 <span class="hl-cyan">주제어(핵심 단어)</span>를 파악해 봅시다.
+        </p>
+      </div>
+
+      <div class="grid-2" style="gap:0.8em; align-items:start;">
+        <div>
+          <h3 style="font-size:0.85em; margin-bottom:0.5em;">활동 순서</h3>
+          <div style="font-size:0.82em;">
+            <div class="step-box" style="margin-bottom:0.4em;">
+              <div class="step-num">①</div>
+              <div class="step-desc">인터넷에서 <span class="hl-cyan">'자율 주행'</span> 관련 뉴스 기사 검색</div>
+            </div>
+            <div class="step-box" style="margin-bottom:0.4em;">
+              <div class="step-num">②</div>
+              <div class="step-desc">기사 본문 텍스트를 <span class="hl-amber">복사</span>하기</div>
+            </div>
+            <div class="step-box" style="margin-bottom:0.4em;">
+              <div class="step-num">③</div>
+              <div class="step-desc">워드클라우드 생성기에 <span class="hl-green">붙여넣기</span> → 생성</div>
+            </div>
+            <div class="step-box">
+              <div class="step-num">④</div>
+              <div class="step-desc">가장 크게 표시된 단어 3개 찾기 → 주제어 파악</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size:0.85em; margin-bottom:0.5em;">발표 및 공유</h3>
+          <div class="card" style="font-size:0.8em; padding:0.8em 1em;">
+            <ul class="summary-list">
+              <li>각자 만든 단어 구름에서 <span class="hl-cyan">가장 큰 단어</span>는?</li>
+              <li>단어 구름에서 파악한 기사의 <span class="hl-amber">핵심 주제</span>는?</li>
+              <li>어떤 시각화 방법(표/막대/원/단어구름) 중<br/>이 목적에 <span class="hl-green">가장 적합한 방법</span>은?</li>
+            </ul>
+          </div>
+          <div class="note-box" style="margin-top:0.5em;">
+            <span class="note-label">예상 결과</span>
+            '자율', '주행', '차량', '기술', '안전' 등이 크게 표시될 것이다.
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        학생 활동 시간: 약 10~15분. 개인 또는 2인 1조로 진행해도 좋습니다.
+        발표 시 단어 구름 스크린샷을 화면에 공유하도록 안내하세요.
+        자율 주행 외에 학생들이 관심 있는 주제의 기사를 선택해도 됩니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 15 — 개념 정리
+         ============================================================ -->
+    <section id="summary-slide" data-background-gradient="radial-gradient(ellipse at 70% 80%, rgba(0,212,255,0.07) 0%, transparent 50%), #0a0f1e">
+      <div class="slide-progress">Slide 15 / 15</div>
+      <h2>개념 정리하기</h2>
+
+      <div style="font-size:0.85em; color:rgba(232,244,253,0.6); margin-bottom:0.6em;">빈칸을 채우며 오늘 배운 내용을 정리해 봅시다.</div>
+
+      <div class="quiz-item">
+        <span style="color:var(--cyan); font-weight:700; margin-right:0.3em;">Q1.</span>
+        자료의 분석 결과를 시각적으로 표현하여 효과적으로 전달하는 과정을
+        <span class="blank">（　　　　　）</span>라고 한다.
+        <span class="fragment" data-fragment-index="1">
+          &nbsp;&rarr;&nbsp;<span class="answer">시각화</span>
+        </span>
+      </div>
+
+      <div class="quiz-item">
+        <span style="color:var(--cyan); font-weight:700; margin-right:0.3em;">Q2.</span>
+        시각화 방법의 6가지 유형 중 두 번째인
+        <span class="blank">（　　　　　）</span>
+        시각화는 원그래프, 도넛그래프, 단어 구름이 해당된다.
+        <span class="fragment" data-fragment-index="2">
+          &nbsp;&rarr;&nbsp;<span class="answer">분포</span>
+        </span>
+      </div>
+
+      <div class="quiz-item">
+        <span style="color:var(--cyan); font-weight:700; margin-right:0.3em;">Q3.</span>
+        텍스트 자료는 단어 빈도수를 이용하여 표,
+        <span class="blank">（　　　　　）</span>,
+        원그래프,
+        <span class="blank">（　　　　　）</span>
+        등으로 시각화할 수 있다.
+        <span class="fragment" data-fragment-index="3">
+          &nbsp;&rarr;&nbsp;<span class="answer">막대그래프</span>,&nbsp;<span class="answer">단어 구름</span>
+        </span>
+      </div>
+
+      <div class="quiz-item">
+        <span style="color:var(--cyan); font-weight:700; margin-right:0.3em;">Q4.</span>
+        단어 구름에서 빈도수가 큰 단어일수록 글자가
+        <span class="blank">（　　　）</span>
+        표시된다.
+        <span class="fragment" data-fragment-index="4">
+          &nbsp;&rarr;&nbsp;<span class="answer">크게</span>
+        </span>
+      </div>
+
+      <div class="fragment" data-fragment-index="5">
+        <div class="card-green" style="margin-top:0.7em; font-size:0.82em; text-align:center;">
+          오늘 학습 완료! &nbsp; 수고하셨습니다. 👏
+          <div style="font-size:0.85em; color:rgba(232,244,253,0.6); margin-top:0.2em;">
+            다음 시간: 1. 텍스트 자료의 표현 — 단원 마무리 및 형성평가
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        정답을 하나씩 클릭하며 확인합니다.
+        Q1: 시각화 / Q2: 분포 / Q3: 막대그래프, 단어 구름 / Q4: 크게
+        마지막 슬라이드이므로 오늘 배운 4가지 시각화 방법(표, 막대그래프, 원그래프, 단어 구름)을 다시 한번 정리해 주세요.
+      </aside>
+    </section>
+
+  </div><!-- /.slides -->
+</div><!-- /.reveal -->
+
+<!-- ===== SCRIPTS ===== -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+
+<script>
+  // ================================================================
+  // REVEAL.JS INITIALIZATION
+  // ================================================================
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    hash: true,
+    slideNumber: 'c/t',
+    progress: true,
+    controls: true,
+    transition: 'slide',
+    backgroundTransition: 'fade',
+    center: false,
+    touch: true,
+    autoAnimateDuration: 0.6,
+    plugins: [RevealNotes]
+  });
+
+  // ================================================================
+  // CHART.JS — STATE FLAGS
+  // ================================================================
+  let barChartInitialized = false;
+  let pieChartInitialized = false;
+
+  // ================================================================
+  // BAR CHART FACTORY
+  // ================================================================
+  function initBarChart() {
+    if (barChartInitialized) return;
+    barChartInitialized = true;
+
+    const ctx = document.getElementById('barChart');
+    if (!ctx) return;
+
+    new Chart(ctx.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: ['청바지', '추천', '예쁘다', '저렴하다', '가격', '디자인', '좋다', '신축성'],
+        datasets: [{
+          label: '단어 빈도수 (TF)',
+          data: [4, 4, 1, 1, 2, 3, 3, 1],
+          backgroundColor: [
+            '#00d4ff', '#39d98a',
+            'rgba(74,122,155,0.75)', 'rgba(74,122,155,0.75)',
+            '#ffb347',
+            '#a78bfa', '#a78bfa',
+            'rgba(74,122,155,0.75)'
+          ],
+          borderColor: 'rgba(255,255,255,0.25)',
+          borderWidth: 1,
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: {
+          duration: 1500,
+          easing: 'easeInOutQuart'
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#e8f4fd',
+              font: { family: "'Noto Sans KR', sans-serif", size: 15 },
+              padding: 16
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(10,15,30,0.95)',
+            borderColor: '#00d4ff',
+            borderWidth: 1,
+            titleColor: '#00d4ff',
+            bodyColor: '#e8f4fd',
+            titleFont: { family: "'Noto Sans KR', sans-serif", size: 14 },
+            bodyFont: { family: "'Noto Sans KR', sans-serif", size: 14 },
+            callbacks: {
+              label: function(context) {
+                return ' 빈도수: ' + context.parsed.y + '회';
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 5,
+            ticks: {
+              color: '#e8f4fd',
+              font: { family: "'Noto Sans KR', sans-serif", size: 15 },
+              stepSize: 1
+            },
+            grid: { color: 'rgba(255,255,255,0.08)' },
+            title: {
+              display: true,
+              text: '빈도수 (TF)',
+              color: 'rgba(232,244,253,0.6)',
+              font: { family: "'Noto Sans KR', sans-serif", size: 13 }
+            }
+          },
+          x: {
+            ticks: {
+              color: '#e8f4fd',
+              font: { family: "'Noto Sans KR', sans-serif", size: 17 }
+            },
+            grid: { color: 'rgba(255,255,255,0.05)' }
+          }
+        }
+      }
+    });
+  }
+
+  // ================================================================
+  // PIE CHART FACTORY
+  // ================================================================
+  function initPieChart() {
+    if (pieChartInitialized) return;
+    pieChartInitialized = true;
+
+    const ctx = document.getElementById('pieChart');
+    if (!ctx) return;
+
+    new Chart(ctx.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: [
+          '청바지 (21%)', '추천 (21%)',
+          '예쁘다 (5%)', '저렴하다 (5%)',
+          '가격 (11%)', '디자인 (16%)',
+          '좋다 (16%)', '신축성 (5%)'
+        ],
+        datasets: [{
+          data: [4, 4, 1, 1, 2, 3, 3, 1],
+          backgroundColor: [
+            '#00d4ff', '#39d98a',
+            '#4a7a9b', '#2d5a7b',
+            '#ffb347', '#ff6b9d',
+            '#a78bfa', '#45b7d1'
+          ],
+          borderWidth: 2,
+          borderColor: '#0a0f1e',
+          hoverBorderWidth: 3,
+          hoverBorderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: {
+          duration: 2000,
+          animateRotate: true,
+          animateScale: true
+        },
+        cutout: '45%',
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              color: '#e8f4fd',
+              font: { family: "'Noto Sans KR', sans-serif", size: 13 },
+              padding: 10,
+              usePointStyle: true,
+              pointStyleWidth: 12
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(10,15,30,0.95)',
+            borderColor: '#00d4ff',
+            borderWidth: 1,
+            titleColor: '#00d4ff',
+            bodyColor: '#e8f4fd',
+            titleFont: { family: "'Noto Sans KR', sans-serif", size: 14 },
+            bodyFont: { family: "'Noto Sans KR', sans-serif", size: 14 },
+            callbacks: {
+              label: function(context) {
+                const val = context.parsed;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = Math.round(val / total * 100);
+                return ' 빈도수: ' + val + '회 (' + pct + '%)';
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ================================================================
+  // SLIDE CHANGE HANDLER — initialize charts lazily
+  // ================================================================
+  Reveal.on('slidechanged', function(event) {
+    const slideId = event.currentSlide ? event.currentSlide.id : '';
+
+    if (slideId === 'bar-slide') {
+      // Small delay to let the canvas render at correct size
+      setTimeout(initBarChart, 150);
+    }
+
+    if (slideId === 'pie-slide') {
+      setTimeout(initPieChart, 150);
+    }
+
+    // Re-typeset MathJax on every slide change
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      MathJax.typesetPromise([event.currentSlide]).catch(function(err) {
+        console.warn('MathJax typesetPromise error:', err);
+      });
+    }
+  });
+
+  // Also handle the case where the page loads directly on bar/pie slides
+  Reveal.on('ready', function(event) {
+    const slideId = event.currentSlide ? event.currentSlide.id : '';
+    if (slideId === 'bar-slide') setTimeout(initBarChart, 200);
+    if (slideId === 'pie-slide') setTimeout(initPieChart, 200);
+  });
+</script>
+</body>
+</html>

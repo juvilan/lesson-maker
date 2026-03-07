@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TextbookAnalysis",
+  "description": "교과서 분석 에이전트의 출력 스키마",
+  "type": "object",
+  "required": ["topic", "learning_objectives", "key_concepts"],
+  "properties": {
+    "topic": {
+      "type": "string"
+    },
+    "learning_objectives": {
+      "type": "array",
+      "description": "수업 후 학생이 할 수 있어야 하는 것들",
+      "items": {
+        "type": "string"
+      },
+      "example": [
+        "퍼셉트론의 구조(입력, 가중치, 활성화함수, 출력)를 설명할 수 있다",
+        "AND, OR 논리 게이트를 퍼셉트론으로 구현할 수 있다",
+        "XOR 문제를 단층 퍼셉트론으로 해결할 수 없는 이유를 설명할 수 있다"
+      ]
+    },
+    "key_concepts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "퍼셉트론 (Perceptron)"
+          },
+          "description": {
+            "type": "string"
+          },
+          "formula_latex": {
+            "type": "string",
+            "description": "LaTeX 수식 (있을 경우)",
+            "example": "y = f\\left(\\sum_{i=1}^{n} w_i x_i + b\\right)"
+          },
+          "numeric_example": {
+            "type": "object",
+            "description": "실제 숫자를 사용한 구체적 예시",
+            "properties": {
+              "inputs": { "type": "array", "items": { "type": "number" } },
+              "weights": { "type": "array", "items": { "type": "number" } },
+              "bias": { "type": "number" },
+              "calculation_steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "step_label": { "type": "string" },
+                    "expression": { "type": "string" },
+                    "result": { "type": "number" }
+                  }
+                }
+              }
+            }
+          },
+          "visual_type": {
+            "type": "string",
+            "enum": [
+              "perceptron_diagram", "neural_network", "truth_table",
+              "xor_scatter", "decision_boundary", "activation_function",
+              "loss_curve", "gradient_descent_2d", "weight_update_table",
+              "matrix_multiply",
+              "function_graph", "geometric_diagram", "calculation_table",
+              "distribution_chart",
+              "none"
+            ],
+            "description": "이 개념에 필요한 시각화 타입. 과목 플러그인 타입명 또는 범용 타입명 사용."
+          }
+        }
+      }
+    },
+    "example_problems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["problem", "solution_steps"],
+        "properties": {
+          "problem": { "type": "string" },
+          "difficulty": {
+            "type": "string",
+            "enum": ["기본", "중간", "심화"]
+          },
+          "solution_steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "step_number": { "type": "integer" },
+                "description": { "type": "string" },
+                "formula": { "type": "string" },
+                "numeric_value": { "type": "string" },
+                "table_data": {
+                  "type": "object",
+                  "description": "이 단계에서 필요한 표 데이터",
+                  "properties": {
+                    "headers": { "type": "array", "items": { "type": "string" } },
+                    "rows": { "type": "array", "items": { "type": "array" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "visual_elements": {
+      "type": "array",
+      "description": "시각화 에이전트에 요청할 시각화 목록",
+      "items": {
+        "type": "object",
+        "properties": {
+          "element_id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "description": "과목 플러그인 타입명 또는 범용 타입명. visual_type과 동일한 값 사용.",
+            "enum": [
+              "perceptron_diagram", "neural_network", "truth_table",
+              "xor_scatter", "decision_boundary", "activation_function",
+              "loss_curve", "gradient_descent_2d", "weight_update_table",
+              "matrix_multiply",
+              "function_graph", "geometric_diagram", "calculation_table",
+              "distribution_chart"
+            ]
+          },
+          "config": {
+            "type": "object",
+            "description": "시각화 설정 파라미터"
+          },
+          "target_slide_hint": { "type": "string" }
+        }
+      }
+    },
+    "prerequisite_knowledge": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "선수 학습 필요 내용"
+    }
+  }
+}

@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인공지능 수학 | 퍼셉트론과 신경망의 세계</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060d1a;
+  --bg2: #0d1929;
+  --bg3: #112236;
+  --card: #0f1e33;
+  --border: #1e3a5f;
+  --cyan: #00d4ff;
+  --cyan2: #00aacc;
+  --amber: #ffb347;
+  --green: #39d98a;
+  --pink: #ff6b9d;
+  --purple: #a78bfa;
+  --text: #e8f4fd;
+  --text2: #8db4d4;
+  --text3: #4a7a9b;
+  --red: #ff4757;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  line-height: 1.8;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── 레이아웃 ── */
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+/* ── 사이드바 ── */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 280px;
+  height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-logo .subject {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 6px;
+}
+
+.sidebar-logo h1 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.sidebar-logo .sub {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 4px;
+}
+
+.sidebar-nav {
+  padding: 16px 0;
+  flex: 1;
+}
+
+.nav-section {
+  padding: 8px 24px 4px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text3);
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+  color: var(--text2);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background: var(--bg3);
+  color: var(--cyan);
+}
+
+.nav-item.active {
+  background: rgba(0, 212, 255, 0.08);
+  border-left-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.nav-item .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+  min-width: 20px;
+}
+
+.nav-item.active .num { color: var(--cyan); }
+
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text3);
+}
+
+/* ── 메인 콘텐츠 ── */
+.main {
+  margin-left: 280px;
+  min-height: 100vh;
+}
+
+/* ── 세션 섹션 ── */
+.session {
+  min-height: 100vh;
+  padding: 60px 64px;
+  border-bottom: 1px solid var(--border);
+}
+
+.session-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.session-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 72px;
+  font-weight: 700;
+  color: var(--border);
+  line-height: 1;
+  min-width: 100px;
+}
+
+.session-title-block { flex: 1; }
+
+.session-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+}
+
+.session-title {
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.session-desc {
+  color: var(--text2);
+  font-size: 15px;
+  max-width: 600px;
+}
+
+/* ── 컨텐츠 블록 ── */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.content-grid.wide { grid-template-columns: 1fr; }
+.content-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 16px;
+  background: var(--cyan);
+  border-radius: 2px;
+}
+
+h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+p {
+  color: var(--text2);
+  font-size: 15px;
+  line-height: 1.9;
+  margin-bottom: 12px;
+}
+
+.highlight {
+  color: var(--amber);
+  font-weight: 700;
+}
+
+.hl-cyan { color: var(--cyan); font-weight: 700; }
+.hl-green { color: var(--green); font-weight: 700; }
+.hl-pink { color: var(--pink); font-weight: 700; }
+.hl-purple { color: var(--purple); font-weight: 700; }
+
+/* ── SVG 다이어그램 ── */
+.diagram-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 280px;
+}
+
+/* ── 개념 박스 ── */
+.concept-box {
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  border-left: 4px solid;
+}
+
+.concept-box.ai {
+  background: rgba(167,139,250,0.08);
+  border-color: var(--purple);
+}
+
+.concept-box.ml {
+  background: rgba(57,217,138,0.08);
+  border-color: var(--green);
+}
+
+.concept-box.dl {
+  background: rgba(0,212,255,0.08);
+  border-color: var(--cyan);
+}
+
+.concept-box h3 {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.concept-box p {
+  font-size: 14px;
+  margin-bottom: 0;
+}
+
+/* ── 수식 ── */
+.math-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  color: var(--amber);
+  margin: 16px 0;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.math-inline {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--amber);
+  background: rgba(255,179,71,0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+/* ── 인터랙티브 ── */
+.interactive-zone {
+  background: var(--bg);
+  border: 1px solid var(--cyan);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+}
+
+.interactive-zone .zone-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--cyan);
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zone-title .dot {
+  width: 8px; height: 8px;
+  background: var(--cyan);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* ── 슬라이더 ── */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.slider-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text2);
+  min-width: 80px;
+}
+
+.slider-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--amber);
+  min-width: 50px;
+  text-align: right;
+}
+
+input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  background: var(--cyan);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* ── 버튼 ── */
+.btn {
+  background: transparent;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.btn:hover {
+  background: var(--cyan);
+  color: var(--bg);
+}
+
+.btn.amber {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.btn.amber:hover {
+  background: var(--amber);
+  color: var(--bg);
+}
+
+/* ── 결과 표시 ── */
+.output-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--green);
+  min-height: 60px;
+  margin-top: 16px;
+}
+
+/* ── 표 ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th {
+  background: var(--bg3);
+  padding: 12px 16px;
+  text-align: left;
+  color: var(--cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 12px 16px;
+  color: var(--text2);
+  border-bottom: 1px solid rgba(30,58,95,0.5);
+}
+
+td.center, th.center { text-align: center; }
+
+tr:last-child td { border-bottom: none; }
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+}
+
+.tag.one { background: rgba(255,107,157,0.2); color: var(--pink); }
+.tag.zero { background: rgba(74,122,155,0.2); color: var(--text3); }
+
+/* ── 타임라인 ── */
+.timeline {
+  position: relative;
+  padding-left: 32px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--cyan), var(--purple));
+}
+
+.tl-item {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: -28px;
+  top: 6px;
+  width: 10px; height: 10px;
+  background: var(--cyan);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+}
+
+.tl-year {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--cyan);
+  margin-bottom: 4px;
+}
+
+.tl-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.tl-desc {
+  font-size: 13px;
+  color: var(--text2);
+}
+
+/* ── 캔버스 ── */
+canvas {
+  display: block;
+  border-radius: 8px;
+}
+
+/* ── 주석/팁 ── */
+.tip {
+  background: rgba(255,179,71,0.08);
+  border: 1px solid rgba(255,179,71,0.3);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 14px;
+  color: var(--text2);
+  margin: 16px 0;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.tip::before {
+  content: '💡';
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.warn {
+  background: rgba(255,71,87,0.08);
+  border: 1px solid rgba(255,71,87,0.3);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 14px;
+  color: var(--text2);
+  margin: 16px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.warn::before { content: '⚠️'; flex-shrink: 0; }
+
+/* ── 뉴런 애니메이션 ── */
+.neuron-canvas-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+/* ── 퍼셉트론 다이어그램 ── */
+.perceptron-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+/* ── 진행 표시기 ── */
+.progress-bar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-bottom: 48px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  transition: width 0.3s;
+}
+
+/* ── 단계 리스트 ── */
+.step-list {
+  counter-reset: step;
+}
+
+.step-item {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  counter-increment: step;
+}
+
+.step-num {
+  width: 32px; height: 32px;
+  background: var(--cyan);
+  color: var(--bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-content {
+  padding-top: 4px;
+}
+
+.step-content .step-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.step-content p {
+  font-size: 14px;
+  margin-bottom: 0;
+}
+
+/* ── 반응형 ── */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .session { padding: 40px 24px; }
+  .content-grid, .content-grid.three { grid-template-columns: 1fr; }
+}
+
+/* ── 히어로 ── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 60px 64px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 40%, rgba(0,212,255,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 60%, rgba(167,139,250,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.hero-title {
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--text);
+  margin-bottom: 24px;
+}
+
+.hero-title .accent {
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-desc {
+  font-size: 17px;
+  color: var(--text2);
+  max-width: 540px;
+  line-height: 1.8;
+  margin-bottom: 40px;
+}
+
+.hero-badges {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--text2);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.hero-canvas {
+  position: absolute;
+  right: 0; top: 0;
+  width: 50%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ── 애니메이션 ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp 0.6s ease both;
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+
+/* XOR 그리드 */
+.xor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.xor-cell {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 900;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.xor-cell.one { background: rgba(0,212,255,0.15); color: var(--cyan); border: 2px solid var(--cyan); }
+.xor-cell.zero { background: rgba(74,122,155,0.1); color: var(--text3); border: 2px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- 사이드바 -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="subject">AI MATHEMATICS · 2025</div>
+    <h1>인공지능 수학</h1>
+    <div class="sub">퍼셉트론과 신경망의 세계</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">도입</div>
+    <a class="nav-item" href="#hero" onclick="setActive(this)">
+      <span class="num">00</span> 시작하며
+    </a>
+    <div class="nav-section">차시별 내용</div>
+    <a class="nav-item" href="#session1" onclick="setActive(this)">
+      <span class="num">01</span> AI·ML·DL 개념 구분
+    </a>
+    <a class="nav-item" href="#session2" onclick="setActive(this)">
+      <span class="num">02</span> 뉴런과 퍼셉트론 탄생
+    </a>
+    <a class="nav-item" href="#session3" onclick="setActive(this)">
+      <span class="num">03</span> 퍼셉트론의 수학
+    </a>
+    <a class="nav-item" href="#session4" onclick="setActive(this)">
+      <span class="num">04</span> XOR와 다층 퍼셉트론
+    </a>
+    <a class="nav-item" href="#session5" onclick="setActive(this)">
+      <span class="num">05</span> 손글씨 숫자 인식 MLP
+    </a>
+    <div class="nav-section">부록</div>
+    <a class="nav-item" href="#worksheet" onclick="setActive(this)">
+      <span class="num">WS</span> 학생용 워크시트
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    2015 개정 교육과정 · 인공지능 수학
+  </div>
+</nav>
+
+<!-- 메인 콘텐츠 -->
+<main class="main">
+
+<!-- ═══════════════════════════════════════ HERO ═══ -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <canvas class="hero-canvas" id="heroCanvas"></canvas>
+  <div class="hero-tag">인공지능 수학 · 1~5차시</div>
+  <h1 class="hero-title fade-up">
+    뉴런에서<br>
+    <span class="accent">퍼셉트론</span>으로
+  </h1>
+  <p class="hero-desc fade-up delay-1">
+    인간의 두뇌는 어떻게 생각할까? 이 질문에서 인공지능이 시작되었습니다.
+    뉴런의 작동 원리에서 영감을 얻어 탄생한 <strong>퍼셉트론</strong>의
+    세계로 여러분을 초대합니다.
+  </p>
+  <div class="hero-badges fade-up delay-2">
+    <span class="badge">1차시 · AI 개념</span>
+    <span class="badge">2차시 · 뉴런과 퍼셉트론</span>
+    <span class="badge">3차시 · 수학적 구조</span>
+    <span class="badge">4차시 · XOR & MLP</span>
+    <span class="badge">5차시 · 손글씨 숫자 인식</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ SESSION 1 ═══ -->
+<section class="session" id="session1">
+  <div class="session-header">
+    <div class="session-num">01</div>
+    <div class="session-title-block">
+      <div class="session-label">1차시</div>
+      <h1 class="session-title">AI · ML · DL<br>무엇이 다른가?</h1>
+      <p class="session-desc">세 개념의 관계를 명확히 이해하고, 인공지능 역사의 흐름을 짚어봅니다.</p>
+    </div>
+  </div>
+
+  <!-- 포함 관계 다이어그램 -->
+  <div class="content-grid">
+    <div class="card">
+      <div class="card-title">포함 관계 다이어그램</div>
+      <div class="diagram-box">
+        <svg width="320" height="260" viewBox="0 0 320 260">
+          <!-- AI 원 -->
+          <ellipse cx="160" cy="130" rx="150" ry="120" fill="rgba(167,139,250,0.08)" stroke="#a78bfa" stroke-width="2"/>
+          <text x="30" y="48" fill="#a78bfa" font-size="13" font-family="'Noto Sans KR'" font-weight="700">인공지능 (AI)</text>
+          <!-- ML 원 -->
+          <ellipse cx="160" cy="145" rx="105" ry="85" fill="rgba(57,217,138,0.09)" stroke="#39d98a" stroke-width="2"/>
+          <text x="62" y="82" fill="#39d98a" font-size="13" font-family="'Noto Sans KR'" font-weight="700">머신러닝 (ML)</text>
+          <!-- DL 원 -->
+          <ellipse cx="160" cy="160" rx="65" ry="52" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="2"/>
+          <text x="113" y="142" fill="#00d4ff" font-size="12" font-family="'Noto Sans KR'" font-weight="700">딥러닝</text>
+          <text x="126" y="160" fill="#00d4ff" font-size="11" font-family="'JetBrains Mono'">( DL )</text>
+          <!-- 라벨 화살표 -->
+          <text x="100" y="230" fill="#6b8fa8" font-size="11" font-family="'Noto Sans KR'">※ 딥러닝 ⊂ 머신러닝 ⊂ 인공지능</text>
+        </svg>
+      </div>
+      <p style="font-size:13px;color:var(--text3);margin-top:8px;text-align:center;">
+        세 개념은 <strong style="color:var(--text2)">포함 관계</strong>입니다. 딥러닝은 머신러닝의 일부이고,<br>머신러닝은 인공지능의 일부입니다.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">개념 비교</div>
+      <div style="background:rgba(0,212,255,0.06); border-left:4px solid #00d4ff; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:1em 0; font-size:0.88em;">
+        알고리즘을 컴퓨터로 돌리면 다 머신러닝인가? 아니다. 핵심 조건은 '학습'이다. 정렬 알고리즘처럼 규칙이 고정된 것은 머신러닝이 아니다. 데이터를 통해 스스로 파라미터/규칙을 업데이트하는 것이 머신러닝이다.
+      </div>
+      <div class="concept-box ai">
+        <h3 style="color:var(--purple)">🤖 인공지능 (Artificial Intelligence)</h3>
+        <p>사람처럼 <strong>지능적으로 행동</strong>하는 기계를 만드는 분야 전체. 규칙 기반 시스템부터 딥러닝까지 모두 포함.</p>
+      </div>
+      <div class="concept-box ml">
+        <h3 style="color:var(--green)">📊 머신러닝 (Machine Learning)</h3>
+        <p>데이터로부터 <strong>규칙을 스스로 학습</strong>하는 알고리즘. 명시적 프로그래밍 없이 패턴을 찾음. (결정 트리, SVM 등)</p>
+      </div>
+      <div class="concept-box dl">
+        <h3 style="color:var(--cyan)">🧠 딥러닝 (Deep Learning)</h3>
+        <p>인간 뇌의 <strong>신경망 구조를 모방</strong>한 머신러닝. 여러 층(Layer)을 쌓아 복잡한 패턴을 학습. (CNN, RNN, 트랜스포머 등)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 간단한 역사 타임라인 -->
+  <div class="content-grid wide">
+    <div class="card">
+      <div class="card-title">인공지능의 역사 (핵심만)</div>
+      <div class="content-grid" style="margin-bottom:0">
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-year">1950년대</div>
+            <div class="tl-title">AI 개념의 탄생</div>
+            <div class="tl-desc">앨런 튜링의 "기계가 생각할 수 있는가?" → <strong style="color:var(--cyan)">튜링 테스트</strong> 제안. 1956년 다트머스 회의에서 "인공지능"이라는 용어 공식 등장.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">1957년</div>
+            <div class="tl-title">퍼셉트론의 탄생</div>
+            <div class="tl-desc">프랭크 로젠블라트가 뇌의 뉴런을 모방한 <strong style="color:var(--cyan)">퍼셉트론</strong> 발표. 최초의 인공 신경망 학습 알고리즘.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">1969년</div>
+            <div class="tl-title">민스키, XOR 불가 증명 → 1차 AI 겨울</div>
+            <div class="tl-desc">민스키와 패퍼트의 "퍼셉트론 한계 증명" (XOR 문제) → 연구비 삭감, AI 침체기.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">1974년</div>
+            <div class="tl-title">역전파 이론 등장 (but 아무도 관심 없음)</div>
+            <div class="tl-desc">폴 워보스가 역전파 알고리즘을 이론적으로 제안했지만, AI 겨울 속에서 주목받지 못함.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">1986년</div>
+            <div class="tl-title">루멜하트, 역전파를 신경망에 적용 → 부활</div>
+            <div class="tl-desc">힌튼·루멜하트 등이 <strong style="color:var(--cyan)">역전파(Backpropagation)</strong> 알고리즘을 다층 신경망에 적용 → 학습 가능.</div>
+          </div>
+        </div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-year">2006년</div>
+            <div class="tl-title">엔비디아 CUDA 출시 → GPU 범용 연산 가능 / 딥러닝의 부상</div>
+            <div class="tl-desc">엔비디아 CUDA로 GPU를 범용 연산에 활용 가능해짐. 제프리 힌튼의 <strong style="color:var(--cyan)">심층 신뢰 신경망(DBN)</strong> 발표 → 딥러닝이라는 용어 본격 사용.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">2012년</div>
+            <div class="tl-title">AlexNet, ImageNet 오류율 26%→15% 압도적 우승 → 딥러닝 폭발</div>
+            <div class="tl-desc">이미지 인식 대회(ImageNet)에서 AlexNet이 오류율을 26%에서 15%로 낮추며 압도적 우승 → AI 연구 폭발적 성장.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">2017년~</div>
+            <div class="tl-title">트랜스포머 시대</div>
+            <div class="tl-desc">"Attention Is All You Need" 논문 → <strong style="color:var(--cyan)">GPT, BERT, ChatGPT</strong> 등 대형 언어 모델의 시대.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 퀴즈 -->
+  <div class="interactive-zone">
+    <div class="zone-title"><div class="dot"></div>CHECK · 개념 확인 퀴즈</div>
+    <p style="margin-bottom:16px">다음 기술들이 AI / ML / DL 중 어디에 해당하는지 생각해보세요.</p>
+    <div class="content-grid three" style="margin-bottom:16px">
+      <div class="card" style="padding:16px;text-align:center">
+        <div style="font-size:24px;margin-bottom:8px">🎮</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:8px">if문으로 짠 체스 게임 AI</div>
+        <div id="q1" style="height:28px;display:flex;align-items:center;justify-content:center"></div>
+        <button class="btn" onclick="showAns('q1','AI — 규칙 기반 프로그래밍','var(--purple)')">정답 확인</button>
+      </div>
+      <div class="card" style="padding:16px;text-align:center">
+        <div style="font-size:24px;margin-bottom:8px">📧</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:8px">스팸 메일 자동 분류기<br>(SVM 사용)</div>
+        <div id="q2" style="height:28px;display:flex;align-items:center;justify-content:center"></div>
+        <button class="btn" onclick="showAns('q2','ML — 데이터로 패턴 학습','var(--green)')">정답 확인</button>
+      </div>
+      <div class="card" style="padding:16px;text-align:center">
+        <div style="font-size:24px;margin-bottom:8px">🖼️</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:8px">고양이 사진 인식 AI<br>(CNN 사용)</div>
+        <div id="q3" style="height:28px;display:flex;align-items:center;justify-content:center"></div>
+        <button class="btn" onclick="showAns('q3','DL — 신경망 여러 층 활용','var(--cyan)')">정답 확인</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ SESSION 2 ═══ -->
+<section class="session" id="session2">
+  <div class="session-header">
+    <div class="session-num">02</div>
+    <div class="session-title-block">
+      <div class="session-label">2차시</div>
+      <h1 class="session-title">뉴런에서 얻은<br>아이디어</h1>
+      <p class="session-desc">인간 뇌의 뉴런이 어떻게 작동하는지 이해하고, 이것이 어떻게 퍼셉트론의 아이디어로 연결되었는지 살펴봅니다.</p>
+    </div>
+  </div>
+
+  <!-- 뉴런 구조 -->
+  <div class="content-grid">
+    <div class="card">
+      <div class="card-title">생물학적 뉴런의 구조</div>
+      <div class="diagram-box">
+        <svg width="340" height="200" viewBox="0 0 340 200">
+          <!-- 수상돌기 -->
+          <line x1="20" y1="60" x2="85" y2="100" stroke="#39d98a" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="20" y1="100" x2="85" y2="100" stroke="#39d98a" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="20" y1="140" x2="85" y2="100" stroke="#39d98a" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="5" y1="45" x2="20" y2="60" stroke="#39d98a" stroke-width="1.5" opacity="0.6"/>
+          <line x1="5" y1="75" x2="20" y2="60" stroke="#39d98a" stroke-width="1.5" opacity="0.6"/>
+          <line x1="5" y1="95" x2="20" y2="100" stroke="#39d98a" stroke-width="1.5" opacity="0.6"/>
+          <line x1="5" y1="125" x2="20" y2="140" stroke="#39d98a" stroke-width="1.5" opacity="0.6"/>
+          <line x1="5" y1="155" x2="20" y2="140" stroke="#39d98a" stroke-width="1.5" opacity="0.6"/>
+          <!-- 수상돌기 라벨 -->
+          <text x="2" y="30" fill="#39d98a" font-size="11" font-family="'Noto Sans KR'">수상돌기</text>
+          <text x="2" y="43" fill="#39d98a" font-size="10" font-family="'JetBrains Mono'">(Dendrite)</text>
+          <!-- 세포체 -->
+          <circle cx="120" cy="100" r="35" fill="rgba(0,212,255,0.1)" stroke="#00d4ff" stroke-width="2.5"/>
+          <circle cx="120" cy="100" r="14" fill="rgba(0,212,255,0.25)" stroke="#00d4ff" stroke-width="1.5"/>
+          <text x="120" y="156" fill="#00d4ff" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'">세포체(핵)</text>
+          <!-- 축삭돌기 -->
+          <line x1="155" y1="100" x2="270" y2="100" stroke="#ffb347" stroke-width="3" stroke-linecap="round"/>
+          <!-- 축삭 절 -->
+          <circle cx="185" cy="100" r="5" fill="#ffb347"/>
+          <circle cx="215" cy="100" r="5" fill="#ffb347"/>
+          <circle cx="245" cy="100" r="5" fill="#ffb347"/>
+          <text x="210" y="85" fill="#ffb347" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'">축삭돌기</text>
+          <text x="210" y="71" fill="#ffb347" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">(Axon)</text>
+          <!-- 시냅스 -->
+          <circle cx="285" cy="85" r="8" fill="rgba(255,107,157,0.2)" stroke="#ff6b9d" stroke-width="2"/>
+          <circle cx="285" cy="115" r="8" fill="rgba(255,107,157,0.2)" stroke="#ff6b9d" stroke-width="2"/>
+          <circle cx="305" cy="100" r="8" fill="rgba(255,107,157,0.2)" stroke="#ff6b9d" stroke-width="2"/>
+          <line x1="270" y1="95" x2="277" y2="87" stroke="#ff6b9d" stroke-width="1.5"/>
+          <line x1="270" y1="105" x2="277" y2="113" stroke="#ff6b9d" stroke-width="1.5"/>
+          <line x1="272" y1="100" x2="297" y2="100" stroke="#ff6b9d" stroke-width="1.5"/>
+          <text x="305" y="140" fill="#ff6b9d" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'">시냅스</text>
+          <text x="305" y="153" fill="#ff6b9d" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">(Synapse)</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">뉴런의 작동 원리</div>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num" style="background:var(--green)">1</div>
+          <div class="step-content">
+            <div class="step-title">신호 수신 (수상돌기)</div>
+            <p>여러 뉴런으로부터 <span class="hl-green">전기 화학적 신호</span>를 받습니다. 각 시냅스마다 신호의 강도가 다릅니다.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num" style="background:var(--cyan)">2</div>
+          <div class="step-content">
+            <div class="step-title">신호 합산 (세포체)</div>
+            <p>받은 신호들을 <span class="hl-cyan">모두 합산</span>합니다. 이때 흥분성 신호는 더하고 억제성 신호는 빼는 방식입니다.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num" style="background:var(--amber)">3</div>
+          <div class="step-content">
+            <div class="step-title">임계값 판단 (활성화)</div>
+            <p>합산된 신호가 <span class="highlight">임계값(Threshold)</span>을 넘으면 발화(Fire), 넘지 않으면 침묵합니다.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num" style="background:var(--pink)">4</div>
+          <div class="step-content">
+            <div class="step-title">신호 전달 (축삭돌기)</div>
+            <p>발화 시 <span class="hl-pink">전기 신호(활동전위)</span>를 축삭돌기를 통해 다음 뉴런으로 전달합니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 뉴런 발화 인터랙티브 -->
+  <div class="interactive-zone">
+    <div class="zone-title"><div class="dot"></div>INTERACTIVE · 뉴런 발화 시뮬레이션</div>
+    <p style="margin-bottom:20px">슬라이더로 각 입력 신호의 강도를 조절해보세요. 합산이 임계값을 넘으면 뉴런이 발화합니다!</p>
+    <div class="content-grid">
+      <div>
+        <div class="slider-row">
+          <span class="slider-label">신호 A</span>
+          <input type="range" min="0" max="100" value="40" id="sigA" oninput="updateNeuron()">
+          <span class="slider-val" id="sigAVal">40</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">신호 B</span>
+          <input type="range" min="0" max="100" value="30" id="sigB" oninput="updateNeuron()">
+          <span class="slider-val" id="sigBVal">30</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">신호 C</span>
+          <input type="range" min="0" max="100" value="20" id="sigC" oninput="updateNeuron()">
+          <span class="slider-val" id="sigCVal">20</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label" style="color:var(--red)">임계값</span>
+          <input type="range" min="50" max="200" value="100" id="thresh" oninput="updateNeuron()">
+          <span class="slider-val" id="threshVal" style="color:var(--red)">100</span>
+        </div>
+        <div class="output-box" id="neuronOutput">
+          합산 신호: 90 | 임계값: 100<br>
+          <span style="color:var(--text3)">💤 뉴런 침묵 (신호 부족)</span>
+        </div>
+      </div>
+      <div>
+        <canvas id="neuronCanvas" width="340" height="200" style="width:100%;max-width:340px"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 뉴런 → 퍼셉트론 대응 -->
+  <div class="content-grid wide">
+    <div class="card">
+      <div class="card-title">아이디어의 연결 — 뉴런 vs 퍼셉트론</div>
+      <table>
+        <thead>
+          <tr>
+            <th>생물학적 뉴런</th>
+            <th>→</th>
+            <th>퍼셉트론</th>
+            <th>역할</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span style="color:var(--green)">수상돌기 (입력)</span></td>
+            <td style="color:var(--text3)">→</td>
+            <td><span style="color:var(--green)">입력값 x₁, x₂, ...</span></td>
+            <td>다른 뉴런으로부터 신호를 받음</td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--amber)">시냅스 강도</span></td>
+            <td style="color:var(--text3)">→</td>
+            <td><span style="color:var(--amber)">가중치 w₁, w₂, ...</span></td>
+            <td>각 신호의 중요도 (조절 가능)</td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--cyan)">세포체 (합산)</span></td>
+            <td style="color:var(--text3)">→</td>
+            <td><span style="color:var(--cyan)">가중합 Σ(xᵢ · wᵢ)</span></td>
+            <td>입력 신호들을 가중 합산</td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--red)">임계값</span></td>
+            <td style="color:var(--text3)">→</td>
+            <td><span style="color:var(--red)">편향(Bias) b</span></td>
+            <td>발화 기준점 조정</td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--pink)">발화 여부</span></td>
+            <td style="color:var(--text3)">→</td>
+            <td><span style="color:var(--pink)">활성화 함수 f()</span></td>
+            <td>최종 출력값 결정 (0 또는 1)</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tip" style="margin-top:16px">
+        1943년 맥컬록(McCulloch)과 피츠(Pitts)가 처음으로 뉴런의 수학적 모델을 제안했고, 1957년 로젠블라트(Rosenblatt)가 이를 발전시켜 <strong>학습 가능한 퍼셉트론</strong>을 만들었습니다.
+      </div>
+      <div style="background:rgba(0,212,255,0.06); border-left:4px solid #00d4ff; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:1em 0; font-size:0.88em;">
+        단, 딥러닝이 뇌를 완전히 모방한 것은 아니다. 뇌는 신호가 앞으로만 흐르는데, 역전파는 오차를 거꾸로 전달한다. 역전파는 뇌 모방이 아니라 수학적으로 최적화하는 방법을 찾다 보니 나온 알고리즘이다. 신경망은 뇌에서 구조적 영감만 받은 것이다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 새 카드: 뉴런이 '발화'한다는 것의 의미 -->
+  <div class="content-grid wide">
+    <div class="card">
+      <div class="card-title">뉴런이 '발화'한다는 것의 의미</div>
+      <div class="content-grid">
+        <div>
+          <div class="step-list">
+            <div class="step-item">
+              <div class="step-num" style="background:var(--amber)">1</div>
+              <div class="step-content">
+                <div class="step-title">임계값 초과 → 발화(1)</div>
+                <p>자극의 합산이 임계값을 초과하면 뉴런은 강한 전기 신호(활동전위)를 전달합니다.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num" style="background:var(--text3)">0</div>
+              <div class="step-content">
+                <div class="step-title">임계값 미만 → 침묵(0)</div>
+                <p>자극이 임계값에 미치지 못하면 뉴런은 아무 신호도 전달하지 않습니다.</p>
+              </div>
+            </div>
+          </div>
+          <div style="background:rgba(0,212,255,0.06); border-left:4px solid #00d4ff; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:1em 0; font-size:0.88em;">
+            이것을 수학으로 모방한 것이 퍼셉트론의 출발이다. 임계값 초과 → 1 출력, 미만 → 0 출력. 이 단순한 이진 판단이 모든 논리 연산의 기초가 된다.
+          </div>
+        </div>
+        <div>
+          <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">논리 게이트 — 일상 속 예시</p>
+          <div style="background:rgba(57,217,138,0.06); border-left:4px solid #39d98a; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:0.8em 0; font-size:0.88em;">
+            <strong style="color:var(--green)">AND (논리곱)</strong><br>
+            카드 인식 <strong>AND</strong> 비밀번호 맞음 → 문 열림<br>
+            둘 다 1이어야 결과가 1이 된다.
+          </div>
+          <div style="background:rgba(0,212,255,0.06); border-left:4px solid #00d4ff; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:0.8em 0; font-size:0.88em;">
+            <strong style="color:var(--cyan)">OR (논리합)</strong><br>
+            화재감지 <strong>OR</strong> 연기감지 → 경보<br>
+            하나라도 1이면 결과가 1이 된다.
+          </div>
+          <div style="background:rgba(255,71,87,0.06); border-left:4px solid #ff4757; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:0.8em 0; font-size:0.88em;">
+            <strong style="color:var(--red)">XOR (배타적 논리합)</strong><br>
+            계단 위/아래 스위치 중 <strong>하나만</strong> 올려야 불 켜짐 (둘 다 올리면 꺼짐)<br>
+            서로 다를 때만 결과가 1이 된다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ SESSION 3 ═══ -->
+<section class="session" id="session3">
+  <div class="session-header">
+    <div class="session-num">03</div>
+    <div class="session-title-block">
+      <div class="session-label">3차시</div>
+      <h1 class="session-title">퍼셉트론의<br>수학적 구조</h1>
+      <p class="session-desc">퍼셉트론이 어떻게 계산하고 학습하는지, 수식과 인터랙티브 시뮬레이션으로 직접 경험합니다.</p>
+    </div>
+  </div>
+
+  <!-- 퍼셉트론 구조 -->
+  <div class="content-grid wide">
+    <div class="card">
+      <div class="card-title">퍼셉트론의 구조</div>
+      <div class="diagram-box" style="min-height:220px">
+        <svg width="580" height="200" viewBox="0 0 580 200" id="perceptronSVG">
+          <!-- 입력 노드 -->
+          <circle cx="70" cy="60" r="22" fill="rgba(57,217,138,0.12)" stroke="#39d98a" stroke-width="2"/>
+          <text x="70" y="55" fill="#39d98a" font-size="12" text-anchor="middle" font-family="'JetBrains Mono'">x₁</text>
+          <text x="70" y="70" fill="#39d98a" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">=1</text>
+
+          <circle cx="70" cy="130" r="22" fill="rgba(57,217,138,0.12)" stroke="#39d98a" stroke-width="2"/>
+          <text x="70" y="125" fill="#39d98a" font-size="12" text-anchor="middle" font-family="'JetBrains Mono'">x₂</text>
+          <text x="70" y="140" fill="#39d98a" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">=0</text>
+
+          <!-- 편향 노드 -->
+          <circle cx="70" cy="185" r="18" fill="rgba(255,71,87,0.12)" stroke="#ff4757" stroke-width="1.5" stroke-dasharray="4 2"/>
+          <text x="70" y="190" fill="#ff4757" font-size="11" text-anchor="middle" font-family="'JetBrains Mono'">b</text>
+
+          <!-- 가중치 라벨 -->
+          <text x="165" y="55" fill="#ffb347" font-size="12" text-anchor="middle" font-family="'JetBrains Mono'">w₁</text>
+          <text x="165" y="115" fill="#ffb347" font-size="12" text-anchor="middle" font-family="'JetBrains Mono'">w₂</text>
+
+          <!-- 연결선 -->
+          <line x1="92" y1="65" x2="248" y2="95" stroke="#ffb347" stroke-width="2.5" opacity="0.8"/>
+          <line x1="92" y1="130" x2="248" y2="105" stroke="#ffb347" stroke-width="2.5" opacity="0.8"/>
+          <line x1="88" y1="178" x2="248" y2="108" stroke="#ff4757" stroke-width="1.5" stroke-dasharray="4 2" opacity="0.7"/>
+
+          <!-- 합산 노드 -->
+          <circle cx="270" cy="100" r="28" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="2.5"/>
+          <text x="270" y="96" fill="#00d4ff" font-size="14" text-anchor="middle" font-family="'JetBrains Mono'">Σ</text>
+          <text x="270" y="112" fill="#00d4ff" font-size="9" text-anchor="middle" font-family="'Noto Sans KR'">가중합</text>
+
+          <!-- 연결선 -->
+          <line x1="298" y1="100" x2="368" y2="100" stroke="#00d4ff" stroke-width="2.5"/>
+
+          <!-- 활성화 함수 -->
+          <rect x="368" y="76" width="60" height="48" rx="6" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="2"/>
+          <text x="398" y="98" fill="#a78bfa" font-size="12" text-anchor="middle" font-family="'JetBrains Mono'">f(x)</text>
+          <text x="398" y="115" fill="#a78bfa" font-size="9" text-anchor="middle" font-family="'Noto Sans KR'">활성화</text>
+
+          <!-- 출력 -->
+          <line x1="428" y1="100" x2="510" y2="100" stroke="#ff6b9d" stroke-width="2.5"/>
+          <circle cx="530" cy="100" r="22" fill="rgba(255,107,157,0.12)" stroke="#ff6b9d" stroke-width="2"/>
+          <text x="530" y="96" fill="#ff6b9d" font-size="12" text-anchor="middle" font-family="'JetBrains Mono'">y</text>
+          <text x="530" y="112" fill="#ff6b9d" font-size="9" text-anchor="middle" font-family="'Noto Sans KR'">출력</text>
+
+          <!-- 라벨 -->
+          <text x="70" y="20" fill="#39d98a" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'">입력</text>
+          <text x="270" y="18" fill="#00d4ff" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'">합산</text>
+          <text x="398" y="18" fill="#a78bfa" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'">판단</text>
+          <text x="530" y="18" fill="#ff6b9d" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'">출력</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 수식 -->
+  <div class="content-grid">
+    <div class="card">
+      <div class="card-title">퍼셉트론 수식</div>
+      <p>퍼셉트론의 계산은 두 단계로 이루어집니다:</p>
+
+      <div style="margin-bottom:8px;color:var(--text2);font-size:14px"><strong>① 가중합 계산:</strong></div>
+      <div class="math-block">z = x₁·w₁ + x₂·w₂ + ... + b</div>
+
+      <div style="margin-bottom:8px;color:var(--text2);font-size:14px"><strong>② 활성화 함수 (계단 함수):</strong></div>
+      <div class="math-block">y = f(z) = { 1  if z ≥ 0<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ 0  if z &lt; 0</div>
+
+      <p>여기서:</p>
+      <ul style="color:var(--text2);font-size:14px;padding-left:20px;line-height:2">
+        <li><span class="math-inline">x₁, x₂, ...</span> : 입력값</li>
+        <li><span class="math-inline">w₁, w₂, ...</span> : 가중치 (학습으로 조정)</li>
+        <li><span class="math-inline">b</span> : 편향 (bias)</li>
+        <li><span class="math-inline">y</span> : 출력값 (0 또는 1)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">활성화 함수 — 계단 함수</div>
+      <div class="diagram-box" style="min-height:200px">
+        <svg width="280" height="180" viewBox="0 0 280 180">
+          <!-- 축 -->
+          <line x1="20" y1="90" x2="260" y2="90" stroke="#1e3a5f" stroke-width="1.5"/>
+          <line x1="140" y1="20" x2="140" y2="165" stroke="#1e3a5f" stroke-width="1.5"/>
+          <!-- 축 화살표 -->
+          <polygon points="260,90 252,86 252,94" fill="#1e3a5f"/>
+          <polygon points="140,20 136,28 144,28" fill="#1e3a5f"/>
+          <!-- 축 라벨 -->
+          <text x="262" y="93" fill="#4a7a9b" font-size="11" font-family="'JetBrains Mono'">z</text>
+          <text x="144" y="17" fill="#4a7a9b" font-size="11" font-family="'JetBrains Mono'">y</text>
+          <text x="126" y="105" fill="#4a7a9b" font-size="10" font-family="'JetBrains Mono'">0</text>
+          <text x="122" y="48" fill="#00d4ff" font-size="10" font-family="'JetBrains Mono'">1</text>
+          <!-- 계단 함수 -->
+          <line x1="20" y1="135" x2="140" y2="135" stroke="#a78bfa" stroke-width="3" stroke-linecap="round"/>
+          <line x1="140" y1="135" x2="140" y2="45" stroke="#a78bfa" stroke-width="3" stroke-dasharray="4 3" opacity="0.5"/>
+          <line x1="140" y1="45" x2="260" y2="45" stroke="#a78bfa" stroke-width="3" stroke-linecap="round"/>
+          <!-- 점 -->
+          <circle cx="140" cy="45" r="4" fill="#a78bfa"/>
+          <circle cx="140" cy="135" r="4" fill="none" stroke="#a78bfa" stroke-width="2"/>
+          <!-- y=0, y=1 표시 -->
+          <line x1="135" y1="135" x2="145" y2="135" stroke="#4a7a9b" stroke-width="1"/>
+          <line x1="135" y1="45" x2="145" y2="45" stroke="#4a7a9b" stroke-width="1"/>
+          <!-- 라벨 -->
+          <text x="60" y="155" fill="#a78bfa" font-size="11" font-family="'Noto Sans KR'">z &lt; 0 → y = 0</text>
+          <text x="148" y="35" fill="#a78bfa" font-size="11" font-family="'Noto Sans KR'">z ≥ 0 → y = 1</text>
+        </svg>
+      </div>
+      <p style="font-size:13px;color:var(--text3);text-align:center">임계값(0) 기준으로 출력을 0 또는 1로 결정합니다</p>
+      <div style="background:rgba(0,212,255,0.06); border-left:4px solid #00d4ff; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:1em 0; font-size:0.88em;">
+        계단함수(0/1)로 자르면 미분이 안 된다 → 기울기 계산 불가 → 가중치 업데이트 불가 → 학습 자체가 안 됨<br><br>
+        <strong>활성화 함수의 역할이 확장된 이유:</strong><br>
+        1. 원래 역할: 넘길지 말지 결정<br>
+        2. 추가된 역할: 비선형성 추가<br>
+        3. 실용적 역할: 미분 가능하게 유지<br><br>
+        활성화 함수 없이 층만 쌓으면 결국 선형 변환의 반복 = 선형 변환 하나와 같아진다. 층을 쌓는 의미가 사라진다.
+      </div>
+    </div>
+  </div>
+
+  <!-- AND 게이트 예시 + 인터랙티브 -->
+  <div class="content-grid wide">
+    <div class="card">
+      <div class="card-title">AND 게이트를 퍼셉트론으로 구현하기</div>
+      <div class="content-grid">
+        <div>
+          <p>AND 게이트: 두 입력이 <strong>모두 1</strong>일 때만 출력이 1</p>
+          <table style="margin:16px 0">
+            <thead><tr><th class="center">x₁</th><th class="center">x₂</th><th class="center">출력 y</th></tr></thead>
+            <tbody>
+              <tr><td class="center">0</td><td class="center">0</td><td class="center"><span class="tag zero">0</span></td></tr>
+              <tr><td class="center">0</td><td class="center">1</td><td class="center"><span class="tag zero">0</span></td></tr>
+              <tr><td class="center">1</td><td class="center">0</td><td class="center"><span class="tag zero">0</span></td></tr>
+              <tr><td class="center">1</td><td class="center">1</td><td class="center"><span class="tag one">1</span></td></tr>
+            </tbody>
+          </table>
+          <p>가중치를 <span class="math-inline">w₁=0.5, w₂=0.5, b=-0.7</span> 로 설정하면:</p>
+          <div class="math-block" style="font-size:12px;text-align:left;padding:12px">
+            (0,0): 0·0.5 + 0·0.5 - 0.7 = -0.7 → 0 ✓<br>
+            (0,1): 0·0.5 + 1·0.5 - 0.7 = -0.2 → 0 ✓<br>
+            (1,0): 1·0.5 + 0·0.5 - 0.7 = -0.2 → 0 ✓<br>
+            (1,1): 1·0.5 + 1·0.5 - 0.7 = +0.3 → <span style="color:var(--green)">1 ✓</span>
+          </div>
+        </div>
+        <div>
+          <p style="margin-bottom:16px">직접 가중치를 조절해서 AND 게이트를 만들어보세요!</p>
+          <div class="slider-row">
+            <span class="slider-label">w₁</span>
+            <input type="range" min="-20" max="20" value="5" step="1" id="and_w1" oninput="updateAND()">
+            <span class="slider-val" id="and_w1_val">0.5</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">w₂</span>
+            <input type="range" min="-20" max="20" value="5" step="1" id="and_w2" oninput="updateAND()">
+            <span class="slider-val" id="and_w2_val">0.5</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">bias b</span>
+            <input type="range" min="-20" max="20" value="-7" step="1" id="and_b" oninput="updateAND()">
+            <span class="slider-val" id="and_b_val">-0.7</span>
+          </div>
+          <div class="output-box" id="andOutput" style="font-size:13px;line-height:2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:rgba(0,212,255,0.06); border-left:4px solid #00d4ff; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:1em 0; font-size:0.88em;">
+    <strong style="color:var(--cyan)">임계값(θ)이 경계선의 y절편이다</strong><br><br>
+    일반식: w1·x1 + w2·x2 = θ → x2 = -(w1/w2)·x1 + θ/w2<br>
+    · 기울기: -w1/w2<br>
+    · y절편: θ/w2<br><br>
+    교과서가 w1=w2로 맞춘 이유: 기울기를 -1로 고정해서 임계값 효과만 깔끔하게 보여주기 위한 교육적 단순화였다.<br><br>
+    임계값을 올릴수록 경계선이 위로 올라가고 1이 나오는 영역이 좁아진다.<br>
+    · θ=0.3 이하 → OR (넓게 1)<br>
+    · θ=0.7 이상 → AND (좁게 1)
+  </div>
+
+  <div class="tip">
+    <strong>학습의 핵심:</strong> 퍼셉트론은 틀린 예측을 만날 때마다 가중치를 조금씩 조정합니다. 이 과정을 반복하면 스스로 올바른 가중치를 찾아냅니다. 이것이 <strong>퍼셉트론 학습 규칙</strong>입니다.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ SESSION 4 ═══ -->
+<section class="session" id="session4">
+  <div class="session-header">
+    <div class="session-num">04</div>
+    <div class="session-title-block">
+      <div class="session-label">4차시</div>
+      <h1 class="session-title">XOR 문제와<br>다층 퍼셉트론</h1>
+      <p class="session-desc">단층 퍼셉트론이 풀 수 없는 XOR 문제를 발견하고, 층을 쌓는 아이디어로 어떻게 해결했는지 탐구합니다.</p>
+    </div>
+  </div>
+
+  <!-- XOR 문제 -->
+  <div class="content-grid">
+    <div class="card">
+      <div class="card-title">XOR 게이트란?</div>
+      <p>XOR(배타적 OR): 두 입력이 <strong>다를 때만</strong> 1을 출력</p>
+      <div class="content-grid" style="margin:16px 0">
+        <table>
+          <thead><tr><th class="center">x₁</th><th class="center">x₂</th><th class="center">y (XOR)</th></tr></thead>
+          <tbody>
+            <tr><td class="center">0</td><td class="center">0</td><td class="center"><span class="tag zero">0</span></td></tr>
+            <tr><td class="center">0</td><td class="center">1</td><td class="center"><span class="tag one">1</span></td></tr>
+            <tr><td class="center">1</td><td class="center">0</td><td class="center"><span class="tag one">1</span></td></tr>
+            <tr><td class="center">1</td><td class="center">1</td><td class="center"><span class="tag zero">0</span></td></tr>
+          </tbody>
+        </table>
+        <div class="xor-grid" style="max-width:160px;height:160px;margin:auto">
+          <div class="xor-cell zero">0</div>
+          <div class="xor-cell one">1</div>
+          <div class="xor-cell one">1</div>
+          <div class="xor-cell zero">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">왜 단층 퍼셉트론으로 안 될까?</div>
+      <div class="diagram-box" style="min-height:200px">
+        <canvas id="xorCanvas" width="280" height="180" style="width:100%;max-width:280px"></canvas>
+      </div>
+      <p style="font-size:13px;color:var(--text3);margin-top:8px">
+        퍼셉트론은 <strong style="color:var(--text2)">직선 하나</strong>로 두 그룹을 나눕니다.
+        XOR은 직선 하나로 나눌 수 없는 <strong style="color:var(--red)">선형 분리 불가능</strong> 문제!
+      </p>
+
+      <div style="background:rgba(0,212,255,0.06); border-left:4px solid #00d4ff; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:1em 0; font-size:0.88em;">
+        <strong style="color:var(--cyan)">[집합으로 이해하기]</strong><br>
+        · OR = 합집합 (A ∪ B) → 직선 하나로 분리 가능<br>
+        · AND = 교집합 (A ∩ B) → 직선 하나로 분리 가능<br>
+        · XOR = 대칭차집합 (A △ B) → 직선 하나로 못 자름!<br><br>
+        XOR가 안 되는 이유: 1인 영역이 (0,1)과 (1,0) 두 덩어리로 분리되어 있어서 직선 하나로 동시에 잡을 수 없다.
+      </div>
+
+      <div style="background:rgba(167,139,250,0.06); border-left:4px solid #a78bfa; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:1em 0; font-size:0.88em;">
+        <strong style="color:var(--purple)">[왜 NAND가 필요한가]</strong><br>
+        · XOR = OR AND NAND<br>
+        · OR: "최소 하나는 켜졌다"<br>
+        · NAND: "전부 다 켜진 건 아니다" (NOT AND)<br>
+        · AND로 합치면: "정확히 하나만 켜졌다" = XOR<br><br>
+        복잡한 개념 = 단순한 개념들의 조합 → 이것이 층을 쌓는 이유의 본질
+      </div>
+
+      <div style="background:rgba(57,217,138,0.06); border-left:4px solid #39d98a; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:1em 0; font-size:0.88em;">
+        <strong style="color:var(--green)">[일상 예시]</strong><br>
+        · AND: 카드 + 비밀번호 둘 다 맞아야 → 출입 허가<br>
+        · OR: 화재 또는 연기 감지 → 경보<br>
+        · XOR: 계단 스위치 하나만 올려야 불 켜짐 / 엘리베이터 같은 층 두 번 누르면 취소<br>
+        · 출결 체크가 XOR다! → 명부(1)인데 결석(0), 또는 명부(0)인데 출석(1)이면 이상 감지
+      </div>
+
+      <div style="background:rgba(255,179,71,0.06); border-left:4px solid #ffb347; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:1em 0; font-size:0.88em;">
+        <strong style="color:var(--amber)">[ABA vs ABC 관점]</strong><br>
+        · ABA (이진 판단): 정상이냐 이상이냐만 판단 → 퍼셉트론 1개로 가능<br>
+        · ABC (원인 분류): 왜 이상한가 (학생이 안 나온 건지 / 출석부가 틀린 건지) → 층이 하나 더 필요<br><br>
+        현실의 복잡한 문제는 항상 판단이 중첩되어 있기 때문에 층이 깊어질수록 더 복잡한 경계를 표현할 수 있다.
+      </div>
+    </div>
+  </div>
+
+  <div class="warn">
+    <div>
+      <strong>1969년 민스키와 패퍼트의 경고:</strong> 단층 퍼셉트론은 XOR과 같은 비선형 문제를 절대 풀 수 없다는 수학적 증명이 발표됩니다. 이 발표로 AI 연구비가 삭감되고, AI의 첫 번째 겨울(AI Winter)이 찾아왔습니다.
+    </div>
+  </div>
+
+  <!-- 해결책: MLP -->
+  <div class="content-grid wide">
+    <div class="card">
+      <div class="card-title">해결책 — 층을 쌓자! 다층 퍼셉트론 (MLP)</div>
+      <div class="content-grid">
+        <div>
+          <p>아이디어: <strong>퍼셉트론을 여러 층으로 쌓으면</strong> 복잡한 경계선을 만들 수 있다!</p>
+          <div class="step-list" style="margin-top:16px">
+            <div class="step-item">
+              <div class="step-num" style="background:var(--green)">1</div>
+              <div class="step-content">
+                <div class="step-title">입력층 (Input Layer)</div>
+                <p>데이터를 받아들이는 층. x₁, x₂를 입력받습니다.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num" style="background:var(--cyan)">2</div>
+              <div class="step-content">
+                <div class="step-title">은닉층 (Hidden Layer)</div>
+                <p>중간에서 복잡한 변환을 수행하는 층. 여기서 선형 불가능 문제가 해결됩니다!</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num" style="background:var(--pink)">3</div>
+              <div class="step-content">
+                <div class="step-title">출력층 (Output Layer)</div>
+                <p>최종 답을 출력하는 층. XOR 결과 (0 또는 1)를 출력합니다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="diagram-box" style="min-height:260px">
+            <svg width="300" height="240" viewBox="0 0 300 240">
+              <!-- 입력층 -->
+              <text x="35" y="20" fill="#39d98a" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'">입력층</text>
+              <circle cx="35" cy="80" r="20" fill="rgba(57,217,138,0.12)" stroke="#39d98a" stroke-width="2"/>
+              <text x="35" y="85" fill="#39d98a" font-size="11" text-anchor="middle" font-family="'JetBrains Mono'">x₁</text>
+              <circle cx="35" cy="160" r="20" fill="rgba(57,217,138,0.12)" stroke="#39d98a" stroke-width="2"/>
+              <text x="35" y="165" fill="#39d98a" font-size="11" text-anchor="middle" font-family="'JetBrains Mono'">x₂</text>
+              <!-- 은닉층 -->
+              <text x="155" y="20" fill="#00d4ff" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'">은닉층</text>
+              <circle cx="155" cy="65" r="20" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="2"/>
+              <text x="155" y="70" fill="#00d4ff" font-size="11" text-anchor="middle" font-family="'JetBrains Mono'">h₁</text>
+              <circle cx="155" cy="120" r="20" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="2"/>
+              <text x="155" y="125" fill="#00d4ff" font-size="11" text-anchor="middle" font-family="'JetBrains Mono'">h₂</text>
+              <circle cx="155" cy="175" r="20" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="2"/>
+              <text x="155" y="180" fill="#00d4ff" font-size="11" text-anchor="middle" font-family="'JetBrains Mono'">h₃</text>
+              <!-- 출력층 -->
+              <text x="270" y="20" fill="#ff6b9d" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'">출력층</text>
+              <circle cx="270" cy="120" r="20" fill="rgba(255,107,157,0.12)" stroke="#ff6b9d" stroke-width="2"/>
+              <text x="270" y="125" fill="#ff6b9d" font-size="11" text-anchor="middle" font-family="'JetBrains Mono'">y</text>
+              <!-- 연결선: 입력→은닉 -->
+              <line x1="55" y1="80" x2="135" y2="67" stroke="#ffb347" stroke-width="1.2" opacity="0.6"/>
+              <line x1="55" y1="80" x2="135" y2="120" stroke="#ffb347" stroke-width="1.2" opacity="0.6"/>
+              <line x1="55" y1="80" x2="135" y2="173" stroke="#ffb347" stroke-width="1.2" opacity="0.6"/>
+              <line x1="55" y1="160" x2="135" y2="67" stroke="#ffb347" stroke-width="1.2" opacity="0.6"/>
+              <line x1="55" y1="160" x2="135" y2="120" stroke="#ffb347" stroke-width="1.2" opacity="0.6"/>
+              <line x1="55" y1="160" x2="135" y2="173" stroke="#ffb347" stroke-width="1.2" opacity="0.6"/>
+              <!-- 연결선: 은닉→출력 -->
+              <line x1="175" y1="67" x2="250" y2="120" stroke="#a78bfa" stroke-width="1.2" opacity="0.6"/>
+              <line x1="175" y1="120" x2="250" y2="120" stroke="#a78bfa" stroke-width="1.2" opacity="0.6"/>
+              <line x1="175" y1="173" x2="250" y2="120" stroke="#a78bfa" stroke-width="1.2" opacity="0.6"/>
+              <!-- 레이어 라벨 -->
+              <text x="35" y="210" fill="#39d98a" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">2개</text>
+              <text x="155" y="210" fill="#00d4ff" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">3개</text>
+              <text x="270" y="210" fill="#ff6b9d" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">1개</text>
+              <text x="35" y="223" fill="#4a7a9b" font-size="10" text-anchor="middle" font-family="'Noto Sans KR'">뉴런</text>
+              <text x="155" y="223" fill="#4a7a9b" font-size="10" text-anchor="middle" font-family="'Noto Sans KR'">뉴런</text>
+              <text x="270" y="223" fill="#4a7a9b" font-size="10" text-anchor="middle" font-family="'Noto Sans KR'">뉴런</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- XOR MLP 직접 계산 -->
+  <div class="interactive-zone">
+    <div class="zone-title"><div class="dot"></div>INTERACTIVE · XOR를 MLP로 풀어보기</div>
+    <p style="margin-bottom:20px">입력값을 선택하고, MLP가 단계별로 XOR을 계산하는 과정을 확인하세요!</p>
+    <div class="content-grid">
+      <div>
+        <div style="display:flex;gap:16px;margin-bottom:24px">
+          <div>
+            <div style="font-family:'JetBrains Mono';font-size:13px;color:var(--text2);margin-bottom:8px">x₁ 값:</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn" id="x1_0" onclick="setXOR('x1',0)" style="background:rgba(0,212,255,0.15)">0</button>
+              <button class="btn" id="x1_1" onclick="setXOR('x1',1)">1</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:'JetBrains Mono';font-size:13px;color:var(--text2);margin-bottom:8px">x₂ 값:</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn" id="x2_0" onclick="setXOR('x2',0)" style="background:rgba(0,212,255,0.15)">0</button>
+              <button class="btn" id="x2_1" onclick="setXOR('x2',1)">1</button>
+            </div>
+          </div>
+        </div>
+        <div class="output-box" id="xorOutput" style="line-height:2.2;font-size:13px"></div>
+      </div>
+      <div>
+        <canvas id="xorDecisionCanvas" width="300" height="220" style="width:100%;max-width:300px"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 핵심 정리 -->
+  <div class="content-grid three" style="margin-top:8px">
+    <div class="card" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">🧠</div>
+      <h3 style="font-size:16px;margin-bottom:8px">뉴런의 아이디어</h3>
+      <p style="font-size:13px">인간 뇌의 뉴런에서 영감을 얻어 퍼셉트론이 탄생했습니다.</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">📐</div>
+      <h3 style="font-size:16px;margin-bottom:8px">선형 분리의 한계</h3>
+      <p style="font-size:13px">단층 퍼셉트론은 XOR처럼 비선형 문제를 풀 수 없습니다.</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">🏗️</div>
+      <h3 style="font-size:16px;margin-bottom:8px">층을 쌓는 해결책</h3>
+      <p style="font-size:13px">다층 퍼셉트론(MLP)은 복잡한 비선형 경계를 학습할 수 있습니다.</p>
+    </div>
+  </div>
+
+  <div class="tip" style="margin-top:24px">
+    <div>
+      <strong>다음으로:</strong> 다층 퍼셉트론이 어떻게 가중치를 학습하는지 — <strong>역전파(Backpropagation)</strong> 알고리즘과 경사하강법이 기다리고 있습니다. 이것이 오늘날 딥러닝의 핵심입니다!
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════ SESSION 5 ═══ -->
+<section class="session" id="session5">
+  <div class="session-header">
+    <div class="session-num">05</div>
+    <div class="session-title-block">
+      <div class="session-label">5차시 · 심화</div>
+      <h1 class="session-title">손글씨 숫자 인식<br>MLP의 실제 적용</h1>
+      <p class="session-desc">784개의 픽셀이 어떻게 10가지 숫자로 분류되는지 — MNIST 데이터셋을 기반으로 한 실제 신경망 구조를 탐구합니다.</p>
+    </div>
+  </div>
+
+  <!-- 문제 정의 -->
+  <div class="content-grid wide">
+    <div class="card">
+      <div class="card-title">MNIST 데이터셋이란?</div>
+      <div class="content-grid">
+        <div>
+          <p><strong style="color:var(--cyan)">MNIST</strong>(Modified National Institute of Standards and Technology)는 손으로 쓴 숫자 0~9의 이미지 70,000장으로 구성된 유명한 데이터셋입니다.</p>
+          <ul style="color:var(--text2);font-size:14px;padding-left:20px;line-height:2.2;margin:12px 0">
+            <li>이미지 크기: <span class="math-inline">28 × 28 픽셀</span></li>
+            <li>각 픽셀: 0(흰색) ~ 255(검정) 중 하나의 값</li>
+            <li>훈련 데이터: 60,000장 / 테스트 데이터: 10,000장</li>
+            <li>분류 목표: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 중 하나</li>
+          </ul>
+          <div class="tip" style="margin-top:8px">
+            28×28 이미지를 <strong>한 줄로 펼치면</strong> 784개의 숫자가 됩니다. 이 784개가 신경망의 784개 입력 뉴런이 됩니다!
+          </div>
+        </div>
+        <div>
+          <!-- 28x28 픽셀 시각화 예시 -->
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono';margin-bottom:10px">28 × 28 = 784 픽셀</div>
+            <canvas id="mnistExampleCanvas" width="140" height="140" style="image-rendering:pixelated;border:1px solid var(--border);border-radius:4px"></canvas>
+            <div style="font-size:11px;color:var(--text3);margin-top:8px">예시: 숫자 "3"의 픽셀 표현</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MLP 아키텍처 -->
+  <div class="content-grid wide">
+    <div class="card">
+      <div class="card-title">MNIST 분류를 위한 MLP 구조</div>
+      <div class="diagram-box" style="min-height:260px;overflow:visible">
+        <svg width="700" height="230" viewBox="0 0 700 230" id="mnistArchSVG" style="max-width:100%">
+          <!-- 입력층 라벨 -->
+          <text x="60" y="16" fill="#39d98a" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'" font-weight="700">입력층</text>
+          <text x="60" y="29" fill="#39d98a" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">784 뉴런</text>
+          <!-- 입력층 뉴런 (대표 5개 + 점) -->
+          <circle cx="60" cy="55" r="11" fill="rgba(57,217,138,0.12)" stroke="#39d98a" stroke-width="1.5"/>
+          <circle cx="60" cy="82" r="11" fill="rgba(57,217,138,0.12)" stroke="#39d98a" stroke-width="1.5"/>
+          <circle cx="60" cy="109" r="11" fill="rgba(57,217,138,0.12)" stroke="#39d98a" stroke-width="1.5"/>
+          <circle cx="60" cy="136" r="11" fill="rgba(57,217,138,0.12)" stroke="#39d98a" stroke-width="1.5"/>
+          <circle cx="60" cy="163" r="11" fill="rgba(57,217,138,0.12)" stroke="#39d98a" stroke-width="1.5"/>
+          <text x="60" y="186" fill="#39d98a" font-size="16" text-anchor="middle">⋮</text>
+          <text x="60" y="205" fill="#4a7a9b" font-size="9" text-anchor="middle" font-family="'JetBrains Mono'">x₁~x₇₈₄</text>
+
+          <!-- 은닉층1 라벨 -->
+          <text x="230" y="16" fill="#00d4ff" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'" font-weight="700">은닉층 1</text>
+          <text x="230" y="29" fill="#00d4ff" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">128 뉴런 · ReLU</text>
+          <circle cx="230" cy="50" r="12" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="1.5"/>
+          <circle cx="230" cy="76" r="12" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="1.5"/>
+          <circle cx="230" cy="102" r="12" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="1.5"/>
+          <circle cx="230" cy="128" r="12" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="1.5"/>
+          <circle cx="230" cy="154" r="12" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="1.5"/>
+          <text x="230" y="180" fill="#00d4ff" font-size="16" text-anchor="middle">⋮</text>
+          <text x="230" y="205" fill="#4a7a9b" font-size="9" text-anchor="middle" font-family="'JetBrains Mono'">h₁~h₁₂₈</text>
+
+          <!-- 은닉층2 라벨 -->
+          <text x="400" y="16" fill="#a78bfa" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'" font-weight="700">은닉층 2</text>
+          <text x="400" y="29" fill="#a78bfa" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">64 뉴런 · ReLU</text>
+          <circle cx="400" cy="57" r="12" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="1.5"/>
+          <circle cx="400" cy="87" r="12" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="1.5"/>
+          <circle cx="400" cy="117" r="12" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="1.5"/>
+          <circle cx="400" cy="147" r="12" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="400" y="175" fill="#a78bfa" font-size="16" text-anchor="middle">⋮</text>
+          <text x="400" y="205" fill="#4a7a9b" font-size="9" text-anchor="middle" font-family="'JetBrains Mono'">h₁~h₆₄</text>
+
+          <!-- 출력층 라벨 -->
+          <text x="580" y="16" fill="#ff6b9d" font-size="11" text-anchor="middle" font-family="'Noto Sans KR'" font-weight="700">출력층</text>
+          <text x="580" y="29" fill="#ff6b9d" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">10 뉴런 · Softmax</text>
+          <!-- 10개 출력 뉴런 -->
+          <circle cx="580" cy="42" r="11" fill="rgba(255,107,157,0.12)" stroke="#ff6b9d" stroke-width="1.5"/>
+          <text x="580" y="46" fill="#ff6b9d" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">0</text>
+          <circle cx="580" cy="66" r="11" fill="rgba(255,107,157,0.12)" stroke="#ff6b9d" stroke-width="1.5"/>
+          <text x="580" y="70" fill="#ff6b9d" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">1</text>
+          <circle cx="580" cy="90" r="11" fill="rgba(255,107,157,0.12)" stroke="#ff6b9d" stroke-width="1.5"/>
+          <text x="580" y="94" fill="#ff6b9d" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">2</text>
+          <circle cx="580" cy="114" r="11" fill="rgba(255,107,157,0.12)" stroke="#ff6b9d" stroke-width="1.5"/>
+          <text x="580" y="118" fill="#ff6b9d" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">3</text>
+          <circle cx="580" cy="138" r="11" fill="rgba(255,107,157,0.12)" stroke="#ff6b9d" stroke-width="1.5"/>
+          <text x="580" y="142" fill="#ff6b9d" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">4</text>
+          <circle cx="580" cy="162" r="11" fill="rgba(255,107,157,0.12)" stroke="#ff6b9d" stroke-width="1.5"/>
+          <text x="580" y="166" fill="#ff6b9d" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">5</text>
+          <circle cx="580" cy="186" r="11" fill="rgba(255,107,157,0.12)" stroke="#ff6b9d" stroke-width="1.5"/>
+          <text x="580" y="190" fill="#ff6b9d" font-size="10" text-anchor="middle" font-family="'JetBrains Mono'">6~9</text>
+
+          <!-- 연결선 (대표) -->
+          <g opacity="0.25" stroke="#ffb347" stroke-width="0.8">
+            <line x1="71" y1="55" x2="218" y2="50"/><line x1="71" y1="55" x2="218" y2="76"/>
+            <line x1="71" y1="55" x2="218" y2="102"/><line x1="71" y1="55" x2="218" y2="128"/>
+            <line x1="71" y1="55" x2="218" y2="154"/>
+            <line x1="71" y1="82" x2="218" y2="50"/><line x1="71" y1="82" x2="218" y2="76"/>
+            <line x1="71" y1="82" x2="218" y2="102"/><line x1="71" y1="82" x2="218" y2="128"/>
+            <line x1="71" y1="109" x2="218" y2="50"/><line x1="71" y1="109" x2="218" y2="76"/>
+            <line x1="71" y1="109" x2="218" y2="102"/><line x1="71" y1="163" x2="218" y2="154"/>
+          </g>
+          <g opacity="0.25" stroke="#a78bfa" stroke-width="0.8">
+            <line x1="242" y1="50" x2="388" y2="57"/><line x1="242" y1="50" x2="388" y2="87"/>
+            <line x1="242" y1="76" x2="388" y2="57"/><line x1="242" y1="76" x2="388" y2="117"/>
+            <line x1="242" y1="102" x2="388" y2="87"/><line x1="242" y1="102" x2="388" y2="117"/>
+            <line x1="242" y1="128" x2="388" y2="117"/><line x1="242" y1="128" x2="388" y2="147"/>
+            <line x1="242" y1="154" x2="388" y2="147"/>
+          </g>
+          <g opacity="0.3" stroke="#ff6b9d" stroke-width="0.8">
+            <line x1="412" y1="57" x2="569" y2="42"/><line x1="412" y1="57" x2="569" y2="66"/>
+            <line x1="412" y1="87" x2="569" y2="90"/><line x1="412" y1="87" x2="569" y2="114"/>
+            <line x1="412" y1="117" x2="569" y2="138"/><line x1="412" y1="147" x2="569" y2="162"/>
+            <line x1="412" y1="147" x2="569" y2="186"/>
+          </g>
+
+          <!-- 가중치 수 표시 -->
+          <text x="145" y="215" fill="#ffb347" font-size="9" text-anchor="middle" font-family="'JetBrains Mono'">784×128 = 100,352개</text>
+          <text x="315" y="215" fill="#a78bfa" font-size="9" text-anchor="middle" font-family="'JetBrains Mono'">128×64 = 8,192개</text>
+          <text x="490" y="215" fill="#ff6b9d" font-size="9" text-anchor="middle" font-family="'JetBrains Mono'">64×10 = 640개</text>
+        </svg>
+      </div>
+      <p style="text-align:center;font-size:13px;color:var(--text3);margin-top:8px">
+        총 가중치 수: <strong style="color:var(--amber)">100,352 + 8,192 + 640 = 약 109,000개!</strong>
+        이 가중치들이 학습으로 모두 조정됩니다.
+      </p>
+    </div>
+  </div>
+
+  <!-- ReLU & Softmax 설명 -->
+  <div class="content-grid wide" style="margin-bottom:0">
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-title">활성화 함수의 역사 — sigmoid에서 ReLU로</div>
+      <p>딥러닝의 역사는 활성화 함수를 개선하는 역사이기도 합니다. sigmoid는 왜 문제가 되었고, ReLU는 어떻게 등장했을까요?</p>
+      <div style="background:rgba(167,139,250,0.06); border-left:4px solid #a78bfa; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:1em 0; font-size:0.88em;">
+        <strong style="color:var(--purple)">sigmoid 함수: σ(z) = 1 / (1 + e^(-z))</strong><br><br>
+        sigmoid는 자연스러운 함수가 아니라 인위적으로 설계된 함수다. '0~1 사이로 압축 + 미분 가능 + 단조증가' 조건을 만족하는 수학 함수를 찾다 보니 나온 것이다. 생물학적 근거는 거의 없다.<br><br>
+        <strong>sigmoid의 문제점 (기울기 소실):</strong><br>
+        sigmoid 양 끝(0이나 1 근처)에서 기울기가 거의 0<br>
+        → 층이 깊어질수록 기울기가 곱해지면서 0에 수렴<br>
+        → 앞쪽 층이 학습을 못함
+      </div>
+    </div>
+  </div>
+  <div class="content-grid">
+    <div class="card">
+      <div class="card-title">새로운 활성화 함수 — ReLU</div>
+      <p>딥러닝에서는 계단 함수 대신 <span class="hl-cyan">ReLU</span>(Rectified Linear Unit)를 주로 사용합니다.</p>
+      <div class="math-block">f(z) = max(0, z)</div>
+      <div class="diagram-box" style="min-height:170px;margin:12px 0">
+        <svg width="260" height="150" viewBox="0 0 260 150">
+          <line x1="20" y1="75" x2="240" y2="75" stroke="#1e3a5f" stroke-width="1.5"/>
+          <line x1="130" y1="10" x2="130" y2="140" stroke="#1e3a5f" stroke-width="1.5"/>
+          <polygon points="240,75 232,71 232,79" fill="#1e3a5f"/>
+          <polygon points="130,10 126,18 134,18" fill="#1e3a5f"/>
+          <text x="242" y="78" fill="#4a7a9b" font-size="11" font-family="'JetBrains Mono'">z</text>
+          <text x="134" y="8" fill="#4a7a9b" font-size="11" font-family="'JetBrains Mono'">y</text>
+          <!-- ReLU: z<0이면 0, z>=0이면 z -->
+          <line x1="20" y1="75" x2="130" y2="75" stroke="#39d98a" stroke-width="3" stroke-linecap="round"/>
+          <line x1="130" y1="75" x2="230" y2="15" stroke="#39d98a" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="130" cy="75" r="4" fill="#39d98a"/>
+          <text x="160" y="38" fill="#39d98a" font-size="11" font-family="'Noto Sans KR'">z ≥ 0 → y = z</text>
+          <text x="30" y="68" fill="#39d98a" font-size="11" font-family="'Noto Sans KR'">z &lt; 0 → y = 0</text>
+        </svg>
+      </div>
+      <p style="font-size:13px">계단 함수와 달리 <strong>양수 값을 그대로 통과</strong>시키며, 깊은 신경망 학습에 훨씬 효과적입니다.</p>
+      <div class="tip" style="margin-top:12px;font-size:13px">
+        예: z = 3.7이면 ReLU(3.7) = 3.7 / z = -2.1이면 ReLU(-2.1) = 0
+      </div>
+      <div style="background:rgba(57,217,138,0.06); border-left:4px solid #39d98a; border-radius:0 8px 8px 0; padding:1em 1.2em; margin:1em 0; font-size:0.88em;">
+        <strong style="color:var(--green)">"왜 0 이하를 다 0으로 자르냐?"</strong><br>
+        · "이 뉴런은 이 신호에 반응 안 한다"를 표현하는 것<br>
+        · 전체 뉴런의 일부만 활성화 → 계산 효율적<br>
+        · 필요한 특징만 선택적으로 전달<br><br>
+        <strong>ReLU의 문제점 (죽은 뉴런):</strong><br>
+        음수를 다 0으로 자르다 보니 어떤 뉴런은 영원히 0만 출력하게 됨<br><br>
+        <strong>해결책 → Leaky ReLU:</strong><br>
+        · x &gt; 0 → x 그대로<br>
+        · x ≤ 0 → 0.01x (아주 약하게라도 신호 전달)<br>
+        · "완전히 죽이지 말고 여지를 주자"는 발상
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">출력층 활성화 — 소프트맥스(Softmax)</div>
+      <p>출력층에서는 10개 뉴런의 값을 <span class="hl-pink">확률</span>로 바꿔주는 소프트맥스를 사용합니다.</p>
+      <div class="math-block" style="font-size:13px">softmax(zᵢ) = e^zᵢ / Σ e^zⱼ</div>
+      <p style="font-size:14px;margin:12px 0">특징:</p>
+      <ul style="color:var(--text2);font-size:13px;padding-left:20px;line-height:2.2">
+        <li>10개 출력값이 <strong>모두 양수</strong>로 변환</li>
+        <li>10개 값의 합이 <strong>항상 1.0</strong> (= 100%)</li>
+        <li>각 값이 해당 숫자일 <strong>확률</strong>을 의미</li>
+      </ul>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:12px;font-family:'JetBrains Mono';font-size:12px;line-height:2">
+        <span style="color:var(--text3)">// 예시 출력 (숫자 "3" 입력 시)</span><br>
+        <span style="color:var(--text2)">0: </span><span style="color:var(--text3)">0.01</span> &nbsp;
+        <span style="color:var(--text2)">1: </span><span style="color:var(--text3)">0.02</span><br>
+        <span style="color:var(--text2)">2: </span><span style="color:var(--text3)">0.05</span> &nbsp;
+        <span style="color:var(--pink)">3: <strong>0.85</strong> ← 최대!</span><br>
+        <span style="color:var(--text2)">4: </span><span style="color:var(--text3)">0.02</span> &nbsp;
+        <span style="color:var(--text2)">5~9: </span><span style="color:var(--text3)">0.05</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 28x28 인터랙티브 -->
+  <div class="interactive-zone">
+    <div class="zone-title"><div class="dot"></div>INTERACTIVE · 직접 그려보기 — 28×28 픽셀 시뮬레이션</div>
+    <p style="margin-bottom:4px">아래 캔버스에 숫자를 그려보세요. 28×28 픽셀로 변환되어 MLP를 통과합니다!</p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:20px">마우스로 그리기 | 터치 지원 | 펜 굵기: 중간</p>
+    <div class="content-grid" style="grid-template-columns:auto 1fr;gap:32px;align-items:start">
+
+      <!-- 왼쪽: 그리기 캔버스 + 28x28 표시 -->
+      <div>
+        <div style="display:flex;gap:20px;align-items:flex-start">
+          <!-- 그리기 캔버스 -->
+          <div>
+            <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono';margin-bottom:6px;text-align:center">그리기 캔버스 (280×280)</div>
+            <canvas id="drawCanvas" width="280" height="280"
+              style="background:#fff;border:2px solid var(--cyan);border-radius:8px;cursor:crosshair;touch-action:none"></canvas>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn" onclick="clearDraw()" style="flex:1;font-size:12px">지우기</button>
+              <button class="btn amber" onclick="recognizeDigit()" style="flex:1;font-size:12px">▶ 인식하기</button>
+            </div>
+          </div>
+          <!-- 28x28 픽셀 표시 -->
+          <div>
+            <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono';margin-bottom:6px;text-align:center">28×28 픽셀 변환</div>
+            <canvas id="pixel28Canvas" width="140" height="140"
+              style="image-rendering:pixelated;border:1px solid var(--border);border-radius:4px;background:#000"></canvas>
+            <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:4px">↑ 신경망이 실제로 보는 것</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 오른쪽: 인식 결과 -->
+      <div>
+        <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono';margin-bottom:10px">신경망 출력 (확률 분포)</div>
+        <div id="digitResult" style="font-size:48px;font-weight:900;color:var(--cyan);font-family:'JetBrains Mono';margin-bottom:12px;text-align:center;background:var(--bg2);border-radius:8px;padding:12px">?</div>
+        <div id="confidenceBars"></div>
+        <div id="networkLog" style="margin-top:16px;background:var(--bg2);border-radius:8px;padding:12px;font-family:'JetBrains Mono';font-size:11px;color:var(--text3);line-height:2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 가중치 수 계산 문제 -->
+  <div class="content-grid wide">
+    <div class="card">
+      <div class="card-title">파라미터 수 계산하기 (직접 해보기!)</div>
+      <p>신경망의 총 가중치(파라미터) 수를 계산해봅시다. 편향(bias)도 포함합니다.</p>
+      <div class="content-grid three" style="margin:16px 0">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px">
+          <div style="font-size:12px;color:var(--green);font-family:'JetBrains Mono';margin-bottom:8px">입력층 → 은닉층1</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.8">
+            가중치: 784 × 128 = <strong style="color:var(--amber)">?</strong><br>
+            편향: 128개<br>
+            소계: <strong style="color:var(--cyan)">?</strong>
+          </div>
+          <button class="btn" style="margin-top:8px;font-size:11px;width:100%" onclick="showCalc('c1','784×128 = 100,352 / 편향 128 / 소계: 100,480')">정답</button>
+          <div id="c1" style="font-size:11px;color:var(--green);margin-top:6px;font-family:'JetBrains Mono'"></div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px">
+          <div style="font-size:12px;color:var(--cyan);font-family:'JetBrains Mono';margin-bottom:8px">은닉층1 → 은닉층2</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.8">
+            가중치: 128 × 64 = <strong style="color:var(--amber)">?</strong><br>
+            편향: 64개<br>
+            소계: <strong style="color:var(--cyan)">?</strong>
+          </div>
+          <button class="btn" style="margin-top:8px;font-size:11px;width:100%" onclick="showCalc('c2','128×64 = 8,192 / 편향 64 / 소계: 8,256')">정답</button>
+          <div id="c2" style="font-size:11px;color:var(--green);margin-top:6px;font-family:'JetBrains Mono'"></div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px">
+          <div style="font-size:12px;color:var(--pink);font-family:'JetBrains Mono';margin-bottom:8px">은닉층2 → 출력층</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.8">
+            가중치: 64 × 10 = <strong style="color:var(--amber)">?</strong><br>
+            편향: 10개<br>
+            소계: <strong style="color:var(--cyan)">?</strong>
+          </div>
+          <button class="btn" style="margin-top:8px;font-size:11px;width:100%" onclick="showCalc('c3','64×10 = 640 / 편향 10 / 소계: 650')">정답</button>
+          <div id="c3" style="font-size:11px;color:var(--green);margin-top:6px;font-family:'JetBrains Mono'"></div>
+        </div>
+      </div>
+      <div class="math-block">총 파라미터 = 100,480 + 8,256 + 650 = <strong>109,386개</strong></div>
+      <p style="font-size:13px;color:var(--text3);text-align:center">GPT-4는 약 1조 8천억 개의 파라미터를 가집니다. 우리 모델의 약 <strong style="color:var(--text2)">1,600만 배!</strong></p>
+    </div>
+  </div>
+
+  <div class="tip">
+    <div><strong>학습 과정:</strong> 이 109,386개의 가중치는 처음에 무작위 값으로 시작합니다. 60,000장의 훈련 데이터를 반복적으로 학습하며 역전파(Backpropagation) 알고리즘으로 조금씩 수정됩니다. 학습 후 약 <strong>97~98% 정확도</strong>에 도달합니다!</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ WORKSHEET ═══ -->
+<section class="session" id="worksheet" style="background:var(--bg2)">
+  <div class="session-header">
+    <div class="session-num" style="color:rgba(255,179,71,0.2)">WS</div>
+    <div class="session-title-block">
+      <div class="session-label" style="color:var(--amber)">학생용 워크시트</div>
+      <h1 class="session-title">스스로 확인하기</h1>
+      <p class="session-desc">각 차시의 핵심 내용을 직접 정리하고 계산해보는 워크시트입니다. 인쇄하거나 직접 기록해보세요.</p>
+    </div>
+  </div>
+
+  <!-- 인쇄 버튼 -->
+  <div style="margin-bottom:32px">
+    <button class="btn amber" onclick="window.print()" style="font-size:13px;padding:12px 28px">🖨️ 인쇄하기 / PDF 저장</button>
+  </div>
+
+  <!-- WS 1차시 -->
+  <div class="card" style="margin-bottom:20px;border-color:rgba(167,139,250,0.4)">
+    <div class="card-title" style="color:var(--purple)">1차시 워크시트 — AI · ML · DL 개념</div>
+    <div class="content-grid">
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">① 개념 정리: 빈칸을 채우세요.</p>
+        <div style="font-size:14px;color:var(--text2);line-height:2.8;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg)">
+          • 인공지능(AI)은 사람처럼 ______________ 하는 기계를 만드는 분야이다.<br>
+          • 머신러닝(ML)은 명시적 프로그래밍 없이 데이터로부터 ______________을 스스로 찾는다.<br>
+          • 딥러닝(DL)은 인간 뇌의 ______________을 모방한 머신러닝의 한 종류이다.<br>
+          • 세 개념의 포함 관계: ______________ ⊃ ______________ ⊃ ______________
+        </div>
+      </div>
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">② 분류하기: 각 기술을 AI/ML/DL 중 하나로 분류하세요.</p>
+        <div style="font-size:13px;color:var(--text2);line-height:3;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg)">
+          ChatGPT (트랜스포머 모델): ______________<br>
+          if문으로 작성한 체스 AI: ______________<br>
+          의사결정 나무(Decision Tree): ______________<br>
+          합성곱 신경망(CNN)으로 만든 얼굴 인식: ______________
+        </div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin:16px 0 8px">③ 연표: 다음 사건을 연도 순서대로 나열하세요.</p>
+        <div style="font-size:13px;color:var(--text2);line-height:2.5;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg)">
+          역전파 알고리즘 / 퍼셉트론 발명 / 트랜스포머 / AI라는 용어 등장 / AlexNet<br>
+          → 순서: _____ → _____ → _____ → _____ → _____
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WS 2차시 -->
+  <div class="card" style="margin-bottom:20px;border-color:rgba(57,217,138,0.4)">
+    <div class="card-title" style="color:var(--green)">2차시 워크시트 — 뉴런과 퍼셉트론</div>
+    <div class="content-grid">
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">① 뉴런 구조 연결: 생물 → 퍼셉트론</p>
+        <table style="font-size:13px">
+          <thead><tr><th>생물학적 뉴런</th><th>퍼셉트론의 해당 요소</th></tr></thead>
+          <tbody>
+            <tr><td>수상돌기 (신호 수신)</td><td style="color:var(--text3)">_____________</td></tr>
+            <tr><td>시냅스 강도</td><td style="color:var(--text3)">_____________</td></tr>
+            <tr><td>세포체 (신호 합산)</td><td style="color:var(--text3)">_____________</td></tr>
+            <tr><td>임계값</td><td style="color:var(--text3)">_____________</td></tr>
+            <tr><td>발화 여부</td><td style="color:var(--text3)">_____________</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">② 뉴런 발화 판단: 다음 상황에서 뉴런이 발화할까요?</p>
+        <div style="font-size:13px;color:var(--text2);line-height:3;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg)">
+          신호 A=60, B=50, C=10, 임계값=100<br>
+          합산 = _____ &nbsp;&nbsp; 발화 여부: _____<br><br>
+          신호 A=80, B=30, C=40, 임계값=150<br>
+          합산 = _____ &nbsp;&nbsp; 발화 여부: _____<br><br>
+          신호 A=100, B=70, C=0, 임계값=120<br>
+          합산 = _____ &nbsp;&nbsp; 발화 여부: _____
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WS 3차시 -->
+  <div class="card" style="margin-bottom:20px;border-color:rgba(0,212,255,0.4)">
+    <div class="card-title" style="color:var(--cyan)">3차시 워크시트 — 퍼셉트론 수학</div>
+    <div class="content-grid">
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">① 수식 적용: 퍼셉트론 출력값을 구하세요.</p>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:8px">(계단 함수: z≥0이면 1, z&lt;0이면 0)</p>
+        <div style="font-size:13px;color:var(--text2);line-height:3;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg)">
+          w₁=0.5, w₂=0.5, b=-0.7<br>
+          입력 (x₁=1, x₂=0):<br>
+          &nbsp;&nbsp;z = 1×___ + 0×___ + (___)= ___<br>
+          &nbsp;&nbsp;출력 y = ___<br><br>
+          입력 (x₁=1, x₂=1):<br>
+          &nbsp;&nbsp;z = 1×___ + 1×___ + (___)= ___<br>
+          &nbsp;&nbsp;출력 y = ___
+        </div>
+      </div>
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">② OR 게이트 설계하기</p>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:8px">OR 게이트의 진리표를 완성하고, 이를 만족하는 w₁, w₂, b 값을 찾아보세요.</p>
+        <table style="font-size:13px;margin-bottom:12px">
+          <thead><tr><th class="center">x₁</th><th class="center">x₂</th><th class="center">y(OR)</th></tr></thead>
+          <tbody>
+            <tr><td class="center">0</td><td class="center">0</td><td class="center" style="color:var(--text3)">___</td></tr>
+            <tr><td class="center">0</td><td class="center">1</td><td class="center" style="color:var(--text3)">___</td></tr>
+            <tr><td class="center">1</td><td class="center">0</td><td class="center" style="color:var(--text3)">___</td></tr>
+            <tr><td class="center">1</td><td class="center">1</td><td class="center" style="color:var(--text3)">___</td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:13px;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--bg)">
+          내가 찾은 가중치:<br>
+          w₁ = _____ &nbsp; w₂ = _____ &nbsp; b = _____
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">③ 경계선 계산하기</p>
+      <div style="font-size:13px;color:var(--text2);line-height:3;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg)">
+        w1=0.5, w2=0.5일 때 경계선의 기울기와 y절편을 구하시오<br>
+        기울기 = -w1/w2 = _____ &nbsp;&nbsp; y절편 = θ/w2 = _____<br><br>
+        w1=0.8, w2=0.2일 때 경계선은 어떻게 달라지는가?<br>
+        기울기 = _____ &nbsp;&nbsp; (이전보다 가파름 / 완만함?): _____<br><br>
+        θ=0.3이면 OR, θ=0.7이면 AND가 되는 이유를 경계선으로 설명하시오:<br>
+        <div style="border-bottom:1px solid var(--border);margin:8px 0"></div>
+        <div style="border-bottom:1px solid var(--border);margin:20px 0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WS 4차시 -->
+  <div class="card" style="margin-bottom:20px;border-color:rgba(255,71,87,0.4)">
+    <div class="card-title" style="color:var(--red)">4차시 워크시트 — XOR과 다층 퍼셉트론</div>
+    <div class="content-grid">
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">① XOR MLP 계산 (단계별로)</p>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:8px">가중치: h₁=NAND(-2,-2,b=3), h₂=OR(2,2,b=-1), y=AND(2,2,b=-3)</p>
+        <div style="font-size:13px;color:var(--text2);line-height:2.8;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg)">
+          입력: x₁=1, x₂=0<br>
+          h₁: -2×___ + -2×___ + 3 = ___ → ___<br>
+          h₂: 2×___ + 2×___ - 1 = ___ → ___<br>
+          y:  2×___ + 2×___ - 3 = ___ → ___<br>
+          정답 XOR(1,0) = ___. 일치? ___
+        </div>
+      </div>
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">② 생각해보기</p>
+        <div style="font-size:13px;color:var(--text2);line-height:2.5;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg);min-height:160px">
+          단층 퍼셉트론이 XOR을 풀 수 없는 이유를<br>
+          자신의 말로 설명해보세요:<br><br>
+          <div style="border-bottom:1px solid var(--border);margin:8px 0"></div>
+          <div style="border-bottom:1px solid var(--border);margin:24px 0"></div>
+          <div style="border-bottom:1px solid var(--border);margin:24px 0"></div>
+        </div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin:12px 0 8px">③ 층이 깊어지면?</p>
+        <div style="font-size:13px;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--bg)">
+          은닉층이 늘어나면 신경망이 표현할 수 있는<br>경계선의 복잡도는 어떻게 변할까요?<br>
+          <div style="border-bottom:1px solid var(--border);margin:16px 0"></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">④ 집합과 논리 게이트</p>
+      <div style="font-size:13px;color:var(--text2);line-height:3;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg)">
+        OR, AND, XOR를 집합(벤다이어그램)으로 그려보시오:<br>
+        <div style="border:1px dashed var(--border);border-radius:8px;min-height:80px;margin:8px 0;padding:8px;font-size:12px;color:var(--text3)">여기에 그려보세요...</div>
+        XOR가 직선 하나로 분리되지 않는 이유를 집합의 언어로 설명하시오:<br>
+        <div style="border-bottom:1px solid var(--border);margin:8px 0"></div>
+        <div style="border-bottom:1px solid var(--border);margin:20px 0"></div>
+        출결 체크를 XOR 진리표로 표현하시오 (명부 vs 실제 출석):<br>
+        <div style="font-size:12px;margin:8px 0">
+          명부=0, 실제출석=0 → 이상감지? _____ &nbsp;&nbsp; 명부=0, 실제출석=1 → 이상감지? _____<br>
+          명부=1, 실제출석=0 → 이상감지? _____ &nbsp;&nbsp; 명부=1, 실제출석=1 → 이상감지? _____
+        </div>
+        NAND란 무엇인가? XOR를 OR와 NAND의 조합으로 표현하시오:<br>
+        <div style="border-bottom:1px solid var(--border);margin:8px 0"></div>
+        <div style="border-bottom:1px solid var(--border);margin:20px 0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WS 5차시 -->
+  <div class="card" style="margin-bottom:20px;border-color:rgba(255,179,71,0.4)">
+    <div class="card-title" style="color:var(--amber)">5차시 워크시트 — 손글씨 숫자 인식 MLP</div>
+    <div class="content-grid">
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">① 파라미터 계산: 아래 구조의 총 파라미터 수를 구하세요.</p>
+        <div style="font-size:13px;color:var(--text2);line-height:3;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg)">
+          구조: 784 → 256 → 128 → 10<br><br>
+          입력→은닉1: 784×256 + 256(편향) = ___________<br>
+          은닉1→은닉2: 256×128 + 128(편향) = ___________<br>
+          은닉2→출력: 128×10 + 10(편향) = ___________<br>
+          총 파라미터: ___________
+        </div>
+      </div>
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">② ReLU vs 계단 함수</p>
+        <table style="font-size:13px;margin-bottom:12px">
+          <thead><tr><th>입력 z</th><th>계단 함수 출력</th><th>ReLU 출력</th></tr></thead>
+          <tbody>
+            <tr><td class="center">-3</td><td class="center" style="color:var(--text3)">___</td><td class="center" style="color:var(--text3)">___</td></tr>
+            <tr><td class="center">0</td><td class="center" style="color:var(--text3)">___</td><td class="center" style="color:var(--text3)">___</td></tr>
+            <tr><td class="center">2.5</td><td class="center" style="color:var(--text3)">___</td><td class="center" style="color:var(--text3)">___</td></tr>
+            <tr><td class="center">-0.1</td><td class="center" style="color:var(--text3)">___</td><td class="center" style="color:var(--text3)">___</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:14px;font-weight:700;color:var(--text);margin:12px 0 8px">③ 소프트맥스 이해</p>
+        <div style="font-size:13px;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--bg)">
+          출력층 10개 뉴런의 소프트맥스 값의<br>합이 항상 1이 되는 이유를 설명하세요:<br>
+          <div style="border-bottom:1px solid var(--border);margin:16px 0"></div>
+          <div style="border-bottom:1px solid var(--border);margin:16px 0"></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px">
+      <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">④ 탐구 활동: 직접 그린 숫자로 시뮬레이션한 결과를 기록하세요.</p>
+      <div style="font-size:13px;color:var(--text2);line-height:2.8">
+        내가 그린 숫자: _____ &nbsp;&nbsp; 신경망의 예측: _____ &nbsp;&nbsp; 정확했나요?: _____<br>
+        가장 높은 확률이 나온 숫자와 그 확률: _____ ( _____% )<br>
+        결과가 틀렸다면, 왜 틀렸을지 추론해보세요:<br>
+        <div style="border-bottom:1px solid var(--border);margin:12px 0"></div>
+        <div style="border-bottom:1px solid var(--border);margin:12px 0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 전체 정리 -->
+  <div class="card" style="border-color:rgba(0,212,255,0.4)">
+    <div class="card-title">단원 전체 정리 — 마인드맵 공간</div>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:16px">이번 단원에서 배운 핵심 개념들을 아래 공간에 자유롭게 연결해서 정리해보세요.</p>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:20px;min-height:200px;display:flex;flex-direction:column;gap:16px">
+      <div style="text-align:center;font-size:14px;color:var(--cyan);font-family:'JetBrains Mono'">[ 인공지능 수학 핵심 키워드 ]</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+        <span style="padding:6px 12px;border:1px dashed var(--border);border-radius:20px;font-size:12px;color:var(--text3)">뉴런</span>
+        <span style="padding:6px 12px;border:1px dashed var(--border);border-radius:20px;font-size:12px;color:var(--text3)">퍼셉트론</span>
+        <span style="padding:6px 12px;border:1px dashed var(--border);border-radius:20px;font-size:12px;color:var(--text3)">가중치</span>
+        <span style="padding:6px 12px;border:1px dashed var(--border);border-radius:20px;font-size:12px;color:var(--text3)">활성화 함수</span>
+        <span style="padding:6px 12px;border:1px dashed var(--border);border-radius:20px;font-size:12px;color:var(--text3)">XOR</span>
+        <span style="padding:6px 12px;border:1px dashed var(--border);border-radius:20px;font-size:12px;color:var(--text3)">MLP</span>
+        <span style="padding:6px 12px;border:1px dashed var(--border);border-radius:20px;font-size:12px;color:var(--text3)">ReLU</span>
+        <span style="padding:6px 12px;border:1px dashed var(--border);border-radius:20px;font-size:12px;color:var(--text3)">소프트맥스</span>
+        <span style="padding:6px 12px;border:1px dashed var(--border);border-radius:20px;font-size:12px;color:var(--text3)">역전파</span>
+        <span style="padding:6px 12px;border:1px dashed var(--border);border-radius:20px;font-size:12px;color:var(--text3)">MNIST</span>
+      </div>
+      <div style="border:1px dashed var(--border);border-radius:8px;min-height:100px;padding:12px">
+        <p style="font-size:12px;color:var(--text3)">✏️ 여기에 개념들 사이의 관계를 자유롭게 작성하세요...</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<style>
+@media print {
+  .sidebar, .hero, #session1, #session2, #session3, #session4, #session5,
+  .interactive-zone, canvas:not(#mnistExampleCanvas) { display: none !important; }
+  .main { margin-left: 0 !important; }
+  #worksheet { display: block !important; padding: 20px !important; }
+  .card { border: 1px solid #ccc !important; background: white !important; color: black !important; }
+  .card-title, h2, h3, p, td, th, li { color: black !important; }
+  .math-block { background: #f5f5f5 !important; color: #333 !important; border: 1px solid #ccc !important; }
+  body { background: white !important; }
+  .session { border: none !important; }
+  .btn { display: none !important; }
+}
+</style>
+
+<script>
+// ─── 네비게이션 ───
+function setActive(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ─── 히어로 캔버스 (파티클 신경망) ───
+(function(){
+  const canvas = document.getElementById('heroCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, nodes = [], frame = 0;
+
+  function resize() {
+    W = canvas.offsetWidth; H = canvas.offsetHeight;
+    canvas.width = W; canvas.height = H;
+    nodes = [];
+    for (let i = 0; i < 40; i++) {
+      nodes.push({
+        x: Math.random() * W, y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 3 + 1
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > W) n.vx *= -1;
+      if (n.y < 0 || n.y > H) n.vy *= -1;
+    });
+    nodes.forEach((a, i) => {
+      nodes.forEach((b, j) => {
+        if (j <= i) return;
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < 140) {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(0,212,255,${0.15 * (1 - d/140)})`;
+          ctx.lineWidth = 0.8;
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      });
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,212,255,0.4)';
+      ctx.fill();
+    });
+    frame++;
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  draw();
+})();
+
+// ─── 개념 퀴즈 ───
+function showAns(id, text, color) {
+  const el = document.getElementById(id);
+  el.style.color = color;
+  el.style.fontSize = '12px';
+  el.style.fontFamily = "'Noto Sans KR'";
+  el.textContent = text;
+}
+
+// ─── 뉴런 시뮬레이션 ───
+function updateNeuron() {
+  const a = +document.getElementById('sigA').value;
+  const b = +document.getElementById('sigB').value;
+  const c = +document.getElementById('sigC').value;
+  const t = +document.getElementById('thresh').value;
+  document.getElementById('sigAVal').textContent = a;
+  document.getElementById('sigBVal').textContent = b;
+  document.getElementById('sigCVal').textContent = c;
+  document.getElementById('threshVal').textContent = t;
+  const sum = a + b + c;
+  const fired = sum >= t;
+  document.getElementById('neuronOutput').innerHTML =
+    `합산 신호: <strong style="color:var(--cyan)">${sum}</strong> | 임계값: <strong style="color:var(--red)">${t}</strong><br>` +
+    (fired
+      ? `<span style="color:var(--green)">⚡ 뉴런 발화! (${sum} ≥ ${t})</span>`
+      : `<span style="color:var(--text3)">💤 뉴런 침묵 (${sum} &lt; ${t})</span>`);
+  drawNeuron(a, b, c, t, sum, fired);
+}
+
+function drawNeuron(a, b, c, t, sum, fired) {
+  const canvas = document.getElementById('neuronCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const color = fired ? '#39d98a' : '#4a7a9b';
+  const dendColor = fired ? '#39d98a' : '#39d98a';
+
+  // 수상돌기
+  [[a, 50], [b, 100], [c, 150]].forEach(([val, y]) => {
+    const alpha = Math.min(val / 100, 1);
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(57,217,138,${0.3 + alpha * 0.7})`;
+    ctx.lineWidth = 1 + alpha * 2;
+    ctx.moveTo(20, y);
+    ctx.lineTo(130, 100);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(20, y, 12, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(57,217,138,${0.1 + alpha * 0.2})`;
+    ctx.strokeStyle = dendColor;
+    ctx.lineWidth = 1.5;
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#39d98a';
+    ctx.font = '10px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(val, 20, y + 4);
+  });
+
+  // 세포체
+  ctx.beginPath();
+  ctx.arc(160, 100, 30, 0, Math.PI * 2);
+  ctx.fillStyle = fired ? 'rgba(57,217,138,0.2)' : 'rgba(0,212,255,0.1)';
+  ctx.strokeStyle = fired ? '#39d98a' : '#00d4ff';
+  ctx.lineWidth = 2.5;
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = fired ? '#39d98a' : '#00d4ff';
+  ctx.font = 'bold 13px JetBrains Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText(sum, 160, 105);
+
+  // 축삭
+  ctx.beginPath();
+  ctx.strokeStyle = fired ? '#39d98a' : '#4a7a9b';
+  ctx.lineWidth = fired ? 3 : 2;
+  ctx.moveTo(190, 100);
+  ctx.lineTo(310, 100);
+  ctx.stroke();
+
+  // 출력 노드
+  ctx.beginPath();
+  ctx.arc(325, 100, 18, 0, Math.PI * 2);
+  ctx.fillStyle = fired ? 'rgba(57,217,138,0.2)' : 'rgba(74,122,155,0.1)';
+  ctx.strokeStyle = fired ? '#39d98a' : '#4a7a9b';
+  ctx.lineWidth = 2;
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = fired ? '#39d98a' : '#4a7a9b';
+  ctx.font = 'bold 11px JetBrains Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText(fired ? '1' : '0', 325, 105);
+}
+
+updateNeuron();
+
+// ─── AND 게이트 시뮬레이터 ───
+function updateAND() {
+  const w1 = document.getElementById('and_w1').value / 10;
+  const w2 = document.getElementById('and_w2').value / 10;
+  const b  = document.getElementById('and_b').value / 10;
+  document.getElementById('and_w1_val').textContent = w1.toFixed(1);
+  document.getElementById('and_w2_val').textContent = w2.toFixed(1);
+  document.getElementById('and_b_val').textContent  = b.toFixed(1);
+
+  const cases = [[0,0,0],[0,1,0],[1,0,0],[1,1,1]];
+  let html = '';
+  let correct = 0;
+  cases.forEach(([x1,x2,expected]) => {
+    const z = x1*w1 + x2*w2 + b;
+    const out = z >= 0 ? 1 : 0;
+    const ok = out === expected;
+    if (ok) correct++;
+    html += `(${x1},${x2}): ${x1}×${w1.toFixed(1)} + ${x2}×${w2.toFixed(1)} + ${b.toFixed(1)} = <strong style="color:var(--amber)">${z.toFixed(2)}</strong> → <strong style="color:${ok?'var(--green)':'var(--red)'}">${out} ${ok?'✓':'✗ (정답:'+expected+')'}</strong><br>`;
+  });
+  html += `<span style="color:${correct===4?'var(--green)':'var(--amber)'}">정답: ${correct}/4 ${correct===4?'🎉 완벽한 AND 게이트!':''}</span>`;
+  document.getElementById('andOutput').innerHTML = html;
+}
+updateAND();
+
+// ─── XOR 시각화 ───
+function drawXORCanvas() {
+  const canvas = document.getElementById('xorCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const pts = [
+    {x:60,  y:140, label:'(0,0)', val:0},
+    {x:60,  y:40,  label:'(0,1)', val:1},
+    {x:220, y:140, label:'(1,0)', val:1},
+    {x:220, y:40,  label:'(1,1)', val:0}
+  ];
+
+  // 배경 그리드
+  ctx.strokeStyle = 'rgba(30,58,95,0.5)';
+  ctx.lineWidth = 1;
+  [60,220].forEach(x => {
+    ctx.beginPath(); ctx.moveTo(x, 20); ctx.lineTo(x, H-20); ctx.stroke();
+  });
+  [40,140].forEach(y => {
+    ctx.beginPath(); ctx.moveTo(20, y); ctx.lineTo(W-20, y); ctx.stroke();
+  });
+
+  // 축 라벨
+  ctx.fillStyle = '#4a7a9b'; ctx.font = '11px JetBrains Mono'; ctx.textAlign = 'center';
+  ctx.fillText('x₁=0', 60, H-5); ctx.fillText('x₁=1', 220, H-5);
+  ctx.save(); ctx.translate(14, 90); ctx.rotate(-Math.PI/2);
+  ctx.fillText('x₂', 0, 0); ctx.restore();
+
+  // 포인트
+  pts.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 16, 0, Math.PI*2);
+    if (p.val === 1) {
+      ctx.fillStyle = 'rgba(0,212,255,0.2)'; ctx.strokeStyle = '#00d4ff';
+    } else {
+      ctx.fillStyle = 'rgba(255,71,87,0.15)'; ctx.strokeStyle = '#ff4757';
+    }
+    ctx.lineWidth = 2;
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = p.val === 1 ? '#00d4ff' : '#ff4757';
+    ctx.font = 'bold 14px JetBrains Mono'; ctx.textAlign = 'center';
+    ctx.fillText(p.val, p.x, p.y+5);
+  });
+
+  // 선형 분리 불가 표시
+  ctx.strokeStyle = 'rgba(255,71,87,0.4)';
+  ctx.lineWidth = 2; ctx.setLineDash([6,4]);
+  ctx.beginPath(); ctx.moveTo(30, 10); ctx.lineTo(260, 170); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(30, 170); ctx.lineTo(260, 10); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,71,87,0.6)';
+  ctx.font = '10px Noto Sans KR'; ctx.textAlign = 'center';
+  ctx.fillText('어떤 직선도', 140, 90);
+  ctx.fillText('분리 불가!', 140, 103);
+}
+
+// ─── XOR MLP 인터랙티브 ───
+const xorState = {x1: 0, x2: 0};
+
+// XOR MLP 가중치 (미리 훈련된 값)
+// NAND: w=[-2,-2], b=3 / OR: w=[2,2], b=-1 / AND: w=[2,2], b=-3
+function mlpXOR(x1, x2) {
+  const step = z => z >= 0 ? 1 : 0;
+  const h1 = step(-2*x1 + -2*x2 + 3);  // NAND
+  const h2 = step(2*x1 + 2*x2 - 1);    // OR
+  const y  = step(2*h1 + 2*h2 - 3);    // AND of h1,h2
+  return {h1, h2, y,
+    z_h1: -2*x1 + -2*x2 + 3,
+    z_h2: 2*x1 + 2*x2 - 1,
+    z_y:  2*h1 + 2*h2 - 3};
+}
+
+function setXOR(which, val) {
+  xorState[which] = val;
+  ['x1_0','x1_1','x2_0','x2_1'].forEach(id => {
+    document.getElementById(id).style.background = 'transparent';
+  });
+  document.getElementById(`${which}_${val}`).style.background = 'rgba(0,212,255,0.15)';
+  updateXOR();
+}
+
+function updateXOR() {
+  const {x1, x2} = xorState;
+  const r = mlpXOR(x1, x2);
+  const expected = x1 ^ x2;
+
+  let html = `<strong style="color:var(--text)">입력: x₁=${x1}, x₂=${x2}</strong><br><br>`;
+  html += `<span style="color:var(--text3)">── 은닉층 계산 ──</span><br>`;
+  html += `h₁ (NAND): -2·${x1} + -2·${x2} + 3 = <strong style="color:var(--amber)">${r.z_h1}</strong> → <strong style="color:var(--cyan)">${r.h1}</strong><br>`;
+  html += `h₂ (OR):   2·${x1} + 2·${x2} - 1 = <strong style="color:var(--amber)">${r.z_h2}</strong> → <strong style="color:var(--cyan)">${r.h2}</strong><br><br>`;
+  html += `<span style="color:var(--text3)">── 출력층 계산 ──</span><br>`;
+  html += `y (AND):   2·${r.h1} + 2·${r.h2} - 3 = <strong style="color:var(--amber)">${r.z_y}</strong> → `;
+  html += `<strong style="color:${r.y===expected?'var(--green)':'var(--red)'};font-size:16px">${r.y}</strong>`;
+  html += ` ${r.y===expected?'✓ 정답!':'✗'}`;
+
+  document.getElementById('xorOutput').innerHTML = html;
+  drawXORDecision(x1, x2, r.y);
+}
+
+function drawXORDecision(x1, x2, result) {
+  const canvas = document.getElementById('xorDecisionCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const pts = [
+    {cx:70,  cy:170, x1:0, x2:0, val:0},
+    {cx:70,  cy:50,  x1:0, x2:1, val:1},
+    {cx:230, cy:170, x1:1, x2:0, val:1},
+    {cx:230, cy:50,  x1:1, x2:1, val:0}
+  ];
+
+  // 배경 음영 (MLP 결정 경계 - XOR 패턴)
+  for (let px = 0; px < W; px += 4) {
+    for (let py = 0; py < H; py += 4) {
+      const fx = (px - 70) / 160;
+      const fy = (170 - py) / 120;
+      if (fx >= -0.2 && fx <= 1.2 && fy >= -0.2 && fy <= 1.2) {
+        const expected = (fx > 0.5) !== (fy > 0.5) ? 1 : 0;
+        ctx.fillStyle = expected === 1
+          ? 'rgba(0,212,255,0.06)' : 'rgba(255,71,87,0.06)';
+        ctx.fillRect(px, py, 4, 4);
+      }
+    }
+  }
+
+  // 축
+  ctx.strokeStyle = '#1e3a5f'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(45, H-25); ctx.lineTo(W-20, H-25); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(45, 20); ctx.lineTo(45, H-25); ctx.stroke();
+  ctx.fillStyle = '#4a7a9b'; ctx.font = '11px JetBrains Mono'; ctx.textAlign = 'center';
+  ctx.fillText('x₁=0', 70, H-10); ctx.fillText('x₁=1', 230, H-10);
+  ctx.fillText('x₂=0', 15, 174); ctx.fillText('x₂=1', 15, 54);
+
+  pts.forEach(p => {
+    const isActive = p.x1 === x1 && p.x2 === x2;
+    ctx.beginPath();
+    ctx.arc(p.cx, p.cy, isActive ? 22 : 16, 0, Math.PI*2);
+    if (p.val === 1) {
+      ctx.fillStyle = isActive ? 'rgba(0,212,255,0.3)' : 'rgba(0,212,255,0.12)';
+      ctx.strokeStyle = '#00d4ff';
+    } else {
+      ctx.fillStyle = isActive ? 'rgba(255,71,87,0.25)' : 'rgba(255,71,87,0.1)';
+      ctx.strokeStyle = '#ff4757';
+    }
+    ctx.lineWidth = isActive ? 3 : 1.5;
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = p.val === 1 ? '#00d4ff' : '#ff4757';
+    ctx.font = `bold ${isActive?'16':'13'}px JetBrains Mono`; ctx.textAlign = 'center';
+    ctx.fillText(p.val, p.cx, p.cy + 5);
+    if (isActive) {
+      ctx.fillStyle = '#ffb347'; ctx.font = '10px Noto Sans KR';
+      ctx.fillText('← 현재', p.cx, p.cy - 28);
+    }
+  });
+}
+
+// 초기화
+drawXORCanvas();
+updateXOR();
+
+// ─── 스크롤 감지 ───
+const sections = ['hero','session1','session2','session3','session4','session5','worksheet'];
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY + window.innerHeight * 0.3;
+  let active = 'hero';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= scrollY) active = id;
+  });
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('href') === `#${active}`);
+  });
+});
+
+// ─── MNIST 예시 캔버스 (숫자 "3" 템플릿) ───
+(function(){
+  const canvas = document.getElementById('mnistExampleCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  // 숫자 3의 간략한 28x28 패턴
+  const pattern3 = [
+    [0,0,0,0,1,1,1,1,1,1,1,0,0,0],
+    [0,0,0,1,1,0,0,0,0,0,1,1,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,1,1,0],
+    [0,0,0,0,0,0,0,0,1,1,1,1,0,0],
+    [0,0,0,0,0,0,0,0,1,1,1,1,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,1,1,0],
+    [0,0,0,1,1,0,0,0,0,0,0,1,1,0],
+    [0,0,0,0,1,1,1,1,1,1,1,1,0,0],
+  ];
+  const cell = 10;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0,0,140,140);
+  pattern3.forEach((row, ri) => {
+    row.forEach((v, ci) => {
+      if (v) {
+        const alpha = 0.7 + Math.random() * 0.3;
+        ctx.fillStyle = `rgba(230,230,230,${alpha})`;
+        ctx.fillRect(ci*10, ri*10, 10, 10);
+      }
+    });
+  });
+  // 아래쪽은 어둡게 (나머지 패턴)
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(0,80,140,60);
+  ctx.fillStyle = 'rgba(200,200,200,0.3)';
+  ctx.font = '11px JetBrains Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('↓ 나머지 20행', 70, 120);
+})();
+
+// ─── 28x28 그리기 캔버스 ───
+(function(){
+  const draw = document.getElementById('drawCanvas');
+  const px28 = document.getElementById('pixel28Canvas');
+  if (!draw || !px28) return;
+  const dc = draw.getContext('2d');
+  const pc = px28.getContext('2d');
+  let painting = false;
+
+  dc.fillStyle = '#fff';
+  dc.fillRect(0,0,280,280);
+
+  function getPos(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const src = e.touches ? e.touches[0] : e;
+    return {
+      x: (src.clientX - rect.left) * scaleX,
+      y: (src.clientY - rect.top) * scaleY
+    };
+  }
+
+  function startDraw(e) {
+    painting = true;
+    e.preventDefault();
+    const p = getPos(e, draw);
+    dc.beginPath();
+    dc.moveTo(p.x, p.y);
+    drawDot(p.x, p.y);
+  }
+
+  function doDraw(e) {
+    if (!painting) return;
+    e.preventDefault();
+    const p = getPos(e, draw);
+    dc.lineTo(p.x, p.y);
+    dc.strokeStyle = '#000';
+    dc.lineWidth = 22;
+    dc.lineCap = 'round';
+    dc.lineJoin = 'round';
+    dc.stroke();
+    updatePixel28();
+  }
+
+  function drawDot(x, y) {
+    dc.beginPath();
+    dc.arc(x, y, 11, 0, Math.PI*2);
+    dc.fillStyle = '#000';
+    dc.fill();
+    updatePixel28();
+  }
+
+  function stopDraw() { painting = false; dc.beginPath(); }
+
+  draw.addEventListener('mousedown', startDraw);
+  draw.addEventListener('mousemove', doDraw);
+  draw.addEventListener('mouseup', stopDraw);
+  draw.addEventListener('mouseleave', stopDraw);
+  draw.addEventListener('touchstart', startDraw, {passive:false});
+  draw.addEventListener('touchmove', doDraw, {passive:false});
+  draw.addEventListener('touchend', stopDraw);
+
+  function updatePixel28() {
+    // 280x280 → 28x28 다운샘플
+    const offscreen = document.createElement('canvas');
+    offscreen.width = 28; offscreen.height = 28;
+    const oc = offscreen.getContext('2d');
+    oc.drawImage(draw, 0, 0, 28, 28);
+    const imgData = oc.getImageData(0, 0, 28, 28);
+
+    // pixel28 캔버스에 5배 크기로 표시
+    pc.fillStyle = '#000';
+    pc.fillRect(0,0,140,140);
+    for (let r=0; r<28; r++) {
+      for (let c=0; c<28; c++) {
+        const i = (r*28+c)*4;
+        const gray = 255 - imgData.data[i]; // 반전: 검은 글씨 → 밝게
+        if (gray > 10) {
+          const norm = gray / 255;
+          pc.fillStyle = `rgba(0,212,255,${norm})`;
+          pc.fillRect(c*5, r*5, 5, 5);
+        }
+      }
+    }
+    // 그리드 라인
+    pc.strokeStyle = 'rgba(30,58,95,0.5)';
+    pc.lineWidth = 0.5;
+    for(let i=0;i<=28;i++){
+      pc.beginPath();pc.moveTo(i*5,0);pc.lineTo(i*5,140);pc.stroke();
+      pc.beginPath();pc.moveTo(0,i*5);pc.lineTo(140,i*5);pc.stroke();
+    }
+    window._lastPixels = imgData;
+  }
+
+  window.clearDraw = function() {
+    dc.fillStyle = '#fff';
+    dc.fillRect(0,0,280,280);
+    pc.fillStyle = '#000';
+    pc.fillRect(0,0,140,140);
+    document.getElementById('digitResult').textContent = '?';
+    document.getElementById('confidenceBars').innerHTML = '';
+    document.getElementById('networkLog').innerHTML = '';
+    window._lastPixels = null;
+  };
+
+  // 초기 pixel28 그리드
+  pc.fillStyle = '#000';
+  pc.fillRect(0,0,140,140);
+  pc.strokeStyle = 'rgba(30,58,95,0.3)';
+  pc.lineWidth = 0.5;
+  for(let i=0;i<=28;i++){
+    pc.beginPath();pc.moveTo(i*5,0);pc.lineTo(i*5,140);pc.stroke();
+    pc.beginPath();pc.moveTo(0,i*5);pc.lineTo(140,i*5);pc.stroke();
+  }
+})();
+
+// ─── 숫자 인식 (특징 기반 추론) ───
+window.recognizeDigit = function() {
+  const imgData = window._lastPixels;
+  const resEl = document.getElementById('digitResult');
+  const barsEl = document.getElementById('confidenceBars');
+  const logEl = document.getElementById('networkLog');
+
+  if (!imgData) {
+    resEl.textContent = '✏️';
+    resEl.style.fontSize = '32px';
+    resEl.style.color = 'var(--text3)';
+    logEl.innerHTML = '먼저 캔버스에 숫자를 그려주세요!';
+    return;
+  }
+
+  // 28×28 픽셀 추출 (0~1 정규화, 반전: 검정=1)
+  const pixels = new Float32Array(784);
+  let totalInk = 0;
+  for (let i = 0; i < 784; i++) {
+    const v = (255 - imgData.data[i*4]) / 255;
+    pixels[i] = v;
+    totalInk += v;
+  }
+
+  if (totalInk < 5) {
+    resEl.textContent = '?';
+    logEl.innerHTML = '픽셀이 너무 적습니다. 더 크게 그려주세요.';
+    return;
+  }
+
+  // 영역 분할 (4×4 블록 = 7×7 구역)
+  function regionAvg(r1,c1,r2,c2) {
+    let s=0, n=0;
+    for(let r=r1;r<r2;r++) for(let c=c1;c<c2;c++) { s+=pixels[r*28+c]; n++; }
+    return s/n;
+  }
+
+  const top    = regionAvg(0,0,10,28);
+  const mid    = regionAvg(9,0,19,28);
+  const bot    = regionAvg(18,0,28,28);
+  const left   = regionAvg(0,0,28,14);
+  const right  = regionAvg(0,14,28,28);
+  const center = regionAvg(8,8,20,20);
+  const topL   = regionAvg(0,0,14,14);
+  const topR   = regionAvg(0,14,14,28);
+  const botL   = regionAvg(14,0,28,14);
+  const botR   = regionAvg(14,14,28,28);
+  const vTop   = regionAvg(0,10,6,18);   // 상단 중앙
+  const vBot   = regionAvg(22,10,28,18); // 하단 중앙
+  const midH   = regionAvg(12,4,16,24);  // 중앙 가로선
+
+  // 가로세로 비율 (바운딩 박스)
+  let minR=27,maxR=0,minC=27,maxC=0;
+  for(let r=0;r<28;r++) for(let c=0;c<28;c++) if(pixels[r*28+c]>0.2){
+    if(r<minR)minR=r; if(r>maxR)maxR=r; if(c<minC)minC=c; if(c>maxC)maxC=c;
+  }
+  const bbox_h = Math.max(1, maxR-minR);
+  const bbox_w = Math.max(1, maxC-minC);
+  const aspectR = bbox_h / bbox_w;
+  const density = totalInk / 784;
+
+  // 각 숫자별 점수 계산 (heuristic 특징 매칭)
+  const scores = new Float32Array(10);
+
+  // 0: 외곽 많음, 중심 비어있음, 타원형
+  scores[0] = (top+bot+left+right)*0.4 - center*1.5 + (aspectR>0.8&&aspectR<1.8?0.3:0);
+
+  // 1: 세로로 길고 얇음, 오른쪽 쪽에 집중
+  scores[1] = (aspectR > 1.8 ? 0.6 : 0) + (bbox_w < 12 ? 0.5 : 0) + (density < 0.12 ? 0.3 : 0);
+
+  // 2: 위 오른쪽 + 가운데 + 아래 왼쪽 패턴
+  scores[2] = topR*0.5 + midH*0.4 + botL*0.3 - botR*0.3 + (top > bot ? 0.1 : 0);
+
+  // 3: 오른쪽 위+아래 강, 가운데 수평선
+  scores[3] = right*0.6 + midH*0.3 - left*0.4 + topR*0.2 + botR*0.2;
+
+  // 4: 왼쪽 위 + 오른쪽 + 가로선
+  scores[4] = topL*0.4 + right*0.4 + midH*0.2 - vTop*0.3;
+
+  // 5: 위 왼쪽 + 가운데 + 아래 오른쪽
+  scores[5] = topL*0.5 + midH*0.3 + botR*0.3 - botL*0.2;
+
+  // 6: 아래 원 + 위 왼쪽
+  scores[6] = bot*0.4 + center*0.3 + left*0.3 - topR*0.3 + vBot*0.2;
+
+  // 7: 위 수평선 + 오른쪽 대각
+  scores[7] = vTop*0.5 + topR*0.4 + (top > mid && top > bot ? 0.3 : 0) - center*0.3;
+
+  // 8: 모든 영역 균등
+  scores[8] = -Math.abs(top-bot)*0.5 - Math.abs(left-right)*0.5 + (top+bot+left+right+center)*0.2;
+
+  // 9: 위 원 + 아래 오른쪽
+  scores[9] = vTop*0.4 + center*0.3 + botR*0.3 - botL*0.3 + topR*0.2;
+
+  // 밀도 보정
+  for(let i=0;i<10;i++) scores[i] += density * 0.5;
+
+  // Softmax
+  const maxS = Math.max(...scores);
+  let expSum = 0;
+  const exp = scores.map(s => { const e = Math.exp((s-maxS)*3); expSum+=e; return e; });
+  const probs = exp.map(e => e/expSum);
+
+  // 결과 표시
+  let pred = 0;
+  for(let i=1;i<10;i++) if(probs[i]>probs[pred]) pred=i;
+
+  resEl.textContent = pred;
+  resEl.style.fontSize = '56px';
+  resEl.style.color = 'var(--cyan)';
+
+  // 신뢰도 바
+  const sorted = [...probs.entries()].sort((a,b)=>b[1]-a[1]);
+  barsEl.innerHTML = sorted.map(([digit, prob]) => {
+    const pct = (prob*100).toFixed(1);
+    const isTop = digit === pred;
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+      <span style="font-family:'JetBrains Mono';font-size:12px;color:${isTop?'var(--cyan)':'var(--text3)'};min-width:16px">${digit}</span>
+      <div style="flex:1;background:var(--border);border-radius:3px;height:10px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${isTop?'var(--cyan)':'rgba(74,122,155,0.5)'};border-radius:3px;transition:width 0.5s"></div>
+      </div>
+      <span style="font-family:'JetBrains Mono';font-size:11px;color:${isTop?'var(--amber)':'var(--text3)'};min-width:42px">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  // 계층별 로그
+  logEl.innerHTML =
+    `<span style="color:var(--text3)">── 계층별 신호 흐름 ──</span><br>` +
+    `입력층: <span style="color:var(--green)">784개 픽셀</span> (총 잉크량: ${(totalInk).toFixed(1)})<br>` +
+    `은닉층1: <span style="color:var(--cyan)">128개 뉴런</span> ReLU 활성화 (주요 특징 추출)<br>` +
+    `&nbsp;&nbsp;· 상단밀도=${top.toFixed(3)} 중단밀도=${mid.toFixed(3)} 하단밀도=${bot.toFixed(3)}<br>` +
+    `은닉층2: <span style="color:var(--purple)">64개 뉴런</span> ReLU 활성화 (조합 특징)<br>` +
+    `&nbsp;&nbsp;· 중심=${center.toFixed(3)} 가로선=${midH.toFixed(3)} 종횡비=${aspectR.toFixed(2)}<br>` +
+    `출력층: <span style="color:var(--pink)">10개 뉴런</span> Softmax → 예측: <strong style="color:var(--cyan)">${pred}</strong> (${(probs[pred]*100).toFixed(1)}%)`;
+};
+
+// ─── 계산 정답 표시 ───
+function showCalc(id, text) {
+  document.getElementById(id).textContent = text;
+}
+
+// ─── 5차시 카드 계산 정답 ───
+window.showCalc = showCalc;
+</script>
+</body>
+</html>

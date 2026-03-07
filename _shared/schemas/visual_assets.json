@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VisualAssets",
+  "description": "시각화 제작 에이전트의 출력 스키마",
+  "type": "object",
+  "properties": {
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "type", "html_snippet"],
+        "properties": {
+          "asset_id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["p5js_sketch", "chartjs", "svg_diagram", "html_table", "css_animation"]
+          },
+          "target_slide": {
+            "type": "string",
+            "description": "삽입될 슬라이드 ID"
+          },
+          "description": { "type": "string" },
+          "html_snippet": {
+            "type": "string",
+            "description": "슬라이드에 삽입될 완전한 HTML 코드 (canvas, script 포함)"
+          },
+          "width": { "type": "integer", "default": 500 },
+          "height": { "type": "integer", "default": 400 },
+          "interactive": {
+            "type": "boolean",
+            "description": "사용자가 클릭/드래그 등 상호작용 가능한지"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "시각화 파라미터 (학생이 조정 가능한 값)",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "label": { "type": "string" },
+                "type": { "type": "string", "enum": ["slider", "input", "checkbox"] },
+                "min": { "type": "number" },
+                "max": { "type": "number" },
+                "default": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "examples_for_ai_math": {
+    "perceptron_diagram": {
+      "asset_id": "perceptron-and-gate",
+      "type": "p5js_sketch",
+      "description": "AND 게이트 퍼셉트론 다이어그램 - 입력 노드, 가중치 엣지, 합산 노드, 활성화 함수, 출력 노드를 시각화. 각 노드에 실제 숫자 표시.",
+      "interactive": true
+    },
+    "neural_network": {
+      "asset_id": "mlp-xor",
+      "type": "p5js_sketch",
+      "description": "XOR 해결을 위한 2-2-1 다층 퍼셉트론. 각 레이어의 노드와 가중치 표시, 순전파 시 값이 흐르는 애니메이션.",
+      "interactive": true
+    },
+    "activation_function": {
+      "asset_id": "sigmoid-relu-graph",
+      "type": "chartjs",
+      "description": "시그모이드, ReLU 활성화 함수 그래프. 입력값 슬라이더로 출력값 확인 가능.",
+      "interactive": true
+    },
+    "loss_curve": {
+      "asset_id": "mse-loss-curve",
+      "type": "chartjs",
+      "description": "학습 에폭에 따른 손실(MSE) 감소 곡선. 숫자 예시와 함께 표시."
+    },
+    "gradient_descent": {
+      "asset_id": "gradient-descent-viz",
+      "type": "p5js_sketch",
+      "description": "2D 손실 함수 표면에서 경사하강법으로 최솟값을 찾아가는 과정 애니메이션."
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WebResearch",
+  "description": "웹 리서치 에이전트의 출력 스키마",
+  "type": "object",
+  "properties": {
+    "topic": { "type": "string" },
+    "real_world_applications": {
+      "type": "array",
+      "description": "수업 도입부에 활용할 실생활 연결 예시",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "example": "스팸 메일 필터링" },
+          "description": { "type": "string" },
+          "connection_to_topic": { "type": "string" },
+          "image_url": { "type": "string" }
+        }
+      }
+    },
+    "teaching_strategies": {
+      "type": "array",
+      "description": "이 주제에 효과적인 교수 전략 및 설명 방법",
+      "items": {
+        "type": "object",
+        "properties": {
+          "strategy_name": { "type": "string" },
+          "description": { "type": "string" },
+          "example_activity": { "type": "string" }
+        }
+      }
+    },
+    "additional_problems": {
+      "type": "array",
+      "description": "수업에 활용할 추가 문제 (교과서 외)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "problem": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["개념확인", "계산연습", "토론", "프로젝트"]
+          },
+          "hint": { "type": "string" }
+        }
+      }
+    },
+    "misconceptions": {
+      "type": "array",
+      "description": "학생들이 자주 오해하는 부분 (미리 예방)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "misconception": { "type": "string" },
+          "correction": { "type": "string" }
+        }
+      }
+    },
+    "analogies": {
+      "type": "array",
+      "description": "직관적 이해를 위한 비유/유추",
+      "items": {
+        "type": "object",
+        "properties": {
+          "concept": { "type": "string" },
+          "analogy": { "type": "string" }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "url": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>텍스트 자료의 표현 | 인공지능 수학</title>
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <style>
+    /* ===================================================
+       GLOBAL RESET & FONT
+    =================================================== */
+    :root {
+      --bg:        #0a0f1e;
+      --text:      #e8f4fd;
+      --cyan:      #00d4ff;
+      --amber:     #ffb347;
+      --green:     #39d98a;
+      --red:       #ff4757;
+      --purple:    #a78bfa;
+      --card-bg:   rgba(255,255,255,0.07);
+      --border:    rgba(255,255,255,0.15);
+      --shadow:    rgba(0,0,0,0.5);
+    }
+
+    .reveal-viewport { background: var(--bg); }
+
+    .reveal {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 28px;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .reveal .slides section {
+      text-align: left;
+      padding: 0 20px;
+    }
+
+    /* ===================================================
+       HEADINGS
+    =================================================== */
+    .reveal h1 {
+      font-size: 2.2em;
+      font-weight: 900;
+      color: var(--cyan);
+      line-height: 1.2;
+      text-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+      letter-spacing: -0.02em;
+    }
+
+    .reveal h2 {
+      font-size: 1.6em;
+      font-weight: 700;
+      color: var(--cyan);
+      border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+      padding-bottom: 0.3em;
+      margin-bottom: 0.6em;
+      letter-spacing: -0.01em;
+    }
+
+    .reveal h3 {
+      font-size: 1.2em;
+      font-weight: 700;
+      color: var(--amber);
+      margin-bottom: 0.4em;
+    }
+
+    /* ===================================================
+       CARDS & BOXES
+    =================================================== */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 10px 0;
+      backdrop-filter: blur(4px);
+    }
+
+    .card-cyan {
+      border-left: 4px solid var(--cyan);
+      background: rgba(0, 212, 255, 0.08);
+    }
+
+    .card-amber {
+      border-left: 4px solid var(--amber);
+      background: rgba(255, 179, 71, 0.08);
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: rgba(167, 139, 250, 0.10);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: rgba(57, 217, 138, 0.08);
+    }
+
+    .definition-box {
+      background: rgba(0, 212, 255, 0.06);
+      border: 2px solid rgba(0, 212, 255, 0.4);
+      border-radius: 14px;
+      padding: 22px 28px;
+      margin: 12px 0;
+      position: relative;
+    }
+
+    .definition-box::before {
+      content: '정의';
+      position: absolute;
+      top: -14px;
+      left: 20px;
+      background: var(--cyan);
+      color: #0a0f1e;
+      font-weight: 900;
+      font-size: 0.7em;
+      padding: 2px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+    }
+
+    .highlight-box {
+      background: rgba(167, 139, 250, 0.12);
+      border: 2px solid rgba(167, 139, 250, 0.5);
+      border-radius: 12px;
+      padding: 16px 22px;
+      margin: 10px 0;
+    }
+
+    /* ===================================================
+       TWO-COLUMN LAYOUT
+    =================================================== */
+    .cols {
+      display: grid;
+      gap: 20px;
+      align-items: start;
+    }
+    .cols-2  { grid-template-columns: 1fr 1fr; }
+    .cols-3  { grid-template-columns: 1fr 1fr 1fr; }
+
+    /* ===================================================
+       BADGES & TAGS
+    =================================================== */
+    .badge {
+      display: inline-block;
+      font-size: 0.72em;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 30px;
+      margin-right: 6px;
+    }
+    .badge-cyan   { background: rgba(0,212,255,0.2);  color: var(--cyan);   border: 1px solid var(--cyan); }
+    .badge-amber  { background: rgba(255,179,71,0.2); color: var(--amber);  border: 1px solid var(--amber); }
+    .badge-green  { background: rgba(57,217,138,0.2); color: var(--green);  border: 1px solid var(--green); }
+    .badge-red    { background: rgba(255,71,87,0.2);  color: var(--red);    border: 1px solid var(--red); }
+    .badge-purple { background: rgba(167,139,250,0.2);color: var(--purple); border: 1px solid var(--purple); }
+
+    /* ===================================================
+       WORD BOXES (Slide 8)
+    =================================================== */
+    .word-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin: 12px 0;
+    }
+
+    .word-box {
+      background: rgba(0, 212, 255, 0.12);
+      border: 1.5px solid rgba(0, 212, 255, 0.5);
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 1.05em;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .word-box.dict-form {
+      background: rgba(255, 179, 71, 0.12);
+      border-color: rgba(255, 179, 71, 0.5);
+      color: var(--amber);
+      font-size: 0.9em;
+    }
+
+    /* ===================================================
+       STOPWORD STYLE (Slide 9)
+    =================================================== */
+    .stopword {
+      color: var(--red);
+      text-decoration: line-through;
+      opacity: 0.65;
+    }
+
+    .word-box.stopword-box {
+      background: rgba(255, 71, 87, 0.10);
+      border-color: rgba(255, 71, 87, 0.4);
+      color: var(--red);
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    /* ===================================================
+       VECTOR TABLE (Slide 13)
+    =================================================== */
+    .vector-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82em;
+      margin: 12px 0;
+    }
+
+    .vector-table th {
+      background: rgba(0, 212, 255, 0.15);
+      color: var(--cyan);
+      font-weight: 700;
+      padding: 9px 6px;
+      text-align: center;
+      border: 1px solid rgba(0, 212, 255, 0.25);
+      font-size: 0.9em;
+    }
+
+    .vector-table td {
+      padding: 9px 8px;
+      text-align: center;
+      border: 1px solid var(--border);
+      font-weight: 500;
+      min-width: 44px;
+    }
+
+    .vector-table tr:nth-child(odd) td {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .vector-table td.label {
+      background: rgba(255, 179, 71, 0.12);
+      color: var(--amber);
+      font-weight: 700;
+      text-align: left;
+      padding-left: 14px;
+    }
+
+    .cell-one  { color: var(--green); font-weight: 900; }
+    .cell-zero { color: rgba(255,255,255,0.3); }
+    .cell-hidden { opacity: 0; }
+
+    /* ===================================================
+       REVIEW CARDS (댓글, 후기)
+    =================================================== */
+    .review-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      font-size: 0.9em;
+    }
+
+    .review-card .label {
+      font-weight: 900;
+      margin-right: 8px;
+    }
+
+    .review-card.a { border-left: 4px solid var(--cyan); }
+    .review-card.b { border-left: 4px solid var(--amber); }
+    .review-card.c { border-left: 4px solid var(--purple); }
+
+    .label-a { color: var(--cyan); }
+    .label-b { color: var(--amber); }
+    .label-c { color: var(--purple); }
+
+    /* ===================================================
+       SETS DISPLAY
+    =================================================== */
+    .set-display {
+      font-size: 1.05em;
+      margin: 8px 0;
+      padding: 10px 18px;
+      border-radius: 8px;
+    }
+    .set-a { background: rgba(0,212,255,0.08);  border-left: 3px solid var(--cyan);   }
+    .set-b { background: rgba(255,179,71,0.08); border-left: 3px solid var(--amber);  }
+    .set-c { background: rgba(167,139,250,0.08);border-left: 3px solid var(--purple); }
+    .set-u { background: rgba(57,217,138,0.08); border-left: 3px solid var(--green);  font-weight: 700; }
+
+    .set-label {
+      font-weight: 900;
+      margin-right: 6px;
+    }
+
+    /* ===================================================
+       VECTOR DISPLAY
+    =================================================== */
+    .vector-display {
+      font-size: 1.1em;
+      padding: 10px 18px;
+      margin: 8px 0;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.03em;
+    }
+
+    .vec-a { background: rgba(0,212,255,0.08);   border-left: 3px solid var(--cyan);   }
+    .vec-b { background: rgba(255,179,71,0.08);  border-left: 3px solid var(--amber);  }
+    .vec-c { background: rgba(167,139,250,0.08); border-left: 3px solid var(--purple); }
+
+    .vec-one  { color: var(--green);  font-weight: 900; }
+    .vec-zero { color: rgba(200,200,200,0.45); }
+
+    /* ===================================================
+       OBJECTIVE LIST
+    =================================================== */
+    .obj-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .obj-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 18px;
+      margin: 10px 0;
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 1.05em;
+    }
+
+    .obj-list li .num {
+      background: var(--cyan);
+      color: #0a0f1e;
+      font-weight: 900;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.9em;
+    }
+
+    /* ===================================================
+       FILL-IN-THE-BLANK
+    =================================================== */
+    .blank {
+      display: inline-block;
+      min-width: 60px;
+      border-bottom: 3px solid var(--purple);
+      padding: 0 8px;
+      color: transparent;
+      font-weight: 900;
+    }
+
+    .blank.revealed {
+      color: var(--green);
+    }
+
+    .fitb-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+      padding: 12px 18px;
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 0.95em;
+      flex-wrap: wrap;
+    }
+
+    .fitb-answer {
+      color: var(--green);
+      font-weight: 900;
+      font-size: 1.1em;
+      margin-left: 8px;
+    }
+
+    /* ===================================================
+       ARROW STYLES
+    =================================================== */
+    .arrow {
+      font-size: 1.4em;
+      color: var(--amber);
+      margin: 0 6px;
+    }
+
+    /* ===================================================
+       TABLE: 정형 텍스트 변환
+    =================================================== */
+    .convert-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92em;
+    }
+
+    .convert-table th {
+      background: rgba(255, 179, 71, 0.18);
+      color: var(--amber);
+      font-weight: 700;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 179, 71, 0.3);
+      text-align: center;
+    }
+
+    .convert-table td {
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .convert-table tr:nth-child(even) td {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .num-badge {
+      display: inline-block;
+      background: rgba(57, 217, 138, 0.2);
+      color: var(--green);
+      border: 1px solid var(--green);
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-weight: 900;
+      font-size: 0.9em;
+    }
+
+    /* ===================================================
+       TITLE SLIDE ACCENT
+    =================================================== */
+    .title-meta {
+      font-size: 0.8em;
+      color: rgba(232, 244, 253, 0.6);
+      margin-top: 6px;
+    }
+
+    .chapter-badge {
+      display: inline-block;
+      background: rgba(0, 212, 255, 0.15);
+      border: 1px solid rgba(0, 212, 255, 0.4);
+      border-radius: 30px;
+      padding: 6px 20px;
+      font-size: 0.72em;
+      color: var(--cyan);
+      font-weight: 700;
+      margin-bottom: 20px;
+      letter-spacing: 0.05em;
+    }
+
+    .achievement-tag {
+      display: inline-block;
+      background: rgba(167, 139, 250, 0.15);
+      border: 1px solid rgba(167, 139, 250, 0.4);
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 0.75em;
+      color: var(--purple);
+      font-weight: 500;
+      margin-top: 24px;
+    }
+
+    /* ===================================================
+       PROGRESS / SLIDE NUMBER
+    =================================================== */
+    .reveal .progress { background: rgba(0,212,255,0.15); }
+    .reveal .progress span { background: var(--cyan); }
+    .reveal .slide-number { color: var(--cyan); font-size: 16px; }
+
+    /* ===================================================
+       REVEAL THEME OVERRIDES
+    =================================================== */
+    .reveal .controls { color: var(--cyan); }
+    .reveal .controls .navigate-left,
+    .reveal .controls .navigate-right,
+    .reveal .controls .navigate-up,
+    .reveal .controls .navigate-down { color: var(--cyan); }
+
+    /* ===================================================
+       MIN FONT SIZE ENFORCEMENT
+    =================================================== */
+    .reveal section p,
+    .reveal section li,
+    .reveal section td,
+    .reveal section th {
+      font-size: max(0.85em, 24px);
+    }
+
+    /* ===================================================
+       KEYWORD HIGHLIGHT
+    =================================================== */
+    .kw-cyan   { color: var(--cyan);   font-weight: 700; }
+    .kw-amber  { color: var(--amber);  font-weight: 700; }
+    .kw-green  { color: var(--green);  font-weight: 700; }
+    .kw-red    { color: var(--red);    font-weight: 700; }
+    .kw-purple { color: var(--purple); font-weight: 700; }
+
+    /* ===================================================
+       ANIMATION HELPERS
+    =================================================== */
+    .anim-target { will-change: opacity, transform; }
+
+    /* Question mark big display */
+    .big-question {
+      font-size: 4em;
+      color: var(--amber);
+      text-align: center;
+      text-shadow: 0 0 40px rgba(255, 179, 71, 0.6);
+      margin: 20px 0;
+      font-weight: 900;
+    }
+
+    /* Union display */
+    .union-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+
+    .union-set {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.92em;
+      text-align: center;
+    }
+
+    .union-op {
+      color: var(--green);
+      font-size: 1.4em;
+      font-weight: 900;
+    }
+
+    /* Practice problem box */
+    .practice-box {
+      background: rgba(167, 139, 250, 0.06);
+      border: 2px solid rgba(167, 139, 250, 0.35);
+      border-radius: 14px;
+      padding: 20px 26px;
+      margin: 12px 0;
+      position: relative;
+    }
+
+    .practice-box::before {
+      content: '확인 문제';
+      position: absolute;
+      top: -14px;
+      left: 20px;
+      background: var(--purple);
+      color: #fff;
+      font-weight: 900;
+      font-size: 0.68em;
+      padding: 3px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Styled sub-label in title */
+    .reveal .slides > section {
+      padding-top: 10px;
+    }
+
+    /* ===================================================
+       RESPONSIVE FONT SCALING
+    =================================================== */
+    @media (max-width: 960px) {
+      .reveal { font-size: 24px; }
+    }
+
+    /* ===================================================
+       PRINT / PDF
+    =================================================== */
+    @media print {
+      .reveal .slides section { page-break-after: always; }
+    }
+
+    /* ===================================================
+       SLIDE 13 SPECIAL: animated cells
+    =================================================== */
+    .vc { transition: all 0.3s ease; }
+
+    /* 개념정리 blanks */
+    .blank-wrap {
+      display: inline-flex;
+      align-items: center;
+      margin: 0 4px;
+    }
+    .blank-box {
+      display: inline-block;
+      min-width: 80px;
+      padding: 2px 10px;
+      border-bottom: 3px solid var(--purple);
+      text-align: center;
+      font-weight: 900;
+      color: transparent;
+    }
+    .blank-box.show {
+      color: var(--green);
+    }
+
+    /* centered wrapper for title */
+    .title-center { text-align: center; }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ===================================================
+         SLIDE 1: TITLE
+    =================================================== -->
+    <section data-transition="zoom" data-background-gradient="radial-gradient(ellipse at 30% 40%, rgba(0,212,255,0.08) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(167,139,250,0.08) 0%, transparent 60%)">
+      <div class="title-center" style="padding: 30px 0;">
+        <div class="chapter-badge">Ⅱ. 자료의 표현 &nbsp;›&nbsp; 1. 텍스트 자료의 표현</div>
+        <h1 style="font-size: 2.4em; margin: 10px 0 20px;">
+          텍스트 자료의<br>표현
+        </h1>
+        <p style="font-size: 1.0em; color: var(--amber); font-weight: 500; margin: 0;">
+          01 텍스트 자료의 표현
+        </p>
+        <div class="achievement-tag" style="margin-top: 30px; display: block;">
+          <span style="opacity: 0.7; margin-right: 6px;">성취기준</span>
+          <strong>12인수02-01</strong>&nbsp; 수와 수학 기호를 이용하여 실생활의 텍스트 자료를<br>목적에 알맞게 표현할 수 있다.
+        </div>
+        <p class="title-meta" style="margin-top: 24px; font-size: 0.7em;">
+          미래엔 고등 인공지능 수학 | pp. 29–32
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 2: 학습 목표
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>학습 목표</h2>
+      <ul class="obj-list">
+        <li class="fragment fade-up" data-fragment-index="1">
+          <div class="num">1</div>
+          <div>자료의 종류인 <span class="kw-cyan">정형 자료</span>와 <span class="kw-amber">비정형 자료</span>를 구분할 수 있다.</div>
+        </li>
+        <li class="fragment fade-up" data-fragment-index="2">
+          <div class="num">2</div>
+          <div>텍스트 자료를 <span class="kw-cyan">집합</span>으로 표현할 수 있다.</div>
+        </li>
+        <li class="fragment fade-up" data-fragment-index="3">
+          <div class="num">3</div>
+          <div>텍스트 자료를 <span class="kw-purple">벡터</span>로 표현할 수 있다.</div>
+        </li>
+      </ul>
+      <div class="fragment fade-up" data-fragment-index="4" style="margin-top: 24px;">
+        <div class="highlight-box" style="text-align: center; font-size: 0.9em;">
+          <span class="kw-green">핵심 흐름:</span>&nbsp;&nbsp;
+          텍스트 자료 &nbsp;<span class="arrow">→</span>&nbsp; 집합 &nbsp;<span class="arrow">→</span>&nbsp; 벡터 &nbsp;<span class="arrow">→</span>&nbsp; 컴퓨터가 처리 가능한 <span class="kw-purple">수</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 3: 자료란 무엇인가?
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>자료(data)란?</h2>
+      <div class="definition-box" style="margin-top: 30px;">
+        <p style="margin: 0; font-size: 1.05em; line-height: 1.7;">
+          관찰이나 측정 등을 통해 얻게 되는 <span class="kw-cyan">가공되지 않은 정보</span>
+        </p>
+        <p style="margin: 10px 0 0; font-size: 0.85em; color: rgba(232,244,253,0.65);">
+          예: 키와 성적, 각종 설문을 통해 얻는 값이나 의견
+        </p>
+      </div>
+
+      <div class="cols cols-2" style="margin-top: 28px; gap: 18px;">
+        <div class="fragment fade-right" data-fragment-index="1">
+          <div class="card card-cyan" style="height: 100%;">
+            <h3><span class="badge badge-cyan">정형</span> Structured</h3>
+            <p style="margin: 8px 0 0; font-size: 0.9em; line-height: 1.6;">
+              일정한 <span class="kw-cyan">형식을 갖춘</span> 자료
+            </p>
+            <p style="font-size: 0.8em; color: rgba(232,244,253,0.6); margin-top: 8px;">
+              예: 회계 자료, 학생 명단, 성적표
+            </p>
+          </div>
+        </div>
+        <div class="fragment fade-left" data-fragment-index="2">
+          <div class="card card-amber" style="height: 100%;">
+            <h3><span class="badge badge-amber">비정형</span> Unstructured</h3>
+            <p style="margin: 8px 0 0; font-size: 0.9em; line-height: 1.6;">
+              일정한 <span class="kw-amber">형식을 갖추지 않은</span> 자료
+            </p>
+            <p style="font-size: 0.8em; color: rgba(232,244,253,0.6); margin-top: 8px;">
+              예: 댓글, 음성, 사진, 동영상
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="3" style="margin-top: 18px;">
+        <div class="card card-purple" style="font-size: 0.88em; padding: 14px 20px;">
+          <strong class="kw-purple">왜 중요한가?</strong>&nbsp; 컴퓨터(AI)는 <span class="kw-green">수(숫자)</span>만 처리할 수 있습니다.
+          자료를 목적에 맞게 수로 <strong>변환</strong>하는 것이 인공지능 수학의 출발점입니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 4: 자료의 종류 비교
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>자료의 종류 비교</h2>
+      <div class="cols cols-2" style="margin-top: 20px; gap: 22px; align-items: stretch;">
+        <div class="card card-cyan">
+          <h3 style="text-align: center; font-size: 1.1em;">
+            정형(Structured) 자료
+          </h3>
+          <div style="text-align:center; margin: 4px 0 12px;">
+            <span class="badge badge-cyan">일정한 형식 O</span>
+          </div>
+          <div class="fragment fade-up" data-fragment-index="1">
+            <div style="background:rgba(0,212,255,0.06); border-radius:8px; padding: 12px 14px; margin-bottom: 10px;">
+              <p style="margin:0; font-size: 0.85em; line-height:1.8;">
+                📋 학생 성적표<br>
+                📋 출석부<br>
+                📋 회계 장부<br>
+                📋 주소록
+              </p>
+            </div>
+            <p style="font-size: 0.8em; color: rgba(232,244,253,0.6); margin: 6px 0 0; text-align:center;">
+              행과 열이 명확하고, 규칙적 구조
+            </p>
+          </div>
+        </div>
+        <div class="card card-amber">
+          <h3 style="text-align: center; font-size: 1.1em;">
+            비정형(Unstructured) 자료
+          </h3>
+          <div style="text-align:center; margin: 4px 0 12px;">
+            <span class="badge badge-red">일정한 형식 X</span>
+          </div>
+          <div class="fragment fade-up" data-fragment-index="2">
+            <div style="background:rgba(255,179,71,0.06); border-radius:8px; padding: 12px 14px; margin-bottom: 10px;">
+              <p style="margin:0; font-size: 0.85em; line-height:1.8;">
+                💬 SNS 댓글 / 게시물<br>
+                🎵 음성 파일<br>
+                🖼️ 사진 / 이미지<br>
+                🎬 동영상
+              </p>
+            </div>
+            <p style="font-size: 0.8em; color: rgba(232,244,253,0.6); margin: 6px 0 0; text-align:center;">
+              구조가 없고, 자유로운 형태
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="fragment fade-up" data-fragment-index="3" style="margin-top: 16px;">
+        <div class="highlight-box" style="text-align:center; font-size: 0.88em; padding: 12px 20px;">
+          전 세계 데이터의 약 <span class="kw-amber">80~90%</span>가 비정형 자료 — AI가 처리할 수 있도록 변환하는 방법을 배웁니다!
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 5: 텍스트 자료의 종류
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>텍스트 자료의 종류</h2>
+      <div class="cols cols-2" style="margin-top: 20px; gap: 22px; align-items: stretch;">
+        <div>
+          <div class="card card-cyan" style="height: auto;">
+            <h3>정형 텍스트 자료</h3>
+            <p style="font-size: 0.88em; line-height: 1.6; margin: 6px 0;">
+              그 자체로 이미 <span class="kw-cyan">분류가 되는</span> 텍스트
+            </p>
+          </div>
+          <div class="fragment fade-up" data-fragment-index="1" style="margin-top: 14px;">
+            <div class="card" style="font-size: 0.85em; line-height: 1.9; padding: 14px 18px;">
+              <span class="badge badge-cyan" style="margin-bottom: 6px; display: inline-block;">예시</span><br>
+              이름 &nbsp;/&nbsp; 성별 (남, 여)<br>
+              혈액형 (A, B, O, AB)<br>
+              학년 / 반 / 번호
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card card-amber" style="height: auto;">
+            <h3>비정형 텍스트 자료</h3>
+            <p style="font-size: 0.88em; line-height: 1.6; margin: 6px 0;">
+              그 자체로는 <span class="kw-amber">분류가 되지 않는</span> 텍스트
+            </p>
+          </div>
+          <div class="fragment fade-up" data-fragment-index="2" style="margin-top: 14px;">
+            <div class="card" style="font-size: 0.85em; line-height: 1.9; padding: 14px 18px;">
+              <span class="badge badge-amber" style="margin-bottom: 6px; display: inline-block;">예시</span><br>
+              영화 감상평<br>
+              SNS 댓글<br>
+              제품 사용 설명서
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fragment fade-up" data-fragment-index="3" style="margin-top: 20px;">
+        <div class="card card-green" style="font-size: 0.88em; padding: 14px 20px; text-align: center;">
+          두 종류 모두 컴퓨터가 이해할 수 있도록 <span class="kw-green">수(숫자)로 변환</span>해야 합니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 6: 정형 텍스트 → 수 변환
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>정형 텍스트 <span class="arrow">→</span> 수로 변환</h2>
+      <p style="font-size: 0.88em; color: rgba(232,244,253,0.7); margin: 0 0 20px;">
+        정형 텍스트는 <span class="kw-cyan">직접 숫자를 대응</span>시켜 변환합니다. (목적에 따라 대응 방식을 선택)
+      </p>
+
+      <div class="cols cols-2" style="gap: 22px; align-items: start;">
+        <div class="fragment fade-right" data-fragment-index="1">
+          <h3>성별 변환</h3>
+          <table class="convert-table">
+            <thead>
+              <tr><th>텍스트</th><th>변환 값</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>남</td>
+                <td><span class="num-badge">3</span></td>
+              </tr>
+              <tr>
+                <td>여</td>
+                <td><span class="num-badge">4</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size: 0.75em; color: rgba(232,244,253,0.5); margin-top: 8px;">
+            * 0/1로 표현하는 방법도 가능 (목적에 맞게 선택)
+          </p>
+        </div>
+
+        <div class="fragment fade-left" data-fragment-index="2">
+          <h3>혈액형 변환</h3>
+          <table class="convert-table">
+            <thead>
+              <tr><th>텍스트</th><th>변환 값</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>A형</td><td><span class="num-badge">0</span></td></tr>
+              <tr><td>B형</td><td><span class="num-badge">1</span></td></tr>
+              <tr><td>O형</td><td><span class="num-badge">2</span></td></tr>
+              <tr><td>AB형</td><td><span class="num-badge">3</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="3" style="margin-top: 22px;">
+        <div class="card card-purple" style="font-size: 0.88em; padding: 14px 22px;">
+          <strong class="kw-purple">핵심:</strong>&nbsp;
+          컴퓨터는 <span class="kw-green">수</span>를 인식합니다.
+          분류 기준에 따라 텍스트에 <strong>임의의 수</strong>를 대응시키면 정형 텍스트 변환 완료!
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 7: 비정형 텍스트 도전
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>비정형 텍스트를 어떻게 수로 변환할까?</h2>
+      <p style="font-size: 0.85em; color: rgba(232,244,253,0.65); margin: 0 0 16px;">
+        다음 영화 댓글을 컴퓨터가 처리할 수 있는 수로 나타낼 수 있을까요?
+      </p>
+
+      <div class="review-card a">
+        <span class="label label-a">댓글 A</span>
+        이 영화는 긴장감과 감동이 있는 영화예요.
+      </div>
+      <div class="review-card b">
+        <span class="label label-b">댓글 B</span>
+        이 영화는 감동은 있지만 지루해서 실망이에요.
+      </div>
+      <div class="review-card c">
+        <span class="label label-c">댓글 C</span>
+        추천! 눈물 없이는 볼 수 없는 감동적인 영화입니다.
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="1" style="margin-top: 24px;">
+        <div class="big-question">?</div>
+        <div style="text-align: center; font-size: 0.95em; color: var(--amber); margin-top: -10px;">
+          어떻게 컴퓨터가 이해할 수 있게 만들까요?
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 8: 낱말 분리 (댓글 A) — GSAP 애니메이션
+    =================================================== -->
+    <section data-transition="slide" id="slide-tokenize">
+      <h2>텍스트 자료의 표현 — 낱말 분리</h2>
+
+      <div class="card card-cyan" style="margin-bottom: 18px; font-size: 0.9em;">
+        <strong class="kw-cyan">원문 (댓글 A):</strong>&nbsp;
+        이 영화는 긴장감과 감동이 있는 영화예요.
+      </div>
+
+      <h3 style="font-size: 1.0em; margin-bottom: 8px;">
+        <span class="badge badge-cyan">STEP 1</span> 낱말 분리
+      </h3>
+      <div class="word-row" id="words-split">
+        <div class="word-box anim-target">이</div>
+        <div class="word-box anim-target">영화는</div>
+        <div class="word-box anim-target">긴장감과</div>
+        <div class="word-box anim-target">감동이</div>
+        <div class="word-box anim-target">있는</div>
+        <div class="word-box anim-target">영화예요</div>
+      </div>
+
+      <h3 style="font-size: 1.0em; margin: 18px 0 8px;" class="fragment" data-fragment-index="1">
+        <span class="badge badge-amber">STEP 2</span> 기본 사전형(원형)으로 변환
+      </h3>
+      <div class="word-row fragment" data-fragment-index="1" id="words-dict">
+        <div class="word-box dict-form anim-target">이</div>
+        <div class="word-box dict-form anim-target">영화</div>
+        <div class="word-box dict-form anim-target">는</div>
+        <div class="word-box dict-form anim-target">긴장감</div>
+        <div class="word-box dict-form anim-target">과</div>
+        <div class="word-box dict-form anim-target">감동</div>
+        <div class="word-box dict-form anim-target">이</div>
+        <div class="word-box dict-form anim-target">있다</div>
+        <div class="word-box dict-form anim-target">영화</div>
+        <div class="word-box dict-form anim-target">이다</div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="2" style="margin-top: 14px;">
+        <div class="card" style="font-size: 0.82em; padding: 10px 16px; color: rgba(232,244,253,0.65);">
+          조사(는, 과, 이), 관형사(이), 접미사(이다), 용언(있다) 등이 분리됩니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 9: 불용어 표시 및 제거
+    =================================================== -->
+    <section data-transition="slide" id="slide-stopword">
+      <h2>불용어(不用語)란?</h2>
+
+      <div class="definition-box" style="margin-bottom: 20px;">
+        <p style="margin: 0; font-size: 0.95em; line-height: 1.7;">
+          인터넷 검색 시 <span class="kw-red">검색어로 사용하지 않는 단어</span><br>
+          조사, 관형사, 접미사, 특수 문자 등 — 의미를 구별하는 데 도움이 되지 않는 단어
+        </p>
+      </div>
+
+      <h3 style="font-size: 0.98em; margin-bottom: 10px;">기본 사전형에서 불용어 식별</h3>
+      <div class="word-row" id="words-stopword">
+        <div class="word-box stopword-box anim-sw">이</div>
+        <div class="word-box anim-sw">영화</div>
+        <div class="word-box stopword-box anim-sw">는</div>
+        <div class="word-box anim-sw">긴장감</div>
+        <div class="word-box stopword-box anim-sw">과</div>
+        <div class="word-box anim-sw">감동</div>
+        <div class="word-box stopword-box anim-sw">이</div>
+        <div class="word-box stopword-box anim-sw">있다</div>
+        <div class="word-box anim-sw">영화</div>
+        <div class="word-box stopword-box anim-sw">이다</div>
+      </div>
+
+      <div style="margin-top: 6px; font-size: 0.8em; color: var(--red);">
+        <span class="stopword">취소선</span> = 불용어 (이, 는, 과, 이, 있다, 이다)
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="1" style="margin-top: 20px;">
+        <h3 style="font-size: 0.98em; margin-bottom: 10px;">
+          <span class="badge badge-green">불용어 제거 후</span>
+        </h3>
+        <div class="word-row">
+          <div class="word-box" style="background: rgba(57,217,138,0.12); border-color: rgba(57,217,138,0.5); color: var(--green); font-size: 1.1em; font-weight: 700;">영화</div>
+          <div class="word-box" style="background: rgba(57,217,138,0.12); border-color: rgba(57,217,138,0.5); color: var(--green); font-size: 1.1em; font-weight: 700;">긴장감</div>
+          <div class="word-box" style="background: rgba(57,217,138,0.12); border-color: rgba(57,217,138,0.5); color: var(--green); font-size: 1.1em; font-weight: 700;">감동</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 10: 집합으로 표현
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>불용어 제거 후 집합 표현</h2>
+
+      <p style="font-size: 0.85em; color: rgba(232,244,253,0.65); margin: 0 0 16px;">
+        3개의 영화 댓글을 각각 집합으로 나타냅니다.
+      </p>
+
+      <div class="review-card a" style="font-size: 0.82em; margin-bottom: 8px;">
+        <span class="label label-a">댓글 A</span> "이 영화는 긴장감과 감동이 있는 영화예요."
+      </div>
+      <div class="set-display set-a">
+        <span class="set-label label-a">A</span> = &#123;&nbsp;<span class="kw-cyan">영화</span>, 긴장감, 감동&nbsp;&#125;
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="1">
+        <div class="review-card b" style="font-size: 0.82em; margin: 14px 0 8px;">
+          <span class="label label-b">댓글 B</span> "이 영화는 감동은 있지만 지루해서 실망이에요."
+        </div>
+        <div class="set-display set-b">
+          <span class="set-label label-b">B</span> = &#123;&nbsp;<span class="kw-cyan">영화</span>, <span class="kw-amber">감동</span>, 지루하다, 실망&nbsp;&#125;
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="2">
+        <div class="review-card c" style="font-size: 0.82em; margin: 14px 0 8px;">
+          <span class="label label-c">댓글 C</span> "추천! 눈물 없이는 볼 수 없는 감동적인 영화입니다."
+        </div>
+        <div class="set-display set-c">
+          <span class="set-label label-c">C</span> = &#123;&nbsp;추천, 눈물, 보다, <span class="kw-amber">감동</span>, <span class="kw-cyan">영화</span>&nbsp;&#125;
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 11: 단어 사전 만들기
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>단어 사전(word dictionary) 만들기</h2>
+
+      <p style="font-size: 0.85em; color: rgba(232,244,253,0.65); margin: 0 0 16px;">
+        세 집합의 <span class="kw-green">합집합(∪)</span>으로 단어 사전을 구성합니다.
+      </p>
+
+      <div class="union-display" style="margin-bottom: 18px;">
+        <div class="union-set" style="border-color: rgba(0,212,255,0.4);">
+          <div style="color: var(--cyan); font-weight: 700; margin-bottom: 4px;">A</div>
+          <div style="font-size: 0.78em; line-height: 1.8;">영화<br>긴장감<br>감동</div>
+        </div>
+        <div class="union-op">∪</div>
+        <div class="union-set" style="border-color: rgba(255,179,71,0.4);">
+          <div style="color: var(--amber); font-weight: 700; margin-bottom: 4px;">B</div>
+          <div style="font-size: 0.78em; line-height: 1.8;">영화<br>감동<br>지루하다<br>실망</div>
+        </div>
+        <div class="union-op">∪</div>
+        <div class="union-set" style="border-color: rgba(167,139,250,0.4);">
+          <div style="color: var(--purple); font-weight: 700; margin-bottom: 4px;">C</div>
+          <div style="font-size: 0.78em; line-height: 1.8;">추천<br>눈물<br>보다<br>감동<br>영화</div>
+        </div>
+        <div class="union-op fragment" data-fragment-index="1">=</div>
+        <div class="union-set fragment" data-fragment-index="1" style="border-color: rgba(57,217,138,0.5); background: rgba(57,217,138,0.06);">
+          <div style="color: var(--green); font-weight: 900; margin-bottom: 4px;">U</div>
+          <div style="font-size: 0.75em; line-height: 1.8; color: var(--green);">영화<br>긴장감<br>감동<br>지루하다<br>실망<br>추천<br>눈물<br>보다</div>
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="1">
+        <div class="set-display set-u" style="font-size: 0.92em;">
+          <span class="set-label" style="color: var(--green);">U</span> = A∪B∪C = &#123;&nbsp;영화, 긴장감, 감동, 지루하다, 실망, 추천, 눈물, 보다&nbsp;&#125;
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="2" style="margin-top: 12px;">
+        <div class="card" style="font-size: 0.82em; padding: 10px 18px;">
+          <span class="kw-green">중요:</span> 합집합이므로 같은 단어는 한 번만 포함합니다. (총 <strong class="kw-green">8</strong>개 단어)
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 12: 목적별 불용어
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>불용어는 목적에 따라 다르게 설정</h2>
+
+      <div class="card card-amber" style="font-size: 0.88em; margin-bottom: 18px;">
+        <strong class="kw-amber">예시:</strong>&nbsp;
+        영화 감상 <span class="kw-cyan">감성 분석</span>이 목적이라면,
+        '영화'와 '보다'는 모든 댓글에 공통으로 나타나므로 <span class="kw-red">불용어로 추가</span> 처리 가능
+      </div>
+
+      <div class="cols cols-2" style="gap: 18px;">
+        <div>
+          <h3 style="font-size: 0.92em; color: var(--text);">
+            <span class="badge badge-red">추가 불용어</span> 영화, 보다
+          </h3>
+          <div class="set-display set-a">
+            <span class="set-label label-a">A'</span> = &#123;&nbsp;긴장감, 감동&nbsp;&#125;
+          </div>
+          <div class="fragment fade-up" data-fragment-index="1">
+            <div class="set-display set-b" style="margin-top: 10px;">
+              <span class="set-label label-b">B'</span> = &#123;&nbsp;감동, 지루하다, 실망&nbsp;&#125;
+            </div>
+          </div>
+          <div class="fragment fade-up" data-fragment-index="2">
+            <div class="set-display set-c" style="margin-top: 10px;">
+              <span class="set-label label-c">C'</span> = &#123;&nbsp;추천, 눈물, 감동&nbsp;&#125;
+            </div>
+          </div>
+        </div>
+        <div class="fragment fade-up" data-fragment-index="3">
+          <h3 style="font-size: 0.92em; color: var(--text);">새로운 단어 사전</h3>
+          <div class="set-display set-u" style="font-size: 0.88em; line-height: 1.9;">
+            <span class="set-label" style="color: var(--green);">U'</span> = &#123;&nbsp;긴장감, 감동, 지루하다, 실망, 추천, 눈물&nbsp;&#125;
+          </div>
+          <div style="margin-top: 14px; font-size: 0.82em; color: rgba(232,244,253,0.6);">
+            8개 → <span class="kw-green">6개</span>로 줄어들어 더 핵심적인 특징만 남음
+          </div>
+          <div class="card card-purple" style="font-size: 0.82em; padding: 12px 16px; margin-top: 12px;">
+            <strong class="kw-purple">핵심:</strong> 불용어 설정은 분석 목적에 따라 유동적으로 결정합니다.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 13: 집합 → 벡터 변환 (GSAP)
+    =================================================== -->
+    <section data-transition="slide" id="slide-vector-table">
+      <h2>집합을 벡터로 표현하기</h2>
+
+      <p style="font-size: 0.82em; color: rgba(232,244,253,0.65); margin: 0 0 14px;">
+        단어 사전 U의 각 단어가 해당 집합에 <span class="kw-green">속하면 1</span>, <span class="kw-red">속하지 않으면 0</span>으로 표현
+      </p>
+
+      <table class="vector-table" id="vt">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:14px;">집합</th>
+            <th>영화</th>
+            <th>긴장감</th>
+            <th>감동</th>
+            <th>지루하다</th>
+            <th>실망</th>
+            <th>추천</th>
+            <th>눈물</th>
+            <th>보다</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="fragment" data-fragment-index="1">
+            <td class="label">A</td>
+            <td id="a1" class="cell-hidden vc">1</td>
+            <td id="a2" class="cell-hidden vc">1</td>
+            <td id="a3" class="cell-hidden vc">1</td>
+            <td id="a4" class="cell-hidden vc">0</td>
+            <td id="a5" class="cell-hidden vc">0</td>
+            <td id="a6" class="cell-hidden vc">0</td>
+            <td id="a7" class="cell-hidden vc">0</td>
+            <td id="a8" class="cell-hidden vc">0</td>
+          </tr>
+          <tr class="fragment" data-fragment-index="2">
+            <td class="label">B</td>
+            <td id="b1" class="cell-hidden vc">1</td>
+            <td id="b2" class="cell-hidden vc">0</td>
+            <td id="b3" class="cell-hidden vc">1</td>
+            <td id="b4" class="cell-hidden vc">1</td>
+            <td id="b5" class="cell-hidden vc">1</td>
+            <td id="b6" class="cell-hidden vc">0</td>
+            <td id="b7" class="cell-hidden vc">0</td>
+            <td id="b8" class="cell-hidden vc">0</td>
+          </tr>
+          <tr class="fragment" data-fragment-index="3">
+            <td class="label">C</td>
+            <td id="c1" class="cell-hidden vc">1</td>
+            <td id="c2" class="cell-hidden vc">0</td>
+            <td id="c3" class="cell-hidden vc">1</td>
+            <td id="c4" class="cell-hidden vc">0</td>
+            <td id="c5" class="cell-hidden vc">0</td>
+            <td id="c6" class="cell-hidden vc">1</td>
+            <td id="c7" class="cell-hidden vc">1</td>
+            <td id="c8" class="cell-hidden vc">1</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="fragment fade-up" data-fragment-index="4" style="margin-top: 16px;">
+        <div class="card card-green" style="font-size: 0.85em; padding: 12px 18px;">
+          각 행이 하나의 <span class="kw-purple">벡터</span>가 됩니다. 이제 컴퓨터가 처리할 수 있는 형태로 변환 완료!
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 14: 벡터 표현 결과
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>벡터 표현 결과</h2>
+
+      <p style="font-size: 0.82em; color: rgba(232,244,253,0.65); margin: 0 0 16px;">
+        단어 사전 U = &#123;영화, 긴장감, 감동, 지루하다, 실망, 추천, 눈물, 보다&#125; 순서에 따름
+      </p>
+
+      <div class="vector-display vec-a">
+        <span class="label-a" style="font-weight: 900; font-family: 'Noto Sans KR', sans-serif; margin-right: 8px;">\(\vec{A}\)</span> =&nbsp;
+        (<span class="vec-one">1</span>,&nbsp;
+        <span class="vec-one">1</span>,&nbsp;
+        <span class="vec-one">1</span>,&nbsp;
+        <span class="vec-zero">0</span>,&nbsp;
+        <span class="vec-zero">0</span>,&nbsp;
+        <span class="vec-zero">0</span>,&nbsp;
+        <span class="vec-zero">0</span>,&nbsp;
+        <span class="vec-zero">0</span>)
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="1">
+        <div class="vector-display vec-b" style="margin-top: 12px;">
+          <span class="label-b" style="font-weight: 900; font-family: 'Noto Sans KR', sans-serif; margin-right: 8px;">\(\vec{B}\)</span> =&nbsp;
+          (<span class="vec-one">1</span>,&nbsp;
+          <span class="vec-zero">0</span>,&nbsp;
+          <span class="vec-one">1</span>,&nbsp;
+          <span class="vec-one">1</span>,&nbsp;
+          <span class="vec-one">1</span>,&nbsp;
+          <span class="vec-zero">0</span>,&nbsp;
+          <span class="vec-zero">0</span>,&nbsp;
+          <span class="vec-zero">0</span>)
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="2">
+        <div class="vector-display vec-c" style="margin-top: 12px;">
+          <span class="label-c" style="font-weight: 900; font-family: 'Noto Sans KR', sans-serif; margin-right: 8px;">\(\vec{C}\)</span> =&nbsp;
+          (<span class="vec-one">1</span>,&nbsp;
+          <span class="vec-zero">0</span>,&nbsp;
+          <span class="vec-one">1</span>,&nbsp;
+          <span class="vec-zero">0</span>,&nbsp;
+          <span class="vec-zero">0</span>,&nbsp;
+          <span class="vec-one">1</span>,&nbsp;
+          <span class="vec-one">1</span>,&nbsp;
+          <span class="vec-one">1</span>)
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="3" style="margin-top: 20px;">
+        <div class="highlight-box" style="font-size: 0.85em; padding: 14px 20px;">
+          <strong class="kw-green">정리:</strong>&nbsp;
+          비정형 텍스트 댓글 3개가 각각 <span class="kw-purple">8차원 벡터</span>로 변환되었습니다.<br>
+          이제 AI 알고리즘이 수학적으로 처리할 수 있습니다!
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 15: 벡터 정의
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>벡터(vector)란?</h2>
+
+      <div class="definition-box" style="margin-top: 20px; padding: 28px 32px;">
+        <p style="margin: 0 0 14px; font-size: 1.0em; line-height: 1.8;">
+          \(n\)개의 수 \(x_1, x_2, \ldots, x_n\)을 괄호 속에 순서대로 나열하여 나타낸
+        </p>
+        <div style="text-align: center; font-size: 1.3em; margin: 10px 0 14px; color: var(--cyan);">
+          \[ \vec{X} = (x_1,\; x_2,\; \ldots,\; x_n) \]
+        </div>
+        <p style="margin: 0; font-size: 1.0em;">
+          을 <span class="kw-purple">벡터</span>라 한다.
+        </p>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="1" style="margin-top: 22px;">
+        <div class="cols cols-2" style="gap: 16px;">
+          <div class="card" style="font-size: 0.88em; padding: 14px 18px; text-align: center;">
+            <p style="margin: 0; color: rgba(232,244,253,0.65); font-size: 0.85em;">첫째 성분</p>
+            <p style="margin: 6px 0 0; font-size: 1.1em; color: var(--cyan);">\(x_1\)</p>
+          </div>
+          <div class="card" style="font-size: 0.88em; padding: 14px 18px; text-align: center;">
+            <p style="margin: 0; color: rgba(232,244,253,0.65); font-size: 0.85em;">\(n\)째 성분</p>
+            <p style="margin: 6px 0 0; font-size: 1.1em; color: var(--cyan);">\(x_n\)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="2" style="margin-top: 16px;">
+        <div class="card card-amber" style="font-size: 0.88em; padding: 14px 20px;">
+          <strong class="kw-amber">예시:</strong>&nbsp;
+          댓글 A의 벡터 \(\vec{A} = (1, 1, 1, 0, 0, 0, 0, 0)\) 에서<br>
+          첫째 성분 = <span class="kw-green">1</span> (영화 ∈ A),&nbsp; 넷째 성분 = <span class="kw-red">0</span> (지루하다 ∉ A)
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="3" style="margin-top: 12px;">
+        <div class="card card-purple" style="font-size: 0.85em; padding: 12px 18px;">
+          <strong class="kw-purple">주의:</strong>&nbsp;
+          벡터는 순서가 중요합니다. 단어 사전의 순서를 반드시 지켜야 합니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 16: 연습문제
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>확인 문제</h2>
+
+      <div class="practice-box" style="margin-top: 30px;">
+        <p style="font-size: 1.0em; margin: 0 0 20px;">
+          벡터 \(\vec{X} = (1,\; 0,\; 2,\; 3,\; 1)\) 에서 다음을 구하시오.
+        </p>
+
+        <div style="margin-bottom: 18px;">
+          <p style="margin: 0 0 8px; font-size: 0.95em; font-weight: 500;">
+            <span class="badge badge-cyan">(1)</span>&nbsp; 벡터 \(\vec{X}\) 의 <span class="kw-cyan">둘째 성분</span>은?
+          </p>
+          <div class="fragment fade-up" data-fragment-index="1" style="margin-left: 30px;">
+            <span class="arrow">→</span>&nbsp;
+            <span style="font-size: 1.3em; color: var(--green); font-weight: 900;">0</span>
+            <span style="font-size: 0.82em; color: rgba(232,244,253,0.55); margin-left: 10px;">(x₂ = 0)</span>
+          </div>
+        </div>
+
+        <div>
+          <p style="margin: 0 0 8px; font-size: 0.95em; font-weight: 500;">
+            <span class="badge badge-amber">(2)</span>&nbsp; 벡터 \(\vec{X}\) 의 <span class="kw-amber">넷째 성분</span>은?
+          </p>
+          <div class="fragment fade-up" data-fragment-index="2" style="margin-left: 30px;">
+            <span class="arrow">→</span>&nbsp;
+            <span style="font-size: 1.3em; color: var(--green); font-weight: 900;">3</span>
+            <span style="font-size: 0.82em; color: rgba(232,244,253,0.55); margin-left: 10px;">(x₄ = 3)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="3" style="margin-top: 22px;">
+        <div class="card card-green" style="font-size: 0.88em; padding: 14px 20px;">
+          <strong class="kw-green">확인:</strong>&nbsp;
+          \(\vec{X} = (\underbrace{1}_{x_1},\; \underbrace{0}_{x_2},\; \underbrace{2}_{x_3},\; \underbrace{3}_{x_4},\; \underbrace{1}_{x_5})\)
+          — 성분 번호와 위치를 꼭 확인하세요!
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 17: 활동 문제 — 돈가스 후기
+    =================================================== -->
+    <section data-transition="slide">
+      <h2>활동: 돈가스 음식점 후기 분석</h2>
+
+      <div class="review-card a" style="font-size: 0.8em; margin-bottom: 7px;">
+        <span class="label label-a">후기 A</span> 수제 돈가스가 맛있고, 양도 많았어요~!
+      </div>
+      <div class="review-card b" style="font-size: 0.8em; margin-bottom: 7px;">
+        <span class="label label-b">후기 B</span> 돈가스에 치즈가 많아요, 치즈 돈가스 추천!
+      </div>
+      <div class="review-card c" style="font-size: 0.8em; margin-bottom: 12px;">
+        <span class="label label-c">후기 C</span> 역시 수제 돈가스! 치즈 돈가스와 카레 돈가스도 맛있어요!
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="1">
+        <div class="cols cols-3" style="gap: 12px; font-size: 0.82em;">
+          <div class="set-display set-a">
+            <span class="set-label label-a">A</span> = &#123;수제, 맛있다, 양, 많다&#125;
+          </div>
+          <div class="set-display set-b">
+            <span class="set-label label-b">B</span> = &#123;치즈, 많다, 추천&#125;
+          </div>
+          <div class="set-display set-c">
+            <span class="set-label label-c">C</span> = &#123;수제, 치즈, 카레, 맛있다&#125;
+          </div>
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="2" style="margin-top: 10px;">
+        <div class="set-display set-u" style="font-size: 0.85em;">
+          <span class="set-label" style="color: var(--green);">U</span> = &#123;수제, 맛있다, 양, 많다, 치즈, 추천, 카레&#125;
+          <span style="font-size: 0.8em; color: rgba(232,244,253,0.5); margin-left: 8px;">(7개)</span>
+        </div>
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="3" style="margin-top: 12px;">
+        <div class="vector-display vec-a" style="font-size: 0.9em; margin-bottom: 8px;">
+          \(\vec{A}\) =&nbsp;
+          (<span class="vec-one">1</span>,<span class="vec-one">1</span>,<span class="vec-one">1</span>,<span class="vec-one">1</span>,<span class="vec-zero">0</span>,<span class="vec-zero">0</span>,<span class="vec-zero">0</span>)
+          <span style="font-size: 0.75em; color: rgba(232,244,253,0.5); margin-left: 10px;">수제·맛있다·양·많다 ∈ A</span>
+        </div>
+        <div class="vector-display vec-b" style="font-size: 0.9em; margin-bottom: 8px;">
+          \(\vec{B}\) =&nbsp;
+          (<span class="vec-zero">0</span>,<span class="vec-zero">0</span>,<span class="vec-zero">0</span>,<span class="vec-one">1</span>,<span class="vec-one">1</span>,<span class="vec-one">1</span>,<span class="vec-zero">0</span>)
+          <span style="font-size: 0.75em; color: rgba(232,244,253,0.5); margin-left: 10px;">많다·치즈·추천 ∈ B</span>
+        </div>
+        <div class="vector-display vec-c" style="font-size: 0.9em;">
+          \(\vec{C}\) =&nbsp;
+          (<span class="vec-one">1</span>,<span class="vec-one">1</span>,<span class="vec-zero">0</span>,<span class="vec-zero">0</span>,<span class="vec-one">1</span>,<span class="vec-zero">0</span>,<span class="vec-one">1</span>)
+          <span style="font-size: 0.75em; color: rgba(232,244,253,0.5); margin-left: 10px;">수제·맛있다·치즈·카레 ∈ C</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 18: 개념 정리하기
+    =================================================== -->
+    <section data-transition="slide" data-background-gradient="radial-gradient(ellipse at 20% 50%, rgba(0,212,255,0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 30%, rgba(167,139,250,0.07) 0%, transparent 50%)">
+      <h2>개념 정리하기</h2>
+
+      <div style="margin-top: 16px;">
+
+        <div class="fitb-row">
+          <span style="flex:1;">관찰이나 측정 등을 통해 얻게 되는 가공되지 않은 정보를</span>
+          <span class="fragment fitb-answer" data-fragment-index="1">&nbsp;자료&nbsp;</span>
+          <span>라고 한다.</span>
+        </div>
+
+        <div class="fitb-row fragment" data-fragment-index="2">
+          <span class="fragment fitb-answer" data-fragment-index="3">정형</span>
+          <span>&nbsp;자료는 일정한 형식을 갖춘 자료이고,&nbsp;</span>
+          <span class="fragment fitb-answer" data-fragment-index="4">비정형</span>
+          <span>&nbsp;자료는 일정한 형식을 갖추지 않은 자료이다.</span>
+        </div>
+
+        <div class="fitb-row fragment" data-fragment-index="5">
+          <span>텍스트 자료는 집합이나</span>
+          <span class="fragment fitb-answer" data-fragment-index="6">&nbsp;벡터&nbsp;</span>
+          <span>로 나타낼 수 있다.</span>
+        </div>
+
+        <div class="fitb-row fragment" data-fragment-index="7">
+          <span>\(n\)개의 수를 괄호 속에 순서대로 나열한 것을</span>
+          <span class="fragment fitb-answer" data-fragment-index="8">&nbsp;벡터&nbsp;</span>
+          <span>라 한다.</span>
+        </div>
+
+      </div>
+
+      <div class="fragment fade-up" data-fragment-index="9" style="margin-top: 24px;">
+        <div class="card card-cyan" style="text-align: center; font-size: 0.92em; padding: 18px 22px;">
+          <p style="margin: 0 0 8px;">
+            <strong class="kw-cyan">핵심 흐름 정리</strong>
+          </p>
+          <p style="margin: 0; font-size: 1.0em;">
+            텍스트 자료
+            &nbsp;<span class="arrow">→</span>&nbsp;
+            <span class="kw-amber">낱말 분리 + 불용어 제거</span>
+            &nbsp;<span class="arrow">→</span>&nbsp;
+            <span class="kw-cyan">집합</span>
+            &nbsp;<span class="arrow">→</span>&nbsp;
+            <span class="kw-purple">벡터</span>
+            &nbsp;<span class="arrow">→</span>&nbsp;
+            <span class="kw-green">AI 처리</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /slides -->
+</div><!-- /reveal -->
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<!-- Reveal.js -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+
+<script>
+  // =====================================================
+  //  REVEAL.JS INITIALIZATION
+  // =====================================================
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    progress: true,
+    controls: true,
+    transition: 'slide',
+    backgroundTransition: 'fade',
+    center: false,
+    touch: true,
+    autoAnimateDuration: 0.6,
+    width: 1280,
+    height: 720,
+    margin: 0.06,
+    minScale: 0.4,
+    maxScale: 2.0,
+    plugins: [RevealNotes]
+  });
+
+  // =====================================================
+  //  MATHJAX RE-RENDER ON SLIDE CHANGE
+  // =====================================================
+  Reveal.on('slidechanged', function () {
+    if (typeof MathJax !== 'undefined') {
+      MathJax.typesetPromise();
+    }
+  });
+
+  // =====================================================
+  //  HELPER: apply color classes to table cells
+  // =====================================================
+  function colorVectorCell(el) {
+    const text = el.textContent.trim();
+    if (text === '1') {
+      el.classList.add('cell-one');
+      el.classList.remove('cell-zero');
+    } else {
+      el.classList.add('cell-zero');
+      el.classList.remove('cell-one');
+    }
+    el.classList.remove('cell-hidden');
+  }
+
+  // =====================================================
+  //  ANIMATION MAP: slide id → animation function
+  // =====================================================
+  const animations = {
+    'slide-tokenize': animateTokenize,
+    'slide-stopword': animateStopword,
+    'slide-vector-table': animateVectorTable
+  };
+
+  // =====================================================
+  //  SLIDE 8: Tokenize animation
+  // =====================================================
+  function animateTokenize() {
+    const boxes = document.querySelectorAll('#words-split .word-box');
+    gsap.fromTo(boxes,
+      { opacity: 0, y: 24, scale: 0.85 },
+      {
+        opacity: 1, y: 0, scale: 1,
+        duration: 0.45,
+        stagger: 0.13,
+        ease: 'back.out(1.4)',
+        delay: 0.15
+      }
+    );
+  }
+
+  // =====================================================
+  //  SLIDE 9: Stopword animation
+  // =====================================================
+  function animateStopword() {
+    const boxes = document.querySelectorAll('#words-stopword .word-box');
+    gsap.fromTo(boxes,
+      { opacity: 0, x: -18 },
+      {
+        opacity: 1, x: 0,
+        duration: 0.35,
+        stagger: 0.1,
+        ease: 'power2.out',
+        delay: 0.1,
+        onComplete: function () {
+          // Pulse the stopword boxes
+          const stopwords = document.querySelectorAll('#words-stopword .stopword-box');
+          gsap.to(stopwords, {
+            scale: 1.08,
+            duration: 0.25,
+            yoyo: true,
+            repeat: 1,
+            ease: 'power1.inOut',
+            stagger: 0.06
+          });
+        }
+      }
+    );
+  }
+
+  // =====================================================
+  //  SLIDE 13: Vector table — cells revealed on fragment
+  // =====================================================
+  const rowData = {
+    a: ['a1','a2','a3','a4','a5','a6','a7','a8'],
+    b: ['b1','b2','b3','b4','b5','b6','b7','b8'],
+    c: ['c1','c2','c3','c4','c5','c6','c7','c8']
+  };
+
+  function revealTableRow(row) {
+    const ids = rowData[row];
+    ids.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      setTimeout(() => {
+        colorVectorCell(el);
+        gsap.fromTo(el,
+          { opacity: 0, scale: 0.5 },
+          { opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(1.6)' }
+        );
+      }, i * 80);
+    });
+  }
+
+  function animateVectorTable() {
+    // Reset all cells when entering slide
+    Object.values(rowData).flat().forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('cell-hidden');
+        el.classList.remove('cell-one', 'cell-zero');
+        el.style.opacity = '';
+        el.style.transform = '';
+      }
+    });
+  }
+
+  // =====================================================
+  //  FRAGMENT SHOWN HANDLER — for vector table rows
+  // =====================================================
+  Reveal.on('fragmentshown', function (event) {
+    const frag = event.fragment;
+    const slide = frag.closest('section');
+
+    // Vector table rows
+    if (slide && slide.id === 'slide-vector-table') {
+      const rows = slide.querySelectorAll('tbody tr');
+      const idx = Array.from(rows).indexOf(frag);
+      if (idx === 0) revealTableRow('a');
+      else if (idx === 1) revealTableRow('b');
+      else if (idx === 2) revealTableRow('c');
+    }
+
+    // dict-form words (slide 8) animate on fragment reveal
+    if (slide && slide.id === 'slide-tokenize') {
+      const dictRow = document.getElementById('words-dict');
+      if (frag === dictRow || dictRow.contains(frag)) {
+        const boxes = dictRow.querySelectorAll('.word-box');
+        gsap.fromTo(boxes,
+          { opacity: 0, y: 16, scale: 0.85 },
+          {
+            opacity: 1, y: 0, scale: 1,
+            duration: 0.35,
+            stagger: 0.08,
+            ease: 'back.out(1.4)',
+            delay: 0.05
+          }
+        );
+      }
+    }
+  });
+
+  // =====================================================
+  //  FRAGMENT HIDDEN HANDLER — reset vector table on go-back
+  // =====================================================
+  Reveal.on('fragmenthidden', function (event) {
+    const frag = event.fragment;
+    const slide = frag.closest('section');
+    if (slide && slide.id === 'slide-vector-table') {
+      const rows = slide.querySelectorAll('tbody tr');
+      const idx = Array.from(rows).indexOf(frag);
+      const rowKey = idx === 0 ? 'a' : idx === 1 ? 'b' : idx === 2 ? 'c' : null;
+      if (rowKey) {
+        rowData[rowKey].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.classList.add('cell-hidden');
+            el.classList.remove('cell-one', 'cell-zero');
+          }
+        });
+      }
+    }
+  });
+
+  // =====================================================
+  //  SLIDE CHANGE — trigger entrance animations
+  // =====================================================
+  Reveal.on('slidechanged', function (event) {
+    const slideEl = event.currentSlide;
+    if (!slideEl) return;
+    const id = slideEl.id;
+    if (animations[id]) {
+      // Small delay to allow slide transition to settle
+      setTimeout(() => animations[id](), 350);
+    }
+  });
+
+  // =====================================================
+  //  INITIAL SLIDE CHECK (in case page loads mid-deck)
+  // =====================================================
+  Reveal.on('ready', function () {
+    if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+    const currentSlide = Reveal.getCurrentSlide();
+    if (currentSlide) {
+      const id = currentSlide.id;
+      if (animations[id]) {
+        setTimeout(() => animations[id](), 500);
+      }
+    }
+  });
+</script>
+</body>
+</html>

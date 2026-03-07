@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ⅱ-1-02 텍스트 자료의 처리 | 고등 인공지능 수학</title>
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol'] }
+      },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+      startup: { ready() { MathJax.startup.defaultReady(); } }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <style>
+    /* ===== BASE ===== */
+    :root {
+      --bg:        #0a0f1e;
+      --text:      #e8f4fd;
+      --cyan:      #00d4ff;
+      --amber:     #ffb347;
+      --green:     #39d98a;
+      --red:       #ff4757;
+      --purple:    #a78bfa;
+      --card-bg:   rgba(255,255,255,0.07);
+      --border:    rgba(255,255,255,0.15);
+      --step1:     #00d4ff;
+      --step2:     #39d98a;
+      --step3:     #a78bfa;
+      --step4:     #ffb347;
+    }
+
+    html, body, .reveal {
+      background: var(--bg) !important;
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 26px;
+    }
+
+    .reveal .slides section {
+      text-align: left;
+      padding: 4px 20px;
+    }
+
+    /* ===== TYPOGRAPHY ===== */
+    .reveal h1 {
+      font-size: 2.4em;
+      font-weight: 900;
+      color: var(--cyan);
+      text-align: center;
+      line-height: 1.3;
+      text-shadow: 0 0 30px rgba(0,212,255,0.4);
+    }
+
+    .reveal h2 {
+      font-size: 1.8em;
+      font-weight: 700;
+      color: var(--cyan);
+      border-bottom: 2px solid rgba(0,212,255,0.35);
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+    }
+
+    .reveal h3 {
+      font-size: 1.35em;
+      font-weight: 700;
+      color: var(--amber);
+      margin-bottom: 12px;
+    }
+
+    .reveal p, .reveal li, .reveal td, .reveal th {
+      font-size: 1.05em;
+      line-height: 1.65;
+      color: var(--text);
+    }
+
+    .reveal ul, .reveal ol {
+      margin-left: 1.4em;
+    }
+
+    .reveal li { margin-bottom: 2px; }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 16px;
+      margin: 5px 0;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 8px 0;
+    }
+
+    .card-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 8px 0;
+    }
+
+    .review-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    .review-card .label {
+      font-size: 0.75em;
+      font-weight: 700;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+
+    .review-card p {
+      font-size: 0.92em;
+      margin: 0;
+    }
+
+    /* ===== HIGHLIGHT BOXES ===== */
+    .highlight-box {
+      background: rgba(0,212,255,0.1);
+      border-left: 4px solid var(--cyan);
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin: 5px 0;
+    }
+
+    .highlight-box.amber {
+      background: rgba(255,179,71,0.1);
+      border-left-color: var(--amber);
+    }
+
+    .highlight-box.green {
+      background: rgba(57,217,138,0.1);
+      border-left-color: var(--green);
+    }
+
+    .highlight-box.purple {
+      background: rgba(167,139,250,0.1);
+      border-left-color: var(--purple);
+    }
+
+    .highlight-box.red {
+      background: rgba(255,71,87,0.1);
+      border-left-color: var(--red);
+    }
+
+    /* ===== STEP HEADERS ===== */
+    .step-header {
+      display: inline-block;
+      font-size: 0.85em;
+      font-weight: 900;
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+    .step1 { background: rgba(0,212,255,0.2); color: var(--step1); border: 1px solid var(--step1); }
+    .step2 { background: rgba(57,217,138,0.2); color: var(--step2); border: 1px solid var(--step2); }
+    .step3 { background: rgba(167,139,250,0.2); color: var(--step3); border: 1px solid var(--step3); }
+    .step4 { background: rgba(255,179,71,0.2); color: var(--step4); border: 1px solid var(--step4); }
+
+    /* ===== TABLES ===== */
+    .reveal table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82em;
+      margin: 10px 0;
+    }
+
+    .reveal table th {
+      background: rgba(0,212,255,0.15);
+      color: var(--cyan);
+      font-weight: 700;
+      padding: 5px 8px;
+      border: 1px solid rgba(0,212,255,0.25);
+      text-align: center;
+      font-size: 0.9em;
+    }
+
+    .reveal table td {
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      text-align: center;
+      color: var(--text);
+      font-size: 0.95em;
+    }
+
+    .reveal table tr:nth-child(even) td {
+      background: rgba(255,255,255,0.035);
+    }
+
+    .reveal table tr:last-child td {
+      background: rgba(0,212,255,0.08);
+      font-weight: 700;
+      color: var(--cyan);
+    }
+
+    .tfidf-high {
+      color: var(--amber) !important;
+      font-weight: 900 !important;
+      text-shadow: 0 0 10px rgba(255,179,71,0.6);
+    }
+
+    .tfidf-mid {
+      color: var(--green) !important;
+      font-weight: 700 !important;
+    }
+
+    .tfidf-zero {
+      color: rgba(255,255,255,0.3) !important;
+    }
+
+    .df-high {
+      color: var(--red) !important;
+      font-weight: 700 !important;
+    }
+
+    .idf-high {
+      color: var(--green) !important;
+      font-weight: 700 !important;
+    }
+
+    .td-row-label {
+      text-align: left !important;
+      font-weight: 700;
+      color: var(--amber) !important;
+      background: rgba(255,179,71,0.07) !important;
+    }
+
+    /* ===== FORMULA BOX ===== */
+    .formula-box {
+      background: rgba(167,139,250,0.12);
+      border: 1px solid rgba(167,139,250,0.4);
+      border-radius: 12px;
+      padding: 10px 16px;
+      text-align: center;
+      margin: 8px 0;
+      font-size: 1.05em;
+    }
+
+    /* ===== TITLE SLIDE ===== */
+    .title-meta {
+      font-size: 0.8em;
+      color: rgba(232,244,253,0.55);
+      margin-top: 8px;
+    }
+
+    .title-badge {
+      display: inline-block;
+      background: rgba(0,212,255,0.15);
+      border: 1px solid rgba(0,212,255,0.4);
+      border-radius: 20px;
+      padding: 5px 18px;
+      font-size: 0.75em;
+      color: var(--cyan);
+      margin: 6px 4px;
+      font-weight: 700;
+    }
+
+    /* ===== OBJECTIVE SLIDE ===== */
+    .objective-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin: 14px 0;
+    }
+
+    .obj-icon {
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+      font-weight: 900;
+    }
+
+    .obj-icon.cyan  { background: rgba(0,212,255,0.2);   color: var(--cyan); }
+    .obj-icon.amber { background: rgba(255,179,71,0.2);  color: var(--amber); }
+    .obj-icon.green { background: rgba(57,217,138,0.2);  color: var(--green); }
+
+    /* ===== VECTOR ===== */
+    .vector-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0;
+      flex-wrap: wrap;
+    }
+
+    .vector-label {
+      font-weight: 900;
+      color: var(--cyan);
+      min-width: 40px;
+      font-size: 1em;
+    }
+
+    .vector-val {
+      display: inline-block;
+      width: 38px;
+      height: 38px;
+      line-height: 38px;
+      text-align: center;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95em;
+    }
+
+    .v-nonzero { background: rgba(0,212,255,0.18); color: var(--cyan); border: 1px solid rgba(0,212,255,0.35); }
+    .v-zero    { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.1); }
+    .v-high    { background: rgba(255,179,71,0.25); color: var(--amber); border: 1px solid rgba(255,179,71,0.5); }
+
+    /* ===== LIMIT / COMPARISON ===== */
+    .compare-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .compare-bad {
+      background: rgba(255,71,87,0.08);
+      border: 1px solid rgba(255,71,87,0.35);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .compare-good {
+      background: rgba(57,217,138,0.08);
+      border: 1px solid rgba(57,217,138,0.35);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    /* ===== STEP FLOW ===== */
+    .step-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .step-block {
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .step-block .num {
+      font-size: 1.8em;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .step-block .name {
+      font-size: 0.75em;
+      font-weight: 700;
+      margin-top: 6px;
+      line-height: 1.3;
+    }
+
+    .sb1 { background: rgba(0,212,255,0.12);   border: 1px solid rgba(0,212,255,0.4);   }
+    .sb2 { background: rgba(57,217,138,0.12);  border: 1px solid rgba(57,217,138,0.4);  }
+    .sb3 { background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.4); }
+    .sb4 { background: rgba(255,179,71,0.12);  border: 1px solid rgba(255,179,71,0.4);  }
+
+    .sb1 .num, .sb1 .name { color: var(--step1); }
+    .sb2 .num, .sb2 .name { color: var(--step2); }
+    .sb3 .num, .sb3 .name { color: var(--step3); }
+    .sb4 .num, .sb4 .name { color: var(--step4); }
+
+    /* ===== RESULT CARD ===== */
+    .result-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin: 8px 0;
+    }
+
+    .result-card .rc-label {
+      font-size: 0.8em;
+      font-weight: 700;
+      color: var(--amber);
+      margin-bottom: 6px;
+    }
+
+    .result-card .rc-keyword {
+      font-size: 1em;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .result-card .rc-reason {
+      font-size: 0.88em;
+      color: rgba(232,244,253,0.75);
+      margin-top: 4px;
+    }
+
+    /* ===== SUMMARY TABLE ===== */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 8px 0;
+    }
+
+    .summary-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .summary-item .si-term {
+      font-size: 1em;
+      font-weight: 900;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+
+    .summary-item .si-desc {
+      font-size: 0.85em;
+      color: rgba(232,244,253,0.75);
+      line-height: 1.5;
+    }
+
+    /* ===== QUIZ ===== */
+    .quiz-blank {
+      display: inline-block;
+      min-width: 80px;
+      height: 28px;
+      background: rgba(255,255,255,0.1);
+      border-bottom: 2px solid var(--cyan);
+      border-radius: 4px 4px 0 0;
+      vertical-align: bottom;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .quiz-answer {
+      color: var(--amber);
+      font-weight: 900;
+    }
+
+    /* ===== IMPORTANCE SCALE ===== */
+    .importance-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .imp-low { color: rgba(232,244,253,0.4); font-size: 0.85em; }
+    .imp-high { color: var(--amber); font-size: 0.85em; font-weight: 700; }
+
+    .imp-scale {
+      flex: 1;
+      height: 10px;
+      border-radius: 5px;
+      background: linear-gradient(to right, rgba(255,255,255,0.15), var(--amber));
+    }
+
+    /* ===== SMALL UTILS ===== */
+    .text-cyan   { color: var(--cyan) !important; }
+    .text-amber  { color: var(--amber) !important; }
+    .text-green  { color: var(--green) !important; }
+    .text-purple { color: var(--purple) !important; }
+    .text-red    { color: var(--red) !important; }
+    .text-dim    { color: rgba(232,244,253,0.55); }
+
+    .fw900 { font-weight: 900; }
+    .fw700 { font-weight: 700; }
+    .mt8   { margin-top: 8px; }
+    .mt12  { margin-top: 12px; }
+    .mt16  { margin-top: 16px; }
+    .mb8   { margin-bottom: 8px; }
+    .center { text-align: center; }
+
+    small { font-size: 0.78em; color: rgba(232,244,253,0.6); }
+
+    /* ===== FRAGMENT OVERRIDES ===== */
+    .reveal .fragment.highlight-amber.visible { color: var(--amber) !important; font-weight: 900; }
+    .reveal .fragment.highlight-green.visible  { color: var(--green) !important; font-weight: 700; }
+    .reveal .fragment.highlight-cyan.visible   { color: var(--cyan) !important; font-weight: 700; }
+
+    /* ===== SLIDE NUMBERS ===== */
+    .reveal .slide-number { font-size: 0.65em; color: rgba(232,244,253,0.4); }
+
+    /* ===== PROGRESS BAR ===== */
+    .reveal .progress { background: rgba(255,255,255,0.1); }
+    .reveal .progress span { background: var(--cyan); }
+
+    /* ===== SUBTITLE ===== */
+    .subtitle {
+      font-size: 1.1em;
+      color: rgba(232,244,253,0.7);
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    /* ===== ARROW ===== */
+    .arrow-right {
+      color: var(--amber);
+      font-size: 1.2em;
+      margin: 0 6px;
+    }
+
+    /* ===== FRACTIONS ===== */
+    .frac {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+    }
+    .frac .num-f { display: block; border-bottom: 1px solid currentColor; padding: 0 4px; line-height: 1.4; }
+    .frac .den-f { display: block; padding: 0 4px; line-height: 1.4; }
+
+    /* ===== LOG NOTE ===== */
+    .log-note {
+      background: rgba(167,139,250,0.1);
+      border: 1px dashed rgba(167,139,250,0.4);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.78em;
+      margin-top: 8px;
+    }
+
+    /* Responsive minimal adjustments for large displays */
+    @media (min-width: 1600px) {
+      .reveal h1 { font-size: 2.8em; }
+      .reveal h2 { font-size: 2em; }
+    }
+
+    /* Table compact for wide tables */
+    .table-compact th, .table-compact td {
+      padding: 5px 6px;
+      font-size: 0.78em;
+    }
+
+    /* ===== GSAP INITIAL HIDE ===== */
+    .gsap-row { opacity: 1; }
+  </style>
+</head>
+
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ===== SLIDE 1: TITLE ===== -->
+<section id="title" data-background-color="#0a0f1e">
+  <div style="text-align:center; padding: 20px 0;">
+    <div style="font-size:0.85em; color:var(--amber); font-weight:700; letter-spacing:3px; margin-bottom:14px;">
+      Ⅱ. 자료의 표현 &nbsp;›&nbsp; 1. 텍스트 자료의 표현
+    </div>
+
+    <h1>02 텍스트 자료의 처리</h1>
+
+    <div style="margin: 24px 0 16px;">
+      <span class="title-badge">TF (단어 빈도수)</span>
+      <span class="title-badge">DF (문서 빈도수)</span>
+      <span class="title-badge">IDF (역문서 빈도수)</span>
+      <span class="title-badge">TF·IDF</span>
+    </div>
+
+    <div style="margin: 30px auto; max-width: 640px;">
+      <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:20px 28px;">
+        <div style="font-size:0.78em; color:rgba(232,244,253,0.5); margin-bottom:8px;">성취기준 12인수02-02</div>
+        <p style="font-size:0.95em; margin:0; line-height:1.7; text-align:center;">
+          수와 수학 기호로 표현된 텍스트 자료를 처리하는 수학 원리를 이해하고<br>자료를 시각화할 수 있다.
+        </p>
+      </div>
+    </div>
+
+    <div class="title-meta">고등 인공지능 수학 &nbsp;|&nbsp; 미래엔 pp.33–38</div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 2: 학습목표 ===== -->
+<section id="objectives">
+  <h2>학습목표</h2>
+
+  <div style="margin-top: 20px;">
+    <div class="objective-item">
+      <div class="obj-icon cyan">1</div>
+      <div>
+        <div style="font-weight:700; font-size:1.05em;">단어 빈도수(TF)로 주제어를 찾을 수 있다.</div>
+        <div style="font-size:0.85em; color:rgba(232,244,253,0.6); margin-top:4px;">
+          각 문서에서 단어의 등장 횟수를 세어 가장 자주 등장하는 단어를 주제어로 파악한다.
+        </div>
+      </div>
+    </div>
+
+    <div class="objective-item" style="margin-top:16px;">
+      <div class="obj-icon amber">2</div>
+      <div>
+        <div style="font-weight:700; font-size:1.05em;">TF·IDF 4단계 계산 방법을 이해하고 적용할 수 있다.</div>
+        <div style="font-size:0.85em; color:rgba(232,244,253,0.6); margin-top:4px;">
+          TF → DF → IDF → TF·IDF 순서로 계산하여 특정 문서만의 핵심 정보를 추출한다.
+        </div>
+      </div>
+    </div>
+
+    <div class="objective-item" style="margin-top:16px;">
+      <div class="obj-icon green">3</div>
+      <div>
+        <div style="font-weight:700; font-size:1.05em;">TF·IDF 값을 해석하여 유용한 정보를 도출할 수 있다.</div>
+        <div style="font-size:0.85em; color:rgba(232,244,253,0.6); margin-top:4px;">
+          값이 클수록 특정 문서에서 중요한 단어임을 이해하고, 실제 텍스트에서 의미를 읽어낸다.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-box" style="margin-top:24px;">
+    <span class="text-amber fw700">핵심 질문:</span>
+    &nbsp;"청바지 후기가 수백 개일 때, 어떤 후기가 <span class="text-cyan fw700">진짜 유용한 정보</span>를 담고 있을까?"
+  </div>
+</section>
+
+<!-- ===== SLIDE 3: 다가서기 ===== -->
+<section id="intro">
+  <h2>다가서기</h2>
+  <div class="subtitle" style="text-align:left; font-size:1em; color:rgba(232,244,253,0.75); margin-bottom:16px;">
+    비정형 텍스트에서 <span class="text-cyan fw700">주제어와 유용한 정보</span>를 어떻게 찾을 수 있을까?
+  </div>
+
+  <div class="card-grid">
+    <div class="review-card">
+      <div class="label">후기 A</div>
+      <p>"청바지 추천! 예쁘고 저렴해서 청바지를 추천해요."</p>
+    </div>
+    <div class="review-card">
+      <div class="label">후기 B</div>
+      <p>"청바지의 가격, 디자인 다 좋아요. 특히 디자인 추천!^^"</p>
+    </div>
+    <div class="review-card">
+      <div class="label">후기 C</div>
+      <p>"신축성과 디자인이 좋고, 가격도 좋아서 이 청바지를 추천해요."</p>
+    </div>
+  </div>
+
+  <div class="highlight-box" style="margin-top:14px;">
+    <p style="margin:0; font-size:0.95em;">
+      세 후기 모두 <span class="text-amber fw700">"청바지", "추천"</span>이라는 단어를 공통으로 포함합니다.<br>
+      하지만 각 후기가 전달하는 <span class="text-cyan fw700">핵심 정보(추천 이유)</span>는 서로 다릅니다.
+    </p>
+  </div>
+
+  <div style="margin-top:16px; display:flex; gap:16px; align-items:center;">
+    <div style="flex:1; background:rgba(255,71,87,0.08); border:1px solid rgba(255,71,87,0.3); border-radius:10px; padding:12px 16px;">
+      <div style="font-weight:700; color:var(--red); margin-bottom:4px; font-size:0.85em;">문제</div>
+      <p style="font-size:0.88em; margin:0;">단순히 자주 나오는 단어만 보면 모든 후기의 핵심이 "청바지, 추천"으로 동일해 보인다.</p>
+    </div>
+    <div style="font-size:2em; color:var(--amber);">→</div>
+    <div style="flex:1; background:rgba(57,217,138,0.08); border:1px solid rgba(57,217,138,0.3); border-radius:10px; padding:12px 16px;">
+      <div style="font-weight:700; color:var(--green); margin-bottom:4px; font-size:0.85em;">해결</div>
+      <p style="font-size:0.88em; margin:0;">해당 문서에서만 자주 나오는 단어에 높은 가중치를 부여하면 각 후기의 핵심 정보를 추출할 수 있다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 4: 집합 & 단어사전 ===== -->
+<section id="sets">
+  <h2>후기 데이터 — 집합 & 단어사전</h2>
+
+  <div style="font-size:0.88em; margin-bottom:12px; color:rgba(232,244,253,0.7);">
+    불용어(조사, 접속어 등 의미 없는 단어)를 제거한 후 집합으로 표현합니다.
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="step-header step1">후기 A</div>
+      <p style="font-size:0.88em; margin:6px 0;">A = {<span class="text-cyan fw700">청바지</span>, <span class="text-cyan fw700">추천</span>, 예쁘다, 저렴하다}</p>
+    </div>
+    <div class="card">
+      <div class="step-header step2">후기 B</div>
+      <p style="font-size:0.88em; margin:6px 0;">B = {<span class="text-cyan fw700">청바지</span>, <span class="text-cyan fw700">추천</span>, 가격, 디자인, 좋다}</p>
+    </div>
+    <div class="card">
+      <div class="step-header step3">후기 C</div>
+      <p style="font-size:0.88em; margin:6px 0;">C = {신축성, 디자인, 좋다, 가격, <span class="text-cyan fw700">청바지</span>, <span class="text-cyan fw700">추천</span>}</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px; background: rgba(0,212,255,0.06); border-color: rgba(0,212,255,0.3);">
+    <div style="font-weight:700; color:var(--cyan); margin-bottom:8px;">단어사전 U (합집합)</div>
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <span style="background:rgba(0,212,255,0.15); border:1px solid rgba(0,212,255,0.4); border-radius:20px; padding:4px 14px; font-size:0.88em; color:var(--cyan);">청바지</span>
+      <span style="background:rgba(0,212,255,0.15); border:1px solid rgba(0,212,255,0.4); border-radius:20px; padding:4px 14px; font-size:0.88em; color:var(--cyan);">추천</span>
+      <span style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:0.88em;">예쁘다</span>
+      <span style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:0.88em;">저렴하다</span>
+      <span style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:0.88em;">가격</span>
+      <span style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:0.88em;">디자인</span>
+      <span style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:0.88em;">좋다</span>
+      <span style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:0.88em;">신축성</span>
+    </div>
+    <div style="font-size:0.8em; color:rgba(232,244,253,0.55); margin-top:8px;">총 8개 단어 (8차원 벡터 공간)</div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 5: TF 개념 ===== -->
+<section id="tf-concept">
+  <h2>단어 빈도수 (TF, Term Frequency)</h2>
+
+  <div class="formula-box">
+    <span class="text-cyan fw900" style="font-size:1.2em;">TF</span>
+    &nbsp;=&nbsp; 단어가 해당 문서(후기)에서 <span class="text-amber fw900">등장한 횟수</span>
+  </div>
+
+  <div class="card-grid" style="margin-top:16px;">
+    <div class="card">
+      <div class="step-header step1">후기 A 분석</div>
+      <p style="font-size:0.85em; margin:6px 0; line-height:1.8;">
+        "청바지 추천! 예쁘고<br>저렴해서 <span class="text-amber">청바지</span>를 <span class="text-amber">추천</span>해요."
+      </p>
+      <div style="font-size:0.82em; color:rgba(232,244,253,0.6); margin-top:6px;">
+        청바지: <span class="text-amber fw700">2번</span>, 추천: <span class="text-amber fw700">2번</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="step-header step2">후기 B 분석</div>
+      <p style="font-size:0.85em; margin:6px 0; line-height:1.8;">
+        "청바지의 가격, <span class="text-amber">디자인</span> 다 좋아요.<br>특히 <span class="text-amber">디자인</span> 추천!^^"
+      </p>
+      <div style="font-size:0.82em; color:rgba(232,244,253,0.6); margin-top:6px;">
+        디자인: <span class="text-amber fw700">2번</span>, 나머지: 1번
+      </div>
+    </div>
+    <div class="card">
+      <div class="step-header step3">후기 C 분석</div>
+      <p style="font-size:0.85em; margin:6px 0; line-height:1.8;">
+        "신축성과 디자인이 <span class="text-amber">좋고</span>,<br>가격도 <span class="text-amber">좋아서</span> 이 청바지를 추천해요."
+      </p>
+      <div style="font-size:0.82em; color:rgba(232,244,253,0.6); margin-top:6px;">
+        좋다: <span class="text-amber fw700">2번</span>, 나머지: 1번
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-box" style="margin-top:16px;">
+    <span class="text-cyan fw700">TF의 원리:</span>
+    &nbsp;같은 문서 안에서 반복되는 단어는 그 문서의 <span class="text-amber fw700">주제</span>와 관련이 깊다.
+    마치 연설에서 자주 반복되는 단어가 핵심 주제인 것처럼.
+  </div>
+</section>
+
+<!-- ===== SLIDE 6: TF 표 (GSAP 애니메이션) ===== -->
+<section id="tf-table">
+  <h2>단어 빈도수(TF) 표</h2>
+  <div style="font-size:0.82em; color:rgba(232,244,253,0.6); margin-bottom:10px;">
+    각 행 = 하나의 후기, 각 열 = 단어 빈도 &nbsp;|&nbsp; 표는 순서대로 나타납니다.
+  </div>
+
+  <table class="table-compact" id="tf-main-table">
+    <thead>
+      <tr>
+        <th style="text-align:left;">후기</th>
+        <th>청바지</th>
+        <th>추천</th>
+        <th>예쁘다</th>
+        <th>저렴하다</th>
+        <th>가격</th>
+        <th>디자인</th>
+        <th>좋다</th>
+        <th>신축성</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="gsap-row" id="tf-row-a">
+        <td class="td-row-label">후기 A</td>
+        <td class="text-amber fw700">2</td>
+        <td class="text-amber fw700">2</td>
+        <td>1</td>
+        <td>1</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-zero">0</td>
+      </tr>
+      <tr class="gsap-row" id="tf-row-b">
+        <td class="td-row-label">후기 B</td>
+        <td>1</td>
+        <td>1</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-zero">0</td>
+        <td>1</td>
+        <td class="text-amber fw700">2</td>
+        <td>1</td>
+        <td class="tfidf-zero">0</td>
+      </tr>
+      <tr class="gsap-row" id="tf-row-c">
+        <td class="td-row-label">후기 C</td>
+        <td>1</td>
+        <td>1</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-zero">0</td>
+        <td>1</td>
+        <td>1</td>
+        <td class="text-amber fw700">2</td>
+        <td>1</td>
+      </tr>
+      <tr class="gsap-row" id="tf-row-total">
+        <td class="td-row-label" style="color:var(--cyan) !important;">말뭉치 합계</td>
+        <td>4</td>
+        <td>4</td>
+        <td>1</td>
+        <td>1</td>
+        <td>2</td>
+        <td>3</td>
+        <td>3</td>
+        <td>1</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box amber" style="margin-top:14px;">
+    <span class="text-amber fw700">TF 최댓값으로 주제어 파악:</span>
+    <div style="font-size:0.88em; margin-top:6px; line-height:1.8;">
+      후기 A: <span class="text-amber fw700">청바지, 추천</span> (TF=2) &nbsp;|&nbsp;
+      후기 B: <span class="text-amber fw700">디자인</span> (TF=2) &nbsp;|&nbsp;
+      후기 C: <span class="text-amber fw700">좋다</span> (TF=2)
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 7: TF 벡터 표현 ===== -->
+<section id="tf-vector">
+  <h2>벡터(Vector) 표현</h2>
+  <div style="font-size:0.88em; color:rgba(232,244,253,0.7); margin-bottom:16px;">
+    TF 표의 각 행을 <span class="text-cyan fw700">수의 나열(벡터)</span>로 표현하면 수학적으로 다룰 수 있습니다.
+  </div>
+
+  <div style="margin-bottom:10px; font-size:0.82em; color:rgba(232,244,253,0.55);">
+    순서: (청바지, 추천, 예쁘다, 저렴하다, 가격, 디자인, 좋다, 신축성)
+  </div>
+
+  <div class="card" style="padding:20px 24px;">
+    <div class="vector-row" id="vec-a">
+      <span class="vector-label">\(\vec{A}\) =</span>
+      <span class="vector-val v-high">2</span>
+      <span class="vector-val v-high">2</span>
+      <span class="vector-val v-nonzero">1</span>
+      <span class="vector-val v-nonzero">1</span>
+      <span class="vector-val v-zero">0</span>
+      <span class="vector-val v-zero">0</span>
+      <span class="vector-val v-zero">0</span>
+      <span class="vector-val v-zero">0</span>
+    </div>
+    <div class="vector-row" style="margin-top:12px;" id="vec-b">
+      <span class="vector-label">\(\vec{B}\) =</span>
+      <span class="vector-val v-nonzero">1</span>
+      <span class="vector-val v-nonzero">1</span>
+      <span class="vector-val v-zero">0</span>
+      <span class="vector-val v-zero">0</span>
+      <span class="vector-val v-nonzero">1</span>
+      <span class="vector-val v-high">2</span>
+      <span class="vector-val v-nonzero">1</span>
+      <span class="vector-val v-zero">0</span>
+    </div>
+    <div class="vector-row" style="margin-top:12px;" id="vec-c">
+      <span class="vector-label">\(\vec{C}\) =</span>
+      <span class="vector-val v-nonzero">1</span>
+      <span class="vector-val v-nonzero">1</span>
+      <span class="vector-val v-zero">0</span>
+      <span class="vector-val v-zero">0</span>
+      <span class="vector-val v-nonzero">1</span>
+      <span class="vector-val v-nonzero">1</span>
+      <span class="vector-val v-high">2</span>
+      <span class="vector-val v-nonzero">1</span>
+    </div>
+  </div>
+
+  <div class="card-grid-2" style="margin-top:14px;">
+    <div class="highlight-box">
+      <span class="text-cyan fw700">벡터란?</span>
+      <p style="font-size:0.85em; margin:6px 0 0;">크기와 방향을 가진 수학적 객체. 여기서는 단어들의 빈도를 순서대로 나열한 것.</p>
+    </div>
+    <div class="highlight-box amber">
+      <span class="text-amber fw700">활용:</span>
+      <p style="font-size:0.85em; margin:6px 0 0;">두 문서의 벡터가 비슷하면 → 비슷한 내용<br>코사인 유사도 등으로 문서 분류에 활용</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 8: 주제어 찾기 (TF 최댓값) ===== -->
+<section id="tf-keyword">
+  <h2>주제어 찾기 — TF 최댓값</h2>
+
+  <div class="card-grid" style="margin-top:10px;">
+    <div class="card" style="border-color:rgba(0,212,255,0.4);">
+      <div class="step-header step1">후기 A 주제어</div>
+      <div style="font-size:2em; font-weight:900; color:var(--amber); text-align:center; margin:10px 0;">청바지, 추천</div>
+      <div style="text-align:center; font-size:0.85em; color:rgba(232,244,253,0.6);">TF = <span class="text-amber fw700">2</span></div>
+    </div>
+    <div class="card" style="border-color:rgba(57,217,138,0.4);">
+      <div class="step-header step2">후기 B 주제어</div>
+      <div style="font-size:2em; font-weight:900; color:var(--amber); text-align:center; margin:10px 0;">디자인</div>
+      <div style="text-align:center; font-size:0.85em; color:rgba(232,244,253,0.6);">TF = <span class="text-amber fw700">2</span></div>
+    </div>
+    <div class="card" style="border-color:rgba(167,139,250,0.4);">
+      <div class="step-header step3">후기 C 주제어</div>
+      <div style="font-size:2em; font-weight:900; color:var(--amber); text-align:center; margin:10px 0;">좋다</div>
+      <div style="text-align:center; font-size:0.85em; color:rgba(232,244,253,0.6);">TF = <span class="text-amber fw700">2</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px; background:rgba(0,212,255,0.06); border-color:rgba(0,212,255,0.3);">
+    <div style="font-weight:700; color:var(--cyan); margin-bottom:8px;">말뭉치 전체 주제어</div>
+    <div style="font-size:1.6em; font-weight:900; color:var(--amber);">청바지, 추천 &nbsp;<small style="font-size:0.5em; color:rgba(232,244,253,0.6);">(TF = 4)</small></div>
+    <div style="font-size:0.82em; color:rgba(232,244,253,0.6); margin-top:6px;">
+      말뭉치 전체에서 가장 자주 등장하는 단어 = 전체 주제어
+    </div>
+  </div>
+
+  <div style="margin-top:14px; display:flex; align-items:center; gap:12px;">
+    <div style="font-size:0.88em; color:rgba(232,244,253,0.6); font-style:italic;">
+      주제어 선택 기준: TF가 최대인 단어<br>TF가 같을 경우 복수 선택 가능
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 9: TF의 한계 ===== -->
+<section id="tf-limit">
+  <h2>TF의 한계</h2>
+
+  <div class="compare-row" style="margin-top:16px;">
+    <div class="compare-bad">
+      <div style="font-weight:700; color:var(--red); margin-bottom:10px; font-size:1em;">문제점</div>
+      <p style="font-size:0.88em; line-height:1.7; margin:0;">
+        "청바지"는 세 후기 모두에서 등장합니다.<br><br>
+        의류 쇼핑몰 후기라면 <span class="text-red fw700">모든 후기에 "청바지"가 등장</span>하는 것은 당연합니다.<br><br>
+        TF만 보면 "청바지"가 항상 주제어로 나오지만, 이는 <span class="text-red fw700">당연한 정보</span>일 뿐 각 후기의 특별한 정보가 아닙니다.
+      </p>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="background:rgba(255,179,71,0.08); border:1px solid rgba(255,179,71,0.3); border-radius:10px; padding:12px 14px;">
+        <div style="font-weight:700; color:var(--amber); margin-bottom:6px; font-size:0.85em;">예시 1 — 영화 리뷰 사이트</div>
+        <p style="font-size:0.82em; margin:0;">"영화", "감독" 같은 단어는 모든 리뷰에 등장 → TF 높지만 정보 가치 낮음</p>
+      </div>
+      <div style="background:rgba(255,179,71,0.08); border:1px solid rgba(255,179,71,0.3); border-radius:10px; padding:12px 14px;">
+        <div style="font-weight:700; color:var(--amber); margin-bottom:6px; font-size:0.85em;">예시 2 — 뉴스 기사</div>
+        <p style="font-size:0.82em; margin:0;">"기자", "보도" 등은 뉴스 전반에 공통 → TF 높지만 특정 기사의 핵심이 아님</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-box" style="margin-top:16px;">
+    <span class="text-cyan fw700">결론:</span>
+    &nbsp;<span class="text-amber fw700">많은 문서에 공통으로 자주 등장하는 단어</span>는 TF가 높더라도 <span class="text-red fw700">특정 문서의 유용한 정보</span>를 나타내지 못합니다.<br>
+    <span style="font-size:0.88em; color:rgba(232,244,253,0.75);">→ 각 문서에서만 특별히 자주 나오는 단어를 찾는 새로운 방법이 필요합니다.</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 10: TF·IDF 도입 ===== -->
+<section id="tfidf-intro">
+  <h2>TF·IDF — 유용한 정보 찾기</h2>
+
+  <div class="subtitle" style="text-align:left; font-size:0.92em; margin-bottom:18px;">
+    <span class="text-cyan fw700">특정 문서에서만 자주 나오는 단어</span>에 높은 점수를 부여하는 방법
+  </div>
+
+  <div class="step-flow" id="step-flow">
+    <div class="step-block sb1">
+      <div class="num">1</div>
+      <div class="name">TF<br>단어 빈도수</div>
+    </div>
+    <div class="step-block sb2">
+      <div class="num">2</div>
+      <div class="name">DF<br>문서 빈도수<br>+ 상대도수</div>
+    </div>
+    <div class="step-block sb3">
+      <div class="num">3</div>
+      <div class="name">IDF<br>역문서<br>빈도수</div>
+    </div>
+    <div class="step-block sb4">
+      <div class="num">4</div>
+      <div class="name">TF·IDF<br>최종 점수</div>
+    </div>
+  </div>
+
+  <div class="card-grid-2" style="margin-top:14px;">
+    <div class="highlight-box">
+      <span class="text-cyan fw700">핵심 아이디어</span>
+      <p style="font-size:0.88em; margin:8px 0 0; line-height:1.6;">
+        단어가 <span class="text-amber fw700">여러 문서에 공통으로</span> 나타날수록 → 정보 가치 낮음<br>
+        단어가 <span class="text-green fw700">특정 문서에만</span> 나타날수록 → 정보 가치 높음
+      </p>
+    </div>
+    <div class="highlight-box purple">
+      <span class="text-purple fw700">TF·IDF 공식</span>
+      <div style="text-align:center; margin:10px 0; font-size:1.1em; font-weight:900;">
+        TF·IDF = <span class="text-cyan">TF</span> × <span class="text-purple">IDF</span>
+      </div>
+      <p style="font-size:0.85em; margin:0;">IDF는 "많이 퍼진 단어는 점수 DOWN, 희귀한 단어는 점수 UP"</p>
+    </div>
+  </div>
+
+  <div class="importance-bar" style="margin-top:16px;">
+    <span class="imp-low">청바지, 추천<br>(모든 문서에 등장)</span>
+    <div class="imp-scale"></div>
+    <span class="imp-high">예쁘다, 저렴하다<br>신축성 (특정 문서만)</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 11: 단계1 TF 복습 ===== -->
+<section id="step1">
+  <div class="step-header step1" style="font-size:1em; padding:8px 20px; margin-bottom:16px;">단계 1 — TF (단어 빈도수)</div>
+  <h2 style="margin-top:0;">TF — 복습</h2>
+
+  <div class="card-grid-2" style="margin-bottom:14px;">
+    <div class="card">
+      <div style="font-weight:700; color:var(--cyan); margin-bottom:8px;">정의</div>
+      <p style="font-size:0.9em; margin:0;">각 단어가 해당 문서(후기)에서 <span class="text-amber fw700">등장한 횟수</span></p>
+    </div>
+    <div class="card">
+      <div style="font-weight:700; color:var(--cyan); margin-bottom:8px;">역할</div>
+      <p style="font-size:0.9em; margin:0;">TF·IDF 계산의 <span class="text-amber fw700">첫 번째 인수(因數)</span>. 문서 내 중요도 측정.</p>
+    </div>
+  </div>
+
+  <table class="table-compact">
+    <thead>
+      <tr>
+        <th style="text-align:left;">후기</th>
+        <th>청바지</th>
+        <th>추천</th>
+        <th>예쁘다</th>
+        <th>저렴하다</th>
+        <th>가격</th>
+        <th>디자인</th>
+        <th>좋다</th>
+        <th>신축성</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-row-label">후기 A</td>
+        <td>2</td><td>2</td><td>1</td><td>1</td>
+        <td class="tfidf-zero">0</td><td class="tfidf-zero">0</td><td class="tfidf-zero">0</td><td class="tfidf-zero">0</td>
+      </tr>
+      <tr>
+        <td class="td-row-label">후기 B</td>
+        <td>1</td><td>1</td><td class="tfidf-zero">0</td><td class="tfidf-zero">0</td>
+        <td>1</td><td>2</td><td>1</td><td class="tfidf-zero">0</td>
+      </tr>
+      <tr>
+        <td class="td-row-label">후기 C</td>
+        <td>1</td><td>1</td><td class="tfidf-zero">0</td><td class="tfidf-zero">0</td>
+        <td>1</td><td>1</td><td>2</td><td>1</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box" style="margin-top:14px;">
+    다음 단계: TF만으로는 "모든 문서에 공통으로 등장하는 단어"와 "특정 문서에만 등장하는 단어"를 구별하지 못합니다.<br>
+    <span class="text-amber fw700">→ DF(문서 빈도수)로 각 단어가 몇 개 문서에 등장하는지 파악합니다.</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 12: 단계2 DF & 상대도수 ===== -->
+<section id="step2">
+  <div class="step-header step2" style="font-size:1em; padding:8px 20px; margin-bottom:16px;">단계 2 — DF (문서 빈도수) &amp; 상대도수</div>
+  <h2 style="margin-top:0;">DF — 단어가 등장하는 문서의 수</h2>
+
+  <div class="card-grid-2" style="margin-bottom:12px;">
+    <div class="card">
+      <div style="font-weight:700; color:var(--green); margin-bottom:6px;">DF 정의</div>
+      <p style="font-size:0.88em; margin:0;">단어가 <span class="text-green fw700">등장하는 문서의 개수</span><br>(전체 문서 수 n = 3)</p>
+    </div>
+    <div class="card">
+      <div style="font-weight:700; color:var(--green); margin-bottom:6px;">상대도수 DF/n</div>
+      <p style="font-size:0.88em; margin:0;">DF를 전체 문서 수로 나눈 값<br>0과 1 사이의 값</p>
+    </div>
+  </div>
+
+  <table class="table-compact" id="df-table">
+    <thead>
+      <tr>
+        <th style="text-align:left;">구분</th>
+        <th>청바지</th>
+        <th>추천</th>
+        <th>예쁘다</th>
+        <th>저렴하다</th>
+        <th>가격</th>
+        <th>디자인</th>
+        <th>좋다</th>
+        <th>신축성</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="gsap-row" id="df-row">
+        <td class="td-row-label" style="color:var(--green) !important;">DF</td>
+        <td class="df-high">3</td>
+        <td class="df-high">3</td>
+        <td>1</td>
+        <td>1</td>
+        <td>2</td>
+        <td>2</td>
+        <td>2</td>
+        <td>1</td>
+      </tr>
+      <tr class="gsap-row" id="dfn-row">
+        <td class="td-row-label" style="color:var(--green) !important; background:rgba(57,217,138,0.07) !important;">DF/n</td>
+        <td class="df-high">1</td>
+        <td class="df-high">1</td>
+        <td>1/3</td>
+        <td>1/3</td>
+        <td>2/3</td>
+        <td>2/3</td>
+        <td>2/3</td>
+        <td>1/3</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box green" style="margin-top:14px;">
+    <span class="text-green fw700">해석:</span>
+    <div style="font-size:0.88em; margin-top:6px; line-height:1.8;">
+      <span class="text-red">청바지, 추천</span>: DF = 3 (전체 3개 후기 모두에 등장) → 상대도수 = <span class="text-red fw700">1</span> (최대)<br>
+      <span class="text-green">예쁘다, 저렴하다, 신축성</span>: DF = 1 (1개 후기에만 등장) → 상대도수 = <span class="text-green fw700">1/3</span> (최소)
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 13: 단계3 IDF ===== -->
+<section id="step3">
+  <div class="step-header step3" style="font-size:1em; padding:8px 20px; margin-bottom:16px;">단계 3 — IDF (역문서 빈도수)</div>
+  <h2 style="margin-top:0;">IDF — 상대도수의 역수</h2>
+
+  <div class="formula-box">
+    \[
+      \text{IDF} = \frac{n}{\text{DF}} = \frac{1}{\text{DF}/n}
+    \]
+    <div style="font-size:0.75em; color:rgba(232,244,253,0.6); margin-top:8px;">
+      상대도수(DF/n)가 <span class="text-red">크면(많은 문서에 등장)</span> → IDF <span class="text-red">작음</span> &nbsp;|&nbsp;
+      상대도수가 <span class="text-green">작으면(희귀한 단어)</span> → IDF <span class="text-green">큼</span>
+    </div>
+  </div>
+
+  <table class="table-compact" id="idf-table">
+    <thead>
+      <tr>
+        <th style="text-align:left;">구분</th>
+        <th>청바지</th>
+        <th>추천</th>
+        <th>예쁘다</th>
+        <th>저렴하다</th>
+        <th>가격</th>
+        <th>디자인</th>
+        <th>좋다</th>
+        <th>신축성</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="gsap-row" id="dfn-row2">
+        <td class="td-row-label" style="color:var(--green) !important;">DF/n</td>
+        <td>1</td><td>1</td><td>1/3</td><td>1/3</td><td>2/3</td><td>2/3</td><td>2/3</td><td>1/3</td>
+      </tr>
+      <tr class="gsap-row" id="idf-row">
+        <td class="td-row-label" style="color:var(--purple) !important;">IDF = n/DF</td>
+        <td class="tfidf-zero">1</td>
+        <td class="tfidf-zero">1</td>
+        <td class="idf-high">3</td>
+        <td class="idf-high">3</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="idf-high">3</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card-grid-2" style="margin-top:14px;">
+    <div class="highlight-box red">
+      <span class="text-red fw700">청바지, 추천</span> — IDF = 1<br>
+      <span style="font-size:0.82em;">3개 문서 모두에 등장 → 역수 = 1 (낮은 정보 가치)</span>
+    </div>
+    <div class="highlight-box green">
+      <span class="text-green fw700">예쁘다, 저렴하다, 신축성</span> — IDF = 3<br>
+      <span style="font-size:0.82em;">1개 문서에만 등장 → 역수 = 3 (높은 정보 가치)</span>
+    </div>
+  </div>
+
+  <div class="log-note">
+    <span class="text-purple fw700">참고 (실제 AI/검색엔진):</span>
+    &nbsp;실제로는 IDF = \(\log\!\left(\dfrac{n}{\text{DF}}\right)\)을 사용하여 큰 값을 압축합니다.<br>
+    예: n = 10,000,000, DF = 100이면 n/DF = 100,000이지만 log(100,000) ≈ 5로 관리 가능한 크기로 변환.
+  </div>
+</section>
+
+<!-- ===== SLIDE 14: 단계4 TF·IDF 계산 ===== -->
+<section id="step4">
+  <div class="step-header step4" style="font-size:1em; padding:8px 20px; margin-bottom:14px;">단계 4 — TF·IDF = TF × IDF</div>
+  <h2 style="margin-top:0;">TF·IDF 계산</h2>
+
+  <div class="card" style="margin-bottom:12px; padding:14px 18px;">
+    <div style="font-size:0.82em; color:rgba(232,244,253,0.6); margin-bottom:6px;">IDF 참고값: 청바지=1, 추천=1, 예쁘다=3, 저렴하다=3, 가격=3/2, 디자인=3/2, 좋다=3/2, 신축성=3</div>
+  </div>
+
+  <table class="table-compact" id="tfidf-table">
+    <thead>
+      <tr>
+        <th style="text-align:left;">후기</th>
+        <th>청바지</th>
+        <th>추천</th>
+        <th>예쁘다</th>
+        <th>저렴하다</th>
+        <th>가격</th>
+        <th>디자인</th>
+        <th>좋다</th>
+        <th>신축성</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="gsap-row" id="tfidf-row-a">
+        <td class="td-row-label">후기 A</td>
+        <td>2×1=2</td>
+        <td>2×1=2</td>
+        <td class="tfidf-high">1×3=3</td>
+        <td class="tfidf-high">1×3=3</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-zero">0</td>
+      </tr>
+      <tr class="gsap-row" id="tfidf-row-b">
+        <td class="td-row-label">후기 B</td>
+        <td>1×1=1</td>
+        <td>1×1=1</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-mid">1×3/2=3/2</td>
+        <td class="tfidf-high">2×3/2=3</td>
+        <td class="tfidf-mid">1×3/2=3/2</td>
+        <td class="tfidf-zero">0</td>
+      </tr>
+      <tr class="gsap-row" id="tfidf-row-c">
+        <td class="td-row-label">후기 C</td>
+        <td>1×1=1</td>
+        <td>1×1=1</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-zero">0</td>
+        <td class="tfidf-mid">1×3/2=3/2</td>
+        <td class="tfidf-mid">1×3/2=3/2</td>
+        <td class="tfidf-high">2×3/2=3</td>
+        <td class="tfidf-high">1×3=3</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box amber" style="margin-top:12px;">
+    <span class="text-amber fw700">최고값(★):</span> TF·IDF = <span class="tfidf-high" style="font-size:1.1em;">3</span>인 단어들이 각 후기의 핵심 정보!<br>
+    <span style="font-size:0.85em; color:rgba(232,244,253,0.7);">후기 A: 예쁘다, 저렴하다 &nbsp;|&nbsp; 후기 B: 디자인 &nbsp;|&nbsp; 후기 C: 좋다, 신축성</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 15: TF·IDF 결과표 & 해석 ===== -->
+<section id="tfidf-result">
+  <h2>TF·IDF 결과표 & 해석</h2>
+
+  <table class="table-compact" style="margin-bottom:14px;">
+    <thead>
+      <tr>
+        <th style="text-align:left;">후기</th>
+        <th>청바지</th>
+        <th>추천</th>
+        <th>예쁘다</th>
+        <th>저렴하다</th>
+        <th>가격</th>
+        <th>디자인</th>
+        <th>좋다</th>
+        <th>신축성</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-row-label">A</td>
+        <td>2</td><td>2</td>
+        <td class="tfidf-high">3★</td>
+        <td class="tfidf-high">3★</td>
+        <td class="tfidf-zero">0</td><td class="tfidf-zero">0</td><td class="tfidf-zero">0</td><td class="tfidf-zero">0</td>
+      </tr>
+      <tr>
+        <td class="td-row-label">B</td>
+        <td>1</td><td>1</td>
+        <td class="tfidf-zero">0</td><td class="tfidf-zero">0</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="tfidf-high">3★</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="tfidf-zero">0</td>
+      </tr>
+      <tr>
+        <td class="td-row-label">C</td>
+        <td>1</td><td>1</td>
+        <td class="tfidf-zero">0</td><td class="tfidf-zero">0</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="tfidf-high">3★</td>
+        <td class="tfidf-high">3★</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card-grid">
+    <div class="result-card">
+      <div class="rc-label">후기 A — TF·IDF 최고값</div>
+      <div class="rc-keyword">예쁘다 (3), 저렴하다 (3)</div>
+      <div class="rc-reason">→ 이 청바지는 <strong>예쁘고 저렴해서</strong> 추천!</div>
+    </div>
+    <div class="result-card">
+      <div class="rc-label">후기 B — TF·IDF 최고값</div>
+      <div class="rc-keyword">디자인 (3)</div>
+      <div class="rc-reason">→ 이 청바지는 <strong>디자인</strong> 때문에 추천!</div>
+    </div>
+    <div class="result-card">
+      <div class="rc-label">후기 C — TF·IDF 최고값</div>
+      <div class="rc-keyword">좋다 (3), 신축성 (3)</div>
+      <div class="rc-reason">→ 이 청바지는 <strong>신축성이 좋아서</strong> 추천!</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 16: 유용한 정보 도출 ===== -->
+<section id="useful-info">
+  <h2>각 후기의 유용한 정보 도출</h2>
+
+  <div class="card-grid" style="margin-top:16px;">
+    <div class="card" style="border-color:rgba(0,212,255,0.4);">
+      <div style="font-size:1.4em; margin-bottom:8px;">📝 <span class="text-cyan fw900">후기 A</span></div>
+      <p style="font-size:0.85em; margin-bottom:8px; color:rgba(232,244,253,0.7);">"청바지 추천! 예쁘고 저렴해서 청바지를 추천해요."</p>
+      <div style="background:rgba(255,179,71,0.12); border:1px solid rgba(255,179,71,0.3); border-radius:8px; padding:10px 12px; margin-top:8px;">
+        <div style="font-size:0.82em; color:var(--amber); font-weight:700;">유용한 정보 (TF·IDF 최고)</div>
+        <div style="font-size:1.1em; font-weight:900; color:var(--green); margin-top:4px;">예쁘다, 저렴하다</div>
+        <div style="font-size:0.8em; color:rgba(232,244,253,0.6); margin-top:4px;">추천 이유: 예쁘고 저렴해서</div>
+      </div>
+    </div>
+
+    <div class="card" style="border-color:rgba(57,217,138,0.4);">
+      <div style="font-size:1.4em; margin-bottom:8px;">📝 <span class="text-green fw900">후기 B</span></div>
+      <p style="font-size:0.85em; margin-bottom:8px; color:rgba(232,244,253,0.7);">"청바지의 가격, 디자인 다 좋아요. 특히 디자인 추천!^^"</p>
+      <div style="background:rgba(255,179,71,0.12); border:1px solid rgba(255,179,71,0.3); border-radius:8px; padding:10px 12px; margin-top:8px;">
+        <div style="font-size:0.82em; color:var(--amber); font-weight:700;">유용한 정보 (TF·IDF 최고)</div>
+        <div style="font-size:1.1em; font-weight:900; color:var(--green); margin-top:4px;">디자인</div>
+        <div style="font-size:0.8em; color:rgba(232,244,253,0.6); margin-top:4px;">추천 이유: 디자인이 특히 좋아서</div>
+      </div>
+    </div>
+
+    <div class="card" style="border-color:rgba(167,139,250,0.4);">
+      <div style="font-size:1.4em; margin-bottom:8px;">📝 <span class="text-purple fw900">후기 C</span></div>
+      <p style="font-size:0.85em; margin-bottom:8px; color:rgba(232,244,253,0.7);">"신축성과 디자인이 좋고, 가격도 좋아서 이 청바지를 추천해요."</p>
+      <div style="background:rgba(255,179,71,0.12); border:1px solid rgba(255,179,71,0.3); border-radius:8px; padding:10px 12px; margin-top:8px;">
+        <div style="font-size:0.82em; color:var(--amber); font-weight:700;">유용한 정보 (TF·IDF 최고)</div>
+        <div style="font-size:1.1em; font-weight:900; color:var(--green); margin-top:4px;">좋다, 신축성</div>
+        <div style="font-size:0.8em; color:rgba(232,244,253,0.6); margin-top:4px;">추천 이유: 신축성이 좋아서</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-box" style="margin-top:14px;">
+    <span class="text-cyan fw700">결론:</span>
+    TF만으로는 모두 "청바지, 추천"이었지만, TF·IDF를 적용하면
+    <span class="text-amber fw700">각 후기가 강조하는 진짜 이유</span>가 드러납니다.
+  </div>
+</section>
+
+<!-- ===== SLIDE 17: TF·IDF 의미 정리 ===== -->
+<section id="meaning">
+  <h2>TF·IDF의 의미</h2>
+
+  <div class="compare-row" style="margin-top:8px;">
+    <div style="background:rgba(255,71,87,0.08); border:1px solid rgba(255,71,87,0.35); border-radius:12px; padding:14px;">
+      <div style="font-size:1em; font-weight:900; color:var(--red); margin-bottom:6px;">TF·IDF 작으면 (→ 0에 가까울수록)</div>
+      <div style="font-size:1.2em; font-weight:700; color:rgba(232,244,253,0.5); margin-bottom:6px;">중요도 낮음</div>
+      <ul style="font-size:0.85em; line-height:1.6; margin-left:1.2em;">
+        <li>여러 문서에 공통으로 자주 등장</li>
+        <li>특정 문서에 특별한 정보를 제공하지 않음</li>
+        <li>예: <span class="text-red">청바지(1), 추천(1)</span></li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(57,217,138,0.08); border:1px solid rgba(57,217,138,0.35); border-radius:12px; padding:14px;">
+      <div style="font-size:1em; font-weight:900; color:var(--green); margin-bottom:6px;">TF·IDF 크면 (→ 값이 클수록)</div>
+      <div style="font-size:1.2em; font-weight:700; color:var(--amber); margin-bottom:6px;">중요도 높음</div>
+      <ul style="font-size:0.85em; line-height:1.6; margin-left:1.2em;">
+        <li>특정 문서에서만 자주 등장</li>
+        <li>해당 문서만의 고유한 핵심 정보</li>
+        <li>예: <span class="text-green">예쁘다(3), 신축성(3)</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="formula-box" style="margin-top:8px; font-size:0.9em;">
+    \[
+      \text{TF·IDF}(t, d) = \underbrace{\text{TF}(t, d)}_{\text{문서 } d \text{에서 단어 } t \text{의 빈도}}
+      \times
+      \underbrace{\frac{n}{\text{DF}(t)}}_{\text{단어 } t \text{가 특정 문서에만 있을수록 } \uparrow}
+    \]
+  </div>
+
+  <div class="card-grid-2" style="margin-top:6px;">
+    <div class="card">
+      <div class="text-amber fw700 mb8">실생활 활용</div>
+      <ul style="font-size:0.82em; line-height:1.5; margin-left:1em;">
+        <li>인터넷 검색 엔진의 문서 순위 결정</li>
+        <li>추천 시스템 (Netflix, 쇼핑몰 등)</li>
+        <li>뉴스 기사 자동 분류</li>
+        <li>챗봇 대화 의도 파악</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="text-purple fw700 mb8">발전 방향</div>
+      <ul style="font-size:0.82em; line-height:1.5; margin-left:1em;">
+        <li>IDF에 로그(log) 적용 → 값 안정화</li>
+        <li>Word2Vec: 의미 기반 벡터</li>
+        <li>BERT, GPT: 문맥 이해까지 확장</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 18: 예제2 날씨 기사 ===== -->
+<section id="example2">
+  <h2>예제 2 — 날씨 기사 TF·IDF</h2>
+
+  <div class="card" style="margin-bottom:12px;">
+    <div style="font-weight:700; color:var(--amber); margin-bottom:8px;">기사 제목 3개</div>
+    <div style="font-size:0.85em; line-height:2;">
+      <span class="text-cyan fw700">기사 A:</span> "한파에 눈 예보, 일부는 비 예보"<br>
+      <span class="text-green fw700">기사 B:</span> "눈 예보, 퇴근길에 눈 조심!"<br>
+      <span class="text-purple fw700">기사 C:</span> "비 예보에 일부는 눈 또는 비, 비 그치면 한파"
+    </div>
+  </div>
+
+  <div style="font-size:0.78em; color:rgba(232,244,253,0.6); margin:4px 0 6px;">단어사전 U = {한파, 눈, 예보, 일부, 비, 퇴근길, 조심, 그치다}</div>
+
+  <table class="table-compact">
+    <thead>
+      <tr>
+        <th style="text-align:left;">구분</th>
+        <th>한파</th><th>눈</th><th>예보</th><th>일부</th><th>비</th><th>퇴근길</th><th>조심</th><th>그치다</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="fragment" data-fragment-index="1">
+        <td class="td-row-label" style="color:var(--cyan) !important;">TF(A)</td>
+        <td>1</td><td>1</td><td class="text-amber fw700">2</td><td>1</td><td>1</td><td class="tfidf-zero">0</td><td class="tfidf-zero">0</td><td class="tfidf-zero">0</td>
+      </tr>
+      <tr class="fragment" data-fragment-index="2">
+        <td class="td-row-label" style="color:var(--green) !important;">TF(B)</td>
+        <td class="tfidf-zero">0</td><td class="text-amber fw700">2</td><td>1</td><td class="tfidf-zero">0</td><td class="tfidf-zero">0</td><td>1</td><td>1</td><td class="tfidf-zero">0</td>
+      </tr>
+      <tr class="fragment" data-fragment-index="3">
+        <td class="td-row-label" style="color:var(--purple) !important;">TF(C)</td>
+        <td>1</td><td>1</td><td>1</td><td>1</td><td class="text-amber fw700">3</td><td class="tfidf-zero">0</td><td class="tfidf-zero">0</td><td>1</td>
+      </tr>
+      <tr class="fragment" data-fragment-index="4">
+        <td class="td-row-label" style="color:var(--amber) !important;">DF</td>
+        <td>2</td><td>3</td><td>3</td><td>2</td><td>2</td><td>1</td><td>1</td><td>1</td>
+      </tr>
+      <tr class="fragment" data-fragment-index="5">
+        <td class="td-row-label" style="color:var(--amber) !important;">IDF=n/DF</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="tfidf-zero">1</td>
+        <td class="tfidf-zero">1</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="idf-high">3</td>
+        <td class="idf-high">3</td>
+        <td class="idf-high">3</td>
+      </tr>
+      <tr class="fragment" data-fragment-index="6">
+        <td class="td-row-label" style="color:var(--amber) !important; background:rgba(255,179,71,0.07) !important;">TF·IDF(A)</td>
+        <td class="tfidf-mid">3/2</td>
+        <td>1</td>
+        <td class="tfidf-high">2★</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="tfidf-zero">0</td><td class="tfidf-zero">0</td><td class="tfidf-zero">0</td>
+      </tr>
+      <tr class="fragment" data-fragment-index="7">
+        <td class="td-row-label" style="color:var(--amber) !important; background:rgba(255,179,71,0.07) !important;">TF·IDF(B)</td>
+        <td class="tfidf-zero">0</td>
+        <td>2</td>
+        <td>1</td>
+        <td class="tfidf-zero">0</td><td class="tfidf-zero">0</td>
+        <td class="tfidf-high">3★</td>
+        <td class="tfidf-high">3★</td>
+        <td class="tfidf-zero">0</td>
+      </tr>
+      <tr class="fragment" data-fragment-index="8">
+        <td class="td-row-label" style="color:var(--amber) !important; background:rgba(255,179,71,0.07) !important;">TF·IDF(C)</td>
+        <td class="tfidf-mid">3/2</td>
+        <td>1</td>
+        <td>1</td>
+        <td class="tfidf-mid">3/2</td>
+        <td class="tfidf-high">9/2★</td>
+        <td class="tfidf-zero">0</td><td class="tfidf-zero">0</td>
+        <td class="tfidf-high">3★</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="fragment highlight-box amber" data-fragment-index="9" style="margin-top:10px; font-size:0.85em;">
+    기사 A의 핵심: <span class="tfidf-high">예보</span> &nbsp;|&nbsp;
+    기사 B의 핵심: <span class="tfidf-high">퇴근길, 조심</span> &nbsp;|&nbsp;
+    기사 C의 핵심: <span class="tfidf-high">비 (9/2), 그치다</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 19: 확인 문제 ===== -->
+<section id="quiz">
+  <h2>확인 문제</h2>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div style="font-weight:700; color:var(--amber); margin-bottom:10px;">스포츠 기사 3개의 TF·IDF를 계산하시오.</div>
+    <div style="font-size:0.85em; line-height:2;">
+      <span class="text-cyan fw700">기사 P:</span> "손흥민 득점! 경기에서 손흥민 활약"<br>
+      <span class="text-green fw700">기사 Q:</span> "경기 결과, 팀의 승리"<br>
+      <span class="text-purple fw700">기사 R:</span> "손흥민 어시스트, 팀 경기 승리"
+    </div>
+    <div style="font-size:0.78em; color:rgba(232,244,253,0.5); margin-top:6px;">불용어 제거 후: U = {손흥민, 득점, 경기, 활약, 결과, 팀, 승리, 어시스트}</div>
+  </div>
+
+  <div class="card-grid-2" style="margin-bottom:12px;">
+    <div class="card">
+      <div style="font-weight:700; color:var(--cyan); margin-bottom:8px;">TF 표</div>
+      <table class="table-compact" style="font-size:0.7em;">
+        <thead>
+          <tr><th>기사</th><th>손흥민</th><th>득점</th><th>경기</th><th>활약</th><th>결과</th><th>팀</th><th>승리</th><th>어시스트</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="td-row-label">P</td><td>2</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td class="td-row-label">Q</td><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+          <tr><td class="td-row-label">R</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div style="font-weight:700; color:var(--green); margin-bottom:8px;">DF 표</div>
+      <table class="table-compact" style="font-size:0.7em;">
+        <thead>
+          <tr><th>구분</th><th>손흥민</th><th>득점</th><th>경기</th><th>활약</th><th>결과</th><th>팀</th><th>승리</th><th>어시스트</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-row-label" style="color:var(--green) !important;">DF</td>
+            <td>2</td><td>1</td><td>3</td><td>1</td><td>1</td><td>2</td><td>2</td><td>1</td>
+          </tr>
+          <tr>
+            <td class="td-row-label" style="color:var(--green) !important;">IDF</td>
+            <td>3/2</td><td>3</td><td class="tfidf-zero">1</td><td>3</td><td>3</td><td>3/2</td><td>3/2</td><td>3</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="highlight-box amber">
+    <div style="font-weight:700; color:var(--amber); margin-bottom:8px;">정답 (클릭하여 확인)</div>
+    <div class="fragment" data-fragment-index="1" style="font-size:0.88em; line-height:1.9;">
+      <span class="text-cyan fw700">기사 P의 유용한 정보:</span>
+      <span class="tfidf-high">손흥민 (TF·IDF = 2×3/2 = 3), 득점, 활약 (1×3 = 3)</span><br>
+      <span class="text-green fw700">기사 Q의 유용한 정보:</span>
+      <span class="tfidf-high">결과 (1×3 = 3)</span> — 팀, 승리는 R과 공유하므로 중요도 낮음<br>
+      <span class="text-purple fw700">기사 R의 유용한 정보:</span>
+      <span class="tfidf-high">어시스트 (1×3 = 3)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 20: 개념 정리하기 ===== -->
+<section id="summary">
+  <h2>개념 정리하기</h2>
+
+  <div class="summary-grid" style="margin-top:16px;">
+    <div class="summary-item">
+      <div class="si-term">단어 빈도수 (TF, Term Frequency)</div>
+      <div class="si-desc">
+        단어가 해당 문서에서 등장한 <span class="text-amber fw700">횟수</span>.<br>
+        TF가 가장 큰 단어 = <span class="text-cyan fw700">주제어</span>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="si-term">문서 빈도수 (DF, Document Frequency)</div>
+      <div class="si-desc">
+        단어가 등장하는 <span class="text-amber fw700">문서의 개수</span>.<br>
+        상대도수 = DF ÷ 전체 문서 수 (n)
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="si-term">역문서 빈도수 (IDF, Inverse Document Frequency)</div>
+      <div class="si-desc">
+        상대도수(DF/n)의 <span class="text-amber fw700">역수</span> = n/DF<br>
+        희귀 단어일수록 <span class="text-green fw700">IDF 큼</span>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="si-term">TF·IDF</div>
+      <div class="si-desc">
+        TF × IDF<br>
+        <span class="text-red">작으면</span> 중요도 낮음 &nbsp;|&nbsp; <span class="text-green">크면</span> 중요도 높음
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px; background:rgba(0,212,255,0.06); border-color:rgba(0,212,255,0.3);">
+    <div style="font-weight:700; color:var(--cyan); margin-bottom:10px;">빈칸 채우기 — 핵심 정리</div>
+    <div style="font-size:0.9em; line-height:2.2;">
+      ① 단어가 해당 문서에서 출현한 횟수를 구하면 <span class="quiz-answer">TF (단어 빈도수)</span>를 알 수 있다.<br>
+      ② DF를 전체 문서 수로 나눈 값을 <span class="quiz-answer">상대도수</span>라 한다.<br>
+      ③ IDF는 상대도수 DF/n의 <span class="quiz-answer">역수</span>이다.<br>
+      ④ TF·IDF가 <span class="quiz-answer">작을수록</span> 중요도가 낮은 단어, <span class="quiz-answer">클수록</span> 중요도가 높은 단어이다.
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:14px;">
+    <div style="display:inline-flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+      <span class="step-header step1">1. TF — 문서 내 빈도</span>
+      <span style="font-size:1.4em; color:var(--amber); line-height:1.8;">→</span>
+      <span class="step-header step2">2. DF — 문서 빈도</span>
+      <span style="font-size:1.4em; color:var(--amber); line-height:1.8;">→</span>
+      <span class="step-header step3">3. IDF — 역수</span>
+      <span style="font-size:1.4em; color:var(--amber); line-height:1.8;">→</span>
+      <span class="step-header step4">4. TF·IDF</span>
+    </div>
+  </div>
+</section>
+
+</div><!-- .slides -->
+</div><!-- .reveal -->
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<!-- Reveal.js -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+
+<script>
+  // ===== REVEAL INIT =====
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    hash: true,
+    slideNumber: 'c/t',
+    progress: true,
+    controls: true,
+    transition: 'slide',
+    backgroundTransition: 'fade',
+    center: true,
+    touch: true,
+    autoAnimateDuration: 0.6,
+    plugins: [RevealNotes]
+  });
+
+  // ===== MATHJAX RE-TYPESET ON SLIDE CHANGE =====
+  Reveal.on('slidechanged', (event) => {
+    if (typeof MathJax !== 'undefined') {
+      MathJax.typesetPromise([event.currentSlide]).catch(err => console.warn('MathJax:', err));
+    }
+    runSlideAnimations(event.currentSlide);
+  });
+
+  // Also run on ready (first slide)
+  Reveal.on('ready', (event) => {
+    if (typeof MathJax !== 'undefined') {
+      MathJax.typesetPromise().catch(err => console.warn('MathJax ready:', err));
+    }
+    runSlideAnimations(event.currentSlide);
+  });
+
+  // ===== GSAP ANIMATIONS PER SLIDE =====
+  const animatedSlides = new Set();
+
+  function runSlideAnimations(slide) {
+    if (!slide) return;
+    const id = slide.id;
+    if (!id || animatedSlides.has(id)) return;
+    animatedSlides.add(id);
+
+    // ---- TF Table (Slide 6) ----
+    if (id === 'tf-table') {
+      const rows = slide.querySelectorAll('#tf-main-table tbody tr');
+      gsap.fromTo(rows,
+        { opacity: 0, x: -30 },
+        { opacity: 1, x: 0, stagger: 0.35, duration: 0.5, ease: 'power2.out', delay: 0.3 }
+      );
+    }
+
+    // ---- Vector rows (Slide 7) ----
+    if (id === 'tf-vector') {
+      const vecs = slide.querySelectorAll('#vec-a, #vec-b, #vec-c');
+      gsap.fromTo(vecs,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, stagger: 0.4, duration: 0.5, ease: 'back.out(1.2)', delay: 0.3 }
+      );
+      const vals = slide.querySelectorAll('.v-high');
+      gsap.fromTo(vals,
+        { scale: 0.6 },
+        { scale: 1, stagger: 0.15, duration: 0.4, ease: 'elastic.out(1, 0.5)', delay: 1.6 }
+      );
+    }
+
+    // ---- Step flow (Slide 10) ----
+    if (id === 'tfidf-intro') {
+      const blocks = slide.querySelectorAll('.step-block');
+      gsap.fromTo(blocks,
+        { opacity: 0, y: 30, scale: 0.85 },
+        { opacity: 1, y: 0, scale: 1, stagger: 0.25, duration: 0.55, ease: 'back.out(1.5)', delay: 0.4 }
+      );
+    }
+
+    // ---- DF Table (Slide 12) ----
+    if (id === 'step2') {
+      const rows = slide.querySelectorAll('#df-table tbody tr');
+      gsap.fromTo(rows,
+        { opacity: 0, x: -25 },
+        { opacity: 1, x: 0, stagger: 0.45, duration: 0.5, ease: 'power2.out', delay: 0.4 }
+      );
+    }
+
+    // ---- IDF Table (Slide 13) ----
+    if (id === 'step3') {
+      const rows = slide.querySelectorAll('#idf-table tbody tr');
+      gsap.fromTo(rows,
+        { opacity: 0, x: -25 },
+        { opacity: 1, x: 0, stagger: 0.5, duration: 0.5, ease: 'power2.out', delay: 0.3 }
+      );
+      // Animate IDF high values
+      const idfHighs = slide.querySelectorAll('.idf-high');
+      gsap.fromTo(idfHighs,
+        { scale: 0.5, opacity: 0 },
+        { scale: 1, opacity: 1, stagger: 0.12, duration: 0.45, ease: 'elastic.out(1, 0.5)', delay: 1.4 }
+      );
+    }
+
+    // ---- TF·IDF Table (Slide 14) ----
+    if (id === 'step4') {
+      const rows = slide.querySelectorAll('#tfidf-table tbody tr');
+      gsap.fromTo(rows,
+        { opacity: 0, x: -30 },
+        { opacity: 1, x: 0, stagger: 0.4, duration: 0.5, ease: 'power2.out', delay: 0.3 }
+      );
+      const highs = slide.querySelectorAll('.tfidf-high');
+      gsap.fromTo(highs,
+        { scale: 0.4, opacity: 0 },
+        { scale: 1, opacity: 1, stagger: 0.1, duration: 0.5, ease: 'elastic.out(1.2, 0.5)', delay: 1.5 }
+      );
+    }
+
+    // ---- Result cards (Slide 15) ----
+    if (id === 'tfidf-result') {
+      const cards = slide.querySelectorAll('.result-card');
+      gsap.fromTo(cards,
+        { opacity: 0, y: 24, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, stagger: 0.3, duration: 0.5, ease: 'back.out(1.3)', delay: 0.3 }
+      );
+    }
+
+    // ---- Summary items (Slide 20) ----
+    if (id === 'summary') {
+      const items = slide.querySelectorAll('.summary-item');
+      gsap.fromTo(items,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, stagger: 0.25, duration: 0.45, ease: 'power2.out', delay: 0.3 }
+      );
+    }
+  }
+</script>
+</body>
+</html>

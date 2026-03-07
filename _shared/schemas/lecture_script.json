@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LectureScript",
+  "description": "강의 원고/발표안 생성 에이전트의 출력 스키마",
+  "type": "object",
+  "required": ["topic", "slides_script"],
+  "properties": {
+    "topic": { "type": "string" },
+    "total_duration_minutes": { "type": "number" },
+    "lesson_flow_summary": {
+      "type": "string",
+      "description": "수업 전체 흐름 한 단락 요약 (교사 사전 파악용)"
+    },
+    "slides_script": {
+      "type": "array",
+      "description": "슬라이드별 강의 원고",
+      "items": {
+        "type": "object",
+        "required": ["slide_id", "slide_title", "script"],
+        "properties": {
+          "slide_id": { "type": "string" },
+          "slide_title": { "type": "string" },
+          "estimated_time_minutes": { "type": "number" },
+          "script": {
+            "type": "object",
+            "properties": {
+              "opening": {
+                "type": "string",
+                "description": "이 슬라이드 시작 시 교사가 할 말 (도입)"
+              },
+              "main_explanation": {
+                "type": "string",
+                "description": "핵심 내용 설명 스크립트 (수식/숫자 읽는 법 포함)"
+              },
+              "animation_narration": {
+                "type": "array",
+                "description": "애니메이션 각 단계에서 교사가 할 말",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "step_id": { "type": "integer" },
+                    "narration": {
+                      "type": "string",
+                      "description": "이 단계 클릭 후 교사가 설명할 내용",
+                      "example": "자, 이제 입력값 x₁=1, x₂=1을 넣었을 때 가중합을 계산해 봅시다. 칠판에 같이 써볼까요? 0.5 곱하기 1 더하기 0.5 곱하기 1, 그리고 편향 -0.7을 더하면..."
+                    }
+                  }
+                }
+              },
+              "student_activity": {
+                "type": "string",
+                "description": "학생이 직접 해볼 활동 (없으면 null)"
+              },
+              "questioning_prompts": {
+                "type": "array",
+                "description": "학생에게 던질 질문들 (수업 참여 유도)",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "question": {
+                      "type": "string",
+                      "example": "만약 편향 b를 -0.7 대신 0으로 바꾸면 어떻게 될까요?"
+                    },
+                    "expected_answer": { "type": "string" },
+                    "follow_up": { "type": "string" }
+                  }
+                }
+              },
+              "closing": {
+                "type": "string",
+                "description": "이 슬라이드 마무리 멘트 (다음 슬라이드 연결)"
+              }
+            }
+          },
+          "pacing_notes": {
+            "type": "string",
+            "description": "진도 조절 팁 (예: '이해도 확인 후 진행', '빠른 반응이면 심화 문제 추가')"
+          },
+          "whiteboard_notes": {
+            "type": "string",
+            "description": "칠판/보드에 판서할 내용 (선택)"
+          }
+        }
+      }
+    },
+    "lesson_plan_summary": {
+      "type": "object",
+      "description": "수업 전 준비용 요약 (인쇄해서 쓰는 버전)",
+      "properties": {
+        "objectives": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "materials": {
+          "type": "array",
+          "items": { "type": "string" },
+          "example": ["노트북/프로젝터", "학생 활동지", "계산기"]
+        },
+        "timing_table": {
+          "type": "array",
+          "description": "수업 시간표 (분 단위)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "phase": {
+                "type": "string",
+                "enum": ["도입", "전개1", "전개2", "정리", "형성평가"]
+              },
+              "duration_minutes": { "type": "number" },
+              "activity": { "type": "string" },
+              "slide_range": { "type": "string" }
+            }
+          }
+        },
+        "differentiation": {
+          "type": "object",
+          "description": "수준별 대응",
+          "properties": {
+            "for_struggling": { "type": "string" },
+            "for_advanced": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

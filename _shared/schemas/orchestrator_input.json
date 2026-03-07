@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OrchestratorInput",
+  "description": "오케스트레이터에 전달되는 수업 교안 생성 요청",
+  "type": "object",
+  "required": ["topic", "grade", "subject"],
+  "properties": {
+    "topic": {
+      "type": "string",
+      "description": "수업 주제 (예: '삼각함수 덧셈정리', '퍼셉트론과 XOR', '이항분포의 평균')"
+    },
+    "grade": {
+      "type": "string",
+      "enum": ["고1", "고2", "고3"],
+      "description": "대상 학년"
+    },
+    "subject": {
+      "type": "string",
+      "enum": ["인공지능수학", "수학I", "수학II", "확률과통계", "미적분", "기하"],
+      "description": "교과목"
+    },
+    "textbook_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "input/ 폴더 내 교과서 파일 경로 목록 (PDF, 이미지, 텍스트)"
+    },
+    "slide_count": {
+      "type": "integer",
+      "default": 15,
+      "minimum": 5,
+      "maximum": 40,
+      "description": "목표 슬라이드 수"
+    },
+    "lesson_duration_minutes": {
+      "type": "integer",
+      "default": 45,
+      "description": "수업 시간 (분)"
+    },
+    "style": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "enum": ["dark", "light", "league", "sky"],
+          "default": "dark"
+        },
+        "emphasis_color": {
+          "type": "string",
+          "default": "#f39c12",
+          "description": "강조 색상 (수식 하이라이트 등)"
+        },
+        "show_calculation_tables": {
+          "type": "boolean",
+          "default": true,
+          "description": "계산 과정 표 표시 여부"
+        },
+        "animation_speed": {
+          "type": "string",
+          "enum": ["slow", "normal", "fast"],
+          "default": "normal"
+        }
+      }
+    },
+    "ai_math_options": {
+      "type": "object",
+      "description": "인공지능 수학 특화 옵션",
+      "properties": {
+        "show_numeric_examples": {
+          "type": "boolean",
+          "default": true,
+          "description": "실제 숫자 예시 포함 여부 (변수 대신 구체적 수치)"
+        },
+        "include_truth_tables": {
+          "type": "boolean",
+          "default": true,
+          "description": "논리 연산 진리표 포함"
+        },
+        "include_weight_tables": {
+          "type": "boolean",
+          "default": true,
+          "description": "가중치/편향 계산 표 포함"
+        },
+        "include_loss_visualization": {
+          "type": "boolean",
+          "default": true,
+          "description": "손실함수 그래프 포함"
+        },
+        "neural_network_layers": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "default": [2, 3, 1],
+          "description": "신경망 레이어 구조 [입력, 은닉, 출력] 노드 수"
+        }
+      }
+    },
+    "session_id": {
+      "type": "string",
+      "description": "작업 세션 ID (workspace/{session_id}/ 폴더 생성에 사용)"
+    }
+  }
+}

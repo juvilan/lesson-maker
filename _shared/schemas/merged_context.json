@@ -1,0 +1,209 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MergedContext",
+  "description": "Wave 1 결과를 병합한 Wave 2 에이전트 공통 입력 계약. 오케스트레이터가 생성하며, 모든 ID를 사전 부여한다.",
+  "type": "object",
+  "required": ["topic", "grade", "subject", "subject_plugin_path", "learning_objectives", "key_concepts"],
+  "properties": {
+    "topic": {
+      "type": "string",
+      "description": "수업 주제",
+      "example": "퍼셉트론과 논리 게이트"
+    },
+    "grade": {
+      "type": "string",
+      "description": "학년",
+      "example": "고2"
+    },
+    "subject": {
+      "type": "string",
+      "description": "과목 key",
+      "enum": ["ai_math", "math1", "math2", "calculus", "statistics", "geometry"]
+    },
+    "subject_plugin_path": {
+      "type": "string",
+      "description": "과목 플러그인 경로 (없으면 빈 문자열)",
+      "example": "subjects/ai_math/"
+    },
+    "learning_objectives": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "key_concepts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "formula_latex": { "type": "string" },
+          "numeric_example": {
+            "type": "object",
+            "properties": {
+              "inputs": { "type": "array", "items": { "type": "number" } },
+              "weights": { "type": "array", "items": { "type": "number" } },
+              "bias": { "type": "number" },
+              "calculation_steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "step_label": { "type": "string" },
+                    "expression": { "type": "string" },
+                    "result": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "example_problems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "problem": { "type": "string" },
+          "difficulty": { "type": "string", "enum": ["기본", "중간", "심화"] },
+          "solution_steps": { "type": "array" }
+        }
+      }
+    },
+    "visual_requirements": {
+      "type": "array",
+      "description": "오케스트레이터가 asset_id와 target_slide_id를 사전 부여. visual_creator는 이 ID를 그대로 사용한다.",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "type", "target_slide_id"],
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "description": "오케스트레이터가 부여한 시각화 고유 ID",
+            "pattern": "^[a-z0-9_-]+-[a-z0-9_-]+-\\d{2}$",
+            "example": "ai-perceptron-01"
+          },
+          "type": {
+            "type": "string",
+            "description": "시각화 타입. 플러그인 타입명 또는 범용 타입명 사용.",
+            "example": "perceptron_diagram"
+          },
+          "target_slide_id": {
+            "type": "string",
+            "description": "이 시각화가 삽입될 슬라이드 ID",
+            "pattern": "^slide-\\d{2}-[a-z_]+$",
+            "example": "slide-06-concept"
+          },
+          "config": {
+            "type": "object",
+            "description": "시각화 설정 파라미터 (타입별 상이)"
+          },
+          "plugin_source": {
+            "type": "string",
+            "description": "플러그인 패턴 파일 경로 (있을 경우)",
+            "example": "subjects/ai_math/visuals.md"
+          }
+        }
+      }
+    },
+    "animation_requirements": {
+      "type": "array",
+      "description": "오케스트레이터가 animation_id와 target_slide_id를 사전 부여. math_animator는 이 ID를 그대로 사용한다.",
+      "items": {
+        "type": "object",
+        "required": ["animation_id", "topic_key", "target_slide_id"],
+        "properties": {
+          "animation_id": {
+            "type": "string",
+            "description": "오케스트레이터가 부여한 애니메이션 고유 ID",
+            "pattern": "^anim-[a-z0-9_-]+-\\d{2}$",
+            "example": "anim-forward-01"
+          },
+          "topic_key": {
+            "type": "string",
+            "description": "애니메이션 주제 키 (플러그인 카탈로그 참조)",
+            "example": "perceptron_forward"
+          },
+          "target_slide_id": {
+            "type": "string",
+            "description": "이 애니메이션이 삽입될 슬라이드 ID",
+            "example": "slide-07-numeric"
+          },
+          "numeric_values": {
+            "type": "object",
+            "description": "애니메이션에 사용될 구체적 숫자 값",
+            "example": { "w1": 0.5, "w2": 0.5, "bias": -0.7 }
+          },
+          "step_count": {
+            "type": "integer",
+            "description": "예상 단계 수"
+          }
+        }
+      }
+    },
+    "real_world_hook": {
+      "type": "string",
+      "description": "수업 도입에 사용할 실생활 연결 사례"
+    },
+    "teaching_strategies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "strategy_name": { "type": "string" },
+          "description": { "type": "string" },
+          "example_activity": { "type": "string" }
+        }
+      }
+    },
+    "misconceptions": {
+      "type": "array",
+      "description": "오개념 목록. 교과서 분석과 웹 리서치에서 수집한 것을 병합하고 중복 제거한 결과.",
+      "items": {
+        "type": "object",
+        "required": ["misconception", "correction", "source"],
+        "properties": {
+          "misconception": {
+            "type": "string",
+            "description": "학생이 자주 오해하는 내용"
+          },
+          "correction": {
+            "type": "string",
+            "description": "올바른 설명"
+          },
+          "source": {
+            "type": "string",
+            "enum": ["textbook", "web", "both"],
+            "description": "이 오개념 정보의 출처. 양쪽 모두에서 나온 경우 'both'."
+          }
+        }
+      }
+    },
+    "analogies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "concept": { "type": "string" },
+          "analogy": { "type": "string" }
+        }
+      }
+    },
+    "prerequisite_knowledge": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "additional_problems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "problem": { "type": "string" },
+          "type": { "type": "string" },
+          "hint": { "type": "string" }
+        }
+      }
+    }
+  }
+}

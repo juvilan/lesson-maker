@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SlideStructure",
+  "description": "슬라이드 제작 에이전트의 출력 스키마",
+  "type": "object",
+  "required": ["slides"],
+  "properties": {
+    "topic": { "type": "string" },
+    "total_slides": { "type": "integer" },
+    "slides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["slide_id", "type", "title", "reveal_section_html"],
+        "properties": {
+          "slide_id": {
+            "type": "string",
+            "description": "슬라이드 고유 ID (예: slide-01-intro)"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "title",
+              "objectives",
+              "concept_intro",
+              "numeric_example",
+              "truth_table",
+              "calculation_walkthrough",
+              "network_diagram",
+              "interactive_demo",
+              "comparison",
+              "quiz",
+              "summary"
+            ]
+          },
+          "title": { "type": "string" },
+          "estimated_time_minutes": {
+            "type": "number",
+            "description": "이 슬라이드에 예상 소요 시간"
+          },
+          "reveal_section_html": {
+            "type": "string",
+            "description": "Reveal.js <section> 태그 전체 HTML"
+          },
+          "has_animation": {
+            "type": "boolean",
+            "description": "math_animations.json의 애니메이션 컴포넌트 포함 여부"
+          },
+          "animation_id": {
+            "type": "string",
+            "description": "연결된 애니메이션 ID (math_animations.json 참조)"
+          },
+          "has_visual": {
+            "type": "boolean",
+            "description": "visual_assets.json의 시각화 포함 여부"
+          },
+          "visual_id": {
+            "type": "string",
+            "description": "연결된 시각화 asset ID"
+          },
+          "speaker_notes": {
+            "type": "string",
+            "description": "교사용 발표자 노트"
+          }
+        }
+      }
+    }
+  }
+}

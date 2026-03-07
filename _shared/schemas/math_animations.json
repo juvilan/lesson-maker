@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MathAnimations",
+  "description": "수학 애니메이션 에이전트의 출력 스키마 (인공지능 수학 특화)",
+  "type": "object",
+  "properties": {
+    "animations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["animation_id", "topic", "steps", "html_component"],
+        "properties": {
+          "animation_id": {
+            "type": "string",
+            "description": "애니메이션 고유 ID (슬라이드에서 참조)"
+          },
+          "topic": {
+            "type": "string",
+            "description": "이 애니메이션이 설명하는 개념",
+            "examples": [
+              "perceptron_and_gate",
+              "xor_linear_separation_fail",
+              "mlp_forward_pass",
+              "sigmoid_activation",
+              "mse_loss_calculation",
+              "gradient_descent_step"
+            ]
+          },
+          "trigger_mode": {
+            "type": "string",
+            "enum": ["click_button", "auto", "keyboard"],
+            "default": "click_button",
+            "description": "애니메이션 진행 방식 (수업 중 교사가 클릭으로 제어)"
+          },
+          "steps": {
+            "type": "array",
+            "description": "단계별 애니메이션 내용 (숫자 계산 과정 중심)",
+            "items": {
+              "type": "object",
+              "required": ["step_id", "title"],
+              "properties": {
+                "step_id": { "type": "integer" },
+                "title": {
+                  "type": "string",
+                  "example": "Step 2: 가중합 계산"
+                },
+                "formula_latex": {
+                  "type": "string",
+                  "example": "z = w_1 x_1 + w_2 x_2 + b"
+                },
+                "numeric_substitution": {
+                  "type": "string",
+                  "description": "변수에 숫자를 대입한 식",
+                  "example": "z = (0.5)(1) + (0.5)(1) + (-0.7) = 0.3"
+                },
+                "result": {
+                  "type": "string",
+                  "description": "이 단계의 결과값",
+                  "example": "z = 0.3 → 활성화 함수 입력"
+                },
+                "highlight_elements": {
+                  "type": "array",
+                  "description": "이 단계에서 강조할 HTML 요소 ID 목록",
+                  "items": { "type": "string" }
+                },
+                "table_update": {
+                  "type": "object",
+                  "description": "이 단계에서 업데이트될 계산표 정보",
+                  "properties": {
+                    "table_id": { "type": "string" },
+                    "row_to_fill": { "type": "integer" },
+                    "values": { "type": "array" }
+                  }
+                },
+                "gsap_effect": {
+                  "type": "string",
+                  "enum": [
+                    "formula_appear",
+                    "number_substitute",
+                    "highlight_term",
+                    "cancel_terms",
+                    "box_result",
+                    "arrow_flow",
+                    "node_activate",
+                    "table_row_fill",
+                    "graph_point_appear"
+                  ]
+                }
+              }
+            }
+          },
+          "calculation_table": {
+            "type": "object",
+            "description": "단계별 계산 과정을 한눈에 보여주는 표 (수업 중 학생이 함께 채워나감)",
+            "properties": {
+              "headers": {
+                "type": "array",
+                "items": { "type": "string" },
+                "example": ["입력 x₁", "입력 x₂", "가중치 w₁", "가중치 w₂", "편향 b", "가중합 z", "출력 y"]
+              },
+              "rows": {
+                "type": "array",
+                "items": { "type": "array" },
+                "description": "각 행은 하나의 예시 (처음엔 빈 칸, 단계별로 채워짐)"
+              },
+              "fill_order": {
+                "type": "array",
+                "description": "애니메이션 단계 순서에 따라 채워지는 셀 좌표",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "step": { "type": "integer" },
+                    "row": { "type": "integer" },
+                    "col": { "type": "integer" },
+                    "value": {}
+                  }
+                }
+              }
+            }
+          },
+          "html_component": {
+            "type": "string",
+            "description": "슬라이드에 삽입될 완전한 HTML (MathStepAnimator 사용, GSAP 포함)"
+          },
+          "gsap_timeline_script": {
+            "type": "string",
+            "description": "GSAP 타임라인 JavaScript 코드"
+          }
+        }
+      }
+    }
+  },
+  "examples_for_ai_math": {
+    "perceptron_and_gate": {
+      "animation_id": "perceptron-and-walkthrough",
+      "steps": [
+        { "step_id": 1, "title": "입력값 설정", "numeric_substitution": "x₁=1, x₂=1 (AND의 경우 1,1)", "gsap_effect": "node_activate" },
+        { "step_id": 2, "title": "가중합 계산", "formula_latex": "z = w_1 x_1 + w_2 x_2 + b", "numeric_substitution": "z = 0.5×1 + 0.5×1 + (−0.7) = 0.3", "gsap_effect": "number_substitute" },
+        { "step_id": 3, "title": "활성화 함수 적용", "formula_latex": "y = \\begin{cases} 1 & z \\geq 0 \\\\ 0 & z < 0 \\end{cases}", "numeric_substitution": "z=0.3 ≥ 0 이므로 y=1", "gsap_effect": "box_result" }
+      ]
+    }
+  }
+}

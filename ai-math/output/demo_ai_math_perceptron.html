@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>퍼셉트론과 다층 퍼셉트론 | 인공지능 수학</title>
+
+  <!-- Reveal.js CDN (온라인 필요 - 오프라인 배포 시 libs/ 로 교체) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/dracula.css">
+
+  <!-- MathJax -->
+  <script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},options:{skipHtmlTags:['script','noscript','style','textarea','pre']},startup:{typeset:false}};</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --accent: #f39c12;
+      --success: #2ecc71;
+      --danger:  #e74c3c;
+      --info:    #3498db;
+      --muted:   #95a5a6;
+    }
+
+    /* ── 강조 ── */
+    .reveal .hl   { color: var(--accent); font-weight: bold; }
+    .reveal .ok   { color: var(--success); font-weight: bold; }
+    .reveal .ng   { color: var(--danger); }
+    .reveal .note { color: var(--muted); font-size: 0.8em; }
+
+    /* ── 계산 단계 박스 ── */
+    .step-box {
+      background: rgba(255,255,255,0.07);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 0.55em 1em;
+      margin: 0.4em 0;
+    }
+    .step-label {
+      font-size: 0.68em;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.15em;
+    }
+
+    /* ── 계산 표 ── */
+    .calc-table { width: 100%; border-collapse: collapse; font-size: 0.82em; }
+    .calc-table th { background: var(--accent); color: #000; padding: 0.45em 0.7em; text-align: center; }
+    .calc-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em 0.65em; text-align: center; transition: background 0.3s; }
+    .calc-table .fillable { color: var(--muted); font-style: italic; }
+    .calc-table .filled   { color: #fff; font-style: normal; }
+    .calc-table tr.highlight-row td { background: rgba(243,156,18,0.15); }
+
+    /* ── 진리표 ── */
+    .truth-table { margin: 0 auto; border-collapse: collapse; }
+    .truth-table th { background: var(--accent); color: #000; padding: 0.5em 1em; }
+    .truth-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.45em 1em; text-align: center; }
+    .truth-table .v1 { color: var(--success); font-weight: bold; }
+    .truth-table .v0 { color: var(--danger); }
+    .truth-table .impossible { color: var(--danger); font-weight: bold; }
+
+    /* ── 2열 레이아웃 ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4em; align-items: start; }
+    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1em; }
+
+    /* ── 카드 ── */
+    .card { background: rgba(255,255,255,0.07); border-radius: 10px; padding: 1em; }
+    .card-accent { border: 1px solid var(--accent); }
+
+    /* ── 학습목표 ── */
+    .obj-list { list-style: none; padding: 0; text-align: left; }
+    .obj-list li { padding: 0.4em 0 0.4em 2em; position: relative; font-size: 0.9em; }
+    .obj-list li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+
+    /* ── 경고 박스 ── */
+    .warn-box { background: rgba(231,76,60,0.12); border: 1px solid var(--danger); border-radius: 8px; padding: 0.6em 1em; font-size: 0.82em; }
+
+    /* ── 컨트롤 버튼 ── */
+    .anim-ctrl { display: flex; align-items: center; justify-content: center; gap: 0.7em; margin-top: 0.6em; flex-wrap: wrap; }
+    .abtn { background: var(--accent); color: #000; border: none; border-radius: 6px; padding: 0.35em 1em; font-size: 0.8em; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+    .abtn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .abtn.gray { background: rgba(255,255,255,0.15); color: #fff; }
+    .step-cnt { color: var(--muted); font-size: 0.78em; min-width: 4em; text-align: center; }
+
+    /* ── 퍼셉트론 다이어그램 (SVG 기반) ── */
+    .nn-node-circle { transition: fill .5s, filter .5s; }
+    .nn-edge-line { transition: stroke .4s, stroke-width .4s, opacity .4s; }
+
+    /* ── 개념 카드 (요약용) ── */
+    .concept-card { background: rgba(255,255,255,0.07); border-radius: 10px; padding: 1em; text-align: center; }
+    .concept-card .icon { font-size: 2em; margin-bottom: 0.3em; }
+    .concept-card h4 { color: var(--accent); margin: 0.3em 0; font-size: 0.95em; }
+    .concept-card p { font-size: 0.75em; color: var(--muted); margin: 0; }
+
+    /* ── 프로그레스 바 ── */
+    .reveal .progress span { background: var(--accent); }
+    .reveal .progress { height: 4px; }
+
+    /* ── 슬라이더 그룹 ── */
+    .slider-group { display: flex; align-items: center; gap: 0.6em; font-size: 0.82em; margin: 0.3em 0; }
+    .slider-group label { min-width: 5em; color: var(--accent); }
+    .slider-group input[type=range] { flex: 1; }
+    .slider-group .sv { min-width: 3em; text-align: right; font-family: monospace; }
+
+    /* ── 인라인 result ── */
+    .big-result { font-size: 1.5em; font-weight: bold; color: var(--success); text-shadow: 0 0 20px var(--success); }
+    .big-result.ng { color: var(--danger); text-shadow: 0 0 20px var(--danger); }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 1: 제목
+═══════════════════════════════════════════ -->
+<section data-background-gradient="linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)">
+  <h2 style="font-size:1.6em; line-height:1.3;">
+    퍼셉트론과<br><span style="color:var(--accent)">다층 퍼셉트론</span>
+  </h2>
+  <p style="color:var(--muted); margin-top:0.3em;">인공지능 수학 | 고등학교</p>
+  <div style="margin-top:1.5em; font-size:0.78em; color:var(--muted);">
+    <p>🧠 뇌의 뉴런 → 퍼셉트론 → 신경망으로 이어지는 흐름을 <span class="hl">숫자로</span> 직접 확인합니다</p>
+  </div>
+  <aside class="notes">
+    "오늘은 퍼셉트론부터 시작해서 XOR 문제, 다층 퍼셉트론까지 배웁니다.
+    교과서 변수 대신 실제 숫자를 직접 계산하면서 따라갑시다."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 2: 학습 목표
+═══════════════════════════════════════════ -->
+<section>
+  <h3>학습 목표</h3>
+  <ul class="obj-list">
+    <li class="fragment">퍼셉트론의 구조(입력, 가중치, 활성화함수, 출력)를 설명할 수 있다</li>
+    <li class="fragment">AND, OR 논리 게이트를 퍼셉트론으로 구현하고 <span class="hl">직접 계산</span>할 수 있다</li>
+    <li class="fragment">XOR 문제를 단층 퍼셉트론으로 해결할 수 없는 이유를 설명할 수 있다</li>
+    <li class="fragment">다층 퍼셉트론으로 XOR를 해결하는 순전파 계산을 따라갈 수 있다</li>
+    <li class="fragment">활성화 함수(계단, 시그모이드, ReLU)의 역할을 비교할 수 있다</li>
+  </ul>
+  <aside class="notes">
+    각 목표를 클릭하며: "오늘 수업이 끝나면 이것들을 할 수 있게 됩니다.
+    특히 두 번째 — 직접 계산하는 것이 오늘 핵심입니다."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 3: 실생활 연결 (도입)
+═══════════════════════════════════════════ -->
+<section>
+  <h3>이런 것들이 퍼셉트론으로 동작합니다</h3>
+  <div class="three-col" style="margin-top:0.8em;">
+    <div class="concept-card fragment">
+      <div class="icon">📧</div>
+      <h4>스팸 필터</h4>
+      <p>"무료", "당첨" 같은 단어가 있으면(=1) 스팸 판단</p>
+    </div>
+    <div class="concept-card fragment">
+      <div class="icon">💳</div>
+      <h4>신용카드 승인</h4>
+      <p>소득, 신용점수 등을 입력 → 승인/거절 이진 출력</p>
+    </div>
+    <div class="concept-card fragment">
+      <div class="icon">🏥</div>
+      <h4>질병 진단 보조</h4>
+      <p>혈압, 혈당 등 수치를 입력 → 고위험/정상 분류</p>
+    </div>
+  </div>
+  <p class="fragment" style="margin-top:1em; color:var(--accent); font-size:0.9em;">
+    → 모두 "여러 입력 → 0 또는 1 판단" = 퍼셉트론의 핵심 구조
+  </p>
+  <aside class="notes">
+    "여러분 매일 쓰는 기술들이 오늘 배울 퍼셉트론 원리로 동작합니다.
+    스팸 필터: '무료'라는 단어가 있으면 x₁=1, 없으면 x₁=0...
+    이런 식으로 여러 특징을 숫자로 표현하는 거예요."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 4: 퍼셉트론 구조
+═══════════════════════════════════════════ -->
+<section>
+  <h3>퍼셉트론 구조</h3>
+  <div class="two-col" style="align-items:center;">
+    <!-- SVG 다이어그램 -->
+    <div>
+      <svg id="perceptron-svg" width="380" height="260" viewBox="0 0 380 260" style="overflow:visible;">
+        <!-- 입력 노드 -->
+        <circle id="n-x1" cx="55" cy="90" r="35" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2" class="nn-node-circle"/>
+        <text x="55" y="85" text-anchor="middle" fill="#ecf0f1" font-size="13">x₁</text>
+        <text x="55" y="100" text-anchor="middle" fill="#f39c12" font-size="13" id="lv-x1">=1</text>
+
+        <circle id="n-x2" cx="55" cy="180" r="35" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2" class="nn-node-circle"/>
+        <text x="55" y="175" text-anchor="middle" fill="#ecf0f1" font-size="13">x₂</text>
+        <text x="55" y="190" text-anchor="middle" fill="#f39c12" font-size="13" id="lv-x2">=1</text>
+
+        <!-- 가중치 엣지 -->
+        <line id="e-w1" x1="90" y1="100" x2="185" y2="130" stroke="#7f8c8d" stroke-width="1.8" class="nn-edge-line"
+              stroke-dasharray="110" stroke-dashoffset="110"/>
+        <line id="e-w2" x1="90" y1="165" x2="185" y2="140" stroke="#7f8c8d" stroke-width="1.8" class="nn-edge-line"
+              stroke-dasharray="110" stroke-dashoffset="110"/>
+
+        <!-- 가중치 라벨 -->
+        <text id="lbl-w1" x="130" y="110" fill="#95a5a6" font-size="12" opacity="0">w₁=0.5</text>
+        <text id="lbl-w2" x="130" y="165" fill="#95a5a6" font-size="12" opacity="0">w₂=0.5</text>
+
+        <!-- 합산 노드 (Σ) -->
+        <circle id="n-sum" cx="215" cy="135" r="38" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2" class="nn-node-circle"/>
+        <text x="215" y="128" text-anchor="middle" fill="#ecf0f1" font-size="18">Σ</text>
+        <text id="lv-sum" x="215" y="148" text-anchor="middle" fill="#f39c12" font-size="12" opacity="0">z=?</text>
+
+        <!-- Σ→f 엣지 -->
+        <line id="e-sf" x1="253" y1="135" x2="295" y2="135" stroke="#7f8c8d" stroke-width="1.8" class="nn-edge-line"
+              stroke-dasharray="50" stroke-dashoffset="50"/>
+
+        <!-- 편향 라벨 -->
+        <text id="lbl-b" x="195" y="188" fill="#95a5a6" font-size="12" opacity="0">b=−0.7</text>
+
+        <!-- 활성화 함수 노드 -->
+        <rect id="n-act" x="295" y="110" width="52" height="50" rx="10" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2" class="nn-node-circle"/>
+        <text x="321" y="131" text-anchor="middle" fill="#95a5a6" font-size="11">f(z)</text>
+        <text id="lv-act" x="321" y="149" text-anchor="middle" fill="#2ecc71" font-size="12" opacity="0">≥0</text>
+
+        <!-- f→출력 엣지 -->
+        <line id="e-fo" x1="347" y1="135" x2="375" y2="135" stroke="#7f8c8d" stroke-width="1.8" class="nn-edge-line"
+              stroke-dasharray="30" stroke-dashoffset="30"/>
+
+        <!-- 출력 노드 -->
+        <circle id="n-out" cx="380" cy="135" r="0" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2" class="nn-node-circle"/>
+        <text id="lv-out" x="380" y="131" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold" opacity="0">y=?</text>
+
+        <!-- 화살표 마커 정의 -->
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#7f8c8d"/>
+          </marker>
+          <marker id="arr-active" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#f39c12"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- 오른쪽: 수식 설명 -->
+    <div>
+      <div class="step-box fragment">
+        <div class="step-label">가중합</div>
+        \[ z = \sum_{i=1}^{n} w_i x_i + b \]
+      </div>
+      <div class="step-box fragment">
+        <div class="step-label">활성화 함수 (계단 함수)</div>
+        \[ y = \begin{cases} 1 & z \geq 0 \\ 0 & z < 0 \end{cases} \]
+      </div>
+      <div class="step-box fragment">
+        <div class="step-label">핵심 파라미터</div>
+        <p style="font-size:0.82em; margin:0;">
+          <span class="hl">w (가중치)</span>: 각 입력의 중요도<br>
+          <span class="hl">b (편향)</span>: 기준선 이동<br>
+          <span class="hl">f(z)</span>: 활성화 함수 (0/1 결정)
+        </p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    "퍼셉트론 구조입니다. 왼쪽에 입력, 가운데 합산, 오른쪽 출력.
+    가중치는 각 입력이 얼마나 중요한지를 나타내요.
+    편향은 기준선을 조정하는 역할을 합니다."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 5: AND 게이트 숫자 계산 (핵심 슬라이드)
+═══════════════════════════════════════════ -->
+<section data-anim-id="and-calc">
+  <h3>AND 게이트 — 숫자로 직접 계산</h3>
+  <p class="note" style="margin-bottom:0.6em;">w₁ = 0.5, w₂ = 0.5, b = −0.7 | 계단 함수 사용</p>
+
+  <div class="two-col">
+    <!-- 왼쪽: 단계별 계산 -->
+    <div>
+      <div class="step-box" id="and-step-1" style="opacity:0; transform:translateY(10px)">
+        <div class="step-label">Step 1 — 입력 선택: x₁=1, x₂=1</div>
+        AND 진리표에서 (1, 1) 행을 계산합니다
+      </div>
+
+      <div class="step-box" id="and-step-2" style="opacity:0; transform:translateY(10px)">
+        <div class="step-label">Step 2 — 가중합 z 계산</div>
+        \[ z = w_1 x_1 + w_2 x_2 + b \]
+        <div id="and-num-2" style="color:var(--accent); font-size:0.9em; opacity:0; margin-top:0.3em;">
+          \[ z = 0.5 \times 1 + 0.5 \times 1 + (-0.7) = 1.0 - 0.7 = \mathbf{0.3} \]
+        </div>
+      </div>
+
+      <div class="step-box" id="and-step-3" style="opacity:0; transform:translateY(10px)">
+        <div class="step-label">Step 3 — 활성화 함수 적용</div>
+        \[ z = 0.3 \geq 0 \implies y = 1 \]
+        <div id="and-result" style="opacity:0; margin-top:0.5em;">
+          <span class="big-result">y = 1</span>
+          &nbsp;<span class="note">✓ AND(1,1) = 1 맞음</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: AND 진리표 -->
+    <div>
+      <table class="truth-table" id="and-truth-table">
+        <thead>
+          <tr><th>x₁</th><th>x₂</th><th>z (가중합)</th><th>y (출력)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="v0">0</td><td class="v0">0</td><td class="fillable">?</td><td class="fillable">?</td></tr>
+          <tr><td class="v0">0</td><td class="v1">1</td><td class="fillable">?</td><td class="fillable">?</td></tr>
+          <tr><td class="v1">1</td><td class="v0">0</td><td class="fillable">?</td><td class="fillable">?</td></tr>
+          <tr id="and-row-3" class="highlight-row"><td class="v1">1</td><td class="v1">1</td><td class="fillable" id="and-z-11">?</td><td class="fillable" id="and-y-11">?</td></tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-top:0.5em;">→ 전체 채우기 버튼으로 나머지 행도 확인</p>
+    </div>
+  </div>
+
+  <div class="anim-ctrl">
+    <button class="abtn" id="btn-prev-and-calc" onclick="andAnim.prev()" disabled>◀ 이전</button>
+    <span class="step-cnt" id="step-cnt-and-calc">0 / 3</span>
+    <button class="abtn" id="btn-next-and-calc" onclick="andAnim.next()">다음 ▶</button>
+    <button class="abtn gray" onclick="andFillAll()">표 전체 채우기</button>
+    <button class="abtn gray" onclick="andReset()">↺ 초기화</button>
+  </div>
+  <aside class="notes">
+    "[클릭 1] '입력값 1,1을 넣겠습니다'
+     [클릭 2] '가중합 계산: 칠판에 같이 써요. 0.5×1+0.5×1-0.7=0.3'
+     [클릭 3] '0.3이 0보다 크니까 y=1, AND(1,1)=1 맞죠?'
+     그다음: '전체 채우기로 나머지 행도 확인해볼게요'"
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 6: XOR 문제
+═══════════════════════════════════════════ -->
+<section>
+  <h3>XOR — 단층 퍼셉트론의 한계</h3>
+  <div class="two-col">
+    <div>
+      <table class="truth-table">
+        <thead><tr><th>x₁</th><th>x₂</th><th>XOR 출력</th></tr></thead>
+        <tbody>
+          <tr><td class="v0">0</td><td class="v0">0</td><td class="v0">0</td></tr>
+          <tr><td class="v0">0</td><td class="v1">1</td><td class="v1">1</td></tr>
+          <tr><td class="v1">1</td><td class="v0">0</td><td class="v1">1</td></tr>
+          <tr><td class="v1">1</td><td class="v1">1</td><td class="v0">0</td></tr>
+        </tbody>
+      </table>
+      <div class="warn-box fragment" style="margin-top:0.8em;">
+        ⚠️ <strong>선형 분리 불가능:</strong><br>
+        초록(1)과 빨강(0)을 직선 하나로 나눌 수 없음
+      </div>
+    </div>
+
+    <!-- XOR 산점도 (Canvas) -->
+    <div style="text-align:center;">
+      <canvas id="xor-canvas" width="280" height="280" style="border-radius:8px;"></canvas>
+      <p class="note">직선으로 분리 불가 → 단층 퍼셉트론 한계</p>
+    </div>
+  </div>
+
+  <p class="fragment" style="color:var(--accent); font-size:0.9em; margin-top:0.5em;">
+    → 해결책: <strong>레이어를 더 쌓자!</strong> → 다층 퍼셉트론 (MLP)
+  </p>
+  <aside class="notes">
+    "XOR는 다릴 때만 1이에요. 그래프를 보면 초록과 빨강이 섞여 있어서
+    직선 하나로는 절대 나눌 수 없습니다.
+    이것이 1969년 민스키가 지적한 퍼셉트론의 한계예요.
+    해결책은? 레이어를 더 쌓는 것 — 다층 퍼셉트론입니다."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 7: 다층 퍼셉트론 구조
+═══════════════════════════════════════════ -->
+<section>
+  <h3>다층 퍼셉트론 (MLP) 구조</h3>
+  <div style="text-align:center; margin:0.5em 0;">
+    <svg id="mlp-svg" width="560" height="300" viewBox="0 0 560 300" style="overflow:visible;">
+      <!-- 레이어 라벨 -->
+      <text x="70" y="285" text-anchor="middle" fill="#bdc3c7" font-size="13">입력층</text>
+      <text x="280" y="285" text-anchor="middle" fill="#bdc3c7" font-size="13">은닉층</text>
+      <text x="490" y="285" text-anchor="middle" fill="#bdc3c7" font-size="13">출력층</text>
+
+      <!-- 입력 노드 -->
+      <circle id="m-x1" cx="70" cy="100" r="32" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2"/>
+      <text x="70" y="95" text-anchor="middle" fill="#ecf0f1" font-size="13">x₁</text>
+      <text id="m-vx1" x="70" y="110" text-anchor="middle" fill="#f39c12" font-size="12">= 0</text>
+
+      <circle id="m-x2" cx="70" cy="200" r="32" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2"/>
+      <text x="70" y="195" text-anchor="middle" fill="#ecf0f1" font-size="13">x₂</text>
+      <text id="m-vx2" x="70" y="210" text-anchor="middle" fill="#f39c12" font-size="12">= 1</text>
+
+      <!-- 은닉층 노드 -->
+      <circle id="m-h1" cx="280" cy="80" r="32" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2"/>
+      <text x="280" y="75" text-anchor="middle" fill="#ecf0f1" font-size="13">h₁</text>
+      <text id="m-vh1" x="280" y="90" text-anchor="middle" fill="#3498db" font-size="11" opacity="0">?</text>
+
+      <circle id="m-h2" cx="280" cy="160" r="32" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2"/>
+      <text x="280" y="155" text-anchor="middle" fill="#ecf0f1" font-size="13">h₂</text>
+      <text id="m-vh2" x="280" y="170" text-anchor="middle" fill="#3498db" font-size="11" opacity="0">?</text>
+
+      <circle id="m-h3" cx="280" cy="240" r="32" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2"/>
+      <text x="280" y="235" text-anchor="middle" fill="#ecf0f1" font-size="13">h₃</text>
+      <text id="m-vh3" x="280" y="250" text-anchor="middle" fill="#3498db" font-size="11" opacity="0">?</text>
+
+      <!-- 출력층 노드 -->
+      <circle id="m-y" cx="490" cy="160" r="32" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2"/>
+      <text x="490" y="155" text-anchor="middle" fill="#ecf0f1" font-size="13">y</text>
+      <text id="m-vy" x="490" y="170" text-anchor="middle" fill="#2ecc71" font-size="13" font-weight="bold" opacity="0">?</text>
+
+      <!-- 입력→은닉 엣지 -->
+      <line id="m-e-x1h1" x1="102" y1="110" x2="248" y2="88"  stroke="#7f8c8d" stroke-width="1.2" opacity="0.5"/>
+      <line id="m-e-x1h2" x1="102" y1="118" x2="248" y2="158" stroke="#7f8c8d" stroke-width="1.2" opacity="0.5"/>
+      <line id="m-e-x1h3" x1="102" y1="122" x2="248" y2="230" stroke="#7f8c8d" stroke-width="1.2" opacity="0.5"/>
+      <line id="m-e-x2h1" x1="102" y1="188" x2="248" y2="92"  stroke="#7f8c8d" stroke-width="1.2" opacity="0.5"/>
+      <line id="m-e-x2h2" x1="102" y1="195" x2="248" y2="162" stroke="#7f8c8d" stroke-width="1.2" opacity="0.5"/>
+      <line id="m-e-x2h3" x1="102" y1="200" x2="248" y2="232" stroke="#7f8c8d" stroke-width="1.2" opacity="0.5"/>
+
+      <!-- 은닉→출력 엣지 -->
+      <line id="m-e-h1y" x1="312" y1="88"  x2="458" y2="150" stroke="#7f8c8d" stroke-width="1.2" opacity="0.5"/>
+      <line id="m-e-h2y" x1="312" y1="160" x2="458" y2="160" stroke="#7f8c8d" stroke-width="1.2" opacity="0.5"/>
+      <line id="m-e-h3y" x1="312" y1="232" x2="458" y2="170" stroke="#7f8c8d" stroke-width="1.2" opacity="0.5"/>
+
+      <!-- 활성화 함수 표시 -->
+      <text x="420" y="25" text-anchor="middle" fill="#95a5a6" font-size="11">활성화: 시그모이드 σ(z)</text>
+    </svg>
+  </div>
+
+  <div class="two-col" style="font-size:0.82em; margin-top:0;">
+    <div class="card fragment">
+      <span class="hl">입력층</span> → 데이터 입력 (x₁, x₂)
+    </div>
+    <div class="card fragment">
+      <span class="hl">은닉층</span> → 비선형 변환 (여러 개 가능)
+    </div>
+  </div>
+  <aside class="notes">
+    "레이어를 여러 개 쌓으면 직선이 아닌 복잡한 경계를 그릴 수 있어요.
+    입력층, 은닉층, 출력층 — 이 구조가 다층 퍼셉트론입니다.
+    은닉층의 노드 수, 레이어 수가 바로 신경망의 구조를 결정합니다."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 8: 활성화 함수 비교
+═══════════════════════════════════════════ -->
+<section>
+  <h3>활성화 함수 — 왜 시그모이드를 쓸까?</h3>
+  <div class="two-col" style="align-items:center;">
+    <div>
+      <canvas id="act-chart" width="380" height="260"></canvas>
+    </div>
+    <div>
+      <div class="step-box fragment">
+        <div class="step-label">계단 함수 (퍼셉트론)</div>
+        미분 불가 → <span class="ng">학습 불가</span>
+      </div>
+      <div class="step-box fragment">
+        <div class="step-label">시그모이드 σ(z)</div>
+        \[ \sigma(z) = \frac{1}{1+e^{-z}} \]
+        미분 가능, 출력 0~1 → <span class="ok">학습 가능</span>
+      </div>
+      <div class="step-box fragment">
+        <div class="step-label">ReLU (현대 신경망 주류)</div>
+        \[ \text{ReLU}(z) = \max(0, z) \]
+        계산 빠름, 기울기 소실 적음 → <span class="ok">학습 효율↑</span>
+      </div>
+
+      <!-- 슬라이더: z 입력값 -->
+      <div class="slider-group fragment" style="margin-top:0.8em;">
+        <label>입력 z</label>
+        <input type="range" min="-5" max="5" step="0.1" value="2" id="sl-z"
+               oninput="updateActChart(this.value)">
+        <span class="sv" id="sv-z">2.0</span>
+      </div>
+      <div id="act-readout" style="font-size:0.78em; color:var(--muted); margin-top:0.3em;"></div>
+    </div>
+  </div>
+  <aside class="notes">
+    "왜 계단 함수 대신 시그모이드를 쓰냐면 — 학습을 위해서입니다.
+    학습은 미분이 필요한데 계단 함수는 미분이 안 돼요.
+    슬라이더로 z값을 바꿔보면 각 함수의 출력이 어떻게 다른지 볼 수 있어요."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 9: 신경망 순전파 (숫자 계산)
+═══════════════════════════════════════════ -->
+<section data-anim-id="mlp-fwd">
+  <h3>순전파 계산 — 숫자로 직접 (XOR: x₁=0, x₂=1)</h3>
+  <div class="two-col">
+    <div>
+      <p class="note" style="font-size:0.72em; margin-bottom:0.4em;">
+        2-2-1 구조 | 시그모이드 활성화 | 아래 가중치 사용
+      </p>
+      <!-- 순전파 단계 -->
+      <div class="step-box" id="fwd-s1" style="opacity:0; transform:translateY(8px)">
+        <div class="step-label">Step 1 — 입력 설정</div>
+        x₁ = 0, x₂ = 1
+      </div>
+      <div class="step-box" id="fwd-s2" style="opacity:0; transform:translateY(8px)">
+        <div class="step-label">Step 2 — 은닉층 h₁ 계산</div>
+        <div style="font-size:0.85em;">
+          z₁ = 1×0 + 1×1 + (−0.5) = 0.5<br>
+          <span id="fwd-h1-val" style="opacity:0">h₁ = σ(0.5) ≈ <span class="hl">0.622</span></span>
+        </div>
+      </div>
+      <div class="step-box" id="fwd-s3" style="opacity:0; transform:translateY(8px)">
+        <div class="step-label">Step 3 — 은닉층 h₂ 계산</div>
+        <div style="font-size:0.85em;">
+          z₂ = 1×0 + 1×1 + (−1.5) = −0.5<br>
+          <span id="fwd-h2-val" style="opacity:0">h₂ = σ(−0.5) ≈ <span class="hl">0.378</span></span>
+        </div>
+      </div>
+      <div class="step-box" id="fwd-s4" style="opacity:0; transform:translateY(8px)">
+        <div class="step-label">Step 4 — 출력층 y 계산</div>
+        <div style="font-size:0.85em;">
+          z₃ = 1×0.622 + (−2)×0.378 + (−0.5)<br>
+          = 0.622 − 0.756 − 0.5 = −0.634<br>
+          <span id="fwd-y-val" style="opacity:0">y = σ(−0.634) ≈ <span class="ok">0.347</span>
+          → 반올림 → <strong>0</strong> ✗ (XOR(0,1)=1이 맞는데...)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 계산 추적 테이블 -->
+    <div>
+      <table class="calc-table" id="fwd-table">
+        <thead>
+          <tr><th>레이어</th><th>노드</th><th>z (가중합)</th><th>출력값</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>입력층</td><td>x₁, x₂</td><td>—</td><td class="fillable" id="ft-in">0, 1</td></tr>
+          <tr><td>은닉층</td><td>h₁</td><td class="fillable" id="ft-z1">?</td><td class="fillable" id="ft-h1">?</td></tr>
+          <tr><td>은닉층</td><td>h₂</td><td class="fillable" id="ft-z2">?</td><td class="fillable" id="ft-h2">?</td></tr>
+          <tr><td>출력층</td><td>y</td><td class="fillable" id="ft-z3">?</td><td class="fillable" id="ft-y">?</td></tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-top:0.5em; font-size:0.72em;">
+        * 이 가중치는 학습 전 임의 초기값 — 학습 후엔 달라집니다
+      </p>
+    </div>
+  </div>
+
+  <div class="anim-ctrl">
+    <button class="abtn" id="btn-prev-mlp-fwd" onclick="fwdAnim.prev()" disabled>◀ 이전</button>
+    <span class="step-cnt" id="step-cnt-mlp-fwd">0 / 4</span>
+    <button class="abtn" id="btn-next-mlp-fwd" onclick="fwdAnim.next()">다음 ▶</button>
+    <button class="abtn gray" onclick="fwdAnim.reset()">↺ 초기화</button>
+  </div>
+  <aside class="notes">
+    "이 가중치는 임의 초기값이라 결과가 틀려요.
+    학습을 통해 가중치를 조정하면 XOR(0,1)=1이 정확히 나오게 됩니다.
+    학습 과정 — 손실 계산과 역전파 — 은 다음 시간에 배웁니다."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 10: 손실함수 맛보기
+═══════════════════════════════════════════ -->
+<section>
+  <h3>손실함수 — 얼마나 틀렸는지 측정</h3>
+  <div class="two-col">
+    <div>
+      <div class="step-box">
+        <div class="step-label">평균 제곱 오차 (MSE)</div>
+        \[ \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 \]
+      </div>
+
+      <div class="step-box fragment">
+        <div class="step-label">숫자 대입 예시</div>
+        <div style="font-size:0.85em;">
+          실제: y = 1 &nbsp;|&nbsp; 예측: ŷ = 0.347<br>
+          오차: 1 − 0.347 = 0.653<br>
+          <span class="hl">손실 = 0.653² = <strong>0.426</strong></span>
+        </div>
+      </div>
+
+      <div class="step-box fragment">
+        <div class="step-label">학습의 목표</div>
+        손실을 <strong>최소화</strong>하는 가중치 w 찾기<br>
+        <span class="note">→ 경사하강법 (다음 시간)</span>
+      </div>
+    </div>
+
+    <!-- 손실 곡선 -->
+    <div>
+      <canvas id="loss-chart" width="320" height="240"></canvas>
+      <p class="note">가중치 w가 최적값(w=1)으로 수렴할수록 손실이 0에 가까워짐</p>
+    </div>
+  </div>
+  <aside class="notes">
+    "손실함수는 '우리가 얼마나 틀렸는지'를 숫자로 나타냅니다.
+    실제 1, 예측 0.347 → 오차 0.653 → 제곱하면 0.426.
+    이 값을 줄이는 방향으로 가중치를 조금씩 바꾸는 것이 학습입니다."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 11: 요약
+═══════════════════════════════════════════ -->
+<section>
+  <h2>오늘 배운 내용</h2>
+  <div class="three-col" style="margin-top:1em;">
+    <div class="concept-card fragment">
+      <div class="icon">🧠</div>
+      <h4>퍼셉트론</h4>
+      <p>입력 × 가중치 → 가중합 z → 활성화 함수 → 0/1 출력</p>
+    </div>
+    <div class="concept-card fragment">
+      <div class="icon">✖️</div>
+      <h4>XOR 한계</h4>
+      <p>선형 분리 불가 → 단층 퍼셉트론으로 해결 불가 → 다층(MLP)으로 해결</p>
+    </div>
+    <div class="concept-card fragment">
+      <div class="icon">⚡</div>
+      <h4>활성화 함수</h4>
+      <p>계단(학습불가) → 시그모이드(0~1) → ReLU(현대 주류)</p>
+    </div>
+  </div>
+  <p class="fragment" style="margin-top:1.2em; color:var(--accent); font-size:0.9em;">
+    다음 시간: <strong>손실함수와 경사하강법</strong> — 어떻게 학습하는가
+  </p>
+  <aside class="notes">
+    "오늘 핵심 세 가지를 정리했습니다.
+    퍼셉트론은 계산 방법, XOR는 왜 다층이 필요한지, 활성화 함수는 왜 시그모이드를 쓰는지.
+    다음 시간엔 이 신경망이 어떻게 스스로 가중치를 조정하며 학습하는지 배웁니다."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+  슬라이드 12: 형성평가
+═══════════════════════════════════════════ -->
+<section>
+  <h3>확인 문제</h3>
+  <div class="card card-accent" style="max-width:680px; margin:0.5em auto; text-align:left; padding:1.2em;">
+    <p><strong>Q1.</strong> 퍼셉트론에서 w₁=1, w₂=−1, b=0.5일 때,<br>
+    입력 (x₁=1, x₂=1)에 대한 출력 y를 계산하시오.</p>
+    <div class="fragment" style="margin-top:1em; padding-top:1em; border-top:1px solid rgba(255,255,255,0.2);">
+      <p><strong style="color:var(--success)">풀이:</strong></p>
+      <p style="font-size:0.88em;">
+        z = 1×1 + (−1)×1 + 0.5 = 1 − 1 + 0.5 = <span class="hl">0.5</span><br>
+        0.5 ≥ 0 이므로 <strong class="ok">y = 1</strong>
+      </p>
+    </div>
+  </div>
+  <div class="card card-accent" style="max-width:680px; margin:0.5em auto; text-align:left; padding:1.2em;" class="fragment">
+    <p><strong>Q2.</strong> 단층 퍼셉트론으로 XOR 게이트를 구현할 수 없는 이유는?</p>
+    <div class="fragment" style="margin-top:1em; padding-top:1em; border-top:1px solid rgba(255,255,255,0.2);">
+      <p style="font-size:0.88em; color:var(--success)">
+        XOR의 데이터 점들이 선형 분리 불가능한 배치이기 때문.<br>
+        단층 퍼셉트론은 직선(초평면) 하나로만 분리할 수 있어 XOR를 표현할 수 없다.
+      </p>
+    </div>
+  </div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<!-- Reveal.js -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+Reveal.initialize({
+  hash: true, slideNumber: 'c/t', progress: true,
+  controls: true, transition: 'slide', center: true, touch: true,
+  keyboard: {
+    78: () => {
+      const s = Reveal.getCurrentSlide();
+      const id = s.dataset.animId;
+      if (id && window.slideAnims && window.slideAnims[id]) window.slideAnims[id].next();
+    },
+    80: () => {
+      const s = Reveal.getCurrentSlide();
+      const id = s.dataset.animId;
+      if (id && window.slideAnims && window.slideAnims[id]) window.slideAnims[id].prev();
+    }
+  }
+});
+Reveal.on('slidechanged', () => { if(typeof MathJax!=='undefined') MathJax.typesetPromise(); });
+</script>
+
+<script>
+/* ════════════════════════════════════════
+   범용 단계별 애니메이터 (간소화)
+════════════════════════════════════════ */
+window.slideAnims = {};
+
+class StepAnim {
+  constructor(id, steps) {
+    this.id = id;
+    this.steps = steps;
+    this.cur = -1;
+    window.slideAnims[id] = this;
+  }
+  next() {
+    if (this.cur < this.steps.length - 1) {
+      this.cur++;
+      this.steps[this.cur]();
+      this._updateUI();
+    }
+  }
+  prev() {
+    // 간소화: 초기화 후 재생
+    this.reset();
+    this.cur = -1;
+    const target = arguments[0] !== undefined ? arguments[0] : this.cur;
+  }
+  reset() {
+    this.cur = -1;
+    this._updateUI();
+  }
+  _updateUI() {
+    const prevBtn = document.getElementById('btn-prev-' + this.id);
+    const nextBtn = document.getElementById('btn-next-' + this.id);
+    const cnt     = document.getElementById('step-cnt-' + this.id);
+    if (prevBtn) prevBtn.disabled = this.cur <= 0;
+    if (nextBtn) nextBtn.disabled = this.cur >= this.steps.length - 1;
+    if (cnt)     cnt.textContent  = (this.cur + 1) + ' / ' + this.steps.length;
+  }
+}
+
+function fadeIn(el, delay=0) {
+  if (!el) return;
+  gsap.to(el, { opacity: 1, y: 0, duration: 0.7, delay, ease: 'power2.out' });
+}
+function fillCell(id, val, color='#fff') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  gsap.to(el, { backgroundColor: 'rgba(243,156,18,0.3)', duration: 0.3, onComplete: () => {
+    el.textContent = val;
+    el.style.color = color;
+    el.classList.add('filled');
+    gsap.to(el, { backgroundColor: 'transparent', duration: 0.5 });
+  }});
+}
+
+/* ── AND 애니메이션 ── */
+const andAnim = new StepAnim('and-calc', [
+  // Step 1
+  () => {
+    fadeIn(document.getElementById('and-step-1'));
+    // 진리표 4번 행 강조
+    document.getElementById('and-row-3').classList.add('highlight-row');
+  },
+  // Step 2
+  () => {
+    fadeIn(document.getElementById('and-step-2'));
+    setTimeout(() => {
+      const n = document.getElementById('and-num-2');
+      if(n) gsap.to(n, { opacity: 1, duration: 0.7 });
+      MathJax.typesetPromise();
+    }, 400);
+    fillCell('and-z-11', '0.3', '#f39c12');
+  },
+  // Step 3
+  () => {
+    fadeIn(document.getElementById('and-step-3'));
+    setTimeout(() => {
+      const r = document.getElementById('and-result');
+      if(r) gsap.to(r, { opacity: 1, duration: 0.8 });
+    }, 400);
+    fillCell('and-y-11', '1', '#2ecc71');
+  }
+]);
+
+function andFillAll() {
+  const data = [
+    ['−0.7', '0', '#e74c3c'],
+    ['−0.2', '0', '#e74c3c'],
+    ['−0.2', '0', '#e74c3c'],
+    ['0.3',  '1', '#2ecc71']
+  ];
+  const rows = document.querySelectorAll('#and-truth-table tbody tr');
+  rows.forEach((row, i) => {
+    const cells = row.querySelectorAll('td.fillable');
+    setTimeout(() => {
+      if(cells[0]) { cells[0].textContent = data[i][0]; cells[0].style.color = '#f39c12'; cells[0].classList.add('filled'); }
+      if(cells[1]) { cells[1].textContent = data[i][1]; cells[1].style.color = data[i][2]; cells[1].classList.add('filled'); }
+    }, i * 600);
+  });
+}
+
+function andReset() {
+  andAnim.cur = -1;
+  andAnim._updateUI();
+  ['and-step-1','and-step-2','and-step-3'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) { gsap.set(el, { opacity: 0, y: 10 }); }
+  });
+  const n = document.getElementById('and-num-2');
+  if(n) gsap.set(n, { opacity: 0 });
+  const r = document.getElementById('and-result');
+  if(r) gsap.set(r, { opacity: 0 });
+  ['and-z-11','and-y-11'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) { el.textContent = '?'; el.style.color = ''; el.classList.remove('filled'); }
+  });
+  document.getElementById('and-row-3')?.classList.remove('highlight-row');
+}
+
+/* ── 순전파 애니메이션 ── */
+const fwdAnim = new StepAnim('mlp-fwd', [
+  // Step 1: 입력
+  () => {
+    fadeIn(document.getElementById('fwd-s1'));
+  },
+  // Step 2: h1
+  () => {
+    fadeIn(document.getElementById('fwd-s2'));
+    setTimeout(() => {
+      fadeIn(document.getElementById('fwd-h1-val'));
+      fillCell('ft-z1', '0.5', '#f39c12');
+      fillCell('ft-h1', '0.622', '#3498db');
+    }, 400);
+  },
+  // Step 3: h2
+  () => {
+    fadeIn(document.getElementById('fwd-s3'));
+    setTimeout(() => {
+      fadeIn(document.getElementById('fwd-h2-val'));
+      fillCell('ft-z2', '−0.5', '#f39c12');
+      fillCell('ft-h2', '0.378', '#3498db');
+    }, 400);
+  },
+  // Step 4: 출력
+  () => {
+    fadeIn(document.getElementById('fwd-s4'));
+    setTimeout(() => {
+      fadeIn(document.getElementById('fwd-y-val'));
+      fillCell('ft-z3', '−0.634', '#f39c12');
+      fillCell('ft-y', '0.347 → 0', '#e74c3c');
+    }, 400);
+  }
+]);
+
+fwdAnim.reset = function() {
+  this.cur = -1;
+  this._updateUI();
+  ['fwd-s1','fwd-s2','fwd-s3','fwd-s4'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) gsap.set(el, { opacity: 0, y: 8 });
+  });
+  ['fwd-h1-val','fwd-h2-val','fwd-y-val'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) gsap.set(el, { opacity: 0 });
+  });
+  ['ft-z1','ft-h1','ft-z2','ft-h2','ft-z3','ft-y'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) { el.textContent = '?'; el.style.color = ''; el.classList.remove('filled'); }
+  });
+};
+
+/* ════════════════════════════════════════
+   XOR 산점도
+════════════════════════════════════════ */
+(function drawXOR() {
+  const canvas = document.getElementById('xor-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 280, H = 280;
+
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(0, 0, W, H);
+
+  // 점 찍기
+  const pts = [[0,0,0],[0,1,1],[1,0,1],[1,1,0]];
+  pts.forEach(([x1, x2, label]) => {
+    const px = 40 + x1 * 180;
+    const py = 240 - x2 * 180;
+    ctx.beginPath();
+    ctx.arc(px, py, 14, 0, Math.PI*2);
+    ctx.fillStyle = label ? '#2ecc71' : '#e74c3c';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, px, py);
+  });
+
+  // 레이블
+  ctx.fillStyle = '#bdc3c7';
+  ctx.font = '12px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('x₁=0', 40, 260);
+  ctx.fillText('x₁=1', 220, 260);
+  ctx.textAlign = 'right';
+  ctx.fillText('x₂=0', 25, 240);
+  ctx.fillText('x₂=1', 25, 60);
+
+  // "직선 불가" 텍스트
+  ctx.fillStyle = '#e74c3c';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('선형 분리 불가!', 140, 20);
+})();
+
+/* ════════════════════════════════════════
+   활성화 함수 Chart.js
+════════════════════════════════════════ */
+let actChart;
+(function initActChart() {
+  const xVals = Array.from({length: 101}, (_, i) => -5 + i * 0.1);
+  actChart = new Chart(document.getElementById('act-chart'), {
+    type: 'line',
+    data: {
+      labels: xVals.map(x => x.toFixed(1)),
+      datasets: [
+        { label: '계단 함수', data: xVals.map(x => x>=0?1:0),
+          borderColor:'#e74c3c', borderWidth:2, pointRadius:0, stepped:true },
+        { label: 'σ(시그모이드)', data: xVals.map(x => 1/(1+Math.exp(-x))),
+          borderColor:'#f39c12', borderWidth:2.5, pointRadius:0 },
+        { label: 'ReLU', data: xVals.map(x => Math.max(0,x)),
+          borderColor:'#2ecc71', borderWidth:2, pointRadius:0 }
+      ]
+    },
+    options: {
+      responsive: false, animation: false,
+      plugins: { legend: { labels: { color:'#ecf0f1', font:{ size:11 } } } },
+      scales: {
+        x: { ticks:{ color:'#bdc3c7', maxTicksLimit:11 }, grid:{ color:'rgba(255,255,255,0.1)' } },
+        y: { ticks:{ color:'#bdc3c7' }, grid:{ color:'rgba(255,255,255,0.1)' }, min:-0.2, max:1.2 }
+      }
+    }
+  });
+  updateActChart(2);
+})();
+
+function updateActChart(z) {
+  z = parseFloat(z);
+  document.getElementById('sv-z').textContent = z.toFixed(1);
+  const sigmoid = 1/(1+Math.exp(-z));
+  const relu    = Math.max(0, z);
+  const step    = z >= 0 ? 1 : 0;
+  document.getElementById('act-readout').innerHTML =
+    `z = ${z.toFixed(1)} 일 때 &nbsp;|&nbsp; ` +
+    `<span style="color:#e74c3c">계단=${step}</span> &nbsp; ` +
+    `<span style="color:#f39c12">σ=${sigmoid.toFixed(3)}</span> &nbsp; ` +
+    `<span style="color:#2ecc71">ReLU=${relu.toFixed(1)}</span>`;
+}
+
+/* ════════════════════════════════════════
+   손실 곡선 Chart.js
+════════════════════════════════════════ */
+(function initLossChart() {
+  const epochs = Array.from({length:20}, (_,i) => i+1);
+  function simLoss(lr) {
+    let w=0;
+    return epochs.map(() => {
+      const loss = Math.pow(1-w,2);
+      const g    = -2*(1-w);
+      w -= lr*g;
+      return loss;
+    });
+  }
+  new Chart(document.getElementById('loss-chart'), {
+    type:'line',
+    data: {
+      labels: epochs,
+      datasets: [
+        { label:'학습률 0.1', data:simLoss(0.1), borderColor:'#f39c12', borderWidth:2.5, pointRadius:3, fill:false },
+        { label:'학습률 0.5', data:simLoss(0.5), borderColor:'#3498db', borderWidth:2, pointRadius:3, borderDash:[5,5], fill:false }
+      ]
+    },
+    options: {
+      responsive: false, animation: false,
+      plugins: {
+        title:{ display:true, text:'에폭별 MSE 손실 감소', color:'#ecf0f1', font:{size:12} },
+        legend:{ labels:{ color:'#ecf0f1', font:{size:11} } }
+      },
+      scales: {
+        x:{ title:{ display:true, text:'에폭', color:'#bdc3c7', font:{size:11} }, ticks:{color:'#bdc3c7'}, grid:{color:'rgba(255,255,255,0.1)'} },
+        y:{ title:{ display:true, text:'MSE 손실', color:'#bdc3c7', font:{size:11} }, ticks:{color:'#bdc3c7'}, grid:{color:'rgba(255,255,255,0.1)'} }
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>
