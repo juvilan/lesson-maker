@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>수행평가2-2 – 이미지의 수학적 표현</title>
+  <style>
+    @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+      font-size: 11pt;
+      color: #111;
+      background: #fff;
+      padding: 10px;
+    }
+
+    .sheet-title { text-align: center; margin-bottom: 6px; }
+    .sheet-title h1 { font-size: 16pt; font-weight: bold; letter-spacing: 0.05em; }
+    .sheet-title h2 { font-size: 12pt; font-weight: normal; margin-top: 2px; }
+
+    .info-row {
+      display: flex; gap: 30px; justify-content: flex-end;
+      margin-bottom: 10px; font-size: 11pt;
+    }
+    .info-row span { border-bottom: 1px solid #333; min-width: 80px; display: inline-block; }
+
+    hr { border: none; border-top: 2px solid #111; margin: 6px 0; }
+    hr.thin { border-top: 1px solid #aaa; margin: 8px 0; }
+
+    .section-label {
+      font-weight: bold; font-size: 11pt;
+      background: #111; color: #fff;
+      padding: 3px 8px; display: inline-block; margin: 10px 0 6px 0;
+    }
+
+    .problem-box {
+      border: 1.5px solid #111; padding: 8px 12px;
+      margin-bottom: 10px; background: #f9f9f9;
+    }
+    .problem-box p { line-height: 1.8; }
+
+    .tip-box {
+      border: 1px dashed #888; background: #fffbe6;
+      padding: 6px 10px; margin: 8px 0;
+      font-size: 9.5pt; line-height: 1.6;
+    }
+    .tip-box strong { color: #c00; }
+
+    /* ── 픽셀 그리드 ── */
+    .grid-area {
+      display: flex;
+      gap: 30px;
+      align-items: flex-start;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+    .grid-block {
+      text-align: center;
+    }
+    .grid-block .grid-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+      font-size: 11pt;
+    }
+    table.pixel-grid {
+      border-collapse: collapse;
+      display: inline-block;
+    }
+    table.pixel-grid td {
+      width: 28px;
+      height: 28px;
+      border: 1.5px solid #555;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 10pt;
+    }
+    .px-black { background: #111; color: #ccc; font-size:9pt; }  /* 검정 = 0 */
+    .px-white { background: #fff; color: #333; font-size:9pt; }  /* 흰색 = 1 */
+
+    /* ── 행렬 입력 표 ── */
+    table.matrix-input {
+      border-collapse: collapse;
+      display: inline-block;
+      margin-top: 6px;
+    }
+    table.matrix-input td {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #aaa;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 10pt;
+      background: #fff;
+    }
+
+    /* ── 두 열 레이아웃 ── */
+    .two-col {
+      display: flex;
+      gap: 20px;
+      margin: 8px 0;
+      align-items: flex-start;
+    }
+    .two-col .col {
+      flex: 1;
+    }
+    .col-title {
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 6px;
+      font-size: 10.5pt;
+    }
+
+    /* ── 차이 행렬 계산 ── */
+    .diff-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+    .diff-label {
+      font-size: 18pt;
+      font-weight: bold;
+      color: #555;
+    }
+
+    /* ── 결과 표 ── */
+    table.result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      font-size: 10.5pt;
+    }
+    table.result-table th {
+      background: #333; color: #fff;
+      padding: 5px 8px; border: 1px solid #555; text-align: center;
+    }
+    table.result-table td {
+      border: 1px solid #aaa;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    table.result-table td.row-label {
+      background: #f0f0f0; font-weight: bold;
+    }
+
+    /* ── 서술 질문 ── */
+    .q-block { margin: 8px 0; }
+    .q-block .q-title { font-weight: bold; margin-bottom: 4px; }
+    .write-lines {
+      border: 1px solid #aaa; padding: 6px 8px; min-height: 60px;
+      background: #fff; line-height: 2;
+      background-image: repeating-linear-gradient(
+        transparent, transparent 27px, #ddd 27px, #ddd 28px
+      );
+    }
+
+    .self-eval {
+      border: 1px solid #aaa; padding: 6px 10px;
+      margin-top: 10px; font-size: 10pt;
+    }
+    .self-eval .eval-title { font-weight: bold; margin-bottom: 4px; }
+    .eval-row { display: flex; gap: 20px; margin-top: 4px; flex-wrap: wrap; }
+
+    /* ── 명암 픽셀 ── */
+    .px-g0   { background: #000;    color: #fff; font-size: 9pt; }
+    .px-g100 { background: #646464; color: #fff; font-size: 9pt; }
+    .px-g200 { background: #c8c8c8; color: #333; font-size: 9pt; }
+    .px-g255 { background: #fff;    color: #333; font-size: 9pt; }
+
+    /* ── RGB 픽셀 표시용 ── */
+    table.rgb-display { border-collapse: collapse; display: inline-block; }
+    table.rgb-display td {
+      width: 72px; height: 38px;
+      border: 1.5px solid #555;
+      text-align: center; vertical-align: middle;
+      font-size: 7.5pt; line-height: 1.3; font-weight: bold;
+    }
+
+    /* ── 3열 행렬 나란히 ── */
+    .three-mat {
+      display: flex; gap: 14px; align-items: flex-start;
+      margin: 6px 0; flex-wrap: wrap;
+    }
+    .three-mat .mat-block { text-align: center; }
+    .three-mat .mat-title {
+      font-weight: bold; font-size: 10.5pt; margin-bottom: 4px;
+    }
+    table.matrix-input-sm {
+      border-collapse: collapse; display: inline-block; margin-top: 2px;
+    }
+    table.matrix-input-sm td {
+      width: 32px; height: 28px;
+      border: 1px solid #aaa;
+      text-align: center; vertical-align: middle;
+      font-size: 9.5pt; background: #fff;
+    }
+    td.mat-given { background: #fff0f0 !important; font-weight: bold; color: #c00; }
+
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+
+  <div class="sheet-title">
+    <h1>인공지능 수학</h1>
+    <h2>— 이미지의 수학적 표현 —</h2>
+  </div>
+  <hr>
+
+  <div class="info-row">
+    학번: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    &nbsp;&nbsp;이름: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <div class="section-label">문제</div>
+
+  <div class="problem-box">
+    <p>이미지를 수학적으로 표현하는 세 가지 방법을 단계별로 학습합니다.</p>
+    <p style="margin-top:5px; font-size:10pt; line-height:1.9;">
+      <strong>① 흑백 이미지</strong> → 0과 1의 행렬 &nbsp;(Step 1~3)<br>
+      <strong>② 명암 이미지</strong> → 0~255 수치 행렬 &nbsp;(Step 4)<br>
+      <strong>③ 컬러 이미지</strong> → R · G · B 세 행렬 &nbsp;(Step 5)
+    </p>
+    <p style="margin-top:4px; font-size:9.5pt; color:#555;">
+      ■ = 검정(<strong>0</strong>) &nbsp; □ = 흰색(<strong>1</strong>) &nbsp; 숫자가 클수록 밝다(0→검정, 255→흰색)
+    </p>
+  </div>
+
+  <hr class="thin">
+
+  <!-- ══════════════════════════════════════════ -->
+  <div class="section-label">Step 1 · 이미지 확인</div>
+
+  <div class="grid-area">
+
+    <!-- 이미지 A : ㄱ자 모양 (검정=0, 흰색=1) -->
+    <div class="grid-block">
+      <div class="grid-title">이미지 A</div>
+      <table class="pixel-grid">
+        <tr>
+          <td class="px-black">0</td>
+          <td class="px-black">0</td>
+          <td class="px-black">0</td>
+          <td class="px-black">0</td>
+        </tr>
+        <tr>
+          <td class="px-black">0</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+        </tr>
+        <tr>
+          <td class="px-black">0</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+        </tr>
+        <tr>
+          <td class="px-black">0</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+        </tr>
+      </table>
+      <div style="font-size:8pt; color:#888; text-align:center; margin-top:3px;">(ㄱ자 모양)</div>
+    </div>
+
+    <!-- 이미지 B : ㄴ자 모양 (검정=0, 흰색=1) -->
+    <div class="grid-block">
+      <div class="grid-title">이미지 B</div>
+      <table class="pixel-grid">
+        <tr>
+          <td class="px-black">0</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+        </tr>
+        <tr>
+          <td class="px-black">0</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+        </tr>
+        <tr>
+          <td class="px-black">0</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+          <td class="px-white">1</td>
+        </tr>
+        <tr>
+          <td class="px-black">0</td>
+          <td class="px-black">0</td>
+          <td class="px-black">0</td>
+          <td class="px-black">0</td>
+        </tr>
+      </table>
+      <div style="font-size:8pt; color:#888; text-align:center; margin-top:3px;">(ㄴ자 모양)</div>
+    </div>
+
+    <!-- 안내 -->
+    <div style="font-size:9.5pt; color:#555; line-height:1.8; align-self:center;">
+      두 이미지는 비슷해 보이지만<br>
+      어떤 픽셀이 다를까요?<br><br>
+      행렬로 바꾸면 차이를<br>
+      <strong>수학적으로</strong> 계산할 수 있습니다.
+    </div>
+
+  </div>
+
+  <hr class="thin">
+
+  <!-- ══════════════════════════════════════════ -->
+  <div class="section-label">Step 2 · 행렬로 표현하기</div>
+
+  <p style="margin-bottom:6px;">검정(■) = <strong>0</strong>, 흰색(□) = <strong>1</strong> 으로 빈칸을 채우시오. &nbsp;<span style="font-size:9pt; color:#888;">(이미지에 이미 숫자가 표시되어 있습니다. 아래 행렬 표에 옮겨 쓰시오.)</span></p>
+
+  <div class="two-col">
+    <div class="col">
+      <div class="col-title">행렬 A</div>
+      <div style="text-align:center;">
+        <table class="matrix-input">
+          <tr><td></td><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td><td></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="col">
+      <div class="col-title">행렬 B</div>
+      <div style="text-align:center;">
+        <table class="matrix-input">
+          <tr><td></td><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td><td></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <hr class="thin">
+
+  <!-- ══════════════════════════════════════════ -->
+  <div class="section-label">Step 3 · 차이 행렬 계산</div>
+
+  <div class="tip-box">
+    <strong>계산 방법:</strong> 두 행렬에서 같은 위치(i행, j열)의 값을 빼고 절댓값을 취합니다.<br>
+    각 위치의 값 = |A의 (i,j) 값 − B의 (i,j) 값|<br>
+    &nbsp;&nbsp;→ 값이 <strong>0</strong>이면 두 이미지에서 같은 픽셀, <strong>1</strong>이면 다른 픽셀<br>
+    <strong>예:</strong> A의 (1,1) = 0, B의 (1,1) = 0 이면 |0−0| = <strong>0</strong> (같음)
+  </div>
+
+  <p style="margin-bottom:6px;">차이 행렬 <strong>|A − B|</strong> 를 계산하여 빈칸을 채우시오.</p>
+
+  <div style="text-align:center; margin: 8px 0;">
+    <table class="matrix-input">
+      <tr><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td></tr>
+    </table>
+  </div>
+
+  <table class="result-table">
+    <thead>
+      <tr>
+        <th>항목</th>
+        <th>값</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="row-label">차이가 있는 픽셀 수 (합계)</td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="row-label">차이가 가장 큰 행 (몇 번째 행?)</td>
+        <td>&nbsp;</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="thin">
+
+  <!-- ══════════════════════════════════════════ -->
+  <div class="section-label">Step 4 · 명암 이미지의 행렬 표현</div>
+
+  <div class="problem-box">
+    <p>픽셀의 밝기를 <strong>0~255</strong> 사이의 숫자로 나타낼 수 있습니다.<br>
+    아래 명암 이미지의 픽셀 값을 그대로 행렬에 옮겨 쓰시오.</p>
+  </div>
+
+  <div class="tip-box">
+    <strong>0</strong> = 완전한 검정 &nbsp;/&nbsp; <strong>255</strong> = 완전한 흰색 &nbsp;/&nbsp;
+    중간 값일수록 회색 계열 &nbsp;&nbsp;
+    <span style="color:#888;">(흑백은 0/1 두 가지, 명암은 0~255 사이 256단계)</span>
+  </div>
+
+  <div class="grid-area">
+    <div class="grid-block">
+      <div class="grid-title">명암 이미지</div>
+      <table class="pixel-grid">
+        <tr>
+          <td class="px-g0">0</td>
+          <td class="px-g100">100</td>
+          <td class="px-g200">200</td>
+          <td class="px-g255">255</td>
+        </tr>
+        <tr>
+          <td class="px-g100">100</td>
+          <td class="px-g200">200</td>
+          <td class="px-g255">255</td>
+          <td class="px-g200">200</td>
+        </tr>
+        <tr>
+          <td class="px-g200">200</td>
+          <td class="px-g255">255</td>
+          <td class="px-g200">200</td>
+          <td class="px-g100">100</td>
+        </tr>
+        <tr>
+          <td class="px-g255">255</td>
+          <td class="px-g200">200</td>
+          <td class="px-g100">100</td>
+          <td class="px-g0">0</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="align-self:center; font-size:9.5pt; color:#555; line-height:1.9;">
+      밝기 값을 그대로<br>행렬의 성분으로 씁니다.<br>
+      <span style="color:#888;">(숫자만 옮기면 됩니다)</span>
+    </div>
+
+    <div class="grid-block">
+      <div class="grid-title">행렬</div>
+      <table class="matrix-input">
+        <tr><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <hr class="thin">
+
+  <!-- ══════════════════════════════════════════ -->
+  <div class="section-label">Step 5 · 컬러 이미지 → RGB 세 행렬</div>
+
+  <div class="problem-box">
+    <p>컬러 이미지의 각 픽셀은 <strong>(R, G, B)</strong> 세 값으로 이루어집니다.<br>
+    이를 분리하면 <strong>R 행렬, G 행렬, B 행렬</strong> 3개를 만들 수 있습니다.</p>
+    <p style="margin-top:4px; font-size:9.5pt; color:#555;">
+      아래 컬러 이미지의 각 픽셀에서 G(초록), B(파랑) 값을 분리하여 행렬을 완성하시오.<br>
+      <strong style="color:#c00;">R 행렬은 예시로 채워져 있습니다.</strong>
+    </p>
+  </div>
+
+  <!-- RGB 픽셀 이미지 -->
+  <div style="text-align:center; margin: 6px 0;">
+    <div style="font-weight:bold; font-size:10pt; margin-bottom:5px;">3×3 컬러 이미지 (각 픽셀의 R, G, B 값)</div>
+    <table class="rgb-display">
+      <tr>
+        <td style="background:rgb(200,0,0); color:#fff;">(200, 0, 0)</td>
+        <td style="background:rgb(0,200,0); color:#111;">(0, 200, 0)</td>
+        <td style="background:rgb(0,0,200); color:#fff;">(0, 0, 200)</td>
+      </tr>
+      <tr>
+        <td style="background:rgb(200,200,0); color:#111;">(200, 200, 0)</td>
+        <td style="background:rgb(100,100,100); color:#fff;">(100, 100, 100)</td>
+        <td style="background:rgb(0,200,200); color:#111;">(0, 200, 200)</td>
+      </tr>
+      <tr>
+        <td style="background:rgb(0,0,0); color:#fff;">(0, 0, 0)</td>
+        <td style="background:rgb(200,0,200); color:#fff;">(200, 0, 200)</td>
+        <td style="background:rgb(200,200,200); color:#111;">(200, 200, 200)</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 3개 행렬 -->
+  <div class="three-mat">
+
+    <div class="mat-block">
+      <div class="mat-title" style="color:#c00;">R 행렬 (예시)</div>
+      <table class="matrix-input-sm">
+        <tr><td class="mat-given">200</td><td class="mat-given">0</td><td class="mat-given">0</td></tr>
+        <tr><td class="mat-given">200</td><td class="mat-given">100</td><td class="mat-given">0</td></tr>
+        <tr><td class="mat-given">0</td><td class="mat-given">200</td><td class="mat-given">200</td></tr>
+      </table>
+    </div>
+
+    <div class="mat-block">
+      <div class="mat-title" style="color:#16a34a;">G 행렬 (작성)</div>
+      <table class="matrix-input-sm">
+        <tr><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td></tr>
+      </table>
+    </div>
+
+    <div class="mat-block">
+      <div class="mat-title" style="color:#2563eb;">B 행렬 (작성)</div>
+      <table class="matrix-input-sm">
+        <tr><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td></tr>
+      </table>
+    </div>
+
+    <div style="align-self:center; font-size:9.5pt; color:#555; line-height:1.9; margin-left:6px;">
+      컬러 이미지 1개<br>= R 행렬<br>+ G 행렬<br>+ B 행렬
+    </div>
+
+  </div>
+
+  <hr class="thin">
+
+  <div class="self-eval">
+    <div class="eval-title">🗒 자기평가</div>
+    <div class="eval-row">
+      <label><input type="checkbox"> 흑백 이미지를 0과 1의 행렬로 변환할 수 있다.</label>
+      <label><input type="checkbox"> 차이 행렬 |A−B|를 계산할 수 있다.</label>
+      <label><input type="checkbox"> 명암 이미지를 0~255 수치 행렬로 나타낼 수 있다.</label>
+      <label><input type="checkbox"> 컬러 이미지를 R·G·B 세 행렬로 분리할 수 있다.</label>
+    </div>
+  </div>
+
+  <p style="margin-top:10px; font-size:9pt; color:#888; text-align:right;">
+    인공지능 수학 | 수행평가 2 – 이미지 편 (4월)
+  </p>
+
+</body>
+</html>

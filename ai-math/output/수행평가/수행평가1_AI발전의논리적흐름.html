@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>수행평가1 – AI 발전의 논리적 흐름</title>
+  <style>
+    @page { size: A4; margin: 15mm 15mm 15mm 15mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+      font-size: 10.5pt;
+      color: #111;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .sheet-title { text-align: center; margin-bottom: 5px; }
+    .sheet-title h1 { font-size: 15pt; font-weight: bold; letter-spacing: 0.05em; }
+    .sheet-title h2 { font-size: 11pt; font-weight: normal; margin-top: 2px; }
+
+    .info-row {
+      display: flex; gap: 24px; justify-content: flex-end;
+      margin-bottom: 8px; font-size: 10.5pt;
+    }
+    .info-row span { border-bottom: 1px solid #333; min-width: 80px; display: inline-block; }
+
+    hr { border: none; border-top: 2px solid #111; margin: 5px 0; }
+    hr.thin { border-top: 1px solid #bbb; margin: 7px 0; }
+
+    .section-label {
+      font-weight: bold; font-size: 10.5pt;
+      background: #111; color: #fff;
+      padding: 2px 8px; display: inline-block; margin: 8px 0 5px 0;
+    }
+
+    .problem-box {
+      border: 1.5px solid #111; padding: 7px 11px;
+      margin-bottom: 8px; background: #f9f9f9; line-height: 1.7;
+    }
+
+    .tip-box {
+      border: 1px dashed #888; background: #fffbe6;
+      padding: 5px 10px; margin: 6px 0;
+      font-size: 9.5pt; line-height: 1.6;
+    }
+    .tip-box strong { color: #c00; }
+
+    /* ── 보기 박스 ── */
+    .box-bank {
+      border: 1.5px solid #555;
+      padding: 6px 12px;
+      margin: 6px 0;
+      background: #f0f4ff;
+      font-size: 10pt;
+      line-height: 1.8;
+    }
+    .box-bank strong { color: #222; }
+
+    /* ── 타임라인 표 ── */
+    table.timeline {
+      width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 10pt;
+    }
+    table.timeline th {
+      background: #333; color: #fff; padding: 4px 7px;
+      text-align: center; border: 1px solid #555;
+    }
+    table.timeline td {
+      border: 1px solid #aaa; padding: 5px 7px; vertical-align: middle;
+    }
+    table.timeline td.year {
+      text-align: center; font-weight: bold;
+      background: #f0f0f0; width: 13%;
+    }
+    table.timeline .blank-cell { background: #fff; min-height: 20px; }
+
+    /* ── 흐름도 ── */
+    .flow-wrap {
+      display: flex; align-items: stretch; gap: 0; margin: 8px 0 4px 0;
+    }
+    .flow-box {
+      flex: 1; border: 2px solid #222;
+      padding: 7px 5px; text-align: center;
+      background: #fff; display: flex; flex-direction: column; justify-content: center;
+    }
+    .flow-box .concept-blank {
+      font-size: 9pt; font-weight: bold; color: #888;
+      border-bottom: 1.5px solid #555; min-width: 80px;
+      display: inline-block; height: 20px; margin-bottom: 4px;
+    }
+    .flow-box .sub-text {
+      font-size: 8.5pt; color: #555; line-height: 1.4;
+    }
+    .flow-arrow-col {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      flex-shrink: 0; width: 32px;
+    }
+    .arrow-svg { width: 28px; height: 20px; }
+
+    /* ── 이유 테이블 ── */
+    table.reason-table {
+      width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 10pt;
+    }
+    table.reason-table th {
+      background: #444; color: #fff;
+      padding: 4px 7px; border: 1px solid #555; text-align: center;
+    }
+    table.reason-table td {
+      border: 1px solid #aaa; padding: 5px 7px;
+    }
+    table.reason-table td.q-cell {
+      background: #f0f0f0; width: 36%; font-weight: bold;
+    }
+    .write-cell { height: 32px; }
+
+    /* ── 논리 연산자 ── */
+    .logic-area {
+      display: flex; gap: 12px; margin: 8px 0; align-items: flex-start;
+    }
+    .logic-block { flex: 1; }
+    .logic-title {
+      font-weight: bold; text-align: center;
+      background: #444; color: #fff;
+      padding: 3px 6px; font-size: 10pt; margin-bottom: 0;
+    }
+    table.truth {
+      width: 100%; border-collapse: collapse; font-size: 10pt;
+    }
+    table.truth th {
+      background: #666; color: #fff;
+      padding: 4px 2px; border: 1px solid #555; text-align: center;
+    }
+    table.truth td {
+      border: 1px solid #aaa; padding: 5px 3px; text-align: center;
+    }
+    table.truth td.given { background: #f5f5f5; }
+    table.truth td.blank { background: #fff; min-height: 20px; }
+
+    /* ── 좌표 그래프 ── */
+    .graph-area {
+      display: flex; gap: 16px; align-items: flex-start; margin: 8px 0;
+    }
+    .graph-block { flex: 0 0 auto; }
+    .graph-block .g-title { font-weight: bold; text-align: center; margin-bottom: 4px; font-size: 10pt; }
+    .graph-desc { flex: 1; font-size: 10pt; line-height: 1.7; }
+    .graph-desc .q-title { font-weight: bold; margin-bottom: 4px; }
+
+    /* ── OX 표 ── */
+    table.ox-table {
+      width: 100%; border-collapse: collapse; font-size: 10pt; margin: 5px 0;
+    }
+    table.ox-table th {
+      background: #333; color: #fff; padding: 4px 8px;
+      border: 1px solid #555; text-align: center;
+    }
+    table.ox-table td {
+      border: 1px solid #bbb; padding: 5px 8px; vertical-align: middle;
+    }
+    table.ox-table td.ox-q { background: #fafafa; }
+    table.ox-table td.ox-ans { text-align: center; width: 60px; font-size: 13pt; }
+
+    /* ── 매칭 표 ── */
+    table.match-table {
+      width: 100%; border-collapse: collapse; font-size: 10.5pt; margin: 5px 0;
+    }
+    table.match-table td {
+      border: 1px solid #bbb; padding: 6px 10px; vertical-align: middle;
+    }
+    table.match-table td.m-left {
+      background: #eef4ff; font-weight: bold; width: 38%; text-align: center;
+    }
+    table.match-table td.m-arrow {
+      text-align: center; width: 12%; font-size: 14pt; color: #555; border: none;
+    }
+    table.match-table td.m-blank {
+      background: #fff; font-size: 10pt; min-height: 24px;
+    }
+
+    /* ── 서술 질문 ── */
+    .q-block { margin: 7px 0; }
+    .q-block .q-title { font-weight: bold; margin-bottom: 3px; line-height: 1.5; }
+    .write-lines {
+      border: 1px solid #aaa; padding: 5px 7px; min-height: 52px;
+      background: #fff;
+      background-image: repeating-linear-gradient(
+        transparent, transparent 25px, #ddd 25px, #ddd 26px
+      );
+      line-height: 1.9;
+    }
+    .write-lines-sm {
+      border: 1px solid #aaa; padding: 5px 7px; min-height: 34px;
+      background: #fff;
+    }
+
+    /* ── 자기평가 ── */
+    .self-eval {
+      border: 1px solid #aaa; padding: 5px 10px; margin-top: 8px; font-size: 9.5pt;
+    }
+    .eval-row { display: flex; gap: 16px; margin-top: 3px; flex-wrap: wrap; }
+
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+
+  <div class="sheet-title">
+    <h1>인공지능 수학</h1>
+    <h2>— AI 발전의 논리적 흐름 —</h2>
+  </div>
+  <hr>
+
+  <div class="info-row">
+    학번: <span>&nbsp;</span>&nbsp;&nbsp;이름: <span>&nbsp;</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section-label">Part 1 · 인공지능 발전 타임라인</div>
+
+  <div class="problem-box">
+    인공지능 역사에서 중요한 사건을 순서대로 정리했습니다. 빈칸 ①~⑤를 아래 <strong>[ 보기 ]</strong>에서 골라 쓰시오.
+  </div>
+
+  <div class="box-bank">
+    <strong>[ 보기 ]</strong> &nbsp;&nbsp;
+    퍼셉트론 &nbsp;/&nbsp; 역전파 알고리즘 &nbsp;/&nbsp; XOR 문제 &nbsp;/&nbsp; 딥러닝(AlexNet) &nbsp;/&nbsp; 맥컬록-피츠 뉴런
+  </div>
+
+  <table class="timeline">
+    <thead>
+      <tr><th>연도</th><th>사건 / 개념</th><th>의미</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="year">1943</td>
+        <td class="blank-cell">① &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td>최초의 인공 뉴런 모델 제안</td>
+      </tr>
+      <tr>
+        <td class="year">1958</td>
+        <td class="blank-cell">② &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td>입력에 가중치를 곱해 0 또는 1 출력</td>
+      </tr>
+      <tr>
+        <td class="year">1969</td>
+        <td class="blank-cell">③ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td>단층 퍼셉트론으로 풀 수 없는 문제 발견 → AI 겨울</td>
+      </tr>
+      <tr>
+        <td class="year">1986</td>
+        <td class="blank-cell">④ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td>오차를 역으로 전파하며 가중치 학습</td>
+      </tr>
+      <tr>
+        <td class="year">2012</td>
+        <td class="blank-cell">⑤ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td>이미지 분류 대회 압도적 성능 → 딥러닝 시대 개막</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="thin">
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section-label">Part 2 · 개념 흐름도 완성</div>
+
+  <div class="problem-box">
+    아래 <strong>[ 보기 ]</strong>에서 알맞은 개념을 골라 흐름도의 빈칸 (가)~(라)에 쓰고,
+    각 화살표 아래에 <strong>다음 단계로 넘어간 이유</strong>를 한 문장으로 적으시오.
+  </div>
+
+  <div class="box-bank">
+    <strong>[ 보기 ]</strong> &nbsp;&nbsp;
+    퍼셉트론 &nbsp;/&nbsp; XOR 문제(단층의 한계) &nbsp;/&nbsp; 다층 신경망(역전파 알고리즘) &nbsp;/&nbsp; 딥러닝(AlexNet)
+  </div>
+
+  <!-- 흐름도 -->
+  <div class="flow-wrap">
+    <div class="flow-box">
+      <div class="concept-blank">&nbsp;</div>
+      <div style="font-size:8pt; font-weight:bold; color:#888; margin-bottom:3px;">(가)</div>
+      <div class="sub-text">가중합→0 or 1</div>
+    </div>
+    <div class="flow-arrow-col">
+      <svg class="arrow-svg" viewBox="0 0 28 20"><line x1="2" y1="10" x2="22" y2="10" stroke="#333" stroke-width="2"/><polygon points="22,6 28,10 22,14" fill="#333"/></svg>
+    </div>
+    <div class="flow-box">
+      <div class="concept-blank">&nbsp;</div>
+      <div style="font-size:8pt; font-weight:bold; color:#888; margin-bottom:3px;">(나)</div>
+      <div class="sub-text">선형 분류 한계</div>
+    </div>
+    <div class="flow-arrow-col">
+      <svg class="arrow-svg" viewBox="0 0 28 20"><line x1="2" y1="10" x2="22" y2="10" stroke="#333" stroke-width="2"/><polygon points="22,6 28,10 22,14" fill="#333"/></svg>
+    </div>
+    <div class="flow-box">
+      <div class="concept-blank">&nbsp;</div>
+      <div style="font-size:8pt; font-weight:bold; color:#888; margin-bottom:3px;">(다)</div>
+      <div class="sub-text">다층 구조로<br>XOR 해결</div>
+    </div>
+    <div class="flow-arrow-col">
+      <svg class="arrow-svg" viewBox="0 0 28 20"><line x1="2" y1="10" x2="22" y2="10" stroke="#333" stroke-width="2"/><polygon points="22,6 28,10 22,14" fill="#333"/></svg>
+    </div>
+    <div class="flow-box">
+      <div class="concept-blank">&nbsp;</div>
+      <div style="font-size:8pt; font-weight:bold; color:#888; margin-bottom:3px;">(라)</div>
+      <div class="sub-text">층을 깊이 쌓음</div>
+    </div>
+  </div>
+
+  <table class="reason-table">
+    <thead>
+      <tr><th style="width:36%">화살표</th><th>이 단계로 넘어간 이유 (한 문장으로)</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="q-cell">(가) 퍼셉트론 → (나)</td>
+        <td class="write-cell"></td>
+      </tr>
+      <tr>
+        <td class="q-cell">(나) → (다) 다층 신경망</td>
+        <td class="write-cell"></td>
+      </tr>
+      <tr>
+        <td class="q-cell">(다) → (라) 딥러닝</td>
+        <td class="write-cell"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="thin">
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section-label">Part 3 · 논리 연산자와 퍼셉트론의 한계</div>
+
+  <div class="problem-box">
+    논리 연산자의 진리표를 완성하고, 퍼셉트론으로 풀 수 없는 연산이 무엇인지 확인하시오.
+  </div>
+
+  <!-- 진리표 3개 -->
+  <div class="logic-area">
+
+    <div class="logic-block">
+      <div class="logic-title">AND</div>
+      <table class="truth">
+        <thead><tr><th>A</th><th>B</th><th>A AND B</th></tr></thead>
+        <tbody>
+          <tr><td class="given">0</td><td class="given">0</td><td class="blank"></td></tr>
+          <tr><td class="given">0</td><td class="given">1</td><td class="blank"></td></tr>
+          <tr><td class="given">1</td><td class="given">0</td><td class="blank"></td></tr>
+          <tr><td class="given">1</td><td class="given">1</td><td class="blank"></td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:8.5pt; color:#666; margin-top:3px; text-align:center;">둘 다 1일 때만 1</div>
+    </div>
+
+    <div class="logic-block">
+      <div class="logic-title">OR</div>
+      <table class="truth">
+        <thead><tr><th>A</th><th>B</th><th>A OR B</th></tr></thead>
+        <tbody>
+          <tr><td class="given">0</td><td class="given">0</td><td class="blank"></td></tr>
+          <tr><td class="given">0</td><td class="given">1</td><td class="blank"></td></tr>
+          <tr><td class="given">1</td><td class="given">0</td><td class="blank"></td></tr>
+          <tr><td class="given">1</td><td class="given">1</td><td class="blank"></td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:8.5pt; color:#666; margin-top:3px; text-align:center;">하나라도 1이면 1</div>
+    </div>
+
+    <div class="logic-block">
+      <div class="logic-title" style="background:#c00;">XOR</div>
+      <table class="truth">
+        <thead><tr><th>A</th><th>B</th><th>A XOR B</th></tr></thead>
+        <tbody>
+          <tr><td class="given">0</td><td class="given">0</td><td class="blank"></td></tr>
+          <tr><td class="given">0</td><td class="given">1</td><td class="blank"></td></tr>
+          <tr><td class="given">1</td><td class="given">0</td><td class="blank"></td></tr>
+          <tr><td class="given">1</td><td class="given">1</td><td class="blank"></td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:8.5pt; color:#c00; margin-top:3px; text-align:center;">서로 다를 때만 1</div>
+    </div>
+
+  </div>
+
+  <!-- 좌표 그래프 -->
+  <div class="graph-area">
+    <div class="graph-block">
+      <div class="g-title">XOR 결과를 좌표에 표시</div>
+      <!-- SVG 좌표계 -->
+      <svg width="150" height="150" viewBox="-15 -15 165 165" style="border:1px solid #aaa; background:#fff; display:block; margin:0 auto;">
+        <!-- 축 -->
+        <line x1="10" y1="130" x2="140" y2="130" stroke="#333" stroke-width="1.5"/>
+        <line x1="10" y1="130" x2="10" y2="0" stroke="#333" stroke-width="1.5"/>
+        <!-- 화살표 -->
+        <polygon points="140,125 147,130 140,135" fill="#333"/>
+        <polygon points="5,0 10,-7 15,0" fill="#333"/>
+        <!-- 눈금 레이블 -->
+        <text x="52" y="145" font-size="11" font-family="sans-serif">0</text>
+        <text x="104" y="145" font-size="11" font-family="sans-serif">1</text>
+        <text x="0" y="78" font-size="11" font-family="sans-serif">1</text>
+        <text x="0" y="130" font-size="11" font-family="sans-serif">0</text>
+        <text x="148" y="134" font-size="11" font-family="sans-serif">A</text>
+        <text x="12" y="-4" font-size="11" font-family="sans-serif">B</text>
+        <!-- 눈금선 -->
+        <line x1="58" y1="127" x2="58" y2="133" stroke="#333" stroke-width="1"/>
+        <line x1="108" y1="127" x2="108" y2="133" stroke="#333" stroke-width="1"/>
+        <line x1="7" y1="75" x2="13" y2="75" stroke="#333" stroke-width="1"/>
+        <!-- 학생이 직접 점 찍는 영역 (점선 격자) -->
+        <line x1="58" y1="10" x2="58" y2="130" stroke="#ddd" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="108" y1="10" x2="108" y2="130" stroke="#ddd" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="10" y1="75" x2="140" y2="75" stroke="#ddd" stroke-width="1" stroke-dasharray="3,3"/>
+        <!-- 출력 0 : (0,0) (1,1) → 빈 원 (학생이 표시) -->
+        <circle cx="58" cy="130" r="7" fill="white" stroke="#888" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <circle cx="108" cy="75" r="7" fill="white" stroke="#888" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <!-- 출력 1 : (0,1) (1,0) → 채운 원 (학생이 표시) -->
+        <circle cx="58" cy="75" r="7" fill="white" stroke="#888" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <circle cx="108" cy="130" r="7" fill="white" stroke="#888" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <!-- 안내 텍스트 -->
+        <text x="20" y="155" font-size="8" fill="#888">● = 출력 1  ○ = 출력 0</text>
+      </svg>
+      <div style="font-size:8.5pt; color:#555; text-align:center; margin-top:3px;">
+        XOR 결과에 따라 ●(출력 1) / ○(출력 0) 표시
+      </div>
+    </div>
+
+    <div class="graph-desc">
+      <div class="q-title">① XOR 진리표를 바탕으로 왼쪽 좌표에 각 점을 ●(출력 1) 또는 ○(출력 0)으로 표시하시오.</div>
+      <div style="margin-top:8px; font-size:9.5pt; color:#555;">
+        &nbsp;&nbsp;(A=0, B=0) → 출력: _____ &nbsp;&nbsp;&nbsp; (A=0, B=1) → 출력: _____<br>
+        &nbsp;&nbsp;(A=1, B=0) → 출력: _____ &nbsp;&nbsp;&nbsp; (A=1, B=1) → 출력: _____
+      </div>
+      <div class="q-title" style="margin-top:10px;">② ●과 ○을 직선 하나로 나눌 수 있는가?</div>
+      <div class="write-lines-sm" style="margin-top:4px;"></div>
+      <div class="q-title" style="margin-top:8px;">③ 위 좌표 그래프를 근거로, 이것이 왜 퍼셉트론의 한계인지 설명하시오.</div>
+      <div class="write-lines-sm" style="margin-top:4px;"></div>
+    </div>
+  </div>
+
+  <hr class="thin">
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section-label">Part 4 · 인공지능의 구조와 수학의 역할</div>
+
+  <!-- 4-1: 포함관계 -->
+  <div style="font-weight:bold; font-size:10.5pt; margin-bottom:5px;">
+    4-1. 인공지능 · 기계학습 · 딥러닝의 포함관계
+  </div>
+  <div class="problem-box">
+    아래 <strong>[ 보기 ]</strong>에서 골라 동심원의 빈칸 (가)~(다)를 채우시오.<br>
+    그리고 아래 O/X 문제에 ○ 또는 ✕를 쓰시오.<br>
+    <span style="color:#555; font-size:9.5pt;">[ 보기: &nbsp; 인공지능(AI) &nbsp;/&nbsp; 기계학습(Machine Learning) &nbsp;/&nbsp; 딥러닝(Deep Learning) ]</span>
+  </div>
+
+  <div style="display:flex; gap:16px; align-items:flex-start; margin:6px 0;">
+
+    <!-- 동심원 다이어그램 -->
+    <div style="flex:0 0 190px; text-align:center;">
+      <svg width="190" height="168" viewBox="0 0 190 168" style="display:block; margin:0 auto;">
+        <!-- 가장 큰 원 (AI) -->
+        <ellipse cx="95" cy="86" rx="88" ry="76" fill="#e8f0ff" stroke="#2563eb" stroke-width="2"/>
+        <!-- 중간 원 (ML) -->
+        <ellipse cx="95" cy="94" rx="59" ry="52" fill="#e6faf0" stroke="#16a34a" stroke-width="2"/>
+        <!-- 가장 작은 원 (DL) -->
+        <ellipse cx="95" cy="104" rx="32" ry="28" fill="#fff9e0" stroke="#d97706" stroke-width="2.5"/>
+        <!-- 빈칸 텍스트 -->
+        <text x="95" y="18" text-anchor="middle" font-size="11" font-family="'Malgun Gothic',sans-serif" fill="#2563eb" font-weight="bold">(가)______________</text>
+        <text x="95" y="48" text-anchor="middle" font-size="11" font-family="'Malgun Gothic',sans-serif" fill="#16a34a" font-weight="bold">(나)__________</text>
+        <text x="95" y="105" text-anchor="middle" font-size="10" font-family="'Malgun Gothic',sans-serif" fill="#d97706" font-weight="bold">(다)_______</text>
+      </svg>
+      <div style="font-size:8pt; color:#888; margin-top:2px;">가장 큰 원 = 가장 넓은 개념</div>
+    </div>
+
+    <!-- O/X 문제 -->
+    <div style="flex:1;">
+      <div style="font-size:9.5pt; color:#555; margin-bottom:5px;">
+        다음 설명이 옳으면 ○, 틀리면 ✕를 쓰시오.
+      </div>
+      <table class="ox-table">
+        <thead>
+          <tr><th style="width:75%">설명</th><th>O / X</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="ox-q">딥러닝은 기계학습의 한 종류이다.</td>
+            <td class="ox-ans"></td>
+          </tr>
+          <tr>
+            <td class="ox-q">기계학습을 사용하면 반드시 딥러닝을 사용하는 것이다.</td>
+            <td class="ox-ans"></td>
+          </tr>
+          <tr>
+            <td class="ox-q">모든 인공지능이 기계학습을 사용하는 것은 아니다.</td>
+            <td class="ox-ans"></td>
+          </tr>
+          <tr>
+            <td class="ox-q">딥러닝을 사용하면 인공지능을 사용한 것이다.</td>
+            <td class="ox-ans"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="thin">
+
+  <!-- 4-2: 데이터와 수학 도구 연결 -->
+  <div style="font-weight:bold; font-size:10.5pt; margin-bottom:5px;">
+    4-2. 데이터 유형과 수학적 표현
+  </div>
+  <div class="problem-box">
+    인공지능은 데이터를 처리하기 위해 종류에 따라 다른 수학적 도구를 사용합니다.<br>
+    <strong>[ 보기 ]</strong>에서 골라 각 데이터에 알맞은 수학적 표현을 쓰시오.<br>
+    <span style="color:#555; font-size:9.5pt;">[ 보기: &nbsp; 행렬(matrix) &nbsp;/&nbsp; 벡터(vector) &nbsp;/&nbsp; 함수(function) ]</span>
+  </div>
+
+  <table class="match-table">
+    <tbody>
+      <tr>
+        <td class="m-left">📝 텍스트 (문장, 단어)</td>
+        <td class="m-arrow">→</td>
+        <td class="m-blank">① &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="m-left">🖼 이미지 (사진, 픽셀)</td>
+        <td class="m-arrow">→</td>
+        <td class="m-blank">② &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="m-left">🤖 판단·예측 결과 (0 또는 1)</td>
+        <td class="m-arrow">→</td>
+        <td class="m-blank">③ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="q-block" style="margin-top:8px;">
+    <div class="q-title">Q. 텍스트나 이미지처럼 형태가 다른 데이터를 모두 수학적으로 표현해야 하는 이유는 무엇인가? (1~2문장)</div>
+    <div class="write-lines"></div>
+  </div>
+
+  <hr class="thin">
+
+  <div class="self-eval">
+    <strong>🗒 자기평가</strong>
+    <div class="eval-row" style="margin-top:4px;">
+      <label><input type="checkbox"> AI 발전 흐름을 순서대로 설명할 수 있다.</label>
+      <label><input type="checkbox"> 논리 연산자(AND/OR/XOR)를 구분할 수 있다.</label>
+      <label><input type="checkbox"> 퍼셉트론이 XOR를 풀지 못하는 이유를 설명할 수 있다.</label>
+      <label><input type="checkbox"> AI⊃기계학습⊃딥러닝 포함관계를 설명할 수 있다.</label>
+      <label><input type="checkbox"> 텍스트·이미지·판단에 쓰이는 수학 도구를 구분할 수 있다.</label>
+    </div>
+  </div>
+
+  <p style="margin-top:8px; font-size:8.5pt; color:#888; text-align:right;">
+    인공지능 수학 | 수행평가 1 (3월) | 20점 만점
+  </p>
+
+</body>
+</html>
