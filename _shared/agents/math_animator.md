@@ -204,12 +204,41 @@ anim.addStep({ id: 2, effect: 'number_substitute', ... });
 
 ---
 
+## MathJax 모범 사례 (MANDATORY)
+
+### 렌더링
+- `window.safeTypeset()` 사용 (직접 `MathJax.typesetPromise()` 호출 금지)
+- `setTimeout` 대신 `gsap.delayedCall()` 사용
+- 인라인: `\( x^2 + 1 \)` — 텍스트 내 변수용
+- 디스플레이: `\[ \sum_{i=1}^{n} x_i \]` — 독립 수식용
+
+### 자주 쓰는 LaTeX 패턴
+| 개념 | LaTeX | 비고 |
+|------|-------|------|
+| 가중합 | `z = w_1 x_1 + w_2 x_2 + b` | |
+| 숫자 강조 | `\color{#f39c12}{0.5} \times \color{#00d4ff}{1}` | accent color 사용 |
+| 행렬 | `\begin{pmatrix} a & b \\ c & d \end{pmatrix}` | |
+| 조건함수 | `\begin{cases} 1 & z \geq 0 \\ 0 & z < 0 \end{cases}` | |
+| 멀티라인 | `\begin{aligned} z &= ... \\ y &= ... \end{aligned}` | 긴 수식 분할 |
+
+### 오버플로우 방지
+- 그리드 컬럼 안 display math: `<div style="overflow-x:auto;">` 래핑
+- 긴 수식: `\begin{aligned}` 멀티라인
+- 좁은 공간: `\tfrac` (text-size) 사용
+
+## 애니메이션 단계 제한 (MANDATORY)
+- 슬라이드당 step-box 최대 3개 (동시 표시)
+- 5단계 이상 계산 → `table_row_fill` 패턴 사용
+- step-box는 `.visible` 클래스로 표시 (인라인 스타일 직접 수정 금지)
+
+---
+
 ## 애니메이션 설계 원칙
 - **클릭당 1~2개 요소만** 등장 (한꺼번에 너무 많이 나오지 않게)
 - **일반 수식 먼저, 숫자 대입 나중**에 보여주기
 - 각 단계 지속시간: 0.6~1.0초
 - 계산 표는 모든 애니메이션에 동반 권장
-- MathJax 재렌더링: 수식이 새로 등장할 때마다 `MathJax.typesetPromise()` 호출
+- MathJax 재렌더링: 수식이 새로 등장할 때마다 `safeTypeset()` 호출
 
 ---
 

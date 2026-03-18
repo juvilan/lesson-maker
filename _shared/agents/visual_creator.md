@@ -44,7 +44,9 @@
 ### 범용 1: 함수 그래프 (Chart.js)
 수학I, 수학II, 미적분에서 공통으로 사용.
 ```html
-<canvas id="{{asset_id}}" width="480" height="300"></canvas>
+<div style="position:relative; max-height:280px;">
+<canvas id="{{asset_id}}"></canvas>
+</div>
 <script>
 (function() {
   const xMin = {{x_min}}, xMax = {{x_max}};
@@ -62,7 +64,8 @@
       }]
     },
     options: {
-      responsive: false, animation: false,
+      responsive: true, maintainAspectRatio: true, aspectRatio: 1.6,
+      animation: false,
       plugins: {
         legend: { labels: { color: '#ecf0f1', font: { size: 12 } } },
         tooltip: { callbacks: { label: ctx => `y = ${ctx.parsed.y.toFixed(3)}` } }
@@ -103,10 +106,13 @@ new p5(function(p) {
   let ox, oy; // 원점
 
   p.setup = function() {
-    const c = p.createCanvas({{width}}, {{height}});
+    const wrap = document.getElementById('{{asset_id}}-wrap');
+    const w = Math.min(wrap ? wrap.clientWidth : {{width}}, 480);
+    const h = Math.min(w * 0.625, 300);
+    const c = p.createCanvas(w, h);
     c.parent('{{asset_id}}-wrap');
-    ox = {{width}} / 2;
-    oy = {{height}} / 2;
+    ox = w / 2;
+    oy = h / 2;
   };
 
   p.draw = function() {
@@ -156,7 +162,9 @@ new p5(function(p) {
 ### 범용 4: 분포 차트 (확률통계용, Chart.js)
 
 ```html
-<canvas id="{{asset_id}}" width="480" height="280"></canvas>
+<div style="position:relative; max-height:280px;">
+<canvas id="{{asset_id}}"></canvas>
+</div>
 <script>
 (function() {
   // 이항분포 B(n=10, p=0.5) 예시
@@ -180,7 +188,8 @@ new p5(function(p) {
         backgroundColor: '#3498db88', borderColor: '#3498db', borderWidth: 2 }]
     },
     options: {
-      responsive: false, animation: false,
+      responsive: true, maintainAspectRatio: true, aspectRatio: 1.6,
+      animation: false,
       plugins: { legend: { labels: { color: '#ecf0f1' } } },
       scales: {
         x: { ticks: { color: '#bdc3c7', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.1)' } },
@@ -213,6 +222,14 @@ new p5(function(p) {
   <!-- 슬라이더 변경 시 JS로 업데이트 -->
 </div>
 ```
+
+---
+
+## 컨테이너 크기 규칙 (MANDATORY)
+- Chart.js: `responsive: true`, 래퍼 `<div style="position:relative; max-height:280px;">` 필수
+- p5.js: 컨테이너 width 읽기, 최대 480×300
+- SVG: `viewBox` + `preserveAspectRatio="xMidYMid meet"`, 컨테이너 `overflow: hidden`
+- 모든 시각화: max-height 300px (또는 42vh 중 작은 값)
 
 ---
 

@@ -15,10 +15,18 @@
       tex: {
         inlineMath: [['\\(', '\\)']],
         displayMath: [['\\[', '\\]']],
-        packages: { '[+]': ['boldsymbol'] }
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
       },
       options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
-      startup: { typeset: false }
+      startup: {
+        typeset: false,
+        ready: () => {
+          MathJax.startup.defaultReady();
+          window.mathJaxReady = true;
+        }
+      },
+      chtml: { scale: 0.92 }
     };
   </script>
   <script src="../../libs/mathjax/tex-chtml.js" id="MathJax-script" async></script>
@@ -38,6 +46,11 @@
       --danger: #e74c3c;
       --info: #3498db;
       --text-muted: #95a5a6;
+      /* ── ppt-maker 디자인 시스템 토큰 ── */
+      --text-dim: #706858;
+      --border: #1e1c18;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* ── 수식/숫자 강조 ── */
@@ -51,13 +64,18 @@
       background: rgba(255,255,255,0.07);
       border-left: 4px solid var(--accent);
       border-radius: 0 8px 8px 0;
-      padding: 0.6em 1em;
-      margin: 0.5em 0;
+      padding: 0;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
       opacity: 0;
       transform: translateY(10px);
-      transition: opacity 0.3s, transform 0.3s;
+      transition: all 0.3s ease;
     }
     .reveal .step-box.visible {
+      padding: 0.6em 1em;
+      margin: 0.5em 0;
+      max-height: 200px;
       opacity: 1;
       transform: translateY(0);
     }
@@ -230,6 +248,177 @@
     /* ── 진행 바 커스터마이징 ── */
     .reveal .progress { height: 4px; }
     .reveal .progress span { background: var(--accent); }
+
+    /* ── 슬라이드 오버플로우 보호 ── */
+    .reveal {
+      font-size: 28px;
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+    }
+    .reveal .slides section {
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    /* ── MathJax display math 오버플로우 방지 ── */
+    .reveal mjx-container[jax="CHTML"][display="true"] {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    /* ── 카드 변형 ── */
+    .reveal .card { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 1em; }
+    .reveal .card-accent { border: 1px solid var(--accent); }
+
+    /* ── 수식 박스 ── */
+    .reveal .formula-box {
+      background: rgba(255,255,255,0.04);
+      border-radius: 8px;
+      padding: 0.8em;
+      text-align: center;
+      margin: 0.4em 0;
+    }
+
+    /* ── 정의 박스 ── */
+    .reveal .definition-box {
+      border-left: 4px solid var(--info);
+      padding: 0.6em 1em;
+      background: rgba(52,152,219,0.08);
+      border-radius: 0 8px 8px 0;
+      margin: 0.5em 0;
+    }
+
+    /* ── 키워드 하이라이트 ── */
+    .reveal .kw { color: var(--accent); font-weight: 600; }
+    .reveal .kw-info { color: var(--info); font-weight: 600; }
+    .reveal .kw-success { color: var(--success); font-weight: 600; }
+    .reveal .kw-danger { color: var(--danger); font-weight: 600; }
+
+    /* ════════════════════════════════════════
+       ppt-maker 컴포넌트 (업그레이드)
+    ════════════════════════════════════════ */
+
+    /* ── terminal-badge: > 커서 블링크 라벨 ── */
+    .reveal .terminal-badge {
+      font-family: var(--font-mono);
+      font-size: 0.65em;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.3em;
+      display: inline-block;
+    }
+    .reveal .terminal-badge::before {
+      content: '> ';
+      animation: tblink 1s step-end infinite;
+    }
+    @keyframes tblink { 50% { opacity: 0; } }
+
+    /* ── badge: 알약형 태그 ── */
+    .reveal .badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.6em;
+      color: var(--accent);
+      padding: 0.2em 0.6em;
+      border: 1px solid var(--accent-dim);
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── accent-line: 강조 구분선 ── */
+    .reveal .accent-line {
+      width: 50px;
+      height: 2px;
+      background: var(--accent);
+      margin: 0.5em 0;
+    }
+
+    /* ── info-card: 정보 카드 ── */
+    .reveal .info-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border, #1e1c18);
+      border-radius: 6px;
+      padding: 0.9em 1.1em;
+      width: 100%;
+    }
+    .reveal .info-card .card-title {
+      font-family: var(--font-mono);
+      font-size: 0.65em;
+      color: var(--text-dim, #706858);
+      margin-bottom: 0.5em;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── split-card: split 내부 카드 ── */
+    .reveal .split-card {
+      padding: 0.9em 1em;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border, #1e1c18);
+      border-radius: 6px;
+    }
+
+    /* ── code-block: 줄번호 + 하이라이트 코드 블록 ── */
+    .reveal .code-block {
+      background: #111118;
+      border: 1px solid var(--border, #1e1c18);
+      border-radius: 6px;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 0.65em;
+      line-height: 1.7;
+      counter-reset: line-number;
+      width: 100%;
+      text-align: left;
+    }
+    .reveal .code-block::before {
+      content: attr(data-language);
+      display: block;
+      background: rgba(198,165,92,0.06);
+      color: var(--text-dim, #706858);
+      font-size: 0.8em;
+      padding: 0.4em 1em;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid var(--border, #1e1c18);
+    }
+    .reveal .code-block code { display: block; padding: 0.8rem 1rem; overflow-x: auto; }
+    .reveal .code-block .line {
+      display: block;
+      padding: 2px 0 2px 3em;
+      position: relative;
+      counter-increment: line-number;
+      transition: background-color 0.3s ease, opacity 0.3s ease;
+      color: #B8B0A0;
+    }
+    .reveal .code-block .line::before {
+      content: counter(line-number);
+      position: absolute;
+      left: 0;
+      width: 2.5em;
+      text-align: right;
+      color: #3a3830;
+      font-size: 0.85em;
+      user-select: none;
+    }
+    .reveal .code-block .line--highlight {
+      background: rgba(198,165,92,0.08);
+      border-left: 3px solid var(--accent);
+      padding-left: calc(3em - 3px);
+    }
+    .reveal .code-block .line--highlight::before { color: var(--accent); }
+    .reveal .code-block.dim-others .line:not(.line--highlight) { opacity: 0.3; }
+
+    /* 신택스 컬러 (ppt-maker 기준) */
+    .reveal .code-block .fn  { color: #D4B87A; }
+    .reveal .code-block .str { color: #A89070; }
+    .reveal .code-block .cmt { color: #555040; font-style: italic; }
+    .reveal .code-block .var { color: #E0D0B0; }
+    .reveal .code-block .op  { color: #8A8070; }
+    .reveal .code-block .tag { color: #C6A55C; }
+    .reveal .code-block .attr { color: #D4B87A; }
+    .reveal .code-block .val { color: #A89070; }
+    .reveal .code-block .kw  { color: #C6A55C; font-weight: normal; }
   </style>
 </head>
 <body>
@@ -259,6 +448,11 @@
     backgroundTransition: 'fade',
     center: true,
     touch: true,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 1.5,
     keyboard: {
       // 왼쪽/오른쪽 화살표: 슬라이드 이동 (기본)
       // 위/아래 화살표: 수직 슬라이드 이동 (기본)
@@ -280,11 +474,32 @@
     plugins: []
   });
 
-  // 슬라이드 전환 시 MathJax 재렌더링
-  Reveal.on('slidechanged', () => {
-    if (typeof MathJax !== 'undefined') {
-      MathJax.typesetPromise();
+  // 안전한 MathJax 호출 유틸리티
+  window.safeTypeset = function(elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
     }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => safeTypeset());
+  Reveal.on('ready', () => {
+    safeTypeset();
+    // code-block 하이라이트 적용
+    document.querySelectorAll('.code-block[data-highlight-lines]').forEach(pre => {
+      const ranges = new Set();
+      pre.dataset.highlightLines.split(',').forEach(part => {
+        part = part.trim();
+        if (part.includes('-')) {
+          const [a, b] = part.split('-').map(Number);
+          for (let i = a; i <= b; i++) ranges.add(i);
+        } else { ranges.add(Number(part)); }
+      });
+      pre.querySelectorAll('.line').forEach((line, i) => {
+        if (ranges.has(i + 1)) line.classList.add('line--highlight');
+      });
+      if (ranges.size > 0) pre.classList.add('dim-others');
+    });
   });
 </script>
 

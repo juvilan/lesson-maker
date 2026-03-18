@@ -27,7 +27,25 @@
     },
     "learning_objectives": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "object",
+        "required": ["text", "bloom_level"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "'~할 수 있다' 형식의 학습 목표 문장"
+          },
+          "bloom_level": {
+            "type": "string",
+            "enum": ["기억", "이해", "적용", "분석", "평가", "창조"],
+            "description": "블룸 분류체계 수준"
+          },
+          "achievement_standard": {
+            "type": "string",
+            "description": "교육과정 성취기준 코드 또는 설명 (선택)"
+          }
+        }
+      }
     },
     "key_concepts": {
       "type": "array",
@@ -202,6 +220,41 @@
           "problem": { "type": "string" },
           "type": { "type": "string" },
           "hint": { "type": "string" }
+        }
+      }
+    },
+    "worksheet_requirements": {
+      "type": "array",
+      "description": "오케스트레이터가 사전 배정한 학습지 문제 골격. worksheet_generator는 이 ID와 설정을 그대로 사용한다.",
+      "items": {
+        "type": "object",
+        "required": ["problem_id", "type", "bloom_level", "difficulty", "source_concept"],
+        "properties": {
+          "problem_id": {
+            "type": "string",
+            "description": "문제 고유 ID",
+            "pattern": "^ws-\\d{2}-[a-z_]+$",
+            "example": "ws-01-recall"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["객관식", "단답형", "서술형", "계산형"],
+            "description": "문제 유형"
+          },
+          "bloom_level": {
+            "type": "string",
+            "enum": ["기억", "이해", "적용", "분석", "평가", "창조"],
+            "description": "블룸 분류체계 수준"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": ["기본", "중간", "심화"],
+            "description": "문제 난이도"
+          },
+          "source_concept": {
+            "type": "string",
+            "description": "출제 근거 개념 (key_concepts[].name 참조)"
+          }
         }
       }
     }

@@ -95,6 +95,38 @@
         }
       }
     },
+    "include_worksheet": {
+      "type": "boolean",
+      "default": true,
+      "description": "학습지 생성 여부. false이면 기존 교안(HTML)만 생성."
+    },
+    "worksheet_options": {
+      "type": "object",
+      "description": "학습지 생성 옵션 (include_worksheet: true일 때만 적용)",
+      "properties": {
+        "problem_count": {
+          "type": "integer",
+          "default": 10,
+          "minimum": 3,
+          "maximum": 30,
+          "description": "학습지 문제 총 수"
+        },
+        "difficulty_distribution": {
+          "type": "object",
+          "description": "난이도별 문제 비율 (합이 1.0이 되어야 함)",
+          "properties": {
+            "기본": { "type": "number", "default": 0.4 },
+            "중간": { "type": "number", "default": 0.4 },
+            "심화": { "type": "number", "default": 0.2 }
+          }
+        },
+        "include_answer_key": {
+          "type": "boolean",
+          "default": true,
+          "description": "정답지 별도 생성 여부"
+        }
+      }
+    },
     "session_id": {
       "type": "string",
       "description": "작업 세션 ID (workspace/{session_id}/ 폴더 생성에 사용)"

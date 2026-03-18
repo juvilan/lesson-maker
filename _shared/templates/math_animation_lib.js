@@ -61,8 +61,9 @@ class MathStepAnimator {
     this.currentStep = -1;
     const container = document.getElementById(`anim-${this.id}`);
     if (container) {
-      // 모든 단계 숨기기
-      container.querySelectorAll('.anim-step').forEach(el => {
+      // 모든 단계 숨기기 (step-box visible 클래스 제거)
+      container.querySelectorAll('.step-box, .anim-step').forEach(el => {
+        el.classList.remove('visible');
         el.style.opacity = '0';
         el.style.transform = 'translateY(10px)';
       });
@@ -121,8 +122,8 @@ class MathStepAnimator {
     }
 
     // MathJax 재렌더링 (수식이 새로 등장한 경우)
-    if (typeof MathJax !== 'undefined' && step.latex) {
-      setTimeout(() => MathJax.typesetPromise(), d * 400);
+    if (step.latex && window.safeTypeset) {
+      gsap.delayedCall(d * 0.5, () => safeTypeset());
     }
   }
 
@@ -130,6 +131,7 @@ class MathStepAnimator {
   _formulaAppear(step, d) {
     const el = document.getElementById(`step-${this.id}-${step.id}`);
     if (!el) return;
+    el.classList.add('visible');
     gsap.fromTo(el,
       { opacity: 0, y: 15 },
       { opacity: 1, y: 0, duration: d, ease: 'power2.out' }
@@ -325,10 +327,13 @@ class NeuralNetDiagram {
   constructor(containerId, layers, options = {}) {
     this.containerId = containerId;
     this.layers = layers;
+    const container = document.getElementById(containerId);
+    const cw = container ? container.clientWidth : 600;
+    const ch = container ? container.clientHeight : 350;
     this.options = {
-      width: options.width || 600,
-      height: options.height || 350,
-      nodeRadius: options.nodeRadius || 28,
+      width: options.width || Math.min(cw, 600),
+      height: options.height || Math.min(ch, 350),
+      nodeRadius: options.nodeRadius || Math.min(28, Math.min(ch, 350) / 12),
       nodeColor: options.nodeColor || '#2c3e50',
       edgeColor: options.edgeColor || '#7f8c8d',
       activeNodeColor: options.activeNodeColor || '#f39c12',
@@ -352,7 +357,8 @@ class NeuralNetDiagram {
     svg.setAttribute('width', width);
     svg.setAttribute('height', height);
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    svg.style.overflow = 'visible';
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.style.overflow = 'hidden';
 
     const layerCount = this.layers.length;
     const xStep = width / (layerCount + 1);

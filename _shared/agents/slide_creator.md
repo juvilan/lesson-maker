@@ -86,7 +86,7 @@ visual_creator와 math_animator가 채워 넣음.
     </div>
   </div>
   <!-- 계산표 자리 -->
-  <div id="{{visual_id}}-placeholder"></div>
+  <div id="{{visual_id}}-placeholder" style="max-height: 28vh; overflow: hidden;"></div>
   <div class="anim-controls">
     <button class="anim-btn" id="btn-prev-{{animation_id}}"
             onclick="mathAnimators['{{animation_id}}'].prev()">◀ 이전</button>
@@ -106,7 +106,7 @@ visual_creator와 math_animator가 채워 넣음.
   <div class="two-col">
     <div>
       <!-- 신경망 다이어그램 자리 -->
-      <div id="{{visual_id}}" style="height:260px;"></div>
+      <div id="{{visual_id}}" style="height:260px; overflow: hidden;"></div>
     </div>
     <div>
       <table class="truth-table" id="{{table_id}}">
@@ -139,6 +139,38 @@ visual_creator와 math_animator가 채워 넣음.
   </div>
 </section>
 ```
+
+### type: "code_slide" (코드 예시 슬라이드) [ppt-maker 업그레이드]
+```html
+<section>
+  <h3 style="color: var(--accent);">{{코드 제목}}</h3>
+  <pre class="code-block" data-language="{{python|javascript|html|etc}}" data-highlight-lines="{{강조 줄 번호, 예: 2,4-6}}"><code><span class="line"><span class="kw">{{키워드}}</span> <span class="fn">{{함수명}}</span>(<span class="var">{{인자}}</span>):</span>
+<span class="line">  <span class="cmt"># {{주석}}</span></span>
+<span class="line">  <span class="kw">return</span> <span class="str">{{값}}</span></span></code></pre>
+  <p class="fragment" style="font-size:0.75em; color: var(--accent); margin-top:0.5em;">{{코드 핵심 설명}}</p>
+  <aside class="notes">{{발표 노트}}</aside>
+</section>
+```
+**규칙**: 최대 10줄. 강조할 줄은 `data-highlight-lines`에 지정. 신택스 클래스: `kw`(키워드), `fn`(함수), `str`(문자열/숫자), `cmt`(주석), `var`(변수), `op`(연산자), `tag`(HTML태그), `attr`(속성).
+
+### type: "info_cards" (정보 카드 + terminal-badge) [ppt-maker 업그레이드]
+```html
+<section>
+  <div class="terminal-badge">{{카테고리 영문 키워드}}</div>
+  <h2>{{섹션 제목}}</h2>
+  <div class="info-card fragment">
+    <div class="card-title">// {{카드1 라벨}}</div>
+    <p style="font-size:0.85em;">{{카드1 내용}}</p>
+  </div>
+  <div class="info-card fragment">
+    <div class="card-title">// {{카드2 라벨}}</div>
+    <p style="font-size:0.85em;">{{카드2 내용}}</p>
+  </div>
+  <div class="accent-line"></div>
+  <aside class="notes">{{발표 노트}}</aside>
+</section>
+```
+**사용 시점**: 개념 정의, 공식 설명, 주의사항 2~3개를 카드형으로 제시할 때.
 
 ### type: "comparison" (단층 vs 다층 비교)
 ```html
@@ -203,6 +235,35 @@ visual_creator와 math_animator가 채워 넣음.
   </p>
 </section>
 ```
+
+---
+
+## 슬라이드 높이 예산 (MANDATORY)
+
+기준: 1280×720 (16:9), 유효 영역 ~691px 높이.
+
+| 타입 | 요소 예산 | 비고 |
+|------|----------|------|
+| title | h1(60) + 부제(30) + 키워드(30) = 120px | 중앙 정렬, 여유 |
+| objectives | h2(50) + 항목 4개(240) = 290px | 항목당 ~60px |
+| concept_intro | h3(40) + two-col 카드 2개(280) + 결론(40) = 360px | 여유 |
+| numeric_example | h3(40) + two-col(300) + anim-controls(50) = 390px | step-box는 숨김→등장이라 추가 공간 불필요 |
+| truth_table | h3(40) + two-col(310) + controls(50) = 400px | SVG 260px 고정 |
+| comparison | h3(40) + two-col(380) + warning(60) = 480px | 리스트 5항목 이내 |
+| quiz | h3(40) + card(350) = 390px | |
+| summary | h2(50) + three-col(350) + 다음주제(40) = 440px | |
+| code_slide | h3(40) + code-block(280) + 설명(30) = 350px | 최대 10줄 코드 |
+| info_cards | terminal-badge(25) + h2(50) + 카드2개(300) + accent-line(20) = 395px | 카드 3개면 분리 |
+
+## 오버플로우 방지 (MANDATORY)
+
+1. **step-box**: 슬라이드당 최대 3개. 더 필요하면 수직 서브슬라이드 분리
+2. **two-col 높이**: 각 컬럼 내용 350px 이내
+3. **시각화 placeholder**: 반드시 `max-height` 지정
+   - Chart: `style="max-height: 280px;"`
+   - SVG: `style="height: 260px; overflow: hidden;"`
+4. **폰트 하한**: `0.7em`(≈20px) 미만 금지. 안 들어가면 슬라이드 분리
+5. **자동 분리 판단**: h3 + two-col + visual + anim-controls 4개 모두 있으면 → 2장 분리 검토
 
 ---
 
