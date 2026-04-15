@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이미지 자료의 처리 | 인공지능 수학</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']], tags: 'ams' },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0f1e; --text: #e8f4fd;
+      --cyan: #00d4ff; --amber: #ffb347; --green: #39d98a;
+      --red: #ff4757; --purple: #a78bfa;
+      --card-bg: rgba(255,255,255,0.07); --border: rgba(255,255,255,0.15);
+    }
+    .reveal-viewport { background: var(--bg); }
+    .reveal {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 28px; color: var(--text); background: var(--bg);
+    }
+    .reveal .slides section { text-align: left; padding: 0 20px; }
+    .reveal .slides > section { padding-top: 8px; }
+
+    /* HEADINGS */
+    .reveal h1 { font-size: 2.2em; font-weight: 900; color: var(--cyan); line-height: 1.2; text-shadow: 0 0 30px rgba(0,212,255,0.4); }
+    .reveal h2 { font-size: 1.5em; font-weight: 700; color: var(--cyan); border-bottom: 2px solid rgba(0,212,255,0.3); padding-bottom: 6px; margin-bottom: 10px; }
+    .reveal h3 { font-size: 1.05em; font-weight: 700; color: var(--amber); margin-bottom: 5px; }
+
+    /* SAFE SPACING */
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px; margin: 5px 0; }
+    .card-cyan   { border-left: 4px solid var(--cyan);   background: rgba(0,212,255,0.08); }
+    .card-amber  { border-left: 4px solid var(--amber);  background: rgba(255,179,71,0.08); }
+    .card-purple { border-left: 4px solid var(--purple); background: rgba(167,139,250,0.10); }
+    .card-green  { border-left: 4px solid var(--green);  background: rgba(57,217,138,0.08); }
+    .card-red    { border-left: 4px solid var(--red);    background: rgba(255,71,87,0.08); }
+
+    .definition-box {
+      background: rgba(0,212,255,0.06); border: 2px solid rgba(0,212,255,0.4);
+      border-radius: 14px; padding: 12px 18px; margin: 8px 0; position: relative;
+    }
+    .definition-box::before {
+      content: '정의'; position: absolute; top: -13px; left: 18px;
+      background: var(--cyan); color: #0a0f1e; font-weight: 900;
+      font-size: 0.68em; padding: 2px 10px; border-radius: 20px;
+    }
+    .highlight-box { background: rgba(167,139,250,0.12); border: 2px solid rgba(167,139,250,0.5); border-radius: 12px; padding: 8px 14px; margin: 5px 0; }
+    .formula-box   { background: rgba(57,217,138,0.08);  border: 2px solid rgba(57,217,138,0.4);  border-radius: 12px; padding: 10px 16px; margin: 8px 0; text-align: center; }
+    .practice-box  { background: rgba(167,139,250,0.06); border: 2px solid rgba(167,139,250,0.35); border-radius: 14px; padding: 14px 20px; margin: 8px 0; position: relative; }
+    .practice-box::before { content: '확인 문제'; position: absolute; top: -13px; left: 18px; background: var(--purple); color: #fff; font-weight: 900; font-size: 0.68em; padding: 2px 12px; border-radius: 20px; }
+    .example-box   { background: rgba(255,179,71,0.06);  border: 2px solid rgba(255,179,71,0.35);  border-radius: 14px; padding: 14px 20px; margin: 8px 0; position: relative; }
+    .example-box::before   { content: '예제'; position: absolute; top: -13px; left: 18px; background: var(--amber); color: #0a0f1e; font-weight: 900; font-size: 0.68em; padding: 2px 12px; border-radius: 20px; }
+
+    /* LAYOUT */
+    .cols { display: grid; gap: 14px; align-items: start; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    /* TABLE */
+    .reveal table { width: 100%; border-collapse: collapse; font-size: 0.88em; margin: 6px 0; }
+    .reveal table th { background: rgba(0,212,255,0.15); color: var(--cyan); font-weight: 700; padding: 5px 8px; text-align: center; border: 1px solid rgba(0,212,255,0.25); line-height: 1.45; }
+    .reveal table td { padding: 5px 8px; border: 1px solid var(--border); text-align: center; line-height: 1.45; }
+    .reveal table tr:nth-child(even) td { background: rgba(255,255,255,0.04); }
+    .reveal li { margin-bottom: 2px; }
+
+    /* PIXEL GRIDS */
+    .pixel-grid { display: inline-grid; gap: 2px; background: rgba(255,255,255,0.2); padding: 3px; border-radius: 4px; }
+    .pixel-cell { display: flex; align-items: center; justify-content: center; font-weight: 700; border-radius: 2px; }
+    .bw-black { background: #111; color: #00d4ff; }
+    .bw-white { background: #efefef; color: #333; }
+
+    /* OP GRID (A op B = C display) */
+    .op-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: nowrap; }
+    .op-symbol { font-size: 1.6em; font-weight: 900; color: var(--amber); flex-shrink: 0; }
+    .matrix-label { font-size: 0.8em; font-weight: 700; text-align: center; margin-bottom: 3px; }
+
+    /* MATRIX BOX */
+    .mat-box { font-family: monospace; font-size: 0.8em; line-height: 1.55; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; display: inline-block; }
+
+    /* OBJECTIVES */
+    .obj-list { list-style: none; padding: 0; margin: 0; }
+    .obj-list li { display: flex; align-items: flex-start; gap: 12px; padding: 10px 16px; margin: 8px 0; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); }
+    .obj-list li .num { background: var(--cyan); color: #0a0f1e; font-weight: 900; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.85em; }
+
+    /* FITB */
+    .fitb-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; padding: 9px 14px; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); font-size: 0.86em; flex-wrap: wrap; }
+
+    /* BRIGHTNESS COMPARE */
+    .bright-compare { display: flex; gap: 14px; justify-content: center; align-items: flex-start; }
+    .bright-item { text-align: center; }
+    .bright-label { font-size: 0.76em; margin-top:4px; }
+
+    /* MATRIX MULT highlight */
+    .row-hl { background: rgba(0,212,255,0.25) !important; }
+    .col-hl { background: rgba(255,179,71,0.25) !important; }
+
+    /* TRANSFORM GRID */
+    .transform-grid { display: grid; grid-template-columns: repeat(4,1fr); gap:2px; background:rgba(255,255,255,0.15); padding:3px; border-radius:4px; }
+    .tg-cell { width:38px; height:38px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; border-radius:2px; }
+
+    /* MISC */
+    .kw-cyan   { color: var(--cyan);   font-weight: 700; }
+    .kw-amber  { color: var(--amber);  font-weight: 700; }
+    .kw-green  { color: var(--green);  font-weight: 700; }
+    .kw-red    { color: var(--red);    font-weight: 700; }
+    .kw-purple { color: var(--purple); font-weight: 700; }
+    .arrow { font-size: 1.3em; color: var(--amber); margin: 0 4px; }
+    .title-meta { font-size: 0.78em; color: rgba(232,244,253,0.6); margin-top: 6px; }
+    .chapter-badge { display: inline-block; background: rgba(0,212,255,0.15); border: 1px solid rgba(0,212,255,0.4); border-radius: 30px; padding: 5px 18px; font-size: 0.7em; color: var(--cyan); font-weight: 700; margin-bottom: 14px; }
+    .achievement-tag { display: inline-block; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.4); border-radius: 8px; padding: 6px 16px; font-size: 0.7em; color: var(--purple); font-weight: 500; margin-top: 14px; }
+    .reveal .progress { background: rgba(0,212,255,0.15); }
+    .reveal .progress span { background: var(--cyan); }
+    .reveal .slide-number { color: var(--cyan); font-size: 16px; }
+    .reveal .controls { color: var(--cyan); }
+    .section-announce { background: rgba(0,212,255,0.06); border-left: 4px solid var(--cyan); border-radius: 8px; padding: 7px 14px; margin: 6px 0; font-size: 0.84em; color: var(--cyan); font-weight: 600; }
+    .badge { display: inline-block; font-size: 0.7em; font-weight: 700; padding: 2px 10px; border-radius: 20px; margin-right: 4px; }
+    .badge-cyan  { background: rgba(0,212,255,0.2);  color: var(--cyan);  border: 1px solid var(--cyan);  }
+    .badge-amber { background: rgba(255,179,71,0.2); color: var(--amber); border: 1px solid var(--amber); }
+    .case-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+    .case-icon { font-size: 1.6em; flex-shrink: 0; }
+    .case-text { font-size: 0.82em; }
+  </style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+<!-- ===== SLIDE 1: TITLE ===== -->
+<section id="slide-title">
+  <div style="display:flex; flex-direction:column; justify-content:center; height:610px; text-align:center;">
+    <div class="chapter-badge">Ⅱ. 자료의 표현 &nbsp;›&nbsp; 2. 이미지 자료의 표현</div>
+    <h1 style="font-size:2.5em; margin:0;">02<br>이미지 자료의 처리</h1>
+    <p class="title-meta" style="margin-top:16px;">교과서 pp. 49–56 &nbsp;|&nbsp; 성취기준 12인수02-02</p>
+    <div class="achievement-tag">수와 수학 기호로 표현된 이미지 자료를 처리하는 수학 원리를 이해한다.</div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 2: OBJECTIVES ===== -->
+<section id="slide-objectives">
+  <h2>학습목표</h2>
+  <ul class="obj-list" style="margin-top:14px;">
+    <li class="fragment fade-up">
+      <span class="num">1</span>
+      <span>행렬의 <span class="kw-cyan">덧셈·뺄셈</span>과 <span class="kw-amber">실수배</span>를 이용하여 이미지를 합성하거나 밝기를 조절할 수 있다.</span>
+    </li>
+    <li class="fragment fade-up">
+      <span class="num">2</span>
+      <span>세 행렬 <em>R, G, B</em>를 이용하여 컬러 이미지를 <span class="kw-green">흑백 이미지</span>로 바꿀 수 있다.</span>
+    </li>
+    <li class="fragment fade-up">
+      <span class="num">3</span>
+      <span>행렬의 <span class="kw-purple">곱셈</span>을 이용하여 이미지의 <span class="kw-amber">이동·대칭</span>을 할 수 있다.</span>
+    </li>
+  </ul>
+</section>
+
+<!-- ===== SLIDE 3: APPROACHING ===== -->
+<section id="slide-approach">
+  <h2>다가서기 — 이미지를 합성하고 보정하다</h2>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;">
+    <div class="case-card fragment fade-up">
+      <span class="case-icon">🖼️</span>
+      <div class="case-text">두 이미지를 <span class="kw-cyan">겹쳐서</span> 새로운 이미지 합성 → <strong>행렬 덧셈</strong></div>
+    </div>
+    <div class="case-card fragment fade-up">
+      <span class="case-icon">🔅</span>
+      <div class="case-text">이미지 <span class="kw-amber">밝기 조절</span> (어둡게·밝게) → <strong>행렬 실수배</strong></div>
+    </div>
+    <div class="case-card fragment fade-up">
+      <span class="case-icon">🎨</span>
+      <div class="case-text">컬러 이미지를 <span class="kw-green">흑백</span>으로 변환 → <strong>R·G·B 평균</strong></div>
+    </div>
+    <div class="case-card fragment fade-up">
+      <span class="case-icon">↔️</span>
+      <div class="case-text">이미지 <span class="kw-purple">이동·대칭</span> 변환 → <strong>행렬 곱셈</strong></div>
+    </div>
+  </div>
+  <div class="highlight-box fragment" style="margin-top:10px; font-size:0.84em;">
+    💡 이미지 처리의 핵심 도구: <span class="kw-cyan">행렬의 4가지 연산</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 4: MATRIX ADDITION ===== -->
+<section id="slide-add">
+  <h2>행렬의 덧셈 — 이미지 합성</h2>
+  <div class="cols cols-2" style="gap:16px; margin-top:8px;">
+    <div>
+      <div class="definition-box">
+        같은 크기의 두 행렬 \(A\), \(B\)에 대하여,
+        <strong>같은 위치에 있는 성분의 합</strong>을 성분으로 하는 행렬을
+        <span class="kw-cyan">A와 B의 합</span>이라 하고, <span class="kw-cyan">\(A+B\)</span>로 나타낸다.
+      </div>
+      <div class="card card-cyan fragment" style="margin-top:8px; font-size:0.84em;">
+        ⚠️ 행렬의 덧셈은 <strong>행과 열의 개수가 같을 때만</strong> 가능하다.
+      </div>
+      <div class="formula-box fragment" style="margin-top:8px; font-size:0.88em;">
+        \[\begin{pmatrix}a_{11}&a_{12}\\a_{21}&a_{22}\end{pmatrix}+\begin{pmatrix}b_{11}&b_{12}\\b_{21}&b_{22}\end{pmatrix}=\begin{pmatrix}a_{11}+b_{11}&a_{12}+b_{12}\\a_{21}+b_{21}&a_{22}+b_{22}\end{pmatrix}\]
+      </div>
+    </div>
+    <div>
+      <div class="card card-amber fragment" style="font-size:0.84em; margin-bottom:8px;">
+        <strong>보기:</strong> 두 행렬 \(A=\begin{pmatrix}3&-1\\-4&0\end{pmatrix}\), \(B=\begin{pmatrix}0&2\\3&2\end{pmatrix}\)에 대하여
+      </div>
+      <div class="fragment" style="font-size:0.82em;">
+        <div class="mat-box">
+          \[A+B=\begin{pmatrix}3+0&-1+2\\-4+3&0+2\end{pmatrix}=\begin{pmatrix}3&1\\-1&2\end{pmatrix}\]
+        </div>
+        <div class="mat-box" style="margin-top:6px;">
+          \[A-B=\begin{pmatrix}3-0&-1-2\\-4-3&0-2\end{pmatrix}=\begin{pmatrix}3&-3\\-7&-2\end{pmatrix}\]
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 5: IMAGE SYNTHESIS (ADD) ===== -->
+<section id="slide-add-image">
+  <h2>행렬 덧셈으로 이미지 합성하기</h2>
+  <div class="section-announce">두 흑백 이미지를 행렬로 나타내고 더하면 합성 이미지를 얻는다. (검은색=0, 흰색=1)</div>
+  <div style="margin-top:10px; font-size:0.82em;">
+    <div class="op-row" style="gap:8px;">
+      <!-- A -->
+      <div style="text-align:center;">
+        <div class="matrix-label kw-cyan">A (이미지 1)</div>
+        <div id="img-A" class="pixel-grid" style="grid-template-columns:repeat(5,1fr);"></div>
+      </div>
+      <div class="op-symbol">+</div>
+      <!-- B -->
+      <div style="text-align:center;">
+        <div class="matrix-label kw-amber">B (이미지 2)</div>
+        <div id="img-B" class="pixel-grid" style="grid-template-columns:repeat(5,1fr);"></div>
+      </div>
+      <div class="op-symbol">=</div>
+      <!-- C (fragment) -->
+      <div style="text-align:center;" class="fragment" data-fragment-index="1">
+        <div class="matrix-label kw-green">A+B (합성)</div>
+        <div id="img-C" class="pixel-grid" style="grid-template-columns:repeat(5,1fr);"></div>
+      </div>
+    </div>
+    <!-- Matrix form -->
+    <div class="fragment" data-fragment-index="2" style="margin-top:10px; display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;">
+      <div class="mat-box" style="font-size:0.82em;">
+        \[\begin{pmatrix}0&1&1&1&0\\1&1&1&1&1\\0&1&0&0&1\end{pmatrix}\]
+      </div>
+      <div class="op-symbol" style="font-size:1.2em;">+</div>
+      <div class="mat-box" style="font-size:0.82em;">
+        \[\begin{pmatrix}0&0&0&0&0\\0&0&0&0&0\\0&0&0&1&0\end{pmatrix}\]
+      </div>
+      <div class="op-symbol" style="font-size:1.2em;">=</div>
+      <div class="mat-box" style="font-size:0.82em; border-color:var(--green);">
+        \[\begin{pmatrix}0&1&1&1&0\\1&1&1&1&1\\0&1&0&1&1\end{pmatrix}\]
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 6: MATRIX SUBTRACTION ===== -->
+<section id="slide-sub">
+  <h2>행렬의 뺄셈 — 이미지 부분 제거</h2>
+  <div class="cols cols-2" style="gap:16px; margin-top:8px;">
+    <div>
+      <div class="definition-box">
+        같은 크기의 두 행렬 \(A\), \(B\)에 대하여,
+        \(A\)의 각 성분에서 <strong>같은 위치에 있는 \(B\)의 성분을 뺀 값</strong>을
+        성분으로 하는 행렬을 <span class="kw-amber">A에서 B를 뺀 차</span>라 하고,
+        <span class="kw-amber">\(A-B\)</span>로 나타낸다.
+      </div>
+      <div class="formula-box fragment" style="margin-top:10px; font-size:0.88em;">
+        \[A-B = \begin{pmatrix}a_{ij}-b_{ij}\end{pmatrix}\]
+      </div>
+      <div class="card card-amber fragment" style="margin-top:8px; font-size:0.84em;">
+        활용: 두 이미지에서 <span class="kw-amber">차이점 추출</span>, <span class="kw-amber">워터마크 제거</span> 등
+      </div>
+    </div>
+    <div>
+      <div class="card card-cyan fragment" style="font-size:0.84em; margin-bottom:8px;">
+        <strong>교환·결합 법칙</strong> (행렬 덧셈도 성립)
+      </div>
+      <div class="fragment" style="font-size:0.84em;">
+        <div class="fitb-row">
+          <strong>교환법칙:</strong> \(A + B = B + A\)
+        </div>
+        <div class="fitb-row" style="margin-top:4px;">
+          <strong>결합법칙:</strong> \((A + B) + C = A + (B + C)\)
+        </div>
+      </div>
+      <div class="practice-box fragment" style="margin-top:10px; font-size:0.82em;">
+        <strong>문제 1.</strong> \(A=\begin{pmatrix}1&2\\3&4\end{pmatrix}\), \(B=\begin{pmatrix}2&-4\\5&-1\end{pmatrix}\)일 때, \(A+B\)와 \(A-B\)를 구하시오.
+        <div class="fragment" style="margin-top:6px; color:var(--green);">
+          \(A+B=\begin{pmatrix}3&-2\\8&3\end{pmatrix}\), \quad A-B=\begin{pmatrix}-1&6\\-2&5\end{pmatrix}\)
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 7: SCALAR MULTIPLICATION ===== -->
+<section id="slide-scalar">
+  <h2>행렬의 실수배 — 밝기 조절</h2>
+  <div class="cols cols-2" style="gap:16px; margin-top:8px;">
+    <div>
+      <div class="definition-box">
+        임의의 실수 \(k\)에 대하여 행렬 \(A\)의 각 성분을
+        <strong>\(k\)배한 것</strong>을 성분으로 하는 행렬을
+        <span class="kw-cyan">A의 k배</span>라 하고, \(kA\)로 나타낸다.
+      </div>
+      <div class="formula-box fragment" style="margin-top:10px; font-size:0.88em;">
+        \[kA = \begin{pmatrix}ka_{11}&ka_{12}\\ka_{21}&ka_{22}\end{pmatrix}\]
+      </div>
+      <div class="highlight-box fragment" style="margin-top:8px; font-size:0.84em;">
+        <div><span class="kw-red">0 &lt; k &lt; 1</span>이면 → 이미지가 <span class="kw-red">어두워진다</span></div>
+        <div style="margin-top:4px;"><span class="kw-green">k &gt; 1</span>이면 → 이미지가 <span class="kw-green">밝아진다</span></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:0.82em; margin-bottom:6px; color:rgba(232,244,253,0.8);">밝기 조절 시각화 (그레이스케일)</div>
+      <div class="bright-compare">
+        <div class="bright-item">
+          <div class="pixel-grid" style="grid-template-columns:repeat(3,1fr);" id="bright-dark"></div>
+          <div class="bright-label"><span class="kw-red">k = 0.5</span><br>어둡게</div>
+        </div>
+        <div class="bright-item">
+          <div class="pixel-grid" style="grid-template-columns:repeat(3,1fr);" id="bright-orig"></div>
+          <div class="bright-label"><span class="kw-amber">k = 1</span><br>원본</div>
+        </div>
+        <div class="bright-item">
+          <div class="pixel-grid" style="grid-template-columns:repeat(3,1fr);" id="bright-light"></div>
+          <div class="bright-label"><span class="kw-green">k = 2</span><br>밝게</div>
+        </div>
+      </div>
+      <div class="card card-amber fragment" style="margin-top:10px; font-size:0.82em;">
+        원본 \(A=\begin{pmatrix}120&64&64\\64&64&120\end{pmatrix}\)일 때,<br>
+        \(\frac{1}{2}A=\begin{pmatrix}60&32&32\\32&32&60\end{pmatrix}\) (어둡게),&nbsp;
+        \(2A=\begin{pmatrix}240&128&128\\128&128&240\end{pmatrix}\) (밝게)
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 8: SCALAR PRACTICE ===== -->
+<section id="slide-scalar-practice">
+  <h2>실수배 연습</h2>
+  <div class="example-box" style="margin-bottom:10px;">
+    <p style="font-size:0.86em; margin-bottom:6px;">
+      <strong>보기:</strong> &nbsp;
+      \(2\begin{pmatrix}1&2&0\\-3&-1&-2\end{pmatrix} = \begin{pmatrix}2\times1&2\times2&2\times0\\2\times(-3)&2\times(-1)&2\times(-2)\end{pmatrix} = \begin{pmatrix}2&4&0\\-6&-2&-4\end{pmatrix}\)
+    </p>
+  </div>
+  <div class="practice-box">
+    <p style="font-size:0.86em; margin-bottom:8px;">
+      <strong>문제 3.</strong> &nbsp; 행렬 \(A = \begin{pmatrix}8&-4\\-2&6\end{pmatrix}\)에 대하여 다음을 구하시오.
+    </p>
+    <div class="cols cols-2" style="gap:12px; font-size:0.84em;">
+      <div>
+        <div class="fitb-row" style="flex-direction:column; align-items:flex-start; gap:4px;">
+          <div>(1) \(3A =\) ?</div>
+          <div class="fragment" data-fragment-index="1">
+            <span class="kw-green">\(3A = \begin{pmatrix}24&-12\\-6&18\end{pmatrix}\)</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="fitb-row" style="flex-direction:column; align-items:flex-start; gap:4px;">
+          <div>(2) \(\dfrac{1}{2}A =\) ?</div>
+          <div class="fragment" data-fragment-index="2">
+            <span class="kw-green">\(\dfrac{1}{2}A = \begin{pmatrix}4&-2\\-1&3\end{pmatrix}\)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 9: COLOR TO GRAYSCALE ===== -->
+<section id="slide-color2gray">
+  <h2>컬러 이미지 → 흑백 이미지</h2>
+  <div class="cols cols-2" style="gap:16px; margin-top:8px; align-items:center;">
+    <div>
+      <div class="section-announce">컬러 이미지의 각 픽셀 RGB 값의 <strong>평균</strong>으로 흑백 전환</div>
+      <div class="formula-box fragment" style="margin-top:10px; font-size:1.0em;">
+        \[K = \frac{1}{3}(R + G + B)\]
+      </div>
+      <div class="card card-cyan fragment" style="margin-top:8px; font-size:0.84em;">
+        행렬 \(K\)의 각 성분은 세 행렬 <em>R, G, B</em>에 대응하는 성분의
+        <span class="kw-cyan">평균</span>을 소수점 아래 첫째 자리에서 <span class="kw-cyan">반올림</span>한 값이다.
+      </div>
+      <div class="card card-amber fragment" style="margin-top:6px; font-size:0.84em;">
+        컬러 이미지 3개 행렬 → 흑백 이미지 1개 행렬 \(K\)
+      </div>
+    </div>
+    <div class="fragment">
+      <div style="font-size:0.78em; margin-bottom:6px; color:rgba(232,244,253,0.8);">교과서 예시 (3×3 컬러 이미지)</div>
+      <div style="font-size:0.76em;" class="mat-box">
+        \[R=\begin{pmatrix}178&183&178\\183&255&183\\178&183&178\end{pmatrix}\]
+        \[G=\begin{pmatrix}235&240&235\\240&0&240\\235&240&235\end{pmatrix}\]
+        \[B=\begin{pmatrix}244&177&244\\177&0&177\\244&177&244\end{pmatrix}\]
+      </div>
+      <div class="fragment" style="margin-top:8px; font-size:0.78em;">
+        <div class="mat-box" style="border-color:var(--green);">
+          \[K = \frac{1}{3}(R+G+B) = \begin{pmatrix}219&200&219\\200&85&200\\219&200&219\end{pmatrix}\]
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 10: COLOR→GRAY PRACTICE ===== -->
+<section id="slide-gray-practice">
+  <h2>컬러→흑백 연습 (문제 5)</h2>
+  <div class="practice-box">
+    <p style="font-size:0.82em; margin-bottom:8px;">
+      다음 컬러 이미지의 RGB 채널을 세 행렬로 변환한 것이다.
+      흑백 이미지로 바꾸기 위한 행렬 \(K\)를 구하시오.
+    </p>
+    <div style="font-size:0.78em; margin-bottom:8px;">
+      <div class="mat-box" style="display:inline-block;">
+        \[R=\begin{pmatrix}243&243&243\\243&183&243\\243&243&243\end{pmatrix},\;
+        G=\begin{pmatrix}98&98&98\\98&117&98\\98&98&98\end{pmatrix},\;
+        B=\begin{pmatrix}166&166&166\\166&255&166\\166&166&166\end{pmatrix}\]
+      </div>
+    </div>
+    <div class="fragment" style="font-size:0.82em;">
+      <div class="card card-green">
+        \[K = \frac{1}{3}(R+G+B)\]
+        \[= \frac{1}{3}\begin{pmatrix}243+98+166&\cdots\\243+183+255&\cdots\end{pmatrix}
+        = \begin{pmatrix}169&169&169\\169&185&169\\169&169&169\end{pmatrix}\]
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 11: MATRIX MULTIPLICATION ===== -->
+<section id="slide-mult-def">
+  <h2>행렬의 곱셈</h2>
+  <div class="cols cols-2" style="gap:14px; margin-top:8px;">
+    <div>
+      <div class="definition-box" style="font-size:0.86em;">
+        \(m \times k\) 행렬 \(A\)와 \(k \times n\) 행렬 \(B\)의 곱 \(AB\)의
+        <span class="kw-purple">\((i,j)\) 성분</span>은
+        \(A\)의 <span class="kw-cyan">제\(i\)행</span>의 성분과
+        \(B\)의 <span class="kw-amber">제\(j\)열</span>의 성분을
+        차례대로 곱하여 더한 값이다.
+      </div>
+      <div class="formula-box fragment" style="margin-top:8px; font-size:0.85em;">
+        \[c_{ij} = \sum_{l=1}^{k} a_{il}\, b_{lj}\]
+      </div>
+      <div class="card card-cyan fragment" style="margin-top:6px; font-size:0.82em;">
+        ⚠️ \(A\)의 <strong>열의 수</strong> = \(B\)의 <strong>행의 수</strong>일 때만 가능<br>
+        결과: \(m \times k\) · \(k \times n\) = <span class="kw-green">\(m \times n\) 행렬</span>
+      </div>
+    </div>
+    <div>
+      <div class="card card-amber fragment" style="font-size:0.82em; margin-bottom:6px;">
+        <strong>보기:</strong> \(\begin{pmatrix}3&1&2\\1&0&4\end{pmatrix}\begin{pmatrix}1&0\\2&-3\\4&1\end{pmatrix}\)
+      </div>
+      <div class="fragment" style="font-size:0.78em;">
+        <div class="mat-box">
+          \[=\begin{pmatrix}3\times1+1\times2+2\times4&3\times0+1\times(-3)+2\times1\\1\times1+0\times2+4\times4&1\times0+0\times(-3)+4\times1\end{pmatrix}\]
+          \[=\begin{pmatrix}13&-1\\17&4\end{pmatrix}\]
+        </div>
+      </div>
+      <div class="highlight-box fragment" style="margin-top:8px; font-size:0.82em;">
+        ⚠️ 일반적으로 행렬의 곱셈은 <span class="kw-red">교환법칙이 성립하지 않는다</span>
+        <div style="margin-top:3px; font-size:0.9em;">\(AB \neq BA\) (경우에 따라 다름)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 12: MATRIX MULT PRACTICE ===== -->
+<section id="slide-mult-practice">
+  <h2>행렬 곱셈 연습 (문제 6)</h2>
+  <div class="practice-box">
+    <p style="font-size:0.86em; margin-bottom:10px;"><strong>다음을 계산하시오.</strong></p>
+    <div class="cols cols-2" style="gap:14px; font-size:0.84em;">
+      <div>
+        <div class="fitb-row" style="flex-direction:column; align-items:flex-start; gap:5px;">
+          <div>(1) \(\begin{pmatrix}1&2\\0&1\end{pmatrix}\begin{pmatrix}1&2\\3&4\end{pmatrix}\)</div>
+          <div class="fragment" data-fragment-index="1">
+            \(= \begin{pmatrix}1+6&2+8\\0+3&0+4\end{pmatrix} =\)
+            <span class="kw-green">\(\begin{pmatrix}7&10\\3&4\end{pmatrix}\)</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="fitb-row" style="flex-direction:column; align-items:flex-start; gap:5px;">
+          <div>(2) \(\begin{pmatrix}3&2\\-4&5\end{pmatrix}\begin{pmatrix}-2\\1\end{pmatrix}\)</div>
+          <div class="fragment" data-fragment-index="2">
+            \(= \begin{pmatrix}3\times(-2)+2\times1\\-4\times(-2)+5\times1\end{pmatrix} =\)
+            <span class="kw-green">\(\begin{pmatrix}-4\\13\end{pmatrix}\)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 13: TRANSLATION T1, T2 ===== -->
+<section id="slide-translation">
+  <h2>이미지 이동 — 행렬 곱셈 활용</h2>
+  <div class="section-announce">이미지를 이동할 때 이미지 행렬과 <strong>이동 행렬의 곱셈</strong>을 이용한다.</div>
+  <div class="cols cols-2" style="gap:14px; margin-top:8px; font-size:0.82em;">
+    <div>
+      <div class="card card-cyan" style="margin-bottom:8px;">
+        <strong>① 오른쪽으로 이동</strong>: 행렬 \(A\)에 \(T_1\)을 오른쪽에서 곱한다.
+      </div>
+      <div class="formula-box" style="font-size:0.88em;">
+        \[T_1 = \begin{pmatrix}0&1&0\\0&0&1\\0&0&0\end{pmatrix}\]
+      </div>
+      <div class="fragment" style="margin-top:6px;">
+        <div class="mat-box" style="font-size:0.78em;">
+          \[AT_1 = \begin{pmatrix}0&0&0\\0&255&0\\0&0&0\end{pmatrix}\begin{pmatrix}0&1&0\\0&0&1\\0&0&0\end{pmatrix} = \begin{pmatrix}0&0&0\\0&0&255\\0&0&0\end{pmatrix}\]
+        </div>
+        <p style="font-size:0.8em; margin-top:4px; color:rgba(232,244,253,0.7);">
+          → 이미지가 <span class="kw-cyan">오른쪽으로 한 픽셀</span> 이동
+        </p>
+      </div>
+    </div>
+    <div>
+      <div class="card card-amber" style="margin-bottom:8px;">
+        <strong>② 왼쪽으로 이동</strong>: 행렬 \(A\)에 \(T_2\)를 오른쪽에서 곱한다.
+      </div>
+      <div class="formula-box" style="font-size:0.88em;">
+        \[T_2 = \begin{pmatrix}0&0&0\\1&0&0\\0&1&0\end{pmatrix}\]
+      </div>
+      <div class="fragment" style="margin-top:6px;">
+        <div class="mat-box" style="font-size:0.78em;">
+          \[AT_2 = \begin{pmatrix}0&0&0\\0&255&0\\0&0&0\end{pmatrix}\begin{pmatrix}0&0&0\\1&0&0\\0&1&0\end{pmatrix} = \begin{pmatrix}0&0&0\\255&0&0\\0&0&0\end{pmatrix}\]
+        </div>
+        <p style="font-size:0.8em; margin-top:4px; color:rgba(232,244,253,0.7);">
+          → 이미지가 <span class="kw-amber">왼쪽으로 한 픽셀</span> 이동
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 14: REFLECTION ===== -->
+<section id="slide-reflection">
+  <h2>이미지 대칭이동 — 행렬 곱셈 활용</h2>
+  <div class="section-announce">이미지를 대칭이동할 때도 행렬의 곱셈을 이용한다.</div>
+  <div class="cols cols-2" style="gap:14px; margin-top:8px; font-size:0.82em;">
+    <div>
+      <div class="card card-purple" style="margin-bottom:8px;">
+        <strong>① 좌우 대칭이동</strong>: 행렬 \(B\)에 \(R\)을 오른쪽에서 곱한다.
+      </div>
+      <div class="formula-box" style="font-size:0.88em;">
+        \[R = \begin{pmatrix}0&0&1\\0&1&0\\1&0&0\end{pmatrix}\]
+      </div>
+      <div class="fragment" style="margin-top:6px;">
+        <div class="mat-box" style="font-size:0.76em;">
+          \[BR = \begin{pmatrix}0&0&0\\255&0&0\\255&0&0\end{pmatrix}\begin{pmatrix}0&0&1\\0&1&0\\1&0&0\end{pmatrix} = \begin{pmatrix}0&0&0\\0&0&255\\0&0&255\end{pmatrix}\]
+        </div>
+        <p style="font-size:0.8em; margin-top:4px; color:rgba(232,244,253,0.7);">→ 이미지가 <span class="kw-purple">좌우 대칭</span>이동</p>
+      </div>
+    </div>
+    <div>
+      <div class="card card-red" style="margin-bottom:8px;">
+        <strong>② 상하 대칭이동</strong>: 행렬 \(R\)에 \(B\)를 오른쪽에서 곱한다.
+      </div>
+      <div class="formula-box" style="font-size:0.88em; border-color:rgba(255,71,87,0.4);">
+        \[RB = \begin{pmatrix}0&0&1\\0&1&0\\1&0&0\end{pmatrix}\begin{pmatrix}0&0&0\\255&0&0\\255&0&0\end{pmatrix}\]
+      </div>
+      <div class="fragment" style="margin-top:6px;">
+        <div class="mat-box" style="font-size:0.78em;">
+          \[= \begin{pmatrix}255&0&0\\255&0&0\\0&0&0\end{pmatrix}\]
+        </div>
+        <p style="font-size:0.8em; margin-top:4px; color:rgba(232,244,253,0.7);">→ 이미지가 <span class="kw-red">상하 대칭</span>이동</p>
+      </div>
+      <div class="highlight-box fragment" style="margin-top:8px; font-size:0.82em;">
+        ⚠️ \(BR \neq RB\) → 행렬 곱셈의 <span class="kw-red">교환법칙 불성립</span> 확인!
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 15: TRANSFORM PRACTICE ===== -->
+<section id="slide-transform-practice">
+  <h2>이동·대칭 연습 (문제 7, 8)</h2>
+  <div class="cols cols-2" style="gap:14px; font-size:0.82em;">
+    <div>
+      <div class="practice-box" style="padding:12px 16px;">
+        <p style="margin-bottom:6px;">
+          <strong>문제 7.</strong> \(A\), \(T_1\), \(T_2\)에 대하여 확인하시오.
+          \(A=\begin{pmatrix}0&0&0\\0&255&0\\0&0&0\end{pmatrix}\)
+        </p>
+        <div class="fitb-row" style="flex-direction:column; align-items:flex-start; gap:4px;">
+          <div>(1) \(T_1A\)가 나타내는 이미지는?</div>
+          <div class="fragment" data-fragment-index="1">
+            → \(T_1 A = \begin{pmatrix}0&255&0\\0&0&0\\0&0&0\end{pmatrix}\)<br>
+            <span class="kw-cyan">위로 한 픽셀 이동</span>
+          </div>
+        </div>
+        <div class="fitb-row" style="flex-direction:column; align-items:flex-start; gap:4px; margin-top:4px;">
+          <div>(2) \(T_2A\)가 나타내는 이미지는?</div>
+          <div class="fragment" data-fragment-index="2">
+            → \(T_2 A = \begin{pmatrix}0&0&0\\0&0&0\\0&255&0\end{pmatrix}\)<br>
+            <span class="kw-amber">아래로 한 픽셀 이동</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="practice-box" style="padding:12px 16px;">
+        <p style="margin-bottom:6px;">
+          <strong>문제 8.</strong> \(B\), \(T_1\), \(R\)에 대하여 구하시오.
+          \(B=\begin{pmatrix}0&0&0\\255&0&0\\255&0&0\end{pmatrix}\)
+        </p>
+        <div class="fitb-row" style="flex-direction:column; align-items:flex-start; gap:4px;">
+          <div>(1) 위로 한 픽셀 이동한 이미지 행렬</div>
+          <div class="fragment" data-fragment-index="3">
+            → <span class="kw-green">\(\begin{pmatrix}255&0&0\\255&0&0\\0&0&0\end{pmatrix}\)</span>
+          </div>
+        </div>
+        <div class="fitb-row" style="flex-direction:column; align-items:flex-start; gap:4px; margin-top:4px;">
+          <div>(2) (1)의 이미지를 좌우 대칭이동한 행렬</div>
+          <div class="fragment" data-fragment-index="4">
+            → <span class="kw-green">\(\begin{pmatrix}0&0&255\\0&0&255\\0&0&0\end{pmatrix}\)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 16: CONCEPT SUMMARY ===== -->
+<section id="slide-summary">
+  <h2>개념 정리하기</h2>
+  <div style="font-size:0.84em;">
+    <div class="fitb-row">
+      두 이미지를 합성할 때 이용되는 행렬의 연산은
+      <span class="fragment"><span class="kw-cyan">덧셈과 뺄셈</span></span>이다.
+    </div>
+    <div class="fitb-row" style="margin-top:4px;">
+      이미지의 밝기를 조절할 때 이용되는 행렬의 연산은
+      <span class="fragment"><span class="kw-amber">실수배</span></span>이다.
+    </div>
+    <div class="fitb-row" style="margin-top:4px;">
+      컬러 이미지를 흑백 이미지로 바꿀 때 흑백 행렬 \(K\) = <span class="fragment"><span class="kw-green">\(\dfrac{1}{3}(R+G+B)\)</span></span>
+    </div>
+    <div class="fitb-row" style="margin-top:4px;">
+      이미지의 평행이동과 대칭이동에 이용되는 행렬의 연산은
+      <span class="fragment"><span class="kw-purple">곱셈</span></span>이다.
+    </div>
+    <div class="fitb-row" style="margin-top:4px;">
+      일반적으로 행렬의 곱셈에서 교환법칙은
+      <span class="fragment"><span class="kw-red">성립하지 않는다</span></span>.
+      즉, <span class="fragment">\(AB \neq BA\)</span>
+    </div>
+    <div class="highlight-box fragment" style="margin-top:8px; font-size:0.84em;">
+      <strong>이미지 처리 4대 연산 요약:</strong>
+      합성 → <span class="kw-cyan">A+B</span> &nbsp;|&nbsp;
+      밝기 → <span class="kw-amber">kA</span> &nbsp;|&nbsp;
+      흑백 → <span class="kw-green">⅓(R+G+B)</span> &nbsp;|&nbsp;
+      이동·대칭 → <span class="kw-purple">AB</span>
+    </div>
+  </div>
+</section>
+
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script>
+  // ============================================================
+  //  IMAGE DATA FOR SLIDE 5
+  // ============================================================
+  const imgAData = [
+    [0,1,1,1,0],[1,1,1,1,1],[0,1,0,0,1]
+  ];
+  const imgBData = [
+    [0,0,0,0,0],[0,0,0,0,0],[0,0,0,1,0]
+  ];
+  const imgCData = [
+    [0,1,1,1,0],[1,1,1,1,1],[0,1,0,1,1]
+  ];
+
+  // Grayscale values for brightness demo (slide 7)
+  const origVals = [120,64,64, 64,64,120];
+
+  // ============================================================
+  //  BUILD GRIDS
+  // ============================================================
+  function buildBWGrid(id, data) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+    data.forEach(row => row.forEach(v => {
+      const c = document.createElement('div');
+      c.className = 'pixel-cell ' + (v === 0 ? 'bw-black' : 'bw-white');
+      c.style.width = '38px'; c.style.height = '38px';
+      el.appendChild(c);
+    }));
+  }
+
+  function buildBrightnessGrids() {
+    ['bright-dark','bright-orig','bright-light'].forEach((id, idx) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = '';
+      const factor = [0.5, 1.0, 2.0][idx];
+      origVals.forEach(v => {
+        const adj = Math.min(255, Math.round(v * factor));
+        const c = document.createElement('div');
+        c.className = 'pixel-cell';
+        c.style.width = '44px'; c.style.height = '40px';
+        c.style.background = `rgb(${adj},${adj},${adj})`;
+        c.style.color = adj > 130 ? '#333' : '#eee';
+        c.style.fontSize = '11px';
+        c.textContent = adj;
+        el.appendChild(c);
+      });
+    });
+  }
+
+  // ============================================================
+  //  REVEAL INIT
+  // ============================================================
+  Reveal.initialize({
+    hash: true, slideNumber: 'c/t', progress: true,
+    controls: true, transition: 'slide', backgroundTransition: 'fade',
+    center: false, touch: true, autoAnimateDuration: 0.6,
+    width: 1280, height: 720, margin: 0.04, plugins: []
+  });
+
+  window.safeTypeset = window.safeTypeset || function(elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+  };
+  Reveal.on('ready', function () {
+    buildBWGrid('img-A', imgAData);
+    buildBWGrid('img-B', imgBData);
+    buildBWGrid('img-C', imgCData);
+    buildBrightnessGrids();
+    window.safeTypeset();
+  });
+
+  Reveal.on('slidechanged', function (event) {
+    window.safeTypeset(event.currentSlide);
+  });
+</script>
+</body>
+</html>

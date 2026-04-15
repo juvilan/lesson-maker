@@ -21,7 +21,8 @@ HTML 강의 교안과 A4 학습지(PDF 포함)를 생성하는 마스터 에이�
 
 | 과목 key | 표시명 | 플러그인 경로 | 상태 |
 |---------|--------|-------------|------|
-| `ai_math` | 인공지능수학 | `ai-math/config/` | ✅ 구현됨 |
+| `ai_math` | 인공지능수학(2015) | `ai-math/config/` | ✅ 구현됨 |
+| `ai_math_2022` | 인공지능수학(2022) | `ai-math-2022/config/` | ✅ 구현됨 |
 | `math1` | 수학I | `algebra/config/` | 🔲 미구현 (범용 패턴 사용) |
 | `math2` | 수학II | `algebra/config/` | 🔲 미구현 |
 | `calculus` | 미적분 | `calculus/config/` | 🔲 미구현 |
@@ -47,6 +48,7 @@ HTML 강의 교안과 A4 학습지(PDF 포함)를 생성하는 마스터 에이�
 ### 과목 자동 감지
 명시적으로 과목을 말하지 않으면 주제 키워드로 추론:
 - "퍼셉트론", "신경망", "XOR", "손실함수", "경사하강법" → `ai_math`
+- "2022", "개정", "빅데이터와 인공지능", "미래엔 인공지능", "2022 개정" → `ai_math_2022`
 - "삼각함수", "지수", "로그", "수열", "등차", "등비" → `math1`
 - "미분", "적분", "극한", "연속" → `math2` 또는 `calculus`
 - "확률", "이항분포", "정규분포", "통계" → `statistics`
@@ -61,6 +63,7 @@ subject_key = detect_subject(topic)  # 과목 키 감지
 # 폴더명 매핑 (subject_key → 실제 폴더명)
 subject_dir_map = {
     "ai_math": "ai-math",
+    "ai_math_2022": "ai-math-2022",
     "math1": "algebra",
     "math2": "algebra",
     "calculus": "calculus",
@@ -253,16 +256,23 @@ Wave 2 에이전트들은 각자 ID를 생성하지 않는다.
 출력: lecture_script.json
 ```
 
-### 학습지 생성 에이전트 (include_worksheet: true일 때만)
+### 학습지/수행평가 생성 에이전트 (include_worksheet: true일 때만)
+
+요청 유형에 따라 에이전트를 선택한다:
+- **학습지**: `worksheet_generator.md` 사용
+- **수행평가**: `assessment_generator.md` 사용 (요청에 "수행평가", "루브릭", "활동" 포함 시)
+
 ```
-에이전트: _shared/agents/worksheet_generator.md
+에이전트: _shared/agents/worksheet_generator.md  ← 학습지
+        또는
+        _shared/agents/assessment_generator.md   ← 수행평가
 모델: claude-sonnet-4-6
 입력:
   merged_context_path: workspace/{session_id}/merged_context.json
-  worksheet_options: {worksheet_options}
+  worksheet_options 또는 assessment_options: {옵션}
   output_path: workspace/{session_id}/worksheet.json
   subject_plugin_path: {subject_plugin_path}
-출력: worksheet.json
+출력: worksheet.json (output_format: "pdf", document_type: "worksheet"|"assessment")
 ```
 
 ---
@@ -318,33 +328,31 @@ geometry:   '#1abc9c'  # 청록 (공간)
 output/lesson_{session_id}.html
 ```
 
-### 3-B: 학습지 HTML 조립 (include_worksheet: true일 때만)
+### 3-B: 학습지/수행평가 PDF 생성 (include_worksheet: true일 때만)
 
-worksheet.json의 `worksheet_html`을 `output/worksheet_{session_id}.html`로 저장.
-`answer_key_html`이 있으면 학습지 HTML 파일 안에 포함됨 (정답지 섹션 분리).
+worksheet.json의 `output_format: "pdf"` 확인 후 pdf_renderer.py를 직접 호출한다.
+HTML 중간 파일은 생성하지 않는다.
+
+```bash
+python _shared/tools/tex_renderer.py \
+  workspace/{session_id}/worksheet.json \
+  output/worksheet_{session_id}.pdf \
+  --template _shared/config/school_template.json
+```
 
 학습지 최종 파일:
 ```
-output/worksheet_{session_id}.html
+output/worksheet_{session_id}.pdf
 ```
 
----
+**렌더러 선택 기준**:
+- 기본: `tex_renderer.py` (xelatex — 수식·한글 완전 품질)
+- xelatex 미설치 환경: `pdf_renderer.py` (fpdf2 폴백)
 
-## Wave 3.5: PDF Export (선택적)
-
-`include_worksheet: true`인 경우, 학습지 HTML을 A4 PDF로 변환:
-
-```bash
-node _shared/tools/pdf_exporter.mjs \
-  --input output/worksheet_{session_id}.html \
-  --output output/worksheet_{session_id}.pdf \
-  --format A4
-```
-
-**Puppeteer 미설치 시 처리**:
-- PDF 변환 실패해도 파이프라인을 중단하지 않는다.
-- 완료 보고에 "PDF 변환 실패 (puppeteer 미설치)" 메시지와 HTML 파일 경로를 안내한다.
-- 교사가 브라우저에서 직접 Cmd+P → 인쇄 → PDF 저장으로 대체 가능함을 안내.
+**오류 처리**:
+- xelatex 미설치: `brew install texlive` 안내 후 fpdf2로 폴백
+- 컴파일 실패 시 .log 파일 내용을 함께 안내
+- PDF 생성 실패해도 파이프라인을 중단하지 않는다.
 
 ---
 
@@ -375,11 +383,11 @@ node _shared/tools/pdf_exporter.mjs \
 
 📝 강의 원고: workspace/{session_id}/lecture_script.json
 
-[학습지 섹션 — include_worksheet: true인 경우만]
-📄 학습지(HTML): output/worksheet_{session_id}.html
-📄 학습지(PDF):  output/worksheet_{session_id}.pdf   ← puppeteer 설치 시
-   └ PDF 미생성 시: 브라우저에서 Cmd+P → 인쇄 → PDF 저장으로 대체 가능
+[학습지/수행평가 섹션 — include_worksheet: true인 경우만]
+📄 학습지(PDF):  output/worksheet_{session_id}.pdf   ← fpdf2 직접 생성
+   └ PDF 미생성 시: pip install fpdf2 후 재실행
 📊 문제 수: {n}문제 | 총 100점
+📋 문서 유형: 학습지 또는 수행평가 (document_type)
 ```
 
 ---

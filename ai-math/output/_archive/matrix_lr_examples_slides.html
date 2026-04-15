@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>행렬 곱 이미지 처리 — 실전 예제</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f172a;--card:#1e293b;--card2:#273348;
+  --text:#f1f5f9;--muted:#94a3b8;
+  --blue:#3b82f6;--green:#10b981;--yellow:#eab308;--purple:#a78bfa;--red:#ef4444;
+  --px-r:#ef4444;--px-g:#22c55e;--px-b:#3b82f6;--px-y:#eab308;--px-k:#1e293b;
+  --row-hi:rgba(234,179,8,0.25);--row-bd:#eab308;
+  --col-hi:rgba(16,185,129,0.25);--col-bd:#10b981;
+  --W:1200px;--H:675px;
+}
+body{background:var(--bg);font-family:'Noto Sans KR',sans-serif;
+  display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:20px;color:var(--text);}
+
+#stage{width:var(--W);max-width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;
+  border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.7);}
+.slide{position:absolute;inset:0;background:var(--card);padding:36px 48px 28px;
+  display:none;flex-direction:column;opacity:0;transition:opacity .35s;}
+.slide.active{display:flex;opacity:1;}
+
+#nav{margin-top:18px;display:flex;align-items:center;gap:12px;}
+.nav-btn{background:var(--card);border:1px solid #334155;color:var(--text);
+  padding:8px 22px;border-radius:8px;cursor:pointer;font-size:14px;
+  font-family:inherit;transition:background .2s;}
+.nav-btn:hover{background:#334155;}
+#counter{color:var(--muted);font-size:13px;min-width:52px;text-align:center;}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:#334155;cursor:pointer;transition:background .2s;}
+.dot.on{background:var(--blue);}
+
+.tag{display:inline-block;background:var(--blue);color:#fff;
+  font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+.tag.g{background:var(--green);}.tag.y{background:var(--yellow);color:#000;}
+.tag.p{background:var(--purple);}.tag.r{background:var(--red);}
+h1{font-size:44px;font-weight:900;line-height:1.2;}
+h2{font-size:26px;font-weight:700;margin-bottom:14px;}
+.sub{font-size:16px;color:var(--muted);margin-top:6px;line-height:1.6;}
+.key{color:var(--yellow);font-weight:700;}
+.key-g{color:var(--green);font-weight:700;}
+.key-b{color:var(--blue);font-weight:700;}
+.key-p{color:var(--purple);font-weight:700;}
+
+.row{display:flex;align-items:center;gap:16px;}
+.col{display:flex;flex-direction:column;gap:8px;}
+.center{justify-content:center;align-items:center;}
+.grow{flex:1;}
+
+.pgrid{display:inline-grid;gap:0;}
+.px{display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  border:2px solid rgba(255,255,255,.12);transition:all .2s;}
+.px-r{background:var(--px-r);} .px-g{background:var(--px-g);}
+.px-b{background:var(--px-b);} .px-y{background:var(--px-y);}
+.px-k{background:var(--px-k);border-color:#475569;}
+.px-p{background:var(--purple);}
+
+.mat{display:inline-flex;flex-direction:column;position:relative;padding:6px 12px;gap:3px;}
+.mat::before,.mat::after{content:'';position:absolute;top:0;bottom:0;width:6px;border:3px solid var(--muted);}
+.mat::before{left:0;border-right:none;border-radius:3px 0 0 3px;}
+.mat::after{right:0;border-left:none;border-radius:0 3px 3px 0;}
+.mrow{display:flex;gap:6px;}
+.mc{width:28px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+.mc.hi-y{color:var(--yellow);font-weight:700;}
+.mc.hi-g{color:var(--green);font-weight:700;}
+.mc.hi-b{color:var(--blue);font-weight:700;}
+.mc.hi-p{color:var(--purple);font-weight:700;}
+.mc.zero{color:#475569;}
+
+.callout{border-radius:10px;padding:12px 16px;font-size:14px;line-height:1.6;}
+.callout-y{background:rgba(234,179,8,.12);border-left:4px solid var(--yellow);}
+.callout-g{background:rgba(16,185,129,.12);border-left:4px solid var(--green);}
+.callout-b{background:rgba(59,130,246,.12);border-left:4px solid var(--blue);}
+.callout-p{background:rgba(167,139,250,.12);border-left:4px solid var(--purple);}
+
+.card{background:var(--card2);border-radius:10px;padding:16px 18px;}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+.formula{font-family:'JetBrains Mono',monospace;font-size:14px;
+  background:#0f172a;border-radius:8px;padding:10px 14px;
+  border:1px solid #334155;line-height:1.8;}
+
+.big-eq{font-size:28px;color:var(--muted);padding:0 8px;}
+.times{font-size:24px;color:var(--muted);padding:0 6px;}
+.arrow-r{font-size:26px;padding:0 6px;}
+
+.ex-row{display:flex;align-items:center;gap:14px;justify-content:center;}
+.label{font-size:12px;color:var(--muted);text-align:center;margin-bottom:4px;}
+.desc{font-size:13px;margin-top:6px;line-height:1.6;}
+
+.section-divider{width:1px;background:#334155;align-self:stretch;}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- ════ SLIDE 1 : 제목 ════ -->
+<div class="slide active" id="s1">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+    <div class="tag">보충 자료 · 행렬 곱 이미지 처리</div>
+    <h1 style="margin-top:12px;">왼쪽 곱 vs 오른쪽 곱<br><span style="color:var(--yellow)">실전 예제 모음</span></h1>
+    <p class="sub" style="max-width:650px;margin-top:16px;">
+      행렬 A = <span style="font-family:'JetBrains Mono',monospace;">[1,2,3; 4,5,6; 7,8,9]</span> 에<br>
+      다양한 행렬을 <span class="key">왼쪽(P·A)</span>과 <span class="key-g">오른쪽(A·Q)</span>에서 곱해보며<br>
+      행 조작과 열 조작의 차이를 확인합니다
+    </p>
+    <div style="margin-top:28px;display:flex;gap:20px;">
+      <div class="callout callout-y" style="font-size:13px;padding:10px 18px;">
+        <b>P · A</b> → 행(가로줄) 조작 예제 4개
+      </div>
+      <div class="callout callout-g" style="font-size:13px;padding:10px 18px;">
+        <b>A · Q</b> → 열(세로줄) 조작 예제 4개
+      </div>
+      <div class="callout callout-p" style="font-size:13px;padding:10px 18px;">
+        비정방 행렬 예제 3개
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 2 : 핵심 원리 복습 ════ -->
+<div class="slide" id="s2">
+  <div class="tag">복습</div>
+  <h2>지난 시간 핵심: <span class="key">왼쪽 곱 = 행</span>, <span class="key-g">오른쪽 곱 = 열</span></h2>
+  <div class="row" style="flex:1;gap:28px;justify-content:center;">
+    <div class="card" style="flex:1;border-top:3px solid var(--yellow);">
+      <div style="color:var(--yellow);font-weight:700;font-size:18px;margin-bottom:12px;">P · A → 행 조작</div>
+      <div class="formula" style="font-size:13px;margin-bottom:10px;">
+        결과의 i행 = P의 i행이 A의 행들을 선형결합<br>
+        = p₁·(A행1) + p₂·(A행2) + p₃·(A행3)
+      </div>
+      <div style="font-size:14px;line-height:1.8;color:var(--text);">
+        P의 각 <b>행</b>이 "A의 행들을 어떻게 섞을까?" 결정<br>
+        → 가로줄 단위로 교환, 복사, 이동, 블렌딩
+      </div>
+    </div>
+    <div class="card" style="flex:1;border-top:3px solid var(--green);">
+      <div style="color:var(--green);font-weight:700;font-size:18px;margin-bottom:12px;">A · Q → 열 조작</div>
+      <div class="formula" style="font-size:13px;margin-bottom:10px;">
+        결과의 j열 = Q의 j열이 A의 열들을 선형결합<br>
+        = q₁·(A열1) + q₂·(A열2) + q₃·(A열3)
+      </div>
+      <div style="font-size:14px;line-height:1.8;color:var(--text);">
+        Q의 각 <b>열</b>이 "A의 열들을 어떻게 섞을까?" 결정<br>
+        → 세로줄 단위로 교환, 복사, 이동, 블렌딩
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-b" style="margin-top:10px;">
+    <b>오늘 사용할 원본 이미지 행렬:</b>
+    <span style="font-family:'JetBrains Mono',monospace;">
+      A = [<span class="key">1, 2, 3</span>; <span class="key-g">4, 5, 6</span>; <span class="key-b">7, 8, 9</span>]
+    </span>
+    — 각 행을 색으로 구분하여 변화를 추적합니다.
+  </div>
+</div>
+
+<!-- ════ SLIDE 3 : 왼쪽 곱 예1 — 행 교환 ════ -->
+<div class="slide" id="s3">
+  <div class="tag y">왼쪽 곱 예제 ①</div>
+  <h2>행 교환 (상하 반전): <span class="key">행1 ↔ 행3</span></h2>
+  <div class="row" style="flex:1;gap:20px;justify-content:center;">
+    <!-- P 행렬 -->
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">P (행 교환)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc hi-y">1</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-g">1</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc hi-b">1</span><span class="mc zero">0</span><span class="mc zero">0</span></div>
+      </div>
+      <div class="desc" style="max-width:140px;text-align:center;">
+        <span style="color:var(--yellow)">행1: 0·행1+0·행2+1·행3</span><br>
+        <span style="color:var(--green)">행2: 0·행1+1·행2+0·행3</span><br>
+        <span style="color:var(--blue)">행3: 1·행1+0·행2+0·행3</span>
+      </div>
+    </div>
+
+    <div class="times">×</div>
+
+    <!-- A 행렬 -->
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">원본 A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-y">2</span><span class="mc hi-y">3</span></div>
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+        <div class="mrow"><span class="mc hi-b">7</span><span class="mc hi-b">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">3</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+      </div>
+    </div>
+
+    <div class="big-eq">=</div>
+
+    <!-- 결과 -->
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">결과 P·A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-b">7</span><span class="mc hi-b">8</span><span class="mc hi-b">9</span></div>
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-y">2</span><span class="mc hi-y">3</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">3</div>
+      </div>
+    </div>
+
+    <!-- 설명 -->
+    <div class="col" style="gap:10px;max-width:260px;">
+      <div class="callout callout-y" style="font-size:13px;">
+        P의 <b>행1 = [0,0,1]</b><br>
+        → 결과 행1 = A의 <b>행3</b>만 1배 선택
+      </div>
+      <div class="callout callout-g" style="font-size:13px;">
+        P의 <b>행2 = [0,1,0]</b><br>
+        → 결과 행2 = A의 <b>행2</b> 유지
+      </div>
+      <div class="callout callout-b" style="font-size:13px;">
+        P의 <b>행3 = [1,0,0]</b><br>
+        → 결과 행3 = A의 <b>행1</b>만 선택
+      </div>
+      <div style="font-size:13px;color:var(--yellow);font-weight:700;">
+        → 이미지가 상하 반전!
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 4 : 왼쪽 곱 예2 — 행 복사 ════ -->
+<div class="slide" id="s4">
+  <div class="tag y">왼쪽 곱 예제 ②</div>
+  <h2>행 복사: <span class="key">모든 행을 행2로 통일</span></h2>
+  <div class="row" style="flex:1;gap:20px;justify-content:center;">
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">P (행2 복사)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-y">1</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-g">1</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-b">1</span><span class="mc zero">0</span></div>
+      </div>
+      <div class="desc" style="max-width:160px;text-align:center;">
+        세 행 모두 [0,1,0]<br>
+        → "A의 행2만 골라라"
+      </div>
+    </div>
+    <div class="times">×</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">원본 A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-y">2</span><span class="mc hi-y">3</span></div>
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+        <div class="mrow"><span class="mc hi-b">7</span><span class="mc hi-b">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">3</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+      </div>
+    </div>
+    <div class="big-eq">=</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">결과 P·A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">6</div>
+      </div>
+    </div>
+    <div class="col" style="gap:10px;max-width:260px;">
+      <div class="callout callout-y" style="font-size:13px;">
+        P의 모든 행이 <b>[0, 1, 0]</b><br>
+        → 결과의 모든 행 = A의 행2 = [4, 5, 6]
+      </div>
+      <div class="callout callout-b" style="font-size:13px;">
+        <b>활용:</b> 이미지의 특정 가로줄(행2)로<br>
+        전체를 채움 → <b>가로 줄무늬 패턴</b> 생성
+      </div>
+      <div style="font-size:13px;color:var(--yellow);font-weight:700;">
+        → 행2가 3번 반복된 이미지!
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 5 : 왼쪽 곱 예3 — 행 이동 ════ -->
+<div class="slide" id="s5">
+  <div class="tag y">왼쪽 곱 예제 ③</div>
+  <h2>행 이동 (위로 스크롤): <span class="key">행2→행1, 행3→행2, 행3→검정</span></h2>
+  <div class="row" style="flex:1;gap:20px;justify-content:center;">
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">P (위로 이동)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-y">1</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc hi-g">1</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc zero">0</span></div>
+      </div>
+      <div class="desc" style="max-width:160px;text-align:center;">
+        <span style="color:var(--yellow)">행1=[0,1,0] → A행2</span><br>
+        <span style="color:var(--green)">행2=[0,0,1] → A행3</span><br>
+        <span style="color:var(--muted)">행3=[0,0,0] → 영벡터</span>
+      </div>
+    </div>
+    <div class="times">×</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">원본 A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-y">2</span><span class="mc hi-y">3</span></div>
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+        <div class="mrow"><span class="mc hi-b">7</span><span class="mc hi-b">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">3</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+      </div>
+    </div>
+    <div class="big-eq">=</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">결과 P·A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+        <div class="mrow"><span class="mc hi-b">7</span><span class="mc hi-b">8</span><span class="mc hi-b">9</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc zero">0</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+        <div class="px px-k" style="width:40px;height:40px;font-size:12px;color:#475569;">0</div>
+        <div class="px px-k" style="width:40px;height:40px;font-size:12px;color:#475569;">0</div>
+        <div class="px px-k" style="width:40px;height:40px;font-size:12px;color:#475569;">0</div>
+      </div>
+    </div>
+    <div class="col" style="gap:10px;max-width:260px;">
+      <div class="callout callout-y" style="font-size:13px;">
+        <b>행1</b>에 원래 행2가, <b>행2</b>에 원래 행3이 들어감<br>
+        → 이미지가 <b>한 칸 위로 이동</b>
+      </div>
+      <div class="callout callout-b" style="font-size:13px;">
+        <b>행3 = [0,0,0]</b><br>
+        → 0·행1 + 0·행2 + 0·행3 = <b>[0,0,0]</b><br>
+        → 맨 아래 줄이 <b>검정(소거)</b>됨
+      </div>
+      <div style="font-size:13px;color:var(--yellow);font-weight:700;">
+        → 위로 스크롤한 효과!
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 6 : 왼쪽 곱 예4 — 행 블렌딩 ════ -->
+<div class="slide" id="s6">
+  <div class="tag y">왼쪽 곱 예제 ④</div>
+  <h2>행 블렌딩 (세로 흐리기): <span class="key">인접 행의 평균</span></h2>
+  <div class="row" style="flex:1;gap:18px;justify-content:center;">
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">P (블렌딩)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y" style="font-size:12px;">½</span><span class="mc hi-y" style="font-size:12px;">½</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-g" style="font-size:12px;">½</span><span class="mc hi-g" style="font-size:12px;">½</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc hi-b">1</span></div>
+      </div>
+      <div class="desc" style="max-width:170px;text-align:center;font-size:12px;">
+        <span style="color:var(--yellow)">행1 = ½·행1 + ½·행2</span><br>
+        <span style="color:var(--green)">행2 = ½·행2 + ½·행3</span><br>
+        <span style="color:var(--blue)">행3 = 행3 유지</span>
+      </div>
+    </div>
+    <div class="times">×</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">원본 A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-y">2</span><span class="mc hi-y">3</span></div>
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+        <div class="mrow"><span class="mc hi-b">7</span><span class="mc hi-b">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">3</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+      </div>
+    </div>
+    <div class="big-eq">=</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">결과 P·A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc" style="color:#d4a017;font-size:12px;">2.5</span><span class="mc" style="color:#d4a017;font-size:12px;">3.5</span><span class="mc" style="color:#d4a017;font-size:12px;">4.5</span></div>
+        <div class="mrow"><span class="mc" style="color:#19a87e;font-size:12px;">5.5</span><span class="mc" style="color:#19a87e;font-size:12px;">6.5</span><span class="mc" style="color:#19a87e;font-size:12px;">7.5</span></div>
+        <div class="mrow"><span class="mc hi-b">7</span><span class="mc hi-b">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px" style="width:40px;height:40px;font-size:10px;background:#b8860b;">2.5</div>
+        <div class="px" style="width:40px;height:40px;font-size:10px;background:#b8860b;">3.5</div>
+        <div class="px" style="width:40px;height:40px;font-size:10px;background:#b8860b;">4.5</div>
+        <div class="px" style="width:40px;height:40px;font-size:10px;background:#2d8f6f;">5.5</div>
+        <div class="px" style="width:40px;height:40px;font-size:10px;background:#2d8f6f;">6.5</div>
+        <div class="px" style="width:40px;height:40px;font-size:10px;background:#2d8f6f;">7.5</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+      </div>
+    </div>
+    <div class="col" style="gap:8px;max-width:260px;">
+      <div class="callout callout-y" style="font-size:13px;">
+        <b>행1</b> = ½×[1,2,3] + ½×[4,5,6]<br>
+        = [<b>2.5, 3.5, 4.5</b>]<br>
+        → 행1과 행2의 <b>중간값</b>
+      </div>
+      <div class="callout callout-g" style="font-size:13px;">
+        <b>행2</b> = ½×[4,5,6] + ½×[7,8,9]<br>
+        = [<b>5.5, 6.5, 7.5</b>]<br>
+        → 행2과 행3의 <b>중간값</b>
+      </div>
+      <div class="callout callout-b" style="font-size:12px;">
+        색이 부드럽게 섞임 → <b>세로 방향 블러</b> 효과!<br>
+        P의 계수가 가중치 역할을 합니다.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 7 : 오른쪽 곱 예1 — 열 교환 ════ -->
+<div class="slide" id="s7">
+  <div class="tag g">오른쪽 곱 예제 ①</div>
+  <h2>열 교환 (좌우 반전): <span class="key-g">열1 ↔ 열3</span></h2>
+  <div class="row" style="flex:1;gap:20px;justify-content:center;">
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">원본 A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-g">2</span><span class="mc hi-b">3</span></div>
+        <div class="mrow"><span class="mc hi-y">4</span><span class="mc hi-g">5</span><span class="mc hi-b">6</span></div>
+        <div class="mrow"><span class="mc hi-y">7</span><span class="mc hi-g">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">3</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+      </div>
+      <div class="row" style="gap:0;margin-top:2px;">
+        <div style="width:40px;font-size:10px;color:var(--yellow);text-align:center;">열1</div>
+        <div style="width:40px;font-size:10px;color:var(--green);text-align:center;">열2</div>
+        <div style="width:40px;font-size:10px;color:var(--blue);text-align:center;">열3</div>
+      </div>
+    </div>
+    <div class="times">×</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">Q (열 교환)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc hi-b">1</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-g">1</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc zero">0</span><span class="mc zero">0</span></div>
+      </div>
+      <div class="desc" style="max-width:160px;text-align:center;font-size:12px;">
+        <span style="color:var(--yellow)">열1=[0,0,1]ᵀ → A열3</span><br>
+        <span style="color:var(--green)">열2=[0,1,0]ᵀ → A열2</span><br>
+        <span style="color:var(--blue)">열3=[1,0,0]ᵀ → A열1</span>
+      </div>
+    </div>
+    <div class="big-eq">=</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">결과 A·Q</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-b">3</span><span class="mc hi-g">2</span><span class="mc hi-y">1</span></div>
+        <div class="mrow"><span class="mc hi-b">6</span><span class="mc hi-g">5</span><span class="mc hi-y">4</span></div>
+        <div class="mrow"><span class="mc hi-b">9</span><span class="mc hi-g">8</span><span class="mc hi-y">7</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">3</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">7</div>
+      </div>
+      <div class="row" style="gap:0;margin-top:2px;">
+        <div style="width:40px;font-size:10px;color:var(--blue);text-align:center;">열3→1</div>
+        <div style="width:40px;font-size:10px;color:var(--green);text-align:center;">열2</div>
+        <div style="width:40px;font-size:10px;color:var(--yellow);text-align:center;">열1→3</div>
+      </div>
+    </div>
+    <div class="col" style="gap:10px;max-width:250px;">
+      <div class="callout callout-g" style="font-size:13px;">
+        Q의 <b>열1 = [0,0,1]ᵀ</b><br>
+        → 결과 열1 = 0·A열1 + 0·A열2 + 1·<b>A열3</b>
+      </div>
+      <div class="callout callout-b" style="font-size:13px;">
+        행렬 P·A (상하 반전)와 같은 행렬인데<br>
+        A·Q로 곱하면 → <b>좌우 반전</b>!<br><br>
+        같은 행렬이라도 <b>곱하는 위치</b>가 결과를 바꿈
+      </div>
+      <div style="font-size:13px;color:var(--green);font-weight:700;">
+        → 세로줄이 뒤집힌 좌우 반전!
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 8 : 오른쪽 곱 예2 — 열 복사 ════ -->
+<div class="slide" id="s8">
+  <div class="tag g">오른쪽 곱 예제 ②</div>
+  <h2>열 복사: <span class="key-g">모든 열을 열1로 통일</span></h2>
+  <div class="row" style="flex:1;gap:20px;justify-content:center;">
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">원본 A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-g">2</span><span class="mc hi-b">3</span></div>
+        <div class="mrow"><span class="mc hi-y">4</span><span class="mc hi-g">5</span><span class="mc hi-b">6</span></div>
+        <div class="mrow"><span class="mc hi-y">7</span><span class="mc hi-g">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">3</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+      </div>
+    </div>
+    <div class="times">×</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">Q (열1 복사)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-y">1</span><span class="mc hi-y">1</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc zero">0</span></div>
+      </div>
+      <div class="desc" style="max-width:160px;text-align:center;font-size:12px;">
+        세 열 모두 [1,0,0]ᵀ<br>
+        → "A의 열1만 골라라"
+      </div>
+    </div>
+    <div class="big-eq">=</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">결과 A·Q</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-y">1</span><span class="mc hi-y">1</span></div>
+        <div class="mrow"><span class="mc hi-y">4</span><span class="mc hi-y">4</span><span class="mc hi-y">4</span></div>
+        <div class="mrow"><span class="mc hi-y">7</span><span class="mc hi-y">7</span><span class="mc hi-y">7</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">7</div>
+      </div>
+    </div>
+    <div class="col" style="gap:10px;max-width:260px;">
+      <div class="callout callout-g" style="font-size:13px;">
+        Q의 모든 열이 <b>[1, 0, 0]ᵀ</b><br>
+        → 결과의 모든 열 = A의 열1 = [1, 4, 7]ᵀ
+      </div>
+      <div class="callout callout-b" style="font-size:13px;">
+        <b>비교:</b> 행 복사(P·A)는 가로 줄무늬<br>
+        열 복사(A·Q)는 <b>세로 줄무늬</b> 패턴!<br><br>
+        같은 "복사"인데 방향이 다릅니다.
+      </div>
+      <div style="font-size:13px;color:var(--green);font-weight:700;">
+        → 열1이 3번 반복된 세로 줄무늬!
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 9 : 오른쪽 곱 예3 — 열 이동 ════ -->
+<div class="slide" id="s9">
+  <div class="tag g">오른쪽 곱 예제 ③</div>
+  <h2>열 이동 (오른쪽 스크롤): <span class="key-g">열1→열2, 열2→열3, 열1→검정</span></h2>
+  <div class="row" style="flex:1;gap:20px;justify-content:center;">
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">원본 A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-g">2</span><span class="mc hi-b">3</span></div>
+        <div class="mrow"><span class="mc hi-y">4</span><span class="mc hi-g">5</span><span class="mc hi-b">6</span></div>
+        <div class="mrow"><span class="mc hi-y">7</span><span class="mc hi-g">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">3</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+      </div>
+    </div>
+    <div class="times">×</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">Q (오른쪽 이동)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-g">1</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc hi-b">1</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc zero">0</span></div>
+      </div>
+      <div class="desc" style="max-width:160px;text-align:center;font-size:12px;">
+        <span style="color:var(--muted)">열1=[0,0,0]ᵀ → 영벡터</span><br>
+        <span style="color:var(--green)">열2=[1,0,0]ᵀ → A열1</span><br>
+        <span style="color:var(--blue)">열3=[0,1,0]ᵀ → A열2</span>
+      </div>
+    </div>
+    <div class="big-eq">=</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">결과 A·Q</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-y">1</span><span class="mc hi-g">2</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-y">4</span><span class="mc hi-g">5</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-y">7</span><span class="mc hi-g">8</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-k" style="width:40px;height:40px;font-size:12px;color:#475569;">0</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-k" style="width:40px;height:40px;font-size:12px;color:#475569;">0</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-k" style="width:40px;height:40px;font-size:12px;color:#475569;">0</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">8</div>
+      </div>
+    </div>
+    <div class="col" style="gap:10px;max-width:260px;">
+      <div class="callout callout-g" style="font-size:13px;">
+        <b>열1</b>에 영벡터, <b>열2</b>에 원래 열1, <b>열3</b>에 원래 열2<br>
+        → 이미지가 <b>한 칸 오른쪽으로 이동</b>
+      </div>
+      <div class="callout callout-b" style="font-size:13px;">
+        <b>비교:</b> 행 이동(P·A)은 위/아래 스크롤<br>
+        열 이동(A·Q)은 <b>좌/우 스크롤</b>!<br><br>
+        원래 <b>열3(파랑)</b>은 사라지고<br>
+        왼쪽에 <b>검정 열</b>이 생김
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 10 : 오른쪽 곱 예4 — 열 스케일링 ════ -->
+<div class="slide" id="s10">
+  <div class="tag g">오른쪽 곱 예제 ④</div>
+  <h2>열 스케일링: <span class="key-g">각 열의 밝기를 개별 조절</span></h2>
+  <div class="row" style="flex:1;gap:20px;justify-content:center;">
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">원본 A</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-g">2</span><span class="mc hi-b">3</span></div>
+        <div class="mrow"><span class="mc hi-y">4</span><span class="mc hi-g">5</span><span class="mc hi-b">6</span></div>
+        <div class="mrow"><span class="mc hi-y">7</span><span class="mc hi-g">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">3</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+      </div>
+    </div>
+    <div class="times">×</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">Q (대각 스케일링)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">2</span><span class="mc zero">0</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-g">1</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc hi-b">0</span></div>
+      </div>
+      <div class="desc" style="max-width:160px;text-align:center;font-size:12px;">
+        <span style="color:var(--yellow)">열1: ×2 (밝게)</span><br>
+        <span style="color:var(--green)">열2: ×1 (유지)</span><br>
+        <span style="color:var(--blue)">열3: ×0 (소거)</span>
+      </div>
+    </div>
+    <div class="big-eq">=</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">결과 A·Q</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">2</span><span class="mc hi-g">2</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc hi-y">8</span><span class="mc hi-g">5</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc hi-y">14</span><span class="mc hi-g">8</span><span class="mc zero">0</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px" style="width:40px;height:40px;font-size:12px;background:#d4a017;">2</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-k" style="width:40px;height:40px;font-size:12px;color:#475569;">0</div>
+        <div class="px" style="width:40px;height:40px;font-size:12px;background:#d4a017;">8</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-k" style="width:40px;height:40px;font-size:12px;color:#475569;">0</div>
+        <div class="px" style="width:40px;height:40px;font-size:12px;background:#d4a017;">14</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-k" style="width:40px;height:40px;font-size:12px;color:#475569;">0</div>
+      </div>
+    </div>
+    <div class="col" style="gap:8px;max-width:260px;">
+      <div class="callout callout-g" style="font-size:13px;">
+        <b>대각행렬</b>로 곱하면<br>
+        각 열에 <b>개별 배율</b>을 적용!<br>
+        열1은 2배, 열2는 유지, 열3은 소거
+      </div>
+      <div class="callout callout-p" style="font-size:13px;">
+        <b>참고:</b> 왼쪽에서 대각행렬을 곱하면?<br>
+        → 각 <b>행</b>에 개별 배율 적용!<br>
+        diag(2,1,0)·A = 행1×2, 행2 유지, 행3 소거
+      </div>
+      <div style="font-size:13px;color:var(--green);font-weight:700;">
+        → 열별 밝기 조절 = 세로줄별 필터!
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 11 : 비정방 예1 — 행 줄이기 ════ -->
+<div class="slide" id="s11">
+  <div class="tag p">비정방 행렬 예제 ①</div>
+  <h2>행 줄이기: <span class="key-p">2×3 행렬 × 3×3 이미지</span> → 2×3 결과</h2>
+  <div class="row" style="flex:1;gap:18px;justify-content:center;">
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">P (2×3)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc zero">0</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc hi-g">1</span></div>
+      </div>
+      <div class="desc" style="max-width:140px;text-align:center;font-size:12px;">
+        행1: A의 행1 선택<br>
+        행2: A의 행3 선택<br>
+        <b>→ 행2 삭제!</b>
+      </div>
+    </div>
+    <div class="times">×</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">원본 A (3×3)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-y">2</span><span class="mc hi-y">3</span></div>
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+        <div class="mrow"><span class="mc hi-b">7</span><span class="mc hi-b">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">3</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">4</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">5</div>
+        <div class="px px-g" style="width:40px;height:40px;font-size:12px;">6</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+      </div>
+    </div>
+    <div class="big-eq">=</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">결과 (2×3)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-y">2</span><span class="mc hi-y">3</span></div>
+        <div class="mrow"><span class="mc hi-b">7</span><span class="mc hi-b">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,40px);margin-top:6px;">
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">1</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">2</div>
+        <div class="px px-y" style="width:40px;height:40px;font-size:12px;">3</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">7</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">8</div>
+        <div class="px px-b" style="width:40px;height:40px;font-size:12px;">9</div>
+      </div>
+    </div>
+    <div class="col" style="gap:10px;max-width:280px;">
+      <div class="callout callout-p" style="font-size:13px;">
+        <b>P가 2×3</b>이므로 결과는 <b>2행</b>만 가짐<br>
+        → 이미지 높이가 3에서 2로 줄어듦!<br><br>
+        P의 행 수 = 결과의 행 수
+      </div>
+      <div class="callout callout-b" style="font-size:13px;">
+        <b>활용:</b> 이미지 <b>자르기(crop)</b><br>
+        원하는 행만 골라서 추출<br>
+        → 세로 해상도 축소
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 12 : 비정방 예2 — 행 늘리기 ════ -->
+<div class="slide" id="s12">
+  <div class="tag p">비정방 행렬 예제 ②</div>
+  <h2>행 늘리기: <span class="key-p">4×3 행렬 × 3×3 이미지</span> → 4×3 결과</h2>
+  <div class="row" style="flex:1;gap:18px;justify-content:center;">
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">P (4×3)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc zero">0</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc hi-y" style="font-size:11px;">½</span><span class="mc hi-g" style="font-size:11px;">½</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc hi-g">1</span><span class="mc zero">0</span></div>
+        <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc hi-b">1</span></div>
+      </div>
+      <div class="desc" style="max-width:160px;text-align:center;font-size:11px;">
+        행1: A행1<br>
+        행2: A행1과 A행2의 평균<br>
+        행3: A행2<br>
+        행4: A행3
+      </div>
+    </div>
+    <div class="times">×</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">원본 A (3×3)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-y">2</span><span class="mc hi-y">3</span></div>
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+        <div class="mrow"><span class="mc hi-b">7</span><span class="mc hi-b">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,36px);margin-top:6px;">
+        <div class="px px-y" style="width:36px;height:36px;font-size:11px;">1</div>
+        <div class="px px-y" style="width:36px;height:36px;font-size:11px;">2</div>
+        <div class="px px-y" style="width:36px;height:36px;font-size:11px;">3</div>
+        <div class="px px-g" style="width:36px;height:36px;font-size:11px;">4</div>
+        <div class="px px-g" style="width:36px;height:36px;font-size:11px;">5</div>
+        <div class="px px-g" style="width:36px;height:36px;font-size:11px;">6</div>
+        <div class="px px-b" style="width:36px;height:36px;font-size:11px;">7</div>
+        <div class="px px-b" style="width:36px;height:36px;font-size:11px;">8</div>
+        <div class="px px-b" style="width:36px;height:36px;font-size:11px;">9</div>
+      </div>
+    </div>
+    <div class="big-eq">=</div>
+    <div class="col" style="align-items:center;gap:6px;">
+      <div class="label">결과 (4×3)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">1</span><span class="mc hi-y">2</span><span class="mc hi-y">3</span></div>
+        <div class="mrow"><span class="mc" style="color:#b8860b;font-size:11px;">2.5</span><span class="mc" style="color:#b8860b;font-size:11px;">3.5</span><span class="mc" style="color:#b8860b;font-size:11px;">4.5</span></div>
+        <div class="mrow"><span class="mc hi-g">4</span><span class="mc hi-g">5</span><span class="mc hi-g">6</span></div>
+        <div class="mrow"><span class="mc hi-b">7</span><span class="mc hi-b">8</span><span class="mc hi-b">9</span></div>
+      </div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,36px);margin-top:6px;">
+        <div class="px px-y" style="width:36px;height:36px;font-size:11px;">1</div>
+        <div class="px px-y" style="width:36px;height:36px;font-size:11px;">2</div>
+        <div class="px px-y" style="width:36px;height:36px;font-size:11px;">3</div>
+        <div class="px" style="width:36px;height:36px;font-size:9px;background:#b8860b;">2.5</div>
+        <div class="px" style="width:36px;height:36px;font-size:9px;background:#b8860b;">3.5</div>
+        <div class="px" style="width:36px;height:36px;font-size:9px;background:#b8860b;">4.5</div>
+        <div class="px px-g" style="width:36px;height:36px;font-size:11px;">4</div>
+        <div class="px px-g" style="width:36px;height:36px;font-size:11px;">5</div>
+        <div class="px px-g" style="width:36px;height:36px;font-size:11px;">6</div>
+        <div class="px px-b" style="width:36px;height:36px;font-size:11px;">7</div>
+        <div class="px px-b" style="width:36px;height:36px;font-size:11px;">8</div>
+        <div class="px px-b" style="width:36px;height:36px;font-size:11px;">9</div>
+      </div>
+    </div>
+    <div class="col" style="gap:8px;max-width:260px;">
+      <div class="callout callout-p" style="font-size:13px;">
+        <b>P가 4×3</b>이므로 결과는 <b>4행</b><br>
+        → 이미지 높이가 3에서 4로 늘어남!
+      </div>
+      <div class="callout callout-y" style="font-size:13px;">
+        행2 = ½×[1,2,3] + ½×[4,5,6]<br>
+        = [2.5, 3.5, 4.5]<br>
+        → 행1과 행2 사이에 <b>보간값 삽입</b>
+      </div>
+      <div class="callout callout-b" style="font-size:12px;">
+        <b>활용:</b> 이미지 <b>업스케일링</b><br>
+        중간 행을 블렌딩으로 생성<br>
+        → 부드러운 세로 해상도 증가
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 13 : 비정방 예3 — 열 줄이기/늘리기 ════ -->
+<div class="slide" id="s13">
+  <div class="tag p">비정방 행렬 예제 ③</div>
+  <h2>열 조절: <span class="key-g">3×3 이미지 × 3×2</span> → 3×2 (열 줄이기)</h2>
+  <div class="row" style="flex:1;gap:20px;align-items:flex-start;justify-content:center;padding-top:10px;">
+
+    <!-- 열 줄이기 -->
+    <div class="col" style="align-items:center;gap:8px;flex:1;">
+      <div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:4px;">열 줄이기 (3→2)</div>
+      <div class="row" style="gap:10px;align-items:center;">
+        <div class="col" style="align-items:center;">
+          <div class="label">A (3×3)</div>
+          <div class="mat" style="padding:5px 10px;">
+            <div class="mrow"><span class="mc hi-y" style="width:24px;">1</span><span class="mc hi-g" style="width:24px;">2</span><span class="mc hi-b" style="width:24px;">3</span></div>
+            <div class="mrow"><span class="mc hi-y" style="width:24px;">4</span><span class="mc hi-g" style="width:24px;">5</span><span class="mc hi-b" style="width:24px;">6</span></div>
+            <div class="mrow"><span class="mc hi-y" style="width:24px;">7</span><span class="mc hi-g" style="width:24px;">8</span><span class="mc hi-b" style="width:24px;">9</span></div>
+          </div>
+        </div>
+        <div class="times" style="font-size:18px;">×</div>
+        <div class="col" style="align-items:center;">
+          <div class="label">Q (3×2)</div>
+          <div class="mat" style="padding:5px 10px;">
+            <div class="mrow"><span class="mc hi-y" style="width:24px;">1</span><span class="mc zero" style="width:24px;">0</span></div>
+            <div class="mrow"><span class="mc zero" style="width:24px;">0</span><span class="mc zero" style="width:24px;">0</span></div>
+            <div class="mrow"><span class="mc zero" style="width:24px;">0</span><span class="mc hi-b" style="width:24px;">1</span></div>
+          </div>
+        </div>
+        <div style="font-size:20px;color:var(--muted);">=</div>
+        <div class="col" style="align-items:center;">
+          <div class="label">결과 (3×2)</div>
+          <div class="mat" style="padding:5px 10px;">
+            <div class="mrow"><span class="mc hi-y" style="width:24px;">1</span><span class="mc hi-b" style="width:24px;">3</span></div>
+            <div class="mrow"><span class="mc hi-y" style="width:24px;">4</span><span class="mc hi-b" style="width:24px;">6</span></div>
+            <div class="mrow"><span class="mc hi-y" style="width:24px;">7</span><span class="mc hi-b" style="width:24px;">9</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="gap:10px;align-items:center;margin-top:4px;">
+        <div class="pgrid" style="grid-template-columns:repeat(3,34px);">
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">1</div>
+          <div class="px px-g" style="width:34px;height:34px;font-size:11px;">2</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">3</div>
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">4</div>
+          <div class="px px-g" style="width:34px;height:34px;font-size:11px;">5</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">6</div>
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">7</div>
+          <div class="px px-g" style="width:34px;height:34px;font-size:11px;">8</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">9</div>
+        </div>
+        <div style="font-size:20px;color:var(--green);">→</div>
+        <div class="pgrid" style="grid-template-columns:repeat(2,34px);">
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">1</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">3</div>
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">4</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">6</div>
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">7</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">9</div>
+        </div>
+      </div>
+      <div class="callout callout-g" style="font-size:12px;width:100%;">
+        Q의 열 수가 2 → 결과도 <b>2열</b><br>
+        열1(노랑)과 열3(파랑)만 남기고 열2(초록) 삭제<br>
+        → <b>가로 자르기(crop)</b>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- 열 늘리기 -->
+    <div class="col" style="align-items:center;gap:8px;flex:1;">
+      <div style="font-size:15px;font-weight:700;color:var(--purple);margin-bottom:4px;">열 늘리기 (3→4)</div>
+      <div class="row" style="gap:10px;align-items:center;">
+        <div class="col" style="align-items:center;">
+          <div class="label">A (3×3)</div>
+          <div class="mat" style="padding:5px 10px;">
+            <div class="mrow"><span class="mc hi-y" style="width:24px;">1</span><span class="mc hi-g" style="width:24px;">2</span><span class="mc hi-b" style="width:24px;">3</span></div>
+            <div class="mrow"><span class="mc hi-y" style="width:24px;">4</span><span class="mc hi-g" style="width:24px;">5</span><span class="mc hi-b" style="width:24px;">6</span></div>
+            <div class="mrow"><span class="mc hi-y" style="width:24px;">7</span><span class="mc hi-g" style="width:24px;">8</span><span class="mc hi-b" style="width:24px;">9</span></div>
+          </div>
+        </div>
+        <div class="times" style="font-size:18px;">×</div>
+        <div class="col" style="align-items:center;">
+          <div class="label">Q (3×4)</div>
+          <div class="mat" style="padding:5px 8px;">
+            <div class="mrow"><span class="mc hi-y" style="width:20px;font-size:12px;">1</span><span class="mc zero" style="width:20px;font-size:12px;">0</span><span class="mc zero" style="width:20px;font-size:12px;">0</span><span class="mc hi-y" style="width:20px;font-size:12px;">1</span></div>
+            <div class="mrow"><span class="mc zero" style="width:20px;font-size:12px;">0</span><span class="mc hi-g" style="width:20px;font-size:12px;">1</span><span class="mc zero" style="width:20px;font-size:12px;">0</span><span class="mc zero" style="width:20px;font-size:12px;">0</span></div>
+            <div class="mrow"><span class="mc zero" style="width:20px;font-size:12px;">0</span><span class="mc zero" style="width:20px;font-size:12px;">0</span><span class="mc hi-b" style="width:20px;font-size:12px;">1</span><span class="mc zero" style="width:20px;font-size:12px;">0</span></div>
+          </div>
+        </div>
+        <div style="font-size:20px;color:var(--muted);">=</div>
+        <div class="col" style="align-items:center;">
+          <div class="label">결과 (3×4)</div>
+          <div class="mat" style="padding:5px 8px;">
+            <div class="mrow"><span class="mc hi-y" style="width:20px;font-size:12px;">1</span><span class="mc hi-g" style="width:20px;font-size:12px;">2</span><span class="mc hi-b" style="width:20px;font-size:12px;">3</span><span class="mc hi-y" style="width:20px;font-size:12px;">1</span></div>
+            <div class="mrow"><span class="mc hi-y" style="width:20px;font-size:12px;">4</span><span class="mc hi-g" style="width:20px;font-size:12px;">5</span><span class="mc hi-b" style="width:20px;font-size:12px;">6</span><span class="mc hi-y" style="width:20px;font-size:12px;">4</span></div>
+            <div class="mrow"><span class="mc hi-y" style="width:20px;font-size:12px;">7</span><span class="mc hi-g" style="width:20px;font-size:12px;">8</span><span class="mc hi-b" style="width:20px;font-size:12px;">9</span><span class="mc hi-y" style="width:20px;font-size:12px;">7</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="gap:10px;align-items:center;margin-top:4px;">
+        <div class="pgrid" style="grid-template-columns:repeat(3,34px);">
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">1</div>
+          <div class="px px-g" style="width:34px;height:34px;font-size:11px;">2</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">3</div>
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">4</div>
+          <div class="px px-g" style="width:34px;height:34px;font-size:11px;">5</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">6</div>
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">7</div>
+          <div class="px px-g" style="width:34px;height:34px;font-size:11px;">8</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">9</div>
+        </div>
+        <div style="font-size:20px;color:var(--purple);">→</div>
+        <div class="pgrid" style="grid-template-columns:repeat(4,34px);">
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">1</div>
+          <div class="px px-g" style="width:34px;height:34px;font-size:11px;">2</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">3</div>
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">1</div>
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">4</div>
+          <div class="px px-g" style="width:34px;height:34px;font-size:11px;">5</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">6</div>
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">4</div>
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">7</div>
+          <div class="px px-g" style="width:34px;height:34px;font-size:11px;">8</div>
+          <div class="px px-b" style="width:34px;height:34px;font-size:11px;">9</div>
+          <div class="px px-y" style="width:34px;height:34px;font-size:11px;">7</div>
+        </div>
+      </div>
+      <div class="callout callout-p" style="font-size:12px;width:100%;">
+        Q의 열4 = [1,0,0]ᵀ → <b>열1을 복사</b>해서 오른쪽에 추가<br>
+        → <b>가로 확장</b> (열 복제로 너비 증가)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 14 : 최종 정리 ════ -->
+<div class="slide" id="s14">
+  <div class="tag">최종 정리</div>
+  <h2 style="margin-bottom:16px;">행렬 곱의 위치가 <span class="key">조작 방향</span>을 결정한다</h2>
+  <div class="card-grid" style="flex:1;">
+    <div class="card" style="border-top:3px solid var(--yellow);">
+      <div style="color:var(--yellow);font-weight:700;font-size:16px;margin-bottom:10px;">왼쪽 곱 P · A → 행(가로줄) 조작</div>
+      <div style="font-size:13px;line-height:1.9;">
+        <b>① 행 교환:</b> P = 순열행렬 → 상하 반전<br>
+        <b>② 행 복사:</b> 같은 행벡터 반복 → 줄무늬<br>
+        <b>③ 행 이동:</b> 대각 아래 shift → 위로 스크롤<br>
+        <b>④ 행 블렌딩:</b> 가중합 → 세로 블러
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--green);">
+      <div style="color:var(--green);font-weight:700;font-size:16px;margin-bottom:10px;">오른쪽 곱 A · Q → 열(세로줄) 조작</div>
+      <div style="font-size:13px;line-height:1.9;">
+        <b>① 열 교환:</b> Q = 순열행렬 → 좌우 반전<br>
+        <b>② 열 복사:</b> 같은 열벡터 반복 → 세로 줄무늬<br>
+        <b>③ 열 이동:</b> 대각 위 shift → 오른쪽 스크롤<br>
+        <b>④ 열 스케일링:</b> 대각행렬 → 열별 밝기 조절
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple);">
+      <div style="color:var(--purple);font-weight:700;font-size:16px;margin-bottom:10px;">비정방 행렬 → 크기 변환</div>
+      <div style="font-size:13px;line-height:1.9;">
+        <b>m×n × n×n:</b> m &lt; n → 행 줄이기 (자르기), m &gt; n → 행 늘리기 (보간)<br>
+        <b>n×n × n×p:</b> p &lt; n → 열 줄이기 (자르기), p &gt; n → 열 늘리기 (복제)
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--blue);">
+      <div style="color:var(--blue);font-weight:700;font-size:16px;margin-bottom:10px;">핵심 공식</div>
+      <div class="formula" style="text-align:center;font-size:16px;">
+        (P·A)의 i행 = P의 i행이 A의 행들을 <span class="key">선형결합</span><br>
+        (A·Q)의 j열 = Q의 j열이 A의 열들을 <span class="key-g">선형결합</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-top:8px;">
+        → 조작 행렬의 각 행/열이 "레시피"이고, 원본의 행/열이 "재료"입니다.
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /stage -->
+
+<!-- nav -->
+<div id="nav">
+  <button class="nav-btn" onclick="prev()">← 이전</button>
+  <div class="dots" id="dots"></div>
+  <button class="nav-btn" onclick="next()">다음 →</button>
+  <span id="counter"></span>
+</div>
+
+<script>
+const TOTAL=14;
+let cur=1;
+const dotsEl=document.getElementById('dots');
+for(let i=1;i<=TOTAL;i++){
+  const d=document.createElement('div');
+  d.className='dot'+(i===1?' on':'');
+  d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+}
+function goTo(n){
+  document.getElementById('s'+cur).classList.remove('active');
+  dotsEl.children[cur-1].classList.remove('on');
+  cur=Math.max(1,Math.min(TOTAL,n));
+  const sl=document.getElementById('s'+cur);
+  sl.classList.add('active');
+  sl.style.opacity=0;
+  requestAnimationFrame(()=>{sl.style.opacity=1;});
+  dotsEl.children[cur-1].classList.add('on');
+  document.getElementById('counter').textContent=cur+' / '+TOTAL;
+}
+function prev(){goTo(cur-1);}
+function next(){goTo(cur+1);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')next();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')prev();
+});
+goTo(1);
+</script>
+</body>
+</html>

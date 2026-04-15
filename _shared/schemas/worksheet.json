@@ -1,0 +1,174 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Worksheet / Assessment",
+  "description": "worksheet_generator 및 assessment_generator 에이전트 출력 계약. output_format이 'pdf'이면 HTML 필드는 선택적.",
+  "type": "object",
+  "required": ["session_id", "topic", "grade", "subject", "problems", "output_format", "document_type"],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "작업 세션 ID"
+    },
+    "topic": {
+      "type": "string",
+      "description": "수업 주제"
+    },
+    "grade": {
+      "type": "string",
+      "description": "학년 (예: 고2)"
+    },
+    "semester": {
+      "type": "string",
+      "description": "학기 (예: 1학기)"
+    },
+    "subject": {
+      "type": "string",
+      "description": "과목 key (ai_math, math1 등)"
+    },
+    "subject_display": {
+      "type": "string",
+      "description": "과목 표시명 (인공지능수학 등)"
+    },
+    "output_format": {
+      "type": "string",
+      "enum": ["pdf", "html"],
+      "description": "출력 포맷. 'pdf' → pdf_renderer.py로 렌더링, 'html' → 기존 HTML 조립"
+    },
+    "document_type": {
+      "type": "string",
+      "enum": ["worksheet", "assessment"],
+      "description": "문서 종류. 'worksheet' → 학습지, 'assessment' → 수행평가"
+    },
+    "assessment_meta": {
+      "type": "object",
+      "description": "수행평가 전용 메타정보 (document_type: assessment일 때)",
+      "properties": {
+        "assessment_name": { "type": "string", "description": "수행평가명" },
+        "time_limit": { "type": "integer", "description": "시간 제한 (분)" },
+        "materials": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "준비물 목록"
+        },
+        "instructions": { "type": "string", "description": "전체 지시사항" }
+      }
+    },
+    "rubric": {
+      "type": "object",
+      "description": "채점 기준표 (수행평가 전용)",
+      "properties": {
+        "criteria": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["description", "points"],
+            "properties": {
+              "description": { "type": "string" },
+              "points": { "type": "integer" },
+              "note": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "description": "활동 섹션 목록 (수행평가의 활동형 구조. sections 또는 problems 중 하나 사용)",
+      "items": {
+        "type": "object",
+        "required": ["title", "problems"],
+        "properties": {
+          "title": { "type": "string" },
+          "instructions": { "type": "string" },
+          "problems": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/problem" }
+          }
+        }
+      }
+    },
+    "problems": {
+      "type": "array",
+      "description": "문제 목록. problem_id는 merged_context.json의 worksheet_requirements[].problem_id와 1:1 매칭.",
+      "items": { "$ref": "#/definitions/problem" }
+    },
+    "total_points": {
+      "type": "integer",
+      "description": "총 배점"
+    },
+    "include_answer_key": {
+      "type": "boolean",
+      "description": "정답지 포함 여부 (기본 true)"
+    },
+    "worksheet_html": {
+      "type": "string",
+      "description": "[선택적, 하위호환] output_format=html일 때 조립된 학습지 HTML"
+    },
+    "answer_key_html": {
+      "type": "string",
+      "description": "[선택적, 하위호환] output_format=html일 때 정답지 HTML"
+    }
+  },
+  "definitions": {
+    "problem": {
+      "type": "object",
+      "required": ["problem_id", "type", "bloom_level", "difficulty", "question", "answer", "points"],
+      "properties": {
+        "problem_id": {
+          "type": "string",
+          "pattern": "^(ws|as)-\\d{2}-[a-z_]+$",
+          "description": "학습지: ws-NN-bloom, 수행평가: as-NN-bloom"
+        },
+        "number": {
+          "type": "integer",
+          "description": "문제 번호 (1부터 시작)"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["객관식", "단답형", "서술형", "계산형", "OX형", "연결형", "진위표"]
+        },
+        "bloom_level": {
+          "type": "string",
+          "enum": ["기억", "이해", "적용", "분석", "평가", "창조"]
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["기본", "중간", "심화"]
+        },
+        "question": {
+          "type": "string",
+          "description": "문제 본문 (LaTeX 수식 $...$ 형식 사용 가능)"
+        },
+        "choices": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "객관식 선택지 (객관식 타입일 때만)"
+        },
+        "answer": {
+          "type": "string",
+          "description": "정답"
+        },
+        "solution_steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["step_label", "explanation"],
+            "properties": {
+              "step_label": { "type": "string" },
+              "explanation": { "type": "string" }
+            }
+          },
+          "description": "풀이 단계 (계산형/서술형)"
+        },
+        "points": {
+          "type": "integer",
+          "description": "배점"
+        },
+        "page_number": {
+          "type": "integer",
+          "description": "학습지 내 페이지 번호 (A4 기준, 1부터 시작)"
+        }
+      }
+    }
+  }
+}

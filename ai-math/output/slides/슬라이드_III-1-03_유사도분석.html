@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>유사도 분석 | 인공지능 수학</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']], tags: 'ams' },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0f1e; --text: #e8f4fd; --cyan: #00d4ff; --amber: #ffb347;
+      --green: #39d98a; --red: #ff4757; --purple: #a78bfa;
+      --card-bg: rgba(255,255,255,0.07); --border: rgba(255,255,255,0.15);
+    }
+    .reveal-viewport { background: var(--bg); }
+    .reveal { font-family: 'Noto Sans KR','Apple SD Gothic Neo',sans-serif; font-size: 28px; color: var(--text); background: var(--bg); }
+    .reveal .slides section { text-align: left; padding: 0 20px; }
+    .reveal h1 { font-size: 2.2em; font-weight: 900; color: var(--cyan); line-height: 1.2; text-shadow: 0 0 30px rgba(0,212,255,0.4); }
+    .reveal h2 { font-size: 1.6em; font-weight: 700; color: var(--cyan); border-bottom: 2px solid rgba(0,212,255,0.3); padding-bottom: .3em; margin-bottom: .6em; }
+    .reveal h3 { font-size: 1.15em; font-weight: 700; color: var(--amber); margin-bottom: .4em; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px 22px; margin: 8px 0; }
+    .card-cyan   { border-left: 4px solid var(--cyan);   background: rgba(0,212,255,0.08); }
+    .card-amber  { border-left: 4px solid var(--amber);  background: rgba(255,179,71,0.08); }
+    .card-green  { border-left: 4px solid var(--green);  background: rgba(57,217,138,0.08); }
+    .card-purple { border-left: 4px solid var(--purple); background: rgba(167,139,250,0.10); }
+    .definition-box { background: rgba(0,212,255,0.06); border: 2px solid rgba(0,212,255,0.4); border-radius: 14px; padding: 18px 24px; margin: 12px 0; position: relative; }
+    .definition-box::before { content: '정의'; position: absolute; top: -13px; left: 18px; background: var(--cyan); color: #0a0f1e; font-weight: 900; font-size: .7em; padding: 2px 12px; border-radius: 20px; }
+    .formula-box { background: rgba(167,139,250,0.08); border: 2px solid rgba(167,139,250,0.4); border-radius: 12px; padding: 14px 20px; margin: 10px 0; text-align: center; }
+    .practice-box { background: rgba(167,139,250,0.06); border: 2px solid rgba(167,139,250,0.35); border-radius: 14px; padding: 18px 24px; margin: 12px 0; position: relative; }
+    .practice-box::before { content: '확인 문제'; position: absolute; top: -13px; left: 18px; background: var(--purple); color: #fff; font-weight: 900; font-size: .68em; padding: 3px 14px; border-radius: 20px; }
+    .cols { display: grid; gap: 16px; align-items: start; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .badge { display: inline-block; font-size: .72em; font-weight: 700; padding: 3px 12px; border-radius: 30px; margin-right: 6px; }
+    .badge-cyan   { background: rgba(0,212,255,0.2);   color: var(--cyan);   border: 1px solid var(--cyan); }
+    .badge-amber  { background: rgba(255,179,71,0.2);  color: var(--amber);  border: 1px solid var(--amber); }
+    .badge-green  { background: rgba(57,217,138,0.2);  color: var(--green);  border: 1px solid var(--green); }
+    .badge-purple { background: rgba(167,139,250,0.2); color: var(--purple); border: 1px solid var(--purple); }
+    .kw-cyan   { color: var(--cyan);   font-weight: 700; }
+    .kw-amber  { color: var(--amber);  font-weight: 700; }
+    .kw-green  { color: var(--green);  font-weight: 700; }
+    .kw-red    { color: var(--red);    font-weight: 700; }
+    .kw-purple { color: var(--purple); font-weight: 700; }
+    .arrow { font-size: 1.3em; color: var(--amber); margin: 0 6px; }
+    .chapter-badge { display: inline-block; background: rgba(0,212,255,0.15); border: 1px solid rgba(0,212,255,0.4); border-radius: 30px; padding: 6px 20px; font-size: .72em; color: var(--cyan); font-weight: 700; margin-bottom: 18px; }
+    .achievement-tag { display: inline-block; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.4); border-radius: 8px; padding: 8px 18px; font-size: .75em; color: var(--purple); font-weight: 500; margin-top: 20px; }
+    .title-meta { font-size: .7em; color: rgba(232,244,253,0.55); margin-top: 18px; }
+    .obj-list { list-style: none; padding: 0; margin: 0; }
+    .obj-list li { display: flex; align-items: flex-start; gap: 14px; padding: 12px 16px; margin: 8px 0; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); }
+    .obj-list .num { background: var(--cyan); color: #0a0f1e; font-weight: 900; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: .9em; }
+    .sim-table { width: 100%; border-collapse: collapse; font-size: .85em; margin: 10px 0; }
+    .sim-table th { background: rgba(167,139,250,0.15); color: var(--purple); font-weight: 700; padding: 8px 10px; text-align: center; border: 1px solid rgba(167,139,250,0.3); }
+    .sim-table td { padding: 8px 10px; border: 1px solid var(--border); text-align: center; }
+    .sim-table tr:nth-child(odd) td { background: rgba(255,255,255,0.03); }
+    .highlight-cell { background: rgba(57,217,138,0.2) !important; color: var(--green); font-weight: 900; }
+    .reveal .progress { background: rgba(0,212,255,0.15); }
+    .reveal .progress span { background: var(--cyan); }
+    .reveal .slide-number { color: var(--cyan); font-size: 16px; }
+    .reveal .controls { color: var(--cyan); }
+    .reveal section p, .reveal section li, .reveal section td, .reveal section th { font-size: max(.85em, 22px); }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ── SLIDE 1: TITLE ── -->
+<section data-transition="zoom" data-background-gradient="radial-gradient(ellipse at 30% 40%, rgba(167,139,250,0.08) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(0,212,255,0.08) 0%, transparent 60%)">
+  <div style="padding:24px 0; text-align:center;">
+    <div class="chapter-badge">Ⅲ. 분류와 예측 &nbsp;›&nbsp; 1. 자료의 분류</div>
+    <h1 style="font-size:2.0em; margin:8px 0 16px;">
+      유사도 분석<br>
+      <span style="font-size:.65em; color:var(--amber);">유클리드 · 코사인 · 자카드</span>
+    </h1>
+    <p style="font-size:1.0em; color:var(--amber); font-weight:500; margin:0;">01 인공지능의 텍스트 분류 (유사도 분석)</p>
+    <div class="achievement-tag">
+      <span style="opacity:.7; margin-right:6px;">성취기준</span>
+      <strong>12인수03-01</strong>&nbsp; 인공지능을 이용하여 텍스트를 분류하는 수학적 방법을 이해한다.
+    </div>
+    <p class="title-meta">미래엔 고등 인공지능 수학 | pp. 67–72</p>
+  </div>
+</section>
+
+<!-- ── SLIDE 2: 학습 목표 ── -->
+<section data-transition="slide">
+  <h2>학습 목표</h2>
+  <ul class="obj-list">
+    <li class="fragment fade-up" data-fragment-index="1">
+      <div class="num">1</div>
+      <div><span class="kw-cyan">유클리드 유사도</span> \(L(\vec{P}, \vec{Q})\)를 구할 수 있다.</div>
+    </li>
+    <li class="fragment fade-up" data-fragment-index="2">
+      <div class="num">2</div>
+      <div><span class="kw-amber">코사인 유사도</span> \(C(\vec{P}, \vec{Q})\)를 구할 수 있다.</div>
+    </li>
+    <li class="fragment fade-up" data-fragment-index="3">
+      <div class="num">3</div>
+      <div><span class="kw-purple">자카드 유사도</span> \(J(P, Q)\)를 구할 수 있다.</div>
+    </li>
+    <li class="fragment fade-up" data-fragment-index="4">
+      <div class="num">4</div>
+      <div>유사도 분석을 이용하여 텍스트를 <span class="kw-green">그룹</span>으로 분류할 수 있다.</div>
+    </li>
+  </ul>
+</section>
+
+<!-- ── SLIDE 3: 유사도란? ── -->
+<section data-transition="slide">
+  <h2>유사도(Similarity)란?</h2>
+  <div class="definition-box" style="margin-top:20px;">
+    <p style="margin:0; font-size:1.02em; line-height:1.7;">
+      두 텍스트 사이의 <span class="kw-cyan">유사한 정도</span>를 수학적으로 수치화한 것<br>
+      → '유사한 정도'는 주관적이므로 <span class="kw-amber">정량화</span>가 필요
+    </p>
+  </div>
+  <div class="cols cols-3" style="margin-top:16px;">
+    <div class="card card-cyan" style="text-align:center;">
+      <h3>유클리드 유사도</h3>
+      <p style="font-size:.88em; opacity:.8;">두 벡터 사이의 <strong>거리</strong><br>값이 작을수록 유사</p>
+    </div>
+    <div class="card card-amber" style="text-align:center;">
+      <h3>코사인 유사도</h3>
+      <p style="font-size:.88em; opacity:.8;">두 벡터가 이루는 <strong>각도의 코사인</strong><br>1에 가까울수록 유사</p>
+    </div>
+    <div class="card card-purple" style="text-align:center;">
+      <h3>자카드 유사도</h3>
+      <p style="font-size:.88em; opacity:.8;">두 집합의 <strong>공통 원소 비율</strong><br>1에 가까울수록 유사</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 4: 유클리드 유사도 ── -->
+<section data-transition="slide">
+  <h2>① 유클리드 유사도(Euclid Similarity)</h2>
+  <div class="definition-box" style="margin-top:14px;">
+    <p style="margin:0 0 6px;">두 텍스트 P, Q의 벡터가 \(\vec{P}=(p_1,p_2,\ldots,p_n)\), \(\vec{Q}=(q_1,q_2,\ldots,q_n)\)일 때,</p>
+    <div class="formula-box" style="margin-top:8px;">
+      \[L(\vec{P},\vec{Q}) = \sqrt{(p_1-q_1)^2+(p_2-q_2)^2+\cdots+(p_n-q_n)^2}\]
+    </div>
+    <p style="margin:6px 0 0; font-size:.88em; opacity:.75;">※ 두 벡터의 끝점 사이의 <span class="kw-cyan">좌표평면 거리</span>와 같다. 값이 <strong>작을수록</strong> 유사.</p>
+  </div>
+  <div class="card card-amber" style="margin-top:14px;">
+    <h3>예제</h3>
+    <p>세 텍스트 P, Q, R의 벡터: \(\vec{P}=(1,0,1)\), \(\vec{Q}=(0,1,2)\), \(\vec{R}=(1,1,0)\)일 때, 가장 유사한 두 텍스트를 구하시오.</p>
+    <div class="fragment" data-fragment-index="1">
+      <p style="margin:6px 0 0; font-size:.9em;">
+        \(L(P,Q)=\sqrt{(1-0)^2+(0-1)^2+(1-2)^2}=\sqrt{3}\)<br>
+        \(L(Q,R)=\sqrt{(0-1)^2+(1-1)^2+(2-0)^2}=\sqrt{5}\)<br>
+        \(L(R,P)=\sqrt{(1-1)^2+(1-0)^2+(0-1)^2}=\sqrt{2}\)
+      </p>
+      <p style="color:var(--green); font-weight:700;">∴ \(L(R,P)=\sqrt{2}\)가 가장 작으므로 <span class="kw-green">P와 R</span>이 가장 유사</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 5: 코사인 유사도 ── -->
+<section data-transition="slide">
+  <h2>② 코사인 유사도(Cosine Similarity)</h2>
+  <div class="definition-box" style="margin-top:14px;">
+    <p style="margin:0 0 6px;">두 텍스트 P, Q의 벡터가 \(\vec{P}=(p_1,\ldots,p_n)\), \(\vec{Q}=(q_1,\ldots,q_n)\)일 때,</p>
+    <div class="formula-box" style="margin-top:8px;">
+      \[C(\vec{P},\vec{Q}) = \dfrac{p_1 q_1 + p_2 q_2 + \cdots + p_n q_n}{\sqrt{p_1^2+\cdots+p_n^2}\ \cdot\ \sqrt{q_1^2+\cdots+q_n^2}}\]
+    </div>
+    <p style="font-size:.88em; margin:6px 0 0; opacity:.75;">※ \(C(\vec{P},\vec{Q}) = \cos\theta\) (두 벡터가 이루는 각의 코사인)&nbsp;&nbsp; \(0 \le C \le 1\), 값이 <strong>클수록</strong> 유사</p>
+  </div>
+  <div class="card card-amber" style="margin-top:14px;">
+    <h3>예제</h3>
+    <p style="font-size:.92em;">\(\vec{P}=(1,1,0)\), \(\vec{Q}=(2,0,0)\), \(\vec{R}=(1,0,2)\)일 때, 가장 유사한 두 텍스트를 구하시오.</p>
+    <div class="fragment" data-fragment-index="1">
+      <p style="font-size:.88em; margin:6px 0 0;">
+        \(C(P,Q)=\dfrac{1\cdot2+1\cdot0+0\cdot0}{\sqrt{2}\cdot2}=\dfrac{2}{2\sqrt{2}}=\dfrac{1}{\sqrt{2}}\approx 0.71\)<br>
+        \(C(Q,R)=\dfrac{2}{\sqrt{5}\cdot2}\approx 0.45\),&nbsp;
+        \(C(R,P)=\dfrac{1}{\sqrt{5}\cdot\sqrt{2}}\approx 0.32\)
+      </p>
+      <p style="color:var(--green); font-weight:700;">∴ \(C(P,Q)\)가 가장 크므로 <span class="kw-green">P와 Q</span>가 가장 유사</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 6: 자카드 유사도 ── -->
+<section data-transition="slide">
+  <h2>③ 자카드 유사도(Jaccard Similarity)</h2>
+  <div class="definition-box" style="margin-top:14px;">
+    <p style="margin:0 0 6px;">두 텍스트 P, Q를 구성하는 단어의 집합이 \(P=\{p_1,\ldots,p_k\}\), \(Q=\{q_1,\ldots,q_m\}\)일 때,</p>
+    <div class="formula-box" style="margin-top:8px;">
+      \[J(P,Q) = \dfrac{n(P \cap Q)}{n(P \cup Q)} = \dfrac{n(P \cap Q)}{n(P)+n(Q)-n(P \cap Q)}\]
+    </div>
+    <p style="font-size:.88em; margin:6px 0 0; opacity:.75;">※ 두 집합에 공통으로 포함되는 원소가 많을수록 유사 &nbsp;·&nbsp; \(0 \le J(P,Q) \le 1\)</p>
+  </div>
+  <div class="card card-amber" style="margin-top:14px;">
+    <h3>예제</h3>
+    <p style="font-size:.9em;">\(P=\{\text{빨강, 노랑, 파랑}\}\), \(Q=\{\text{빨강, 초록, 보라}\}\), \(R=\{\text{초록, 파랑, 보라}\}\)일 때, 가장 유사한 두 텍스트를 구하시오.</p>
+    <div class="fragment" data-fragment-index="1">
+      <p style="font-size:.88em; margin:6px 0 0;">
+        \(J(P,Q)=\dfrac{1}{5}\),&nbsp; \(J(Q,R)=\dfrac{2}{4}=\dfrac{1}{2}\),&nbsp; \(J(R,P)=\dfrac{1}{5}\)
+      </p>
+      <p style="color:var(--green); font-weight:700;">∴ \(J(Q,R)\)가 가장 크므로 <span class="kw-green">Q와 R</span>이 가장 유사</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 7: 세 유사도 비교 ── -->
+<section data-transition="slide">
+  <h2>세 유사도 비교</h2>
+  <table class="sim-table" style="margin-top:14px;">
+    <thead>
+      <tr>
+        <th>구분</th>
+        <th>유클리드 유사도</th>
+        <th>코사인 유사도</th>
+        <th>자카드 유사도</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>입력</strong></td>
+        <td>수치 벡터</td>
+        <td>수치 벡터</td>
+        <td>단어 집합</td>
+      </tr>
+      <tr>
+        <td><strong>범위</strong></td>
+        <td>\(L \ge 0\)</td>
+        <td>\(0 \le C \le 1\)</td>
+        <td>\(0 \le J \le 1\)</td>
+      </tr>
+      <tr>
+        <td><strong>유사 조건</strong></td>
+        <td class="highlight-cell"><strong>작을수록</strong> 유사</td>
+        <td class="highlight-cell"><strong>클수록</strong> 유사 (1에 가까울수록)</td>
+        <td class="highlight-cell"><strong>클수록</strong> 유사 (1에 가까울수록)</td>
+      </tr>
+      <tr>
+        <td><strong>의미</strong></td>
+        <td>두 끝점 사이의 거리</td>
+        <td>두 벡터의 각도(cos)</td>
+        <td>공통 단어 비율</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="card card-cyan" style="margin-top:14px; text-align:center;">
+    <span class="kw-cyan">핵심:</span> 유클리드는 거리(↓ 유사), 코사인·자카드는 유사도(↑ 유사)
+  </div>
+</section>
+
+<!-- ── SLIDE 8: 유사도 분석으로 텍스트 분류 ── -->
+<section data-transition="slide">
+  <h2>유사도 분석 — 텍스트 그룹 분류</h2>
+  <p style="font-size:.9em; margin-bottom:10px;">코사인 유사도 행렬에서 유사한 것끼리 반복적으로 묶어 그룹 형성</p>
+  <div class="cols cols-2">
+    <div>
+      <p style="font-size:.85em; margin-bottom:6px;"><span class="kw-amber">상호 유사도 행렬</span> (코사인 유사도)</p>
+      <table class="sim-table">
+        <thead><tr><th></th><th>T₁</th><th>T₂</th><th>T₃</th><th>T₄</th><th>T₅</th></tr></thead>
+        <tbody>
+          <tr><td>T₁</td><td>1</td><td class="highlight-cell">0.95</td><td>0.82</td><td>0.47</td><td>0.33</td></tr>
+          <tr><td>T₂</td><td class="highlight-cell">0.95</td><td>1</td><td>0.83</td><td>0.58</td><td>0.41</td></tr>
+          <tr><td>T₃</td><td>0.82</td><td>0.83</td><td>1</td><td>0.87</td><td>0.82</td></tr>
+          <tr><td>T₄</td><td>0.47</td><td>0.58</td><td>0.87</td><td>1</td><td class="highlight-cell">0.94</td></tr>
+          <tr><td>T₅</td><td>0.33</td><td>0.41</td><td>0.82</td><td class="highlight-cell">0.94</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="card card-cyan fragment" data-fragment-index="1">
+        <h3>① T₁·T₂ → G₁</h3>
+        <p style="font-size:.88em;">\(C(T_1,T_2)=0.95\)로 가장 유사<br>→ <span class="kw-cyan">G₁</span> (사과·바나나 모두 좋아함)</p>
+      </div>
+      <div class="card card-amber fragment" data-fragment-index="2">
+        <h3>② T₄·T₅ → G₂</h3>
+        <p style="font-size:.88em;">\(C(T_4,T_5)=0.94\)로 다음 유사<br>→ <span class="kw-amber">G₂</span> (바나나 싫어함)</p>
+      </div>
+      <div class="card card-green fragment" data-fragment-index="3">
+        <h3>최종: G₁, G₂, T₃ 세 그룹</h3>
+        <p style="font-size:.88em;">유사도 분석으로 텍스트 자동 분류 완성</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 9: 확인 문제 ── -->
+<section data-transition="slide">
+  <h2>확인 문제</h2>
+  <div class="practice-box" style="margin-top:16px;">
+    <p><strong>문제 1.</strong> 세 텍스트 P, Q, R를 나타내는 벡터가 다음과 같을 때, 유클리드 유사도를 이용하여 가장 유사한 두 텍스트를 고르시오.</p>
+    <div class="formula-box">
+      \[\vec{P}=(2,0,1,1),\quad \vec{Q}=(0,1,0,2),\quad \vec{R}=(1,3,1,0)\]
+    </div>
+    <div class="fragment" data-fragment-index="1">
+      <p style="font-size:.9em;">
+        \(L(P,Q)=\sqrt{4+1+1+1}=\sqrt{7}\),&nbsp;
+        \(L(Q,R)=\sqrt{1+4+1+4}=\sqrt{10}\),&nbsp;
+        \(L(R,P)=\sqrt{1+9+0+1}=\sqrt{11}\)
+      </p>
+      <p style="color:var(--green); font-weight:700;">∴ <span class="kw-green">P와 Q</span>가 가장 유사</p>
+    </div>
+    <p style="margin-top:14px;"><strong>문제 2.</strong> 두 텍스트 P, Q를 구성하는 단어의 집합이 \(P=\{\text{쥐, 호랑이, 용}\}\), \(Q=\{\text{소, 호랑이, 용, 뱀}\}\)일 때, 자카드 유사도 \(J(P,Q)\)를 구하시오.</p>
+    <div class="fragment" data-fragment-index="2">
+      <p style="font-size:.9em;">\(P\cap Q=\{\text{호랑이, 용}\}\), \(P\cup Q=\{\text{쥐, 소, 호랑이, 용, 뱀}\}\)</p>
+      <p style="color:var(--green); font-weight:700;">\(J(P,Q)=\dfrac{2}{5}\)</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 10: 핵심 정리 ── -->
+<section data-transition="slide" data-background-gradient="radial-gradient(ellipse at 50% 50%, rgba(167,139,250,0.06) 0%, transparent 70%)">
+  <h2>핵심 정리</h2>
+  <div class="cols cols-3" style="margin-top:16px;">
+    <div class="definition-box" style="border-color: rgba(0,212,255,0.4);">
+      <h3 style="margin-top:0; color:var(--cyan);">유클리드 유사도</h3>
+      <div class="formula-box" style="font-size:.88em;">
+        \(L = \sqrt{\sum(p_i - q_i)^2}\)
+      </div>
+      <p style="font-size:.85em; margin:6px 0 0;"><span class="kw-cyan">작을수록</span> 유사 (범위: \(L \ge 0\))</p>
+    </div>
+    <div class="definition-box" style="border-color: rgba(255,179,71,0.4);">
+      <h3 style="margin-top:0; color:var(--amber);">코사인 유사도</h3>
+      <div class="formula-box" style="font-size:.85em;">
+        \(C = \dfrac{\vec{P}\cdot\vec{Q}}{|\vec{P}||\vec{Q}|}\)
+      </div>
+      <p style="font-size:.85em; margin:6px 0 0;"><span class="kw-amber">클수록</span> 유사 (범위: \(0 \le C \le 1\))</p>
+    </div>
+    <div class="definition-box" style="border-color: rgba(167,139,250,0.4);">
+      <h3 style="margin-top:0; color:var(--purple);">자카드 유사도</h3>
+      <div class="formula-box" style="font-size:.88em;">
+        \(J = \dfrac{n(P \cap Q)}{n(P \cup Q)}\)
+      </div>
+      <p style="font-size:.85em; margin:6px 0 0;"><span class="kw-purple">클수록</span> 유사 (범위: \(0 \le J \le 1\))</p>
+    </div>
+  </div>
+  <div class="card card-green" style="margin-top:14px; text-align:center;">
+    유사도 분석 → 텍스트를 <span class="kw-green">의미 있는 그룹</span>으로 자동 분류
+  </div>
+</section>
+
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true, slideNumber: 'c/t', transition: 'slide',
+    center: false, width: 1280, height: 720, margin: 0.04, maxScale: 2.0,
+    plugins: [RevealNotes]
+  });
+</script>
+</body>
+</html>

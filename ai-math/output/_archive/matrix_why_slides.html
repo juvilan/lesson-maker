@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>왜 왼쪽 곱과 오른쪽 곱은 다를까?</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f172a;--card:#1e293b;--card2:#273348;
+  --text:#f1f5f9;--muted:#94a3b8;
+  --blue:#3b82f6;--green:#10b981;--yellow:#eab308;--purple:#a78bfa;--red:#ef4444;
+  --px-r:#ef4444;--px-g:#22c55e;--px-b:#3b82f6;--px-y:#eab308;--px-k:#1e293b;
+  --row-hi:rgba(234,179,8,0.25);--row-bd:#eab308;
+  --col-hi:rgba(16,185,129,0.25);--col-bd:#10b981;
+  --W:1200px;--H:675px;
+}
+body{background:var(--bg);font-family:'Noto Sans KR',sans-serif;
+  display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:20px;color:var(--text);}
+
+/* ── stage ── */
+#stage{width:var(--W);max-width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;
+  border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.7);}
+.slide{position:absolute;inset:0;background:var(--card);padding:40px 52px 32px;
+  display:none;flex-direction:column;opacity:0;transition:opacity .35s;}
+.slide.active{display:flex;opacity:1;}
+
+/* ── nav ── */
+#nav{margin-top:18px;display:flex;align-items:center;gap:12px;}
+.nav-btn{background:var(--card);border:1px solid #334155;color:var(--text);
+  padding:8px 22px;border-radius:8px;cursor:pointer;font-size:14px;
+  font-family:inherit;transition:background .2s;}
+.nav-btn:hover{background:#334155;}
+#counter{color:var(--muted);font-size:13px;min-width:52px;text-align:center;}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:#334155;cursor:pointer;transition:background .2s;}
+.dot.on{background:var(--blue);}
+
+/* ── tag / titles ── */
+.tag{display:inline-block;background:var(--blue);color:#fff;
+  font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;}
+.tag.g{background:var(--green);}.tag.y{background:var(--yellow);color:#000;}
+.tag.p{background:var(--purple);}.tag.r{background:var(--red);}
+h1{font-size:48px;font-weight:900;line-height:1.2;}
+h2{font-size:30px;font-weight:700;margin-bottom:18px;}
+.sub{font-size:17px;color:var(--muted);margin-top:8px;line-height:1.6;}
+.key{color:var(--yellow);font-weight:700;}
+.key-g{color:var(--green);font-weight:700;}
+.key-b{color:var(--blue);font-weight:700;}
+.key-p{color:var(--purple);font-weight:700;}
+
+/* ── layout helpers ── */
+.row{display:flex;align-items:center;gap:18px;}
+.col{display:flex;flex-direction:column;gap:10px;}
+.center{justify-content:center;align-items:center;}
+.grow{flex:1;}
+
+/* ── pixel grid ── */
+.pgrid{display:grid;grid-template-columns:repeat(3,52px);}
+.px{width:52px;height:52px;border:2px solid rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:rgba(255,255,255,.8);
+  transition:outline .2s,background .2s;}
+.px-r{background:var(--px-r);} .px-g{background:var(--px-g);}
+.px-b{background:var(--px-b);} .px-y{background:var(--px-y);}
+.px-k{background:var(--px-k);border-color:#475569;}
+.row-hi .px{outline:3px solid var(--row-bd);background:var(--row-hi)!important;}
+.col-hi .px{outline:3px solid var(--col-bd);background:var(--col-hi)!important;}
+
+/* ── matrix bracket ── */
+.mat{display:inline-flex;flex-direction:column;position:relative;padding:6px 14px;gap:4px;}
+.mat::before,.mat::after{content:'';position:absolute;top:0;bottom:0;width:6px;border:3px solid var(--muted);}
+.mat::before{left:0;border-right:none;border-radius:3px 0 0 3px;}
+.mat::after{right:0;border-left:none;border-radius:0 3px 3px 0;}
+.mrow{display:flex;gap:10px;}
+.mc{width:32px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:15px;}
+.mc.hi-y{color:var(--yellow);font-weight:700;}
+.mc.hi-g{color:var(--green);font-weight:700;}
+.mc.hi-b{color:var(--blue);font-weight:700;}
+.mc.hi-p{color:var(--purple);font-weight:700;}
+.mc.zero{color:#475569;}
+
+/* ── grid table (dot product grid) ── */
+.grid-table{border-collapse:collapse;}
+.grid-table td,.grid-table th{
+  width:72px;height:52px;text-align:center;
+  font-family:'JetBrains Mono',monospace;font-size:13px;
+  border:1.5px solid #334155;transition:background .3s,outline .3s;}
+.grid-table th{background:#1a2740;color:var(--muted);font-size:12px;font-weight:600;}
+.grid-table td{background:var(--card2);}
+.cell-active{background:rgba(59,130,246,.25)!important;color:var(--blue);}
+.cell-row{background:var(--row-hi)!important;outline:2px solid var(--row-bd);}
+.cell-col{background:var(--col-hi)!important;outline:2px solid var(--col-bd);}
+
+/* ── arrows ── */
+.arrow-r{font-size:22px;color:var(--yellow);}
+.arrow-d{font-size:22px;color:var(--green);}
+.big-eq{font-size:32px;color:var(--muted);padding:0 10px;}
+.times{font-size:26px;color:var(--muted);padding:0 8px;}
+
+/* ── callout boxes ── */
+.callout{border-radius:10px;padding:14px 18px;font-size:15px;line-height:1.65;}
+.callout-y{background:rgba(234,179,8,.12);border-left:4px solid var(--yellow);}
+.callout-g{background:rgba(16,185,129,.12);border-left:4px solid var(--green);}
+.callout-b{background:rgba(59,130,246,.12);border-left:4px solid var(--blue);}
+.callout-p{background:rgba(167,139,250,.12);border-left:4px solid var(--purple);}
+
+/* ── card grid ── */
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.card{background:var(--card2);border-radius:10px;padding:18px 20px;}
+
+/* ── formula highlight ── */
+.formula{font-family:'JetBrains Mono',monospace;font-size:16px;
+  background:#0f172a;border-radius:8px;padding:10px 16px;
+  border:1px solid #334155;line-height:1.8;}
+
+/* ── slide 1 decoration ── */
+.deco-grid{display:grid;grid-template-columns:repeat(5,36px);gap:4px;opacity:.25;}
+.deco-px{width:36px;height:36px;border-radius:4px;}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- ════ SLIDE 1 : 제목 ════ -->
+<div class="slide active" id="s1">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+    <div class="tag">선형대수 · 이미지 변환</div>
+    <h1 style="margin-top:14px;">왜 왼쪽 곱과<br>오른쪽 곱은 다를까?</h1>
+    <p class="sub" style="max-width:600px;margin-top:18px;">
+      행렬 곱셈의 <span class="key">격자 구조</span>에서<br>
+      <span class="key-g">행(가로줄)</span> 과 <span class="key-b">열(세로줄)</span> 이 어떻게 다르게 움직이는지 따라가 봅시다
+    </p>
+    <!-- deco -->
+    <div class="deco-grid" style="margin-top:36px;">
+      <div class="deco-px" style="background:#ef4444"></div>
+      <div class="deco-px" style="background:#22c55e"></div>
+      <div class="deco-px" style="background:#3b82f6"></div>
+      <div class="deco-px" style="background:#eab308"></div>
+      <div class="deco-px" style="background:#a78bfa"></div>
+      <div class="deco-px" style="background:#eab308"></div>
+      <div class="deco-px" style="background:#ef4444"></div>
+      <div class="deco-px" style="background:#a78bfa"></div>
+      <div class="deco-px" style="background:#22c55e"></div>
+      <div class="deco-px" style="background:#ef4444"></div>
+      <div class="deco-px" style="background:#3b82f6"></div>
+      <div class="deco-px" style="background:#a78bfa"></div>
+      <div class="deco-px" style="background:#ef4444"></div>
+      <div class="deco-px" style="background:#22c55e"></div>
+      <div class="deco-px" style="background:#3b82f6"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 2 : 방정식 하나 → 내적 (2변수) ════ -->
+<div class="slide" id="s2">
+  <div class="tag y">행렬의 출발점</div>
+  <h2>일차방정식 하나 = <span class="key">내적</span>과 같은 모양</h2>
+  <div class="row" style="flex:1;gap:36px;align-items:center;justify-content:center;">
+
+    <div class="col" style="gap:16px;align-items:center;">
+      <div style="font-size:13px;color:var(--muted);">우리가 아는 일차방정식</div>
+      <div style="font-size:34px;font-family:'JetBrains Mono',monospace;
+        background:#0f172a;padding:20px 32px;border-radius:10px;border:1px solid #334155;">
+        <span style="color:var(--yellow)">a</span>x + <span style="color:var(--green)">b</span>y = c
+      </div>
+    </div>
+
+    <div style="font-size:36px;color:var(--muted);">=</div>
+
+    <div class="col" style="gap:16px;align-items:center;">
+      <div style="font-size:13px;color:var(--muted);">계수를 행벡터, 변수를 열벡터로</div>
+      <div class="row" style="gap:8px;align-items:center;">
+        <div class="mat" style="padding:10px 18px;">
+          <div class="mrow">
+            <span class="mc hi-y" style="font-size:20px;width:36px;">a</span>
+            <span class="mc hi-g" style="font-size:20px;width:36px;">b</span>
+          </div>
+        </div>
+        <div class="mat" style="padding:10px 18px;">
+          <div class="mrow"><span class="mc" style="font-size:20px;width:36px;">x</span></div>
+          <div class="mrow"><span class="mc" style="font-size:20px;width:36px;">y</span></div>
+        </div>
+        <div style="font-size:26px;color:var(--muted);">=</div>
+        <div style="font-size:26px;font-family:'JetBrains Mono',monospace;
+          background:#0f172a;padding:10px 20px;border-radius:8px;border:1px solid #334155;">c</div>
+      </div>
+    </div>
+
+    <div style="font-size:36px;color:var(--blue);">=</div>
+
+    <div class="col" style="gap:12px;align-items:center;">
+      <div style="font-size:13px;color:var(--muted);">전개하면 내적과 동일</div>
+      <div style="font-size:26px;font-family:'JetBrains Mono',monospace;
+        background:rgba(59,130,246,.12);padding:18px 24px;border-radius:10px;
+        border:2px solid var(--blue);text-align:center;line-height:1.9;">
+        <span style="color:var(--yellow)">a</span>·x + <span style="color:var(--green)">b</span>·y<br>
+        <span style="font-size:14px;color:var(--blue);">← 내적의 정의와 같다!</span>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-b" style="margin-top:8px;">
+    <b>핵심:</b> ax + by = c 는 계수 행벡터 [<span class="key">a, b</span>] 와 변수 열벡터 [x, y]ᵀ 의 <span class="key">내적</span>입니다. 행렬 표기는 이 구조를 그대로 사용합니다.
+  </div>
+</div>
+
+<!-- ════ SLIDE 3 : 2×2 — 방정식 두 개를 한 번에 ════ -->
+<div class="slide" id="s3">
+  <div class="tag y">2×2 행렬</div>
+  <h2>방정식 <span class="key">두 개</span>를 묶으면 → <span class="key">2×2 행렬</span></h2>
+  <div class="row" style="flex:1;gap:28px;align-items:center;justify-content:center;">
+
+    <div class="col" style="gap:12px;align-items:center;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">연립방정식</div>
+      <div style="background:#0f172a;border-radius:10px;border:1px solid #334155;padding:20px 28px;">
+        <div style="font-size:22px;font-family:'JetBrains Mono',monospace;
+          border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:12px;">
+          <span style="color:var(--yellow)">a₁</span>x + <span style="color:var(--yellow)">b₁</span>y = c₁
+        </div>
+        <div style="font-size:22px;font-family:'JetBrains Mono',monospace;">
+          <span style="color:var(--green)">a₂</span>x + <span style="color:var(--green)">b₂</span>y = c₂
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:30px;color:var(--muted);">→</div>
+
+    <div class="col" style="gap:8px;align-items:center;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">행렬로 한 번에</div>
+      <div class="row" style="gap:6px;align-items:center;">
+        <div>
+          <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:4px;">계수 행렬 (2×2)</div>
+          <div class="mat">
+            <div class="mrow">
+              <span class="mc hi-y" style="width:36px;">a₁</span>
+              <span class="mc hi-y" style="width:36px;">b₁</span>
+            </div>
+            <div class="mrow">
+              <span class="mc hi-g" style="width:36px;">a₂</span>
+              <span class="mc hi-g" style="width:36px;">b₂</span>
+            </div>
+          </div>
+        </div>
+        <div class="mat" style="padding:10px 14px;">
+          <div class="mrow"><span class="mc" style="width:28px;">x</span></div>
+          <div class="mrow"><span class="mc" style="width:28px;">y</span></div>
+        </div>
+        <div style="font-size:22px;color:var(--muted);">=</div>
+        <div class="mat" style="padding:10px 14px;">
+          <div class="mrow"><span class="mc" style="width:28px;">c₁</span></div>
+          <div class="mrow"><span class="mc" style="width:28px;">c₂</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:28px;color:var(--blue);">→</div>
+
+    <div class="col" style="gap:10px;max-width:260px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:2px;">각 행 = 내적 한 번</div>
+      <div class="callout callout-y" style="font-size:14px;">
+        <b>행1:</b> <span style="color:var(--yellow)">[a₁, b₁]</span> · [x, y]ᵀ = c₁
+      </div>
+      <div class="callout callout-g" style="font-size:14px;">
+        <b>행2:</b> <span style="color:var(--green)">[a₂, b₂]</span> · [x, y]ᵀ = c₂
+      </div>
+      <div style="font-size:13px;color:var(--blue);margin-top:6px;font-weight:700;">
+        → 행렬 × 열벡터 = 내적을 행 수만큼 반복
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 4 : 3×1 — 변수 3개로 확장 ════ -->
+<div class="slide" id="s4">
+  <div class="tag g">3변수 확장</div>
+  <h2>변수가 3개여도: <span class="key-g">방정식 하나</span> = 여전히 내적</h2>
+  <div class="row" style="flex:1;gap:36px;align-items:center;justify-content:center;">
+
+    <div class="col" style="gap:14px;align-items:center;">
+      <div style="font-size:12px;color:var(--muted);">2변수 (앞에서)</div>
+      <div style="background:#0f172a;border-radius:10px;border:1px solid #334155;padding:16px 22px;text-align:center;">
+        <div style="font-size:20px;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">
+          <span style="color:var(--yellow)">a</span>x + <span style="color:var(--green)">b</span>y = d
+        </div>
+        <div class="row" style="gap:6px;align-items:center;justify-content:center;margin-top:8px;">
+          <div class="mat"><div class="mrow">
+            <span class="mc hi-y" style="width:28px;">a</span>
+            <span class="mc hi-g" style="width:28px;">b</span>
+          </div></div>
+          <div class="mat">
+            <div class="mrow"><span class="mc" style="width:24px;">x</span></div>
+            <div class="mrow"><span class="mc" style="width:24px;">y</span></div>
+          </div>
+          <span style="font-size:18px;color:var(--muted);">= d</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:34px;color:var(--muted);">→</div>
+
+    <div class="col" style="gap:14px;align-items:center;">
+      <div style="font-size:12px;color:var(--muted);">3변수로 확장</div>
+      <div style="background:#0f172a;border-radius:10px;border:2px solid var(--green);padding:16px 22px;text-align:center;">
+        <div style="font-size:20px;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">
+          <span style="color:var(--yellow)">a</span>x + <span style="color:var(--green)">b</span>y + <span style="color:var(--blue)">c</span>z = d
+        </div>
+        <div class="row" style="gap:6px;align-items:center;justify-content:center;margin-top:8px;">
+          <div class="mat"><div class="mrow">
+            <span class="mc hi-y" style="width:28px;">a</span>
+            <span class="mc hi-g" style="width:28px;">b</span>
+            <span class="mc hi-b" style="width:28px;">c</span>
+          </div></div>
+          <div class="mat">
+            <div class="mrow"><span class="mc" style="width:24px;">x</span></div>
+            <div class="mrow"><span class="mc" style="width:24px;">y</span></div>
+            <div class="mrow"><span class="mc" style="width:24px;">z</span></div>
+          </div>
+          <span style="font-size:18px;color:var(--muted);">= d</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--green);">구조는 동일: 내적!</div>
+    </div>
+
+    <div style="font-size:30px;color:var(--muted);">→</div>
+
+    <div class="col" style="gap:10px;max-width:250px;">
+      <div class="callout callout-g" style="font-size:15px;text-align:center;">
+        <span style="font-family:'JetBrains Mono',monospace;">
+          <span style="color:var(--yellow)">a</span>·x + <span style="color:var(--green)">b</span>·y + <span style="color:var(--blue)">c</span>·z
+        </span><br><br>
+        = 두 벡터의 <b style="color:var(--green)">내적</b>
+      </div>
+      <div class="callout callout-b" style="font-size:13px;">
+        1×2 행벡터 × 2×1 열벡터 = 수<br>
+        1×3 행벡터 × 3×1 열벡터 = 수<br>
+        <span style="color:var(--blue)">→ 크기와 무관하게 같은 구조</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 5 : 3×3 — 방정식 세 개를 한 번에 ════ -->
+<div class="slide" id="s5">
+  <div class="tag p">3×3 행렬</div>
+  <h2>방정식 <span class="key-p">세 개</span>를 묶으면 → <span class="key-p">3×3 행렬</span></h2>
+  <div class="row" style="flex:1;gap:28px;align-items:center;justify-content:center;">
+
+    <div class="col" style="gap:8px;align-items:center;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">연립방정식 (3개)</div>
+      <div style="background:#0f172a;border-radius:10px;border:1px solid #334155;padding:16px 22px;">
+        <div style="font-size:17px;font-family:'JetBrains Mono',monospace;
+          border-bottom:1px solid #334155;padding-bottom:8px;margin-bottom:8px;">
+          <span style="color:var(--yellow)">a₁</span>x+<span style="color:var(--yellow)">b₁</span>y+<span style="color:var(--yellow)">c₁</span>z=d₁
+        </div>
+        <div style="font-size:17px;font-family:'JetBrains Mono',monospace;
+          border-bottom:1px solid #334155;padding-bottom:8px;margin-bottom:8px;">
+          <span style="color:var(--green)">a₂</span>x+<span style="color:var(--green)">b₂</span>y+<span style="color:var(--green)">c₂</span>z=d₂
+        </div>
+        <div style="font-size:17px;font-family:'JetBrains Mono',monospace;">
+          <span style="color:var(--blue)">a₃</span>x+<span style="color:var(--blue)">b₃</span>y+<span style="color:var(--blue)">c₃</span>z=d₃
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:26px;color:var(--muted);">→</div>
+
+    <div class="col" style="gap:6px;align-items:center;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">3×3 행렬로 한 번에</div>
+      <div class="row" style="gap:6px;align-items:center;">
+        <div class="mat">
+          <div class="mrow">
+            <span class="mc hi-y" style="width:32px;">a₁</span><span class="mc hi-y" style="width:32px;">b₁</span><span class="mc hi-y" style="width:32px;">c₁</span>
+          </div>
+          <div class="mrow">
+            <span class="mc hi-g" style="width:32px;">a₂</span><span class="mc hi-g" style="width:32px;">b₂</span><span class="mc hi-g" style="width:32px;">c₂</span>
+          </div>
+          <div class="mrow">
+            <span class="mc hi-b" style="width:32px;">a₃</span><span class="mc hi-b" style="width:32px;">b₃</span><span class="mc hi-b" style="width:32px;">c₃</span>
+          </div>
+        </div>
+        <div class="mat">
+          <div class="mrow"><span class="mc" style="width:24px;">x</span></div>
+          <div class="mrow"><span class="mc" style="width:24px;">y</span></div>
+          <div class="mrow"><span class="mc" style="width:24px;">z</span></div>
+        </div>
+        <div style="font-size:20px;color:var(--muted);">=</div>
+        <div class="mat">
+          <div class="mrow"><span class="mc" style="width:28px;">d₁</span></div>
+          <div class="mrow"><span class="mc" style="width:28px;">d₂</span></div>
+          <div class="mrow"><span class="mc" style="width:28px;">d₃</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:26px;color:var(--purple);">→</div>
+
+    <div class="col" style="gap:8px;max-width:270px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:2px;">각 행 = 내적 한 번씩</div>
+      <div class="callout callout-y" style="font-size:13px;">
+        행1: <span style="color:var(--yellow)">[a₁,b₁,c₁]</span>·[x,y,z]ᵀ = d₁
+      </div>
+      <div class="callout callout-g" style="font-size:13px;">
+        행2: <span style="color:var(--green)">[a₂,b₂,c₂]</span>·[x,y,z]ᵀ = d₂
+      </div>
+      <div class="callout callout-b" style="font-size:13px;">
+        행3: <span style="color:var(--blue)">[a₃,b₃,c₃]</span>·[x,y,z]ᵀ = d₃
+      </div>
+      <div style="font-size:12px;color:var(--purple);margin-top:4px;font-weight:700;">
+        → 행렬 × 벡터 = 내적의 반복
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 6 : 연결 — 행렬 × 행렬 = 내적들의 표 ════ -->
+<div class="slide" id="s6">
+  <div class="tag">핵심 연결</div>
+  <h2>행렬 × 행렬 = <span class="key">내적들의 표</span></h2>
+  <div class="row" style="flex:1;gap:24px;align-items:center;justify-content:center;">
+
+    <div class="col" style="gap:14px;max-width:310px;">
+      <div class="callout callout-y" style="font-size:14px;">
+        <b>행렬 × 열벡터</b><br>
+        각 행이 그 열벡터와 <b>내적</b><br>
+        = n개 방정식을 동시에 처리
+      </div>
+      <div class="callout callout-g" style="font-size:14px;">
+        <b>행렬 × 행렬</b><br>
+        오른쪽 열벡터들을 왼쪽 행렬에<br>
+        <b>한 번씩 곱한 것</b> → 표(grid)가 됨
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:17px;
+        background:#0f172a;border-radius:8px;padding:14px 18px;
+        border:1px solid #334155;line-height:2;text-align:center;">
+        (RC)ᵢⱼ = <span style="color:var(--yellow)">rᵢ</span> · <span style="color:var(--green)">cⱼ</span>
+      </div>
+    </div>
+
+    <div class="col" style="align-items:center;gap:8px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">칸을 클릭하면 어느 내적인지 표시</div>
+      <table class="grid-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th style="color:var(--green)">c₁</th>
+            <th style="color:var(--blue)">c₂</th>
+            <th style="color:var(--purple)">c₃</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th style="color:var(--yellow)">r₁</th>
+            <td style="cursor:pointer;" onclick="showDot(1,1)">r₁·c₁</td>
+            <td style="cursor:pointer;" onclick="showDot(1,2)">r₁·c₂</td>
+            <td style="cursor:pointer;" onclick="showDot(1,3)">r₁·c₃</td>
+          </tr>
+          <tr>
+            <th style="color:var(--green)">r₂</th>
+            <td style="cursor:pointer;" onclick="showDot(2,1)">r₂·c₁</td>
+            <td style="cursor:pointer;" onclick="showDot(2,2)">r₂·c₂</td>
+            <td style="cursor:pointer;" onclick="showDot(2,3)">r₂·c₃</td>
+          </tr>
+          <tr>
+            <th style="color:var(--blue)">r₃</th>
+            <td style="cursor:pointer;" onclick="showDot(3,1)">r₃·c₁</td>
+            <td style="cursor:pointer;" onclick="showDot(3,2)">r₃·c₂</td>
+            <td style="cursor:pointer;" onclick="showDot(3,3)">r₃·c₃</td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="dot-detail" style="font-family:'JetBrains Mono',monospace;font-size:14px;
+        background:#0f172a;border-radius:8px;padding:10px 16px;border:1px solid #334155;
+        min-width:320px;text-align:center;min-height:44px;color:var(--muted);">
+        ← 칸을 클릭해 보세요
+      </div>
+    </div>
+
+    <div class="col" style="gap:10px;max-width:230px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">이걸 알면…</div>
+      <div class="card" style="font-size:13px;line-height:1.8;border-top:3px solid var(--yellow);">
+        <b style="color:var(--yellow)">행 방향(→)</b><br>
+        rᵢ가 모든 cⱼ에 내적<br>
+        → <b>i번째 행 전체 완성</b>
+      </div>
+      <div class="card" style="font-size:13px;line-height:1.8;border-top:3px solid var(--green);">
+        <b style="color:var(--green)">열 방향(↓)</b><br>
+        cⱼ가 모든 rᵢ에 내적<br>
+        → <b>j번째 열 전체 완성</b>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">다음 슬라이드에서 이 두 관점이<br>왜 중요한지 봅니다 →</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 7 (구 SLIDE 2) : 행렬 곱 = 내적의 격자 ════ -->
+<div class="slide" id="s7">
+  <div class="tag">핵심 메커니즘</div>
+  <h2>행렬 곱 <span class="key">R × C</span> = 내적의 <span class="key">격자</span></h2>
+  <div class="row" style="flex:1;gap:32px;align-items:center;justify-content:center;">
+
+    <!-- 왼쪽 행렬 R -->
+    <div class="col" style="align-items:center;gap:6px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">왼쪽 행렬 <b style="color:var(--yellow)">R</b> (행벡터들)</div>
+      <div class="mat">
+        <div class="mrow"><span class="mc hi-y">—</span><span class="mc hi-y">r₁</span><span class="mc hi-y">—</span></div>
+        <div class="mrow"><span class="mc hi-g">—</span><span class="mc hi-g">r₂</span><span class="mc hi-g">—</span></div>
+        <div class="mrow"><span class="mc hi-b">—</span><span class="mc hi-b">r₃</span><span class="mc hi-b">—</span></div>
+      </div>
+    </div>
+
+    <div class="times">×</div>
+
+    <!-- 오른쪽 행렬 V -->
+    <div class="col" style="align-items:center;gap:6px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">오른쪽 행렬 <b style="color:var(--purple)">C</b> (열벡터들)</div>
+      <div class="mat">
+        <div class="mrow">
+          <span class="mc hi-p">|</span><span class="mc hi-b">|</span><span class="mc hi-g">|</span>
+        </div>
+        <div class="mrow">
+          <span class="mc hi-p">c₁</span><span class="mc hi-b">c₂</span><span class="mc hi-g">c₃</span>
+        </div>
+        <div class="mrow">
+          <span class="mc hi-p">|</span><span class="mc hi-b">|</span><span class="mc hi-g">|</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="big-eq">=</div>
+
+    <!-- 결과 격자 -->
+    <div class="col" style="align-items:center;gap:6px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">결과 행렬 <b>RC</b></div>
+      <table class="grid-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th style="color:var(--purple)">c₁</th>
+            <th style="color:var(--blue)">c₂</th>
+            <th style="color:var(--green)">c₃</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th style="color:var(--yellow)">r₁</th>
+            <td style="color:var(--yellow)">r₁·c₁</td>
+            <td style="color:var(--yellow)">r₁·c₂</td>
+            <td style="color:var(--yellow)">r₁·c₃</td>
+          </tr>
+          <tr>
+            <th style="color:var(--green)">r₂</th>
+            <td style="color:var(--green)">r₂·c₁</td>
+            <td style="color:var(--green)">r₂·c₂</td>
+            <td style="color:var(--green)">r₂·c₃</td>
+          </tr>
+          <tr>
+            <th style="color:var(--blue)">r₃</th>
+            <td style="color:var(--blue)">r₃·c₁</td>
+            <td style="color:var(--blue)">r₃·c₂</td>
+            <td style="color:var(--blue)">r₃·c₃</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  <div class="callout callout-b" style="margin-top:14px;">
+    결과의 <b>(i, j) 성분</b> = <b>rᵢ · cⱼ</b> (내적).
+    이 격자를 <span class="key">가로(→)로 읽으면 행 관점</span>, <span class="key-g">세로(↓)로 읽으면 열 관점</span>이 됩니다.
+  </div>
+</div>
+
+<!-- ════ SLIDE 3 : 격자를 행으로 읽기 ════ -->
+<div class="slide" id="s8">
+  <div class="tag y">격자 → 행으로 읽기</div>
+  <h2>결과의 한 <span class="key">행(→)</span> = 왼쪽 행벡터 <span class="key">rᵢ</span>가 C의 <span class="key">각 열에 내적</span></h2>
+  <div class="row" style="flex:1;gap:28px;align-items:center;justify-content:center;">
+
+    <!-- 격자에 행 하이라이트 -->
+    <div class="col" style="align-items:center;">
+      <table class="grid-table" id="grid-row">
+        <thead>
+          <tr><th></th><th>c₁</th><th>c₂</th><th>c₃</th><th style="width:40px;border:none;color:var(--yellow)">→</th></tr>
+        </thead>
+        <tbody>
+          <tr id="gr1">
+            <th style="color:var(--yellow)">r₁</th>
+            <td class="cell-row">r₁·c₁</td><td class="cell-row">r₁·c₂</td><td class="cell-row">r₁·c₃</td>
+            <td style="border:none;color:var(--yellow);font-weight:700;font-size:13px;">행 1</td>
+          </tr>
+          <tr>
+            <th style="color:var(--green)">r₂</th>
+            <td>r₂·c₁</td><td>r₂·c₂</td><td>r₂·c₃</td>
+            <td style="border:none;color:var(--muted);font-size:13px;">행 2</td>
+          </tr>
+          <tr>
+            <th style="color:var(--blue)">r₃</th>
+            <td>r₃·c₁</td><td>r₃·c₂</td><td>r₃·c₃</td>
+            <td style="border:none;color:var(--muted);font-size:13px;">행 3</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button onclick="hlRow(1)" style="padding:5px 12px;background:#1a2740;border:1px solid var(--yellow);color:var(--yellow);border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;">행1 강조</button>
+        <button onclick="hlRow(2)" style="padding:5px 12px;background:#1a2740;border:1px solid var(--green);color:var(--green);border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;">행2 강조</button>
+        <button onclick="hlRow(3)" style="padding:5px 12px;background:#1a2740;border:1px solid var(--blue);color:var(--blue);border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;">행3 강조</button>
+      </div>
+    </div>
+
+    <div style="font-size:32px;color:var(--muted);">→</div>
+
+    <!-- 설명 -->
+    <div class="col" style="gap:12px;max-width:380px;">
+      <div class="callout callout-y">
+        <b>결과의 i번째 행</b> = rᵢ 가 C의 모든 열에 내적을 취한 결과<br>
+        <code style="font-size:13px;color:var(--yellow);">[rᵢ·c₁, rᵢ·c₂, rᵢ·c₃]</code>
+      </div>
+      <div class="callout callout-b" style="font-size:14px;">
+        <b>핵심:</b> 결과의 각 행은 <span class="key">왼쪽 행렬의 행 rᵢ</span>에만 의존한다.<br><br>
+        따라서 <b>P · A</b> 에서<br>
+        → P의 i번째 행이 A의 행들을 어떻게 섞을지 결정<br>
+        → <span class="key">왼쪽 곱 = 행을 조작</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 4 : 격자를 열로 읽기 ════ -->
+<div class="slide" id="s9">
+  <div class="tag g">격자 → 열로 읽기</div>
+  <h2>결과의 한 <span class="key-g">열(↓)</span> = 오른쪽 열벡터 <span class="key-g">cⱼ</span>가 R의 <span class="key-g">각 행에 내적</span></h2>
+  <div class="row" style="flex:1;gap:28px;align-items:center;justify-content:center;">
+
+    <!-- 격자에 열 하이라이트 -->
+    <div class="col" style="align-items:center;">
+      <table class="grid-table" id="grid-col">
+        <thead>
+          <tr><th></th><th id="ch1" style="color:var(--green)">c₁</th><th>c₂</th><th>c₃</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>r₁</th>
+            <td class="cell-col" id="cc11">r₁·c₁</td><td>r₁·c₂</td><td>r₁·c₃</td>
+          </tr>
+          <tr>
+            <th>r₂</th>
+            <td class="cell-col" id="cc21">r₂·c₁</td><td>r₂·c₂</td><td>r₂·c₃</td>
+          </tr>
+          <tr>
+            <th>r₃</th>
+            <td class="cell-col" id="cc31">r₃·c₁</td><td>r₃·c₂</td><td>r₃·c₃</td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- ↓ arrows -->
+      <div style="display:flex;gap:0;margin-top:4px;">
+        <div style="width:72px;"></div>
+        <div id="darr1" style="width:72px;text-align:center;font-size:20px;color:var(--green);">↓</div>
+        <div style="width:72px;text-align:center;font-size:20px;color:var(--muted);">↓</div>
+        <div style="width:72px;text-align:center;font-size:20px;color:var(--muted);">↓</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button onclick="hlCol(1)" style="padding:5px 12px;background:#1a2740;border:1px solid var(--green);color:var(--green);border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;">열1 강조</button>
+        <button onclick="hlCol(2)" style="padding:5px 12px;background:#1a2740;border:1px solid var(--blue);color:var(--blue);border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;">열2 강조</button>
+        <button onclick="hlCol(3)" style="padding:5px 12px;background:#1a2740;border:1px solid var(--purple);color:var(--purple);border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;">열3 강조</button>
+      </div>
+    </div>
+
+    <div style="font-size:32px;color:var(--muted);">→</div>
+
+    <!-- 설명 -->
+    <div class="col" style="gap:12px;max-width:380px;">
+      <div class="callout callout-g">
+        <b>결과의 j번째 열</b> = R의 모든 행이 cⱼ에 내적을 취한 결과<br>
+        <code style="font-size:13px;color:var(--green);">[r₁·cⱼ, r₂·cⱼ, r₃·cⱼ]ᵀ</code>
+      </div>
+      <div class="callout callout-b" style="font-size:14px;">
+        <b>핵심:</b> 결과의 각 열은 <span class="key-g">오른쪽 행렬의 열 cⱼ</span>에만 의존한다.<br><br>
+        따라서 <b>A · Q</b> 에서<br>
+        → Q의 j번째 열이 A의 열들을 어떻게 섞을지 결정<br>
+        → <span class="key-g">오른쪽 곱 = 열을 조작</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 5 : P·A 이미지에 적용 ════ -->
+<div class="slide" id="s10">
+  <div class="tag y">왼쪽 곱 P·A — 이미지 적용</div>
+  <h2>P의 각 <span class="key">행</span>이 A의 <span class="key">행(가로줄)들</span>을 선택·조합</h2>
+
+  <!-- P 행렬 구조 설명 -->
+  <div class="row" style="gap:24px;align-items:flex-start;flex:1;">
+
+    <!-- 왼쪽: 수식 설명 -->
+    <div class="col" style="gap:12px;flex:1;">
+      <div class="formula">
+        P 의 i행 = [p₁, p₂, p₃]<br>
+        → 결과의 i행 = <span style="color:var(--yellow)">p₁·(A의 행1)</span> + <span style="color:var(--green)">p₂·(A의 행2)</span> + <span style="color:var(--blue)">p₃·(A의 행3)</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px;">예시: 상하 대칭 — P의 1행=[0,0,1], 3행=[1,0,0]</div>
+
+      <!-- 상하 대칭 P 행렬 -->
+      <div class="row" style="align-items:center;gap:10px;margin-top:4px;">
+        <div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">P (상하 대칭)</div>
+          <div class="mat">
+            <div class="mrow"><span class="mc hi-b">0</span><span class="mc zero">0</span><span class="mc hi-y">1</span></div>
+            <div class="mrow"><span class="mc zero">0</span><span class="mc hi-g">1</span><span class="mc zero">0</span></div>
+            <div class="mrow"><span class="mc hi-y">1</span><span class="mc zero">0</span><span class="mc hi-b">0</span></div>
+          </div>
+        </div>
+        <div class="col" style="font-size:12px;color:var(--muted);gap:12px;margin-top:12px;">
+          <div><span style="color:var(--yellow)">행1 → 1·(행3)</span></div>
+          <div><span style="color:var(--green)">행2 → 1·(행2)</span></div>
+          <div><span style="color:var(--blue)">행3 → 1·(행1)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 픽셀 이미지 변환 -->
+    <div class="col" style="align-items:center;gap:14px;flex:1.2;">
+      <div class="row" style="gap:20px;align-items:center;">
+        <!-- 원본 -->
+        <div class="col" style="align-items:center;gap:6px;">
+          <div style="font-size:12px;color:var(--muted);">원본 A</div>
+          <div class="pgrid" id="pa-orig">
+            <div class="px px-r"></div><div class="px px-r"></div><div class="px px-r"></div>
+            <div class="px px-g"></div><div class="px px-g"></div><div class="px px-g"></div>
+            <div class="px px-b"></div><div class="px px-b"></div><div class="px px-b"></div>
+          </div>
+          <div class="col" style="gap:2px;margin-top:4px;">
+            <div style="font-size:11px;color:var(--yellow);text-align:center;">← 행1 (빨강) →</div>
+            <div style="font-size:11px;color:var(--green);text-align:center;">← 행2 (초록) →</div>
+            <div style="font-size:11px;color:var(--blue);text-align:center;">← 행3 (파랑) →</div>
+          </div>
+        </div>
+
+        <!-- 화살표 + P -->
+        <div class="col" style="align-items:center;gap:4px;">
+          <div style="font-size:12px;color:var(--muted);">P·</div>
+          <div style="font-size:28px;color:var(--yellow);">→</div>
+          <div style="font-size:12px;color:var(--yellow);">행1↔행3</div>
+        </div>
+
+        <!-- 결과 -->
+        <div class="col" style="align-items:center;gap:6px;">
+          <div style="font-size:12px;color:var(--muted);">결과 P·A</div>
+          <div class="pgrid">
+            <div class="px px-b"></div><div class="px px-b"></div><div class="px px-b"></div>
+            <div class="px px-g"></div><div class="px px-g"></div><div class="px px-g"></div>
+            <div class="px px-r"></div><div class="px px-r"></div><div class="px px-r"></div>
+          </div>
+          <div class="col" style="gap:2px;margin-top:4px;">
+            <div style="font-size:11px;color:var(--blue);text-align:center;">← 행3→행1 (파랑) →</div>
+            <div style="font-size:11px;color:var(--green);text-align:center;">← 행2 유지 (초록) →</div>
+            <div style="font-size:11px;color:var(--yellow);text-align:center;">← 행1→행3 (빨강) →</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 평행이동 예시 -->
+      <div class="callout callout-y" style="font-size:13px;width:100%;">
+        <b>평행이동 예:</b> P의 1행=[0,1,0], 2행=[0,0,1], 3행=[0,0,0]<br>
+        → 결과의 행1=원본 행2, 행2=원본 행3, <span class="key">행3=0·행1+0·행2+0·행3 = 零벡터 (검정)</span><br>
+        → 이미지가 한 칸 <b>위로 이동</b>하고 맨 아래 줄이 소거됨
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 6 : A·Q 이미지에 적용 ════ -->
+<div class="slide" id="s11">
+  <div class="tag g">오른쪽 곱 A·Q — 이미지 적용</div>
+  <h2>Q의 각 <span class="key-g">열</span>이 A의 <span class="key-g">열(세로줄)들</span>을 선택·조합</h2>
+
+  <div class="row" style="gap:24px;align-items:flex-start;flex:1;">
+
+    <!-- 왼쪽: 수식 설명 -->
+    <div class="col" style="gap:12px;flex:1;">
+      <div class="formula">
+        Q 의 j열 = [q₁, q₂, q₃]ᵀ<br>
+        → 결과의 j열 = <span style="color:var(--yellow)">q₁·(A의 열1)</span> + <span style="color:var(--green)">q₂·(A의 열2)</span> + <span style="color:var(--blue)">q₃·(A의 열3)</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px;">예시: 좌우 대칭 — Q의 1열=[0,0,1]ᵀ, 3열=[1,0,0]ᵀ</div>
+
+      <div class="row" style="align-items:center;gap:10px;margin-top:4px;">
+        <div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">Q (좌우 대칭)</div>
+          <div class="mat">
+            <div class="mrow"><span class="mc zero">0</span><span class="mc zero">0</span><span class="mc hi-y">1</span></div>
+            <div class="mrow"><span class="mc zero">0</span><span class="mc hi-g">1</span><span class="mc zero">0</span></div>
+            <div class="mrow"><span class="mc hi-y">1</span><span class="mc zero">0</span><span class="mc zero">0</span></div>
+          </div>
+        </div>
+        <div class="col" style="font-size:12px;color:var(--muted);gap:12px;margin-top:12px;">
+          <div><span style="color:var(--yellow)">열1 → 1·(열3)</span></div>
+          <div><span style="color:var(--green)">열2 → 1·(열2)</span></div>
+          <div><span style="color:var(--blue)">열3 → 1·(열1)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 픽셀 이미지 변환 -->
+    <div class="col" style="align-items:center;gap:14px;flex:1.2;">
+      <div class="row" style="gap:20px;align-items:center;">
+        <!-- 원본 (열 기반) -->
+        <div class="col" style="align-items:center;gap:6px;">
+          <div style="font-size:12px;color:var(--muted);">원본 A</div>
+          <div class="pgrid">
+            <div class="px px-r"></div><div class="px px-g"></div><div class="px px-b"></div>
+            <div class="px px-r"></div><div class="px px-g"></div><div class="px px-b"></div>
+            <div class="px px-r"></div><div class="px px-g"></div><div class="px px-b"></div>
+          </div>
+          <div class="row" style="gap:0;margin-top:4px;">
+            <div style="width:52px;font-size:10px;color:var(--yellow);text-align:center;">↑<br>열1<br>↓</div>
+            <div style="width:52px;font-size:10px;color:var(--green);text-align:center;">↑<br>열2<br>↓</div>
+            <div style="width:52px;font-size:10px;color:var(--blue);text-align:center;">↑<br>열3<br>↓</div>
+          </div>
+        </div>
+
+        <!-- 화살표 -->
+        <div class="col" style="align-items:center;gap:4px;">
+          <div style="font-size:12px;color:var(--muted);">·Q</div>
+          <div style="font-size:28px;color:var(--green);">→</div>
+          <div style="font-size:12px;color:var(--green);">열1↔열3</div>
+        </div>
+
+        <!-- 결과 -->
+        <div class="col" style="align-items:center;gap:6px;">
+          <div style="font-size:12px;color:var(--muted);">결과 A·Q</div>
+          <div class="pgrid">
+            <div class="px px-b"></div><div class="px px-g"></div><div class="px px-r"></div>
+            <div class="px px-b"></div><div class="px px-g"></div><div class="px px-r"></div>
+            <div class="px px-b"></div><div class="px px-g"></div><div class="px px-r"></div>
+          </div>
+          <div class="row" style="gap:0;margin-top:4px;">
+            <div style="width:52px;font-size:10px;color:var(--blue);text-align:center;">↑<br>열3→1<br>↓</div>
+            <div style="width:52px;font-size:10px;color:var(--green);text-align:center;">↑<br>열2<br>↓</div>
+            <div style="width:52px;font-size:10px;color:var(--yellow);text-align:center;">↑<br>열1→3<br>↓</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-g" style="font-size:13px;width:100%;">
+        <b>평행이동 예:</b> Q의 1열=[0,0,0]ᵀ, 2열=[1,0,0]ᵀ, 3열=[0,1,0]ᵀ<br>
+        → 결과의 열1=<span class="key-g">零벡터(검정)</span>, 열2=원본 열1, 열3=원본 열2<br>
+        → 이미지가 한 칸 <b>오른쪽으로 이동</b>하고 맨 왼쪽 열이 소거됨
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SLIDE 7 : 비정방 행렬 ════ -->
+<div class="slide" id="s12">
+  <div class="tag p">확장 — 비정방 행렬</div>
+  <h2>정방이 아니어도 같은 원리: <span class="key-p">크기가 달라질 뿐</span></h2>
+  <div class="row" style="flex:1;gap:24px;align-items:stretch;">
+
+    <!-- 왼쪽: m×3 × 3×3 -->
+    <div class="col" style="flex:1;gap:10px;">
+      <div class="callout callout-y" style="font-size:14px;">
+        <b>2×3 행렬 P × 3×3 이미지 A</b><br>
+        → 결과는 <span class="key">2×3</span> (행이 2개로 줄어듦)
+      </div>
+      <div class="formula" style="font-size:13px;">
+        P = <span style="color:var(--yellow)">[1 0 0]</span>  ← 행1: A의 행1만 선택<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--green)">[0 0 1]</span>  ← 행2: A의 행3만 선택<br><br>
+        결과: A의 행1, 행3 만 남음 (행2 소거)
+      </div>
+      <div class="row" style="gap:12px;align-items:center;justify-content:center;">
+        <div class="col" style="align-items:center;gap:4px;">
+          <div style="font-size:11px;color:var(--muted);">원본 A (3행)</div>
+          <div class="pgrid">
+            <div class="px px-r"></div><div class="px px-r"></div><div class="px px-r"></div>
+            <div class="px px-g"></div><div class="px px-g"></div><div class="px px-g"></div>
+            <div class="px px-b"></div><div class="px px-b"></div><div class="px px-b"></div>
+          </div>
+        </div>
+        <div style="font-size:22px;color:var(--yellow);">→</div>
+        <div class="col" style="align-items:center;gap:4px;">
+          <div style="font-size:11px;color:var(--muted);">결과 (2행)</div>
+          <div style="display:grid;grid-template-columns:repeat(3,52px);">
+            <div class="px px-r"></div><div class="px px-r"></div><div class="px px-r"></div>
+            <div class="px px-b"></div><div class="px px-b"></div><div class="px px-b"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="width:1px;background:#334155;"></div>
+
+    <!-- 오른쪽: 3×3 × 3×4 -->
+    <div class="col" style="flex:1;gap:10px;">
+      <div class="callout callout-g" style="font-size:14px;">
+        <b>3×3 이미지 A × 3×4 행렬 Q</b><br>
+        → 결과는 <span class="key-g">3×4</span> (열이 4개로 늘어남)
+      </div>
+      <div class="formula" style="font-size:13px;">
+        Q의 열1=[1,0,0]ᵀ ← A의 열1<br>
+        Q의 열2=[0,1,0]ᵀ ← A의 열2<br>
+        Q의 열3=[0,0,1]ᵀ ← A의 열3<br>
+        Q의 열4=[1,0,0]ᵀ ← A의 열1 (복사)
+      </div>
+      <div class="row" style="gap:12px;align-items:center;justify-content:center;">
+        <div class="col" style="align-items:center;gap:4px;">
+          <div style="font-size:11px;color:var(--muted);">원본 A (3열)</div>
+          <div class="pgrid">
+            <div class="px px-r"></div><div class="px px-g"></div><div class="px px-b"></div>
+            <div class="px px-r"></div><div class="px px-g"></div><div class="px px-b"></div>
+            <div class="px px-r"></div><div class="px px-g"></div><div class="px px-b"></div>
+          </div>
+        </div>
+        <div style="font-size:22px;color:var(--green);">→</div>
+        <div class="col" style="align-items:center;gap:4px;">
+          <div style="font-size:11px;color:var(--muted);">결과 (4열)</div>
+          <div style="display:grid;grid-template-columns:repeat(4,46px);">
+            <div class="px px-r" style="width:46px;"></div><div class="px px-g" style="width:46px;"></div><div class="px px-b" style="width:46px;"></div><div class="px px-r" style="width:46px;"></div>
+            <div class="px px-r" style="width:46px;"></div><div class="px px-g" style="width:46px;"></div><div class="px px-b" style="width:46px;"></div><div class="px px-r" style="width:46px;"></div>
+            <div class="px px-r" style="width:46px;"></div><div class="px px-g" style="width:46px;"></div><div class="px px-b" style="width:46px;"></div><div class="px px-r" style="width:46px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════ SLIDE 8 : 정리 ════ -->
+<div class="slide" id="s13">
+  <div class="tag">핵심 정리</div>
+  <h2 style="margin-bottom:20px;">하나의 격자, 두 가지 읽기</h2>
+  <div class="card-grid" style="flex:1;">
+    <div class="card" style="border-top:3px solid var(--yellow);">
+      <div style="color:var(--yellow);font-weight:700;font-size:16px;margin-bottom:10px;">왼쪽 곱 P · A</div>
+      <div style="font-size:14px;line-height:1.8;color:var(--text);">
+        결과의 <b>i행</b> = P의 i행 [p₁, p₂, p₃] 이<br>
+        A의 <b>행들을 선형결합</b><br>
+        <code style="color:var(--yellow);font-size:13px;">= p₁·(A행1) + p₂·(A행2) + p₃·(A행3)</code>
+      </div>
+      <div style="margin-top:10px;font-size:13px;color:var(--muted);">
+        ✓ 행 교환 (순열)<br>
+        ✓ 행 이동 (아래/위로 shift)<br>
+        ✓ 행 소거 (0행 → 검정 줄)<br>
+        ✓ 행 수 변경 (m×n 행렬 → m행 결과)
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--green);">
+      <div style="color:var(--green);font-weight:700;font-size:16px;margin-bottom:10px;">오른쪽 곱 A · Q</div>
+      <div style="font-size:14px;line-height:1.8;color:var(--text);">
+        결과의 <b>j열</b> = Q의 j열 [q₁, q₂, q₃]ᵀ 이<br>
+        A의 <b>열들을 선형결합</b><br>
+        <code style="color:var(--green);font-size:13px;">= q₁·(A열1) + q₂·(A열2) + q₃·(A열3)</code>
+      </div>
+      <div style="margin-top:10px;font-size:13px;color:var(--muted);">
+        ✓ 열 교환 (순열)<br>
+        ✓ 열 이동 (오른쪽/왼쪽으로 shift)<br>
+        ✓ 열 소거 (0열 → 검정 줄)<br>
+        ✓ 열 수 변경 (n×p 행렬 → p열 결과)
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--blue);grid-column:1/-1;">
+      <div style="color:var(--blue);font-weight:700;font-size:15px;margin-bottom:8px;">왜 다른가? — 격자를 어느 방향으로 읽느냐의 차이</div>
+      <div class="row" style="gap:24px;font-size:14px;line-height:1.7;">
+        <div>격자의 <b>(i,j) 성분 = rᵢ · cⱼ</b></div>
+        <div>가로(→) 묶음 → <span class="key">i행 전체</span> = 왼쪽 행 rᵢ의 역할</div>
+        <div>세로(↓) 묶음 → <span class="key-g">j열 전체</span> = 오른쪽 열 cⱼ의 역할</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /stage -->
+
+<!-- ── nav ── -->
+<div id="nav">
+  <button class="nav-btn" onclick="prev()">← 이전</button>
+  <div class="dots" id="dots"></div>
+  <button class="nav-btn" onclick="next()">다음 →</button>
+  <span id="counter"></span>
+</div>
+
+<script>
+const TOTAL = 13;
+let cur = 1;
+
+// 초기 dots 생성
+const dotsEl = document.getElementById('dots');
+for(let i=1;i<=TOTAL;i++){
+  const d = document.createElement('div');
+  d.className='dot'+(i===1?' on':'');
+  d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+}
+
+function goTo(n){
+  document.getElementById('s'+cur).classList.remove('active');
+  dotsEl.children[cur-1].classList.remove('on');
+  cur = Math.max(1,Math.min(TOTAL,n));
+  const sl = document.getElementById('s'+cur);
+  sl.classList.add('active');
+  // re-trigger fade
+  sl.style.opacity=0;
+  requestAnimationFrame(()=>{ sl.style.opacity=1; });
+  dotsEl.children[cur-1].classList.add('on');
+  document.getElementById('counter').textContent = cur+' / '+TOTAL;
+}
+function prev(){ goTo(cur-1); }
+function next(){ goTo(cur+1); }
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') next();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') prev();
+});
+goTo(1);
+
+/* ── Slide 6: dot product detail ── */
+function showDot(i,j){
+  const rColors=['','var(--yellow)','var(--green)','var(--blue)'];
+  const cColors=['','var(--green)','var(--blue)','var(--purple)'];
+  const rNames=['','r₁','r₂','r₃'];
+  const cNames=['','c₁','c₂','c₃'];
+  // reset all cells
+  document.querySelectorAll('#s6 .grid-table td').forEach(td=>{ td.style.background=''; td.style.outline=''; });
+  // highlight clicked cell
+  const rows = document.querySelectorAll('#s6 .grid-table tbody tr');
+  const tds = rows[i-1].querySelectorAll('td');
+  tds[j-1].style.background='rgba(59,130,246,0.3)';
+  tds[j-1].style.outline='2px solid var(--blue)';
+  // show detail
+  const detail = document.getElementById('dot-detail');
+  detail.innerHTML =
+    '<span style="color:'+rColors[i]+'">'+rNames[i]+'</span>' +
+    ' · <span style="color:'+cColors[j]+'">'+cNames[j]+'</span>' +
+    ' = 행'+i+'의 계수 × 열'+j+'의 성분을 각각 곱해서 더한 값';
+}
+
+/* ── Slide 8: row highlight ── */
+function hlRow(r){
+  const tbl = document.getElementById('grid-row');
+  const rows = tbl.querySelectorAll('tbody tr');
+  const colors = [null,'var(--yellow)','var(--green)','var(--blue)'];
+  rows.forEach((tr,i)=>{
+    tr.querySelectorAll('td').forEach(td=>{
+      td.className = (i+1===r) ? 'cell-row' : '';
+      td.style.color = (i+1===r) ? colors[r] : '';
+    });
+  });
+}
+
+/* ── Slide 9: col highlight ── */
+function hlCol(c){
+  const tbl = document.getElementById('grid-col');
+  const colors = [null,'var(--green)','var(--blue)','var(--purple)'];
+  const ths = tbl.querySelectorAll('thead th');
+  // reset all
+  tbl.querySelectorAll('td').forEach(td=>{ td.className=''; td.style.color=''; });
+  ths.forEach((th,i)=>{ if(i>0) th.style.color='var(--muted)'; });
+  // highlight col c
+  const rows = tbl.querySelectorAll('tbody tr');
+  rows.forEach(tr=>{
+    const tds = tr.querySelectorAll('td');
+    if(tds[c-1]){ tds[c-1].className='cell-col'; tds[c-1].style.color=colors[c]; }
+  });
+  if(ths[c]) ths[c].style.color=colors[c];
+  // arrows
+  const arr = document.getElementById('darr1');
+  if(arr){ arr.style.display='none'; }
+}
+</script>
+</body>
+</html>

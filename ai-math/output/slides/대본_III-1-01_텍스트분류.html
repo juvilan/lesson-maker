@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>강의 대본 — 인공지능의 텍스트 분류 (감성 분석)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #f39c12;
+      --accent-light: #fef9ee;
+      --accent-mid: #fde68a;
+      --dark: #1a1a2e;
+      --gray: #6b7280;
+      --light-gray: #f3f4f6;
+      --border: #e5e7eb;
+      --text: #111827;
+      --board-bg: #1e3a5f;
+      --board-text: #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text);
+      background: #fff;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 40px;
+    }
+
+    /* ── 헤더 ── */
+    .doc-header {
+      border-top: 5px solid var(--accent);
+      padding-top: 24px;
+      margin-bottom: 32px;
+    }
+    .doc-header .subject-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .doc-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+    .doc-header .meta {
+      display: flex;
+      gap: 24px;
+      color: var(--gray);
+      font-size: 13px;
+    }
+    .doc-header .meta span::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* ── 수업 타임라인 표 ── */
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      margin-top: 32px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .timeline-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .timeline-table th {
+      background: var(--dark);
+      color: #fff;
+      font-weight: 600;
+      padding: 9px 12px;
+      text-align: left;
+    }
+    .timeline-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .timeline-table tr:last-child td { border-bottom: none; }
+    .timeline-table tr:nth-child(even) td { background: var(--light-gray); }
+    .phase-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .phase-도입    { background: #dbeafe; color: #1d4ed8; }
+    .phase-전개1   { background: #dcfce7; color: #15803d; }
+    .phase-전개2   { background: #d1fae5; color: #065f46; }
+    .phase-정리    { background: #fef3c7; color: #92400e; }
+    .phase-평가    { background: #fce7f3; color: #9d174d; }
+    .slide-num { color: var(--gray); font-size: 12px; }
+
+    /* ── 준비물 ── */
+    .materials-box {
+      background: var(--accent-light);
+      border-left: 3px solid var(--accent);
+      padding: 10px 14px;
+      border-radius: 0 4px 4px 0;
+      font-size: 13px;
+      color: #78350f;
+      margin-top: 8px;
+    }
+
+    /* ── 슬라이드 섹션 ── */
+    .slides-area { margin-top: 12px; }
+
+    .slide-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .slide-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--light-gray);
+      border-bottom: 1px solid var(--border);
+    }
+    .slide-num-badge {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      min-width: 32px;
+      text-align: center;
+      padding: 3px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .slide-card-header h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+      flex: 1;
+    }
+    .slide-time {
+      font-size: 12px;
+      color: var(--gray);
+      white-space: nowrap;
+    }
+    .slide-time::before { content: '⏱ '; }
+
+    .slide-card-body { padding: 14px 16px; }
+
+    /* 대본 텍스트 */
+    .script-text {
+      white-space: pre-wrap;
+      font-size: 13.5px;
+      line-height: 1.85;
+      color: #374151;
+    }
+
+    /* 판서 박스 */
+    .board-box {
+      background: var(--board-bg);
+      color: var(--board-text);
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-top: 12px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .board-box .board-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .board-box .board-content {
+      white-space: pre-wrap;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+
+    /* ── 인쇄 ── */
+    @media print {
+      body { padding: 16px 24px; font-size: 12px; max-width: 100%; }
+      .doc-header { padding-top: 16px; }
+      .doc-header h1 { font-size: 20px; }
+      .slide-card { margin-bottom: 14px; }
+      .slide-card-header h2 { font-size: 13px; }
+      .script-text { font-size: 12px; }
+      .section-title { margin-top: 20px; }
+      a { text-decoration: none; color: inherit; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ───── 헤더 ───── -->
+  <header class="doc-header">
+    <div class="subject-badge">강의 대본</div>
+    <h1>인공지능의 텍스트 분류 (감성 분석)</h1>
+    <div class="meta">
+      <span>인공지능수학</span>
+      <span>고2</span>
+      <span>총 45분</span>
+      <span>III단원 1차시</span>
+    </div>
+  </header>
+
+  <!-- ───── 수업 단계 타임라인 ───── -->
+  <div class="section-title">수업 단계 타임라인</div>
+  <table class="timeline-table">
+    <thead>
+      <tr>
+        <th>단계</th>
+        <th>시간</th>
+        <th>활동 내용</th>
+        <th>슬라이드</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="phase-badge phase-도입">도입</span></td>
+        <td>5분</td>
+        <td>실생활 연결 (넷플릭스 리뷰), 학습 목표 제시</td>
+        <td><span class="slide-num">1–3</span></td>
+      </tr>
+      <tr>
+        <td><span class="phase-badge phase-전개1">전개 1</span></td>
+        <td>15분</td>
+        <td>감성 분석 개념, 감성 사전, 벡터 표현</td>
+        <td><span class="slide-num">4–6</span></td>
+      </tr>
+      <tr>
+        <td><span class="phase-badge phase-전개2">전개 2</span></td>
+        <td>15분</td>
+        <td>감성 점수 계산 실습, 분류 기준, 학생 참여 문제</td>
+        <td><span class="slide-num">7–11</span></td>
+      </tr>
+      <tr>
+        <td><span class="phase-badge phase-정리">정리</span></td>
+        <td>5분</td>
+        <td>한계 및 발전 방향, 요약</td>
+        <td><span class="slide-num">12–14</span></td>
+      </tr>
+      <tr>
+        <td><span class="phase-badge phase-평가">평가</span></td>
+        <td>5분</td>
+        <td>형성평가 (퀴즈)</td>
+        <td><span class="slide-num">15</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="materials-box">
+    📋 <strong>준비물:</strong> 프로젝터, 학생 활동지 (벡터 계산 표)
+  </div>
+
+  <!-- ───── 슬라이드별 대본 ───── -->
+  <div class="section-title">슬라이드별 강의 대본</div>
+  <div class="slides-area">
+
+    <!-- Slide 01 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">01</span>
+        <h2>제목 슬라이드</h2>
+        <span class="slide-time">1분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[도입 멘트]
+"자, 여러분. 넷플릭스에서 영화를 고를 때 '이 영화 좋아요 92%'라는 숫자를 보신 적 있나요? 그 숫자가 어떻게 만들어지는지 궁금하셨나요?
+수백만 명이 남긴 리뷰 텍스트를 AI가 자동으로 읽고 긍정인지 부정인지 분류한 결과입니다.
+오늘 수업에서 그 원리를 직접 수학으로 계산해 봅니다."</div>
+        <div class="board-box">
+          <div class="board-label">📋 판서</div>
+          <div class="board-content">텍스트 → 숫자 → 분류</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 02 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">02</span>
+        <h2>학습 목표</h2>
+        <span class="slide-time">2분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[도입 멘트]
+"오늘 수업의 목표 다섯 가지를 하나씩 보겠습니다."
+
+→ [클릭] "첫째, 감성 분석의 개념과 감성 사전을 설명할 수 있다."
+→ [클릭] "둘째, 텍스트를 벡터로 표현할 수 있다. 이게 핵심이에요—글을 숫자로 만드는 과정."
+→ [클릭] "셋째, 감성 점수 공식을 직접 계산할 수 있다."
+→ [클릭] "넷째, 실제 리뷰에 적용해볼 거예요."
+→ [클릭] "다섯째, 가장 중요한 마지막 목표—한계를 아는 것. 어떤 기술이든 할 수 있는 것과 못 하는 것을 아는 게 진짜 이해입니다."</div>
+      </div>
+    </div>
+
+    <!-- Slide 03 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">03</span>
+        <h2>실생활 연결</h2>
+        <span class="slide-time">2분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[도입 멘트]
+"텍스트 분류가 실제로 어디에 쓰이는지 두 가지 사례를 보겠습니다."
+
+→ [클릭] "넷플릭스 예시. 영화 한 편에 리뷰가 수백만 개예요. 사람이 다 읽을 수가 없죠. AI가 자동으로 긍정/부정을 판단해서 '좋아요 92%' 숫자를 만듭니다."
+→ [클릭] "쇼핑몰 예시. 쿠팡에서 상품 리뷰 수십만 개를 자동으로 분석해서 판매자에게 개선점을 알려줘요."
+→ [클릭: fragment] "이 모든 것이 '텍스트를 숫자로 바꾸는' 과정에서 시작합니다."
+
+[질문 포인트]
+Q: "그럼 여러분이 쓴 댓글도 AI가 분석할 수 있을까요?"
+[학생 응답 대기: 15초]</div>
+      </div>
+    </div>
+
+    <!-- Slide 04 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">04</span>
+        <h2>감성 분석 정의</h2>
+        <span class="slide-time">3분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[핵심 설명]
+"감성 분석이 무엇인지 정의부터 잡겠습니다."
+
+→ [클릭] "감성 분석은 텍스트가 긍정인지 부정인지 중립인지를 판단하는 기술입니다. 핵심은 텍스트를 숫자로 변환한다는 거예요."
+→ [클릭] "처리 단계를 보면: ① 텍스트 입력 → ② 단어로 쪼개기 → ③ 감성 사전과 대조 → ④ 벡터 생성 후 점수 계산 → 분류. 이 4단계를 오늘 수업에서 하나씩 채워나갑니다."</div>
+        <div class="board-box">
+          <div class="board-label">📋 판서</div>
+          <div class="board-content">텍스트 → 단어 분리 → 사전 대조 → 벡터 (긍, 부, 중) → 감성 점수 → 분류</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 05 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">05</span>
+        <h2>감성 사전</h2>
+        <span class="slide-time">4분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[핵심 설명]
+"감성 사전은 AI의 단어장입니다. 각 단어에 미리 긍정, 부정, 중립 레이블을 붙여놓은 목록이에요."
+
+"표를 보겠습니다. 훌륭하다, 감동적이다 같은 단어는 긍정. 실망스럽다, 지루하다는 부정. 영화, 배우처럼 감정을 담지 않은 단어는 중립입니다."
+
+[질문 포인트]
+Q: "사전에 없는 단어는 어떻게 처리할까요? 예를 들어 신조어 '킹받다'는?"
+[학생 응답 대기: 20초]
+A: "사전에 없으면 보통 무시하거나 중립으로 처리합니다. 이게 한계 중 하나예요 — 나중에 다시 다룰 겁니다."
+
+[오개념 예방]
+"여기서 주의할 점이 있어요. '작다'라는 단어 — 음식 양이 작다면 부정이지만 가격이 작다면 긍정이 될 수 있죠. 같은 단어도 문맥에 따라 달라집니다. 지금 방식은 이 문맥을 무시한다는 걸 기억해두세요."</div>
+      </div>
+    </div>
+
+    <!-- Slide 06 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">06</span>
+        <h2>벡터 표현</h2>
+        <span class="slide-time">4분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[핵심 설명]
+"자, 이제 텍스트를 벡터로 만들어봅니다. 벡터는 숫자를 나열한 것이죠. 여기서는 세 숫자입니다."
+
+"수식을 읽어볼게요: 벡터 v는 긍정 단어 수, 부정 단어 수, 중립 단어 수의 순서쌍입니다."
+
+"오른쪽 예시 텍스트를 보겠습니다: '연기는 훌륭했지만 스토리가 지루하고 음악이 시끄러웠다'
+→ 훌륭했지만은 긍정 1개
+→ 지루하고, 시끄러웠다는 부정 2개
+→ 연기, 스토리, 음악은 중립 3개"
+
+→ [클릭: fragment] "그래서 벡터 = (1, 2, 3)입니다."
+
+[질문 포인트]
+Q: "벡터 (1, 2, 3)만 보고 어떤 단어가 쓰였는지 알 수 있나요?"
+[학생 응답 대기: 15초]
+A: "알 수 없습니다. 이게 벡터 변환의 한계예요 — 단어 정보가 손실됩니다."</div>
+        <div class="board-box">
+          <div class="board-label">📋 판서</div>
+          <div class="board-content">벡터 v = (긍정 수, 부정 수, 중립 수)
+예: (1, 2, 3)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 07 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">07</span>
+        <h2>감성 점수 계산</h2>
+        <span class="slide-time">5분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[핵심 설명]
+"드디어 핵심 공식입니다. 감성 점수 = 긍정 단어 수 빼기 부정 단어 수.
+읽어볼게요: '감성 점수는 긍정 단어 수에서 부정 단어 수를 뺀 값입니다.'
+양수면 긍정, 0이면 중립, 음수면 부정."
+
+→ [클릭] "실제 텍스트로 해봅시다. '정말 재미있고 연기가 훌륭했다. 음악도 아름다웠다. 결말이 실망스러웠다.'
+긍정 단어를 세어봐요: 재미있고, 훌륭했다, 아름다웠다 — 3개."
+→ [클릭] "부정 단어: 실망스러웠다 — 1개."
+→ [클릭] "감성 점수 = 3 빼기 1 = 2. 양수니까 긍정 텍스트입니다."
+
+[질문 포인트]
+Q: "같은 텍스트인데 감성 사전이 다르면 결과가 달라질 수 있나요?"
+[학생 계산 시간: 30초]
+A: "맞아요. 감성 사전 구성이 달라지면 같은 텍스트도 다르게 분류될 수 있습니다. 그래서 좋은 감성 사전을 만드는 것이 중요합니다."</div>
+        <div class="board-box">
+          <div class="board-label">📋 판서</div>
+          <div class="board-content">감성 점수 = 긍정 수 − 부정 수
+= 3 − 1 = 2 → 긍정</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 08 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">08</span>
+        <h2>다양한 리뷰 비교</h2>
+        <span class="slide-time">3분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[핵심 설명]
+"표에서 세 가지 리뷰를 비교합니다.
+리뷰 A는 긍정 3, 부정 1 → 점수 +2 → 긍정.
+리뷰 B는 긍정 0, 부정 2 → 점수 −2 → 부정.
+리뷰 C는 긍정 1, 부정 1 → 점수 0 → 중립."
+
+"차트를 보면 감성 점수가 양수, 0, 음수로 나뉘는 게 한눈에 보이죠?"
+
+[질문 포인트]
+Q: "중립 점수가 나온 리뷰 C를 보면 '좋았지만, 실망스러웠다'처럼 긍정과 부정이 상쇄된 경우인데, 이게 정말 '중립'일까요?"
+[학생 응답 대기: 20초]</div>
+      </div>
+    </div>
+
+    <!-- Slide 09 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">09</span>
+        <h2>벡터 변환 실습</h2>
+        <span class="slide-time">4분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[핵심 설명]
+"이제 여러분이 직접 해봅니다. 텍스트: '공연이 감동적이었다. 하지만 음향이 불쾌하고 좌석이 불편했다.'"
+
+→ [클릭] "Step 1: 텍스트를 단어로 쪼갭니다. 공연, 감동적이었다, 음향, 불쾌하고, 좌석, 불편했다."
+→ [클릭] "Step 2: 감성 사전과 대조합니다. 옆 친구와 30초 동안 각 단어를 분류해보세요. [학생 계산 시간: 30초]
+확인해봅시다: 감동적이었다는 긍정(1), 불쾌하고와 불편했다는 부정(2), 공연·음향·좌석은 중립(3)."
+→ [클릭] "Step 3: 벡터 = (1, 2, 3), 감성 점수 = 1 − 2 = −1. 음수니까 부정입니다."</div>
+        <div class="board-box">
+          <div class="board-label">📋 판서</div>
+          <div class="board-content">벡터 = (1, 2, 3)
+감성 점수 = 1 − 2 = −1 → 부정</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 10 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">10</span>
+        <h2>분류 기준</h2>
+        <span class="slide-time">3분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[핵심 설명]
+"분류 기준을 수학적으로 표현하면 조건함수 형태입니다.
+수학I에서 배운 조각함수와 같은 구조예요."
+
+→ [클릭] "예제 1: 긍정 3, 부정 1 → 점수 +2. 양수니까 긍정."
+→ [클릭] "예제 2: 긍정 2, 부정 2 → 점수 0. 딱 중립."
+→ [클릭] "예제 3: 긍정 0, 부정 3 → 점수 −3. 음수니까 부정."
+
+"이 조건함수를 외워두세요. 나중에 문제에서 많이 나옵니다."</div>
+      </div>
+    </div>
+
+    <!-- Slide 11 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">11</span>
+        <h2>학생 실습</h2>
+        <span class="slide-time">4분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[핵심 설명]
+"이제 실제로 여러분이 풀어봅니다. 옆 친구와 짝을 지어 1분간 계산해보세요."
+
+"텍스트를 읽어드릴게요: '무대가 아름다웠고 배우들의 연기가 훌륭했다. 하지만 음악이 너무 시끄럽고 좌석이 불편했다.'
+
+감성 사전은 슬라이드에 나와있어요. [학생 계산 시간: 60초]"
+
+→ [클릭: fragment] "확인해봅시다.
+긍정: 아름다웠고, 훌륭했다 → 2개.
+부정: 시끄럽고, 불편했다 → 2개.
+중립: 무대, 배우, 음악, 좌석 → 4개.
+벡터 = (2, 2, 4)
+감성 점수 = 2 − 2 = 0 → 중립입니다."</div>
+        <div class="board-box">
+          <div class="board-label">📋 판서</div>
+          <div class="board-content">(2, 2, 4) → 0 → 중립</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 12 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">12</span>
+        <h2>한계</h2>
+        <span class="slide-time">3분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[오개념 예방]
+"지금까지 배운 감성 사전 방식의 한계를 짚겠습니다."
+
+"가장 큰 문제는 부정어 처리예요. '재미없다'에서 '재미'를 긍정 단어로 세면 어떻게 될까요? 실제로는 부정인데 긍정으로 분류됩니다."
+
+"두 번째는 문맥 무시. '작다'가 음식 양에 쓰이면 부정이지만 가격에 쓰이면 긍정이 될 수 있어요. 단어만 보면 구별이 안 됩니다."
+
+→ [클릭: fragment] "그래서 '감성 사전이 크면 클수록 무조건 정확하다'는 생각은 틀렸어요. 사전의 크기보다 문맥 이해 능력이 더 중요합니다."</div>
+      </div>
+    </div>
+
+    <!-- Slide 13 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">13</span>
+        <h2>발전 방향</h2>
+        <span class="slide-time">2분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[핵심 설명]
+"그럼 더 정확하게 하려면 어떻게 할까요?"
+
+→ [클릭] "머신러닝 방법은 레이블된 텍스트 수만 개로 학습시킵니다. 단어 빈도 외에 패턴을 학습하죠."
+→ [클릭] "딥러닝 방법인 BERT 같은 모델은 '재미없다'처럼 부정어가 붙은 경우도 문맥으로 이해합니다. 지금 가장 높은 정확도를 보이지만 계산 비용이 높아요."
+
+"우리가 배운 방식이 출발점이고 이를 개선하려는 노력이 머신러닝, 딥러닝으로 이어집니다."</div>
+      </div>
+    </div>
+
+    <!-- Slide 14 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">14</span>
+        <h2>요약</h2>
+        <span class="slide-time">2분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[마무리 멘트]
+"오늘 배운 세 가지 핵심을 정리합니다."
+
+→ [클릭] "감성 사전: 단어에 긍정/부정/중립 레이블을 붙인 AI의 단어장."
+→ [클릭] "벡터 표현: 텍스트를 (긍정 수, 부정 수, 중립 수) 숫자 벡터로 변환."
+→ [클릭] "감성 점수: 긍정 수 빼기 부정 수. 양수 긍정, 0 중립, 음수 부정."
+→ [클릭] "다음 시간에는 나이브 베이즈 분류기를 배웁니다. 확률로 텍스트를 분류하는 더 정교한 방법이에요."</div>
+      </div>
+    </div>
+
+    <!-- Slide 15 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">15</span>
+        <h2>형성평가</h2>
+        <span class="slide-time">5분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-text">[평가]
+"마지막 5분, 형성평가입니다. 혼자서 풀어보세요."
+
+"Q1 텍스트를 읽어드릴게요... [학생 계산 시간: 2분]"
+
+→ [클릭: fragment] "Q1 정답 확인. 벡터 (2, 2, 4), 감성 점수 0, 중립."
+
+"Q2 이건 개념 문제예요. '재미없다'를 분류하면 어떤 문제가 생기나요? [학생 응답 대기: 30초]"
+
+→ [클릭: fragment] "정답: '재미'가 긍정으로 분류되어 부정 텍스트를 긍정으로 오분류. 부정어 처리 한계입니다."
+
+[마무리]
+"오늘 수업 잘 따라왔나요? 핵심은 텍스트를 숫자 벡터로 변환하고 간단한 뺄셈으로 감성을 분류한다는 것입니다. 다음 시간에는 이 방법을 확률적으로 개선하는 나이브 베이즈를 배울 거예요."</div>
+      </div>
+    </div>
+
+  </div><!-- /slides-area -->
+
+</body>
+</html>

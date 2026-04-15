@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>02 인공지능과 수학 | 고등 인공지능 수학</title>
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+
+  <!-- MathJax -->
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    /* ============================================================
+       ROOT & BODY OVERRIDES
+    ============================================================ */
+    :root {
+      --bg-primary:   #0a0f1e;
+      --bg-card:      rgba(255, 255, 255, 0.07);
+      --border:       rgba(255, 255, 255, 0.15);
+      --text-main:    #e8f4fd;
+      --cyan:         #00d4ff;
+      --amber:        #ffb347;
+      --green:        #39d98a;
+      --purple:       #b388ff;
+      --pink:         #ff6b9d;
+      --red:          #ff5252;
+    }
+
+    .reveal-viewport,
+    .reveal,
+    .reveal .slides {
+      background: var(--bg-primary) !important;
+    }
+
+    .reveal {
+      font-family: 'Noto Sans KR', sans-serif !important;
+      font-size: 28px;
+      color: var(--text-main);
+    }
+
+    /* ============================================================
+       HEADINGS
+    ============================================================ */
+    .reveal h1 {
+      font-family: 'Noto Sans KR', sans-serif !important;
+      color: var(--cyan) !important;
+      font-weight: 900;
+      font-size: 2em;
+      text-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+      line-height: 1.3;
+    }
+
+    .reveal h2 {
+      font-family: 'Noto Sans KR', sans-serif !important;
+      color: var(--cyan) !important;
+      font-weight: 700;
+      font-size: 1.45em;
+      border-bottom: 2px solid rgba(0, 212, 255, 0.35);
+      padding-bottom: 0.25em;
+      margin-bottom: 0.6em;
+      text-align: left;
+    }
+
+    .reveal h3 {
+      font-family: 'Noto Sans KR', sans-serif !important;
+      color: var(--amber) !important;
+      font-weight: 700;
+      font-size: 1.1em;
+    }
+
+    .reveal p,
+    .reveal li,
+    .reveal span,
+    .reveal td,
+    .reveal th {
+      font-family: 'Noto Sans KR', sans-serif !important;
+      font-size: 1em;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    /* ============================================================
+       SLIDE SECTIONS
+    ============================================================ */
+    .reveal .slides section {
+      padding: 0 40px;
+    }
+
+    /* ============================================================
+       UNIT LABEL & SUBTITLE TAGS
+    ============================================================ */
+    .unit-label {
+      display: inline-block;
+      background: rgba(0, 212, 255, 0.12);
+      border: 1px solid rgba(0, 212, 255, 0.4);
+      color: var(--cyan);
+      font-size: 0.55em;
+      font-weight: 500;
+      padding: 5px 18px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.6em;
+    }
+
+    .achievement-tag {
+      display: inline-block;
+      background: rgba(57, 217, 138, 0.12);
+      border: 1px solid rgba(57, 217, 138, 0.4);
+      color: var(--green);
+      font-size: 0.48em;
+      font-weight: 500;
+      padding: 4px 16px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+      margin-top: 0.5em;
+    }
+
+    /* ============================================================
+       CARD COMPONENTS
+    ============================================================ */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin: 8px 0;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0, 212, 255, 0.12);
+    }
+
+    .card-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card-grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .card-grid-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .card-grid-4 {
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+
+    /* Overview cards (Slide 3) */
+    .overview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .overview-card .icon {
+      font-size: 2.2em;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .overview-card .label {
+      font-size: 0.95em;
+      font-weight: 700;
+      color: var(--text-main);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .overview-card .arrow {
+      font-size: 1.4em;
+      color: var(--cyan);
+      display: block;
+      margin: 8px 0;
+    }
+
+    .overview-card .math-tag {
+      display: inline-block;
+      font-size: 0.85em;
+      font-weight: 900;
+      padding: 6px 18px;
+      border-radius: 30px;
+    }
+
+    .tag-vector  { background: rgba(0,212,255,0.18); color: var(--cyan);   border: 1px solid rgba(0,212,255,0.5); }
+    .tag-matrix  { background: rgba(255,179,71,0.18); color: var(--amber); border: 1px solid rgba(255,179,71,0.5); }
+    .tag-func    { background: rgba(57,217,138,0.18); color: var(--green); border: 1px solid rgba(57,217,138,0.5); }
+
+    /* Case cards */
+    .case-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      text-align: center;
+    }
+
+    .case-card .case-icon {
+      font-size: 1.8em;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .case-card .case-title {
+      font-size: 0.82em;
+      font-weight: 700;
+      color: var(--text-main);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .case-card .case-desc {
+      font-size: 0.65em;
+      color: rgba(232,244,253,0.65);
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       KEY MATH BADGE
+    ============================================================ */
+    .key-math {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0,212,255,0.1);
+      border: 1.5px solid rgba(0,212,255,0.45);
+      border-radius: 30px;
+      padding: 8px 22px;
+      margin-bottom: 22px;
+    }
+
+    .key-math .km-label {
+      font-size: 0.6em;
+      color: var(--cyan);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+    }
+
+    .key-math .km-value {
+      font-size: 0.75em;
+      font-weight: 900;
+      color: var(--cyan);
+    }
+
+    .key-math-amber {
+      background: rgba(255,179,71,0.1);
+      border-color: rgba(255,179,71,0.45);
+    }
+    .key-math-amber .km-label,
+    .key-math-amber .km-value { color: var(--amber); }
+
+    .key-math-green {
+      background: rgba(57,217,138,0.1);
+      border-color: rgba(57,217,138,0.45);
+    }
+    .key-math-green .km-label,
+    .key-math-green .km-value { color: var(--green); }
+
+    /* ============================================================
+       MATH PREVIEW BOX (Slides 5, 7, 9)
+    ============================================================ */
+    .math-preview {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 36px;
+      margin: 16px 0;
+      text-align: center;
+    }
+
+    .math-preview .formula {
+      font-size: 1.15em;
+      color: var(--cyan);
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    .math-preview .formula-desc {
+      font-size: 0.65em;
+      color: rgba(232,244,253,0.65);
+    }
+
+    /* Pixel grid */
+    .pixel-grid {
+      display: inline-grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      margin: 16px auto;
+    }
+
+    .pixel-cell {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55em;
+      font-weight: 700;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .note-box {
+      background: rgba(179, 136, 255, 0.1);
+      border: 1px solid rgba(179, 136, 255, 0.35);
+      border-radius: 10px;
+      padding: 12px 20px;
+      margin-top: 16px;
+      font-size: 0.68em;
+      color: var(--purple);
+      text-align: center;
+    }
+
+    /* ============================================================
+       MATCHING DIAGRAM (Slide 10)
+    ============================================================ */
+    .matching-diagram {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 0;
+      margin: 20px 0;
+    }
+
+    .match-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .match-col-center {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 0 0 80px;
+      align-items: center;
+      justify-content: space-around;
+      padding-top: 2px;
+    }
+
+    .match-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      text-align: center;
+      font-size: 0.82em;
+      font-weight: 700;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .match-item-left  { border-left: 4px solid var(--cyan); }
+    .match-item-right { border-right: 4px solid; }
+    .match-item-r1 { border-color: var(--cyan);  color: var(--cyan); }
+    .match-item-r2 { border-color: var(--amber); color: var(--amber); }
+    .match-item-r3 { border-color: var(--green); color: var(--green); }
+
+    .match-arrow {
+      font-size: 1.6em;
+      font-weight: 900;
+    }
+    .match-arrow-1 { color: var(--cyan);  }
+    .match-arrow-2 { color: var(--amber); }
+    .match-arrow-3 { color: var(--green); }
+
+    /* ============================================================
+       FILL-IN-THE-BLANK (Slide 11)
+    ============================================================ */
+    .blank-row {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 24px;
+      margin: 10px 0;
+      font-size: 0.82em;
+      line-height: 1.8;
+    }
+
+    .blank {
+      display: inline-block;
+      min-width: 70px;
+      border-bottom: 2px solid var(--cyan);
+      color: transparent;
+      font-weight: 900;
+      padding: 0 6px;
+    }
+
+    .answer {
+      display: inline-block;
+      min-width: 70px;
+      border-bottom: 2px solid var(--cyan);
+      color: var(--green);
+      font-weight: 900;
+      padding: 0 6px;
+      text-align: center;
+    }
+
+    /* ============================================================
+       PROBLEM CARDS (Slide 12)
+    ============================================================ */
+    .problem-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 22px;
+      margin: 10px 0;
+      text-align: left;
+    }
+
+    .problem-num {
+      display: inline-block;
+      background: var(--cyan);
+      color: #0a0f1e;
+      font-size: 0.6em;
+      font-weight: 900;
+      padding: 3px 12px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    .problem-text {
+      font-size: 0.72em;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    .problem-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .opt {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 14px;
+      font-size: 0.65em;
+      color: rgba(232,244,253,0.8);
+    }
+
+    .opt-correct {
+      background: rgba(57,217,138,0.15);
+      border-color: var(--green);
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .answer-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 0.68em;
+    }
+
+    .answer-badge {
+      background: rgba(57,217,138,0.18);
+      border: 1px solid var(--green);
+      color: var(--green);
+      font-weight: 900;
+      padding: 4px 14px;
+      border-radius: 20px;
+    }
+
+    /* ============================================================
+       OBJECTIVE LIST (Slide 2)
+    ============================================================ */
+    .objective-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .objective-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 12px 0;
+      font-size: 0.88em;
+      line-height: 1.6;
+    }
+
+    .objective-list li .obj-num {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      background: var(--cyan);
+      color: #0a0f1e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.9em;
+      margin-top: 2px;
+    }
+
+    /* ============================================================
+       TITLE SLIDE DECORATION
+    ============================================================ */
+    .title-decoration {
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .title-decoration-2 {
+      position: absolute;
+      bottom: -80px;
+      left: -80px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255,179,71,0.05) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .separator-line {
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--amber), transparent);
+      border-radius: 2px;
+      margin: 18px 0;
+      border: none;
+    }
+
+    /* ============================================================
+       HIGHLIGHT SPANS
+    ============================================================ */
+    .hl-cyan   { color: var(--cyan);   font-weight: 700; }
+    .hl-amber  { color: var(--amber);  font-weight: 700; }
+    .hl-green  { color: var(--green);  font-weight: 700; }
+    .hl-purple { color: var(--purple); font-weight: 700; }
+    .hl-pink   { color: var(--pink);   font-weight: 700; }
+
+    /* ============================================================
+       SECTION DIVIDER SLIDES
+    ============================================================ */
+    .section-bg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-num {
+      font-size: 5em;
+      font-weight: 900;
+      opacity: 0.06;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+      color: var(--cyan);
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       SUMMARY TABLE (Slide 10)
+    ============================================================ */
+    .summary-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 10px 0;
+    }
+
+    .summary-row .sr-ai {
+      flex: 2;
+      font-size: 0.8em;
+      font-weight: 700;
+    }
+
+    .summary-row .sr-arrow {
+      flex: 0 0 30px;
+      text-align: center;
+      font-size: 1.3em;
+      color: rgba(232,244,253,0.4);
+    }
+
+    .summary-row .sr-math {
+      flex: 1;
+      text-align: center;
+      font-size: 0.82em;
+      font-weight: 900;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .sr-m1 { background: rgba(0,212,255,0.15); color: var(--cyan); border: 1px solid rgba(0,212,255,0.4); }
+    .sr-m2 { background: rgba(255,179,71,0.15); color: var(--amber); border: 1px solid rgba(255,179,71,0.4); }
+    .sr-m3 { background: rgba(57,217,138,0.15); color: var(--green); border: 1px solid rgba(57,217,138,0.4); }
+
+    /* ============================================================
+       REVEAL.JS FRAGMENT OVERRIDES
+    ============================================================ */
+    .reveal .fragment {
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .reveal .fragment.fade-up {
+      transform: translateY(20px);
+    }
+
+    .reveal .fragment.fade-up.visible {
+      transform: translateY(0);
+    }
+
+    /* ============================================================
+       PROGRESS / SLIDE NUMBER
+    ============================================================ */
+    .reveal .progress {
+      color: var(--cyan);
+      height: 4px;
+    }
+
+    .reveal .slide-number {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.5em;
+      color: rgba(232,244,253,0.5);
+      background: transparent;
+    }
+
+    /* ============================================================
+       RESPONSIVE ADJUSTMENTS
+    ============================================================ */
+    @media (max-width: 1280px) {
+      .reveal { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================================================
+         SLIDE 1: TITLE
+    ============================================================ -->
+    <section>
+      <div class="title-decoration"></div>
+      <div class="title-decoration-2"></div>
+
+      <div style="text-align: center; padding: 30px 0;">
+        <div class="unit-label">Ⅰ. 인공지능과 수학 &nbsp;|&nbsp; 1. 인공지능과 관련된 수학</div>
+
+        <hr class="separator-line" style="margin: 20px auto; max-width: 500px;" />
+
+        <h1 style="font-size: 2.2em; margin: 20px 0;">
+          02 인공지능과 수학
+        </h1>
+
+        <p style="color: rgba(232,244,253,0.7); font-size: 0.75em; margin-bottom: 24px; line-height: 2;">
+          미래엔 고등 인공지능 수학 &nbsp;|&nbsp; pp. 17–21
+        </p>
+
+        <div class="achievement-tag">
+          성취기준 12인수01-02 &nbsp;— 인공지능에 수학이 활용되는 다양한 예를 찾을 수 있다.
+        </div>
+
+        <div style="margin-top: 40px; display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 0.65em; color: rgba(232,244,253,0.5);">
+            <span style="color: var(--cyan); font-size: 1.4em;">▶</span> 벡터
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 0.65em; color: rgba(232,244,253,0.5);">
+            <span style="color: var(--amber); font-size: 1.4em;">▶</span> 행렬
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 0.65em; color: rgba(232,244,253,0.5);">
+            <span style="color: var(--green); font-size: 1.4em;">▶</span> 함수
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        오늘은 인공지능에 수학이 어떻게 활용되는지 살펴볼 것입니다. 텍스트, 이미지, 의사결정 세 영역에서 각각 어떤 수학 개념이 쓰이는지 배웁니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 2: 학습 목표
+    ============================================================ -->
+    <section>
+      <h2>학습 목표</h2>
+
+      <ul class="objective-list">
+        <li class="fragment fade-up">
+          <span class="obj-num">1</span>
+          <span>
+            인공지능에 <span class="hl-cyan">수학이 활용</span>되는 다양한 예를 찾을 수 있다.
+          </span>
+        </li>
+        <li class="fragment fade-up">
+          <span class="obj-num">2</span>
+          <span>
+            <span class="hl-cyan">텍스트 자료</span>를 인식하는 AI에서 <span class="hl-cyan">벡터</span>가 활용됨을 설명할 수 있다.
+          </span>
+        </li>
+        <li class="fragment fade-up">
+          <span class="obj-num">3</span>
+          <span>
+            <span class="hl-amber">이미지 자료</span>를 인식하는 AI에서 <span class="hl-amber">행렬</span>이 활용됨을 설명할 수 있다.
+          </span>
+        </li>
+        <li class="fragment fade-up">
+          <span class="obj-num">4</span>
+          <span>
+            <span class="hl-green">경향성 분석과 의사 결정</span>을 하는 AI에서 <span class="hl-green">함수</span>가 활용됨을 설명할 수 있다.
+          </span>
+        </li>
+      </ul>
+
+      <aside class="notes">
+        학습 목표를 하나씩 확인합니다. 오늘 수업이 끝나면 이 네 가지를 모두 말할 수 있어야 합니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 3: OVERVIEW — 인공지능과 수학의 연결
+    ============================================================ -->
+    <section>
+      <h2>인공지능과 수학의 연결</h2>
+
+      <p style="font-size: 0.75em; color: rgba(232,244,253,0.65); margin-bottom: 24px;">
+        인공지능은 종류에 따라 서로 다른 <span class="hl-cyan">수학 개념</span>을 핵심 도구로 사용합니다.
+      </p>
+
+      <div class="card-grid card-grid-3">
+        <div class="overview-card fragment fade-up">
+          <span class="icon">💬</span>
+          <span class="label">텍스트 자료를 인식하는 AI</span>
+          <span class="arrow">↓</span>
+          <span class="math-tag tag-vector">벡터 (Vector)</span>
+        </div>
+
+        <div class="overview-card fragment fade-up">
+          <span class="icon">🖼️</span>
+          <span class="label">이미지 자료를 인식하는 AI</span>
+          <span class="arrow">↓</span>
+          <span class="math-tag tag-matrix">행렬 (Matrix)</span>
+        </div>
+
+        <div class="overview-card fragment fade-up">
+          <span class="icon">📊</span>
+          <span class="label">경향성 분석 &amp; 의사 결정 AI</span>
+          <span class="arrow">↓</span>
+          <span class="math-tag tag-func">함수 (Function)</span>
+        </div>
+      </div>
+
+      <div class="fragment fade-up" style="margin-top: 20px;">
+        <div class="note-box" style="background: rgba(0,212,255,0.07); border-color: rgba(0,212,255,0.25); color: rgba(232,244,253,0.75);">
+          각 수학 개념은 앞으로 이 교과서의 핵심 단원에서 자세히 다룰 예정입니다.
+        </div>
+      </div>
+
+      <aside class="notes">
+        큰 그림을 먼저 보겠습니다. AI가 처리하는 데이터 종류에 따라 활용되는 수학이 다릅니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 4: 텍스트 자료를 인식하는 AI
+    ============================================================ -->
+    <section>
+      <h2>텍스트 자료를 인식하는 인공지능</h2>
+
+      <div class="key-math">
+        <span class="km-label">핵심 수학</span>
+        <span style="color: rgba(232,244,253,0.4);">|</span>
+        <span class="km-value">벡터 (Vector)</span>
+      </div>
+
+      <p style="font-size: 0.72em; color: rgba(232,244,253,0.65); margin-bottom: 18px;">
+        우리가 사용하는 <strong>자연어(natural language)</strong>를 컴퓨터로 처리하는 작업을
+        <span class="hl-cyan">자연어 처리(NLP)</span>라고 하며, 이 때 <span class="hl-cyan">벡터</span> 개념이 핵심으로 사용됩니다.
+      </p>
+
+      <div class="card-grid card-grid-2">
+        <div class="case-card fragment fade-up">
+          <span class="case-icon">🗨️</span>
+          <span class="case-title">챗봇 (Chatbot)</span>
+          <span class="case-desc">사용자와 대화할 수 있도록 구현된 컴퓨터 프로그램. 자연어 처리 기술로 문맥을 파악하여 대답.</span>
+        </div>
+
+        <div class="case-card fragment fade-up">
+          <span class="case-icon">📝</span>
+          <span class="case-title">자동 번역</span>
+          <span class="case-desc">문맥과 의미를 파악하여 다양한 언어로 번역. 단어 간의 관계를 벡터로 표현하여 처리.</span>
+        </div>
+
+        <div class="case-card fragment fade-up">
+          <span class="case-icon">📧</span>
+          <span class="case-title">스팸 메일 차단</span>
+          <span class="case-desc">메일의 제목이나 내용에서 텍스트를 분석하여 스팸 여부를 예측하고 자동으로 차단.</span>
+        </div>
+
+        <div class="case-card fragment fade-up">
+          <span class="case-icon">🔍</span>
+          <span class="case-title">관련어 자동 추천</span>
+          <span class="case-desc">검색 엔진에서 몇 글자만 입력해도 관련 검색어를 자동으로 추천해 주는 기능.</span>
+        </div>
+      </div>
+
+      <aside class="notes">
+        텍스트 AI의 핵심은 자연어 처리입니다. 챗봇, 번역, 스팸 차단, 자동 추천이 대표 사례입니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 5: 벡터 미리보기
+    ============================================================ -->
+    <section>
+      <h2>핵심 수학: 벡터 (Vector)</h2>
+
+      <div class="key-math">
+        <span class="km-label">텍스트 → 수(數)로 변환</span>
+        <span style="color: rgba(232,244,253,0.4);">|</span>
+        <span class="km-value">벡터 활용</span>
+      </div>
+
+      <p style="font-size: 0.78em; color: rgba(232,244,253,0.75); margin-bottom: 16px;">
+        컴퓨터는 텍스트를 직접 이해하지 못합니다. 텍스트의 각 단어를
+        <span class="hl-cyan">숫자들의 나열(벡터)</span>로 변환하여 처리합니다.
+      </p>
+
+      <div class="math-preview fragment fade-up">
+        <div class="formula">
+          \(\vec{x} = (x_1,\; x_2,\; \ldots,\; x_n)\)
+        </div>
+        <div class="formula-desc">
+          \(n\)개의 수를 순서대로 나열한 것 — 텍스트 데이터를 벡터로 표현
+        </div>
+      </div>
+
+      <div class="card-grid card-grid-3 fragment fade-up" style="margin-top: 16px; gap: 10px;">
+        <div class="card" style="text-align: center; padding: 14px;">
+          <div style="font-size: 0.65em; color: rgba(232,244,253,0.5); margin-bottom: 6px;">단어 "왕"</div>
+          <div style="font-size: 0.72em; color: var(--cyan);">(0.2, 0.8, 0.5, ...)</div>
+        </div>
+        <div class="card" style="text-align: center; padding: 14px;">
+          <div style="font-size: 0.65em; color: rgba(232,244,253,0.5); margin-bottom: 6px;">단어 "여왕"</div>
+          <div style="font-size: 0.72em; color: var(--cyan);">(0.3, 0.9, 0.6, ...)</div>
+        </div>
+        <div class="card" style="text-align: center; padding: 14px;">
+          <div style="font-size: 0.65em; color: rgba(232,244,253,0.5); margin-bottom: 6px;">단어 "사과"</div>
+          <div style="font-size: 0.72em; color: var(--cyan);">(0.9, 0.1, 0.2, ...)</div>
+        </div>
+      </div>
+
+      <p class="fragment fade-up" style="font-size: 0.68em; color: rgba(232,244,253,0.6); margin-top: 10px; text-align: center;">
+        의미가 비슷한 단어는 <span class="hl-cyan">벡터의 방향이 유사</span>합니다.
+      </p>
+
+      <div class="note-box fragment fade-up">
+        자세한 내용은 <strong>2단원 벡터</strong>에서 학습합니다.
+      </div>
+
+      <aside class="notes">
+        벡터는 여러 수를 순서대로 나열한 것입니다. 단어를 벡터로 변환하면 컴퓨터가 단어 사이의 관계를 수학적으로 처리할 수 있습니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 6: 이미지 자료를 인식하는 AI
+    ============================================================ -->
+    <section>
+      <h2>이미지 자료를 인식하는 인공지능</h2>
+
+      <div class="key-math key-math-amber">
+        <span class="km-label">핵심 수학</span>
+        <span style="color: rgba(232,244,253,0.4);">|</span>
+        <span class="km-value">행렬 (Matrix)</span>
+      </div>
+
+      <p style="font-size: 0.72em; color: rgba(232,244,253,0.65); margin-bottom: 18px;">
+        이미지를 구성하는 픽셀(pixel) 값들을 <span class="hl-amber">행과 열로 배열</span>하면 행렬이 됩니다.
+        인공지능은 이 행렬을 분석하여 이미지를 인식합니다.
+      </p>
+
+      <div class="card-grid card-grid-3">
+        <div class="case-card fragment fade-up">
+          <span class="case-icon">👁️</span>
+          <span class="case-title">생체 인식</span>
+          <span class="case-desc">지문·홍채·안면 인식으로 본인 인증. 은행 및 건물 출입 통제에 활용.</span>
+        </div>
+
+        <div class="case-card fragment fade-up">
+          <span class="case-icon">🚗</span>
+          <span class="case-title">자동차 번호판 인식</span>
+          <span class="case-desc">주차 관리, 교통 위반 단속, 톨게이트 요금 징수 등에 자동으로 활용.</span>
+        </div>
+
+        <div class="case-card fragment fade-up">
+          <span class="case-icon">🏥</span>
+          <span class="case-title">의료 영상 판독</span>
+          <span class="case-desc">X-선·MRI 영상에서 질병 의심 부분을 감지하여 의사의 진단을 보조.</span>
+        </div>
+      </div>
+
+      <div class="fragment fade-up" style="margin-top: 16px;">
+        <div class="card" style="display: flex; align-items: center; gap: 16px; padding: 14px 20px;">
+          <span style="font-size: 1.4em;">💡</span>
+          <span style="font-size: 0.7em; color: rgba(232,244,253,0.75);">
+            광학 문자 인식(OCR), 동작 인식 시스템도 이미지 AI의 사례입니다.
+          </span>
+        </div>
+      </div>
+
+      <aside class="notes">
+        이미지 AI의 핵심은 행렬입니다. 생체 인식, 번호판 인식, 의료 영상 판독이 대표 사례입니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 7: 행렬 미리보기
+    ============================================================ -->
+    <section>
+      <h2>핵심 수학: 행렬 (Matrix)</h2>
+
+      <div class="key-math key-math-amber">
+        <span class="km-label">이미지 = 픽셀 값의 배열</span>
+        <span style="color: rgba(232,244,253,0.4);">|</span>
+        <span class="km-value">행렬 활용</span>
+      </div>
+
+      <p style="font-size: 0.78em; color: rgba(232,244,253,0.75); margin-bottom: 16px;">
+        디지털 이미지는 픽셀 값으로 이루어져 있으며, 이 값들을
+        <span class="hl-amber">행(row)과 열(column)로 배열</span>하면 행렬이 됩니다.
+      </p>
+
+      <div class="fragment fade-up" style="text-align: center; margin: 20px 0;">
+        <div style="display: inline-flex; align-items: center; gap: 32px; flex-wrap: wrap; justify-content: center;">
+          <!-- pixel grid visual -->
+          <div>
+            <div style="font-size: 0.6em; color: rgba(232,244,253,0.5); margin-bottom: 10px;">이미지 픽셀</div>
+            <div class="pixel-grid">
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.9); color: #111;">255</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.7); color: #111;">200</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.5); color: #333;">150</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.3); color: #ccc;">80</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.1); color: #aaa;">20</div>
+
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.8); color: #111;">220</div>
+              <div class="pixel-cell" style="background: rgba(0,212,255,0.6); color: #fff;">180</div>
+              <div class="pixel-cell" style="background: rgba(0,212,255,0.4); color: #fff;">130</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.2); color: #ccc;">60</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.05); color: #888;">10</div>
+
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.6); color: #222;">170</div>
+              <div class="pixel-cell" style="background: rgba(0,212,255,0.3); color: #fff;">120</div>
+              <div class="pixel-cell" style="background: rgba(0,212,255,0.5); color: #fff;">160</div>
+              <div class="pixel-cell" style="background: rgba(255,179,71,0.4); color: #fff;">100</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.1); color: #aaa;">30</div>
+
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.4); color: #555;">110</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.2); color: #bbb;">70</div>
+              <div class="pixel-cell" style="background: rgba(255,179,71,0.3); color: #fff;">90</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.15); color: #bbb;">50</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.05); color: #888;">15</div>
+
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.1); color: #aaa;">25</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.08); color: #999;">18</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.06); color: #888;">12</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.04); color: #888;">8</div>
+              <div class="pixel-cell" style="background: rgba(255,255,255,0.02); color: #777;">3</div>
+            </div>
+          </div>
+
+          <div style="font-size: 2em; color: var(--amber);">→</div>
+
+          <!-- matrix representation -->
+          <div>
+            <div style="font-size: 0.6em; color: rgba(232,244,253,0.5); margin-bottom: 10px;">행렬 표현</div>
+            <div style="font-size: 0.7em; color: var(--amber); line-height: 2; font-family: monospace; background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 10px; border: 1px solid rgba(255,179,71,0.3);">
+              \(\begin{pmatrix} 255 & 200 & \cdots \\ 220 & 180 & \cdots \\ \vdots & \vdots & \ddots \end{pmatrix}\)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note-box fragment fade-up">
+        자세한 내용은 <strong>2단원 행렬</strong>에서 학습합니다.
+      </div>
+
+      <aside class="notes">
+        이미지의 각 픽셀 밝기 값을 행렬로 표현하면 컴퓨터가 수학 연산으로 이미지를 처리할 수 있습니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 8: 경향성 분석 AI
+    ============================================================ -->
+    <section>
+      <h2>자료의 경향성 분석과 의사 결정 AI</h2>
+
+      <div class="key-math key-math-green">
+        <span class="km-label">핵심 수학</span>
+        <span style="color: rgba(232,244,253,0.4);">|</span>
+        <span class="km-value">함수 (Function)</span>
+      </div>
+
+      <p style="font-size: 0.72em; color: rgba(232,244,253,0.65); margin-bottom: 18px;">
+        수집된 데이터의 <span class="hl-green">경향성(trend)</span>을 파악하고,
+        이를 바탕으로 <span class="hl-green">합리적인 의사 결정</span>을 내릴 때 <span class="hl-green">함수</span> 개념이 사용됩니다.
+      </p>
+
+      <div class="card-grid card-grid-3">
+        <div class="case-card fragment fade-up">
+          <span class="case-icon">💰</span>
+          <span class="case-title">금융 분야</span>
+          <span class="case-desc">투자 아이디어 제안, 자산 운용, 금융 리스크 관리에 AI가 활용됩니다.</span>
+        </div>
+
+        <div class="case-card fragment fade-up">
+          <span class="case-icon">⚽</span>
+          <span class="case-title">스포츠 분야</span>
+          <span class="case-desc">선수 역량 분석, 경기력 관리, 부상 예방을 위한 데이터 기반 의사 결정.</span>
+        </div>
+
+        <div class="case-card fragment fade-up">
+          <span class="case-icon">🏭</span>
+          <span class="case-title">스마트 팩토리</span>
+          <span class="case-desc">제조 장비와 물류 시스템을 AI로 자율 조절하여 생산 효율을 극대화.</span>
+        </div>
+      </div>
+
+      <div class="fragment fade-up" style="margin-top: 14px;">
+        <div class="card" style="display: flex; align-items: center; gap: 16px; padding: 14px 20px;">
+          <span style="font-size: 1.4em;">📈</span>
+          <span style="font-size: 0.7em; color: rgba(232,244,253,0.75);">
+            입력(데이터)에 따른 출력(결정)의 규칙을 <span class="hl-green">함수</span>로 모델링합니다.
+          </span>
+        </div>
+      </div>
+
+      <aside class="notes">
+        경향성 분석 AI는 데이터의 패턴을 함수로 표현하여 예측과 의사결정을 합니다. 금융, 스포츠, 스마트 팩토리가 대표 사례입니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 9: 함수 미리보기
+    ============================================================ -->
+    <section>
+      <h2>핵심 수학: 함수 (Function)</h2>
+
+      <div class="key-math key-math-green">
+        <span class="km-label">입력 → 출력 규칙</span>
+        <span style="color: rgba(232,244,253,0.4);">|</span>
+        <span class="km-value">AI의 의사결정에 활용</span>
+      </div>
+
+      <p style="font-size: 0.78em; color: rgba(232,244,253,0.75); margin-bottom: 16px;">
+        함수는 <span class="hl-green">입력값</span>에 따라 정해진 규칙으로 <span class="hl-green">출력값</span>을 결정합니다.
+        인공지능이 데이터를 받아 결론을 내리는 과정도 함수로 표현됩니다.
+      </p>
+
+      <div class="math-preview fragment fade-up">
+        <div class="formula">
+          \(y = f(x)\)
+        </div>
+        <div class="formula-desc" style="margin-top: 8px;">
+          입력 데이터 \(x\) → 함수 \(f\) → 결과/예측 \(y\)
+        </div>
+      </div>
+
+      <div class="card-grid card-grid-3 fragment fade-up" style="margin-top: 16px; gap: 10px;">
+        <div class="card" style="text-align: center; padding: 14px;">
+          <div style="font-size: 0.65em; color: rgba(232,244,253,0.5); margin-bottom: 6px;">입력 (x)</div>
+          <div style="font-size: 0.72em; color: var(--green);">경기 통계 데이터</div>
+        </div>
+        <div class="card" style="text-align: center; padding: 14px; display: flex; align-items: center; justify-content: center;">
+          <div style="font-size: 1.6em; color: var(--green);">→ f →</div>
+        </div>
+        <div class="card" style="text-align: center; padding: 14px;">
+          <div style="font-size: 0.65em; color: rgba(232,244,253,0.5); margin-bottom: 6px;">출력 (y)</div>
+          <div style="font-size: 0.72em; color: var(--green);">부상 위험도 예측</div>
+        </div>
+      </div>
+
+      <div class="note-box fragment fade-up">
+        자세한 내용은 이후 단원에서 학습합니다.
+      </div>
+
+      <aside class="notes">
+        함수는 입력과 출력의 규칙입니다. AI가 데이터로부터 예측이나 결정을 내리는 것이 바로 함수의 원리입니다.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 10: 정리 — 수학 개념 매칭
+    ============================================================ -->
+    <section>
+      <h2>정리: 인공지능과 수학 개념</h2>
+
+      <div class="summary-row fragment fade-up">
+        <div class="sr-ai">
+          <span style="font-size: 1.1em; margin-right: 8px;">💬</span>
+          텍스트 자료를 인식하는 인공지능
+          <div style="font-size: 0.7em; font-weight: 400; color: rgba(232,244,253,0.55); margin-top: 4px;">
+            챗봇 · 번역 · 스팸 차단 · 관련어 추천
+          </div>
+        </div>
+        <div class="sr-arrow">→</div>
+        <div class="sr-math sr-m1">벡터</div>
+      </div>
+
+      <div class="summary-row fragment fade-up">
+        <div class="sr-ai">
+          <span style="font-size: 1.1em; margin-right: 8px;">🖼️</span>
+          이미지 자료를 인식하는 인공지능
+          <div style="font-size: 0.7em; font-weight: 400; color: rgba(232,244,253,0.55); margin-top: 4px;">
+            생체 인식 · 번호판 인식 · 의료 영상 판독
+          </div>
+        </div>
+        <div class="sr-arrow">→</div>
+        <div class="sr-math sr-m2">행렬</div>
+      </div>
+
+      <div class="summary-row fragment fade-up">
+        <div class="sr-ai">
+          <span style="font-size: 1.1em; margin-right: 8px;">📊</span>
+          경향성 분석과 의사 결정을 하는 인공지능
+          <div style="font-size: 0.7em; font-weight: 400; color: rgba(232,244,253,0.55); margin-top: 4px;">
+            금융 · 스포츠 · 스마트 팩토리
+          </div>
+        </div>
+        <div class="sr-arrow">→</div>
+        <div class="sr-math sr-m3">함수</div>
+      </div>
+
+      <div class="fragment fade-up" style="margin-top: 20px; text-align: center;">
+        <div style="display: inline-flex; gap: 16px; flex-wrap: wrap; justify-content: center; font-size: 0.7em;">
+          <span style="background: rgba(0,212,255,0.12); border: 1px solid rgba(0,212,255,0.35); color: var(--cyan); padding: 6px 20px; border-radius: 20px; font-weight: 700;">텍스트 → 벡터</span>
+          <span style="background: rgba(255,179,71,0.12); border: 1px solid rgba(255,179,71,0.35); color: var(--amber); padding: 6px 20px; border-radius: 20px; font-weight: 700;">이미지 → 행렬</span>
+          <span style="background: rgba(57,217,138,0.12); border: 1px solid rgba(57,217,138,0.35); color: var(--green); padding: 6px 20px; border-radius: 20px; font-weight: 700;">경향성 → 함수</span>
+        </div>
+      </div>
+
+      <aside class="notes">
+        핵심 정리입니다. 텍스트-벡터, 이미지-행렬, 경향성-함수 이 세 쌍을 반드시 기억하세요.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 11: 개념 정리하기 (빈칸 채우기)
+    ============================================================ -->
+    <section>
+      <h2>개념 정리하기</h2>
+
+      <p style="font-size: 0.72em; color: rgba(232,244,253,0.6); margin-bottom: 18px;">
+        빈칸에 알맞은 수학 개념을 넣어 문장을 완성해 보세요.
+      </p>
+
+      <div class="blank-row fragment" data-fragment-index="0">
+        <div style="font-size: 0.78em; margin-bottom: 10px; color: rgba(232,244,253,0.65);">① 텍스트 자료</div>
+        우리가 일상생활에서 사용하는 언어인 자연어를 인공지능이 텍스트 자료로 인식하여 처리할 때,
+        <span id="blank1" class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        라는 수학 개념이 이용된다.
+        <div class="fragment" data-fragment-index="1" style="margin-top: 8px;">
+          ➜ 정답: <span class="answer">벡터</span>
+        </div>
+      </div>
+
+      <div class="blank-row fragment" data-fragment-index="2">
+        <div style="font-size: 0.78em; margin-bottom: 10px; color: rgba(232,244,253,0.65);">② 이미지 자료</div>
+        인공지능이 이미지 자료를 인식하고 처리할 때,
+        <span id="blank2" class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        이라는 수학 개념이 이용된다.
+        <div class="fragment" data-fragment-index="3" style="margin-top: 8px;">
+          ➜ 정답: <span class="answer">행렬</span>
+        </div>
+      </div>
+
+      <div class="blank-row fragment" data-fragment-index="4">
+        <div style="font-size: 0.78em; margin-bottom: 10px; color: rgba(232,244,253,0.65);">③ 경향성 분석 &amp; 의사 결정</div>
+        인공지능이 자료의 경향성을 나타내고 합리적인 의사 결정을 할 때,
+        <span id="blank3" class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        의 개념이 이용된다.
+        <div class="fragment" data-fragment-index="5" style="margin-top: 8px;">
+          ➜ 정답: <span class="answer">함수</span>
+        </div>
+      </div>
+
+      <aside class="notes">
+        빈칸 채우기입니다. 정답을 누르기 전에 학생들이 먼저 생각하도록 시간을 주세요.
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 12: 대단원 마무리 문제
+    ============================================================ -->
+    <section>
+      <h2>대단원 마무리 문제</h2>
+
+      <!-- 문제 5 -->
+      <div class="problem-card fragment fade-up">
+        <span class="problem-num">문제 5</span>
+        <div class="problem-text">
+          다음 기사는 <strong>자연어 처리(NLP)</strong>를 이용해 사용자의 심리 상태를 파악한 뒤 대답해 주는
+          인공지능 기술을 소개하고 있다. 이 기사와 관련된 인공지능의 사례는 무엇인가?
+        </div>
+        <div class="problem-options">
+          <span class="opt">① 챗봇</span>
+          <span class="opt">② 자동차 번호판 인식</span>
+          <span class="opt">③ 의료 영상 판독</span>
+          <span class="opt">④ 스마트 팩토리</span>
+        </div>
+        <div class="fragment" data-fragment-index="1">
+          <div class="answer-label">
+            <span style="color: rgba(232,244,253,0.6);">정답</span>
+            <span class="answer-badge">① 챗봇</span>
+            <span style="font-size: 0.7em; color: rgba(232,244,253,0.55);">— 자연어 처리(NLP) 기술 이용, 텍스트 자료 인식 AI</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 문제 6 -->
+      <div class="problem-card fragment fade-up">
+        <span class="problem-num">문제 6</span>
+        <div class="problem-text">
+          다음 중 <strong>이미지 자료를 인식하는 인공지능</strong>의 사례가 <u>아닌</u> 것은?
+        </div>
+        <div class="problem-options">
+          <span class="opt">① 의료 영상 판독</span>
+          <span class="opt">② 광학 문자 인식(OCR)</span>
+          <span class="opt">③ 문학 표절 검사</span>
+          <span class="opt">④ 자동차 번호판 인식</span>
+          <span class="opt">⑤ 동작 인식 시스템</span>
+        </div>
+        <div class="fragment" data-fragment-index="2">
+          <div class="answer-label">
+            <span style="color: rgba(232,244,253,0.6);">정답</span>
+            <span class="answer-badge">③ 문학 표절 검사</span>
+            <span style="font-size: 0.7em; color: rgba(232,244,253,0.55);">— 텍스트 자료를 인식하는 AI의 사례</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 문제 7 -->
+      <div class="problem-card fragment fade-up">
+        <span class="problem-num">문제 7</span>
+        <div class="problem-text">
+          다음 수학 개념과 이것이 활용된 인공지능을 알맞게 연결하시오.
+        </div>
+        <div class="fragment" data-fragment-index="3" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+          <span style="background: rgba(0,212,255,0.12); border: 1px solid rgba(0,212,255,0.3); color: var(--cyan); font-size: 0.68em; padding: 5px 14px; border-radius: 8px;">
+            (1) 함수 → 경향성 분석 &amp; 의사 결정 AI
+          </span>
+          <span style="background: rgba(255,179,71,0.12); border: 1px solid rgba(255,179,71,0.3); color: var(--amber); font-size: 0.68em; padding: 5px 14px; border-radius: 8px;">
+            (2) 벡터 → 텍스트 자료를 인식하는 AI
+          </span>
+          <span style="background: rgba(57,217,138,0.12); border: 1px solid rgba(57,217,138,0.3); color: var(--green); font-size: 0.68em; padding: 5px 14px; border-radius: 8px;">
+            (3) 행렬 → 이미지 자료를 인식하는 AI
+          </span>
+        </div>
+      </div>
+
+      <aside class="notes">
+        마무리 문제입니다. 문제 6의 핵심은 "문학 표절 검사"가 텍스트(벡터) AI임을 구별하는 것입니다.
+      </aside>
+    </section>
+
+  </div><!-- /.slides -->
+</div><!-- /.reveal -->
+
+<!-- Reveal.js -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+
+<script>
+  // MathJax configuration
+  window.MathJax = {
+    tex: {
+      inlineMath: [['\\(', '\\)']],
+      displayMath: [['\\[', '\\]']],
+      packages: { '[+]': ['ams'] }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+
+  // Initialize Reveal.js
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    progress: true,
+    controls: true,
+    controlsTutorial: false,
+    transition: 'slide',
+    backgroundTransition: 'fade',
+    center: true,
+    touch: true,
+    autoAnimateDuration: 0.6,
+    autoAnimateEasing: 'ease-out',
+    plugins: [RevealNotes],
+    width: 1280,
+    height: 720,
+    margin: 0.06,
+    minScale: 0.5,
+    maxScale: 2.0
+  });
+
+  window.safeTypeset = window.safeTypeset || function(elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+  };
+  // Re-run MathJax on slide change
+  Reveal.on('slidechanged', () => {
+    window.safeTypeset();
+  });
+
+  // GSAP entrance animations for the overview cards
+  Reveal.on('fragmentshown', function (event) {
+    const el = event.fragment;
+    if (el && el.classList.contains('overview-card')) {
+      gsap.fromTo(el,
+        { y: 20, opacity: 0, scale: 0.95 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.45, ease: 'power2.out' }
+      );
+    }
+  });
+
+  // Keyboard shortcut: press 'f' to toggle fullscreen
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>모범답안 – 텍스트 벡터화 연습</title>
+  <style>
+    @page { size: A4; margin: 18mm 18mm 16mm 18mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+      font-size: 10.5pt;
+      color: #1a1a1a;
+      background: #fff;
+      padding: 10px;
+      line-height: 1.6;
+    }
+
+    .header {
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #1a1a1a;
+      margin-bottom: 10px;
+    }
+    .header .tag {
+      font-size: 8.5pt;
+      color: #888;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    .header h1 { font-size: 15pt; font-weight: bold; letter-spacing: 0.04em; }
+    .header h2 { font-size: 10.5pt; font-weight: normal; color: #555; margin-top: 2px; }
+    .header .ans-badge {
+      display: inline-block;
+      margin-top: 5px;
+      background: #2a6ecc;
+      color: #fff;
+      font-size: 9pt;
+      padding: 2px 10px;
+      border-radius: 2px;
+      letter-spacing: 0.05em;
+    }
+
+    hr.section { border: none; border-top: 1px solid #ddd; margin: 9px 0; }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0 5px 0;
+    }
+    .step-badge {
+      font-size: 8pt;
+      font-weight: bold;
+      color: #fff;
+      background: #444;
+      padding: 1px 7px;
+      border-radius: 2px;
+      letter-spacing: 0.05em;
+    }
+    .step-title { font-size: 10.5pt; font-weight: bold; }
+
+    .note {
+      background: #f7f7f7;
+      border-left: 3px solid #bbb;
+      padding: 5px 10px;
+      margin-bottom: 6px;
+      font-size: 9.5pt;
+      color: #444;
+      line-height: 1.6;
+    }
+    .note strong { color: #1a1a1a; }
+
+    .context-box {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      line-height: 1.8;
+    }
+    .context-box .reviews { padding-left: 4px; margin-top: 4px; }
+    .context-box .reviews li { list-style: none; padding: 1px 0; }
+    .context-box .reviews li span.label {
+      display: inline-block; width: 44px;
+      font-weight: bold; color: #444;
+    }
+
+    .dict-area {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      line-height: 2.0;
+      font-size: 10pt;
+    }
+    .dict-area .row { margin-bottom: 2px; }
+    .dict-area .hint { font-size: 9pt; color: #999; margin-left: 4px; }
+
+    /* 정답 강조 */
+    .ans {
+      color: #2a6ecc;
+      font-weight: bold;
+    }
+    .ans-line {
+      display: inline-block;
+      border-bottom: 2px solid #2a6ecc;
+      color: #2a6ecc;
+      font-weight: bold;
+      min-width: 60px;
+      text-align: center;
+      padding: 0 4px;
+      height: 16px;
+      vertical-align: bottom;
+    }
+
+    table.t {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10pt;
+      text-align: center;
+      margin: 6px 0;
+    }
+    table.t th {
+      background: #444;
+      color: #fff;
+      padding: 4px 5px;
+      border: 1px solid #444;
+      font-weight: normal;
+    }
+    table.t td {
+      border: 1px solid #ccc;
+      padding: 5px 4px;
+      min-width: 28px;
+    }
+    table.t td.lbl { background: #f5f5f5; font-weight: bold; color: #333; }
+    table.t td.given { background: #f5f5f5; color: #333; }
+    table.t td.blank { background: #fff; }
+    /* 정답 셀 */
+    table.t td.answer {
+      background: #eef4ff;
+      color: #2a6ecc;
+      font-weight: bold;
+    }
+    table.t td.result-ans {
+      background: #e6f0ff;
+      color: #1a55bb;
+      font-weight: bold;
+    }
+    table.t td.sub { font-size: 8.5pt; color: #999; background: #fafafa; }
+
+    .q-block { margin: 6px 0; }
+    .q-title { font-weight: bold; margin-bottom: 4px; font-size: 10pt; }
+    .ans-box {
+      border: 1px solid #b0c8f0;
+      background: #f5f9ff;
+      min-height: 52px;
+      padding: 7px 10px;
+      font-size: 10pt;
+      line-height: 1.8;
+      color: #1a3a6e;
+    }
+
+    .check-list {
+      border: 1px solid #ddd;
+      padding: 7px 12px;
+      margin-top: 9px;
+      font-size: 9.5pt;
+      color: #555;
+    }
+    .check-list .title { font-weight: bold; color: #1a1a1a; margin-bottom: 4px; }
+    .check-list label { display: block; margin: 2px 0; }
+
+    .footer {
+      margin-top: 10px;
+      text-align: right;
+      font-size: 8.5pt;
+      color: #bbb;
+    }
+
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="tag">Practice Worksheet · 인공지능 수학</div>
+    <h1>텍스트 벡터화 연습</h1>
+    <h2>TF · IDF · TF-IDF</h2>
+    <div class="ans-badge">★ 모범 답안 ★</div>
+  </div>
+
+  <!-- 문제 상황 -->
+  <div class="step-header">
+    <span class="step-badge">상황</span>
+    <span class="step-title">영화 후기 3개를 수학적으로 분석해 봅시다.</span>
+  </div>
+
+  <div class="context-box">
+    아래 영화 후기에서 각 단어의 중요도를 TF-IDF로 계산하시오.
+    <ul class="reviews">
+      <li><span class="label">후기 A :</span> 재미있는 영화. 영화 스토리가 정말 재미있고 좋아요.</li>
+      <li><span class="label">후기 B :</span> 연기가 좋아요. 음악도 좋습니다.</li>
+      <li><span class="label">후기 C :</span> 영화와 연기 모두 좋은 작품.</li>
+    </ul>
+  </div>
+
+  <hr class="section">
+
+  <!-- STEP 1 -->
+  <div class="step-header">
+    <span class="step-badge">STEP 1</span>
+    <span class="step-title">불용어 제거 + 단어 사전 U 만들기</span>
+  </div>
+
+  <div class="note">
+    <strong>불용어 제거:</strong> 조사(가, 도, 와), 어미(요, 습니다, 는, 은, 이) 등 제거<br>
+    <strong>기본형 변환:</strong> 재미있는·재미있고·재미있어요 → 재미있다 &nbsp;/&nbsp; 좋아요·좋습니다·좋은 → 좋다
+  </div>
+
+  <div class="dict-area">
+    <div class="row">
+      후기 A 처리 결과 <span class="hint">(예시)</span> : { 재미있다, 영화, 스토리, 좋다 }
+    </div>
+    <div class="row">
+      후기 B 처리 결과 : {&nbsp;
+      <span class="ans">연기, 좋다, 음악</span>
+      &nbsp;}
+    </div>
+    <div class="row">
+      후기 C 처리 결과 : {&nbsp;
+      <span class="ans">영화, 연기, 좋다, 작품</span>
+      &nbsp;}
+    </div>
+    <hr style="border:none; border-top:1px solid #e0e0e0; margin:6px 0;">
+    <div class="row">
+      <strong>단어 사전 U</strong> = {&nbsp;
+      <span class="ans">영화, 재미있다, 스토리, 연기, 좋다, 음악, 작품</span>
+      &nbsp;}
+      &nbsp;&nbsp;<span style="font-size:9pt; color:#2a6ecc; font-weight:bold;">(총 7개, n = 3)</span>
+    </div>
+  </div>
+
+  <hr class="section">
+
+  <!-- STEP 2 -->
+  <div class="step-header">
+    <span class="step-badge">STEP 2</span>
+    <span class="step-title">TF 표 작성 &nbsp;<span style="font-weight:normal; font-size:9.5pt; color:#777;">(각 후기에서 단어가 등장한 횟수)</span></span>
+  </div>
+
+  <table class="t">
+    <thead>
+      <tr>
+        <th style="width:13%">후기</th>
+        <th>영화</th>
+        <th>재미있다</th>
+        <th>스토리</th>
+        <th>연기</th>
+        <th>좋다</th>
+        <th>음악</th>
+        <th>작품</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="lbl">A</td>
+        <td class="given">2</td>
+        <td class="given">2</td>
+        <td class="given">1</td>
+        <td class="answer">0</td>
+        <td class="answer">1</td>
+        <td class="answer">0</td>
+        <td class="answer">0</td>
+      </tr>
+      <tr>
+        <td class="lbl">B</td>
+        <td class="answer">0</td>
+        <td class="answer">0</td>
+        <td class="answer">0</td>
+        <td class="answer">1</td>
+        <td class="answer">2</td>
+        <td class="answer">1</td>
+        <td class="answer">0</td>
+      </tr>
+      <tr>
+        <td class="lbl">C</td>
+        <td class="answer">1</td>
+        <td class="answer">0</td>
+        <td class="answer">0</td>
+        <td class="answer">1</td>
+        <td class="answer">1</td>
+        <td class="answer">0</td>
+        <td class="answer">1</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="section">
+
+  <!-- STEP 3 -->
+  <div class="step-header">
+    <span class="step-badge">STEP 3</span>
+    <span class="step-title">DF와 IDF 계산 &nbsp;<span style="font-weight:normal; font-size:9.5pt; color:#777;">(IDF = n ÷ DF, &nbsp;n = 3)</span></span>
+  </div>
+
+  <div class="note">
+    <strong>DF</strong> : 해당 단어가 등장하는 후기의 수 &nbsp;|&nbsp;
+    <strong>IDF</strong> : 전체 후기 수 ÷ DF — 희귀한 단어일수록 IDF가 큽니다.
+  </div>
+
+  <table class="t">
+    <thead>
+      <tr>
+        <th style="width:13%">단어</th>
+        <th>영화</th>
+        <th>재미있다</th>
+        <th>스토리</th>
+        <th>연기</th>
+        <th>좋다</th>
+        <th>음악</th>
+        <th>작품</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="lbl">DF</td>
+        <td class="answer">2</td>
+        <td class="answer">1</td>
+        <td class="answer">1</td>
+        <td class="answer">2</td>
+        <td class="answer">3</td>
+        <td class="answer">1</td>
+        <td class="answer">1</td>
+      </tr>
+      <tr>
+        <td class="lbl">IDF<br><span style="font-size:8pt; font-weight:normal;">(3÷DF)</span></td>
+        <td class="answer">1.5</td>
+        <td class="answer">3</td>
+        <td class="answer">3</td>
+        <td class="answer">1.5</td>
+        <td class="answer">1</td>
+        <td class="answer">3</td>
+        <td class="answer">3</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin: 5px 0 0 2px; font-size:9.5pt; color:#555;">
+    ✎ &nbsp;"좋다"의 IDF = <span class="ans-line">1</span> &nbsp;&nbsp;
+    "재미있다"의 IDF = <span class="ans-line">3</span> &nbsp;&nbsp;
+    더 희귀한(특정 후기만의) 단어는? &nbsp;<span class="ans-line">재미있다</span>
+  </div>
+
+  <hr class="section">
+
+  <!-- STEP 4 -->
+  <div class="step-header">
+    <span class="step-badge">STEP 4</span>
+    <span class="step-title">TF·IDF 계산 (후기 A) &nbsp;<span style="font-weight:normal; font-size:9.5pt; color:#777;">(= TF × IDF)</span></span>
+  </div>
+
+  <table class="t">
+    <thead>
+      <tr>
+        <th style="width:13%">단어</th>
+        <th>영화</th>
+        <th>재미있다</th>
+        <th>스토리</th>
+        <th>연기</th>
+        <th>좋다</th>
+        <th>음악</th>
+        <th>작품</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="lbl">TF(A)</td>
+        <td class="given">2</td>
+        <td class="given">2</td>
+        <td class="given">1</td>
+        <td class="given">0</td>
+        <td class="given">1</td>
+        <td class="given">0</td>
+        <td class="given">0</td>
+      </tr>
+      <tr>
+        <td class="lbl">IDF</td>
+        <td class="answer">1.5</td>
+        <td class="answer">3</td>
+        <td class="answer">3</td>
+        <td class="answer">1.5</td>
+        <td class="answer">1</td>
+        <td class="answer">3</td>
+        <td class="answer">3</td>
+      </tr>
+      <tr>
+        <td class="lbl">TF·IDF</td>
+        <td class="result-ans">3</td>
+        <td class="result-ans">6</td>
+        <td class="result-ans">3</td>
+        <td class="result-ans">0</td>
+        <td class="result-ans">1</td>
+        <td class="result-ans">0</td>
+        <td class="result-ans">0</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin: 5px 0 0 2px; font-size:10pt;">
+    ✎ &nbsp;후기 A의 <strong>핵심어</strong>(TF·IDF 최대) : <span class="ans-line" style="min-width:80px;">재미있다</span>
+    &nbsp;→ 후기 A의 주제는 "<span class="ans-line" style="min-width:80px;">재미있는 스토리</span>"이다.
+  </div>
+
+  <hr class="section">
+
+  <!-- STEP 5 -->
+  <div class="step-header">
+    <span class="step-badge">STEP 5</span>
+    <span class="step-title">생각 정리</span>
+  </div>
+
+  <div class="q-block">
+    <div class="q-title">Q1. "좋다"는 세 후기 모두에 등장한다. TF·IDF 관점에서 "좋다"가 특정 후기의 핵심어가 되기 어려운 이유를 설명하시오.</div>
+    <div class="ans-box">
+      "좋다"는 세 후기 모두에 등장하므로 DF = 3, IDF = 3÷3 = 1이다.
+      IDF가 1로 가장 낮기 때문에, 후기 A에서 TF가 1이더라도 TF·IDF = 1×1 = 1에 불과하다.
+      즉, 여러 후기에 공통으로 나타나는 단어는 IDF가 낮아져 TF·IDF 값도 작아지므로,
+      특정 후기만의 고유한 핵심어로 선택되기 어렵다.
+    </div>
+  </div>
+
+  <div class="q-block" style="margin-top:7px;">
+    <div class="q-title">Q2. TF만 사용했을 때의 한계는 무엇이고, TF·IDF가 이를 어떻게 보완하는가?</div>
+    <div class="ans-box">
+      TF만 사용하면 "좋다"처럼 모든 후기에 자주 등장하는 단어도 높은 중요도를 가지게 된다.
+      이 단어는 특정 후기의 핵심 내용을 나타내지 않으므로 분석의 정확도가 떨어진다.<br>
+      TF·IDF는 여기에 IDF를 곱함으로써, 많은 후기에 공통으로 나오는 단어(DF가 큰 단어)의
+      가중치를 자동으로 낮추고, 특정 후기에만 등장하는 희귀한 단어(DF가 작은 단어)에
+      더 높은 중요도를 부여한다. 이를 통해 각 후기의 고유한 내용을 더 잘 반영할 수 있다.
+    </div>
+  </div>
+
+  <hr class="section">
+
+  <div class="check-list">
+    <div class="title">확인 체크리스트</div>
+    <label><input type="checkbox" checked> 불용어를 제거하고 기본형으로 변환할 수 있다.</label>
+    <label><input type="checkbox" checked> 단어 사전 U를 만들고 TF 표를 완성할 수 있다.</label>
+    <label><input type="checkbox" checked> DF와 IDF를 계산할 수 있다.</label>
+    <label><input type="checkbox" checked> TF·IDF로 후기의 핵심어를 찾을 수 있다.</label>
+  </div>
+
+  <div class="footer">인공지능 수학 · 텍스트 벡터화 연습 학습지 — 모범 답안</div>
+
+</body>
+</html>

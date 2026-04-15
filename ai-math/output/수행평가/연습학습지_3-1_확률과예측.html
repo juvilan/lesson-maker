@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>연습학습지 3-1 – 확률과 예측</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size: 10.5pt; color: #1a1a1a; background: #fff; }
+    .ws-page { width: 210mm; min-height: 297mm; padding: 14mm 15mm 12mm 15mm; margin: 0 auto; background: #fff; }
+    .ws-header { border-bottom: 2.5px solid #1a1a1a; padding-bottom: 8px; margin-bottom: 10px; }
+    .ws-header-top { display: flex; justify-content: space-between; align-items: flex-end; }
+    .ws-header h1 { font-size: 14pt; font-weight: 700; }
+    .ws-header h2 { font-size: 10pt; font-weight: 400; color: #555; margin-top: 2px; }
+    .student-info { display: flex; gap: 6px; justify-content: flex-end; align-items: baseline; margin-bottom: 10px; font-size: 10pt; color: #444; }
+    .student-field { display: flex; align-items: baseline; gap: 4px; }
+    .field-line { border-bottom: 1px solid #888; min-width: 72px; height: 16px; display: inline-block; }
+    .info-sep { color: #ccc; }
+    hr.section { border: none; border-top: 1px solid #ddd; margin: 8px 0; }
+    .step-header { display: flex; align-items: center; gap: 8px; margin: 10px 0 5px 0; }
+    .step-badge { font-size: 8pt; font-weight: 700; color: #fff; background: #444; padding: 1px 7px; border-radius: 2px; letter-spacing: 0.05em; }
+    .step-title { font-size: 10.5pt; font-weight: 700; }
+    .context-box { border: 1px solid #ccc; padding: 7px 11px; margin-bottom: 7px; background: #fafafa; line-height: 1.75; font-size: 10pt; }
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 5px 0; text-align: center; }
+    table.data-table th { background: #444; color: #fff; padding: 5px 6px; border: 1px solid #555; font-weight: 600; }
+    table.data-table td { border: 1px solid #ccc; padding: 5px 6px; vertical-align: middle; }
+    table.data-table td.row-label { background: #f0f0f0; font-weight: 600; }
+    table.data-table td.blank { background: #fff; min-width: 40px; }
+    table.data-table td.result { background: #f0f0f0; font-weight: 700; }
+    .inline-q { margin: 6px 0; font-size: 10pt; line-height: 1.9; }
+    .fill-line { display: inline-block; border-bottom: 1px solid #aaa; height: 16px; }
+    .fill-line.sm { min-width: 60px; }
+    .fill-line.md { min-width: 130px; }
+    .fill-line.lg { min-width: 220px; }
+    .q-block { margin: 8px 0; }
+    .q-title { font-weight: 700; margin-bottom: 5px; line-height: 1.6; font-size: 10pt; }
+    .write-lines { border: 1px solid #ccc; padding: 6px 8px; min-height: 60px; background: #fff; background-image: repeating-linear-gradient(transparent, transparent 26px, #e8e8e8 26px, #e8e8e8 27px); line-height: 1.95; }
+    .write-lines.lg { min-height: 80px; }
+    .hint { font-size: 8.5pt; color: #888; margin: 2px 0; }
+    .footer { text-align: right; font-size: 8.5pt; color: #bbb; margin-top: 10px; }
+    @media print { .ws-page { padding: 14mm 15mm 12mm 15mm; } .ws-page + .ws-page { page-break-before: always; break-before: page; } }
+  </style>
+</head>
+<body>
+
+<!-- ════ PAGE 1 ════ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <div>
+        <h1>인공지능 수학 &nbsp; 연습학습지 3-1</h1>
+        <h2>— 확률과 예측 (자료의 분석과 예측) —</h2>
+      </div>
+      <div style="font-size:9pt; color:#666; text-align:right; line-height:1.6;">
+        수행평가 3 준비<br>Part B 연습
+      </div>
+    </div>
+  </div>
+
+  <div class="student-info">
+    <div class="student-field">학번 <span class="field-line"></span></div>
+    <span class="info-sep">|</span>
+    <div class="student-field">이름 <span class="field-line"></span></div>
+  </div>
+
+  <!-- 문제 상황 -->
+  <div class="step-header">
+    <span class="step-badge">상황</span>
+    <span class="step-title">문제 상황</span>
+  </div>
+  <div class="context-box">
+    어느 학교 학생 <strong>100명</strong>을 대상으로 좋아하는 운동 종목을 조사하였습니다.<br>
+    아래 표를 이용하여 단계별로 확률과 예측 문제를 풀어 보시오.
+    <table class="data-table" style="margin-top:8px;">
+      <thead>
+        <tr><th></th><th>축구</th><th>농구</th><th>배드민턴</th><th>합계</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="row-label">남학생</td><td>28</td><td>12</td><td>10</td><td>50</td></tr>
+        <tr><td class="row-label">여학생</td><td>10</td><td>15</td><td>25</td><td>50</td></tr>
+        <tr><td class="row-label result">합계</td><td class="result">38</td><td class="result">27</td><td class="result">35</td><td class="result">100</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="section">
+
+  <!-- STEP 1 -->
+  <div class="step-header">
+    <span class="step-badge">STEP 1</span>
+    <span class="step-title">전체 확률로 예측하기</span>
+  </div>
+  <div class="hint">전체 100명을 기준으로 각 종목을 좋아할 확률을 구하시오.</div>
+
+  <div class="inline-q">
+    P(축구) = <span class="fill-line sm"></span> / 100 &nbsp;&nbsp;
+    P(농구) = <span class="fill-line sm"></span> / 100 &nbsp;&nbsp;
+    P(배드민턴) = <span class="fill-line sm"></span> / 100
+  </div>
+
+  <div class="q-block">
+    <div class="q-title">① 새로운 학생이 어느 종목을 좋아할지 확률을 근거로 예측하고, 이유를 쓰시오.</div>
+    <div class="write-lines"></div>
+  </div>
+
+  <hr class="section">
+
+  <!-- STEP 2 -->
+  <div class="step-header">
+    <span class="step-badge">STEP 2</span>
+    <span class="step-title">조건부 확률로 예측하기</span>
+  </div>
+  <div class="hint">새 학생이 여학생이라는 조건이 주어졌을 때.</div>
+
+  <div class="inline-q">
+    P(축구|여) = <span class="fill-line sm"></span> / 50 &nbsp;&nbsp;
+    P(농구|여) = <span class="fill-line sm"></span> / 50 &nbsp;&nbsp;
+    P(배드민턴|여) = <span class="fill-line sm"></span> / 50
+  </div>
+
+  <div class="q-block">
+    <div class="q-title">② 여학생이라는 조건에서 예측 결과가 STEP 1과 같은가, 다른가? 확률 값을 비교하여 설명하시오.</div>
+    <div class="write-lines"></div>
+  </div>
+
+  <hr class="section">
+
+  <!-- STEP 3 -->
+  <div class="step-header">
+    <span class="step-badge">STEP 3</span>
+    <span class="step-title">조건부 확률 계산 연습</span>
+  </div>
+  <div class="hint">남학생이라는 조건이 주어졌을 때 각 종목의 확률을 구하시오.</div>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>조건</th><th>P(축구 | 남)</th><th>P(농구 | 남)</th><th>P(배드민턴 | 남)</th><th>예측 종목</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="row-label">남학생</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+    </tbody>
+  </table>
+
+  <div class="footer">인공지능 수학 | 연습학습지 3-1 – 확률과 예측 &nbsp;|&nbsp; 1 / 2</div>
+</div>
+
+<!-- ════ PAGE 2 ════ -->
+<div class="ws-page" style="page-break-before:always; break-before:page;">
+  <div style="border-bottom:1.5px solid #888; padding-bottom:6px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+    <strong style="font-size:10.5pt;">인공지능 수학 | 연습학습지 3-1 – 확률과 예측</strong>
+    <div style="font-size:10pt; color:#444;">학번 <span style="display:inline-block; border-bottom:1px solid #888; min-width:60px; height:14px;"></span> &nbsp; 이름 <span style="display:inline-block; border-bottom:1px solid #888; min-width:60px; height:14px;"></span></div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-header">
+    <span class="step-badge">STEP 4</span>
+    <span class="step-title">예측의 한계 이해하기 (서술)</span>
+  </div>
+
+  <div class="q-block">
+    <div class="q-title">③ 위의 확률 예측이 실제 결과와 다를 수 있는 이유를 두 가지 이상 서술하시오.</div>
+    <div class="hint">힌트: 표본의 크기, 개인의 특성, 반영되지 않은 조건 등을 생각해 보세요.</div>
+    <div class="write-lines lg"></div>
+  </div>
+
+  <hr class="section">
+
+  <!-- STEP 5 -->
+  <div class="step-header">
+    <span class="step-badge">STEP 5</span>
+    <span class="step-title">새 상황에 적용하기</span>
+  </div>
+  <div class="context-box">
+    같은 학교에서 <strong>3학년</strong> 학생만 따로 조사하였더니 아래와 같았습니다.
+    <table class="data-table" style="margin-top:8px;">
+      <thead>
+        <tr><th></th><th>축구</th><th>농구</th><th>배드민턴</th><th>합계</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="row-label">남</td><td>10</td><td>4</td><td>6</td><td>20</td></tr>
+        <tr><td class="row-label">여</td><td>4</td><td>5</td><td>11</td><td>20</td></tr>
+        <tr><td class="row-label result">합계</td><td class="result">14</td><td class="result">9</td><td class="result">17</td><td class="result">40</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="q-block" style="margin-top:8px;">
+    <div class="q-title">④ 3학년이라는 조건에서 어떤 운동 종목을 좋아할지 예측하고, 3학년 여학생이라는 조건에서는 어떤 종목을 예측하는지 구하시오.</div>
+    <div class="inline-q">
+      P(축구|3학년) = <span class="fill-line sm"></span>/40 &nbsp;
+      P(농구|3학년) = <span class="fill-line sm"></span>/40 &nbsp;
+      P(배드민턴|3학년) = <span class="fill-line sm"></span>/40
+    </div>
+    <div class="inline-q">
+      → 3학년 조건 예측: <span class="fill-line md"></span>
+    </div>
+    <div class="inline-q" style="margin-top:6px;">
+      P(축구|3학년 여) = <span class="fill-line sm"></span>/20 &nbsp;
+      P(농구|3학년 여) = <span class="fill-line sm"></span>/20 &nbsp;
+      P(배드민턴|3학년 여) = <span class="fill-line sm"></span>/20
+    </div>
+    <div class="inline-q">
+      → 3학년 여학생 조건 예측: <span class="fill-line md"></span>
+    </div>
+  </div>
+
+  <hr class="section">
+
+  <div class="q-block">
+    <div class="q-title">⑤ 전체(100명) 예측과 3학년(40명) 예측 결과를 비교하고, 조건이 추가될수록 예측이 어떻게 달라지는지 설명하시오.</div>
+    <div class="write-lines lg"></div>
+  </div>
+
+  <div style="margin-top:10px; border:1px solid #ddd; padding:7px 10px; background:#f9f9f9; font-size:9pt; color:#555; line-height:1.7;">
+    <strong>핵심 정리:</strong> 확률이 높은 사건을 예측 → 조건이 추가될수록 특정 집단에 맞는 예측 가능 → 하지만 표본 수·개인차로 인해 오차 발생
+  </div>
+
+  <div class="footer">인공지능 수학 | 연습학습지 3-1 – 확률과 예측 &nbsp;|&nbsp; 2 / 2</div>
+</div>
+
+</body>
+</html>

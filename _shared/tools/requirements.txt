@@ -1,0 +1,15 @@
+# lesson-maker 도구 의존성
+# 설치: pip install -r requirements.txt
+
+# PDF 직접 생성 (pdf_renderer.py)
+fpdf2>=2.7.0
+
+# 수식 이미지 렌더링 (pdf_renderer.py — matplotlib fallback)
+matplotlib>=3.7.0
+
+# HTML → PDF 변환 (html_to_pdf.py)
+playwright>=1.40.0
+
+# 테스트
+pytest>=7.4.0
+pytest-asyncio>=0.23.0

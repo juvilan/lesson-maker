@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>수행평가 3 채점기준표</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 10.5pt;
+      color: #1a1a1a;
+      background: #fff;
+    }
+    .ws-page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 16mm 16mm 14mm 16mm;
+      margin: 0 auto;
+      background: #fff;
+    }
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .ws-header h1 { font-size: 15pt; font-weight: 700; letter-spacing: 0.04em; }
+    .ws-header h2 { font-size: 10pt; font-weight: 400; color: #666; margin-top: 3px; }
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9.5pt;
+      color: #666;
+      margin-bottom: 16px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #ddd;
+    }
+    .section { margin-bottom: 20px; }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .section-title { font-size: 12pt; font-weight: 700; }
+    .section-score { font-size: 10pt; color: #555; font-weight: 400; }
+    table.rubric {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10pt;
+    }
+    table.rubric th {
+      background: #444;
+      color: #fff;
+      padding: 6px 10px;
+      border: 1px solid #555;
+      font-weight: 600;
+      text-align: center;
+    }
+    table.rubric td {
+      border: 1px solid #ccc;
+      padding: 7px 10px;
+      vertical-align: top;
+      line-height: 1.65;
+    }
+    table.rubric .score-cell {
+      text-align: center;
+      font-weight: 700;
+      width: 48px;
+      vertical-align: middle;
+      background: #f8f8f8;
+    }
+    table.rubric .q-num {
+      width: 26px;
+      text-align: center;
+      font-weight: 600;
+      vertical-align: middle;
+      background: #f0f0f0;
+    }
+    .total-row td {
+      background: #1a1a1a;
+      color: #fff;
+      font-weight: 700;
+      text-align: center;
+      padding: 7px 10px;
+    }
+    .basic-box {
+      border: 1.5px solid #999;
+      padding: 8px 14px;
+      margin-bottom: 16px;
+      background: #f5f5f5;
+      font-size: 10pt;
+      line-height: 1.7;
+    }
+    .note-box {
+      margin-top: 18px;
+      border-left: 3px solid #999;
+      padding: 8px 12px;
+      font-size: 9.5pt;
+      color: #444;
+      line-height: 1.75;
+      background: #fafafa;
+    }
+    .score-sum {
+      margin-top: 16px;
+      border: 2px solid #1a1a1a;
+      padding: 10px 16px;
+      font-size: 11pt;
+      line-height: 2.0;
+    }
+    .score-sum strong { font-size: 13pt; }
+  </style>
+</head>
+<body>
+
+<div class="ws-page">
+
+  <div class="ws-header">
+    <h1>수행평가 3 채점기준표</h1>
+    <h2>인공지능수학 · 2학년 1학기 · 경향성과 예측</h2>
+  </div>
+
+  <div class="meta-row">
+    <span>평가 영역: 조건부확률 · 최소제곱법 · 추세선 · 예측</span>
+    <span>총점: 28점 (기본 8 + 평가 20)</span>
+  </div>
+
+  <!-- 기본점수 -->
+  <div class="basic-box">
+    <strong>기본점수 8점</strong> — 수행평가 응시 및 성실히 작성한 경우 부여<br>
+    (미응시 또는 백지 제출 시 0점)
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">STEP 1 — 분류 원리 이해</span>
+      <span class="section-score">8점</span>
+    </div>
+    <table class="rubric">
+      <tr>
+        <th style="width:28px;">문항</th>
+        <th>채점 기준</th>
+        <th style="width:50px;">배점</th>
+      </tr>
+      <tr>
+        <td class="q-num">(1)</td>
+        <td>도보·자전거 통학 학생 중 지각 없는 비율을 분수 \(\dfrac{40}{50}=\dfrac{4}{5}\)로 정확히 나타낸 경우</td>
+        <td class="score-cell">2점</td>
+      </tr>
+      <tr>
+        <td class="q-num">(2)</td>
+        <td>대중교통 통학 학생 중 지각 없는 비율을 분수 \(\dfrac{30}{50}=\dfrac{3}{5}\)로 정확히 나타낸 경우</td>
+        <td class="score-cell">2점</td>
+      </tr>
+      <tr>
+        <td class="q-num">(3)</td>
+        <td>두 비율을 수치로 비교(\(\frac{4}{5}>\frac{3}{5}\) 또는 \(0.8>0.6\))하여 방향을 바르게 제시한 경우</td>
+        <td class="score-cell">2점</td>
+      </tr>
+      <tr>
+        <td class="q-num">(4)</td>
+        <td>
+          '지각 없음'으로 예측하고, 조건부확률이 더 큰 쪽(\(\frac{4}{5}>\frac{1}{5}\))을 근거로 서술한 경우<br>
+          <span style="font-size:9pt; color:#888;">※ 예측만 맞고 이유 없으면 1점 부분 점수</span>
+        </td>
+        <td class="score-cell">2점</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">STEP 2 — 확률과 예측</span>
+      <span class="section-score">8점</span>
+    </div>
+    <table class="rubric">
+      <tr>
+        <th style="width:28px;">문항</th>
+        <th>채점 기준</th>
+        <th style="width:50px;">배점</th>
+      </tr>
+      <tr>
+        <td class="q-num">(1)</td>
+        <td>\(P(\text{상} \mid \text{독서 많음}) = \dfrac{60}{100} = \dfrac{3}{5}\) 또는 0.6으로 정확히 계산한 경우</td>
+        <td class="score-cell">2점</td>
+      </tr>
+      <tr>
+        <td class="q-num">(2)</td>
+        <td>\(P(\text{상} \mid \text{독서 적음}) = \dfrac{20}{100} = \dfrac{1}{5}\) 또는 0.2로 정확히 계산한 경우</td>
+        <td class="score-cell">2점</td>
+      </tr>
+      <tr>
+        <td class="q-num">(3)</td>
+        <td>
+          '상 등급'으로 예측하고, (1)의 비율이 (2)보다 크다는 근거를 제시한 경우<br>
+          <span style="font-size:9pt; color:#888;">※ 예측만 쓰고 근거 없으면 1점 부분 점수</span>
+        </td>
+        <td class="score-cell">2점</td>
+      </tr>
+      <tr>
+        <td class="q-num">(4)</td>
+        <td>
+          다음 중 하나 이상 포함 시 정답:<br>
+          ① 확률은 경향성이며 개별 사례를 보장하지 않는다<br>
+          ② 독서량 외 다른 변수(수업 집중도, 학습 방법 등)가 성적에 영향<br>
+          ③ 표본이 전체를 완벽히 대표하지 않을 수 있다
+        </td>
+        <td class="score-cell">2점</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">STEP 3 — 경향성 분석</span>
+      <span class="section-score">4점</span>
+    </div>
+    <table class="rubric">
+      <tr>
+        <th style="width:28px;">문항</th>
+        <th>채점 기준</th>
+        <th style="width:50px;">배점</th>
+      </tr>
+      <tr>
+        <td class="q-num">(1)</td>
+        <td>편차 표를 완성하여 \(\sum(x-\bar x)^2=20\), \(\sum(x-\bar x)(y-\bar y)=40\)을 구한 경우</td>
+        <td class="score-cell">1점</td>
+      </tr>
+      <tr>
+        <td class="q-num">(2)</td>
+        <td>\(a=2,\ b=40,\ f(x)=2x+40\)을 모두 바르게 나타낸 경우<br>
+          <span style="font-size:9pt; color:#888;">※ \(a\)만 맞으면 0.5점 부분 점수 가능</span>
+        </td>
+        <td class="score-cell">1점</td>
+      </tr>
+      <tr>
+        <td class="q-num">(3)</td>
+        <td>\(f(10)=2\times10+40=60\)점으로 정확히 계산한 경우</td>
+        <td class="score-cell">1점</td>
+      </tr>
+      <tr>
+        <td class="q-num">(4)</td>
+        <td>
+          경향성(양의 상관: 운동 시간↑ → 체력↑)을 언급하고,<br>
+          오차 원인(다른 요인 존재, 추세선의 한계 등) 1가지 이상 서술한 경우
+        </td>
+        <td class="score-cell">1점</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 점수 합계 -->
+  <div class="score-sum">
+    <strong>총점 구성</strong><br>
+    기본점수 8점 + STEP 1 (8점) + STEP 2 (8점) + STEP 3 (4점) = <strong>28점</strong>
+  </div>
+
+  <div class="note-box">
+    <strong>채점 유의사항</strong><br>
+    • 풀이 과정이 있고 결론이 맞으면 정답 처리<br>
+    • 분수와 소수 표현 모두 인정 (예: \(\frac{4}{5}\) = 0.8 동일하게 인정)<br>
+    • 오차 원인 서술 문항은 의미가 통하면 정답 (표현 방식 무관)<br>
+    • STEP 3 (4)번: 경향성 설명과 오차 원인 중 하나만 서술하면 0.5점 부분 점수 가능
+  </div>
+
+</div>
+
+</body>
+</html>

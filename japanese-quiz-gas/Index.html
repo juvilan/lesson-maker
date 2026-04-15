@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>일본어 퀴즈</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .app {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 480px;
+      padding: 28px 24px;
+      margin: 20px;
+    }
+
+    h1 { color: #2c3e50; font-size: 1.8rem; text-align: center; margin-bottom: 6px; }
+    h2 { color: #2c3e50; font-size: 1.2rem; text-align: center; margin-bottom: 16px; }
+    .subtitle { text-align: center; color: #999; font-size: 0.9rem; margin-bottom: 24px; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* 입력 폼 */
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 6px; font-weight: 600; }
+    input {
+      width: 100%;
+      padding: 13px 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    input:focus { outline: none; border-color: #3498db; }
+
+    /* 버튼 */
+    .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+
+    .btn {
+      background: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      width: 100%;
+      font-weight: 600;
+    }
+    .btn:hover { background: #2980b9; }
+    .btn:active { transform: scale(0.98); }
+    .btn.secondary { background: #95a5a6; }
+    .btn.secondary:hover { background: #7f8c8d; }
+
+    /* 타입 선택 */
+    .section-label { font-size: 0.85rem; color: #888; font-weight: 600; margin: 20px 0 10px; }
+    .type-selector { display: flex; gap: 12px; }
+    .type-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+      color: #666;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .type-btn small { display: block; font-weight: 400; color: #aaa; font-size: 0.8rem; }
+    .type-btn.active { border-color: #3498db; background: #ebf5fb; color: #3498db; }
+    .type-btn.active small { color: #7fb3d3; }
+
+    /* 퀴즈 화면 */
+    .progress-track {
+      background: #eee;
+      border-radius: 4px;
+      height: 6px;
+      margin-bottom: 10px;
+    }
+    .progress-fill {
+      background: #3498db;
+      height: 6px;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      text-align: center;
+      color: #aaa;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    .question-card {
+      background: #f9f9f9;
+      border: 1px solid #e8e8e8;
+      border-radius: 12px;
+      padding: 36px 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .question-char {
+      font-size: 5.5rem;
+      font-weight: 700;
+      color: #2c3e50;
+      line-height: 1.1;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .option-btn {
+      background: #fff;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      font-weight: 600;
+      color: #333;
+    }
+    .option-btn:hover:not(:disabled) { background: #f0f0f0; border-color: #bbb; }
+    .option-btn:disabled { cursor: default; }
+    .option-btn.correct { background: #2ecc71; border-color: #27ae60; color: #fff; }
+    .option-btn.incorrect { background: #e74c3c; border-color: #c0392b; color: #fff; }
+
+    /* 결과 화면 */
+    .score-display {
+      text-align: center;
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 28px;
+      margin: 16px 0 20px;
+    }
+    .score-number { font-size: 3rem; font-weight: 700; color: #2c3e50; }
+    .score-sub { color: #aaa; font-size: 0.85rem; margin-top: 4px; }
+    .score-pct { font-size: 1.6rem; font-weight: 700; color: #3498db; margin-top: 10px; }
+
+    .save-status {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #27ae60;
+      min-height: 20px;
+      margin-bottom: 8px;
+    }
+    .save-status.error { color: #e74c3c; }
+
+    @media (max-width: 360px) {
+      .question-char { font-size: 4.2rem; }
+      .option-btn { font-size: 1rem; padding: 13px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 화면 1: 학생 정보 입력 -->
+  <div id="screen-login" class="screen active">
+    <h1>일본어 퀴즈 🎌</h1>
+    <p class="subtitle">히라가나 · 카타카나 학습</p>
+    <div class="form-group">
+      <label>학번</label>
+      <input type="text" id="studentId" placeholder="학번을 입력하세요" inputmode="numeric">
+    </div>
+    <div class="form-group">
+      <label>이름</label>
+      <input type="text" id="studentName" placeholder="이름을 입력하세요">
+    </div>
+    <button class="btn" onclick="goToSelection()">시작하기</button>
+  </div>
+
+  <!-- 화면 2: 퀴즈 설정 -->
+  <div id="screen-selection" class="screen">
+    <h1>퀴즈 설정</h1>
+    <p class="section-label">문자 종류</p>
+    <div class="type-selector">
+      <button class="type-btn active" id="btn-hiragana" onclick="selectType('hiragana')">
+        히라가나
+        <small>ひらがな</small>
+      </button>
+      <button class="type-btn" id="btn-katakana" onclick="selectType('katakana')">
+        카타카나
+        <small>カタカナ</small>
+      </button>
+    </div>
+    <p class="section-label">난이도</p>
+    <div class="btn-group">
+      <button class="btn" onclick="startQuiz('seion')">청음 (清音) · 46자</button>
+      <button class="btn" onclick="startQuiz('dakuon')">탁음·반탁음 (濁音/半濁音) · 23자</button>
+      <button class="btn" onclick="startQuiz('yoon')">요음 (拗音) · 33자</button>
+      <button class="btn" onclick="startQuiz('all')">종합 · 전체</button>
+    </div>
+  </div>
+
+  <!-- 화면 3: 퀴즈 -->
+  <div id="screen-quiz" class="screen">
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <p class="progress-text" id="progress-text"></p>
+    <div class="question-card">
+      <div class="question-char" id="question-char"></div>
+    </div>
+    <div class="options-grid" id="options-grid"></div>
+  </div>
+
+  <!-- 화면 4: 결과 -->
+  <div id="screen-result" class="screen">
+    <h1>퀴즈 완료!</h1>
+    <div class="score-display">
+      <div class="score-number" id="result-score"></div>
+      <div class="score-sub">정답 / 전체 문제</div>
+      <div class="score-pct" id="result-pct"></div>
+    </div>
+    <p class="save-status" id="save-status"></p>
+    <div class="btn-group">
+      <button class="btn" onclick="restartQuiz()">다시하기</button>
+      <button class="btn secondary" onclick="goToSelection()">다른 레벨 선택</button>
+    </div>
+  </div>
+
+</div>
+<script>
+// ===== 가나 데이터 =====
+const KANA = {
+  hiragana: {
+    seion: [
+      {char:'あ',r:'a'},{char:'い',r:'i'},{char:'う',r:'u'},{char:'え',r:'e'},{char:'お',r:'o'},
+      {char:'か',r:'ka'},{char:'き',r:'ki'},{char:'く',r:'ku'},{char:'け',r:'ke'},{char:'こ',r:'ko'},
+      {char:'さ',r:'sa'},{char:'し',r:'shi'},{char:'す',r:'su'},{char:'せ',r:'se'},{char:'そ',r:'so'},
+      {char:'た',r:'ta'},{char:'ち',r:'chi'},{char:'つ',r:'tsu'},{char:'て',r:'te'},{char:'と',r:'to'},
+      {char:'な',r:'na'},{char:'に',r:'ni'},{char:'ぬ',r:'nu'},{char:'ね',r:'ne'},{char:'の',r:'no'},
+      {char:'は',r:'ha'},{char:'ひ',r:'hi'},{char:'ふ',r:'fu'},{char:'へ',r:'he'},{char:'ほ',r:'ho'},
+      {char:'ま',r:'ma'},{char:'み',r:'mi'},{char:'む',r:'mu'},{char:'め',r:'me'},{char:'も',r:'mo'},
+      {char:'や',r:'ya'},{char:'ゆ',r:'yu'},{char:'よ',r:'yo'},
+      {char:'ら',r:'ra'},{char:'り',r:'ri'},{char:'る',r:'ru'},{char:'れ',r:'re'},{char:'ろ',r:'ro'},
+      {char:'わ',r:'wa'},{char:'を',r:'wo'},{char:'ん',r:'n'}
+    ],
+    dakuon: [
+      {char:'が',r:'ga'},{char:'ぎ',r:'gi'},{char:'ぐ',r:'gu'},{char:'げ',r:'ge'},{char:'ご',r:'go'},
+      {char:'ざ',r:'za'},{char:'じ',r:'ji'},{char:'ず',r:'zu'},{char:'ぜ',r:'ze'},{char:'ぞ',r:'zo'},
+      {char:'だ',r:'da'},{char:'で',r:'de'},{char:'ど',r:'do'},
+      {char:'ば',r:'ba'},{char:'び',r:'bi'},{char:'ぶ',r:'bu'},{char:'べ',r:'be'},{char:'ぼ',r:'bo'},
+      {char:'ぱ',r:'pa'},{char:'ぴ',r:'pi'},{char:'ぷ',r:'pu'},{char:'ぺ',r:'pe'},{char:'ぽ',r:'po'}
+    ],
+    yoon: [
+      {char:'きゃ',r:'kya'},{char:'きゅ',r:'kyu'},{char:'きょ',r:'kyo'},
+      {char:'しゃ',r:'sha'},{char:'しゅ',r:'shu'},{char:'しょ',r:'sho'},
+      {char:'ちゃ',r:'cha'},{char:'ちゅ',r:'chu'},{char:'ちょ',r:'cho'},
+      {char:'にゃ',r:'nya'},{char:'にゅ',r:'nyu'},{char:'にょ',r:'nyo'},
+      {char:'ひゃ',r:'hya'},{char:'ひゅ',r:'hyu'},{char:'ひょ',r:'hyo'},
+      {char:'みゃ',r:'mya'},{char:'みゅ',r:'myu'},{char:'みょ',r:'myo'},
+      {char:'りゃ',r:'rya'},{char:'りゅ',r:'ryu'},{char:'りょ',r:'ryo'},
+      {char:'ぎゃ',r:'gya'},{char:'ぎゅ',r:'gyu'},{char:'ぎょ',r:'gyo'},
+      {char:'じゃ',r:'ja'},{char:'じゅ',r:'ju'},{char:'じょ',r:'jo'},
+      {char:'びゃ',r:'bya'},{char:'びゅ',r:'byu'},{char:'びょ',r:'byo'},
+      {char:'ぴゃ',r:'pya'},{char:'ぴゅ',r:'pyu'},{char:'ぴょ',r:'pyo'}
+    ]
+  },
+  katakana: {
+    seion: [
+      {char:'ア',r:'a'},{char:'イ',r:'i'},{char:'ウ',r:'u'},{char:'エ',r:'e'},{char:'オ',r:'o'},
+      {char:'カ',r:'ka'},{char:'キ',r:'ki'},{char:'ク',r:'ku'},{char:'ケ',r:'ke'},{char:'コ',r:'ko'},
+      {char:'サ',r:'sa'},{char:'シ',r:'shi'},{char:'ス',r:'su'},{char:'セ',r:'se'},{char:'ソ',r:'so'},
+      {char:'タ',r:'ta'},{char:'チ',r:'chi'},{char:'ツ',r:'tsu'},{char:'テ',r:'te'},{char:'ト',r:'to'},
+      {char:'ナ',r:'na'},{char:'ニ',r:'ni'},{char:'ヌ',r:'nu'},{char:'ネ',r:'ne'},{char:'ノ',r:'no'},
+      {char:'ハ',r:'ha'},{char:'ヒ',r:'hi'},{char:'フ',r:'fu'},{char:'ヘ',r:'he'},{char:'ホ',r:'ho'},
+      {char:'マ',r:'ma'},{char:'ミ',r:'mi'},{char:'ム',r:'mu'},{char:'メ',r:'me'},{char:'モ',r:'mo'},
+      {char:'ヤ',r:'ya'},{char:'ユ',r:'yu'},{char:'ヨ',r:'yo'},
+      {char:'ラ',r:'ra'},{char:'リ',r:'ri'},{char:'ル',r:'ru'},{char:'レ',r:'re'},{char:'ロ',r:'ro'},
+      {char:'ワ',r:'wa'},{char:'ヲ',r:'wo'},{char:'ン',r:'n'}
+    ],
+    dakuon: [
+      {char:'ガ',r:'ga'},{char:'ギ',r:'gi'},{char:'グ',r:'gu'},{char:'ゲ',r:'ge'},{char:'ゴ',r:'go'},
+      {char:'ザ',r:'za'},{char:'ジ',r:'ji'},{char:'ズ',r:'zu'},{char:'ゼ',r:'ze'},{char:'ゾ',r:'zo'},
+      {char:'ダ',r:'da'},{char:'デ',r:'de'},{char:'ド',r:'do'},
+      {char:'バ',r:'ba'},{char:'ビ',r:'bi'},{char:'ブ',r:'bu'},{char:'ベ',r:'be'},{char:'ボ',r:'bo'},
+      {char:'パ',r:'pa'},{char:'ピ',r:'pi'},{char:'プ',r:'pu'},{char:'ペ',r:'pe'},{char:'ポ',r:'po'}
+    ],
+    yoon: [
+      {char:'キャ',r:'kya'},{char:'キュ',r:'kyu'},{char:'キョ',r:'kyo'},
+      {char:'シャ',r:'sha'},{char:'シュ',r:'shu'},{char:'ショ',r:'sho'},
+      {char:'チャ',r:'cha'},{char:'チュ',r:'chu'},{char:'チョ',r:'cho'},
+      {char:'ニャ',r:'nya'},{char:'ニュ',r:'nyu'},{char:'ニョ',r:'nyo'},
+      {char:'ヒャ',r:'hya'},{char:'ヒュ',r:'hyu'},{char:'ヒョ',r:'hyo'},
+      {char:'ミャ',r:'mya'},{char:'ミュ',r:'myu'},{char:'ミョ',r:'myo'},
+      {char:'リャ',r:'rya'},{char:'リュ',r:'ryu'},{char:'リョ',r:'ryo'},
+      {char:'ギャ',r:'gya'},{char:'ギュ',r:'gyu'},{char:'ギョ',r:'gyo'},
+      {char:'ジャ',r:'ja'},{char:'ジュ',r:'ju'},{char:'ジョ',r:'jo'},
+      {char:'ビャ',r:'bya'},{char:'ビュ',r:'byu'},{char:'ビョ',r:'byo'},
+      {char:'ピャ',r:'pya'},{char:'ピュ',r:'pyu'},{char:'ピョ',r:'pyo'}
+    ]
+  }
+};
+
+// ===== 앱 상태 =====
+const state = {
+  studentId: '',
+  name: '',
+  type: 'hiragana',
+  level: '',
+  questions: [],
+  index: 0,
+  score: 0
+};
+
+// ===== 화면 전환 =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+// ===== 로그인 =====
+function goToSelection() {
+  if (document.getElementById('screen-login').classList.contains('active')) {
+    const id = document.getElementById('studentId').value.trim();
+    const name = document.getElementById('studentName').value.trim();
+    if (!id || !name) {
+      alert('학번과 이름을 모두 입력해주세요.');
+      return;
+    }
+    state.studentId = id;
+    state.name = name;
+  }
+  showScreen('selection');
+}
+
+// ===== 타입 선택 =====
+function selectType(type) {
+  state.type = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + type).classList.add('active');
+}
+
+// ===== 퀴즈 시작 =====
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function startQuiz(level) {
+  state.level = level;
+  const pool = KANA[state.type];
+  const chars = level === 'all'
+    ? [...pool.seion, ...pool.dakuon, ...pool.yoon]
+    : pool[level];
+
+  state.questions = shuffle(chars).slice(0, 20).map(q => {
+    const distractors = shuffle(chars).filter(c => c.r !== q.r).slice(0, 3);
+    return { ...q, options: shuffle([...distractors, q]) };
+  });
+  state.index = 0;
+  state.score = 0;
+
+  showScreen('quiz');
+  renderQuestion();
+}
+
+// ===== 문제 렌더링 =====
+function renderQuestion() {
+  const q = state.questions[state.index];
+  const total = state.questions.length;
+
+  document.getElementById('progress-fill').style.width = (state.index / total * 100) + '%';
+  document.getElementById('progress-text').textContent = `${state.index + 1} / ${total}`;
+  document.getElementById('question-char').textContent = q.char;
+
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.r;
+    btn.onclick = () => handleAnswer(opt, q);
+    grid.appendChild(btn);
+  });
+}
+
+// ===== 답 처리 (정답/오답 피드백 포함) =====
+function handleAnswer(selected, question) {
+  const isCorrect = selected.r === question.r;
+  if (isCorrect) state.score++;
+
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent === question.r) btn.classList.add('correct');
+    if (btn.textContent === selected.r && !isCorrect) btn.classList.add('incorrect');
+  });
+
+  setTimeout(() => {
+    state.index++;
+    if (state.index < state.questions.length) {
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }, 800);
+}
+
+// ===== 결과 & 저장 =====
+const LEVEL_LABEL = { seion: '청음', dakuon: '탁음·반탁음', yoon: '요음', all: '종합' };
+
+function showResult() {
+  const total = state.questions.length;
+  const pct = Math.round(state.score / total * 100);
+
+  document.getElementById('result-score').textContent = `${state.score} / ${total}`;
+  document.getElementById('result-pct').textContent = `${pct}%`;
+  document.getElementById('save-status').textContent = '저장 중...';
+  document.getElementById('save-status').className = 'save-status';
+
+  showScreen('result');
+
+  google.script.run
+    .withSuccessHandler(() => {
+      document.getElementById('save-status').textContent = '✓ 결과가 저장되었습니다.';
+    })
+    .withFailureHandler(() => {
+      const el = document.getElementById('save-status');
+      el.textContent = '저장에 실패했습니다. 선생님께 알려주세요.';
+      el.className = 'save-status error';
+    })
+    .saveResult({
+      studentId: state.studentId,
+      name: state.name,
+      type: state.type === 'hiragana' ? '히라가나' : '카타카나',
+      level: LEVEL_LABEL[state.level],
+      score: state.score,
+      total
+    });
+}
+
+// ===== 다시하기 =====
+function restartQuiz() {
+  startQuiz(state.level);
+}
+</script>
+</body>
+</html>

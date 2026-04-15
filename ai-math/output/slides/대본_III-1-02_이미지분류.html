@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>강의 대본 — 인공지능의 이미지 분류 (픽셀과 유사도)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #f39c12;
+      --accent-light: #fef9ee;
+      --accent-mid: #fde68a;
+      --dark: #1a1a2e;
+      --gray: #6b7280;
+      --light-gray: #f3f4f6;
+      --border: #e5e7eb;
+      --text: #111827;
+      --board-bg: #1e3a5f;
+      --board-text: #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text);
+      background: #fff;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 40px;
+    }
+
+    /* ── 헤더 ── */
+    .doc-header {
+      border-top: 5px solid var(--accent);
+      padding-top: 24px;
+      margin-bottom: 32px;
+    }
+    .doc-header .subject-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .doc-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+    .doc-header .meta {
+      display: flex;
+      gap: 24px;
+      color: var(--gray);
+      font-size: 13px;
+    }
+    .doc-header .meta span::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* ── 섹션 제목 ── */
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      margin-top: 32px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── 타임라인 표 ── */
+    .timeline-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .timeline-table th {
+      background: var(--dark);
+      color: #fff;
+      font-weight: 600;
+      padding: 9px 12px;
+      text-align: left;
+    }
+    .timeline-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .timeline-table tr:last-child td { border-bottom: none; }
+    .timeline-table tr:nth-child(even) td { background: var(--light-gray); }
+    .phase-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .phase-도입    { background: #dbeafe; color: #1d4ed8; }
+    .phase-전개1   { background: #dcfce7; color: #15803d; }
+    .phase-전개2   { background: #d1fae5; color: #065f46; }
+    .phase-정리    { background: #fef3c7; color: #92400e; }
+    .phase-평가    { background: #fce7f3; color: #9d174d; }
+    .slide-num { color: var(--gray); font-size: 12px; }
+
+    /* ── 준비물 ── */
+    .materials-box {
+      background: var(--accent-light);
+      border-left: 3px solid var(--accent);
+      padding: 10px 14px;
+      border-radius: 0 4px 4px 0;
+      font-size: 13px;
+      color: #78350f;
+      margin-top: 8px;
+    }
+
+    /* ── 슬라이드 카드 ── */
+    .slides-area { margin-top: 12px; }
+
+    .slide-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .slide-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--light-gray);
+      border-bottom: 1px solid var(--border);
+    }
+    .slide-num-badge {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      min-width: 32px;
+      text-align: center;
+      padding: 3px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .slide-card-header h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+      flex: 1;
+    }
+    .slide-time {
+      font-size: 12px;
+      color: var(--gray);
+      white-space: nowrap;
+    }
+    .slide-time::before { content: '⏱ '; }
+
+    .slide-card-body { padding: 14px 16px; }
+
+    /* 대본 블록 */
+    .script-block {
+      margin-bottom: 10px;
+    }
+    .script-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 4px;
+    }
+    .script-text {
+      white-space: pre-wrap;
+      font-size: 13.5px;
+      line-height: 1.85;
+      color: #374151;
+    }
+
+    /* 질문 박스 */
+    .question-box {
+      background: #eff6ff;
+      border-left: 3px solid #3b82f6;
+      padding: 10px 14px;
+      border-radius: 0 4px 4px 0;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #1e3a8a;
+    }
+    .question-box .q-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #3b82f6;
+      margin-bottom: 4px;
+    }
+    .question-box .q-text {
+      white-space: pre-wrap;
+    }
+
+    /* 오개념 예방 박스 */
+    .misconception-box {
+      background: #fff7ed;
+      border-left: 3px solid #ea580c;
+      padding: 10px 14px;
+      border-radius: 0 4px 4px 0;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #7c2d12;
+    }
+    .misconception-box .mc-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ea580c;
+      margin-bottom: 4px;
+    }
+
+    /* 판서 박스 */
+    .board-box {
+      background: var(--board-bg);
+      color: var(--board-text);
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .board-box .board-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .board-box .board-content {
+      white-space: pre-wrap;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+
+    /* 활동 박스 */
+    .activity-box {
+      background: #f0fdf4;
+      border-left: 3px solid #22c55e;
+      padding: 10px 14px;
+      border-radius: 0 4px 4px 0;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #14532d;
+    }
+    .activity-box .act-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #22c55e;
+      margin-bottom: 4px;
+    }
+
+    /* ── 인쇄 ── */
+    @media print {
+      body { padding: 16px 24px; font-size: 12px; max-width: 100%; }
+      .doc-header { padding-top: 16px; }
+      .doc-header h1 { font-size: 20px; }
+      .slide-card { margin-bottom: 14px; }
+      .slide-card-header h2 { font-size: 13px; }
+      .script-text { font-size: 12px; }
+      .section-title { margin-top: 20px; }
+      a { text-decoration: none; color: inherit; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ───── 헤더 ───── -->
+  <header class="doc-header">
+    <div class="subject-badge">강의 대본</div>
+    <h1>인공지능의 이미지 분류 (픽셀과 유사도)</h1>
+    <div class="meta">
+      <span>인공지능수학</span>
+      <span>고2</span>
+      <span>총 45분</span>
+      <span>III단원 2차시</span>
+    </div>
+  </header>
+
+  <!-- ───── 수업 단계 타임라인 ───── -->
+  <div class="section-title">수업 단계 타임라인</div>
+  <table class="timeline-table">
+    <thead>
+      <tr>
+        <th>단계</th>
+        <th>시간</th>
+        <th>활동 내용</th>
+        <th>슬라이드</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="phase-badge phase-도입">도입</span></td>
+        <td>5분</td>
+        <td>실생활 사례 제시 + 학습 목표</td>
+        <td><span class="slide-num">1–3</span></td>
+      </tr>
+      <tr>
+        <td><span class="phase-badge phase-전개1">전개 1</span></td>
+        <td>15분</td>
+        <td>픽셀 행렬 표현 + 벡터 변환</td>
+        <td><span class="slide-num">4–7</span></td>
+      </tr>
+      <tr>
+        <td><span class="phase-badge phase-전개2">전개 2</span></td>
+        <td>15분</td>
+        <td>해밍 거리 + 퍼셉트론 분류</td>
+        <td><span class="slide-num">8–13</span></td>
+      </tr>
+      <tr>
+        <td><span class="phase-badge phase-정리">정리</span></td>
+        <td>5분</td>
+        <td>요약 + 실생활 연결</td>
+        <td><span class="slide-num">14</span></td>
+      </tr>
+      <tr>
+        <td><span class="phase-badge phase-평가">평가</span></td>
+        <td>5분</td>
+        <td>형성평가 (퀴즈)</td>
+        <td><span class="slide-num">15</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="materials-box">
+    📋 <strong>준비물:</strong> 프로젝터, 학생 활동지 (픽셀 그리드 종이), 계산기
+  </div>
+
+  <!-- ───── 슬라이드별 대본 ───── -->
+  <div class="section-title">슬라이드별 강의 대본</div>
+  <div class="slides-area">
+
+    <!-- Slide 01 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">01</span>
+        <h2>인공지능의 이미지 분류</h2>
+        <span class="slide-time">1분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">여러분, 스마트폰에서 잠금 해제할 때 얼굴을 보여준 적 있죠? 또 우편함에 손글씨로 주소를 쓰면 알아서 목적지를 찾아가고요. 오늘은 그 원리를 수학으로 직접 풀어봅니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">전개</div>
+          <div class="script-text">→ [슬라이드 표시] '픽셀 행렬', '해밍 거리', '퍼셉트론 분류' — 오늘 세 가지를 배웁니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">마무리</div>
+          <div class="script-text">이미지를 숫자로 바꾸는 것부터 시작합니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 02 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">02</span>
+        <h2>학습 목표</h2>
+        <span class="slide-time">1분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">오늘 배울 내용을 하나씩 확인해 봅시다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">목표 제시</div>
+          <div class="script-text">→ [클릭] 이미지를 픽셀값 0 또는 1의 행렬로 나타낼 수 있다.
+→ [클릭] 그 행렬을 일렬로 나열해서 입력 벡터로 만들 수 있다.
+→ [클릭] 해밍 거리를 계산할 수 있다.
+→ [클릭] 퍼셉트론으로 분류할 수 있다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">마무리</div>
+          <div class="script-text">수업 끝날 때 이 네 가지를 모두 할 수 있어야 합니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 03 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">03</span>
+        <h2>왜 배울까요?</h2>
+        <span class="slide-time">2분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">두 가지 실생활 예시를 보겠습니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">전개</div>
+          <div class="script-text">→ [클릭] 손글씨 우편번호 인식 — 우편물 스캔 후 픽셀 행렬로 변환, 저장된 숫자와 유사도 비교해서 분류합니다.
+→ [클릭] 얼굴 잠금 해제 — 등록된 얼굴과 카메라 입력을 픽셀 수준에서 비교합니다.
+→ [클릭] 이 모든 것이 '픽셀 행렬 + 유사도 계산'으로 동작합니다.</div>
+        </div>
+        <div class="question-box">
+          <div class="q-label">질문 포인트</div>
+          <div class="q-text">Q: 여러분 스마트폰은 어떻게 제 얼굴인지 아닌지 판단할까요? [학생 응답 대기 10초]</div>
+        </div>
+        <div class="script-block" style="margin-top:10px;">
+          <div class="script-label">마무리</div>
+          <div class="script-text">바로 그 원리를 지금 배웁니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 04 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">04</span>
+        <h2>이미지 = 픽셀의 배열</h2>
+        <span class="slide-time">3분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">컴퓨터는 이미지를 어떻게 저장할까요? 이미지는 결국 숫자들의 배열입니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">전개</div>
+          <div class="script-text">→ [클릭] 흑백 이미지: 각 픽셀을 0(검은색) 또는 1(흰색)로 나타냅니다. 이 값들을 m×n 행렬로 표현합니다.
+→ [클릭] 컬러 이미지: 각 픽셀이 R, G, B 세 값으로 나뉩니다. 각각 0~255 사이 값이에요.
+오른쪽에 5×5 픽셀 그리드가 있죠? 지금 클릭해보면 0과 1이 바뀝니다.</div>
+        </div>
+        <div class="activity-box">
+          <div class="act-label">인터랙티브 활동</div>
+          → [인터랙티브 시연] 픽셀 클릭으로 숫자 '0' 모양 만들어보기. 성분 합이 바뀌는 것 확인.
+        </div>
+        <div class="question-box">
+          <div class="q-label">질문 포인트</div>
+          <div class="q-text">Q: 5×5 이미지에서 최대 성분 합은 얼마일까요? [학생 응답: 25]</div>
+        </div>
+        <div class="script-block" style="margin-top:10px;">
+          <div class="script-label">마무리</div>
+          <div class="script-text">이제 이 행렬을 퍼셉트론에 입력하려면 어떻게 해야 할까요?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 05 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">05</span>
+        <h2>이미지 행렬로 나타내기</h2>
+        <span class="slide-time">4분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">전광판의 숫자 '0'을 5×5 행렬로 표현해보겠습니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">단계별 설명</div>
+          <div class="script-text">→ [클릭: Step 1] 불이 켜진 픽셀은 1, 꺼진 픽셀은 0으로 표시합니다. 위쪽 행부터 왼쪽에서 오른쪽 순서로 스캔합니다.
+→ [클릭: Step 2] 행렬 A가 완성됩니다. 1행은 0,1,1,1,0 / 2행은 1,0,0,0,1 ... 이런 식으로 이어집니다.
+→ [클릭: Step 3] 성분의 합 = 켜진 픽셀 수 = 16입니다.</div>
+        </div>
+        <div class="board-box">
+          <div class="board-label">📋 판서 (칠판)</div>
+          <div class="board-content">5×5 격자 그리고 숫자 0 모양 채우기</div>
+        </div>
+        <div class="question-box">
+          <div class="q-label">질문 포인트</div>
+          <div class="q-text">Q: 숫자 8의 이미지는 0보다 성분 합이 클까요 작을까요? [학생 응답] → 8은 두 개의 원이라 켜진 픽셀이 더 많으므로 클 겁니다.</div>
+        </div>
+        <div class="script-block" style="margin-top:10px;">
+          <div class="script-label">마무리</div>
+          <div class="script-text">이 행렬을 이제 퍼셉트론 입력 벡터로 변환해봅시다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 06 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">06</span>
+        <h2>행렬 → 벡터 변환</h2>
+        <span class="slide-time">2분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">퍼셉트론은 1차원 수열을 입력받습니다. 2D 행렬을 1D로 바꿔야 합니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">전개</div>
+          <div class="script-text">→ [클릭] 방법: 1행, 2행, ... m행 순서대로 성분을 일렬로 나열합니다.
+→ [클릭] 왜?: 퍼셉트론은 x₁, x₂, ..., xᵣ 형태의 1D 입력을 받습니다. 2D 이미지를 1D로 펴는 것입니다.
+→ 2×2 행렬 [[1,2],[3,4]]를 보면: (1,2,3,4)가 됩니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">비유</div>
+          <div class="script-text">'행렬을 일렬로 나열한다'는 표현, 어렵지 않죠? 마치 교실 2D 배치도를 1열로 출석 부르는 것처럼요.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">마무리</div>
+          <div class="script-text">5×7 이미지라면 35차원 입력 벡터가 됩니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 07 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">07</span>
+        <h2>해밍 거리 정의와 계산</h2>
+        <span class="slide-time">4분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">이제 두 이미지가 얼마나 다른지 측정하는 방법 — 해밍 거리를 배웁니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">단계별 설명</div>
+          <div class="script-text">H(A, B) = 두 행렬에서 값이 서로 다른 성분의 개수.
+→ [클릭: Step 1] 행렬 P = [[1,0],[1,1]], Q = [[1,1],[0,1]]입니다.
+→ [클릭: Step 2] 위치별 비교: (1,1): 1과 1 → 같음. (1,2): 0과 1 → 다름! (2,1): 1과 0 → 다름! (2,2): 1과 1 → 같음.
+→ [클릭: Step 3] 다른 위치 2곳 → H(P,Q) = 2입니다.</div>
+        </div>
+        <div class="activity-box">
+          <div class="act-label">시각화 활동</div>
+          → [시각화 버튼 클릭] 빨간색으로 표시된 성분 확인.
+        </div>
+        <div class="question-box">
+          <div class="q-label">질문 포인트</div>
+          <div class="q-text">Q: H(A,B) = 0이면 무슨 의미일까요? [학생 응답: 두 이미지가 완전히 같다]</div>
+        </div>
+        <div class="misconception-box">
+          <div class="mc-label">오개념 예방</div>
+          주의! 해밍 거리는 유클리드 거리와 다릅니다. 유클리드는 차이의 크기를 보지만, 해밍은 다른 위치의 개수만 셉니다. 0/1 이진 이미지에 특화된 측정법이에요.
+        </div>
+        <div class="script-block" style="margin-top:10px;">
+          <div class="script-label">마무리</div>
+          <div class="script-text">H가 작을수록 두 이미지가 유사합니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 08 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">08</span>
+        <h2>해밍 거리로 이미지 분류</h2>
+        <span class="slide-time">3분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">교과서 예시 — 전광판 이미지 분류입니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">단계별 설명</div>
+          <div class="script-text">A = 숫자 0 (성분합 19), B = 숫자 8 (성분합 17), C = 불완전한 이미지.
+→ [클릭: Step 1] H(C, A) = 5. C와 A에서 다른 성분이 5곳.
+→ [클릭: Step 2] H(C, B) = 3. C와 B에서 다른 성분이 3곳.
+→ [클릭: Step 3] H(C,B) < H(C,A) → C는 B(숫자 8)에 더 가깝다! 따라서 C를 숫자 8로 분류합니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">비유</div>
+          <div class="script-text">이걸 사람으로 치면, '8과는 3곳만 다르고, 0과는 5곳이나 다르니까 8이겠구나' 판단하는 겁니다.</div>
+        </div>
+        <div class="question-box">
+          <div class="q-label">질문 포인트</div>
+          <div class="q-text">Q: H(C,A)와 H(C,B)가 같으면 어떻게 해야 할까요? [학생 생각 시간 20초] → 다른 방법으로 판단하거나, 추가 이미지가 필요합니다.</div>
+        </div>
+        <div class="script-block" style="margin-top:10px;">
+          <div class="script-label">마무리</div>
+          <div class="script-text">이제 두 번째 방법 — 퍼셉트론으로 분류해봅시다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 09 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">09</span>
+        <h2>확인 문제 — 해밍 거리</h2>
+        <span class="slide-time">2분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">배운 내용을 바로 확인해봅시다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">학생 활동</div>
+          <div class="script-text">행렬 P와 R이 주어졌습니다. 30초 동안 직접 H(P,R)을 계산해보세요.
+[학생 계산 시간: 30초]
+→ [클릭으로 답 공개] H(P,R) = 2. 다른 위치: (1행3열)에서 0≠1, (3행2열)에서 1≠0.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">마무리</div>
+          <div class="script-text">잘 하셨나요? 이제 퍼셉트론으로 넘어갑니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 10 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">10</span>
+        <h2>두 가지 분류 방법 비교</h2>
+        <span class="slide-time">2분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">해밍 거리와 퍼셉트론, 두 방법의 차이를 잠깐 짚어보겠습니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">비교</div>
+          <div class="script-text">→ 해밍 거리: 다른 성분의 개수, 작을수록 유사. 계산 간단.
+→ 퍼셉트론: 가중치 W = (1/합) × 템플릿, 분류 점수가 클수록 유사.
+→ [클릭] 공통점: 두 방법 모두 유사한 픽셀이 많을수록 같은 종류로 판단한다는 원리.</div>
+        </div>
+        <div class="misconception-box">
+          <div class="mc-label">오개념 예방</div>
+          주의! 퍼셉트론이 '왜 성분합으로 나누나요?' — 이미지마다 밝은 픽셀(1) 수가 다르니까, 공평하게 비교하기 위해 정규화합니다.
+        </div>
+        <div class="script-block" style="margin-top:10px;">
+          <div class="script-label">마무리</div>
+          <div class="script-text">퍼셉트론 방법을 지금 계산해봅시다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 11 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">11</span>
+        <h2>퍼셉트론으로 이미지 분류</h2>
+        <span class="slide-time">3분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">이제 퍼셉트론을 이용한 이미지 분류입니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">전개</div>
+          <div class="script-text">→ [클릭] 가중치 행렬 만들기: W_A = (1/A의 성분 합) × A. 정규화된 가중치입니다.
+→ [클릭] 분류 점수: 입력 이미지 C의 벡터에 W_A를 적용하여 가중합 x를 계산합니다. 점수가 클수록 C가 A에 가깝습니다.
+→ 오른쪽 다이어그램: 35개 픽셀값 → 가중치 내적 → 분류 점수 0.82 출력.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">비유</div>
+          <div class="script-text">이미지의 픽셀들이 주어진 템플릿과 얼마나 겹치는지 점수를 냅니다. 겹치는 픽셀이 많을수록 점수가 높아요.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">마무리</div>
+          <div class="script-text">실제 계산을 해봅시다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 12 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">12</span>
+        <h2>가중치 행렬 W 계산</h2>
+        <span class="slide-time">4분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">교과서 7×5 전광판 예시로 계산해봅시다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">단계별 계산</div>
+          <div class="script-text">→ [클릭: Step 1] W_A = (1/19) × A. 숫자 0 이미지 A의 성분 합이 19이므로 각 원소를 19로 나눕니다.
+→ [클릭: Step 2] W_B = (1/17) × B. 숫자 8 이미지 B의 성분 합이 17이므로 17로 나눕니다.
+→ [클릭: Step 3] 이미지 C를 두 퍼셉트론에 입력: P_A 점수 = 0.74, P_B 점수 = 0.82. 0.82 > 0.74이므로 B(숫자 8)로 분류!</div>
+        </div>
+        <div class="board-box">
+          <div class="board-label">📋 판서 (칠판)</div>
+          <div class="board-content">W_A = (1/19) × A
+W_B = (1/17) × B</div>
+        </div>
+        <div class="question-box">
+          <div class="q-label">질문 포인트</div>
+          <div class="q-text">Q: 왜 1/19이 아니라 1/19 × A 전체인가요? [학생 응답 대기] → 행렬 A의 각 성분이 그대로 가중치 역할을 합니다. 템플릿과 같은 위치에 1이 있으면 그 위치의 가중치가 1/19이 됩니다.</div>
+        </div>
+        <div class="misconception-box">
+          <div class="mc-label">오개념 예방</div>
+          주의! W_A와 W_B의 분모가 다릅니다(19 vs 17). 왜일까요? 이미지마다 켜진 픽셀 수가 달라서 공평하게 비교하기 위해 각자의 합으로 나눕니다.
+        </div>
+        <div class="script-block" style="margin-top:10px;">
+          <div class="script-label">마무리</div>
+          <div class="script-text">해밍 거리(3 &lt; 5)와 퍼셉트론(0.82 &gt; 0.74) 두 방법 모두 C를 숫자 8로 분류했습니다!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 13 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">13</span>
+        <h2>실생활 속 이미지 분류</h2>
+        <span class="slide-time">2분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">오늘 배운 원리가 실제로 어떻게 쓰이는지 보겠습니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">전개</div>
+          <div class="script-text">→ [클릭] MNIST: 28×28 픽셀 손글씨 숫자 데이터셋. 784차원 벡터 → 10개 퍼셉트론으로 0~9 분류. 오늘 배운 원리 그대로입니다.
+→ [클릭] 얼굴 인식, 의료 영상도 같은 원리: 픽셀 → 벡터 → 가중치 내적 → 분류.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">비유</div>
+          <div class="script-text">현대 딥러닝도 결국은 이 원리를 더 깊고 복잡하게 쌓은 것입니다. 오늘 배운 것이 AI의 출발점입니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">마무리</div>
+          <div class="script-text">정리하겠습니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 14 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">14</span>
+        <h2>오늘 배운 내용</h2>
+        <span class="slide-time">2분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">오늘 배운 세 가지를 정리합니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">요약</div>
+          <div class="script-text">→ [클릭] 픽셀 행렬: 이미지 = 0/1 행렬 → 행 순서대로 일렬 나열 → 입력 벡터
+→ [클릭] 해밍 거리: H(A,B) = 다른 성분의 수 → 작을수록 유사 → 분류
+→ [클릭] 퍼셉트론 분류: W = (1/합)×A → 입력 C의 점수 비교 → 분류
+→ [클릭] 다음 시간: 인공지능의 이미지 분류 (2) — 유클리드 거리와 k-NN</div>
+        </div>
+        <div class="board-box">
+          <div class="board-label">📋 판서 (칠판) — 세 공식 정리</div>
+          <div class="board-content">H(A,B) = 다른 성분의 개수
+W_A = (1/합_A) × A</div>
+        </div>
+        <div class="script-block" style="margin-top:10px;">
+          <div class="script-label">마무리</div>
+          <div class="script-text">형성평가로 마무리합니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 15 -->
+    <div class="slide-card">
+      <div class="slide-card-header">
+        <span class="slide-num-badge">15</span>
+        <h2>형성평가</h2>
+        <span class="slide-time">5분</span>
+      </div>
+      <div class="slide-card-body">
+        <div class="script-block">
+          <div class="script-label">도입</div>
+          <div class="script-text">마지막으로 오늘 배운 내용을 확인해봅시다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">학생 활동</div>
+          <div class="script-text">행렬 A, B, C가 주어졌습니다. 퍼셉트론 P_A와 P_B를 이용할 때 C를 어떻게 분류하는지 계산해보세요. [학생 풀이 시간: 3분]
+→ [클릭으로 풀이 공개] A와 B 모두 성분합=2이고, C와의 내적 계산 결과가 같습니다. 해밍 거리도 같아서 이 특수한 경우는 두 방법 모두 동일 결과를 냅니다.</div>
+        </div>
+        <div class="script-block">
+          <div class="script-label">마무리</div>
+          <div class="script-text">오늘 수업 수고하셨습니다. 학습지 챙겨가세요!</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /slides-area -->
+
+</body>
+</html>

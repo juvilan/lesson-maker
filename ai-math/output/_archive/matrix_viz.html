@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>행렬 이미지 변환 시각화</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-border: #334155;
+      --blue: #3b82f6;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --red-cell: #ef4444;
+      --green-cell: #22c55e;
+      --blue-cell: #3b82f6;
+      --yellow-cell: #eab308;
+      --white-cell: #f8fafc;
+      --black-cell: #0f172a;
+      --cell-size: 62px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      line-height: 1.6;
+      padding: 32px 16px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+      font-size: 0.95rem;
+    }
+
+    .section {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .section + .section {
+      margin-top: 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .section-badge {
+      background: var(--blue);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .section-badge.green { background: var(--green); }
+    .section-badge.yellow { background: var(--yellow); color: #0f172a; }
+    .section-badge.purple { background: #8b5cf6; }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+      line-height: 1.8;
+    }
+
+    /* Grid */
+    .grid-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .grid-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .grid-label {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .pixel-grid {
+      display: grid;
+      grid-template-columns: repeat(3, var(--cell-size));
+      grid-template-rows: repeat(3, var(--cell-size));
+      border: 2px solid #475569;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .pixel-cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      transition: all 0.3s ease;
+      position: relative;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+
+    .cell-red { background-color: var(--red-cell); }
+    .cell-green { background-color: var(--green-cell); }
+    .cell-blue { background-color: var(--blue-cell); }
+    .cell-yellow { background-color: var(--yellow-cell); color: #0f172a; }
+    .cell-white { background-color: var(--white-cell); color: #0f172a; }
+    .cell-dark { background-color: var(--black-cell); }
+
+    .pixel-cell.highlight-row {
+      box-shadow: inset 0 0 0 3px #fbbf24;
+      background-color: rgba(251, 191, 36, 0.3) !important;
+    }
+
+    .pixel-cell.highlight-col {
+      box-shadow: inset 0 0 0 3px #34d399;
+      background-color: rgba(52, 211, 153, 0.3) !important;
+    }
+
+    /* Bracket overlay */
+    .bracket-row {
+      position: absolute;
+      left: -18px;
+      top: 0;
+      height: 100%;
+      width: 12px;
+      pointer-events: none;
+    }
+
+    .bracket-col {
+      position: absolute;
+      top: -18px;
+      left: 0;
+      width: 100%;
+      height: 12px;
+      pointer-events: none;
+    }
+
+    .row-bracket-svg, .col-bracket-svg {
+      display: block;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1.5px solid var(--card-border);
+      background: #0f172a;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover { border-color: var(--blue); color: var(--blue); }
+    .btn.active-row { border-color: #fbbf24; color: #fbbf24; background: rgba(251,191,36,0.08); }
+    .btn.active-col { border-color: #34d399; color: #34d399; background: rgba(52,211,153,0.08); }
+    .btn.primary { background: var(--blue); color: white; border-color: var(--blue); }
+    .btn.primary:hover { background: #2563eb; }
+    .btn.success { background: var(--green); color: white; border-color: var(--green); }
+    .btn.warning { background: var(--yellow); color: #0f172a; border-color: var(--yellow); }
+    .btn.purple { background: #8b5cf6; color: white; border-color: #8b5cf6; }
+    .btn.reset { border-color: #475569; color: var(--text-muted); }
+    .btn.reset:hover { border-color: #ef4444; color: #ef4444; }
+
+    /* Matrix display */
+    .matrix-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .matrix-symbol {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .matrix-box {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .matrix-name {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .math-matrix {
+      display: inline-grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      border-left: 3px solid var(--text-muted);
+      border-right: 3px solid var(--text-muted);
+      padding: 8px 10px;
+      position: relative;
+    }
+
+    .math-matrix::before, .math-matrix::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 6px;
+      border-color: var(--text-muted);
+      border-style: solid;
+    }
+
+    .math-matrix::before { top: 0; left: -3px; border-width: 2px 0 0 0; }
+    .math-matrix::after { bottom: 0; left: -3px; border-width: 0 0 2px 0; }
+
+    .math-cell {
+      width: 32px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      border-radius: 3px;
+    }
+
+    .math-cell.zero { color: #475569; }
+    .math-cell.one { color: #60a5fa; }
+    .math-cell.highlighted { background: rgba(59,130,246,0.2); color: #93c5fd; }
+
+    /* Arrow animation */
+    .transform-scene {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .arrow-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .arrow-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 80px;
+    }
+
+    /* Row/Col bracket indicators */
+    .bracket-labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      height: calc(var(--cell-size) * 3 + 4px);
+      margin-left: 4px;
+    }
+
+    .bracket-item {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .bracket-item .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .col-bracket-labels {
+      display: flex;
+      justify-content: space-around;
+      width: calc(var(--cell-size) * 3 + 4px);
+      margin-top: 4px;
+    }
+
+    .col-bracket-item {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* SVG arrows */
+    .arrow-svg-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 80px;
+    }
+
+    .arrow-svg-container svg {
+      display: block;
+    }
+
+    /* Animation states */
+    .row-moving {
+      animation: moveRow 0.6s ease-in-out;
+    }
+
+    @keyframes moveRow {
+      0% { transform: translateY(0); opacity: 1; }
+      50% { transform: translateY(20px); opacity: 0.5; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Info box */
+    .info-box {
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.875rem;
+      color: #93c5fd;
+      margin-top: 16px;
+    }
+
+    .info-box.green {
+      background: rgba(16,185,129,0.08);
+      border-color: rgba(16,185,129,0.3);
+      color: #6ee7b7;
+    }
+
+    .info-box strong { color: white; }
+
+    /* Step indicator */
+    .steps-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .step-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--card-border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .step-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: white;
+    }
+
+    .step-arrow { color: #475569; font-size: 1rem; }
+
+    /* Highlight classes for animated transform */
+    .cell-animating {
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .cell-pulse {
+      animation: pulse 0.5s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.12); filter: brightness(1.4); }
+      100% { transform: scale(1); }
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      :root { --cell-size: 50px; }
+      .section { padding: 20px 16px; }
+      h1 { font-size: 1.4rem; }
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--card-border);
+      margin: 24px 0;
+    }
+
+    .formula-box {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--blue);
+      background: rgba(59,130,246,0.1);
+      border-radius: 8px;
+      padding: 10px 18px;
+      display: inline-block;
+      margin-bottom: 16px;
+      letter-spacing: 0.02em;
+    }
+
+    .formula-box.green { color: var(--green); background: rgba(16,185,129,0.1); }
+    .formula-box.purple { color: #a78bfa; background: rgba(139,92,246,0.1); }
+  </style>
+</head>
+<body>
+
+<h1>행렬 이미지 변환 시각화</h1>
+<p class="subtitle">행렬의 왼쪽 곱·오른쪽 곱이 이미지에 미치는 효과를 직관적으로 탐색하세요</p>
+
+<!-- ===== SECTION 1: 행벡터 ===== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge">Section 1</span>
+    <span class="section-title">행벡터 블록 시각화</span>
+  </div>
+  <p class="section-desc">
+    3×3 이미지에서 <strong>행(가로줄 전체)</strong>는 하나의 단위입니다.<br>
+    각 행은 동일한 색상으로 채워져 있어, 행 전체가 <em>하나의 벡터</em>임을 눈으로 확인하세요.
+  </p>
+
+  <div class="grid-container">
+    <div>
+      <div class="grid-label">원본 이미지 A</div>
+      <div style="display:flex; align-items:flex-start; gap:6px;">
+        <!-- Row bracket SVG -->
+        <svg class="row-bracket-svg" width="18" height="calc(62px * 3)" style="height:190px; flex-shrink:0;" viewBox="0 0 18 190">
+          <!-- Row 1 bracket -->
+          <line x1="14" y1="4" x2="14" y2="60" stroke="#fbbf24" stroke-width="2" opacity="0.5"/>
+          <line x1="10" y1="4" x2="14" y2="4" stroke="#fbbf24" stroke-width="2" opacity="0.5"/>
+          <line x1="10" y1="60" x2="14" y2="60" stroke="#fbbf24" stroke-width="2" opacity="0.5"/>
+          <!-- Row 2 bracket -->
+          <line x1="14" y1="66" x2="14" y2="122" stroke="#34d399" stroke-width="2" opacity="0.5"/>
+          <line x1="10" y1="66" x2="14" y2="66" stroke="#34d399" stroke-width="2" opacity="0.5"/>
+          <line x1="10" y1="122" x2="14" y2="122" stroke="#34d399" stroke-width="2" opacity="0.5"/>
+          <!-- Row 3 bracket -->
+          <line x1="14" y1="128" x2="14" y2="184" stroke="#60a5fa" stroke-width="2" opacity="0.5"/>
+          <line x1="10" y1="128" x2="14" y2="128" stroke="#60a5fa" stroke-width="2" opacity="0.5"/>
+          <line x1="10" y1="184" x2="14" y2="184" stroke="#60a5fa" stroke-width="2" opacity="0.5"/>
+        </svg>
+        <div class="pixel-grid" id="grid-row">
+          <!-- Row 1: Red -->
+          <div class="pixel-cell cell-red" data-row="0" data-col="0">r₁</div>
+          <div class="pixel-cell cell-red" data-row="0" data-col="1">r₁</div>
+          <div class="pixel-cell cell-red" data-row="0" data-col="2">r₁</div>
+          <!-- Row 2: Green -->
+          <div class="pixel-cell cell-green" data-row="1" data-col="0">r₂</div>
+          <div class="pixel-cell cell-green" data-row="1" data-col="1">r₂</div>
+          <div class="pixel-cell cell-green" data-row="1" data-col="2">r₂</div>
+          <!-- Row 3: Blue -->
+          <div class="pixel-cell cell-blue" data-row="2" data-col="0">r₃</div>
+          <div class="pixel-cell cell-blue" data-row="2" data-col="1">r₃</div>
+          <div class="pixel-cell cell-blue" data-row="2" data-col="2">r₃</div>
+        </div>
+        <div class="bracket-labels">
+          <div class="bracket-item"><span class="dot" style="background:#ef4444;"></span> 행벡터 r₁ (빨강)</div>
+          <div class="bracket-item"><span class="dot" style="background:#22c55e;"></span> 행벡터 r₂ (초록)</div>
+          <div class="bracket-item"><span class="dot" style="background:#3b82f6;"></span> 행벡터 r₃ (파랑)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn" onclick="highlightRow('grid-row', 0, this)">행 1 강조</button>
+    <button class="btn" onclick="highlightRow('grid-row', 1, this)">행 2 강조</button>
+    <button class="btn" onclick="highlightRow('grid-row', 2, this)">행 3 강조</button>
+    <button class="btn reset" onclick="clearHighlight('grid-row', this)">강조 해제</button>
+  </div>
+
+  <div class="info-box" style="margin-top:16px;">
+    <strong>핵심 개념:</strong> 행렬 A에서 행 전체(r₁, r₂, r₃)가 각각 <em>하나의 행벡터</em>입니다.
+    P·A 를 계산하면, P의 각 행이 A의 행벡터들의 선형결합을 결정합니다 → <strong>상하 방향 변환</strong>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: 열벡터 ===== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge green">Section 2</span>
+    <span class="section-title">열벡터 블록 시각화</span>
+  </div>
+  <p class="section-desc">
+    동일한 이미지에서 <strong>열(세로줄 전체)</strong>는 또 다른 단위입니다.<br>
+    A·Q 를 계산하면, Q의 각 열이 A의 열벡터들의 선형결합을 결정합니다 → <strong>좌우 방향 변환</strong>
+  </p>
+
+  <div class="grid-container">
+    <div>
+      <div class="grid-label">원본 이미지 A (열벡터 관점)</div>
+      <div style="display:flex; flex-direction:column; align-items:flex-start; gap:4px;">
+        <div class="pixel-grid" id="grid-col">
+          <!-- Col 1: Red, Col 2: Green, Col 3: Blue -->
+          <div class="pixel-cell cell-red" data-row="0" data-col="0">c₁</div>
+          <div class="pixel-cell cell-green" data-row="0" data-col="1">c₂</div>
+          <div class="pixel-cell cell-blue" data-row="0" data-col="2">c₃</div>
+          <div class="pixel-cell cell-red" data-row="1" data-col="0">c₁</div>
+          <div class="pixel-cell cell-green" data-row="1" data-col="1">c₂</div>
+          <div class="pixel-cell cell-blue" data-row="1" data-col="2">c₃</div>
+          <div class="pixel-cell cell-red" data-row="2" data-col="0">c₁</div>
+          <div class="pixel-cell cell-green" data-row="2" data-col="1">c₂</div>
+          <div class="pixel-cell cell-blue" data-row="2" data-col="2">c₃</div>
+        </div>
+        <!-- Column bracket SVG below grid -->
+        <svg width="190" height="18" viewBox="0 0 190 18" style="flex-shrink:0;">
+          <line x1="4" y1="4" x2="60" y2="4" stroke="#ef4444" stroke-width="2" opacity="0.6"/>
+          <line x1="4" y1="4" x2="4" y2="10" stroke="#ef4444" stroke-width="2" opacity="0.6"/>
+          <line x1="60" y1="4" x2="60" y2="10" stroke="#ef4444" stroke-width="2" opacity="0.6"/>
+          <line x1="66" y1="4" x2="122" y2="4" stroke="#22c55e" stroke-width="2" opacity="0.6"/>
+          <line x1="66" y1="4" x2="66" y2="10" stroke="#22c55e" stroke-width="2" opacity="0.6"/>
+          <line x1="122" y1="4" x2="122" y2="10" stroke="#22c55e" stroke-width="2" opacity="0.6"/>
+          <line x1="128" y1="4" x2="184" y2="4" stroke="#3b82f6" stroke-width="2" opacity="0.6"/>
+          <line x1="128" y1="4" x2="128" y2="10" stroke="#3b82f6" stroke-width="2" opacity="0.6"/>
+          <line x1="184" y1="4" x2="184" y2="10" stroke="#3b82f6" stroke-width="2" opacity="0.6"/>
+        </svg>
+        <div class="col-bracket-labels">
+          <div class="col-bracket-item"><span style="color:#ef4444; font-size:0.72rem;">열벡터 c₁</span></div>
+          <div class="col-bracket-item"><span style="color:#22c55e; font-size:0.72rem;">열벡터 c₂</span></div>
+          <div class="col-bracket-item"><span style="color:#3b82f6; font-size:0.72rem;">열벡터 c₃</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn" onclick="highlightCol('grid-col', 0, this)">열 1 강조</button>
+    <button class="btn" onclick="highlightCol('grid-col', 1, this)">열 2 강조</button>
+    <button class="btn" onclick="highlightCol('grid-col', 2, this)">열 3 강조</button>
+    <button class="btn reset" onclick="clearHighlight('grid-col', this)">강조 해제</button>
+  </div>
+
+  <div class="info-box green" style="margin-top:16px;">
+    <strong>핵심 개념:</strong> 행렬 A에서 열 전체(c₁, c₂, c₃)가 각각 <em>하나의 열벡터</em>입니다.
+    A·Q 를 계산하면, Q가 A의 열벡터들을 재배치합니다 → <strong>좌우 방향 변환</strong>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: 왼쪽 곱 P·A ===== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge yellow">Section 3</span>
+    <span class="section-title">왼쪽 곱 P·A = 상하 대칭</span>
+  </div>
+  <p class="section-desc">
+    P를 A의 왼쪽에 곱하면, P의 구조가 A의 <strong>행(가로줄)을 재배치</strong>합니다.<br>
+    아래 P는 행1과 행3을 교환합니다: 빨강 ↔ 파랑 → 상하 대칭(수직 반전)
+  </p>
+
+  <div class="formula-box">P · A = A의 행을 재배치 → 상하 변환</div>
+
+  <div class="transform-scene" id="pa-scene">
+    <!-- Matrix P -->
+    <div class="matrix-box">
+      <div class="matrix-name">변환 행렬 P</div>
+      <div class="math-matrix" style="grid-template-columns: repeat(3, 34px);">
+        <div class="math-cell zero">0</div><div class="math-cell zero">0</div><div class="math-cell one">1</div>
+        <div class="math-cell zero">0</div><div class="math-cell one">1</div><div class="math-cell zero">0</div>
+        <div class="math-cell one">1</div><div class="math-cell zero">0</div><div class="math-cell zero">0</div>
+      </div>
+      <div style="font-size:0.72rem; color:var(--text-muted); margin-top:6px; text-align:center;">행1↔행3 교환</div>
+    </div>
+
+    <div class="matrix-symbol">×</div>
+
+    <!-- Original A (row image) -->
+    <div class="matrix-box">
+      <div class="matrix-name">원본 이미지 A</div>
+      <div class="pixel-grid" id="grid-pa-orig">
+        <div class="pixel-cell cell-red" data-row="0">r₁</div>
+        <div class="pixel-cell cell-red" data-row="0">r₁</div>
+        <div class="pixel-cell cell-red" data-row="0">r₁</div>
+        <div class="pixel-cell cell-green" data-row="1">r₂</div>
+        <div class="pixel-cell cell-green" data-row="1">r₂</div>
+        <div class="pixel-cell cell-green" data-row="1">r₂</div>
+        <div class="pixel-cell cell-blue" data-row="2">r₃</div>
+        <div class="pixel-cell cell-blue" data-row="2">r₃</div>
+        <div class="pixel-cell cell-blue" data-row="2">r₃</div>
+      </div>
+    </div>
+
+    <div class="matrix-symbol">=</div>
+
+    <!-- Arrow + Result -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <div class="arrow-svg-container" id="pa-arrow-container">
+        <svg id="pa-arrow-svg" width="80" height="180" viewBox="0 0 80 180" style="overflow:visible;">
+          <!-- Arrows will be drawn dynamically -->
+        </svg>
+      </div>
+    </div>
+
+    <div class="matrix-box">
+      <div class="matrix-name">결과 P·A</div>
+      <div class="pixel-grid" id="grid-pa-result">
+        <div class="pixel-cell cell-blue">r₃</div>
+        <div class="pixel-cell cell-blue">r₃</div>
+        <div class="pixel-cell cell-blue">r₃</div>
+        <div class="pixel-cell cell-green">r₂</div>
+        <div class="pixel-cell cell-green">r₂</div>
+        <div class="pixel-cell cell-green">r₂</div>
+        <div class="pixel-cell cell-red">r₁</div>
+        <div class="pixel-cell cell-red">r₁</div>
+        <div class="pixel-cell cell-red">r₁</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-group" style="margin-top:20px;">
+    <button class="btn primary" onclick="animatePA()">애니메이션 실행</button>
+    <button class="btn reset" onclick="resetPA()">초기화</button>
+  </div>
+
+  <div class="info-box" style="margin-top:16px;">
+    <strong>P 읽는 법:</strong> P의 첫 번째 행 [0,0,1] → 결과의 1행 = A의 3행 (파랑)<br>
+    P의 세 번째 행 [1,0,0] → 결과의 3행 = A의 1행 (빨강)<br>
+    → 상하 대칭 완성!
+  </div>
+</div>
+
+<!-- ===== SECTION 4: 오른쪽 곱 A·Q ===== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge" style="background:#8b5cf6;">Section 4</span>
+    <span class="section-title">오른쪽 곱 A·Q = 좌우 대칭</span>
+  </div>
+  <p class="section-desc">
+    Q를 A의 오른쪽에 곱하면, Q의 구조가 A의 <strong>열(세로줄)을 재배치</strong>합니다.<br>
+    아래 Q는 열1과 열3을 교환합니다: 빨강 ↔ 파랑 → 좌우 대칭(수평 반전)
+  </p>
+
+  <div class="formula-box purple">A · Q = A의 열을 재배치 → 좌우 변환</div>
+
+  <div class="transform-scene" id="aq-scene">
+    <!-- Original A (col image) -->
+    <div class="matrix-box">
+      <div class="matrix-name">원본 이미지 A</div>
+      <div class="pixel-grid" id="grid-aq-orig">
+        <div class="pixel-cell cell-red">c₁</div>
+        <div class="pixel-cell cell-green">c₂</div>
+        <div class="pixel-cell cell-blue">c₃</div>
+        <div class="pixel-cell cell-red">c₁</div>
+        <div class="pixel-cell cell-green">c₂</div>
+        <div class="pixel-cell cell-blue">c₃</div>
+        <div class="pixel-cell cell-red">c₁</div>
+        <div class="pixel-cell cell-green">c₂</div>
+        <div class="pixel-cell cell-blue">c₃</div>
+      </div>
+    </div>
+
+    <div class="matrix-symbol">×</div>
+
+    <!-- Matrix Q -->
+    <div class="matrix-box">
+      <div class="matrix-name">변환 행렬 Q</div>
+      <div class="math-matrix" style="grid-template-columns: repeat(3, 34px);">
+        <div class="math-cell zero">0</div><div class="math-cell zero">0</div><div class="math-cell one">1</div>
+        <div class="math-cell zero">0</div><div class="math-cell one">1</div><div class="math-cell zero">0</div>
+        <div class="math-cell one">1</div><div class="math-cell zero">0</div><div class="math-cell zero">0</div>
+      </div>
+      <div style="font-size:0.72rem; color:var(--text-muted); margin-top:6px; text-align:center;">열1↔열3 교환</div>
+    </div>
+
+    <div class="matrix-symbol">=</div>
+
+    <!-- Arrow area -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <div class="arrow-svg-container" id="aq-arrow-container">
+        <svg id="aq-arrow-svg" width="80" height="180" viewBox="0 0 80 180" style="overflow:visible;">
+        </svg>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="matrix-box">
+      <div class="matrix-name">결과 A·Q</div>
+      <div class="pixel-grid" id="grid-aq-result">
+        <div class="pixel-cell cell-blue">c₃</div>
+        <div class="pixel-cell cell-green">c₂</div>
+        <div class="pixel-cell cell-red">c₁</div>
+        <div class="pixel-cell cell-blue">c₃</div>
+        <div class="pixel-cell cell-green">c₂</div>
+        <div class="pixel-cell cell-red">c₁</div>
+        <div class="pixel-cell cell-blue">c₃</div>
+        <div class="pixel-cell cell-green">c₂</div>
+        <div class="pixel-cell cell-red">c₁</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-group" style="margin-top:20px;">
+    <button class="btn success" onclick="animateAQ()">애니메이션 실행</button>
+    <button class="btn reset" onclick="resetAQ()">초기화</button>
+  </div>
+
+  <div class="info-box green" style="margin-top:16px;">
+    <strong>Q 읽는 법:</strong> Q의 첫 번째 열 [0,0,1]ᵀ → 결과의 1열 = A의 3열 (파랑)<br>
+    Q의 세 번째 열 [1,0,0]ᵀ → 결과의 3열 = A의 1열 (빨강)<br>
+    → 좌우 대칭 완성!
+  </div>
+</div>
+
+<!-- ===== SECTION 5: P·A·Q = 180° 회전 ===== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge" style="background: linear-gradient(135deg, #f59e0b, #8b5cf6); background-clip: unset; -webkit-background-clip: unset;">Section 5</span>
+    <span class="section-title">P·A·Q = 180° 회전 (단계별)</span>
+  </div>
+  <p class="section-desc">
+    상하 대칭(P·A) 후 좌우 대칭(·Q)을 적용하면 180° 회전이 됩니다.<br>
+    단계 버튼을 순서대로 눌러 변환 과정을 확인하세요.
+  </p>
+
+  <div class="formula-box purple">P · A · Q = (상하 대칭) × (좌우 대칭) = 180° 회전</div>
+
+  <div class="steps-row">
+    <button class="step-btn active" id="step-btn-0" onclick="goToStep(0)">① 원본 A</button>
+    <span class="step-arrow">→</span>
+    <button class="step-btn" id="step-btn-1" onclick="goToStep(1)">② P·A (상하 대칭)</button>
+    <span class="step-arrow">→</span>
+    <button class="step-btn" id="step-btn-2" onclick="goToStep(2)">③ P·A·Q (180° 회전)</button>
+  </div>
+
+  <div style="display:flex; gap:32px; align-items:flex-start; flex-wrap:wrap;">
+    <!-- Step display area -->
+    <div>
+      <div class="grid-label" id="paq-label">① 원본 이미지 A</div>
+      <div class="pixel-grid" id="grid-paq" style="--cell-size: 74px;">
+        <!-- cells rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <div style="flex:1; min-width:220px;">
+      <div id="step-desc" style="padding:16px; background:#0f172a; border-radius:10px; border:1px solid #334155; font-size:0.9rem; line-height:1.9; color:var(--text-muted);">
+        <!-- filled by JS -->
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:8px;">
+        <button class="btn primary" id="paq-prev" onclick="prevStep()" style="display:none;">← 이전</button>
+        <button class="btn primary" id="paq-next" onclick="nextStep()">다음 단계 →</button>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div style="font-size:0.88rem; color:var(--text-muted); line-height:2;">
+    <strong style="color:var(--text);">요약 비교표</strong><br>
+    <span style="color:#fbbf24;">■</span> P·A = 상하 대칭 (행 교환, 수직 반전)<br>
+    <span style="color:#34d399;">■</span> A·Q = 좌우 대칭 (열 교환, 수평 반전)<br>
+    <span style="color:#a78bfa;">■</span> P·A·Q = 180° 회전 = 상하 + 좌우 동시 반전
+  </div>
+</div>
+
+<script>
+// ========== DATA ==========
+
+// Row-image: rows are uniform color
+const ROW_COLORS = ['cell-red', 'cell-green', 'cell-blue'];
+const ROW_LABELS = ['r₁', 'r₂', 'r₃'];
+
+// Col-image: cols are uniform color
+const COL_COLORS = ['cell-red', 'cell-green', 'cell-blue'];
+const COL_LABELS = ['c₁', 'c₂', 'c₃'];
+
+// ========== SECTION 1 & 2: HIGHLIGHT ==========
+
+function highlightRow(gridId, row, btn) {
+  const grid = document.getElementById(gridId);
+  const cells = grid.querySelectorAll('.pixel-cell');
+  const btns = btn.closest('.btn-group').querySelectorAll('.btn:not(.reset)');
+
+  btns.forEach(b => b.classList.remove('active-row'));
+  btn.classList.add('active-row');
+
+  cells.forEach(cell => {
+    cell.classList.remove('highlight-row');
+    if (parseInt(cell.dataset.row) === row) {
+      cell.classList.add('highlight-row');
+    }
+  });
+}
+
+function highlightCol(gridId, col, btn) {
+  const grid = document.getElementById(gridId);
+  const cells = grid.querySelectorAll('.pixel-cell');
+  const btns = btn.closest('.btn-group').querySelectorAll('.btn:not(.reset)');
+
+  btns.forEach(b => b.classList.remove('active-col'));
+  btn.classList.add('active-col');
+
+  cells.forEach(cell => {
+    cell.classList.remove('highlight-col');
+    if (parseInt(cell.dataset.col) === col) {
+      cell.classList.add('highlight-col');
+    }
+  });
+}
+
+function clearHighlight(gridId, btn) {
+  const grid = document.getElementById(gridId);
+  grid.querySelectorAll('.pixel-cell').forEach(c => {
+    c.classList.remove('highlight-row', 'highlight-col');
+  });
+  const allBtns = btn.closest('.btn-group').querySelectorAll('.btn');
+  allBtns.forEach(b => b.classList.remove('active-row', 'active-col'));
+}
+
+// ========== SECTION 3: P·A ANIMATION ==========
+
+let paAnimating = false;
+
+function drawPAArrows(progress) {
+  const svg = document.getElementById('pa-arrow-svg');
+  const origGrid = document.getElementById('grid-pa-orig');
+  const resultGrid = document.getElementById('grid-pa-result');
+
+  const cellH = 64;
+  // Row 0 orig -> Row 2 result (red to bottom)
+  // Row 2 orig -> Row 0 result (blue to top)
+
+  svg.innerHTML = '';
+
+  const arrowData = [
+    { fromY: cellH * 0.5, toY: cellH * 2.5, color: '#ef4444', label: 'r₁→3행' },
+    { fromY: cellH * 1.5, toY: cellH * 1.5, color: '#22c55e', label: 'r₂→2행' },
+    { fromY: cellH * 2.5, toY: cellH * 0.5, color: '#3b82f6', label: 'r₃→1행' },
+  ];
+
+  arrowData.forEach(({ fromY, toY, color, label }) => {
+    const curY = fromY + (toY - fromY) * progress;
+
+    // Arrow line
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', '10'); line.setAttribute('y1', String(fromY));
+    line.setAttribute('x2', '70'); line.setAttribute('y2', String(curY));
+    line.setAttribute('stroke', color); line.setAttribute('stroke-width', '2.5');
+    line.setAttribute('stroke-dasharray', '6 3');
+    line.setAttribute('opacity', String(0.3 + progress * 0.7));
+    svg.appendChild(line);
+
+    // Arrowhead
+    if (progress > 0.1) {
+      const angle = Math.atan2(curY - fromY, 60) * 180 / Math.PI;
+      const ah = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      const tip = { x: 70, y: curY };
+      const back = { x: 70 - 10 * Math.cos(angle * Math.PI / 180), y: curY - 10 * Math.sin(angle * Math.PI / 180) };
+      const perp = { x: -Math.sin(angle * Math.PI / 180) * 5, y: Math.cos(angle * Math.PI / 180) * 5 };
+      ah.setAttribute('points',
+        `${tip.x},${tip.y} ${back.x + perp.x},${back.y + perp.y} ${back.x - perp.x},${back.y - perp.y}`
+      );
+      ah.setAttribute('fill', color);
+      ah.setAttribute('opacity', String(progress));
+      svg.appendChild(ah);
+    }
+
+    // Label
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', '38'); text.setAttribute('y', String((fromY + curY) / 2 - 4));
+    text.setAttribute('fill', color); text.setAttribute('font-size', '9');
+    text.setAttribute('text-anchor', 'middle'); text.setAttribute('font-family', 'Noto Sans KR, sans-serif');
+    text.textContent = label;
+    svg.appendChild(text);
+  });
+}
+
+async function animatePA() {
+  if (paAnimating) return;
+  paAnimating = true;
+
+  resetPA(false);
+
+  const origCells = document.getElementById('grid-pa-orig').querySelectorAll('.pixel-cell');
+  const resultGrid = document.getElementById('grid-pa-result');
+  resultGrid.style.opacity = '0.2';
+
+  // Highlight rows in order
+  const rowColors = [
+    { cells: [0,1,2], highlight: 'highlight-row' },
+  ];
+
+  // Animate arrows
+  let start = null;
+  const duration = 1000;
+
+  await new Promise(resolve => {
+    function frame(ts) {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      drawPAArrows(p);
+
+      // Highlight orig rows based on progress
+      origCells.forEach(cell => cell.classList.remove('highlight-row'));
+      if (p < 0.33) {
+        [0,1,2].forEach(i => origCells[i].classList.add('highlight-row'));
+      } else if (p < 0.66) {
+        [3,4,5].forEach(i => origCells[i].classList.add('highlight-row'));
+      } else {
+        [6,7,8].forEach(i => origCells[i].classList.add('highlight-row'));
+      }
+
+      if (p < 1) requestAnimationFrame(frame);
+      else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+
+  // Show result with pulse
+  resultGrid.style.transition = 'opacity 0.4s';
+  resultGrid.style.opacity = '1';
+  resultGrid.querySelectorAll('.pixel-cell').forEach(c => {
+    c.classList.add('cell-pulse');
+    setTimeout(() => c.classList.remove('cell-pulse'), 600);
+  });
+
+  origCells.forEach(cell => cell.classList.remove('highlight-row'));
+  paAnimating = false;
+}
+
+function resetPA(redraw = true) {
+  const svg = document.getElementById('pa-arrow-svg');
+  if (redraw) {
+    svg.innerHTML = '';
+    drawPAArrows(0);
+  }
+  const origCells = document.getElementById('grid-pa-orig').querySelectorAll('.pixel-cell');
+  origCells.forEach(c => c.classList.remove('highlight-row'));
+  const resultGrid = document.getElementById('grid-pa-result');
+  resultGrid.style.opacity = '1';
+}
+
+// ========== SECTION 4: A·Q ANIMATION ==========
+
+let aqAnimating = false;
+
+function drawAQArrows(progress) {
+  const svg = document.getElementById('aq-arrow-svg');
+  svg.innerHTML = '';
+
+  const cellW = 64;
+  const arrowData = [
+    { fromX: cellW * 0.5, toX: cellW * 2.5, color: '#ef4444', label: 'c₁→3열' },
+    { fromX: cellW * 1.5, toX: cellW * 1.5, color: '#22c55e', label: 'c₂→2열' },
+    { fromX: cellW * 2.5, toX: cellW * 0.5, color: '#3b82f6', label: 'c₃→1열' },
+  ];
+
+  // Draw horizontal arrows
+  arrowData.forEach(({ fromX, toX, color, label }, i) => {
+    const curX = fromX + (toX - fromX) * progress;
+    const y = 30 + i * 40;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', '5'); line.setAttribute('y1', String(y));
+    line.setAttribute('x2', String(5 + (curX / (cellW * 3)) * 70)); line.setAttribute('y2', String(y));
+    line.setAttribute('stroke', color); line.setAttribute('stroke-width', '2.5');
+    line.setAttribute('stroke-dasharray', '6 3');
+    line.setAttribute('opacity', String(0.3 + progress * 0.7));
+    svg.appendChild(line);
+
+    if (progress > 0.1) {
+      const endX = 5 + (curX / (cellW * 3)) * 70;
+      const ah = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      const dir = toX > fromX ? 1 : -1;
+      ah.setAttribute('points', `${endX},${y} ${endX - dir*10},${y-5} ${endX - dir*10},${y+5}`);
+      ah.setAttribute('fill', color);
+      ah.setAttribute('opacity', String(progress));
+      svg.appendChild(ah);
+    }
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', '40'); text.setAttribute('y', String(y - 6));
+    text.setAttribute('fill', color); text.setAttribute('font-size', '9');
+    text.setAttribute('text-anchor', 'middle'); text.setAttribute('font-family', 'Noto Sans KR, sans-serif');
+    text.textContent = label;
+    svg.appendChild(text);
+  });
+}
+
+async function animateAQ() {
+  if (aqAnimating) return;
+  aqAnimating = true;
+
+  resetAQ(false);
+
+  const origCells = document.getElementById('grid-aq-orig').querySelectorAll('.pixel-cell');
+  const resultGrid = document.getElementById('grid-aq-result');
+  resultGrid.style.opacity = '0.2';
+
+  let start = null;
+  const duration = 1000;
+
+  await new Promise(resolve => {
+    function frame(ts) {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      drawAQArrows(p);
+
+      origCells.forEach(cell => cell.classList.remove('highlight-col'));
+      const colIdx = p < 0.33 ? 0 : p < 0.66 ? 1 : 2;
+      origCells.forEach(cell => {
+        if (parseInt(cell.dataset.col) === colIdx) cell.classList.add('highlight-col');
+      });
+
+      if (p < 1) requestAnimationFrame(frame);
+      else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+
+  resultGrid.style.transition = 'opacity 0.4s';
+  resultGrid.style.opacity = '1';
+  resultGrid.querySelectorAll('.pixel-cell').forEach(c => {
+    c.classList.add('cell-pulse');
+    setTimeout(() => c.classList.remove('cell-pulse'), 600);
+  });
+
+  origCells.forEach(c => c.classList.remove('highlight-col'));
+  aqAnimating = false;
+}
+
+function resetAQ(redraw = true) {
+  const svg = document.getElementById('aq-arrow-svg');
+  if (redraw) {
+    svg.innerHTML = '';
+    drawAQArrows(0);
+  }
+  document.getElementById('grid-aq-orig').querySelectorAll('.pixel-cell').forEach(c => c.classList.remove('highlight-col'));
+  document.getElementById('grid-aq-result').style.opacity = '1';
+}
+
+// ========== SECTION 5: STEP-BY-STEP P·A·Q ==========
+
+let currentStep = 0;
+
+// Three states of the PAQ grid
+// State 0: Original A (row image: rows uniform)
+// State 1: P·A (rows swapped: blue, green, red)
+// State 2: P·A·Q (also swap cols: each row reversed)
+
+const PAQ_STATES = [
+  {
+    label: '① 원본 이미지 A',
+    cells: [
+      { cls: 'cell-red', lbl: 'r₁c₁' }, { cls: 'cell-red', lbl: 'r₁c₂' }, { cls: 'cell-red', lbl: 'r₁c₃' },
+      { cls: 'cell-green', lbl: 'r₂c₁' }, { cls: 'cell-green', lbl: 'r₂c₂' }, { cls: 'cell-green', lbl: 'r₂c₃' },
+      { cls: 'cell-blue', lbl: 'r₃c₁' }, { cls: 'cell-blue', lbl: 'r₃c₂' }, { cls: 'cell-blue', lbl: 'r₃c₃' },
+    ],
+    desc: `<strong style="color:white;">원본 이미지 A</strong><br>
+행 1 (위) → 빨강 (r₁)<br>
+행 2 (중) → 초록 (r₂)<br>
+행 3 (아래) → 파랑 (r₃)<br><br>
+다음 단계에서 P를 왼쪽에 곱해<br>행을 재배치합니다.`
+  },
+  {
+    label: '② P·A (상하 대칭)',
+    cells: [
+      { cls: 'cell-blue', lbl: 'r₃c₁' }, { cls: 'cell-blue', lbl: 'r₃c₂' }, { cls: 'cell-blue', lbl: 'r₃c₃' },
+      { cls: 'cell-green', lbl: 'r₂c₁' }, { cls: 'cell-green', lbl: 'r₂c₂' }, { cls: 'cell-green', lbl: 'r₂c₃' },
+      { cls: 'cell-red', lbl: 'r₁c₁' }, { cls: 'cell-red', lbl: 'r₁c₂' }, { cls: 'cell-red', lbl: 'r₁c₃' },
+    ],
+    desc: `<strong style="color:#fbbf24;">P·A 적용 후 (상하 대칭)</strong><br>
+행 1 (위) → 파랑 (r₃ 로 이동)<br>
+행 2 (중) → 초록 (r₂ 유지)<br>
+행 3 (아래) → 빨강 (r₁ 로 이동)<br><br>
+P = [[0,0,1],[0,1,0],[1,0,0]]<br>
+행1↔행3 교환 완료.`
+  },
+  {
+    label: '③ P·A·Q (180° 회전)',
+    cells: [
+      { cls: 'cell-red', lbl: 'r₁c₃' }, { cls: 'cell-green', lbl: 'r₂c₂' }, { cls: 'cell-blue', lbl: 'r₃c₁' },
+      { cls: 'cell-red', lbl: 'r₁c₃' }, { cls: 'cell-green', lbl: 'r₂c₂' }, { cls: 'cell-blue', lbl: 'r₃c₁' },
+      { cls: 'cell-red', lbl: 'r₁c₃' }, { cls: 'cell-green', lbl: 'r₂c₂' }, { cls: 'cell-blue', lbl: 'r₃c₁' },
+    ],
+    desc: `<strong style="color:#a78bfa;">P·A·Q 적용 후 (180° 회전)</strong><br>
+상하 대칭 + 좌우 대칭 = 180° 회전!<br><br>
+각 행이 오른쪽→왼쪽으로 반전됩니다:<br>
+· 위→아래 (행 재배치)<br>
+· 좌→우 (열 재배치)<br><br>
+Q = P 동일 행렬 사용 시<br>결과 = 완전한 180° 회전`
+  }
+];
+
+// Actually for P·A·Q with P=Q=[[0,0,1],[0,1,0],[1,0,0]]:
+// P·A swaps row1 and row3. Then ·Q swaps col1 and col3 of that result.
+// P·A = [blue,blue,blue / green,green,green / red,red,red]
+// (P·A)·Q: swap col1&col3 of each row
+// row1: [blue,blue,blue] -> col swap -> [blue,blue,blue] (uniform, no visible change)
+// So for uniform-color rows, P·A·Q with col swap is not visible.
+// Let me use a different mixed image for PAQ section.
+
+// Use a checkered-like image for PAQ:
+// A = [[red,green,blue],[yellow,white,red],[green,blue,yellow]]
+const PAQ_MIXED = {
+  orig: [
+    {cls:'cell-red',lbl:'(1,1)'},{cls:'cell-green',lbl:'(1,2)'},{cls:'cell-blue',lbl:'(1,3)'},
+    {cls:'cell-yellow',lbl:'(2,1)'},{cls:'cell-white',lbl:'(2,2)'},{cls:'cell-red',lbl:'(2,3)'},
+    {cls:'cell-green',lbl:'(3,1)'},{cls:'cell-blue',lbl:'(3,2)'},{cls:'cell-yellow',lbl:'(3,3)'},
+  ],
+  // P·A: swap row1 and row3
+  pa: [
+    {cls:'cell-green',lbl:'(3,1)'},{cls:'cell-blue',lbl:'(3,2)'},{cls:'cell-yellow',lbl:'(3,3)'},
+    {cls:'cell-yellow',lbl:'(2,1)'},{cls:'cell-white',lbl:'(2,2)'},{cls:'cell-red',lbl:'(2,3)'},
+    {cls:'cell-red',lbl:'(1,1)'},{cls:'cell-green',lbl:'(1,2)'},{cls:'cell-blue',lbl:'(1,3)'},
+  ],
+  // (P·A)·Q: swap col1 and col3 of P·A
+  paq: [
+    {cls:'cell-yellow',lbl:'(3,3)'},{cls:'cell-blue',lbl:'(3,2)'},{cls:'cell-green',lbl:'(3,1)'},
+    {cls:'cell-red',lbl:'(2,3)'},{cls:'cell-white',lbl:'(2,2)'},{cls:'cell-yellow',lbl:'(2,1)'},
+    {cls:'cell-blue',lbl:'(1,3)'},{cls:'cell-green',lbl:'(1,2)'},{cls:'cell-red',lbl:'(1,1)'},
+  ],
+};
+
+const PAQ_STEPS = [
+  {
+    label: '① 원본 이미지 A',
+    cells: PAQ_MIXED.orig,
+    desc: `<strong style="color:white;">원본 이미지 A</strong><br>
+서로 다른 색상의 픽셀로 구성된<br>3×3 이미지입니다.<br><br>
+좌상단(1,1): 빨강 → 우하단(3,3): 노랑<br><br>
+다음 단계에서 P를 왼쪽에 곱합니다.`
+  },
+  {
+    label: '② P·A (상하 대칭)',
+    cells: PAQ_MIXED.pa,
+    desc: `<strong style="color:#fbbf24;">P·A 적용 (상하 대칭)</strong><br>
+행 1↔행 3이 교환되었습니다.<br><br>
+P = [[0,0,1],[0,1,0],[1,0,0]]<br>
+· 행1 → 원래 행3의 값으로<br>
+· 행2 → 유지<br>
+· 행3 → 원래 행1의 값으로<br><br>
+수직 반전(상하 대칭) 완료!`
+  },
+  {
+    label: '③ P·A·Q (180° 회전)',
+    cells: PAQ_MIXED.paq,
+    desc: `<strong style="color:#a78bfa;">P·A·Q (180° 회전)</strong><br>
+열 1↔열 3도 추가로 교환됩니다.<br><br>
+Q = [[0,0,1],[0,1,0],[1,0,0]]<br>
+· 열1 → 원래 열3의 값으로<br>
+· 열2 → 유지<br>
+· 열3 → 원래 열1의 값으로<br><br>
+상하 + 좌우 = 완전한 180° 회전!<br>
+<span style="color:#a78bfa;">좌상단 ↔ 우하단</span>`
+  }
+];
+
+function renderPAQGrid(stepIdx) {
+  const grid = document.getElementById('grid-paq');
+  const state = PAQ_STEPS[stepIdx];
+  grid.innerHTML = '';
+  state.cells.forEach(({ cls, lbl }) => {
+    const cell = document.createElement('div');
+    cell.className = `pixel-cell ${cls} cell-animating`;
+    cell.textContent = '';
+    grid.appendChild(cell);
+  });
+  document.getElementById('paq-label').textContent = state.label;
+  document.getElementById('step-desc').innerHTML = state.desc;
+
+  // Update step buttons
+  for (let i = 0; i < 3; i++) {
+    const btn = document.getElementById(`step-btn-${i}`);
+    btn.classList.toggle('active', i === stepIdx);
+  }
+
+  // Prev/Next buttons
+  document.getElementById('paq-prev').style.display = stepIdx > 0 ? 'inline-block' : 'none';
+  document.getElementById('paq-next').style.display = stepIdx < 2 ? 'inline-block' : 'none';
+  document.getElementById('paq-next').textContent = stepIdx < 2 ? '다음 단계 →' : '완료';
+
+  // Pulse animation
+  grid.querySelectorAll('.pixel-cell').forEach((c, i) => {
+    setTimeout(() => {
+      c.classList.add('cell-pulse');
+      setTimeout(() => c.classList.remove('cell-pulse'), 500);
+    }, i * 30);
+  });
+}
+
+function goToStep(idx) {
+  currentStep = idx;
+  renderPAQGrid(idx);
+}
+
+function nextStep() {
+  if (currentStep < 2) goToStep(currentStep + 1);
+}
+
+function prevStep() {
+  if (currentStep > 0) goToStep(currentStep - 1);
+}
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', () => {
+  drawPAArrows(0);
+  drawAQArrows(0);
+  renderPAQGrid(0);
+
+  // Add col data to col-grid cells
+  const colGrid = document.getElementById('grid-col');
+  if (colGrid) {
+    colGrid.querySelectorAll('.pixel-cell').forEach(cell => {
+      // already has data-row, need data-col from position
+    });
+  }
+});
+</script>
+</body>
+</html>

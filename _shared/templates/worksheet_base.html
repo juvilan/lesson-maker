@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{LESSON_TITLE}} - 학습지</title>
+  <style>
+    /* ── 폰트 ── */
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    /* ── A4 인쇄 설정 ── */
+    @page {
+      size: A4;
+      margin: 15mm 15mm 20mm 15mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 10pt; }
+    }
+
+    /* ── 페이지 컨테이너 ── */
+    .ws-page {
+      width: 210mm;
+      /* min-height 제거: @page margin(15/20mm)과 중복으로 A4 인쇄 영역(262mm) 초과 방지 */
+      padding: 15mm 15mm 20mm 15mm;
+      margin: 0 auto;
+      background: #fff;
+      page-break-after: always;
+    }
+    .ws-page:last-child {
+      page-break-after: auto;
+    }
+    @media print {
+      /* 인쇄 시 @page margin이 여백을 담당하므로 padding 중복 제거 */
+      .ws-page {
+        padding: 0;
+        width: auto;
+      }
+    }
+
+    /* ── 헤더 ── */
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+    .ws-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .ws-title {
+      font-size: 14pt;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .ws-meta {
+      font-size: 9pt;
+      color: #666;
+      text-align: right;
+    }
+
+    /* ── 학생 정보란 ── */
+    .student-info {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    .student-field {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10pt;
+    }
+    .student-field label {
+      font-weight: 500;
+      white-space: nowrap;
+      color: #444;
+    }
+    .field-line {
+      width: 80px;
+      border-bottom: 1px solid #999;
+      height: 20px;
+    }
+
+    /* ── 문제 (핵심: 하나의 단위로 묶어 페이지 분할 방지) ── */
+    .problem {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      margin-bottom: 20px;
+      padding: 10px 12px;
+    }
+
+    .problem-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .problem-number {
+      font-weight: 700;
+      font-size: 11pt;
+    }
+
+    .problem-body {
+      font-size: 11pt;
+      line-height: 1.7;
+    }
+    .problem-body p {
+      margin-bottom: 6px;
+    }
+
+    /* ── 객관식 선택지 ── */
+    .choices {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 24px;
+      margin: 8px 0 8px 8px;
+      font-size: 10.5pt;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .choices li {
+      display: flex;
+      gap: 5px;
+      align-items: baseline;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* ── 표 ── */
+    .ws-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      font-size: 10pt;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .ws-table th {
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      padding: 5px 8px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .ws-table td {
+      border: 1px solid #ddd;
+      padding: 5px 8px;
+      text-align: center;
+    }
+    .ws-table td.left { text-align: left; }
+
+    /* ── 답안 공간 (border 없음, 빈 공간만) ── */
+    .answer-space {
+      min-height: 35mm;
+      margin-top: 10px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .answer-space.sm { min-height: 20mm; }
+    .answer-space.md { min-height: 50mm; }
+    .answer-space.lg { min-height: 70mm; }
+
+    /* ── 소단원 구분선 ── */
+    .section-title {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #555;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 3px;
+      margin: 16px 0 10px;
+    }
+
+    /* ── 정보·공식 박스 ── */
+    .info-box {
+      background: #f8f8f8;
+      border-left: 3px solid #bbb;
+      padding: 7px 10px;
+      margin: 8px 0;
+      font-size: 10pt;
+      color: #444;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* ── 페이지 번호 ── */
+    .page-number {
+      text-align: center;
+      font-size: 9pt;
+      color: #999;
+      margin-top: 14px;
+      padding-top: 6px;
+      border-top: 1px solid #eee;
+    }
+  </style>
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] }
+    };
+    window.safeTypeset = window.safeTypeset || function(elements) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body>
+
+{{PROBLEMS_HTML}}
+
+</body>
+</html>

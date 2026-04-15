@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>학습지_1-2_인공지능의역사</title>
+  <style>
+    @page { size: A4; margin: 15mm 20mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Apple SD Gothic Neo', '맑은 고딕', 'Malgun Gothic', sans-serif;
+      font-size: 11pt;
+      color: #111;
+      background: #fff;
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 15mm 20mm;
+    }
+
+    /* 헤더 */
+    .header {
+      border-bottom: 2.5px solid #f39c12;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+    .header h1 { font-size: 15pt; color: #f39c12; margin: 0 0 3px; font-weight: 700; }
+    .header .meta { font-size: 9pt; color: #666; }
+
+    /* 학생 정보 */
+    .student-info {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 14px;
+      font-size: 10pt;
+      align-items: center;
+    }
+    .student-info .label { color: #555; }
+    .student-info .field {
+      display: inline-block;
+      border-bottom: 1px solid #aaa;
+      min-width: 80px;
+      height: 18px;
+    }
+
+    /* 문제 블록 */
+    .problem {
+      page-break-inside: avoid;
+      margin-bottom: 18px;
+    }
+    .problem-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .problem-num {
+      color: #f39c12;
+      font-weight: 700;
+      font-size: 11.5pt;
+    }
+    .bloom-tag {
+      font-size: 8pt;
+      color: #888;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 1px 5px;
+      margin-left: 6px;
+    }
+    .score-tag {
+      font-size: 9pt;
+      color: #888;
+      font-weight: normal;
+    }
+    .problem-q {
+      margin: 4px 0 8px;
+      line-height: 1.75;
+      font-size: 10.5pt;
+    }
+    .problem-q .kw { color: #f39c12; font-weight: 700; }
+    .answer-space {
+      min-height: 55px;
+      background: #fafafa;
+      border-radius: 4px;
+      padding: 8px 10px;
+    }
+    .answer-space-md {
+      min-height: 75px;
+      background: #fafafa;
+      border-radius: 4px;
+      padding: 8px 10px;
+    }
+    .answer-space-lg {
+      min-height: 95px;
+      background: #fafafa;
+      border-radius: 4px;
+      padding: 8px 10px;
+    }
+
+    /* 진리표 */
+    .tbl {
+      border-collapse: collapse;
+      font-size: 10pt;
+      margin: 6px 0;
+    }
+    .tbl th {
+      background: #f39c12;
+      color: #fff;
+      padding: 5px 14px;
+      text-align: center;
+      font-weight: 700;
+    }
+    .tbl td {
+      border: 1px solid #ccc;
+      padding: 5px 14px;
+      text-align: center;
+    }
+    .tbl td.blank {
+      min-width: 50px;
+      background: #fff8f0;
+    }
+
+    /* 2열 레이아웃 */
+    .two-col { display: flex; gap: 20px; align-items: flex-start; }
+    .two-col > * { flex: 1; }
+
+    /* 5지선다 */
+    .choice-list { list-style: none; padding: 0; margin: 6px 0; }
+    .choice-list li {
+      padding: 3px 0 3px 24px;
+      position: relative;
+      font-size: 10pt;
+      line-height: 1.5;
+    }
+    .choice-list li::before {
+      content: attr(data-num);
+      position: absolute;
+      left: 4px;
+      color: #555;
+      font-weight: 600;
+    }
+
+    /* 구분선 */
+    hr.divider { border: none; border-top: 1px solid #e8e8e8; margin: 6px 0; }
+
+    /* 점수 합계 박스 */
+    .score-box {
+      margin-top: 10px;
+      border: 1px solid #f39c12;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 9.5pt;
+      color: #555;
+      page-break-inside: avoid;
+    }
+    .score-box table { width: 100%; border-collapse: collapse; }
+    .score-box td { padding: 2px 6px; text-align: center; font-size: 9pt; }
+    .score-box td.q-num { color: #f39c12; font-weight: 700; }
+
+    @media print {
+      body { padding: 0; width: 100%; }
+      .problem { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 헤더 -->
+  <div class="header">
+    <h1>1-2. 인공지능의 역사</h1>
+    <div class="meta">인공지능수학 &nbsp;|&nbsp; 고2 &nbsp;|&nbsp; 2022 개정 미래엔 &nbsp;|&nbsp; 총 100점</div>
+  </div>
+
+  <!-- 학생 정보 -->
+  <div class="student-info">
+    <span><span class="label">이름</span>: <span class="field"></span></span>
+    <span><span class="label">학번</span>: <span class="field"></span></span>
+    <span><span class="label">날짜</span>: <span class="field"></span></span>
+    <span><span class="label">점수</span>: <span class="field" style="min-width:50px;"></span></span>
+  </div>
+
+  <hr class="divider" style="margin-bottom:12px;">
+
+  <!-- ── 문제 1: 기억 10점 ── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span><span class="problem-num">문제 1</span><span class="bloom-tag">기억</span></span>
+      <span class="score-tag">[10점]</span>
+    </div>
+    <div class="problem-q">
+      다음은 AI 역사의 주요 사건을 정리한 표이다. 빈칸 <strong>㉠~㉤</strong>에 알맞은 내용을 쓰시오.
+    </div>
+    <table class="tbl" style="width:100%;">
+      <thead>
+        <tr><th style="width:18%;">연도</th><th>사건</th><th style="width:30%;">인물/작품</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1950년</td>
+          <td><span style="color:#f39c12; font-weight:600;">㉠</span> 제안 — "기계가 생각할 수 있는가?"</td>
+          <td>튜링(Turing)</td>
+        </tr>
+        <tr>
+          <td>1958년</td>
+          <td><span style="color:#f39c12; font-weight:600;">㉡</span> 등장 — 최초의 인공 신경망</td>
+          <td>로젠블라트</td>
+        </tr>
+        <tr>
+          <td>1986년</td>
+          <td><span style="color:#f39c12; font-weight:600;">㉢</span> 발표 — 다층 퍼셉트론 학습 가능</td>
+          <td>Rumelhart &amp; Hinton</td>
+        </tr>
+        <tr>
+          <td>2012년</td>
+          <td><span style="color:#f39c12; font-weight:600;">㉣</span> — ImageNet 이미지 분류 오류율 대폭 감소</td>
+          <td>딥러닝 연구팀</td>
+        </tr>
+        <tr>
+          <td>2016년</td>
+          <td><span style="color:#f39c12; font-weight:600;">㉤</span> — 이세돌 9단과의 바둑 대국 4:1 승</td>
+          <td>딥마인드</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="answer-space" style="min-height:38px; display:flex; align-items:center; gap:20px; font-size:10pt; color:#bbb;">
+      ㉠: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ㉡: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ㉢: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ㉣: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ㉤:
+    </div>
+  </div>
+
+  <!-- ── 문제 2: 기억 10점 ── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span><span class="problem-num">문제 2</span><span class="bloom-tag">기억</span></span>
+      <span class="score-tag">[10점]</span>
+    </div>
+    <div class="problem-q">
+      AND, OR, XOR 게이트의 진리표를 완성하시오. (0과 1로 채울 것)
+    </div>
+    <div class="two-col" style="gap:14px;">
+      <div style="text-align:center;">
+        <div style="font-weight:700; font-size:9.5pt; color:#f39c12; margin-bottom:4px;">AND (∧)</div>
+        <table class="tbl" style="margin:0 auto;">
+          <thead><tr><th>x₁</th><th>x₂</th><th>x₁∧x₂</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td class="blank"></td></tr>
+            <tr><td>1</td><td>0</td><td class="blank"></td></tr>
+            <tr><td>0</td><td>1</td><td class="blank"></td></tr>
+            <tr><td>0</td><td>0</td><td class="blank"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-weight:700; font-size:9.5pt; color:#3498db; margin-bottom:4px;">OR (∨)</div>
+        <table class="tbl" style="margin:0 auto;">
+          <thead><tr><th>x₁</th><th>x₂</th><th>x₁∨x₂</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td class="blank"></td></tr>
+            <tr><td>1</td><td>0</td><td class="blank"></td></tr>
+            <tr><td>0</td><td>1</td><td class="blank"></td></tr>
+            <tr><td>0</td><td>0</td><td class="blank"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-weight:700; font-size:9.5pt; color:#e74c3c; margin-bottom:4px;">XOR (⊻)</div>
+        <table class="tbl" style="margin:0 auto;">
+          <thead><tr><th>x₁</th><th>x₂</th><th>x₁⊻x₂</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td class="blank"></td></tr>
+            <tr><td>1</td><td>0</td><td class="blank"></td></tr>
+            <tr><td>0</td><td>1</td><td class="blank"></td></tr>
+            <tr><td>0</td><td>0</td><td class="blank"></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 문제 3: 이해 10점 ── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span><span class="problem-num">문제 3</span><span class="bloom-tag">이해</span></span>
+      <span class="score-tag">[10점]</span>
+    </div>
+    <div class="problem-q">
+      '제1차 AI 겨울(1970~1980년대)'이 발생한 원인을 2가지 쓰시오.
+    </div>
+    <div class="answer-space-md">
+      <div style="color:#ccc; font-size:9pt;">① &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+      <div style="color:#ccc; font-size:9pt; margin-top:20px;">② </div>
+    </div>
+  </div>
+
+  <!-- ── 문제 4: 이해 10점 ── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span><span class="problem-num">문제 4</span><span class="bloom-tag">이해</span></span>
+      <span class="score-tag">[10점]</span>
+    </div>
+    <div class="problem-q">
+      XOR 문제가 <span class="kw">단층 퍼셉트론</span>으로 해결되지 않는 이유를 아래 힌트를 활용하여 설명하시오.
+      <div style="background:#fff8f0; border-left:3px solid #f39c12; padding:5px 10px; margin-top:6px; font-size:9.5pt; color:#555; border-radius:0 4px 4px 0;">
+        힌트: 퍼셉트론은 평면을 하나의 직선으로 나눈다.&nbsp;|&nbsp;XOR의 진리값이 1인 점의 위치를 생각하라.
+      </div>
+    </div>
+    <div class="answer-space-md"></div>
+  </div>
+
+  <!-- ── 문제 5: 적용 10점 ── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span><span class="problem-num">문제 5</span><span class="bloom-tag">적용</span></span>
+      <span class="score-tag">[10점]</span>
+    </div>
+    <div class="problem-q">
+      입력값 x₁, x₂에 대한 가중치 <strong>w₁=0.5, w₂=0.5</strong>이고 임계값 <strong>θ=0.7</strong>인 퍼셉트론의
+      활성화함수가 σ(x) = 1 (x≥θ), 0 (x&lt;θ) 일 때, 다음 진리표를 <span class="kw">계산 과정과 함께</span> 완성하시오.
+    </div>
+    <div class="two-col" style="gap:16px; align-items:flex-start;">
+      <div>
+        <table class="tbl">
+          <thead>
+            <tr><th>x₁</th><th>x₂</th><th>가중합 x</th><th>σ(x)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td class="blank"></td><td class="blank"></td></tr>
+            <tr><td>1</td><td>0</td><td class="blank"></td><td class="blank"></td></tr>
+            <tr><td>0</td><td>1</td><td class="blank"></td><td class="blank"></td></tr>
+            <tr><td>0</td><td>0</td><td class="blank"></td><td class="blank"></td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:8.5pt; color:#888; margin-top:4px;">이 퍼셉트론이 구현하는 논리 게이트는? ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
+      </div>
+      <div>
+        <div style="font-size:9.5pt; color:#555; margin-bottom:5px; font-weight:600;">계산 과정</div>
+        <div class="answer-space" style="min-height:75px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 문제 6: 적용 10점 ── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span><span class="problem-num">문제 6</span><span class="bloom-tag">적용</span></span>
+      <span class="score-tag">[10점]</span>
+    </div>
+    <div class="problem-q">
+      가중치 <strong>w₁=0.5, w₂=0.5</strong>인 퍼셉트론으로 <span class="kw">OR 게이트</span>를 구현하려 한다.
+      (1) 가능한 임계값 θ의 범위를 구하시오.
+      (2) θ의 대표값을 선택하여 결정 경계선의 방정식을 구하시오.
+    </div>
+    <div class="two-col" style="gap:16px;">
+      <div>
+        <div style="font-size:9.5pt; font-weight:600; color:#555; margin-bottom:4px;">(1) θ의 범위</div>
+        <div class="answer-space" style="min-height:60px;"></div>
+      </div>
+      <div>
+        <div style="font-size:9.5pt; font-weight:600; color:#555; margin-bottom:4px;">(2) 경계선 방정식</div>
+        <div class="answer-space" style="min-height:60px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 문제 7: 적용 10점 (5지선다) ── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span><span class="problem-num">문제 7</span><span class="bloom-tag">적용</span></span>
+      <span class="score-tag">[10점]</span>
+    </div>
+    <div class="problem-q">
+      XOR 문제를 다층 퍼셉트론으로 해결하는 방법에 대한 설명으로 <strong>옳은 것</strong>을 고르시오.
+    </div>
+    <ul class="choice-list">
+      <li data-num="①">단층 퍼셉트론에서 가중치를 충분히 크게 하면 XOR을 구현할 수 있다.</li>
+      <li data-num="②">OR 게이트와 NAND 게이트의 출력을 AND 게이트로 합치면 XOR이 된다.</li>
+      <li data-num="③">입력층의 노드 수를 늘리면 단층 퍼셉트론으로도 XOR을 구현할 수 있다.</li>
+      <li data-num="④">XOR은 어떤 구조의 신경망으로도 구현이 불가능하다.</li>
+      <li data-num="⑤">OR 게이트와 AND 게이트만으로 XOR을 구현할 수 있다.</li>
+    </ul>
+    <div style="font-size:9.5pt; color:#555; margin-top:6px;">
+      정답: ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) &nbsp;&nbsp; 이유:
+      <div class="answer-space" style="min-height:35px; margin-top:4px;"></div>
+    </div>
+  </div>
+
+  <!-- ── 문제 8: 분석 15점 ── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span><span class="problem-num">문제 8</span><span class="bloom-tag">분석</span></span>
+      <span class="score-tag">[15점]</span>
+    </div>
+    <div class="problem-q">
+      XOR = AND(OR(x₁,x₂), NAND(x₁,x₂))의 구조를 이용하여
+      (1) 아래 진리표를 완성하고,
+      (2) 층을 쌓으면 XOR이 해결되는 이유를 설명하시오.
+    </div>
+    <div style="margin-bottom:8px;">
+      <table class="tbl" style="width:100%;">
+        <thead>
+          <tr>
+            <th>x₁</th><th>x₂</th>
+            <th>h₁ = OR(x₁,x₂)</th>
+            <th>h₂ = NAND(x₁,x₂)</th>
+            <th>y = AND(h₁,h₂)</th>
+            <th>XOR(x₁,x₂)</th>
+            <th>일치?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>1</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td>0</td><td class="blank"></td></tr>
+          <tr><td>1</td><td>0</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td>1</td><td class="blank"></td></tr>
+          <tr><td>0</td><td>1</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td>1</td><td class="blank"></td></tr>
+          <tr><td>0</td><td>0</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td>0</td><td class="blank"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:9.5pt; font-weight:600; color:#555; margin-bottom:4px;">(2) 설명</div>
+    <div class="answer-space-lg"></div>
+  </div>
+
+  <!-- ── 문제 9: 평가 10점 ── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span><span class="problem-num">문제 9</span><span class="bloom-tag">평가</span></span>
+      <span class="score-tag">[10점]</span>
+    </div>
+    <div class="problem-q">
+      다음 주장에 대한 자신의 견해를 <strong>근거를 들어</strong> 서술하시오.
+      <div style="background:#fff8f0; border: 1px solid #f39c12; border-radius:4px; padding:7px 12px; margin-top:6px; font-size:10pt; color:#333; line-height:1.6;">
+        "딥러닝의 성공은 알고리즘의 발전보다 데이터와 하드웨어(GPU)의 발전 덕분이다."
+      </div>
+    </div>
+    <div class="answer-space-lg"></div>
+  </div>
+
+  <!-- ── 문제 10: 창조 5점 ── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span><span class="problem-num">문제 10</span><span class="bloom-tag">창조</span></span>
+      <span class="score-tag">[5점]</span>
+    </div>
+    <div class="problem-q">
+      AI 발전의 역사(태동 → AI 겨울 → 역전파 → 딥러닝 → 생성형 AI)를 참고하여,
+      AI 발전의 <span class="kw">다음 단계</span>는 무엇일지 예측하고 그 근거를 쓰시오.
+    </div>
+    <div class="answer-space-md"></div>
+  </div>
+
+  <!-- 점수 집계 -->
+  <div class="score-box">
+    <table>
+      <tr>
+        <td class="q-num">1</td><td class="q-num">2</td><td class="q-num">3</td><td class="q-num">4</td>
+        <td class="q-num">5</td><td class="q-num">6</td><td class="q-num">7</td><td class="q-num">8</td>
+        <td class="q-num">9</td><td class="q-num">10</td><td style="font-weight:700; color:#f39c12;">합계</td>
+      </tr>
+      <tr>
+        <td>/10</td><td>/10</td><td>/10</td><td>/10</td>
+        <td>/10</td><td>/10</td><td>/10</td><td>/15</td>
+        <td>/10</td><td>/5</td>
+        <td style="font-weight:700; color:#f39c12;">/100</td>
+      </tr>
+      <tr>
+        <td></td><td></td><td></td><td></td>
+        <td></td><td></td><td></td><td></td>
+        <td></td><td></td>
+        <td></td>
+      </tr>
+    </table>
+  </div>
+
+</body>
+</html>

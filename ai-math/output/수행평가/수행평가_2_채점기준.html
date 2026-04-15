@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>수행평가 2 채점 기준표</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 10.5pt;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    .ws-page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 16mm 16mm 14mm 16mm;
+      margin: 0 auto;
+      background: #fff;
+    }
+
+    /* ── 헤더 ── */
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .ws-header h1 { font-size: 15pt; font-weight: 700; letter-spacing: 0.04em; }
+    .ws-header h2 { font-size: 10pt; font-weight: 400; color: #666; margin-top: 3px; }
+
+    /* ── 메타 정보 ── */
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9.5pt;
+      color: #666;
+      margin-bottom: 16px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    /* ── 섹션 ── */
+    .section { margin-bottom: 20px; }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 12pt;
+      font-weight: 700;
+    }
+    .section-score {
+      font-size: 10pt;
+      color: #555;
+      font-weight: 400;
+    }
+
+    /* ── 채점 기준 표 ── */
+    table.rubric {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10pt;
+    }
+    table.rubric th {
+      background: #444;
+      color: #fff;
+      padding: 6px 10px;
+      border: 1px solid #555;
+      font-weight: 600;
+      text-align: center;
+    }
+    table.rubric td {
+      border: 1px solid #ccc;
+      padding: 7px 10px;
+      vertical-align: middle;
+      line-height: 1.7;
+    }
+    table.rubric td.level {
+      text-align: center;
+      font-weight: 700;
+      background: #f7f7f7;
+      white-space: nowrap;
+      width: 12%;
+    }
+    table.rubric td.score {
+      text-align: center;
+      font-weight: 700;
+      width: 9%;
+      font-size: 11pt;
+    }
+    table.rubric td.desc {
+      width: 79%;
+    }
+
+    /* 수준별 왼쪽 색상 강조 */
+    .lv-a td:first-child { border-left: 4px solid #2a6ecc; }
+    .lv-b td:first-child { border-left: 4px solid #16a34a; }
+    .lv-c td:first-child { border-left: 4px solid #ca8a04; }
+    .lv-d td:first-child { border-left: 4px solid #aaa; }
+
+    /* ── 부분 배점 안내 표 ── */
+    table.breakdown {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9.5pt;
+      margin-top: 8px;
+    }
+    table.breakdown th {
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      padding: 5px 8px;
+      font-weight: 600;
+      text-align: center;
+    }
+    table.breakdown td {
+      border: 1px solid #ddd;
+      padding: 5px 8px;
+      text-align: center;
+      line-height: 1.6;
+    }
+    table.breakdown td.step { font-weight: 600; background: #fafafa; }
+
+    /* ── 채점 유의사항 ── */
+    .notice {
+      background: #f7f7f7;
+      border-left: 3px solid #bbb;
+      padding: 6px 10px;
+      margin-top: 8px;
+      font-size: 9.5pt;
+      color: #555;
+      line-height: 1.75;
+    }
+    .notice strong { color: #1a1a1a; }
+
+    hr.section { border: none; border-top: 1px solid #ddd; margin: 18px 0; }
+
+    /* ── 총점 요약 ── */
+    .total-box {
+      display: flex;
+      gap: 14px;
+      justify-content: flex-end;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 10.5pt;
+    }
+    .total-item {
+      border: 1px solid #ccc;
+      padding: 5px 16px;
+      text-align: center;
+      background: #fafafa;
+    }
+    .total-item .label { font-size: 8.5pt; color: #888; }
+    .total-item .value { font-size: 13pt; font-weight: 700; }
+
+    .footer { text-align: right; font-size: 8.5pt; color: #bbb; margin-top: 10px; }
+
+    @media print {
+      .ws-page { padding: 16mm 16mm 14mm 16mm; }
+    }
+  </style>
+</head>
+<body>
+<div class="ws-page">
+
+  <div class="ws-header">
+    <h1>인공지능 수학 — 수행평가 2 채점 기준표</h1>
+    <h2>텍스트 벡터화 · 이미지 행렬화</h2>
+  </div>
+
+  <div class="meta-row">
+    <span>평가 시기: 2026년 4월</span>
+    <span>총 배점: 20점 (텍스트 8점 + 이미지 12점)</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">① 텍스트 벡터화</span>
+      <span class="section-score">총 8점</span>
+    </div>
+
+    <table class="rubric">
+      <thead>
+        <tr>
+          <th>수준</th>
+          <th>기대 수행</th>
+          <th>배점</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="lv-a">
+          <td class="level">매우 우수</td>
+          <td class="desc">단어 사전 구성, TF · DF · IDF · TF·IDF 계산이 모두 정확하며,
+            서술 문항에서 TF·IDF의 의미(희귀도 반영)와 "좋다"가 핵심어가 되지 않는 이유를
+            논리적으로 설명</td>
+          <td class="score">8점</td>
+        </tr>
+        <tr class="lv-b">
+          <td class="level">우수</td>
+          <td class="desc">계산 단계(TF·DF·IDF·TF·IDF)는 정확하나 서술 설명이 불충분하거나
+            단어 사전 구성에 소수 오류가 있음</td>
+          <td class="score">6점</td>
+        </tr>
+        <tr class="lv-c">
+          <td class="level">보통</td>
+          <td class="desc">TF 표는 작성했으나 IDF 계산 오류가 있거나,
+            TF·IDF 전체 계산 중 일부 후기에서 오류 발생.
+            서술 문항에 시도는 있으나 핵심 개념 누락</td>
+          <td class="score">4점</td>
+        </tr>
+        <tr class="lv-d">
+          <td class="level">노력 필요</td>
+          <td class="desc">단계별 계산이 대부분 미흡하나 워크시트 작성을 성실히 시도</td>
+          <td class="score">2점</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="notice" style="margin-top:8px;">
+      <strong>단계별 주요 채점 포인트</strong><br>
+      · Step 1: 불용어(조사·어미) 제거 정확성, 기본형 변환(좋아요→좋다 등), 단어 사전 완성도<br>
+      · Step 2–3: TF·DF·IDF 수치 정확성 (후기 3개 모두)<br>
+      · Step 4: TF·IDF = TF × IDF 계산 정확성, 후기별 핵심어 도출<br>
+      · Step 5: "좋다"가 DF=3이므로 IDF=1로 낮아 핵심어 선택에서 불리함을 설명했는지
+    </div>
+  </div>
+
+  <hr class="section">
+
+  <!-- ══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">② 이미지 행렬화</span>
+      <span class="section-score">총 12점</span>
+    </div>
+
+    <table class="rubric">
+      <thead>
+        <tr>
+          <th>수준</th>
+          <th>기대 수행</th>
+          <th>배점</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="lv-a">
+          <td class="level">매우 우수</td>
+          <td class="desc">흑백 행렬·차이 행렬·이진화·그레이스케일 변환이 모두 정확하고,
+            행조작(P×D)·열조작(D×Q) 계산 및 변환 의미 해석까지 완성됨</td>
+          <td class="score">12점</td>
+        </tr>
+        <tr class="lv-b">
+          <td class="level">우수</td>
+          <td class="desc">흑백·차이·이진화·그레이스케일까지 정확하나,
+            P×D 또는 D×Q 계산에 오류가 있거나 변환 의미 해석이 불충분</td>
+          <td class="score">9점</td>
+        </tr>
+        <tr class="lv-c">
+          <td class="level">보통</td>
+          <td class="desc">흑백 행렬 A·B와 차이 행렬은 정확하나
+            이진화·그레이스케일·행조작·열조작에 오류가 다수 존재</td>
+          <td class="score">6점</td>
+        </tr>
+        <tr class="lv-d">
+          <td class="level">노력 필요</td>
+          <td class="desc">전반적으로 미흡하나 워크시트 작성을 성실히 시도</td>
+          <td class="score">3점</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="breakdown" style="margin-top:10px;">
+      <thead>
+        <tr>
+          <th>단계</th>
+          <th>평가 내용</th>
+          <th>만점 기준</th>
+          <th>참고 배점</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="step">Step 2</td>
+          <td>흑백 행렬 A, B (4×4) 각각 작성</td>
+          <td>검정=0, 흰색=1 전체 정확</td>
+          <td>각 1점 (2점)</td>
+        </tr>
+        <tr>
+          <td class="step">Step 3</td>
+          <td>차이 행렬 |A−B| 계산 및 결과 정리</td>
+          <td>차이 행렬 정확 + 픽셀 수·행 번호 정확</td>
+          <td>2점</td>
+        </tr>
+        <tr>
+          <td class="step">Step 4</td>
+          <td>실수배 — ½A, 2A 각각 계산 + 밝기 변화 서술</td>
+          <td>½A 정확(0.5점) + 2A 정확(0.5점) + 밝기 변화 서술 2개 정확(1점)</td>
+          <td>2점</td>
+        </tr>
+        <tr>
+          <td class="step">Step 5</td>
+          <td>그레이스케일 변환 — (R+G+B)÷3 계산 (3×3 = 9칸)</td>
+          <td>9개 값 모두 정확 (소수점 버림 포함)</td>
+          <td>3점</td>
+        </tr>
+        <tr>
+          <td class="step">Step 6</td>
+          <td>행조작·열조작: ①P×D 계산 + 변환 의미 해석, ②D×Q 계산 + 변환 의미 해석</td>
+          <td>P×D 정확(1점) + D×Q 정확(1점) + 변환 의미 해석 2개 모두 정확(1점)</td>
+          <td>3점</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="notice">
+      <strong>채점 유의사항</strong><br>
+      · Step 2: 픽셀 1~2개 오류 시 해당 행렬 0.5점, 3개 이상 오류 시 0점<br>
+      · Step 3: 차이 행렬이 틀린 경우 결과표(픽셀 수·행 번호)도 연쇄 오류 가능 — 차이 행렬 기준으로 결과표는 별도 채점<br>
+      · Step 4: ½A, 2A 각각 독립 채점. 소수점 이하 버림 적용 여부 확인. 밝기 변화 서술은 "어두워진다" / "밝아진다" 수준이면 정답 인정<br>
+      · Step 5: (R+G+B)÷3 계산 시 소수점 이하 버림 적용. 1~2칸 오류 시 1점 감점, 3칸 이상 오류 시 0점<br>
+      · Step 6: P×D, D×Q 계산이 각각 독립 채점. 해석 답안은 "아래로 평행이동" / "좌우 대칭이동" 수준의 의미가 담기면 정답 인정
+    </div>
+  </div>
+
+  <hr class="section">
+
+  <div class="total-box">
+    <div class="total-item">
+      <div class="label">텍스트 벡터화</div>
+      <div class="value">/ 8점</div>
+    </div>
+    <div class="total-item">
+      <div class="label">이미지 행렬화</div>
+      <div class="value">/ 12점</div>
+    </div>
+    <div class="total-item" style="background:#f0f0f0;">
+      <div class="label">합계</div>
+      <div class="value">/ 20점</div>
+    </div>
+  </div>
+
+  <div class="footer">인공지능 수학 | 수행평가 2 채점 기준표 (2026년 4월)</div>
+
+</div>
+</body>
+</html>

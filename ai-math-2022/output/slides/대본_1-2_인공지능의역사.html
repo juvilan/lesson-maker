@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>대본_1-2_인공지능의역사</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif;
+      font-size: 11pt;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    /* 헤더 */
+    .doc-header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 20px 28px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .doc-header h1 { color: #f39c12; font-size: 16pt; margin: 0 0 6px; }
+    .doc-header .meta { color: #95a5a6; font-size: 9.5pt; }
+    .doc-header .time-overview {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .time-chip {
+      background: rgba(243,156,18,0.15);
+      border: 1px solid #f39c12;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 8.5pt;
+      color: #f39c12;
+    }
+
+    /* 슬라이드 카드 */
+    .slide-card {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .slide-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px;
+      background: #1a1a2e;
+      cursor: pointer;
+    }
+    .slide-num {
+      color: #f39c12;
+      font-weight: 700;
+      font-size: 10.5pt;
+      min-width: 80px;
+    }
+    .slide-title { color: #ecf0f1; font-size: 10.5pt; font-weight: 600; flex: 1; padding: 0 12px; }
+    .slide-time { color: #7f8c8d; font-size: 9pt; background: rgba(255,255,255,0.08); border-radius: 4px; padding: 2px 8px; }
+
+    .slide-body { padding: 14px 20px; }
+
+    /* 섹션 */
+    .section-block { margin-bottom: 12px; }
+    .section-label {
+      font-size: 8.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 5px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .label-narration { background: #e8f5e9; color: #2e7d32; }
+    .label-click     { background: #e3f2fd; color: #1565c0; }
+    .label-tip       { background: #fff8e1; color: #f57f17; }
+    .label-question  { background: #fce4ec; color: #c62828; }
+
+    /* 나레이션 박스 */
+    .narration {
+      background: #f9fafb;
+      border-left: 3px solid #2ecc71;
+      border-radius: 0 6px 6px 0;
+      padding: 10px 14px;
+      font-size: 10.5pt;
+      line-height: 1.8;
+      color: #222;
+      margin: 4px 0 8px;
+    }
+    .narration em { color: #f39c12; font-style: normal; font-weight: 700; }
+    .narration .pause { color: #95a5a6; font-size: 9pt; }
+
+    /* 클릭 타이밍 */
+    .click-block {
+      background: #e3f2fd;
+      border-left: 3px solid #3498db;
+      border-radius: 0 6px 6px 0;
+      padding: 7px 14px;
+      font-size: 9.5pt;
+      color: #1565c0;
+      margin: 4px 0 8px;
+    }
+    .click-block::before { content: '🖱 '; }
+
+    /* 팁 박스 */
+    .tip-block {
+      background: #fff8e1;
+      border-left: 3px solid #f39c12;
+      border-radius: 0 6px 6px 0;
+      padding: 7px 14px;
+      font-size: 9.5pt;
+      color: #7f5f00;
+      margin: 4px 0 8px;
+      line-height: 1.6;
+    }
+    .tip-block::before { content: '💡 교수 팁: '; font-weight: 700; }
+
+    /* 발문 박스 */
+    .question-block {
+      background: #fce4ec;
+      border-left: 3px solid #e74c3c;
+      border-radius: 0 6px 6px 0;
+      padding: 7px 14px;
+      font-size: 9.5pt;
+      color: #880e4f;
+      margin: 4px 0 8px;
+    }
+    .question-block::before { content: '❓ 발문: '; font-weight: 700; }
+
+    /* 구분선 */
+    hr { border: none; border-top: 1px solid #e8e8e8; margin: 6px 0; }
+
+    /* 총 시간 바 */
+    .time-bar {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .time-bar h3 { margin: 0 0 10px; font-size: 10.5pt; color: #555; }
+    .time-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; font-size: 9.5pt; }
+    .time-label { min-width: 120px; color: #555; }
+    .time-fill { height: 14px; background: #f39c12; border-radius: 7px; min-width: 4px; }
+    .time-val { color: #888; min-width: 30px; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 문서 헤더 -->
+  <div class="doc-header">
+    <h1>발표자 대본 — 1-2. 인공지능의 역사</h1>
+    <div class="meta">인공지능수학 | 고2 | 2022 개정 미래엔 | 총 45분</div>
+    <div class="time-overview">
+      <span class="time-chip">슬라이드 1~2: 3분</span>
+      <span class="time-chip">슬라이드 3~4: 7분</span>
+      <span class="time-chip">슬라이드 5: 5분</span>
+      <span class="time-chip">슬라이드 6~7: 8분</span>
+      <span class="time-chip">슬라이드 8~10: 8분</span>
+      <span class="time-chip">슬라이드 11~12: 7분</span>
+      <span class="time-chip">슬라이드 13~14: 5분</span>
+      <span class="time-chip">슬라이드 15: 2분</span>
+    </div>
+  </div>
+
+  <!-- 시간 배분 바 -->
+  <div class="time-bar">
+    <h3>45분 시간 배분 시각화</h3>
+    <div class="time-row">
+      <span class="time-label">표지/학습목표</span>
+      <div class="time-fill" style="width:6%; background:#95a5a6;"></div>
+      <span class="time-val">3분</span>
+    </div>
+    <div class="time-row">
+      <span class="time-label">타임라인/1950s</span>
+      <div class="time-fill" style="width:15%; background:#3498db;"></div>
+      <span class="time-val">7분</span>
+    </div>
+    <div class="time-row">
+      <span class="time-label">AI 겨울/XOR</span>
+      <div class="time-fill" style="width:11%; background:#e74c3c;"></div>
+      <span class="time-val">5분</span>
+    </div>
+    <div class="time-row">
+      <span class="time-label">논리연산/진리표</span>
+      <div class="time-fill" style="width:18%; background:#f39c12;"></div>
+      <span class="time-val">8분</span>
+    </div>
+    <div class="time-row">
+      <span class="time-label">퍼셉트론/XOR한계</span>
+      <div class="time-fill" style="width:18%; background:#e67e22;"></div>
+      <span class="time-val">8분</span>
+    </div>
+    <div class="time-row">
+      <span class="time-label">역전파/XOR해결</span>
+      <div class="time-fill" style="width:15%; background:#2ecc71;"></div>
+      <span class="time-val">7분</span>
+    </div>
+    <div class="time-row">
+      <span class="time-label">딥러닝/생성형AI</span>
+      <div class="time-fill" style="width:11%; background:#9b59b6;"></div>
+      <span class="time-val">5분</span>
+    </div>
+    <div class="time-row">
+      <span class="time-label">정리/확인문제</span>
+      <div class="time-fill" style="width:4%; background:#7f8c8d;"></div>
+      <span class="time-val">2분</span>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 1: 표지 ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 01</span>
+      <span class="slide-title">표지 — 2. 인공지능의 역사</span>
+      <span class="slide-time">⏱ 1분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        자, 오늘 1-2 단원 '인공지능의 역사'를 시작하겠습니다.<br>
+        <em>인공지능은 언제 탄생했을까요?</em> <span class="pause">(1~2초 학생 반응 유도)</span><br>
+        알파고 이후에 유행한 게 아닌가 생각하는 학생들이 많은데요,<br>
+        사실 AI 연구의 역사는 <em>70년이 넘습니다</em>.<br>
+        오늘은 그 역사 속에서 어떤 수학적 문제가 AI를 가로막았고,<br>
+        어떻게 해결했는지를 중심으로 배워보겠습니다.
+      </div>
+      <div class="click-block">슬라이드 넘기기 → 학습목표</div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 2: 학습목표 ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 02</span>
+      <span class="slide-title">학습 목표</span>
+      <span class="slide-time">⏱ 2분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        오늘의 학습 목표 세 가지입니다.<br>
+        첫 번째, <em>AI 발전의 역사를 시대순으로 설명</em>할 수 있어야 합니다.<br>
+        두 번째, <em>AND·OR·XOR의 진리표</em>를 직접 작성할 수 있어야 해요.<br>
+        세 번째, 퍼셉트론으로 AND·OR 게이트를 구현하고,<br>
+        <em>XOR이 왜 안 되는지, 어떻게 해결하는지</em> 설명할 수 있어야 합니다.<br>
+        <span class="pause">(잠시 멈춤)</span> 특히 세 번째 목표가 오늘의 핵심입니다.
+      </div>
+      <div class="tip-block">
+        학습목표를 학생들이 직접 읽게 해도 좋음. "이 중에서 가장 어려울 것 같은 게 뭐예요?" 발문으로 호기심 유발.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 3: 타임라인 ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 03</span>
+      <span class="slide-title">AI 발전 타임라인</span>
+      <span class="slide-time">⏱ 4분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        먼저 전체 흐름을 한 번 보겠습니다.<br>
+        화면에 타임라인이 있어요. 1950년대부터 2020년대까지.<br>
+        각 시대 마커를 클릭하면 주요 사건이 나타납니다.
+      </div>
+      <div class="click-block">1950s 마커 클릭 → "AI의 태동" 팝업 표시</div>
+      <div class="narration">
+        1950년대, AI라는 개념이 처음 등장했습니다. 튜링 테스트, 퍼셉트론.
+        전 세계가 흥분했어요.
+      </div>
+      <div class="click-block">1970~80s 마커 클릭 → "AI 겨울" 표시</div>
+      <div class="narration">
+        그런데 금방 차갑게 식었어요. 왜인지는 조금 있다 자세히 봅니다.
+      </div>
+      <div class="click-block">1986 → 2012 → 2020 마커 순서대로 클릭</div>
+      <div class="narration">
+        역전파, AlexNet, 생성형 AI로 이어지는 흐름.<br>
+        <em>AI의 역사는 기대와 좌절의 반복</em>이었어요. 현재는 세 번째 붐입니다.
+      </div>
+      <div class="tip-block">
+        타임라인을 한 번에 다 설명하지 않아도 됨. 각 시대를 클릭만 하고 "자세히는 다음 슬라이드에서" 방식으로 진행하면 집중도 높아짐.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 4: 1950년대 ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 04</span>
+      <span class="slide-title">1950년대 — AI의 태동</span>
+      <span class="slide-time">⏱ 3분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        1950년, 영국 수학자 <em>튜링</em>이 논문에서 이런 질문을 했습니다.<br>
+        <em>"기계가 생각할 수 있는가?"</em><br>
+        사람과 기계를 구별하는 테스트를 제안했는데, 이게 튜링 테스트예요.<br>
+        컴퓨터와 대화했을 때 사람인지 기계인지 구별 못하면 그 AI는 합격입니다.<br>
+        <span class="pause">(2초 멈춤)</span>
+        1958년엔 <em>로젠블라트</em>가 퍼셉트론을 발표합니다.<br>
+        인공 신경망의 원조죠. "이제 기계가 학습할 수 있다!"<br>
+        언론이 난리났어요. "10년 안에 AI가 세상을 바꾼다"는 기사까지 나왔습니다.
+      </div>
+      <div class="question-block">
+        "튜링 테스트를 직접 해본다면, 어떤 질문을 던져볼 건가요?" — 학생 1~2명 발표.
+      </div>
+      <div class="tip-block">
+        현재 ChatGPT는 튜링 테스트를 통과한다고 볼 수 있음. 교과서 내용 + 현재 상황 연결.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 5: AI 겨울 (핵심) ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 05</span>
+      <span class="slide-title">AI 겨울 — XOR 문제 ★ 핵심</span>
+      <span class="slide-time">⏱ 5분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        그런데 1969년, 한 논문이 모든 것을 뒤엎었습니다.<br>
+        <em>민스키(Minsky)</em>가 수학적으로 증명해버렸어요.<br>
+        퍼셉트론은 <em>XOR 문제를 절대 풀 수 없다</em>고요.<br>
+        <span class="pause">(잠시 멈춤)</span>
+        XOR이 뭔지는 조금 이따 자세히 배우는데요,<br>
+        지금은 그냥 "퍼셉트론의 결정적인 한계"라고 기억하세요.
+      </div>
+      <div class="click-block">오른쪽 XOR 산점도를 가리키며 설명</div>
+      <div class="narration">
+        이 그래프를 보세요. 초록 점이 1(참)이에요.<br>
+        (0,1)이 1이고, (1,0)이 1인데 — <em>대각선으로 흩어져 있죠.</em><br>
+        직선 하나로 초록 점과 빨간 점을 나눌 수가 없어요.<br>
+        아무리 방향을 바꿔도 불가능합니다.<br>
+        <span class="pause">(2초 멈춤)</span>
+        이 수학적 한계 때문에 연구비가 다 끊겼어요.<br>
+        1970년대부터 <em>제1차 AI 겨울</em>이 시작됩니다.
+      </div>
+      <div class="tip-block">
+        "과학적 기대가 너무 컸다가 좌절하면 반동이 크다"는 사회적 맥락도 짧게 언급하면 좋음.
+        전문가 시스템으로 관심이 이동했다는 교과서 내용도 확인.
+      </div>
+      <div class="question-block">
+        "왜 직선 하나로는 안 될까요? 직선을 두 개 쓰면 되지 않나요?" — XOR 한계 직관 확인.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 6: 논리연산 AND ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 06</span>
+      <span class="slide-title">논리연산과 AND 진리표</span>
+      <span class="slide-time">⏱ 4분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        이제 논리연산을 수학적으로 배워봅시다.<br>
+        먼저 일상의 예시를 보세요. 상단에 세 가지 박스가 있어요.<br>
+        <em>AND는 카드 잠금</em> — 카드도 있어야 하고 비밀번호도 맞아야 해요.<br>
+        둘 다 1이어야만 1. 하나라도 0이면 0.<br>
+        <em>OR은 화재 경보</em> — 화재 감지나 연기 감지 중 하나라도 되면 울려야 해요.<br>
+        하나라도 1이면 1.<br>
+        <em>XOR은 계단 스위치</em> — 위아래 스위치가 서로 다른 상태여야 불이 켜져요.
+      </div>
+      <div class="click-block">AND 진리표 아래쪽을 가리킴</div>
+      <div class="narration">
+        AND 게이트 진리표를 보면, (1,1)만 1이고 나머지는 전부 0이에요.<br>
+        "둘 다 참일 때만 참" — 논리곱의 정의입니다.
+      </div>
+      <div class="tip-block">
+        진리표를 학생들이 직접 작성하게 하는 활동 삽입 가능. "빈 종이에 AND 진리표 30초 안에 써보세요."
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 7: OR과 XOR 진리표 ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 07</span>
+      <span class="slide-title">OR과 XOR 진리표</span>
+      <span class="slide-time">⏱ 4분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        OR은 하나라도 1이면 1. (0,0)만 0이에요. <em>직관적으로 이해가 쉬운 연산</em>이죠.<br>
+        <span class="pause">(1초 멈춤)</span>
+        이제 XOR을 봅시다. <em>"서로 다를 때만 1"</em>입니다.<br>
+        (1,1)은 0이에요. 같으니까요.<br>
+        (0,0)도 0이에요. 역시 같으니까요.<br>
+        (1,0)과 (0,1)만 1 — <em>서로 달라야 1</em>.
+      </div>
+      <div class="click-block">표 오른쪽 XOR 강조 표시를 가리키며</div>
+      <div class="narration">
+        AND와 OR은 1인 점들이 한 덩어리로 뭉쳐있어요. 직선 하나로 분리 가능합니다.<br>
+        그런데 XOR은 1인 점이 <em>대각선으로 흩어져 있어요</em>.<br>
+        이 차이가 엄청난 결과를 만들었습니다.
+      </div>
+      <div class="question-block">
+        "NAND는 뭐일까요? NOT AND. 모두 1일 때만 0이 됩니다. 나중에 XOR 해결에서 다시 나와요."
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 8: AND 결정 경계 ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 08</span>
+      <span class="slide-title">퍼셉트론으로 AND 구현</span>
+      <span class="slide-time">⏱ 3분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        이제 퍼셉트론이 AND를 어떻게 구현하는지 봅시다.<br>
+        w₁=0.5, w₂=0.5, 임계값 θ=0.7로 설정했어요.
+      </div>
+      <div class="click-block">왼쪽 Step 버튼 클릭 → Step 2 표시</div>
+      <div class="narration">
+        퍼셉트론의 판단 조건은 w₁x₁ + w₂x₂ ≥ θ 이면 y=1이에요.<br>
+        이 등호가 성립하는 선이 바로 <em>결정 경계선</em>입니다.<br>
+        0.5x₁ + 0.5x₂ = 0.7을 정리하면 <em>x₂ = -x₁ + 1.4</em>가 됩니다.
+      </div>
+      <div class="click-block">슬라이더를 움직이며 경계선 변화 시연</div>
+      <div class="narration">
+        슬라이더로 θ를 바꾸면 경계선이 위아래로 이동하죠?<br>
+        θ를 크게 하면 경계선이 위로 올라가서 1인 영역이 좁아집니다.<br>
+        θ를 작게 하면 내려가서 1인 영역이 넓어지고요.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 9: OR 구현 ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 09</span>
+      <span class="slide-title">퍼셉트론으로 OR 구현</span>
+      <span class="slide-time">⏱ 2분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        OR 게이트는 θ를 0.2로 낮추면 됩니다.<br>
+        경계선이 x₂ = -x₁ + 0.4로 내려와서<br>
+        (0,0)만 경계선 아래에 있게 되거든요.<br>
+        <em>AND와 OR의 차이는 오로지 θ 값 하나</em>입니다.<br>
+        <span class="pause">(2초 멈춤)</span>
+        왼쪽 집합 다이어그램을 보면,<br>
+        OR은 합집합, AND는 교집합, XOR은 대칭차집합이에요.
+      </div>
+      <div class="tip-block">
+        집합 개념과 연결하면 수1 선수학습과 연결되어 이해가 깊어짐. "수1에서 배운 집합 기억하죠?"
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 10: XOR 한계 (핵심) ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 10</span>
+      <span class="slide-title">XOR — 단일 퍼셉트론의 한계 ★ 핵심</span>
+      <span class="slide-time">⏱ 3분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        지금까지 AND, OR은 퍼셉트론으로 구현이 됐어요.<br>
+        그런데 XOR은 왜 안 될까요?<br>
+        화면의 세 집합 다이어그램을 비교해보세요.
+      </div>
+      <div class="click-block">AND, OR 집합 → "직선 분리 ✓" 영역 짚기</div>
+      <div class="narration">
+        AND는 교집합 부분에만 1이 있어요. 한 덩어리죠.<br>
+        OR은 합집합 전체가 1. 역시 한 덩어리로 뭉쳐있어요.
+      </div>
+      <div class="click-block">XOR 집합 → "직선 분리 ✗" 강조</div>
+      <div class="narration">
+        XOR의 1인 영역을 보면 <em>두 덩어리</em>입니다.<br>
+        왼쪽 덩어리(0,1이 1)와 오른쪽 덩어리(1,0이 1).<br>
+        <em>직선 하나로는 두 덩어리를 동시에 분리할 수가 없어요.</em><br>
+        <span class="pause">(2초 멈춤)</span>
+        이게 XOR 문제의 핵심입니다.<br>
+        해결책은 — <em>층을 더 쌓아야 합니다.</em> 다음 슬라이드에서 봅시다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 11: 역전파 ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 11</span>
+      <span class="slide-title">1986 — 역전파 알고리즘</span>
+      <span class="slide-time">⏱ 4분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        AI 겨울이 17년쯤 됐을 때, 1986년에 <em>Rumelhart와 Hinton</em>이<br>
+        역전파 알고리즘을 발표합니다.<br>
+        <span class="pause">(1초)</span>
+        이전에는 신경망 층이 여러 개면 어떻게 학습시켜야 할지 몰랐어요.<br>
+        역전파는 출력에서 나온 오차를 <em>거꾸로 전파시켜서</em> 각 가중치를 수정하는 방법입니다.
+      </div>
+      <div class="click-block">왼쪽 Step 버튼으로 3단계 순서대로 진행</div>
+      <div class="narration">
+        Step 1: 출력에서 오차 계산 → L = (y - ŷ)²<br>
+        Step 2: 오차를 출력층에서 입력층 방향으로 역전파<br>
+        Step 3: 각 가중치를 조금씩 수정 w ← w - η·∂L/∂w<br>
+        <span class="pause">(1초)</span>
+        이걸 수만 번, 수십만 번 반복하면 점점 정확해집니다.
+      </div>
+      <div class="tip-block">
+        "학생이 틀린 문제를 채점받고, 왜 틀렸는지 거꾸로 추적해서 개념을 수정하는 것"과 유사한 비유가 효과적.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 12: XOR 해결 (핵심) ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 12</span>
+      <span class="slide-title">XOR = OR AND NAND 으로 해결 ★ 핵심</span>
+      <span class="slide-time">⏱ 3분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        이제 XOR 해결을 봅시다.<br>
+        2층 구조로 만들면 됩니다.<br>
+        <em>은닉층에 두 퍼셉트론을 놓아요.</em>
+      </div>
+      <div class="click-block">Step 버튼으로 단계별 진행</div>
+      <div class="narration">
+        h₁ = OR(x₁, x₂) — 두 입력의 OR<br>
+        h₂ = NAND(x₁, x₂) — NOT AND. 둘 다 1이면 0, 나머지는 1<br>
+        <span class="pause">(1초)</span>
+        그리고 출력층에서 y = AND(h₁, h₂) 를 계산합니다.
+      </div>
+      <div class="click-block">오른쪽 진리표 확인하며 행별로 설명</div>
+      <div class="narration">
+        (1,1) 입력: h₁=OR(1,1)=1, h₂=NAND(1,1)=0 → AND(1,0)=0 → XOR(1,1)=0 ✓<br>
+        (1,0) 입력: h₁=1, h₂=1 → AND(1,1)=1 → XOR(1,0)=1 ✓<br>
+        (0,1) 입력: h₁=1, h₂=1 → AND(1,1)=1 → XOR(0,1)=1 ✓<br>
+        (0,0) 입력: h₁=0, h₂=1 → AND(0,1)=0 → XOR(0,0)=0 ✓<br>
+        <span class="pause">(1초)</span>
+        <em>전부 일치합니다!</em> 2층 구조로 XOR이 해결됐어요.
+      </div>
+      <div class="tip-block">
+        핵심 통찰 강조: "복잡한 판단 = 단순한 판단들의 조합." 이게 딥러닝 전체의 원리예요.
+        층을 쌓을수록 더 복잡한 패턴을 표현할 수 있게 됩니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 13: 딥러닝 ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 13</span>
+      <span class="slide-title">2010년대 — 딥러닝 혁신</span>
+      <span class="slide-time">⏱ 3분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        역전파로 이론이 완성됐지만, 실제로 층이 많으면 계산이 너무 오래 걸렸어요.<br>
+        2012년, 두 가지가 결합되면서 폭발합니다.<br>
+        <em>GPU 병렬 처리</em>로 계산 속도를 획기적으로 높이고,<br>
+        <em>인터넷 시대의 빅데이터</em>로 충분한 학습 데이터를 확보했어요.<br>
+        <span class="pause">(1초)</span>
+        <em>AlexNet</em>이 이미지 분류 대회에서 오류율을 26%에서 16%로 낮췄습니다.<br>
+        이전 최고가 26%였는데 10%p를 한 번에 개선한 거예요. 충격이었죠.<br>
+        <span class="pause">(1초)</span>
+        2016년 <em>알파고</em>. 이세돌 9단과 바둑 대결에서 4:1 승리.<br>
+        "바둑은 AI가 절대 못 넘는다"는 인식을 무너뜨렸습니다.
+      </div>
+      <div class="tip-block">
+        알파고는 2016년에 학생들이 태어난 시기. 뉴스 영상이나 사진을 떠올리게 하면 공감대 형성.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 14: 생성형 AI와 노벨상 ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 14</span>
+      <span class="slide-title">2020s — 생성형 AI와 노벨 물리학상 ★ 핵심</span>
+      <span class="slide-time">⏱ 2분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        2022년 ChatGPT 등장 이후 AI가 일상 도구가 됐죠.<br>
+        여러분도 쓰고 있을 거예요.<br>
+        텍스트뿐 아니라 이미지(DALL-E), 코드, 음악까지 생성합니다.<br>
+        <span class="pause">(1초)</span>
+        그리고 2024년. <em>노벨 물리학상이 AI 연구자에게 갔습니다.</em><br>
+        Hopfield와 <em>Hinton</em> — Hinton이 누구죠? 역전파를 만든 바로 그 사람입니다.<br>
+        <span class="pause">(2초 멈춤)</span>
+        노벨 물리학상이 AI에 간다는 건 어떤 의미일까요?<br>
+        <em>AI가 이제 물리학만큼 세상을 근본적으로 바꾸는 도구로 인정받았다</em>는 거예요.<br>
+        여러분이 공부하는 이 수학이 그 노벨상 수준의 기술 안에 있습니다.
+      </div>
+      <div class="tip-block">
+        "2024년이면 여러분이 고등학생일 때 일어난 일입니다. 살아있는 역사예요." — 학생들에게 시대적 맥락 부여.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 슬라이드 15: 정리 + 확인문제 ══ -->
+  <div class="slide-card">
+    <div class="slide-card-header">
+      <span class="slide-num">슬라이드 15</span>
+      <span class="slide-title">단원 정리 &amp; 확인 문제</span>
+      <span class="slide-time">⏱ 2분</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        오늘 배운 내용을 한 줄로 정리하면:<br>
+        <em>AI의 역사는 기대-좌절-극복의 반복이었고,</em><br>
+        <em>그 중심에 XOR이라는 수학 문제가 있었다.</em><br>
+        <span class="pause">(1초)</span>
+        확인 문제 두 가지를 풀어보세요.
+      </div>
+      <div class="click-block">확인 문제 섹션 가리키기</div>
+      <div class="narration">
+        문제 1: XOR 진리표를 직접 채워보세요. 1분 드리겠습니다.<br>
+        <span class="pause">(1분 대기)</span>
+        답: (1,1)→0, (1,0)→1, (0,1)→1, (0,0)→0<br>
+        <span class="pause">(1초)</span>
+        문제 2: 역전파가 AI 겨울을 어떻게 극복했나요?<br>
+        핵심은 — 다층 퍼셉트론을 학습시킬 수 없었는데 역전파가 그 방법을 제공했다는 겁니다.
+      </div>
+      <div class="tip-block">
+        수업 마무리 멘트: "다음 시간엔 퍼셉트론의 임계값 θ를 구하는 수학적 계산을 깊게 다룹니다.
+        오늘 확인 문제를 숙지하고 오세요."
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+</body>
+</html>

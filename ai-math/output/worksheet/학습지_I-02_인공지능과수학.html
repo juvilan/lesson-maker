@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인공지능과 수학 - 학습지</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 10pt; }
+    }
+
+    .ws-page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm 15mm 20mm 15mm;
+      margin: 0 auto;
+      background: #fff;
+      page-break-after: always;
+    }
+    .ws-page:last-child { page-break-after: auto; }
+
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+    .ws-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .ws-title { font-size: 14pt; font-weight: 700; letter-spacing: -0.3px; }
+    .ws-meta { font-size: 9pt; color: #666; text-align: right; }
+
+    .student-info {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    .student-field { display: flex; align-items: center; gap: 6px; font-size: 10pt; }
+    .student-field label { font-weight: 500; white-space: nowrap; color: #444; }
+    .field-line { width: 80px; border-bottom: 1px solid #999; height: 20px; }
+
+    .problem {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      margin-bottom: 20px;
+      padding: 10px 12px;
+    }
+    .problem-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .problem-number { font-weight: 700; font-size: 11pt; }
+    .problem-body { font-size: 11pt; line-height: 1.7; }
+    .problem-body p { margin-bottom: 6px; }
+
+    .choices {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 24px;
+      margin: 8px 0 8px 8px;
+      font-size: 10.5pt;
+    }
+    .choices li { display: flex; gap: 5px; align-items: baseline; }
+
+    .ws-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10pt; }
+    .ws-table th { background: #f0f0f0; border: 1px solid #ddd; padding: 5px 8px; text-align: center; font-weight: 600; }
+    .ws-table td { border: 1px solid #ddd; padding: 5px 8px; text-align: center; }
+    .ws-table td.left { text-align: left; }
+
+    .answer-space { min-height: 35mm; margin-top: 10px; }
+    .answer-space.sm { min-height: 20mm; }
+    .answer-space.md { min-height: 50mm; }
+    .answer-space.lg { min-height: 70mm; }
+
+    .section-title {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #555;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 3px;
+      margin: 16px 0 10px;
+    }
+
+    .info-box {
+      background: #f8f8f8;
+      border-left: 3px solid #bbb;
+      padding: 7px 10px;
+      margin: 8px 0;
+      font-size: 10pt;
+      color: #444;
+    }
+
+    .page-number { text-align: center; font-size: 9pt; color: #999; margin-top: 14px; padding-top: 6px; border-top: 1px solid #eee; }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] }
+    };
+    window.safeTypeset = window.safeTypeset || function(elements) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body>
+
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">학습지 · I-02 인공지능과 수학</span>
+      <span class="ws-meta">인공지능수학</span>
+    </div>
+  </div>
+
+  <div class="student-info">
+    <div class="student-field"><label>학번</label><div class="field-line"></div></div>
+    <div class="student-field"><label>이름</label><div class="field-line"></div></div>
+    <div class="student-field"><label>날짜</label><div class="field-line"></div></div>
+  </div>
+
+  <div class="info-box">
+    <strong>성취기준 12인수01-02</strong> — 인공지능에 수학이 활용되는 다양한 예를 찾을 수 있다.
+  </div>
+
+  <!-- 문제 1 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">1.</span>
+    </div>
+    <div class="problem-body">
+      <p>인공지능에서 데이터를 수학적으로 표현할 때 사용하는 핵심 구조 두 가지로 알맞은 것은?</p>
+      <ul class="choices">
+        <li>① 벡터와 행렬</li>
+        <li>② 집합과 함수</li>
+        <li>③ 미분과 적분</li>
+        <li>④ 순열과 조합</li>
+        <li>⑤ 방정식과 부등식</li>
+      </ul>
+    </div>
+    <div class="answer-space sm"></div>
+  </div>
+
+  <!-- 문제 2 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">2.</span>
+    </div>
+    <div class="problem-body">
+      <p>다음 빈칸에 알맞은 수학 개념을 각각 쓰시오.</p>
+      <p style="margin-left:8px;">(1) 텍스트 자료를 인식하는 인공지능에서 핵심적으로 사용하는 수학 개념:</p>
+      <p style="margin-left:8px;">(2) 이미지 자료를 인식하는 인공지능에서 핵심적으로 사용하는 수학 개념:</p>
+      <p style="margin-left:8px;">(3) 경향성 분석과 의사 결정을 하는 인공지능에서 핵심적으로 사용하는 수학 개념:</p>
+    </div>
+    <div class="answer-space sm"></div>
+  </div>
+
+  <!-- 문제 3 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">3.</span>
+    </div>
+    <div class="problem-body">
+      <p>이미지 인식 AI에서 사진 한 장을 수학적으로 표현하는 방법을 설명하시오.</p>
+      <div class="info-box">힌트: 픽셀(pixel)의 밝기 값을 행(row)과 열(column)로 배열하면 어떤 수학 구조가 되는지 생각해 보세요.</div>
+    </div>
+    <div class="answer-space"></div>
+  </div>
+
+  <!-- 문제 4 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">4.</span>
+    </div>
+    <div class="problem-body">
+      <p>텍스트 자료를 인식하는 인공지능의 사례를 수업에서 배운 것 중 두 가지 이상 쓰고, 각각의 사례에서 벡터가 어떤 역할을 하는지 설명하시오.</p>
+    </div>
+    <div class="answer-space"></div>
+  </div>
+
+  <div class="page-number">- 1 -</div>
+</div>
+
+<div class="ws-page">
+
+  <!-- 문제 5 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">5.</span>
+    </div>
+    <div class="problem-body">
+      <p>행렬 $A$와 벡터 $v$가 다음과 같을 때, 행렬과 벡터의 곱 $Av$를 계산하시오.</p>
+      <p style="margin: 8px 0 8px 16px;">$A = \begin{pmatrix}1 & 2 \\ 3 & 4\end{pmatrix}$, &nbsp;&nbsp; $v = \begin{pmatrix}1 \\ 0\end{pmatrix}$</p>
+      <div class="info-box">힌트: $Av$의 첫 번째 성분 = $1\times1 + 2\times0$, 두 번째 성분 = $3\times1 + 4\times0$</div>
+    </div>
+    <div class="answer-space"></div>
+  </div>
+
+  <!-- 문제 6 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">6.</span>
+    </div>
+    <div class="problem-body">
+      <p>인공지능에서 함수는 입력값 $x$에 따라 출력값 $y$를 결정하는 규칙으로 사용된다. 함수 $f(x) = x^2 - 4x + 5$의 최솟값을 미분을 이용하여 구하시오.</p>
+      <div class="info-box">힌트: 최솟값은 $f'(x) = 0$이 되는 $x$ 값에서 찾으세요.</div>
+    </div>
+    <div class="answer-space"></div>
+  </div>
+
+  <!-- 문제 7 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">7.</span>
+    </div>
+    <div class="problem-body">
+      <p>AI 기상 예측 시스템이 "날씨가 흐릴 때 비가 올 확률"을 학습하여 의사 결정에 활용한다. 다음 조건에서 베이즈 정리를 이용하여 $P(\text{흐림}|\text{비})$를 구하시오.</p>
+      <div class="info-box">
+        $P(\text{비}|\text{흐림}) = 0.7$ &nbsp;&nbsp; (흐린 날 중 비가 올 확률)<br>
+        $P(\text{흐림}) = 0.4$ &nbsp;&nbsp; (날씨가 흐릴 확률)<br>
+        $P(\text{비}) = 0.3$ &nbsp;&nbsp; (비가 올 확률)<br><br>
+        베이즈 정리: $P(A|B) = \dfrac{P(B|A) \times P(A)}{P(B)}$
+      </div>
+    </div>
+    <div class="answer-space lg"></div>
+  </div>
+
+  <div class="page-number">- 2 -</div>
+</div>
+
+<div class="ws-page">
+
+  <!-- 문제 8 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">8.</span>
+    </div>
+    <div class="problem-body">
+      <p>수업에서 배운 인공지능과 관련된 세 가지 수학 개념(벡터, 행렬, 함수) 중, 딥러닝(심층신경망)의 학습 과정에서 가장 핵심적인 역할을 한다고 생각하는 분야를 하나 선택하고, 그 이유를 분석하여 서술하시오.</p>
+    </div>
+    <div class="answer-space lg"></div>
+  </div>
+
+  <!-- 문제 9 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">9.</span>
+    </div>
+    <div class="problem-body">
+      <p>"인공지능 발전을 위해 수학 공부가 중요하다"는 주장에 대해 찬성 또는 반대 입장을 정하고, 수업 내용을 근거로 활용하여 자신의 생각을 논리적으로 서술하시오.</p>
+    </div>
+    <div class="answer-space lg"></div>
+  </div>
+
+  <!-- 문제 10 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">10.</span>
+    </div>
+    <div class="problem-body">
+      <p>내가 만들고 싶은 인공지능 시스템을 하나 구상하고, 그 시스템을 구현하기 위해 필요한 수학 분야(벡터, 행렬, 함수 중 해당하는 것 모두)를 쓰고 각각의 역할을 간략히 설명하시오.</p>
+    </div>
+    <div class="answer-space lg"></div>
+  </div>
+
+  <div class="page-number">- 3 -</div>
+</div>
+
+</body>
+</html>
