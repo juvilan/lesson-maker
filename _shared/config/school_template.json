@@ -1,0 +1,25 @@
+{
+  "_comment": "학교 인쇄물 공통 템플릿 설정. pdf_renderer.py가 이 파일을 참조한다.",
+  "logo_path": null,
+  "header_format": "{grade}학년 {semester} {subject}",
+  "student_info_fields": ["학년", "반", "번", "이름"],
+  "page_number_format": "- {n} -",
+  "margins": {
+    "top": 15,
+    "right": 15,
+    "bottom": 20,
+    "left": 15
+  },
+  "fonts": {
+    "primary": "AppleSDGothicNeo",
+    "fallback": "AppleGothic"
+  },
+  "subject_display_names": {
+    "ai_math": "인공지능수학",
+    "math1": "수학I",
+    "math2": "수학II",
+    "calculus": "미적분",
+    "statistics": "확률과통계",
+    "geometry": "기하"
+  }
+}

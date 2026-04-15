@@ -1,0 +1,29 @@
+version: 1
+
+forge:
+  path: ~/.claude
+
+project:
+  name: lesson-maker
+  taskTimeout: 300000
+  maxTurns: 10
+
+review:
+  mode: full
+  categories: [quality, security]
+  maxFilesPerUnit: 15
+
+fix:
+  enabled: false
+  requireApproval: true
+
+safety:
+  maxRetries: 3
+  maxTotalSessions: 100
+
+verification:
+  enabled: true
+
+report:
+  format: markdown
+  groupBy: severity

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>인공지능의 텍스트 분류 — 감성 분석 | 인공지능 수학</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']], tags: 'ams' },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <style>
+    :root {
+      --bg:      #0a0f1e;
+      --text:    #e8f4fd;
+      --cyan:    #00d4ff;
+      --amber:   #ffb347;
+      --green:   #39d98a;
+      --red:     #ff4757;
+      --purple:  #a78bfa;
+      --card-bg: rgba(255,255,255,0.07);
+      --border:  rgba(255,255,255,0.15);
+    }
+    .reveal-viewport { background: var(--bg); }
+    .reveal { font-family: 'Noto Sans KR','Apple SD Gothic Neo',sans-serif; font-size: 28px; color: var(--text); background: var(--bg); }
+    .reveal .slides section { text-align: left; padding: 0 20px; }
+    .reveal h1 { font-size: 2.2em; font-weight: 900; color: var(--cyan); line-height: 1.2; text-shadow: 0 0 30px rgba(0,212,255,0.4); letter-spacing: -0.02em; }
+    .reveal h2 { font-size: 1.6em; font-weight: 700; color: var(--cyan); border-bottom: 2px solid rgba(0,212,255,0.3); padding-bottom: .3em; margin-bottom: .6em; }
+    .reveal h3 { font-size: 1.2em; font-weight: 700; color: var(--amber); margin-bottom: .4em; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 18px 24px; margin: 8px 0; }
+    .card-cyan   { border-left: 4px solid var(--cyan);   background: rgba(0,212,255,0.08); }
+    .card-amber  { border-left: 4px solid var(--amber);  background: rgba(255,179,71,0.08); }
+    .card-green  { border-left: 4px solid var(--green);  background: rgba(57,217,138,0.08); }
+    .card-red    { border-left: 4px solid var(--red);    background: rgba(255,71,87,0.08); }
+    .card-purple { border-left: 4px solid var(--purple); background: rgba(167,139,250,0.10); }
+    .definition-box { background: rgba(0,212,255,0.06); border: 2px solid rgba(0,212,255,0.4); border-radius: 14px; padding: 20px 26px; margin: 12px 0; position: relative; }
+    .definition-box::before { content: '정의'; position: absolute; top: -13px; left: 18px; background: var(--cyan); color: #0a0f1e; font-weight: 900; font-size: .7em; padding: 2px 12px; border-radius: 20px; }
+    .formula-box { background: rgba(167,139,250,0.08); border: 2px solid rgba(167,139,250,0.4); border-radius: 12px; padding: 16px 22px; margin: 10px 0; text-align: center; }
+    .practice-box { background: rgba(167,139,250,0.06); border: 2px solid rgba(167,139,250,0.35); border-radius: 14px; padding: 18px 24px; margin: 12px 0; position: relative; }
+    .practice-box::before { content: '확인 문제'; position: absolute; top: -13px; left: 18px; background: var(--purple); color: #fff; font-weight: 900; font-size: .68em; padding: 3px 14px; border-radius: 20px; }
+    .cols { display: grid; gap: 18px; align-items: start; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .badge { display: inline-block; font-size: .72em; font-weight: 700; padding: 3px 12px; border-radius: 30px; margin-right: 6px; }
+    .badge-cyan   { background: rgba(0,212,255,0.2);   color: var(--cyan);   border: 1px solid var(--cyan); }
+    .badge-amber  { background: rgba(255,179,71,0.2);  color: var(--amber);  border: 1px solid var(--amber); }
+    .badge-green  { background: rgba(57,217,138,0.2);  color: var(--green);  border: 1px solid var(--green); }
+    .badge-red    { background: rgba(255,71,87,0.2);   color: var(--red);    border: 1px solid var(--red); }
+    .kw-cyan   { color: var(--cyan);   font-weight: 700; }
+    .kw-amber  { color: var(--amber);  font-weight: 700; }
+    .kw-green  { color: var(--green);  font-weight: 700; }
+    .kw-red    { color: var(--red);    font-weight: 700; }
+    .kw-purple { color: var(--purple); font-weight: 700; }
+    .arrow { font-size: 1.3em; color: var(--amber); margin: 0 6px; }
+    .chapter-badge { display: inline-block; background: rgba(0,212,255,0.15); border: 1px solid rgba(0,212,255,0.4); border-radius: 30px; padding: 6px 20px; font-size: .72em; color: var(--cyan); font-weight: 700; margin-bottom: 18px; }
+    .achievement-tag { display: inline-block; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.4); border-radius: 8px; padding: 8px 18px; font-size: .75em; color: var(--purple); font-weight: 500; margin-top: 20px; }
+    .title-meta { font-size: .7em; color: rgba(232,244,253,0.55); margin-top: 20px; }
+    .obj-list { list-style: none; padding: 0; margin: 0; }
+    .obj-list li { display: flex; align-items: flex-start; gap: 14px; padding: 12px 16px; margin: 8px 0; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); font-size: 1.0em; }
+    .obj-list .num { background: var(--cyan); color: #0a0f1e; font-weight: 900; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: .9em; }
+    .sentiment-table { width: 100%; border-collapse: collapse; font-size: .88em; margin: 10px 0; }
+    .sentiment-table th { background: rgba(0,212,255,0.15); color: var(--cyan); font-weight: 700; padding: 9px 10px; text-align: center; border: 1px solid rgba(0,212,255,0.25); }
+    .sentiment-table td { padding: 8px 10px; border: 1px solid var(--border); text-align: center; }
+    .sentiment-table tr:nth-child(odd) td { background: rgba(255,255,255,0.03); }
+    .pos-word { color: var(--green); font-weight: 700; }
+    .neg-word { color: var(--red); font-weight: 700; text-decoration: line-through; opacity: .8; }
+    .neutral-word { color: rgba(232,244,253,0.55); }
+    .emoji-row { font-size: 1.6em; display: flex; gap: 16px; margin: 8px 0; }
+    .reveal .progress { background: rgba(0,212,255,0.15); }
+    .reveal .progress span { background: var(--cyan); }
+    .reveal .slide-number { color: var(--cyan); font-size: 16px; }
+    .reveal .controls { color: var(--cyan); }
+    .reveal section p, .reveal section li, .reveal section td, .reveal section th { font-size: max(.85em, 22px); }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ── SLIDE 1: TITLE ── -->
+<section data-transition="zoom" data-background-gradient="radial-gradient(ellipse at 30% 40%, rgba(0,212,255,0.08) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(167,139,250,0.08) 0%, transparent 60%)">
+  <div style="padding: 24px 0; text-align: center;">
+    <div class="chapter-badge">Ⅲ. 분류와 예측 &nbsp;›&nbsp; 1. 자료의 분류</div>
+    <h1 style="font-size:2.0em; margin: 8px 0 16px;">인공지능의 텍스트 분류<br><span style="color:var(--amber);">감성 분석</span></h1>
+    <p style="font-size:1.0em; color:var(--amber); font-weight:500; margin:0;">01 인공지능의 텍스트 분류</p>
+    <div class="achievement-tag">
+      <span style="opacity:.7; margin-right:6px;">성취기준</span>
+      <strong>12인수03-01</strong>&nbsp; 인공지능을 이용하여 텍스트를 분류하는 수학적 방법을 이해한다.
+    </div>
+    <p class="title-meta">미래엔 고등 인공지능 수학 | pp. 65–66</p>
+  </div>
+</section>
+
+<!-- ── SLIDE 2: 학습 목표 ── -->
+<section data-transition="slide">
+  <h2>학습 목표</h2>
+  <ul class="obj-list">
+    <li class="fragment fade-up" data-fragment-index="1">
+      <div class="num">1</div>
+      <div><span class="kw-cyan">감성 분석</span>의 원리를 이해하고, 텍스트를 긍정·부정·중립으로 분류할 수 있다.</div>
+    </li>
+    <li class="fragment fade-up" data-fragment-index="2">
+      <div class="num">2</div>
+      <div>텍스트를 <span class="kw-amber">감성 벡터</span>로 표현하고, <span class="kw-green">감성 점수</span>를 계산할 수 있다.</div>
+    </li>
+    <li class="fragment fade-up" data-fragment-index="3">
+      <div class="num">3</div>
+      <div>감성 분석이 실생활에서 어떻게 활용되는지 설명할 수 있다.</div>
+    </li>
+  </ul>
+  <div class="fragment fade-up" data-fragment-index="4" style="margin-top:20px;">
+    <div class="card-cyan card">
+      <span class="kw-green">핵심 흐름:</span>&nbsp;
+      텍스트 <span class="arrow">→</span> 감성 사전 비교 <span class="arrow">→</span> 벡터 표현 <span class="arrow">→</span> 감성 점수 <span class="arrow">→</span> 분류
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 3: 텍스트 분류의 두 가지 방법 ── -->
+<section data-transition="slide">
+  <h2>텍스트 분류의 두 가지 방법</h2>
+  <div class="cols cols-2" style="margin-top:16px;">
+    <div class="card card-cyan">
+      <h3>① 감성 분석</h3>
+      <p>텍스트에 담긴 <span class="kw-cyan">긍정/부정/중립</span> 감정을 분석하여 분류</p>
+      <p style="font-size:.85em; opacity:.75;">예: 리뷰가 '좋음'인지 '나쁨'인지 판별</p>
+    </div>
+    <div class="card card-amber">
+      <h3>② 유사도 분석</h3>
+      <p>텍스트 간의 <span class="kw-amber">유사한 정도</span>를 수치화하여 그룹으로 묶음</p>
+      <p style="font-size:.85em; opacity:.75;">예: 비슷한 주제의 글끼리 묶기</p>
+    </div>
+  </div>
+  <div class="card card-green" style="margin-top:14px;">
+    <span class="kw-green">이번 차시:</span> 감성 분석의 원리와 계산 방법
+  </div>
+</section>
+
+<!-- ── SLIDE 4: 감성 분석이란? ── -->
+<section data-transition="slide">
+  <h2>감성 분석(Sentiment Analysis)이란?</h2>
+  <div class="definition-box" style="margin-top:20px;">
+    <p style="margin:0; font-size:1.02em; line-height:1.7;">
+      텍스트에 들어 있는 <span class="kw-cyan">의견·감정·평가·태도</span> 등 주관적인 감성 정보를 골라내어
+      텍스트를 <span class="kw-amber">긍정·부정·중립</span>으로 분류하는 방법
+    </p>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <h3>감성 사전(Sentiment Dictionary)</h3>
+    <p>긍정 또는 부정과 같은 감성을 포함한 단어들을 구분하여 모아 놓은 것</p>
+    <div class="cols cols-2" style="margin-top:10px;">
+      <div class="card card-green">
+        <span class="badge badge-green">긍정 단어</span>
+        <p style="margin:6px 0 0; font-size:.9em;">감동, 따뜻하다, 밀다, 사랑, 웃다, 좋다, 재미있다, 추천하다, 최고, 행복</p>
+      </div>
+      <div class="card card-red">
+        <span class="badge badge-red">부정 단어</span>
+        <p style="margin:6px 0 0; font-size:.9em;">눈물, 슬프다, 싫어하다, 아쉽다, 아프다, 어설프다, 억지, 울다, 유치하다, 재미없다, 지루하다</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 5: 텍스트 → 벡터 표현 ── -->
+<section data-transition="slide">
+  <h2>텍스트를 벡터로 표현하기</h2>
+  <p>텍스트 자료의 단어를 감성 사전으로 분류하면 <strong>세 범주</strong>로 구분됨</p>
+  <div class="formula-box" style="font-size:1.1em;">
+    텍스트 벡터 \(= (\text{긍정 단어 수},\ \text{부정 단어 수},\ \text{중립 단어 수})\)
+  </div>
+  <div class="card card-amber" style="margin-top:14px;">
+    <h3>예시 — 공연 감상평</h3>
+    <p style="font-size:.92em; font-style:italic; margin-bottom:10px;">
+      "슬픈 역사의 한 장면을 감동적인 이야기로 구성한 최고의 공연이었다."
+    </p>
+    <div class="cols cols-3">
+      <div class="card card-green" style="text-align:center;">
+        <span class="badge badge-green">긍정</span><br>
+        <span style="color:var(--green); font-size:1.1em; font-weight:700;">감동, 최고</span><br>
+        <span style="color:var(--green); font-size:1.4em; font-weight:900;">→ 2</span>
+      </div>
+      <div class="card card-red" style="text-align:center;">
+        <span class="badge badge-red">부정</span><br>
+        <span style="color:var(--red); font-size:1.1em; font-weight:700;">슬프다</span><br>
+        <span style="color:var(--red); font-size:1.4em; font-weight:900;">→ 1</span>
+      </div>
+      <div class="card" style="text-align:center;">
+        <span class="badge badge-cyan">중립</span><br>
+        <span style="font-size:.9em; opacity:.7;">역사, 한, 장면, 이야기, 구성하다, 공연</span><br>
+        <span style="color:var(--cyan); font-size:1.4em; font-weight:900;">→ 6</span>
+      </div>
+    </div>
+    <div class="formula-box" style="margin-top:10px; font-size:1.1em;">
+      벡터 표현: \((2,\ 1,\ 6)\)
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 6: 감성 점수 ── -->
+<section data-transition="slide">
+  <h2>감성 점수로 분류하기</h2>
+  <div class="formula-box" style="font-size:1.15em; margin-bottom:16px;">
+    \((\text{감성 점수}) = (\text{긍정 단어 수}) - (\text{부정 단어 수})\)
+  </div>
+  <div class="cols cols-3">
+    <div class="card card-green" style="text-align:center;">
+      <p style="color:var(--green); font-weight:900; font-size:1.4em; margin:4px 0;">긍정</p>
+      <p style="opacity:.8;">감성 점수 <span class="kw-green">&gt; 0</span></p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <p style="color:var(--cyan); font-weight:900; font-size:1.4em; margin:4px 0;">중립</p>
+      <p style="opacity:.8;">감성 점수 <span class="kw-cyan">= 0</span></p>
+    </div>
+    <div class="card card-red" style="text-align:center;">
+      <p style="color:var(--red); font-weight:900; font-size:1.4em; margin:4px 0;">부정</p>
+      <p style="opacity:.8;">감성 점수 <span class="kw-red">&lt; 0</span></p>
+    </div>
+  </div>
+  <div class="card card-amber" style="margin-top:14px;">
+    <p><strong>앞의 감상평 예시:</strong></p>
+    <p>벡터 \((2, 1, 6)\) → 감성 점수 \(= 2 - 1 = 1 > 0\)</p>
+    <p style="color:var(--green); font-weight:700;">∴ <span class="kw-green">긍정</span> 텍스트로 분류</p>
+  </div>
+</section>
+
+<!-- ── SLIDE 7: 활동 — 공연 감상평 분류 ── -->
+<section data-transition="slide">
+  <h2>활동 — 공연 감상평 감성 분류</h2>
+  <p style="font-size:.88em; margin-bottom:10px;">아래 감성 사전을 이용하여 각 텍스트의 벡터, 감성 점수, 분류를 구하시오.</p>
+  <table class="sentiment-table">
+    <thead>
+      <tr><th>기호</th><th>텍스트</th><th>벡터</th><th>감성 점수</th><th>분류</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>P</td>
+        <td style="text-align:left; font-size:.85em;">배우 구성은 좋았으나, 연기가 어설퍼 아쉬웠다.</td>
+        <td class="fragment" data-fragment-index="1">(1, 2, 3)</td>
+        <td class="fragment" data-fragment-index="1">1−2 = −1</td>
+        <td class="fragment" data-fragment-index="1" style="color:var(--red);">부정</td>
+      </tr>
+      <tr>
+        <td>Q</td>
+        <td style="text-align:left; font-size:.85em;">다소 유치하고 억지 감동을 유발시킨다.</td>
+        <td class="fragment" data-fragment-index="2">(1, 2, 2)</td>
+        <td class="fragment" data-fragment-index="2">1−2 = −1</td>
+        <td class="fragment" data-fragment-index="2" style="color:var(--red);">부정</td>
+      </tr>
+      <tr>
+        <td>R</td>
+        <td style="text-align:left; font-size:.85em;">가슴이 너무 아프지만 따뜻하게 느껴진다.</td>
+        <td class="fragment" data-fragment-index="3">(1, 1, 3)</td>
+        <td class="fragment" data-fragment-index="3">1−1 = 0</td>
+        <td class="fragment" data-fragment-index="3" style="color:var(--cyan);">중립</td>
+      </tr>
+      <tr>
+        <td>S</td>
+        <td style="text-align:left; font-size:.85em;">스토리 전개가 어설프고 지루했던 공연</td>
+        <td class="fragment" data-fragment-index="4">(0, 2, 3)</td>
+        <td class="fragment" data-fragment-index="4">0−2 = −2</td>
+        <td class="fragment" data-fragment-index="4" style="color:var(--red);">부정</td>
+      </tr>
+      <tr>
+        <td>T</td>
+        <td style="text-align:left; font-size:.85em;">세상이 사랑과 행복으로 가득 차 있다고 믿게 되었다.</td>
+        <td class="fragment" data-fragment-index="5">(3, 0, 5)</td>
+        <td class="fragment" data-fragment-index="5">3−0 = 3</td>
+        <td class="fragment" data-fragment-index="5" style="color:var(--green);">긍정</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ── SLIDE 8: 감성 분석의 활용 ── -->
+<section data-transition="slide">
+  <h2>감성 분석의 활용</h2>
+  <div class="cols cols-2" style="margin-top:14px;">
+    <div class="card card-cyan">
+      <h3>📱 제품 리뷰 분석</h3>
+      <p style="font-size:.9em;">구매 후기에서 긍정/부정 비율을 자동으로 파악하여 <span class="kw-cyan">제품 품질 개선</span>에 활용</p>
+    </div>
+    <div class="card card-amber">
+      <h3>🎬 공연·영화 평가</h3>
+      <p style="font-size:.9em;">관람객 감상평을 분석하여 <span class="kw-amber">선호도</span>를 파악하고 홍보에 활용</p>
+    </div>
+    <div class="card card-green">
+      <h3>📰 SNS 여론 분석</h3>
+      <p style="font-size:.9em;">대규모 SNS 게시물에서 특정 주제에 대한 <span class="kw-green">사회적 여론</span>을 파악</p>
+    </div>
+    <div class="card card-purple">
+      <h3>🛒 추천 시스템</h3>
+      <p style="font-size:.9em;">고객의 감성 분석 결과를 바탕으로 <span class="kw-purple">맞춤형 상품</span>을 추천</p>
+    </div>
+  </div>
+  <div class="card card-cyan" style="margin-top:12px; text-align:center;">
+    텍스트 자료에서 <span class="kw-cyan">가치 있는 정보</span>를 찾아내는 데 유용
+  </div>
+</section>
+
+<!-- ── SLIDE 9: 확인 문제 ── -->
+<section data-transition="slide">
+  <h2>확인 문제</h2>
+  <div class="practice-box" style="margin-top:20px;">
+    <p><strong>문제.</strong> 다음 감성 사전과 텍스트를 이용하여 감성 점수를 구하고 분류하시오.</p>
+    <div class="cols cols-2" style="margin-top:12px;">
+      <div class="card card-green">
+        <span class="badge badge-green">긍정 단어</span>
+        <p style="font-size:.88em; margin-top:6px;">좋다, 재미있다, 감동, 추천, 행복, 따뜻하다</p>
+      </div>
+      <div class="card card-red">
+        <span class="badge badge-red">부정 단어</span>
+        <p style="font-size:.88em; margin-top:6px;">슬프다, 아쉽다, 지루하다, 싫다, 실망</p>
+      </div>
+    </div>
+    <div class="card card-amber" style="margin-top:10px;">
+      <p><strong>텍스트:</strong> "감동적이고 따뜻한 이야기지만 결말이 너무 아쉽고 지루하여 실망했다."</p>
+    </div>
+    <div class="card fragment" data-fragment-index="1" style="margin-top:10px;">
+      <p><span class="kw-green">긍정:</span> 감동, 따뜻한 → 2개&nbsp;&nbsp;
+         <span class="kw-red">부정:</span> 아쉽, 지루하여, 실망 → 3개&nbsp;&nbsp;
+         <span class="kw-cyan">중립:</span> 나머지 → 다수</p>
+      <p>벡터 \(= (2, 3, \ldots)\),&nbsp; 감성 점수 \(= 2 - 3 = -1 < 0\)</p>
+      <p style="color:var(--red); font-weight:700;">∴ <span class="kw-red">부정</span> 텍스트로 분류</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 10: 정리 ── -->
+<section data-transition="slide" data-background-gradient="radial-gradient(ellipse at 50% 50%, rgba(0,212,255,0.06) 0%, transparent 70%)">
+  <h2>핵심 정리</h2>
+  <div class="cols cols-2" style="margin-top:16px;">
+    <div class="definition-box">
+      <p style="margin:0;"><span class="kw-cyan">감성 분석</span>: 텍스트의 긍정/부정/중립 감성 정보를 수치화하여 분류하는 방법</p>
+    </div>
+    <div class="definition-box">
+      <p style="margin:0;"><span class="kw-amber">감성 사전</span>: 긍정/부정 단어를 모아 놓은 사전; 중립 단어는 포함되지 않음</p>
+    </div>
+  </div>
+  <div class="formula-box" style="margin-top:14px; font-size:1.05em;">
+    벡터 \(= (\text{긍정 수},\ \text{부정 수},\ \text{중립 수})\)<br>
+    \((\text{감성 점수}) = (\text{긍정 수}) - (\text{부정 수})\)
+  </div>
+  <div class="cols cols-3" style="margin-top:14px;">
+    <div class="card" style="text-align:center;"><span class="kw-green">점수 &gt; 0</span><br>→ 긍정</div>
+    <div class="card" style="text-align:center;"><span class="kw-cyan">점수 = 0</span><br>→ 중립</div>
+    <div class="card" style="text-align:center;"><span class="kw-red">점수 &lt; 0</span><br>→ 부정</div>
+  </div>
+</section>
+
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    transitionSpeed: 'default',
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    maxScale: 2.0,
+    plugins: [RevealNotes]
+  });
+</script>
+</body>
+</html>

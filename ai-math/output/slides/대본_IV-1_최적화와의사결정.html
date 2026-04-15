@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>강의 대본 — IV-1 최적화와 의사 결정</title>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 0.9 }
+    };
+  </script>
+  <script src="../../libs/mathjax/tex-chtml.js" id="MathJax-script" async></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.7;
+      color: #1a1a1a;
+      background: #f5f5f5;
+    }
+
+    .page {
+      width: 210mm;
+      background: #fff;
+      margin: 8mm auto;
+      padding: 16mm 20mm;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      page-break-after: always;
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page { margin: 0; box-shadow: none; width: 210mm; }
+      .no-print { display: none; }
+    }
+
+    /* ── 헤더 ── */
+    .script-header {
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .script-title { font-size: 14pt; font-weight: 900; }
+    .script-meta { font-size: 9pt; color: #666; text-align: right; }
+
+    /* ── 슬라이드 블록 ── */
+    .slide-block {
+      margin-bottom: 22px;
+      page-break-inside: avoid;
+    }
+    .slide-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .slide-num {
+      background: #1a1a1a;
+      color: #fff;
+      font-size: 9pt;
+      font-weight: bold;
+      padding: 3px 9px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .slide-name {
+      font-size: 10.5pt;
+      font-weight: bold;
+      color: #222;
+    }
+    .time-badge {
+      margin-left: auto;
+      font-size: 8.5pt;
+      color: #888;
+      background: #f0f0f0;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    /* ── 대본 내용 ── */
+    .script-body {
+      margin-left: 2px;
+      padding: 10px 14px;
+      border-left: 3px solid #ddd;
+      font-size: 10pt;
+      line-height: 1.8;
+      color: #2a2a2a;
+    }
+
+    /* ── 교사 말 vs 판서 vs 학생활동 ── */
+    .teacher-say {
+      color: #1a1a1a;
+      margin-bottom: 5px;
+    }
+    .board-write {
+      background: #fafafa;
+      border-left: 3px solid #3498db;
+      padding: 4px 10px;
+      margin: 5px 0;
+      font-size: 9.5pt;
+      color: #1565c0;
+      border-radius: 0 4px 4px 0;
+    }
+    .student-act {
+      background: #f0faf4;
+      border-left: 3px solid #2ecc71;
+      padding: 4px 10px;
+      margin: 5px 0;
+      font-size: 9.5pt;
+      color: #1b5e20;
+      border-radius: 0 4px 4px 0;
+    }
+    .emphasis {
+      background: #fff3cd;
+      border-left: 3px solid #f39c12;
+      padding: 4px 10px;
+      margin: 5px 0;
+      font-size: 9.5pt;
+      color: #795548;
+      border-radius: 0 4px 4px 0;
+    }
+    .tip {
+      background: #fce4ec;
+      border-left: 3px solid #e74c3c;
+      padding: 4px 10px;
+      margin: 5px 0;
+      font-size: 9pt;
+      color: #c62828;
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* ── 구분선 ── */
+    hr { border: none; border-top: 1px dashed #ddd; margin: 18px 0; }
+
+    /* ── 수업 타임라인 ── */
+    .timeline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+    .tl-item {
+      font-size: 8pt;
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: #f0f0f0;
+      color: #555;
+    }
+    .tl-item.current { background: #1a1a1a; color: #fff; }
+
+    /* ── 질문 박스 ── */
+    .question-box {
+      background: #fff8e1;
+      border: 1px dashed #f39c12;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 9.5pt;
+      margin: 5px 0;
+      color: #5d4037;
+    }
+    .question-box::before { content: '💬 발문: '; font-weight: bold; }
+
+    /* ── 판서 박스 ── */
+    .chalkboard {
+      background: #1b5e20;
+      color: #fff;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 9pt;
+      margin: 8px 0;
+    }
+    .chalkboard::before { content: '📋 판서 / 슬라이드: '; font-weight: bold; color: #a5d6a7; }
+
+    /* ── 수업 요약표 ── */
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+      margin-bottom: 14px;
+    }
+    .summary-table th {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 5px 8px;
+      text-align: center;
+    }
+    .summary-table td {
+      border: 1px solid #ccc;
+      padding: 5px 8px;
+      vertical-align: top;
+    }
+    .summary-table tr:nth-child(even) td { background: #f9f9f9; }
+  </style>
+</head>
+<body>
+
+<!-- ══════ 페이지 1: 수업 개요 + 슬라이드 1~5 ══════ -->
+<div class="page">
+
+  <div class="script-header">
+    <div>
+      <div class="script-title">강의 대본 — 최적화와 의사 결정</div>
+      <div style="font-size:9pt; color:#666; margin-top:2px;">인공지능수학 · IV-1 · 고2</div>
+    </div>
+    <div class="script-meta">
+      총 45분 수업<br>
+      슬라이드 15장
+    </div>
+  </div>
+
+  <!-- 수업 타임라인 -->
+  <div class="timeline">
+    <div class="tl-item">도입 5분 (S1~S3)</div>
+    <div class="tl-item">전개1 15분 (S4~S8) 손실함수·경사하강법</div>
+    <div class="tl-item">전개2 12분 (S9~S12) 최솟값·의사결정</div>
+    <div class="tl-item">전개3 8분 (S13) 종합예제</div>
+    <div class="tl-item">정리 5분 (S14~S15)</div>
+  </div>
+
+  <!-- 수업 전 체크리스트 -->
+  <div style="background:#f8f8f8; border:1px solid #ddd; border-radius:4px; padding:8px 14px; font-size:9pt; margin-bottom:14px;">
+    <strong>수업 전 준비:</strong>
+    슬라이드 HTML 열기 → 브라우저 전체화면(F11) →
+    Chart.js 초기화 확인 (슬라이드 4 열어서 그래프 로딩 확인) →
+    학습지 배부
+  </div>
+
+  <!-- 수업 개요표 -->
+  <table class="summary-table">
+    <thead>
+      <tr><th>단계</th><th>슬라이드</th><th>시간</th><th>주요 활동</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>도입</td><td>1~3</td><td>5분</td><td>타이틀, 학습목표, 실생활 최적화 예시</td></tr>
+      <tr><td>전개1: 손실함수</td><td>4</td><td>8분</td><td>손실함수 정의, L(w)=(w-3)² 그래프 해석</td></tr>
+      <tr><td>전개2: 경사하강법</td><td>5~8</td><td>15분</td><td>1단계 계산, 수렴 시뮬레이션, 학습률 비교</td></tr>
+      <tr><td>전개3: 최솟값</td><td>9</td><td>5분</td><td>L'(a)=0으로 최솟값, 교과서 연결</td></tr>
+      <tr><td>전개4: 의사결정</td><td>10~12</td><td>7분</td><td>엔트로피, 정보이득, 비교</td></tr>
+      <tr><td>종합 예제</td><td>13</td><td>5분</td><td>2변수 경사하강법 단계별 계산</td></tr>
+      <tr><td>정리·퀴즈</td><td>14~15</td><td>5분</td><td>핵심 정리, 확인 문제</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <!-- ── 슬라이드 1: 타이틀 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S01</div>
+      <div class="slide-name">타이틀 — 최적화와 의사 결정</div>
+      <div class="time-badge">2분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "안녕하세요. 오늘은 인공지능수학 4단원, '최적화와 의사 결정'을 시작합니다."
+      </div>
+      <div class="teacher-say">
+        "여러분, 내비게이션 써봤죠? 수천 개의 경로 중에서 어떻게 가장 빠른 길을 찾을까요?
+        또, 넷플릭스는 어떻게 내가 좋아할 영화를 추천할까요?"
+      </div>
+      <div class="question-box">
+        "AI가 '최적'을 찾는 수학적 원리가 무엇일까요?"
+      </div>
+      <div class="teacher-say">
+        "오늘 그 핵심 수학, 손실함수와 경사하강법을 배웁니다.
+        교과서 IV단원이고, 이 내용은 수능 인공지능수학 선택 과목의 핵심입니다."
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 슬라이드 2: 학습 목표 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S02</div>
+      <div class="slide-name">학습 목표 3가지</div>
+      <div class="time-badge">2분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "오늘 수업 목표 세 가지를 같이 읽어봐요."
+      </div>
+      <div class="student-act">
+        학생들과 함께 학습 목표 3가지 읽기 (첫 번째, 두 번째, 세 번째 순서로)
+      </div>
+      <div class="teacher-say">
+        "첫째, 손실함수가 뭔지. 둘째, 미분으로 최솟값을 어떻게 구하는지.
+        셋째, 이게 실제 AI에서 어떻게 활용되는지를 오늘 모두 이해하게 될 겁니다."
+      </div>
+      <div class="teacher-say">
+        "성취기준 12인수04-01, 02가 오늘 핵심이고, 03은 다음 차시 탐구 주제로 이어집니다."
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 슬라이드 3: 실생활 최적화 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S03</div>
+      <div class="slide-name">실생활 최적화 예시</div>
+      <div class="time-badge">1분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "최적화가 필요한 상황 세 가지를 봐요. 내비게이션은 경로 최적화,
+        AI 추천 시스템은 오차 최소화, 스마트팜은 환경 최적화입니다."
+      </div>
+      <div class="emphasis">
+        핵심: "최적화 = 오차를 정의하고 → 수학으로 최솟값 찾기"
+        이 흐름을 반드시 강조하고 넘어갈 것.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════ 페이지 2: 슬라이드 4~8 (손실함수·경사하강법) ══════ -->
+<div class="page">
+
+  <div class="script-header" style="border-bottom:1px solid #ccc; padding-bottom:4px; margin-bottom:12px;">
+    <div style="font-size:9.5pt; color:#555;">강의 대본 — IV-1 최적화와 의사 결정 (계속)</div>
+    <div style="font-size:8.5pt; color:#888;">슬라이드 4~8 · 전개1·2</div>
+  </div>
+
+  <!-- ── 슬라이드 4: 손실함수 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S04</div>
+      <div class="slide-name">손실함수 L(w)=(w-3)²</div>
+      <div class="time-badge">8분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "손실함수, Loss Function이라고 합니다. 영어로 기억해두세요."
+      </div>
+      <div class="teacher-say">
+        "교과서 104쪽 정의를 봐요. '추세선에 따른 오차의 제곱의 평균'이 손실함수입니다.
+        오차를 직접 더하면 양수·음수가 상쇄되니까, 제곱해서 모두 양수로 만든 뒤 평균을 냅니다."
+      </div>
+      <div class="chalkboard">
+        L(a) = [(y₁−ax₁)² + (y₂−ax₂)² + ⋯ + (yₙ−axₙ)²] / n
+      </div>
+      <div class="teacher-say">
+        "오늘은 개념 이해를 위해 더 단순한 형태 L(w) = (w−3)²로 시작합니다.
+        오른쪽 그래프를 봐요."
+      </div>
+      <div class="question-box">
+        "그래프에서 L이 가장 작아지는 w는 얼마인가요?"
+      </div>
+      <div class="student-act">
+        학생 답변 유도: "w = 3" → "맞습니다. 초록 점이 최솟값 L=0이에요."
+      </div>
+      <div class="teacher-say">
+        "w = 0이면 오차가 9, w = 2이면 오차가 1, w = 3이면 오차가 0.
+        AI는 이 손실함수를 가장 작게 만드는 w를 찾는 것이 목표입니다."
+      </div>
+      <div class="emphasis">
+        강조: L(w)가 이차함수이기 때문에 미분으로 정확한 최솟값을 구할 수 있다.
+        → 다음 단계에서 경사하강법으로 수치적으로도 접근한다.
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 슬라이드 5: 경사하강법 1단계 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S05</div>
+      <div class="slide-name">경사하강법 1단계 애니메이션</div>
+      <div class="time-badge">5분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "경사하강법, Gradient Descent. 이름 그대로 '경사를 따라 내려가는 방법'입니다.
+        산 위에서 눈을 감고 발이 닿는 땅이 가장 낮은 방향으로 한 발씩 내딛는 거예요."
+      </div>
+      <div class="chalkboard">
+        갱신식: w ← w − η × (∂L/∂w)
+      </div>
+      <div class="teacher-say">
+        "N키를 눌러서 단계별로 진행해봐요. 또는 '다음' 버튼을 클릭합니다."
+      </div>
+      <div class="board-write">
+        [Step 1 등장] "현재 위치 w₀=0, L(0) = 9입니다. 오차가 9라고 해봐요."
+      </div>
+      <div class="board-write">
+        [Step 2 등장] "기울기를 계산합니다. ∂L/∂w = 2(w−3), w=0 대입하면 −6입니다.
+        기울기가 마이너스라는 건, 이 방향으로 가면 L이 올라간다는 뜻이에요.
+        반대로 가야 내려갑니다."
+      </div>
+      <div class="board-write">
+        [Step 3 등장] "갱신식 적용: w₁ = 0 − 0.1×(−6) = 0 + 0.6 = 0.6"
+      </div>
+      <div class="board-write">
+        [Step 4 등장] "L(0.6) = (0.6−3)² = 5.76. 9보다 줄었죠. 한 발 내딛었습니다!"
+      </div>
+      <div class="tip">
+        오개념 주의: "η×(∂L/∂w)에서 η는 보폭 크기, ∂L/∂w는 방향입니다.
+        빼는 이유: 기울기가 양수면 함수가 올라가는 방향이므로 반대로 이동."
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 슬라이드 6: 수렴 시뮬레이션 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S06</div>
+      <div class="slide-name">경사하강법 수렴 시뮬레이션</div>
+      <div class="time-badge">4분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "이번엔 반복 실행을 볼게요. '1회 실행' 버튼을 눌러봐요."
+      </div>
+      <div class="student-act">
+        학생 1~2명이 앞에 나와서 버튼 클릭 또는 전체가 같이 구두로 따라가기
+      </div>
+      <div class="teacher-say">
+        "5회 정도 실행하면 w가 0 → 0.6 → 1.08 → 1.464 → ... 이렇게 3에 가까워집니다.
+        표에서 L(w)도 점점 줄어들죠? 이게 AI가 학습하는 과정입니다."
+      </div>
+      <div class="question-box">
+        "w가 정확히 3이 될 수 있을까요? 아니면 3에 가까워질 뿐인가요?"
+      </div>
+      <div class="teacher-say">
+        "이론상 무한히 반복하면 3에 수렴합니다. 실제로는 오차가 아주 작아지면 멈춥니다."
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 슬라이드 7: 학습률 비교 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S07</div>
+      <div class="slide-name">학습률(η) 비교</div>
+      <div class="time-badge">3분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "보폭, 즉 학습률 η의 크기에 따라 결과가 완전히 달라집니다."
+      </div>
+      <div class="teacher-say">
+        "η=0.1: 안정적으로 수렴. 오늘 예제가 이 경우입니다."
+      </div>
+      <div class="teacher-say">
+        "η=0.01: 같은 방향으로 가지만 너무 느려요. 수천 번이 필요합니다."
+      </div>
+      <div class="teacher-say">
+        "η=1.5: 최솟값 w=3을 지나쳐 버립니다. w=0에서 시작하면
+        w₁=0−1.5×(−6)=9. 더 멀어졌어요! 계속 왔다갔다 발산합니다."
+      </div>
+      <div class="chalkboard">
+        η=1.5: w₀=0 → w₁=9 → w₂=−8.25 → ... (발산)
+      </div>
+      <div class="emphasis">
+        실무에서 학습률 선택이 딥러닝 성능에 가장 크게 영향을 미치는 하이퍼파라미터.
+        보통 0.001 ~ 0.1 사이에서 실험적으로 결정합니다.
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 슬라이드 8: 경사하강법 종류 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S08</div>
+      <div class="slide-name">경사하강법 종류 + 지역/전역 최솟값</div>
+      <div class="time-badge">3분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "실제 AI에서는 데이터가 수백만 개이기 때문에, 모든 데이터로 기울기를 계산하면 느립니다.
+        그래서 미니배치 방식을 씁니다. 32개, 64개씩 묶어서 기울기를 구하는 거예요."
+      </div>
+      <div class="teacher-say">
+        "지역 최솟값 문제. 복잡한 손실 함수에는 골짜기가 여러 개 있어요.
+        경사를 따라 내려가다 가짜 골짜기에 빠질 수 있습니다.
+        이 문제는 랜덤 시작점, 모멘텀 같은 방법으로 어느 정도 해결합니다."
+      </div>
+      <div class="student-act">
+        간단한 질의응답: "Batch, Stochastic, Mini-Batch의 차이점을 학생이 설명해보기"
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════ 페이지 3: 슬라이드 9~15 ══════ -->
+<div class="page">
+
+  <div class="script-header" style="border-bottom:1px solid #ccc; padding-bottom:4px; margin-bottom:12px;">
+    <div style="font-size:9.5pt; color:#555;">강의 대본 — IV-1 최적화와 의사 결정 (계속)</div>
+    <div style="font-size:8.5pt; color:#888;">슬라이드 9~15 · 전개3·4 + 정리</div>
+  </div>
+
+  <!-- ── 슬라이드 9: 미분으로 최솟값 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S09</div>
+      <div class="slide-name">손실함수 최솟값 — 미분 활용 (교과서 핵심)</div>
+      <div class="time-badge">5분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "이제 교과서의 핵심 방법입니다. 손실함수가 이차함수면, 미분해서 L'(a) = 0 을 풀면 됩니다."
+      </div>
+      <div class="chalkboard">
+        교과서 105쪽: L(a) = (880a² − 1672a + 830) / 5<br>
+        L'(a) = (1760a − 1672) / 5 = 0<br>
+        → a = 1672/1760 = 19/20 = 0.95
+      </div>
+      <div class="teacher-say">
+        "이 a = 0.95가 가장 오차가 작은 추세선의 기울기입니다.
+        그래프에서 포물선의 꼭짓점이죠. 접선의 기울기가 0인 지점."
+      </div>
+      <div class="teacher-say">
+        "경사하강법은 이 0.95를 수치적·반복적으로 찾아가는 방법이고,
+        미분 = 0은 해석적으로 한 번에 구하는 방법입니다.
+        둘 다 같은 답을 찾는 방법이에요."
+      </div>
+      <div class="question-box">
+        "경사하강법과 미분=0 방법 중 어느 것이 더 유용할까요? 왜요?"
+      </div>
+      <div class="teacher-say">
+        "미분=0은 간단한 함수에서 정확합니다.
+        딥러닝처럼 수백만 개의 변수가 있으면 L'=0 연립방정식을 풀 수 없어서
+        경사하강법을 사용합니다."
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 슬라이드 10~11: 엔트로피·정보이득 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S10~11</div>
+      <div class="slide-name">엔트로피 + 정보이득</div>
+      <div class="time-badge">7분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "이번엔 다른 유형의 최적화입니다. 의사결정 트리에서 쓰는 엔트로피예요."
+      </div>
+      <div class="teacher-say">
+        "엔트로피는 불확실성의 양입니다. 동전을 던질 때 앞:뒤=50:50이면
+        결과를 전혀 모르니까 불확실성이 최대. H = 1 bit입니다."
+      </div>
+      <div class="chalkboard">
+        H = −Σ pᵢ·log₂(pᵢ)<br>
+        50:50 → H = −(0.5·log₂0.5 + 0.5·log₂0.5) = −(−0.5 + −0.5) = 1.0<br>
+        80:20 → H = −(0.8·log₂0.8 + 0.2·log₂0.2) ≈ 0.72<br>
+        100:0 → H = 0 (완전히 예측 가능)
+      </div>
+      <div class="student-act">
+        막대 그래프 보면서: "어느 경우가 가장 불확실한가요?" → 학생 답변
+      </div>
+      <div class="teacher-say">
+        "의사결정 트리는 데이터를 분류할 때, 분류 후 엔트로피가 가장 많이 줄어드는
+        특징을 선택합니다. 이것이 정보이득입니다."
+      </div>
+      <div class="chalkboard">
+        정보이득 = 분기 전 H − 분기 후 평균 H<br>
+        예: 전체 H=1.0 → 분기 후 평균 H=0.72 → 정보이득=0.28
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 슬라이드 12: 비교 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S12</div>
+      <div class="slide-name">경사하강법 vs 의사결정 트리 비교</div>
+      <div class="time-badge">2분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "정리하면. 경사하강법은 연속적인 수인 가중치를 최적화하고,
+        의사결정 트리는 예/아니오처럼 이산적인 선택을 최적화합니다."
+      </div>
+      <div class="emphasis">
+        공통점 강조: "둘 다 어떤 기준값을 최소화하여 최적의 의사 결정을 내린다."
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 슬라이드 13: 2변수 종합 예제 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S13</div>
+      <div class="slide-name">2변수 경사하강법 종합 예제</div>
+      <div class="time-badge">5분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "이제 실제 딥러닝에 더 가까운 2변수 버전을 봐요.
+        L(w₁, w₂) = w₁² + w₂². 이건 원점이 최솟값인 그릇 모양 함수입니다."
+      </div>
+      <div class="chalkboard">
+        초기: w₁=2, w₂=3 → L=4+9=13<br>
+        편미분: ∂L/∂w₁=2w₁=4, ∂L/∂w₂=2w₂=6<br>
+        갱신: w₁=2−0.1×4=1.6, w₂=3−0.1×6=2.4<br>
+        → L=1.6²+2.4²=2.56+5.76=8.32
+      </div>
+      <div class="teacher-say">
+        "N키로 단계별로 보면서 따라가봐요. 각 변수가 독립적으로 업데이트됩니다.
+        반복할수록 (0,0)으로 수렴해요."
+      </div>
+      <div class="student-act">
+        학생이 2회, 3회 직접 계산해보기 (1분)
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 슬라이드 14: 핵심 요약 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S14</div>
+      <div class="slide-name">핵심 개념 정리</div>
+      <div class="time-badge">2분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "오늘 배운 것 세 가지를 빠르게 정리합니다."
+      </div>
+      <div class="chalkboard">
+        ① 손실함수: 오차²의 평균. 작을수록 예측 좋음.<br>
+        ② 경사하강법: w ← w − η·(∂L/∂w). 반복으로 최솟값.<br>
+        ③ 엔트로피: H = −Σpᵢlog₂pᵢ. 의사결정 분류 기준.
+      </div>
+      <div class="teacher-say">
+        "공통점: 최적화 = 목적함수 정의 → 수학으로 최솟값 탐색 → 최적 의사 결정."
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 슬라이드 15: 퀴즈 ── -->
+  <div class="slide-block">
+    <div class="slide-label">
+      <div class="slide-num">S15</div>
+      <div class="slide-name">확인 문제 + 차시 예고</div>
+      <div class="time-badge">3분</div>
+    </div>
+    <div class="script-body">
+      <div class="teacher-say">
+        "마지막으로 확인 문제. L(w) = w² − 4w + 5, η=0.1, w₀=0.
+        경사하강법 1회 적용하면 w₁은?"
+      </div>
+      <div class="student-act">
+        1분간 학생 개인 풀기 → 손 들어 답 발표 → 정답 버튼 클릭
+      </div>
+      <div class="chalkboard">
+        풀이: L'(w) = 2w−4, w₀=0 대입 → L'(0)=−4<br>
+        w₁ = 0 − 0.1×(−4) = 0.4 → ② 번
+      </div>
+      <div class="teacher-say">
+        "검증: L(0.4) = 0.16−1.6+5 = 3.56. 처음 L(0)=5보다 줄었죠. 맞습니다."
+      </div>
+      <div class="teacher-say">
+        "다음 시간: 다항함수의 미분 심화 (교과서 02번 절). 평균변화율, 미분계수, 도함수.
+        오늘 배운 L'(a)=0을 엄밀하게 유도합니다."
+      </div>
+      <div class="teacher-say">
+        "학습지 5번, 6번은 오늘 내용으로 풀 수 있습니다. 다음 시간 전까지 해오세요."
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── 판서 계획 ── -->
+  <div style="background:#f8f8f8; border:1px solid #ddd; border-radius:4px; padding:10px 14px; font-size:9pt;">
+    <strong>판서 계획 (칠판 or 태블릿):</strong>
+    <ol style="margin: 6px 0 0 16px; line-height:2;">
+      <li>손실함수 정의: L(a) = Σ(yᵢ−axᵢ)²/n</li>
+      <li>경사하강법 갱신식: w ← w − η·(∂L/∂w)</li>
+      <li>L(w)=(w−3)² 예시 수치 계산 (슬라이드 5 따라가며)</li>
+      <li>엔트로피 공식: H = −Σpᵢ·log₂pᵢ</li>
+    </ol>
+  </div>
+
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      MathJax.typesetPromise().catch(err => console.warn('MathJax:', err));
+    }
+  });
+</script>
+
+</body>
+</html>

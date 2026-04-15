@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이차곡선 | 기하 고2</title>
+
+  <link rel="stylesheet" href="../../libs/reveal.min.css">
+  <link rel="stylesheet" href="../../libs/theme/black.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => {
+          MathJax.startup.defaultReady();
+          window.mathJaxReady = true;
+        }
+      },
+      chtml: { scale: 0.92 }
+    };
+  </script>
+  <script src="../../libs/mathjax/tex-chtml.js" id="MathJax-script" async></script>
+
+  <script src="../../libs/gsap.min.js"></script>
+  <script src="../../libs/p5.min.js"></script>
+  <script src="../../libs/chart.min.js"></script>
+
+  <style>
+    :root {
+      --accent: #1abc9c;
+      --accent-dim: #1abc9c88;
+      --success: #2ecc71;
+      --danger: #e74c3c;
+      --info: #3498db;
+      --text-muted: #95a5a6;
+      --text-dim: #706858;
+      --border: #1e1c18;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal .highlight { color: var(--accent); font-weight: bold; }
+    .reveal .num-sub   { color: var(--accent); font-size: 1.1em; }
+    .reveal .result    { color: var(--success); font-weight: bold; }
+    .reveal .wrong     { color: var(--danger); }
+
+    .reveal .step-box {
+      background: rgba(255,255,255,0.07);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 0;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+    }
+    .reveal .step-box.visible {
+      padding: 0.6em 1em;
+      margin: 0.5em 0;
+      max-height: 200px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal .step-box .step-label {
+      font-size: 0.75em;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.2em;
+    }
+
+    .reveal .calc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85em;
+      margin: 0.8em auto;
+    }
+    .reveal .calc-table th {
+      background: var(--accent);
+      color: #000;
+      padding: 0.5em 0.8em;
+      text-align: center;
+      font-weight: 700;
+    }
+    .reveal .calc-table td {
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.45em 0.7em;
+      text-align: center;
+      transition: background 0.3s;
+    }
+
+    .reveal .anim-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8em;
+      margin-top: 0.7em;
+    }
+    .reveal .anim-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      padding: 0.4em 1.2em;
+      font-size: 0.85em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .reveal .anim-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .reveal .anim-btn.reset-btn { background: rgba(255,255,255,0.15); color: #fff; }
+    .reveal .step-counter {
+      color: var(--text-muted);
+      font-size: 0.8em;
+      min-width: 4em;
+      text-align: center;
+    }
+
+    .reveal .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5em;
+      align-items: start;
+    }
+    .reveal .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1em;
+    }
+
+    .reveal .concept-card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 1em;
+      text-align: center;
+    }
+    .reveal .concept-card .icon { font-size: 2em; margin-bottom: 0.3em; }
+    .reveal .concept-card h4 { color: var(--accent); margin: 0.3em 0; }
+
+    .reveal .objective-list {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+    }
+    .reveal .objective-list li {
+      padding: 0.4em 0 0.4em 1.8em;
+      position: relative;
+      font-size: 0.95em;
+    }
+    .reveal .objective-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .reveal .warning-box {
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid var(--danger);
+      border-radius: 8px;
+      padding: 0.7em 1em;
+      font-size: 0.85em;
+    }
+
+    .reveal .formula-box {
+      background: rgba(255,255,255,0.04);
+      border-radius: 8px;
+      padding: 0.8em;
+      text-align: center;
+      margin: 0.4em 0;
+    }
+
+    .reveal .definition-box {
+      border-left: 4px solid var(--info);
+      padding: 0.6em 1em;
+      background: rgba(52,152,219,0.08);
+      border-radius: 0 8px 8px 0;
+      margin: 0.5em 0;
+    }
+
+    .reveal .kw { color: var(--accent); font-weight: 600; }
+    .reveal .kw-info { color: var(--info); font-weight: 600; }
+    .reveal .kw-success { color: var(--success); font-weight: 600; }
+    .reveal .kw-danger { color: var(--danger); font-weight: 600; }
+
+    .reveal .card { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 1em; }
+    .reveal .card-accent { border: 1px solid var(--accent); }
+
+    .reveal .progress { height: 4px; }
+    .reveal .progress span { background: var(--accent); }
+
+    .reveal {
+      font-size: 28px;
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+    }
+    .reveal .slides section {
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .reveal mjx-container[jax="CHTML"][display="true"] {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .reveal .badge {
+      display: inline-block;
+      font-size: 0.6em;
+      color: var(--accent);
+      padding: 0.2em 0.6em;
+      border: 1px solid var(--accent-dim);
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+    }
+
+    .reveal .accent-line {
+      width: 50px;
+      height: 2px;
+      background: var(--accent);
+      margin: 0.5em 0;
+    }
+
+    /* 슬라이드별 커스텀 */
+    .reveal .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.8em;
+      font-size: 0.82em;
+    }
+    .reveal .summary-item {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--accent-dim);
+      border-radius: 8px;
+      padding: 0.8em;
+    }
+    .reveal .summary-item h4 {
+      color: var(--accent);
+      margin: 0 0 0.4em 0;
+      font-size: 1em;
+    }
+    .reveal .quiz-box {
+      background: rgba(26,188,156,0.08);
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      padding: 1.2em;
+      text-align: center;
+      margin: 0.8em 0;
+    }
+    .reveal .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.5em;
+      margin-top: 0.8em;
+      font-size: 0.85em;
+    }
+    .reveal .quiz-option {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      padding: 0.5em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .reveal .quiz-option:hover { background: rgba(26,188,156,0.2); border-color: var(--accent); }
+    .reveal .quiz-option.correct { background: rgba(46,204,113,0.2); border-color: var(--success); color: var(--success); }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ===== 슬라이드 1: 타이틀 ===== -->
+    <section data-background-gradient="linear-gradient(135deg, #0f2027, #203a43, #2c5364)">
+      <div class="badge">기하 · 고2</div>
+      <h1 style="font-size:2em; margin:0.3em 0; color:#fff;">이차곡선</h1>
+      <p style="color:var(--accent); font-size:1.1em; margin:0;">포물선 · 타원 · 쌍곡선</p>
+      <div class="accent-line" style="margin:0.8em auto;"></div>
+      <p style="color:var(--text-muted); font-size:0.75em;">
+        원뿔을 절단하여 만든 곡선을 방정식으로 표현하는 것은 그 기하적 성질을 탐구하는 데 유용한 방법이다.
+      </p>
+      <div class="three-col" style="margin-top:1em; font-size:0.8em;">
+        <div class="concept-card">
+          <div class="icon">📡</div>
+          <h4>포물선</h4>
+          <p style="font-size:0.8em; color:var(--text-muted);">안테나·반사경</p>
+        </div>
+        <div class="concept-card">
+          <div class="icon">🪐</div>
+          <h4>타원</h4>
+          <p style="font-size:0.8em; color:var(--text-muted);">행성 궤도</p>
+        </div>
+        <div class="concept-card">
+          <div class="icon">🛰️</div>
+          <h4>쌍곡선</h4>
+          <p style="font-size:0.8em; color:var(--text-muted);">GPS 측위</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 2: 학습목표 ===== -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.3em;">학습 목표</h2>
+      <div class="accent-line"></div>
+      <ul class="objective-list" style="margin-top:1em;">
+        <li>포물선·타원·쌍곡선의 <span class="kw">정의</span>를 초점과 준선(거리 조건)으로 이해하고 설명할 수 있다.</li>
+        <li>각 이차곡선의 <span class="kw">방정식을 유도</span>하고, 초점·준선·점근선을 구할 수 있다.</li>
+        <li>이차곡선의 성질을 <span class="kw">실생활 문제</span>에 적용할 수 있다.</li>
+      </ul>
+      <div class="definition-box" style="margin-top:1.2em;">
+        <strong style="color:var(--info);">이차곡선(Conic Section)이란?</strong><br>
+        <span style="font-size:0.88em;">원뿔을 평면으로 절단할 때 생기는 곡선 — 포물선, 타원, 쌍곡선의 총칭</span>
+      </div>
+      <table class="calc-table" style="margin-top:0.8em; font-size:0.8em;">
+        <thead>
+          <tr><th>이차곡선</th><th>거리 조건</th><th>표준형</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>포물선</td><td>초점까지 = 준선까지</td><td>\(y^2 = 4px\)</td></tr>
+          <tr><td>타원</td><td>두 초점까지 거리 합 = 2a</td><td>\(\frac{x^2}{a^2}+\frac{y^2}{b^2}=1\)</td></tr>
+          <tr><td>쌍곡선</td><td>두 초점까지 거리 차 = 2a</td><td>\(\frac{x^2}{a^2}-\frac{y^2}{b^2}=1\)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ===== 슬라이드 3: 이차곡선 실생활 ===== -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.2em;">이차곡선과 실생활</h2>
+      <div class="accent-line"></div>
+      <div class="three-col" style="margin-top:0.8em;">
+        <div class="concept-card">
+          <div class="icon">📡</div>
+          <h4>포물선 안테나</h4>
+          <p style="font-size:0.78em; color:var(--text-muted);">
+            포물선의 <span class="kw">반사 성질</span>:<br>
+            초점에서 출발한 전파가 반사면에서 평행 광선이 됨.<br>
+            태양열 집열기, 위성방송 안테나, 손전등 반사경
+          </p>
+        </div>
+        <div class="concept-card">
+          <div class="icon">🪐</div>
+          <h4>타원 행성 궤도</h4>
+          <p style="font-size:0.78em; color:var(--text-muted);">
+            케플러 제1법칙:<br>
+            행성은 <span class="kw">태양을 초점</span>으로 하는 타원 궤도로 공전.<br>
+            지구·화성·수성 등 태양계 행성
+          </p>
+        </div>
+        <div class="concept-card">
+          <div class="icon">🛰️</div>
+          <h4>쌍곡선 GPS</h4>
+          <p style="font-size:0.78em; color:var(--text-muted);">
+            LORAN 항법:<br>
+            두 기지국에서 신호 도달 <span class="kw">시간차</span>로 위치 결정.<br>
+            거리 차 일정 = 쌍곡선 위에 위치
+          </p>
+        </div>
+      </div>
+      <div class="formula-box" style="margin-top:0.8em; font-size:0.85em;">
+        수학의 추상적 곡선이 우주·통신·항법 등 핵심 기술의 기반이 된다
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 4: 포물선 정의 (시각화) ===== -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.2em;">포물선의 정의</h2>
+      <div class="accent-line"></div>
+      <div class="two-col" style="margin-top:0.5em;">
+        <div>
+          <div class="definition-box">
+            <strong style="color:var(--info);">정의</strong><br>
+            <span style="font-size:0.88em;">평면 위의 한 점 F(초점)와 F를 지나지 않는 직선 <em>l</em>(준선)이 주어질 때,<br>
+            <span class="kw">F까지의 거리 = <em>l</em>까지의 거리</span>인 점의 집합</span>
+          </div>
+          <div style="font-size:0.82em; margin-top:0.8em;">
+            <p>• 초점: <span class="kw">F(p, 0)</span></p>
+            <p>• 준선: <span class="kw">x = −p</span></p>
+            <p>• 꼭짓점: O(0, 0)</p>
+            <p>• 대칭축: x축</p>
+            <p style="margin-top:0.5em;">슬라이더로 점 P를 이동하면<br>PF = 준선까지 거리임을 확인!</p>
+          </div>
+        </div>
+        <div>
+          <div id="geo-parabola-01-wrap" style="width:100%; max-width:380px; margin:0 auto;">
+            <div id="geo-parabola-01-canvas-holder"></div>
+            <div style="font-size:0.75em; margin-top:0.4em; text-align:center;">
+              <label style="color:var(--accent);">점 P의 y좌표</label>
+              <input type="range" min="-4" max="4" step="0.5" value="2"
+                     id="geo-parabola-01-py"
+                     oninput="updateParabola_geo_parabola_01(this.value)">
+              <span id="geo-parabola-01-pyv">2</span>
+            </div>
+            <div id="geo-parabola-01-dist"
+                 style="font-size:0.78em; color:#f39c12; text-align:center; margin-top:0.3em;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 5: 포물선 방정식 유도 (애니메이션) ===== -->
+    <section data-anim-id="anim-parabola-01">
+      <h2 style="color:var(--accent); font-size:1.2em;">포물선 방정식 유도 <span class="badge">y² = 8x</span></h2>
+      <div class="accent-line"></div>
+      <p style="font-size:0.8em; color:var(--text-muted);">초점 F(2, 0), 준선 x = −2 (p = 2)</p>
+      <div id="anim-anim-parabola-01" style="min-height:280px;">
+        <div id="step-anim-parabola-01-s1" class="step-box">
+          <div class="step-label">Step 1 — 정의</div>
+          초점 F(2, 0), 준선 x = −2<br>
+          점 P(x, y)에서: <strong>PF = PH</strong> (H는 준선 위 발, 좌표 (−2, y))
+        </div>
+        <div id="step-anim-parabola-01-s2" class="step-box">
+          <div class="step-label">Step 2 — 거리 조건</div>
+          \( \text{PF} = \sqrt{(x-2)^2 + y^2}, \quad \text{PH} = x + 2 \)<br>
+          \[ \sqrt{(x-2)^2 + y^2} = x + 2 \]
+        </div>
+        <div id="step-anim-parabola-01-s3" class="step-box">
+          <div class="step-label">Step 3 — 양변 제곱</div>
+          \[ (x-2)^2 + y^2 = (x+2)^2 \]
+          \[ x^2 - 4x + 4 + y^2 = x^2 + 4x + 4 \]
+          \[ \therefore\; y^2 = 8x \]
+        </div>
+        <div id="step-anim-parabola-01-s4" class="step-box">
+          <div class="step-label">Step 4 — 결론</div>
+          <span class="result">포물선 \( y^2 = 8x \)</span><br>
+          초점 <span class="kw">F(2, 0)</span> &nbsp;|&nbsp; 준선 <span class="kw">x = −2</span> &nbsp;|&nbsp; 꼭짓점 O(0, 0)
+        </div>
+      </div>
+      <div class="anim-controls">
+        <button class="anim-btn reset-btn" id="btn-reset-anim-parabola-01"
+                onclick="mathAnimators['anim-parabola-01'].reset()">↺ 초기화</button>
+        <button class="anim-btn" id="btn-prev-anim-parabola-01" disabled
+                onclick="mathAnimators['anim-parabola-01'].prev()">◀ 이전</button>
+        <span class="step-counter" id="step-counter-anim-parabola-01">0 / 4</span>
+        <button class="anim-btn" id="btn-next-anim-parabola-01"
+                onclick="mathAnimators['anim-parabola-01'].next()">다음 ▶</button>
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 6: 타원 정의 (시각화) ===== -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.2em;">타원의 정의</h2>
+      <div class="accent-line"></div>
+      <div class="two-col" style="margin-top:0.5em;">
+        <div>
+          <div class="definition-box">
+            <strong style="color:var(--info);">정의</strong><br>
+            <span style="font-size:0.88em;">두 초점 F₁, F₂까지 거리의 <span class="kw">합이 2a</span>로 일정한 점의 집합<br>
+            (단, a &gt; c)</span>
+          </div>
+          <div style="font-size:0.82em; margin-top:0.8em;">
+            <p>• 두 초점: <span class="kw">F(±c, 0)</span></p>
+            <p>• 장반축: <span class="kw">a</span> (꼭짓점 A(±a, 0))</p>
+            <p>• 단반축: <span class="kw">b</span> (꼭짓점 B(0, ±b))</p>
+            <p>• 관계: <span class="kw">b² = a² − c²</span></p>
+            <p style="margin-top:0.5em;">이 타원: a=5, b=4, c=3<br>
+            PF₁ + PF₂ = 10 항상 성립!</p>
+          </div>
+        </div>
+        <div>
+          <div id="geo-ellipse-02-wrap" style="width:100%; max-width:380px; margin:0 auto;">
+            <div id="geo-ellipse-02-canvas-holder"></div>
+            <div style="font-size:0.75em; margin-top:0.4em; text-align:center;">
+              <label style="color:var(--accent);">점 P 위치 (각도°)</label>
+              <input type="range" min="0" max="360" step="3" value="60"
+                     id="geo-ellipse-02-angle"
+                     oninput="updateEllipse_geo_ellipse_02(this.value)">
+              <span id="geo-ellipse-02-anglev">60°</span>
+            </div>
+            <div id="geo-ellipse-02-dist"
+                 style="font-size:0.78em; color:#f39c12; text-align:center; margin-top:0.3em;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 7: 타원 방정식 유도 (애니메이션) ===== -->
+    <section data-anim-id="anim-ellipse-02">
+      <h2 style="color:var(--accent); font-size:1.2em;">타원 방정식 유도 <span class="badge">x²/25 + y²/16 = 1</span></h2>
+      <div class="accent-line"></div>
+      <p style="font-size:0.8em; color:var(--text-muted);">F(3,0), F′(−3,0), a=5, b=4, c=3</p>
+      <div id="anim-anim-ellipse-02" style="min-height:280px;">
+        <div id="step-anim-ellipse-02-s1" class="step-box">
+          <div class="step-label">Step 1 — 정의</div>
+          두 초점 F(3,0), F′(−3,0), 점 P(x,y)에 대해<br>
+          <strong>|PF| + |PF′| = 2a = 10</strong>
+        </div>
+        <div id="step-anim-ellipse-02-s2" class="step-box">
+          <div class="step-label">Step 2 — 거리 조건</div>
+          \[ \sqrt{(x-3)^2+y^2} + \sqrt{(x+3)^2+y^2} = 10 \]
+          한 항을 이항: \(\sqrt{(x-3)^2+y^2} = 10 - \sqrt{(x+3)^2+y^2}\)
+        </div>
+        <div id="step-anim-ellipse-02-s3" class="step-box">
+          <div class="step-label">Step 3 — 제곱 2회</div>
+          1차 제곱 후 정리: \(5x + 25 = 5\sqrt{(x+3)^2+y^2}\)<br>
+          2차 제곱: \(16x^2 + 25y^2 = 400\)<br>
+          \[ \therefore\; \frac{x^2}{25} + \frac{y^2}{16} = 1 \]
+        </div>
+        <div id="step-anim-ellipse-02-s4" class="step-box">
+          <div class="step-label">Step 4 — 결론</div>
+          <span class="result">\(\dfrac{x^2}{25} + \dfrac{y^2}{16} = 1\)</span><br>
+          \(b^2 = a^2 - c^2 = 25 - 9 = 16\) &nbsp; 초점 <span class="kw">F(±3, 0)</span>
+        </div>
+      </div>
+      <div class="anim-controls">
+        <button class="anim-btn reset-btn" id="btn-reset-anim-ellipse-02"
+                onclick="mathAnimators['anim-ellipse-02'].reset()">↺ 초기화</button>
+        <button class="anim-btn" id="btn-prev-anim-ellipse-02" disabled
+                onclick="mathAnimators['anim-ellipse-02'].prev()">◀ 이전</button>
+        <span class="step-counter" id="step-counter-anim-ellipse-02">0 / 4</span>
+        <button class="anim-btn" id="btn-next-anim-ellipse-02"
+                onclick="mathAnimators['anim-ellipse-02'].next()">다음 ▶</button>
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 8: 쌍곡선 정의 (시각화) ===== -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.2em;">쌍곡선의 정의</h2>
+      <div class="accent-line"></div>
+      <div class="two-col" style="margin-top:0.5em;">
+        <div>
+          <div class="definition-box">
+            <strong style="color:var(--info);">정의</strong><br>
+            <span style="font-size:0.88em;">두 초점 F₁, F₂까지 거리의 <span class="kw">차의 절댓값이 2a</span>로 일정한 점의 집합<br>
+            (단, 0 &lt; a &lt; c)</span>
+          </div>
+          <div style="font-size:0.82em; margin-top:0.8em;">
+            <p>• 두 초점: <span class="kw">F(±c, 0)</span></p>
+            <p>• 꼭짓점: <span class="kw">A(±a, 0)</span></p>
+            <p>• 점근선: <span class="kw">y = ±(b/a)x</span></p>
+            <p>• 관계: <span class="kw">c² = a² + b²</span></p>
+            <p style="margin-top:0.5em;">이 쌍곡선: a=3, b=4, c=5<br>
+            |PF₁ − PF₂| = 6 항상 성립!</p>
+          </div>
+        </div>
+        <div>
+          <div id="geo-hyperbola-03-wrap" style="width:100%; max-width:380px; margin:0 auto;">
+            <div id="geo-hyperbola-03-canvas-holder"></div>
+            <div style="font-size:0.75em; margin-top:0.4em; text-align:center;">
+              <label style="color:var(--accent);">점 P 위치 (t)</label>
+              <input type="range" min="-2.5" max="2.5" step="0.1" value="0"
+                     id="geo-hyperbola-03-t"
+                     oninput="updateHyperbola_geo_hyperbola_03(this.value)">
+              <span id="geo-hyperbola-03-tv">0</span>
+            </div>
+            <div id="geo-hyperbola-03-dist"
+                 style="font-size:0.78em; color:#f39c12; text-align:center; margin-top:0.3em;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 9: 쌍곡선 방정식 유도 (애니메이션) ===== -->
+    <section data-anim-id="anim-hyperbola-03">
+      <h2 style="color:var(--accent); font-size:1.2em;">쌍곡선 방정식 유도 <span class="badge">x²/9 − y²/16 = 1</span></h2>
+      <div class="accent-line"></div>
+      <p style="font-size:0.8em; color:var(--text-muted);">F(5,0), F′(−5,0), a=3, b=4, c=5</p>
+      <div id="anim-anim-hyperbola-03" style="min-height:280px;">
+        <div id="step-anim-hyperbola-03-s1" class="step-box">
+          <div class="step-label">Step 1 — 정의</div>
+          두 초점 F(5,0), F′(−5,0), 점 P(x,y)에 대해<br>
+          <strong>||PF| − |PF′|| = 2a = 6</strong><br>
+          타원은 합, 쌍곡선은 <span class="kw">차</span> — 공식 하나 차이!
+        </div>
+        <div id="step-anim-hyperbola-03-s2" class="step-box">
+          <div class="step-label">Step 2 — 거리 조건</div>
+          오른쪽 가지(PF′ &gt; PF):<br>
+          \[ \sqrt{(x+5)^2+y^2} - \sqrt{(x-5)^2+y^2} = 6 \]
+        </div>
+        <div id="step-anim-hyperbola-03-s3" class="step-box">
+          <div class="step-label">Step 3 — 제곱 2회</div>
+          이항 후 1차 제곱: \(5x - 9 = 5\sqrt{(x-5)^2+y^2}\)<br>
+          2차 제곱: \(16x^2 - 9y^2 = 144\)<br>
+          \[ \therefore\; \frac{x^2}{9} - \frac{y^2}{16} = 1 \]
+        </div>
+        <div id="step-anim-hyperbola-03-s4" class="step-box">
+          <div class="step-label">Step 4 — 결론</div>
+          <span class="result">\(\dfrac{x^2}{9} - \dfrac{y^2}{16} = 1\)</span><br>
+          \(c^2 = a^2 + b^2 = 9 + 16 = 25\) &nbsp; 점근선: <span class="kw">y = ±(4/3)x</span>
+        </div>
+      </div>
+      <div class="anim-controls">
+        <button class="anim-btn reset-btn" id="btn-reset-anim-hyperbola-03"
+                onclick="mathAnimators['anim-hyperbola-03'].reset()">↺ 초기화</button>
+        <button class="anim-btn" id="btn-prev-anim-hyperbola-03" disabled
+                onclick="mathAnimators['anim-hyperbola-03'].prev()">◀ 이전</button>
+        <span class="step-counter" id="step-counter-anim-hyperbola-03">0 / 4</span>
+        <button class="anim-btn" id="btn-next-anim-hyperbola-03"
+                onclick="mathAnimators['anim-hyperbola-03'].next()">다음 ▶</button>
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 10: 이차곡선 비교 (Chart.js) ===== -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.2em;">이차곡선 3종 비교</h2>
+      <div class="accent-line"></div>
+      <div class="two-col" style="margin-top:0.5em; align-items:center;">
+        <div>
+          <div id="geo-conic-04-wrap" style="width:100%; max-width:420px; margin:0 auto; max-height:280px;">
+            <canvas id="geo-conic-04"></canvas>
+          </div>
+          <div style="font-size:0.72em; text-align:center; margin-top:0.4em; color:#95a5a6;">
+            <span style="color:#3498db;">●</span> 포물선 y²=4x &nbsp;
+            <span style="color:#2ecc71;">●</span> 타원 x²/9+y²/4=1 &nbsp;
+            <span style="color:#e74c3c;">●</span> 쌍곡선 x²/4−y²/2=1
+          </div>
+        </div>
+        <div style="font-size:0.8em;">
+          <table class="calc-table">
+            <thead>
+              <tr><th>구분</th><th>포물선</th><th>타원</th><th>쌍곡선</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>초점 수</td><td>1개</td><td>2개</td><td>2개</td></tr>
+              <tr><td>거리 조건</td><td>= 준선</td><td>합=2a</td><td>차=2a</td></tr>
+              <tr><td>방정식</td><td>y²=4px</td><td>+형</td><td>−형</td></tr>
+              <tr><td>점근선</td><td>없음</td><td>없음</td><td>y=±b/a·x</td></tr>
+              <tr><td>가지 수</td><td>1개</td><td>폐곡선</td><td>2개</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 11: 예제 1 — 포물선 ===== -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.2em;">예제 1 — 포물선</h2>
+      <div class="accent-line"></div>
+      <div class="card card-accent" style="margin-top:0.6em; font-size:0.9em;">
+        <strong>문제</strong> &nbsp; 포물선 \(y^2 = 8x\)의 초점 좌표와 준선의 방정식을 구하시오.
+      </div>
+      <div class="definition-box" style="margin-top:0.8em; font-size:0.85em;">
+        <strong>공식</strong>: \(y^2 = 4px\) → 초점 F(p, 0), 준선 x = −p
+      </div>
+      <div style="margin-top:0.8em; font-size:0.88em;">
+        <p><span class="kw">풀이</span></p>
+        <p>\(y^2 = 8x = 4 \times 2 \times x\) 이므로 \(p = 2\)</p>
+        <div class="formula-box" style="margin-top:0.5em;">
+          초점: <span class="result">F(2, 0)</span> &nbsp;&nbsp; 준선: <span class="result">x = −2</span>
+        </div>
+      </div>
+      <table class="calc-table" style="margin-top:0.8em; font-size:0.8em;">
+        <thead><tr><th>p 값</th><th>방정식</th><th>초점</th><th>준선</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>\(y^2=4x\)</td><td>F(1, 0)</td><td>x=−1</td></tr>
+          <tr style="background:rgba(26,188,156,0.12);">
+            <td><strong>2</strong></td><td><strong>\(y^2=8x\)</strong></td>
+            <td><strong>F(2, 0)</strong></td><td><strong>x=−2</strong></td>
+          </tr>
+          <tr><td>3</td><td>\(y^2=12x\)</td><td>F(3, 0)</td><td>x=−3</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ===== 슬라이드 12: 예제 2 — 타원 ===== -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.2em;">예제 2 — 타원</h2>
+      <div class="accent-line"></div>
+      <div class="card card-accent" style="margin-top:0.6em; font-size:0.9em;">
+        <strong>문제</strong> &nbsp; 타원 \(\dfrac{x^2}{25} + \dfrac{y^2}{16} = 1\)의 초점 좌표와 장축·단축의 길이를 구하시오.
+      </div>
+      <div class="definition-box" style="margin-top:0.8em; font-size:0.85em;">
+        <strong>공식</strong>: \(\frac{x^2}{a^2}+\frac{y^2}{b^2}=1\,(a>b>0)\) → 초점 F(±c, 0), \(c^2=a^2-b^2\)
+      </div>
+      <div style="margin-top:0.8em; font-size:0.88em;">
+        <p><span class="kw">풀이</span></p>
+        <p>\(a^2=25,\ b^2=16\) 이므로 \(a=5,\ b=4\)</p>
+        <p>\(c^2 = a^2 - b^2 = 25 - 16 = 9\) → \(c = 3\)</p>
+        <div class="formula-box" style="margin-top:0.5em;">
+          초점: <span class="result">F(3, 0), F′(−3, 0)</span><br>
+          장축의 길이: <span class="result">2a = 10</span> &nbsp; 단축의 길이: <span class="result">2b = 8</span>
+        </div>
+      </div>
+      <div class="warning-box" style="margin-top:0.6em;">
+        a &gt; b가 아니면 초점이 y축 위! &nbsp;\(\frac{x^2}{b^2}+\frac{y^2}{a^2}=1\) 형태에서 초점 F(0, ±c)
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 13: 예제 3 — 쌍곡선 ===== -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.2em;">예제 3 — 쌍곡선</h2>
+      <div class="accent-line"></div>
+      <div class="card card-accent" style="margin-top:0.6em; font-size:0.9em;">
+        <strong>문제</strong> &nbsp; 쌍곡선 \(\dfrac{x^2}{9} - \dfrac{y^2}{16} = 1\)의 초점 좌표와 점근선의 방정식을 구하시오.
+      </div>
+      <div class="definition-box" style="margin-top:0.8em; font-size:0.85em;">
+        <strong>공식</strong>: \(\frac{x^2}{a^2}-\frac{y^2}{b^2}=1\) → 초점 F(±c, 0), \(c^2=a^2+b^2\), 점근선 \(y=\pm\frac{b}{a}x\)
+      </div>
+      <div style="margin-top:0.8em; font-size:0.88em;">
+        <p><span class="kw">풀이</span></p>
+        <p>\(a^2=9,\ b^2=16\) 이므로 \(a=3,\ b=4\)</p>
+        <p>\(c^2 = a^2 + b^2 = 9 + 16 = 25\) → \(c = 5\)</p>
+        <div class="formula-box" style="margin-top:0.5em;">
+          초점: <span class="result">F(5, 0), F′(−5, 0)</span><br>
+          점근선: <span class="result">\(y = \pm\dfrac{4}{3}x\)</span>
+        </div>
+      </div>
+      <div class="warning-box" style="margin-top:0.5em;">
+        타원: \(c^2 = a^2 - b^2\) &nbsp;|&nbsp; 쌍곡선: \(c^2 = a^2 + b^2\) — 부호 반드시 구분!
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 14: 핵심 공식 정리 ===== -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.2em;">이차곡선 핵심 공식 정리</h2>
+      <div class="accent-line"></div>
+      <div class="summary-grid" style="margin-top:0.6em;">
+        <div class="summary-item">
+          <h4>포물선</h4>
+          <p>\(y^2 = 4px\)</p>
+          <hr style="border-color:rgba(255,255,255,0.1); margin:0.4em 0;">
+          <p style="color:var(--text-muted);">초점: F(p, 0)<br>준선: x = −p<br>꼭짓점: O(0,0)</p>
+          <hr style="border-color:rgba(255,255,255,0.1); margin:0.4em 0;">
+          <p>\(x^2 = 4py\)</p>
+          <p style="color:var(--text-muted);">초점: F(0, p)<br>준선: y = −p</p>
+        </div>
+        <div class="summary-item">
+          <h4>타원</h4>
+          <p>\(\dfrac{x^2}{a^2}+\dfrac{y^2}{b^2}=1\)</p>
+          <p style="color:var(--text-muted); font-size:0.9em;">(a &gt; b &gt; 0)</p>
+          <hr style="border-color:rgba(255,255,255,0.1); margin:0.4em 0;">
+          <p style="color:var(--text-muted);">초점: F(±c, 0)<br>\(c^2=a^2-b^2\)<br>장축: 2a, 단축: 2b</p>
+          <p style="color:var(--success); font-size:0.9em;">PF₁+PF₂=2a</p>
+        </div>
+        <div class="summary-item">
+          <h4>쌍곡선</h4>
+          <p>\(\dfrac{x^2}{a^2}-\dfrac{y^2}{b^2}=1\)</p>
+          <hr style="border-color:rgba(255,255,255,0.1); margin:0.4em 0;">
+          <p style="color:var(--text-muted);">초점: F(±c, 0)<br>\(c^2=a^2+b^2\)<br>점근선: \(y=\pm\frac{b}{a}x\)</p>
+          <p style="color:var(--success); font-size:0.9em;">|PF₁−PF₂|=2a</p>
+        </div>
+      </div>
+      <div class="formula-box" style="margin-top:0.6em; font-size:0.82em;">
+        타원: <span class="kw">합</span> 일정, \(c^2=a^2\mathbf{-}b^2\) &nbsp;|&nbsp;
+        쌍곡선: <span class="kw">차</span> 일정, \(c^2=a^2\mathbf{+}b^2\)
+      </div>
+    </section>
+
+    <!-- ===== 슬라이드 15: 확인 문제 ===== -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.2em;">확인 문제</h2>
+      <div class="accent-line"></div>
+      <div class="quiz-box" style="margin-top:0.6em;">
+        <p style="font-size:0.9em; font-weight:bold;">
+          초점 F(2, 0)이고 준선이 x = −2인 포물선의 방정식은?
+        </p>
+        <div class="quiz-options">
+          <div class="quiz-option" onclick="checkQuiz(this, false)">① \(y^2 = 2x\)</div>
+          <div class="quiz-option" onclick="checkQuiz(this, false)">② \(y^2 = 4x\)</div>
+          <div class="quiz-option" onclick="checkQuiz(this, true)">③ \(y^2 = 8x\)</div>
+          <div class="quiz-option" onclick="checkQuiz(this, false)">④ \(x^2 = 8y\)</div>
+          <div class="quiz-option" onclick="checkQuiz(this, false)">⑤ \(y^2 = 16x\)</div>
+        </div>
+      </div>
+      <div id="quiz-feedback" style="margin-top:0.6em; font-size:0.85em; text-align:center; min-height:1.5em;"></div>
+      <div class="definition-box" style="margin-top:0.6em; font-size:0.82em;">
+        <strong>풀이 힌트</strong>: 초점 F(p, 0), 준선 x = −p → p = ? &nbsp; 방정식 y² = 4px
+      </div>
+      <div class="formula-box" style="margin-top:0.6em; font-size:0.8em; color:var(--text-muted);">
+        정답: ③ &nbsp; p = 2이므로 y² = 4·2·x = 8x
+      </div>
+      <aside class="notes">
+        학생들이 직접 클릭해서 확인하도록 유도. 정답 클릭 시 초록, 오답 클릭 시 빨간 피드백.
+      </aside>
+    </section>
+
+  </div>
+</div>
+
+<script src="../../libs/reveal.min.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    progress: true,
+    controls: true,
+    controlsLayout: 'bottom-right',
+    transition: 'slide',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    center: true,
+    touch: true,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 1.5,
+    keyboard: {
+      78: () => {
+        const currentSlide = Reveal.getCurrentSlide();
+        const animId = currentSlide.dataset.animId;
+        if (animId && window.mathAnimators && window.mathAnimators[animId]) {
+          window.mathAnimators[animId].next();
+        }
+      },
+      80: () => {
+        const currentSlide = Reveal.getCurrentSlide();
+        const animId = currentSlide.dataset.animId;
+        if (animId && window.mathAnimators && window.mathAnimators[animId]) {
+          window.mathAnimators[animId].prev();
+        }
+      }
+    },
+    plugins: []
+  });
+
+  window.safeTypeset = function(elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', (event) => safeTypeset([event.currentSlide]));
+  Reveal.on('ready', () => safeTypeset());
+</script>
+
+<script src="../../templates/math_animation_lib.js"></script>
+
+<script>
+// ════════════════════════════════════════
+// 시각화 1: 포물선 (geo-parabola-01)
+// ════════════════════════════════════════
+(function() {
+  const assetId = 'geo-parabola-01';
+  const wrap = document.getElementById(assetId + '-wrap');
+  if (!wrap) return;
+  const w = Math.min(wrap.clientWidth, 380);
+  const h = Math.min(w * 0.625, 240);
+  const p_param = 2;
+
+  const sketch = function(p) {
+    const ox = w * 0.38, oy = h / 2;
+    const scale = Math.min(w, h) / (p_param * 10);
+
+    p.setup = function() {
+      const cnv = p.createCanvas(w, h);
+      cnv.parent(assetId + '-canvas-holder');
+    };
+
+    p.draw = function() {
+      p.background(26, 26, 46);
+      p.stroke(80, 80, 100); p.strokeWeight(1);
+      p.line(0, oy, w, oy); p.line(ox, 0, ox, h);
+
+      const directrix_x = ox - p_param * scale;
+      p.stroke(150, 80, 80); p.strokeWeight(1.5);
+      p.drawingContext.setLineDash([6, 4]);
+      p.line(directrix_x, 0, directrix_x, h);
+      p.drawingContext.setLineDash([]);
+      p.fill(200, 100, 100); p.noStroke(); p.textSize(10);
+      p.textAlign(p.LEFT);
+      p.text('준선 x=−2', directrix_x + 3, 16);
+
+      const focus_x = ox + p_param * scale, focus_y = oy;
+      p.fill(243, 156, 18); p.noStroke();
+      p.circle(focus_x, focus_y, 9);
+      p.textSize(10); p.textAlign(p.LEFT);
+      p.text('F(2,0)', focus_x + 5, focus_y - 3);
+
+      p.stroke(52, 152, 219); p.strokeWeight(2); p.noFill();
+      p.beginShape();
+      for (let py = -h / 2; py <= h / 2; py += 2) {
+        const px_math = py * py / (4 * p_param);
+        const sx = ox + px_math * scale;
+        const sy = oy - py * scale;
+        if (sx >= 0 && sx <= w) p.vertex(sx, sy);
+      }
+      p.endShape();
+
+      const pyEl = document.getElementById(assetId + '-py');
+      if (!pyEl) return;
+      const py_val = parseFloat(pyEl.value);
+      const px_val = py_val * py_val / (4 * p_param);
+      const Px = ox + px_val * scale, Py = oy - py_val * scale;
+
+      p.fill(46, 204, 113); p.noStroke();
+      p.circle(Px, Py, 11);
+      p.textSize(10); p.textAlign(p.LEFT);
+      p.text('P', Px + 5, Py - 3);
+
+      p.stroke(243, 156, 18); p.strokeWeight(2);
+      p.line(Px, Py, focus_x, focus_y);
+      p.stroke(231, 76, 60); p.strokeWeight(2);
+      p.line(Px, Py, directrix_x, Py);
+
+      const distPF = Math.sqrt((Px - focus_x) ** 2 + (Py - focus_y) ** 2);
+      const distDir = Math.abs(Px - directrix_x);
+      const el = document.getElementById(assetId + '-dist');
+      if (el) {
+        el.innerHTML =
+          'PF = <b>' + (distPF / scale).toFixed(2) + '</b>' +
+          '&emsp;준선까지 = <b>' + (distDir / scale).toFixed(2) + '</b>' +
+          '&emsp;→ ' +
+          (Math.abs(distPF - distDir) < 2
+            ? '<span style="color:#2ecc71">두 거리 일치 ✓</span>'
+            : '<span style="color:#e74c3c">계산 중...</span>');
+      }
+    };
+  };
+
+  window['updateParabola_' + assetId.replace(/-/g,'_')] = function(val) {
+    document.getElementById(assetId + '-pyv').textContent = val;
+  };
+
+  new p5(sketch);
+})();
+
+// ════════════════════════════════════════
+// 시각화 2: 타원 (geo-ellipse-02)
+// ════════════════════════════════════════
+(function() {
+  const assetId = 'geo-ellipse-02';
+  const wrap = document.getElementById(assetId + '-wrap');
+  if (!wrap) return;
+  const w = Math.min(wrap.clientWidth, 380);
+  const h = Math.min(w * 0.625, 240);
+  const a = 5, b = 4;
+  const c = Math.sqrt(a * a - b * b);
+  const cx = w / 2, cy = h / 2;
+  const scale = Math.min(w / (a * 2.8), h / (b * 2.8));
+
+  const sketch = function(p) {
+    p.setup = function() {
+      const cnv = p.createCanvas(w, h);
+      cnv.parent(assetId + '-canvas-holder');
+    };
+
+    p.draw = function() {
+      p.background(26, 26, 46);
+      p.stroke(80, 80, 100); p.strokeWeight(1);
+      p.line(0, cy, w, cy); p.line(cx, 0, cx, h);
+
+      p.stroke(52, 152, 219); p.strokeWeight(2); p.noFill();
+      p.ellipse(cx, cy, a * 2 * scale, b * 2 * scale);
+
+      const f1x = cx - c * scale, f2x = cx + c * scale;
+      p.fill(243, 156, 18); p.noStroke();
+      p.circle(f1x, cy, 9); p.circle(f2x, cy, 9);
+      p.textSize(9); p.textAlign(p.CENTER);
+      p.text('F₁(−3,0)', f1x, cy + 16);
+      p.text('F₂(3,0)', f2x, cy + 16);
+
+      const angleEl = document.getElementById(assetId + '-angle');
+      if (!angleEl) return;
+      const angle = parseFloat(angleEl.value);
+      const rad = angle * Math.PI / 180;
+      const Px = cx + a * Math.cos(rad) * scale;
+      const Py = cy - b * Math.sin(rad) * scale;
+
+      p.fill(46, 204, 113); p.noStroke();
+      p.circle(Px, Py, 11);
+      p.textSize(10); p.textAlign(p.LEFT);
+      p.text('P', Px + 5, Py - 3);
+
+      p.stroke(231, 76, 60); p.strokeWeight(2);
+      p.line(Px, Py, f1x, cy);
+      p.stroke(46, 204, 113); p.strokeWeight(2);
+      p.line(Px, Py, f2x, cy);
+
+      const d1 = Math.sqrt((Px - f1x) ** 2 + (Py - cy) ** 2) / scale;
+      const d2 = Math.sqrt((Px - f2x) ** 2 + (Py - cy) ** 2) / scale;
+      const el = document.getElementById(assetId + '-dist');
+      if (el) {
+        el.innerHTML =
+          'PF₁ = <span style="color:#e74c3c"><b>' + d1.toFixed(2) + '</b></span>' +
+          ' + PF₂ = <span style="color:#2ecc71"><b>' + d2.toFixed(2) + '</b></span>' +
+          ' = <b>' + (d1 + d2).toFixed(2) + '</b>' +
+          ' (2a=10)' +
+          (Math.abs(d1 + d2 - 2 * a) < 0.05 ? ' <span style="color:#2ecc71">✓</span>' : '');
+      }
+    };
+  };
+
+  window['updateEllipse_' + assetId.replace(/-/g,'_')] = function(val) {
+    document.getElementById(assetId + '-anglev').textContent = val + '°';
+  };
+
+  new p5(sketch);
+})();
+
+// ════════════════════════════════════════
+// 시각화 3: 쌍곡선 (geo-hyperbola-03)
+// ════════════════════════════════════════
+(function() {
+  const assetId = 'geo-hyperbola-03';
+  const wrap = document.getElementById(assetId + '-wrap');
+  if (!wrap) return;
+  const w = Math.min(wrap.clientWidth, 380);
+  const h = Math.min(w * 0.625, 240);
+  const a = 3, b = 4;
+  const c = Math.sqrt(a * a + b * b);
+  const cx = w / 2, cy = h / 2;
+  const scale = Math.min(w / (c * 3.5), h / (b * 3.5));
+
+  const sketch = function(p) {
+    p.setup = function() {
+      const cnv = p.createCanvas(w, h);
+      cnv.parent(assetId + '-canvas-holder');
+    };
+
+    p.draw = function() {
+      p.background(26, 26, 46);
+      p.stroke(80, 80, 100); p.strokeWeight(1);
+      p.line(0, cy, w, cy); p.line(cx, 0, cx, h);
+
+      p.stroke(60, 60, 80); p.strokeWeight(1);
+      p.drawingContext.setLineDash([4, 4]);
+      const slope = b / a;
+      p.line(cx - w / 2, cy + w / 2 * slope, cx + w / 2, cy - w / 2 * slope);
+      p.line(cx - w / 2, cy - w / 2 * slope, cx + w / 2, cy + w / 2 * slope);
+      p.drawingContext.setLineDash([]);
+
+      p.stroke(52, 152, 219); p.strokeWeight(2); p.noFill();
+      for (let branch = -1; branch <= 1; branch += 2) {
+        p.beginShape();
+        for (let t = -2.5; t <= 2.5; t += 0.05) {
+          const hx = a * Math.cosh(t) * branch;
+          const hy = b * Math.sinh(t);
+          const sx = cx + hx * scale, sy = cy - hy * scale;
+          if (sx >= 0 && sx <= w) p.vertex(sx, sy);
+        }
+        p.endShape();
+      }
+
+      const f1x = cx - c * scale, f2x = cx + c * scale;
+      p.fill(243, 156, 18); p.noStroke();
+      p.circle(f1x, cy, 9); p.circle(f2x, cy, 9);
+      p.textSize(9); p.textAlign(p.CENTER);
+      p.text('F₁', f1x, cy + 15); p.text('F₂', f2x, cy + 15);
+
+      const tEl = document.getElementById(assetId + '-t');
+      if (!tEl) return;
+      const t_val = parseFloat(tEl.value);
+      const Px = cx + a * Math.cosh(t_val) * scale;
+      const Py = cy - b * Math.sinh(t_val) * scale;
+
+      p.fill(46, 204, 113); p.noStroke();
+      p.circle(Px, Py, 11);
+
+      p.stroke(231, 76, 60); p.strokeWeight(2);
+      p.line(Px, Py, f1x, cy);
+      p.stroke(46, 204, 113); p.strokeWeight(2);
+      p.line(Px, Py, f2x, cy);
+
+      const d1 = Math.sqrt((Px - f1x) ** 2 + (Py - cy) ** 2) / scale;
+      const d2 = Math.sqrt((Px - f2x) ** 2 + (Py - cy) ** 2) / scale;
+      const diff = Math.abs(d1 - d2);
+      const el = document.getElementById(assetId + '-dist');
+      if (el) {
+        el.innerHTML =
+          '|PF₁−PF₂| = |' + d1.toFixed(2) + '−' + d2.toFixed(2) + '|' +
+          ' = <b>' + diff.toFixed(2) + '</b>' +
+          ' (2a=6)' +
+          (Math.abs(diff - 2 * a) < 0.15 ? ' <span style="color:#2ecc71">✓</span>' : '');
+      }
+    };
+  };
+
+  window['updateHyperbola_' + assetId.replace(/-/g,'_')] = function(val) {
+    document.getElementById(assetId + '-tv').textContent = val;
+  };
+
+  new p5(sketch);
+})();
+
+// ════════════════════════════════════════
+// 시각화 4: 이차곡선 비교 Chart.js (geo-conic-04)
+// ════════════════════════════════════════
+(function() {
+  function makePoints(fn, xMin, xMax, step) {
+    const pts = [];
+    for (let x = xMin; x <= xMax; x += step) {
+      const y = fn(x);
+      if (y !== null) pts.push({ x: parseFloat(x.toFixed(3)), y: parseFloat(y.toFixed(3)) });
+    }
+    return pts;
+  }
+
+  const parabolaUpper = makePoints(x => x >= 0 ? 2 * Math.sqrt(x) : null, 0, 4.5, 0.05);
+  const parabolaLower = makePoints(x => x >= 0 ? -2 * Math.sqrt(x) : null, 0, 4.5, 0.05);
+  const ellipseUpper  = makePoints(x => Math.abs(x) <= 3 ? 2 * Math.sqrt(1 - x*x/9) : null, -3, 3, 0.05);
+  const ellipseLower  = makePoints(x => Math.abs(x) <= 3 ? -2 * Math.sqrt(1 - x*x/9) : null, -3, 3, 0.05);
+  const hyperRight  = makePoints(x => x >= 2 ? Math.sqrt(2 * (x*x/4 - 1)) : null, 2, 4.5, 0.05);
+  const hyperLeft   = makePoints(x => x <= -2 ? Math.sqrt(2 * (x*x/4 - 1)) : null, -4.5, -2, 0.05);
+  const hyperRightL = makePoints(x => x >= 2 ? -Math.sqrt(2 * (x*x/4 - 1)) : null, 2, 4.5, 0.05);
+  const hyperLeftL  = makePoints(x => x <= -2 ? -Math.sqrt(2 * (x*x/4 - 1)) : null, -4.5, -2, 0.05);
+
+  const el = document.getElementById('geo-conic-04');
+  if (!el) return;
+
+  new Chart(el, {
+    type: 'scatter',
+    data: {
+      datasets: [
+        { label:'포물선(상)', data: parabolaUpper, borderColor:'#3498db', showLine:true, pointRadius:0, borderWidth:2 },
+        { label:'포물선(하)', data: parabolaLower, borderColor:'#3498db', showLine:true, pointRadius:0, borderWidth:2 },
+        { label:'타원(상)',   data: ellipseUpper,  borderColor:'#2ecc71', showLine:true, pointRadius:0, borderWidth:2 },
+        { label:'타원(하)',   data: ellipseLower,  borderColor:'#2ecc71', showLine:true, pointRadius:0, borderWidth:2 },
+        { label:'쌍곡선(우상)', data: hyperRight,  borderColor:'#e74c3c', showLine:true, pointRadius:0, borderWidth:2 },
+        { label:'쌍곡선(우하)', data: hyperRightL, borderColor:'#e74c3c', showLine:true, pointRadius:0, borderWidth:2 },
+        { label:'쌍곡선(좌상)', data: hyperLeft,  borderColor:'#e74c3c', showLine:true, pointRadius:0, borderWidth:2 },
+        { label:'쌍곡선(좌하)', data: hyperLeftL, borderColor:'#e74c3c', showLine:true, pointRadius:0, borderWidth:2 },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 1.6,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      scales: {
+        x: {
+          min: -5, max: 5,
+          grid: { color: 'rgba(255,255,255,0.08)' },
+          ticks: { color: '#7f8c8d', font: { size: 10 } }
+        },
+        y: {
+          min: -4, max: 4,
+          grid: { color: 'rgba(255,255,255,0.08)' },
+          ticks: { color: '#7f8c8d', font: { size: 10 } }
+        }
+      }
+    }
+  });
+})();
+
+// ════════════════════════════════════════
+// MathStepAnimator 설정
+// ════════════════════════════════════════
+window.mathAnimators = window.mathAnimators || {};
+
+// 포물선 유도 애니메이터
+const animParabola = new MathStepAnimator('anim-parabola-01');
+animParabola
+  .addStep({ id: 's1', effect: 'formula_appear' })
+  .addStep({ id: 's2', effect: 'formula_appear', latex: true })
+  .addStep({ id: 's3', effect: 'formula_appear', latex: true })
+  .addStep({ id: 's4', effect: 'box_result', latex: true });
+
+// 타원 유도 애니메이터
+const animEllipse = new MathStepAnimator('anim-ellipse-02');
+animEllipse
+  .addStep({ id: 's1', effect: 'formula_appear' })
+  .addStep({ id: 's2', effect: 'formula_appear', latex: true })
+  .addStep({ id: 's3', effect: 'formula_appear', latex: true })
+  .addStep({ id: 's4', effect: 'box_result', latex: true });
+
+// 쌍곡선 유도 애니메이터
+const animHyperbola = new MathStepAnimator('anim-hyperbola-03');
+animHyperbola
+  .addStep({ id: 's1', effect: 'formula_appear' })
+  .addStep({ id: 's2', effect: 'formula_appear', latex: true })
+  .addStep({ id: 's3', effect: 'formula_appear', latex: true })
+  .addStep({ id: 's4', effect: 'box_result', latex: true });
+
+// 퀴즈 체크 함수
+window.checkQuiz = function(el, isCorrect) {
+  const allOptions = document.querySelectorAll('.quiz-option');
+  allOptions.forEach(opt => opt.classList.remove('correct'));
+  const feedback = document.getElementById('quiz-feedback');
+  if (isCorrect) {
+    el.classList.add('correct');
+    feedback.innerHTML = '<span style="color:#2ecc71; font-weight:bold;">정답! ✓</span> p = 2이므로 y² = 4·2·x = 8x';
+  } else {
+    feedback.innerHTML = '<span style="color:#e74c3c; font-weight:bold;">오답.</span> 초점 F(p, 0)에서 p = 2. y² = 4px = 8x를 확인하세요.';
+  }
+};
+</script>
+
+</body>
+</html>

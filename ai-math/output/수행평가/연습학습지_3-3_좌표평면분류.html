@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>연습학습지 3-3 – 좌표평면 분류</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size: 10.5pt; color: #1a1a1a; background: #fff; }
+    .ws-page { width: 210mm; min-height: 297mm; padding: 14mm 15mm 12mm 15mm; margin: 0 auto; background: #fff; }
+    .ws-header { border-bottom: 2.5px solid #1a1a1a; padding-bottom: 8px; margin-bottom: 10px; }
+    .ws-header-top { display: flex; justify-content: space-between; align-items: flex-end; }
+    .ws-header h1 { font-size: 14pt; font-weight: 700; }
+    .ws-header h2 { font-size: 10pt; font-weight: 400; color: #555; margin-top: 2px; }
+    .student-info { display: flex; gap: 6px; justify-content: flex-end; align-items: baseline; margin-bottom: 10px; font-size: 10pt; color: #444; }
+    .student-field { display: flex; align-items: baseline; gap: 4px; }
+    .field-line { border-bottom: 1px solid #888; min-width: 72px; height: 16px; display: inline-block; }
+    .info-sep { color: #ccc; }
+    hr.section { border: none; border-top: 1px solid #ddd; margin: 8px 0; }
+    .step-header { display: flex; align-items: center; gap: 8px; margin: 10px 0 5px 0; }
+    .step-badge { font-size: 8pt; font-weight: 700; color: #fff; background: #444; padding: 1px 7px; border-radius: 2px; }
+    .step-title { font-size: 10.5pt; font-weight: 700; }
+    .context-box { border: 1px solid #ccc; padding: 7px 11px; margin-bottom: 7px; background: #fafafa; line-height: 1.75; font-size: 10pt; }
+    table.data-table { border-collapse: collapse; font-size: 10pt; margin: 5px 0; text-align: center; }
+    table.data-table th { background: #444; color: #fff; padding: 5px 8px; border: 1px solid #555; font-weight: 600; }
+    table.data-table td { border: 1px solid #ccc; padding: 5px 8px; vertical-align: middle; }
+    table.data-table td.row-label { background: #f0f0f0; font-weight: 600; }
+    table.data-table td.blank { background: #fff; min-width: 50px; }
+    .inline-q { margin: 6px 0; font-size: 10pt; line-height: 1.9; }
+    .fill-line { display: inline-block; border-bottom: 1px solid #aaa; height: 16px; }
+    .fill-line.sm { min-width: 60px; }
+    .fill-line.md { min-width: 130px; }
+    .fill-line.lg { min-width: 260px; }
+    .q-block { margin: 8px 0; }
+    .q-title { font-weight: 700; margin-bottom: 4px; line-height: 1.6; font-size: 10pt; }
+    .write-lines { border: 1px solid #ccc; padding: 6px 8px; min-height: 55px; background: #fff; background-image: repeating-linear-gradient(transparent, transparent 26px, #e8e8e8 26px, #e8e8e8 27px); line-height: 1.95; }
+    .hint { font-size: 8.5pt; color: #888; margin: 2px 0; }
+    .cols { display: flex; gap: 14px; align-items: flex-start; }
+    .footer { text-align: right; font-size: 8.5pt; color: #bbb; margin-top: 10px; }
+    @media print { .ws-page { padding: 14mm 15mm 12mm 15mm; } }
+  </style>
+</head>
+<body>
+
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <div>
+        <h1>인공지능 수학 &nbsp; 연습학습지 3-3</h1>
+        <h2>— 좌표평면에서 데이터 분류 —</h2>
+      </div>
+      <div style="font-size:9pt; color:#666; text-align:right; line-height:1.6;">
+        수행평가 3 준비<br>Part A 연습
+      </div>
+    </div>
+  </div>
+
+  <div class="student-info">
+    <div class="student-field">학번 <span class="field-line"></span></div>
+    <span class="info-sep">|</span>
+    <div class="student-field">이름 <span class="field-line"></span></div>
+  </div>
+
+  <!-- 상황 -->
+  <div class="step-header">
+    <span class="step-badge">상황</span>
+    <span class="step-title">문제 상황</span>
+  </div>
+  <div class="context-box">
+    어느 반 학생 6명의 <strong>체육 점수(x점)와 예술 점수(y점)</strong>를 조사하여, 공학적 도구를 이용해 분류 기준선 <strong>y = −x + 9</strong>를 구하였다.<br>
+    기준선 위쪽(y &gt; −x+9)에 위치한 학생은 <strong>A그룹(●)</strong>, 아래쪽(y &lt; −x+9)은 <strong>B그룹(○)</strong>으로 분류한다.
+    <div style="margin-top:8px; display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+      <table class="data-table">
+        <thead>
+          <tr><th>학생</th><th>체육(x)</th><th>예술(y)</th><th>그룹</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>가</td><td>1</td><td>9</td><td>●</td></tr>
+          <tr><td>나</td><td>2</td><td>9</td><td>●</td></tr>
+          <tr><td>다</td><td>3</td><td>8</td><td>●</td></tr>
+          <tr><td>라</td><td>7</td><td>1</td><td>○</td></tr>
+          <tr><td>마</td><td>8</td><td>0</td><td>○</td></tr>
+          <tr><td>바</td><td>6</td><td>2</td><td>○</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:9pt; color:#555; line-height:1.7; margin-top:4px;">
+        ● A그룹: y &gt; −x + 9<br>
+        ○ B그룹: y &lt; −x + 9<br><br>
+        <strong>분류선:</strong> y = −x + 9<br>
+        (기울기 −1, y절편 9)
+      </div>
+    </div>
+  </div>
+
+  <hr class="section">
+
+  <div class="cols">
+    <!-- Left: coordinate plane -->
+    <div style="flex:0 0 auto;">
+      <div class="step-header" style="margin-top:0;">
+        <span class="step-badge">STEP 1</span>
+        <span class="step-title">산점도 그리기</span>
+      </div>
+      <div class="hint">6명의 데이터를 좌표평면에 ●(A그룹)과 ○(B그룹)으로 표시하고, 분류 기준선을 그으시오.</div>
+
+      <!-- SVG coordinate plane (blank for students) -->
+      <!-- x, y: 0-10, 16px per unit, origin at (28,188) -->
+      <svg viewBox="0 0 210 215" width="190" height="195" style="border:1px solid #ccc; background:#fff; margin-top:6px;">
+        <!-- Grid lines (every 1 unit) -->
+        <line x1="28" y1="28" x2="28" y2="188" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="44" y1="28" x2="44" y2="188" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="60" y1="28" x2="60" y2="188" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="76" y1="28" x2="76" y2="188" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="92" y1="28" x2="92" y2="188" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="108" y1="28" x2="108" y2="188" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="124" y1="28" x2="124" y2="188" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="140" y1="28" x2="140" y2="188" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="156" y1="28" x2="156" y2="188" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="172" y1="28" x2="172" y2="188" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="28" y1="188" x2="188" y2="188" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="28" y1="172" x2="188" y2="172" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="28" y1="156" x2="188" y2="156" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="28" y1="140" x2="188" y2="140" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="28" y1="124" x2="188" y2="124" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="28" y1="108" x2="188" y2="108" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="28" y1="92" x2="188" y2="92" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="28" y1="76" x2="188" y2="76" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="28" y1="60" x2="188" y2="60" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="28" y1="44" x2="188" y2="44" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <line x1="28" y1="28" x2="188" y2="28" stroke="#ddd" stroke-width="0.6" stroke-dasharray="2,2"/>
+        <!-- Axes -->
+        <line x1="28" y1="188" x2="192" y2="188" stroke="#333" stroke-width="1.5"/>
+        <polygon points="192,184 197,188 192,192" fill="#333"/>
+        <line x1="28" y1="188" x2="28" y2="18" stroke="#333" stroke-width="1.5"/>
+        <polygon points="24,18 28,12 32,18" fill="#333"/>
+        <!-- Axis labels -->
+        <text x="200" y="192" font-size="9" fill="#333" font-family="sans-serif">x</text>
+        <text x="32" y="14" font-size="9" fill="#333" font-family="sans-serif">y</text>
+        <!-- Tick labels every 2 units on x -->
+        <text x="28" y="200" font-size="8" fill="#666" text-anchor="middle" font-family="sans-serif">0</text>
+        <text x="60" y="200" font-size="8" fill="#666" text-anchor="middle" font-family="sans-serif">2</text>
+        <text x="92" y="200" font-size="8" fill="#666" text-anchor="middle" font-family="sans-serif">4</text>
+        <text x="124" y="200" font-size="8" fill="#666" text-anchor="middle" font-family="sans-serif">6</text>
+        <text x="156" y="200" font-size="8" fill="#666" text-anchor="middle" font-family="sans-serif">8</text>
+        <text x="188" y="200" font-size="8" fill="#666" text-anchor="middle" font-family="sans-serif">10</text>
+        <!-- Tick labels on y -->
+        <text x="22" y="188" font-size="8" fill="#666" text-anchor="end" font-family="sans-serif">0</text>
+        <text x="22" y="156" font-size="8" fill="#666" text-anchor="end" font-family="sans-serif">2</text>
+        <text x="22" y="124" font-size="8" fill="#666" text-anchor="end" font-family="sans-serif">4</text>
+        <text x="22" y="92" font-size="8" fill="#666" text-anchor="end" font-family="sans-serif">6</text>
+        <text x="22" y="60" font-size="8" fill="#666" text-anchor="end" font-family="sans-serif">8</text>
+        <text x="22" y="28" font-size="8" fill="#666" text-anchor="end" font-family="sans-serif">10</text>
+        <!-- Classification line y=-x+9: x=0,y=9→(28,44); x=9,y=0→(172,188) -->
+        <!-- (drawn in amber to show expected answer – students can trace) -->
+        <!-- Actually leave blank, just show faint guide -->
+        <!-- Leave for students to draw -->
+        <!-- Mark two reference points for the line (light dots) -->
+        <circle cx="28" cy="44" r="2.5" fill="none" stroke="#ccc" stroke-width="1" stroke-dasharray="2,1"/>
+        <circle cx="172" cy="188" r="2.5" fill="none" stroke="#ccc" stroke-width="1" stroke-dasharray="2,1"/>
+      </svg>
+      <div class="hint" style="margin-top:4px;">● = A그룹 (채워진 원) &nbsp; ○ = B그룹 (빈 원)</div>
+    </div>
+
+    <!-- Right: questions -->
+    <div style="flex:1;">
+      <div class="step-header" style="margin-top:0;">
+        <span class="step-badge">STEP 2</span>
+        <span class="step-title">분류 원리 이해하기</span>
+      </div>
+
+      <div class="q-block">
+        <div class="q-title">① 가(1,9)가 A그룹인지 확인하시오.<br>분류선에서의 값 f(1) = −1 + 9 = <span class="fill-line sm"></span></div>
+        <div class="inline-q">
+          y = 9 &nbsp; □ &gt; &nbsp; □ &lt; &nbsp; f(1) = <span class="fill-line sm"></span>
+          → <span class="fill-line md"></span>그룹
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-title">② 라(7,1)가 B그룹인지 확인하시오.<br>f(7) = −7 + 9 = <span class="fill-line sm"></span></div>
+        <div class="inline-q">
+          y = 1 &nbsp; □ &gt; &nbsp; □ &lt; &nbsp; f(7) = <span class="fill-line sm"></span>
+          → <span class="fill-line md"></span>그룹
+        </div>
+      </div>
+
+      <hr class="section"/>
+
+      <div class="step-header">
+        <span class="step-badge">STEP 3</span>
+        <span class="step-title">새 학생 분류하기</span>
+      </div>
+
+      <div class="q-block">
+        <div class="q-title">③ 신입생 사(4, 4)를 분류하시오.</div>
+        <div class="inline-q">
+          f(4) = −4 + 9 = <span class="fill-line sm"></span>
+        </div>
+        <div class="inline-q">
+          y = 4 &nbsp; □ &gt; &nbsp; □ &lt; &nbsp; f(4) → <span class="fill-line md"></span>그룹
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-title">④ 신입생 아(2, 8)를 분류하시오.</div>
+        <div class="inline-q">
+          f(2) = −2 + 9 = <span class="fill-line sm"></span>
+        </div>
+        <div class="inline-q">
+          y = 8 &nbsp; □ &gt; &nbsp; □ &lt; &nbsp; f(2) → <span class="fill-line md"></span>그룹
+        </div>
+      </div>
+
+      <hr class="section"/>
+
+      <div class="step-header">
+        <span class="step-badge">STEP 4</span>
+        <span class="step-title">판별 과정 서술하기</span>
+      </div>
+
+      <div class="q-block">
+        <div class="q-title">⑤ 체육 5점, 예술 3점인 신입생을 어느 그룹으로 분류하는지 이유를 포함하여 서술하시오.</div>
+        <div class="hint">힌트: f(x) 계산 → y와 f(x) 비교 → 결론 순서로 쓰기</div>
+        <div class="write-lines" style="min-height:70px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section"/>
+
+  <div style="border:1px solid #ddd; padding:7px 10px; background:#f9f9f9; font-size:9pt; color:#555; line-height:1.7;">
+    <strong>핵심 정리:</strong>
+    새 데이터 (x₀, y₀) 분류 순서: ①&nbsp;분류선에 x₀ 대입 → f(x₀) 계산 &nbsp;②&nbsp;y₀와 f(x₀) 비교 &nbsp;③&nbsp;y₀ &gt; f(x₀)이면 A그룹, y₀ &lt; f(x₀)이면 B그룹
+  </div>
+
+  <div class="footer">인공지능 수학 | 연습학습지 3-3 – 좌표평면 분류</div>
+</div>
+
+</body>
+</html>

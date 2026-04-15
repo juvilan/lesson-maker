@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>3차시 학습지② — 최소제곱법 | 인공지능수학</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script>
+    window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 10.5pt;
+      color: #1a1a1a;
+      background: #fff;
+    }
+    .ws-page {
+      width: 210mm;
+      height: 297mm;
+      position: relative;
+      overflow: hidden;
+      margin: 0 auto;
+      background: #fff;
+    }
+    .ws-header {
+      position: absolute;
+      top: 12mm; left: 14mm; right: 14mm;
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 7px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .ws-header h1 { font-size: 15pt; font-weight: 700; letter-spacing: 0.04em; }
+    .ws-header h2 { font-size: 9.5pt; font-weight: 400; color: #666; margin-top: 2px; }
+    .ws-footer {
+      position: absolute;
+      bottom: 8mm; left: 0; right: 0;
+      text-align: center;
+      font-size: 9pt;
+      color: #aaa;
+    }
+    .ws-body {
+      position: absolute;
+      top: 36mm; left: 14mm; right: 14mm;
+      bottom: 16mm;
+      overflow: hidden;
+    }
+    .concept-box {
+      background: #f5f0ff;
+      border-left: 4px solid #7c3aed;
+      padding: 6px 12px;
+      margin-bottom: 7px;
+      font-size: 10pt;
+      line-height: 1.7;
+    }
+    .concept-box strong { color: #7c3aed; }
+    .formula-box {
+      background: #faf0ff;
+      border: 1.5px solid #9b5dcc;
+      border-radius: 5px;
+      padding: 6px 12px;
+      margin: 5px 0;
+      font-size: 10pt;
+      line-height: 1.8;
+    }
+    .sec-title {
+      font-size: 11pt;
+      font-weight: 700;
+      background: #1a1a1a;
+      color: #fff;
+      padding: 3px 10px;
+      margin: 7px 0 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sec-title:first-child { margin-top: 0; }
+    .sec-title .num {
+      background: #fff; color: #1a1a1a;
+      width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9pt; font-weight: 700; flex-shrink: 0;
+    }
+    table.lsq { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 5px 0; }
+    table.lsq th { background: #444; color: #fff; padding: 4px 6px; border: 1px solid #555; text-align: center; font-weight: 600; }
+    table.lsq td { border: 1px solid #bbb; padding: 4px 5px; text-align: center; }
+    table.lsq .total { background: #f5f5f5; font-weight: 700; }
+    table.lsq .blank { background: #fffde7; }
+    .q { margin: 3px 0 1px 0; font-size: 10pt; line-height: 1.65; }
+    .q-box { border: 1px solid #ccc; padding: 5px 10px; margin-bottom: 6px; background: #fafafa; font-size: 10pt; line-height: 1.7; }
+    .step-row { display: flex; align-items: center; gap: 7px; margin: 3px 0; font-size: 9.5pt; }
+    .step-num { background: #7c3aed; color: #fff; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5pt; font-weight: 700; flex-shrink: 0; }
+    .note { font-size: 9pt; color: #888; margin-top: 6px; border-top: 1px solid #eee; padding-top: 5px; }
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+
+<!-- ════ 1페이지 ════ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div>
+      <h1>3차시 학습지 ② — 최소제곱법과 추세선</h1>
+      <h2>인공지능수학 · 수행평가 3 준비 · 3차시</h2>
+    </div>
+    <div style="font-size:9.5pt; color:#555; text-align:right; padding-bottom:2px;">
+      이름: _________________&nbsp;&nbsp; 반·번: _________
+    </div>
+  </div>
+
+  <div class="ws-body">
+
+    <div class="concept-box">
+      <strong>추세선</strong> \(f(x) = ax + b\) : 산점도 데이터의 경향성을 가장 잘 나타내는 직선<br>
+      <strong>최소제곱법</strong> : 오차의 제곱합 \(\sum(y-f(x))^2\)이 <strong>최소</strong>가 되는 \(a, b\)를 구하는 방법<br>
+      ※ 이 "오차의 제곱합" = <strong>손실함수(Loss Function)</strong>의 핵심 개념 — 인공지능 학습의 기초
+    </div>
+
+    <div class="formula-box">
+      \[
+        a = \frac{\displaystyle\sum (x - \bar{x})(y - \bar{y})}{\displaystyle\sum (x - \bar{x})^2},
+        \qquad b = \bar{y} - a\bar{x}
+      \]
+    </div>
+
+    <div style="margin: 7px 0 11px 0;">
+      <div class="step-row"><div class="step-num">①</div> \(\bar x, \bar y\) 계산 (평균)</div>
+      <div class="step-row"><div class="step-num">②</div> 각 데이터의 편차 \(x-\bar x\), \(y-\bar y\) 계산</div>
+      <div class="step-row"><div class="step-num">③</div> \((x-\bar x)^2\), \((x-\bar x)(y-\bar y)\) 계산 후 합산</div>
+      <div class="step-row"><div class="step-num">④</div> 공식에 대입하여 \(a, b\) 계산 → \(f(x) = ax+b\)</div>
+    </div>
+
+    <div class="sec-title"><div class="num">예</div>개념 예제 — 운동 시간과 체력 점수</div>
+
+    <div class="q-box">
+      4명의 학생의 주간 운동 시간 \(x\)(시간)과 체력 점수 \(y\)(점)를 조사했다.<br>
+      (\(\bar{x} = 5,\ \bar{y} = 50\)) &nbsp; 표의 빈칸을 채우고 추세선을 구하시오.
+    </div>
+
+    <table class="lsq">
+      <tr>
+        <th>\(x\)</th><th>\(y\)</th>
+        <th>\(x-5\)</th><th>\(y-50\)</th>
+        <th>\((x-5)^2\)</th><th>\((x-5)(y-50)\)</th>
+      </tr>
+      <tr><td>2</td><td>44</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>4</td><td>49</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>6</td><td>50</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>8</td><td>57</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr class="total"><td>합계</td><td></td><td></td><td></td><td></td><td></td></tr>
+    </table>
+
+    <p class="q">(1) \(a\)와 \(b\)를 계산하시오.</p>
+    <br><br>
+
+    <p class="q">(2) 추세선 \(f(x)\)를 쓰시오.</p>
+    <br><br>
+
+    <p class="q">(3) 주간 운동 시간이 10시간인 학생의 체력 점수를 예측하시오.</p>
+    <br><br>
+
+  </div>
+  <div class="ws-footer">— 1 / 2 —</div>
+</div>
+
+<!-- ════ 2페이지 ════ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div>
+      <h1>3차시 학습지 ② — 최소제곱법과 추세선</h1>
+      <h2>2쪽</h2>
+    </div>
+  </div>
+
+  <div class="ws-body">
+
+    <div class="sec-title"><div class="num">1</div>연습 — 학습 시간과 단어 암기</div>
+
+    <div class="q-box">
+      5명의 하루 학습 시간 \(x\)(시간)과 영어 단어 암기 수 \(y\)(개)를 조사했다.
+      (\(\bar{x} = 3,\ \bar{y} = 25\))
+    </div>
+
+    <table class="lsq">
+      <tr>
+        <th>\(x\)</th><th>\(y\)</th>
+        <th>\(x-3\)</th><th>\(y-25\)</th>
+        <th>\((x-3)^2\)</th><th>\((x-3)(y-25)\)</th>
+      </tr>
+      <tr><td>1</td><td>10</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>2</td><td>20</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>3</td><td>25</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>4</td><td>30</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>5</td><td>40</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr class="total"><td>합계</td><td></td><td></td><td></td><td></td><td></td></tr>
+    </table>
+
+    <p class="q">(1) \(a\)와 \(b\)를 계산하고 추세선 \(f(x)\)를 구하시오.</p>
+    <br><br>
+
+    <p class="q">(2) 학습 시간이 6시간인 학생의 단어 암기 수를 예측하시오.</p>
+    <br>
+
+    <p class="q">(3) 실제 암기 수가 50개였다면 오차를 계산하시오. &nbsp; (오차 = 실제값 − 예측값)</p>
+    <br><br>
+
+    <div class="sec-title"><div class="num">2</div>연습 — 기온과 아이스크림 판매량</div>
+
+    <div class="q-box">
+      5일간의 최고 기온 \(x\)(°C)와 아이스크림 판매량 \(y\)(개)를 조사했다.
+      (\(\bar{x} = 30,\ \bar{y} = 50\))
+    </div>
+
+    <table class="lsq">
+      <tr>
+        <th>\(x\)</th><th>\(y\)</th>
+        <th>\(x-30\)</th><th>\(y-50\)</th>
+        <th>\((x-30)^2\)</th><th>\((x-30)(y-50)\)</th>
+      </tr>
+      <tr><td>26</td><td>38</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>28</td><td>44</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>30</td><td>50</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>32</td><td>56</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>34</td><td>62</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr class="total"><td>합계</td><td></td><td></td><td></td><td></td><td></td></tr>
+    </table>
+
+    <p class="q">(1) 추세선 \(f(x)\)를 구하시오.</p>
+    <br><br>
+
+    <p class="q">(2) 기온이 36°C인 날의 아이스크림 판매량을 예측하시오.</p>
+    <br>
+
+    <p class="q">(3) 이 데이터는 양의 상관과 음의 상관 중 어느 것인지 이유와 함께 쓰시오.</p>
+    <br><br><br>
+
+    <div class="note">핵심 정리: 편차표 → \(\sum(x-\bar x)^2\), \(\sum(x-\bar x)(y-\bar y)\) → \(a\) → \(b\) → 추세선 → 예측</div>
+
+  </div>
+  <div class="ws-footer">— 2 / 2 —</div>
+</div>
+
+</body>
+</html>

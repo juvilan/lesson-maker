@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>강의 대본 — 이차곡선 | 기하 고2</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', '맑은 고딕', sans-serif;
+      font-size: 10.5pt;
+      color: #1a1a1a;
+      background: #f5f5f5;
+    }
+
+    .page {
+      width: 210mm;
+      margin: 0 auto;
+      padding: 15mm 16mm 12mm 16mm;
+      background: #fff;
+    }
+
+    /* ── 헤더 ── */
+    .doc-header {
+      border-bottom: 3px solid #1a1a1a;
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+    }
+    .doc-title {
+      font-size: 16pt;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+    .doc-meta {
+      font-size: 9pt;
+      color: #666;
+      margin-top: 4px;
+      display: flex;
+      gap: 20px;
+    }
+
+    /* ── 시간 분배 요약표 ── */
+    .time-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+      margin-bottom: 18px;
+    }
+    .time-table th {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 5px 8px;
+      text-align: center;
+    }
+    .time-table td {
+      border: 1px solid #ddd;
+      padding: 4px 8px;
+      text-align: center;
+    }
+    .time-table tr:nth-child(even) td { background: #f9f9f9; }
+
+    /* ── 슬라이드 대본 블록 ── */
+    .slide-block {
+      page-break-inside: avoid;
+      margin-bottom: 18px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .slide-header {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 7px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .slide-num { font-weight: 700; font-size: 10pt; }
+    .slide-type {
+      font-size: 8pt;
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 3px;
+      padding: 1px 6px;
+      color: #ccc;
+    }
+    .slide-time {
+      font-size: 8.5pt;
+      color: #aaa;
+    }
+
+    .slide-content {
+      padding: 10px 14px;
+    }
+    .slide-title-text {
+      font-weight: 700;
+      font-size: 10.5pt;
+      color: #222;
+      margin-bottom: 8px;
+      padding-bottom: 5px;
+      border-bottom: 1px dashed #ddd;
+    }
+
+    .script-section {
+      margin-bottom: 8px;
+    }
+    .script-label {
+      font-size: 8pt;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 3px;
+    }
+    .script-text {
+      font-size: 10pt;
+      line-height: 1.75;
+      color: #333;
+      padding-left: 10px;
+      border-left: 2px solid #ddd;
+    }
+    .script-text .em { color: #1a6b4a; font-weight: 600; }
+    .script-text .ques { color: #1565c0; font-style: italic; }
+    .script-text .warn { color: #b71c1c; font-weight: 600; }
+
+    .key-points {
+      background: #f0f7f4;
+      border-left: 3px solid #1a6b4a;
+      padding: 6px 10px;
+      font-size: 9pt;
+      color: #1a4a35;
+      border-radius: 0 4px 4px 0;
+      margin-top: 6px;
+    }
+    .key-points ul { margin: 0; padding-left: 14px; }
+    .key-points li { margin-bottom: 2px; }
+
+    .teacher-note {
+      background: #fff8e1;
+      border: 1px solid #f9a825;
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 9pt;
+      color: #5d4037;
+      margin-top: 6px;
+    }
+    .teacher-note::before { content: '📌 교사 메모: '; font-weight: 700; }
+
+    @media print {
+      body { background: #fff; }
+      .page { margin: 0; padding: 12mm 14mm 10mm 14mm; }
+      .slide-block { page-break-inside: avoid; }
+    }
+    @page { size: A4; margin: 0; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 문서 헤더 -->
+  <div class="doc-header">
+    <div class="doc-title">기하 1-1 이차곡선 — 강의 대본</div>
+    <div class="doc-meta">
+      <span>과목: 기하 | 대상: 고2</span>
+      <span>수업 시간: 45분</span>
+      <span>슬라이드: 15장</span>
+      <span>2026학년도</span>
+    </div>
+  </div>
+
+  <!-- 시간 분배 요약표 -->
+  <table class="time-table">
+    <thead>
+      <tr>
+        <th>슬라이드</th><th>내용</th><th>시간(분)</th><th>누적</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>타이틀 · 도입</td><td>1</td><td>1′</td></tr>
+      <tr><td>2</td><td>학습목표</td><td>2</td><td>3′</td></tr>
+      <tr><td>3</td><td>실생활 연결</td><td>3</td><td>6′</td></tr>
+      <tr><td>4</td><td>포물선 정의 + 시각화</td><td>4</td><td>10′</td></tr>
+      <tr><td>5</td><td>포물선 방정식 유도</td><td>4</td><td>14′</td></tr>
+      <tr><td>6</td><td>타원 정의 + 시각화</td><td>4</td><td>18′</td></tr>
+      <tr><td>7</td><td>타원 방정식 유도</td><td>4</td><td>22′</td></tr>
+      <tr><td>8</td><td>쌍곡선 정의 + 시각화</td><td>4</td><td>26′</td></tr>
+      <tr><td>9</td><td>쌍곡선 방정식 유도</td><td>4</td><td>30′</td></tr>
+      <tr><td>10</td><td>이차곡선 비교</td><td>3</td><td>33′</td></tr>
+      <tr><td>11</td><td>예제 1 (포물선)</td><td>2</td><td>35′</td></tr>
+      <tr><td>12</td><td>예제 2 (타원)</td><td>2</td><td>37′</td></tr>
+      <tr><td>13</td><td>예제 3 (쌍곡선)</td><td>2</td><td>39′</td></tr>
+      <tr><td>14</td><td>핵심 공식 정리</td><td>3</td><td>42′</td></tr>
+      <tr><td>15</td><td>확인 문제</td><td>3</td><td>45′</td></tr>
+    </tbody>
+  </table>
+
+
+  <!-- ═══ 슬라이드 1 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 1 — 타이틀</span>
+      <span class="slide-type">도입</span>
+      <span class="slide-time">약 1분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">이차곡선 — 포물선 · 타원 · 쌍곡선</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "오늘은 기하 1단원, 이차곡선을 배웁니다.<br>
+          포물선, 타원, 쌍곡선 — 이 셋을 통틀어 이차곡선이라고 불러요.<br>
+          슬라이드 하단의 세 아이콘을 보세요. 안테나, 행성 궤도, GPS.<br>
+          <span class='em'>오늘 배우는 수학이 이 모든 기술의 기반</span>입니다."
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 2 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 2 — 학습목표</span>
+      <span class="slide-type">목표 제시</span>
+      <span class="slide-time">약 2분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">학습 목표 3가지</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "학습목표 첫 번째는 정의를 거리 조건으로 이해하는 것입니다.<br>
+          두 번째는 방정식을 직접 유도하는 것. 암기가 아니라 <span class='em'>유도</span>예요.<br>
+          세 번째는 실생활 적용. 수학이 어디에 쓰이는지 느껴보겠습니다.<br><br>
+          아래 표를 보면 세 이차곡선의 거리 조건과 표준형이 한눈에 보이죠.<br>
+          타원은 <span class='em'>합</span>, 쌍곡선은 <span class='em'>차</span> — 이 차이를 수업 끝날 때쯤이면 자연스럽게 알게 됩니다."
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 3 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 3 — 이차곡선과 실생활</span>
+      <span class="slide-type">동기부여</span>
+      <span class="slide-time">약 3분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">포물선 안테나 / 타원 행성 궤도 / 쌍곡선 GPS</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "포물선의 핵심 성질은 반사예요. 초점에서 출발한 신호가 반사면에 닿으면 모두 평행하게 나갑니다.<br>
+          손전등 안에 있는 반사경이 바로 포물선 모양이에요. 그래서 빛이 한쪽으로만 모이죠.<br><br>
+          타원은 케플러가 밝힌 행성 궤도입니다. 지구가 태양 주위를 도는 궤도가 타원이고,<br>
+          태양이 그 <span class='em'>초점</span>에 있어요. 1월이 7월보다 태양에 더 가까운 것도 이 때문이죠.<br><br>
+          쌍곡선은 GPS와 LORAN 항법에 사용됩니다. 두 기지국에서 신호 도달 시간 차이로<br>
+          '거리 차가 일정한 곡선 = 쌍곡선' 위에 있다는 것을 파악해 위치를 결정합니다."
+        </div>
+      </div>
+      <div class="teacher-note">
+        학생들에게 스마트폰 GPS가 쌍곡선 원리를 활용한다는 사실을 언급하면 흥미 유발에 효과적.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 4 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 4 — 포물선 정의 (시각화)</span>
+      <span class="slide-type">개념 + 시각화</span>
+      <span class="slide-time">약 4분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">초점까지 거리 = 준선까지 거리</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "포물선의 정의를 정확히 기억해야 해요.<br>
+          평면 위에 점 F(초점)와 직선 l(준선)이 있을 때,<br>
+          <span class='em'>F까지 거리 = l까지 거리</span>인 점들의 집합이 포물선입니다.<br><br>
+          오른쪽 시각화를 보세요. 슬라이더를 움직여 점 P를 이동해 보겠습니다.<br>
+          노란선 PF와 빨간선 PH의 길이가 항상 같죠? 이게 바로 정의예요.<br><br>
+          <span class='ques'>질문: '준선'이라는 단어가 왜 '직선'이 아니라 '준선'일까요?</span><br>
+          기준(準)이 되는 선(線)이라는 뜻입니다."
+        </div>
+      </div>
+      <div class="key-points">
+        <ul>
+          <li>초점 F(p, 0) — x축 위에 위치</li>
+          <li>준선 x = −p — y축 기준 반대쪽</li>
+          <li>꼭짓점 O(0, 0) — 초점과 준선의 정중간</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 5 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 5 — 포물선 방정식 유도</span>
+      <span class="slide-type">애니메이션 (4단계)</span>
+      <span class="slide-time">약 4분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">y² = 8x 유도 (p = 2)</div>
+      <div class="script-section">
+        <div class="script-label">Step 1 narration</div>
+        <div class="script-text">
+          "초점 F(2, 0), 준선 x = −2로 시작합니다.<br>
+          포물선 위의 임의의 점을 P(x, y)라 하고, 준선에 내린 수선의 발을 H라 하면<br>
+          H의 좌표는 (−2, y)입니다. 정의에 의해 <span class='em'>PF = PH</span>."
+        </div>
+      </div>
+      <div class="script-section">
+        <div class="script-label">Step 2 narration</div>
+        <div class="script-text">
+          "거리를 수식으로 쓰겠습니다.<br>
+          PF = √((x−2)²+y²), PH = x+2 (준선이 세로선이니까 x좌표 차이만).<br>
+          <span class='em'>√((x−2)²+y²) = x+2</span>"
+        </div>
+      </div>
+      <div class="script-section">
+        <div class="script-label">Step 3 narration</div>
+        <div class="script-text">
+          "양변을 제곱해서 루트를 없애요.<br>
+          좌변: x²−4x+4+y², 우변: x²+4x+4<br>
+          x²와 4가 소거되면 y² = 8x만 남습니다."
+        </div>
+      </div>
+      <div class="script-section">
+        <div class="script-label">Step 4 narration</div>
+        <div class="script-text">
+          "결론: <span class='em'>y² = 8x</span>. p = 2이므로 4p = 8.<br>
+          p가 클수록 포물선이 넓게 벌어집니다. 초점이 멀수록 곡선이 완만해지는 거예요."
+        </div>
+      </div>
+      <div class="teacher-note">
+        N키(다음 단계), P키(이전 단계)로 단계 진행 가능. 학생들과 함께 각 단계에서 멈추고 확인할 것.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 6 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 6 — 타원 정의 (시각화)</span>
+      <span class="slide-type">개념 + 시각화</span>
+      <span class="slide-time">약 4분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">PF₁ + PF₂ = 2a = 10</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "타원의 정의. 두 초점 F₁, F₂까지 거리의 합이 항상 2a로 일정한 점의 집합.<br>
+          슬라이더를 움직여 P를 이동해 보면, 빨간선 PF₁과 초록선 PF₂의 합이 항상 10이죠.<br><br>
+          <span class='em'>b² = a² − c²</span> 이 관계가 핵심입니다.<br>
+          직각삼각형으로 기억하세요: a가 빗변(장반축), b가 단반축, c가 초점 거리.<br><br>
+          <span class='ques'>질문: a > c인 이유가 뭔가요?</span><br>
+          타원이 닫힌 곡선이려면 초점이 타원 안에 있어야 하므로 c &lt; a."
+        </div>
+      </div>
+      <div class="key-points">
+        <ul>
+          <li>이 예시: a=5, b=4, c=3 (3-4-5 직각삼각형!)</li>
+          <li>장축: 2a=10, 단축: 2b=8</li>
+          <li>b² = a² − c² = 25 − 9 = 16 ✓</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 7 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 7 — 타원 방정식 유도</span>
+      <span class="slide-type">애니메이션 (4단계)</span>
+      <span class="slide-time">약 4분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">x²/25 + y²/16 = 1 유도 (a=5, b=4, c=3)</div>
+      <div class="script-section">
+        <div class="script-label">Step 1~2 narration</div>
+        <div class="script-text">
+          "두 초점에서 거리의 합이 2a=10이라는 조건을 수식으로 씁니다.<br>
+          루트가 두 개라 복잡해 보이지만, <span class='em'>한쪽을 이항해서 제곱을 두 번</span> 반복하면 됩니다."
+        </div>
+      </div>
+      <div class="script-section">
+        <div class="script-label">Step 3 narration</div>
+        <div class="script-text">
+          "1차 제곱 후 정리하면 a²−cx 형태가 나옵니다.<br>
+          2차 제곱까지 하면 (a²−c²)x²+a²y²=a²(a²−c²).<br>
+          여기서 <span class='em'>b²=a²−c²</span>으로 치환하면 표준형이 나옵니다."
+        </div>
+      </div>
+      <div class="script-section">
+        <div class="script-label">Step 4 narration</div>
+        <div class="script-text">
+          "양변을 a²b²으로 나누면 <span class='em'>x²/a² + y²/b² = 1</span>.<br>
+          b²=a²−c²은 타원의 가장 중요한 관계식. 직각삼각형으로 기억하세요."
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 8 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 8 — 쌍곡선 정의 (시각화)</span>
+      <span class="slide-type">개념 + 시각화</span>
+      <span class="slide-time">약 4분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">|PF₁ − PF₂| = 2a = 6</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "<span class='em'>타원은 합, 쌍곡선은 차.</span> 이 한 마디가 핵심이에요.<br>
+          쌍곡선 위의 점 P에서 두 초점까지 거리의 차의 절댓값이 2a로 일정합니다.<br><br>
+          슬라이더를 움직이면 빨간선과 초록선의 차가 항상 6이죠.<br>
+          또 하나 중요한 것: 점근선. 쌍곡선이 무한히 가까워지지만 닿지 않는 직선입니다.<br>
+          y = ±(b/a)x = ±(4/3)x<br><br>
+          <span class='ques'>질문: 타원과 달리 쌍곡선에서 c > a인 이유는?</span><br>
+          초점이 꼭짓점보다 바깥에 있어야 두 가지가 생기기 때문입니다."
+        </div>
+      </div>
+      <div class="key-points">
+        <ul>
+          <li>이 예시: a=3, b=4, c=5 (3-4-5 직각삼각형, 타원과 같은 수치!)</li>
+          <li>타원: b²=a²−c²=25−9=16 &nbsp; vs &nbsp; 쌍곡선: b²=c²−a²=25−9=16</li>
+          <li>계산 결과는 같지만 공식의 부호가 반대임에 주의</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 9 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 9 — 쌍곡선 방정식 유도</span>
+      <span class="slide-type">애니메이션 (4단계)</span>
+      <span class="slide-time">약 4분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">x²/9 − y²/16 = 1 유도 (a=3, b=4, c=5)</div>
+      <div class="script-section">
+        <div class="script-label">Step 1 narration</div>
+        <div class="script-text">
+          "타원은 두 거리의 합, 쌍곡선은 두 거리의 차가 2a로 일정.<br>
+          공식 하나 차이인데 모양이 완전히 달라져요. 이것이 수학의 아름다움입니다."
+        </div>
+      </div>
+      <div class="script-section">
+        <div class="script-label">Step 3 narration</div>
+        <div class="script-text">
+          "유도 방법은 타원과 완전히 동일합니다. 이항하고 제곱을 두 번.<br>
+          차이는 <span class='em'>c²−a²</span>이 등장한다는 점.<br>
+          쌍곡선에서 c > a이므로 c²−a²은 양수입니다. 이게 b²가 됩니다."
+        </div>
+      </div>
+      <div class="script-section">
+        <div class="script-label">Step 4 narration</div>
+        <div class="script-text">
+          "결론: x²/9 − y²/16 = 1.<br>
+          <span class='em'>점근선 y=±(b/a)x = ±(4/3)x</span>은 쌍곡선이 무한히 가까워지지만 닿지 않는 직선.<br>
+          x/a 비율이 기울기를 결정해요."
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 10 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 10 — 이차곡선 3종 비교</span>
+      <span class="slide-type">비교 정리</span>
+      <span class="slide-time">약 3분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">Chart.js 그래프 + 비교표</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "그래프에서 세 곡선을 한눈에 비교해 봅시다.<br>
+          파란색 포물선은 한쪽으로만 열려 있고, 초록 타원은 닫힌 곡선,<br>
+          빨간 쌍곡선은 두 가지로 분리되어 있죠.<br><br>
+          오른쪽 표를 보면: 포물선은 초점 1개, 타원·쌍곡선은 2개.<br>
+          <span class='em'>방정식에서 + 기호면 타원, − 기호면 쌍곡선</span>으로 구분합니다.<br>
+          점근선은 쌍곡선에만 있어요."
+        </div>
+      </div>
+      <div class="teacher-note">
+        학생들에게 '방정식 부호'로 타원/쌍곡선을 구분하는 방법을 강조. 시험에서 자주 혼동하는 포인트.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 11 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 11 — 예제 1 (포물선)</span>
+      <span class="slide-type">예제 풀이</span>
+      <span class="slide-time">약 2분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">y² = 8x의 초점·준선 구하기</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "y² = 8x = 4·2·x이므로 p = 2.<br>
+          초점 F(2, 0), 준선 x = −2.<br><br>
+          아래 표를 보면 p값에 따른 패턴이 보입니다.<br>
+          <span class='em'>y² = 4px에서 계수가 4p임을 기억하면 p를 바로 읽을 수 있습니다.</span>"
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 12 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 12 — 예제 2 (타원)</span>
+      <span class="slide-type">예제 풀이</span>
+      <span class="slide-time">약 2분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">x²/25 + y²/16 = 1의 초점·장단축</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "a²=25 → a=5, b²=16 → b=4.<br>
+          c² = a²−b² = 25−16 = 9 → c = 3.<br>
+          초점: F(3,0), F′(−3,0). 장축 2a=10, 단축 2b=8.<br><br>
+          경고: <span class='warn'>분모가 큰 쪽이 a²임을 먼저 확인!</span><br>
+          만약 y쪽 분모가 크면 초점이 y축 위에 있습니다."
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 13 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 13 — 예제 3 (쌍곡선)</span>
+      <span class="slide-type">예제 풀이</span>
+      <span class="slide-time">약 2분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">x²/9 − y²/16 = 1의 초점·점근선</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "a²=9 → a=3, b²=16 → b=4.<br>
+          쌍곡선이므로 c² = a²+b² = 9+16 = 25 → c = 5.<br>
+          초점: F(5,0), F′(−5,0). 점근선: y = ±(4/3)x.<br><br>
+          핵심 비교: <span class='em'>타원 c²=a²−b², 쌍곡선 c²=a²+b²</span>.<br>
+          부호 하나 차이. 반드시 구분해야 합니다."
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 14 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 14 — 핵심 공식 정리</span>
+      <span class="slide-type">정리</span>
+      <span class="slide-time">약 3분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">3종 이차곡선 핵심 공식</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "세 칸을 나란히 보겠습니다.<br>
+          포물선: 초점 하나, y²=4px (x방향으로 열림), x²=4py (y방향으로 열림).<br>
+          타원: PF₁+PF₂=2a (합 일정), b²=a²−c², 장축 2a.<br>
+          쌍곡선: |PF₁−PF₂|=2a (차 일정), b²=c²−a², 점근선 y=±b/a·x.<br><br>
+          아래 핵심 문장: <span class='em'>타원은 합·마이너스, 쌍곡선은 차·플러스</span>.<br>
+          이걸 거꾸로 읽으면: 방정식에 +가 있으면 타원, −가 있으면 쌍곡선."
+        </div>
+      </div>
+      <div class="teacher-note">
+        학생들에게 노트에 직접 정리하게 할 것. 3분 정리 시간 제공.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ 슬라이드 15 ═══ -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 15 — 확인 문제</span>
+      <span class="slide-type">형성 평가</span>
+      <span class="slide-time">약 3분</span>
+    </div>
+    <div class="slide-content">
+      <div class="slide-title-text">초점 F(2,0), 준선 x=−2인 포물선 방정식은?</div>
+      <div class="script-section">
+        <div class="script-label">강의 멘트</div>
+        <div class="script-text">
+          "직접 클릭해서 답을 선택해 보세요. 30초 줄게요.<br><br>
+          풀이: 초점 F(p, 0)에서 p = 2. 방정식 y² = 4px = 4·2·x = <span class='em'>y² = 8x</span>.<br>
+          정답은 ③번입니다.<br><br>
+          오답 정리: ①의 y²=2x는 p=1/2, ②의 y²=4x는 p=1, ④의 x²=8y는 축이 y방향."
+        </div>
+      </div>
+      <div class="key-points">
+        <ul>
+          <li>수업 마무리: 오늘 배운 세 이차곡선의 정의와 방정식을 학습지에서 확인</li>
+          <li>다음 시간: 이차곡선 위의 점을 이용한 응용 문제 / 이차곡선의 평행이동</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 하단 -->
+  <div style="margin-top:20px; border-top:1px solid #ddd; padding-top:8px;
+              font-size:8.5pt; color:#aaa; text-align:center;">
+    기하 1-1 이차곡선 강의 대본 · 2026학년도
+  </div>
+
+</div>
+</body>
+</html>

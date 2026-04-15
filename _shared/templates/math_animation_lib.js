@@ -7,6 +7,9 @@
  *   // HTML에서: <button onclick="mathAnimators['my-animation'].next()">다음 ▶</button>
  */
 
+// 레지스트리: 파일 로드 시 한 번만 초기화 (기존 등록 유지)
+window.mathAnimators = window.mathAnimators || {};
+
 class MathStepAnimator {
   constructor(animationId, options = {}) {
     this.id = animationId;
@@ -24,7 +27,6 @@ class MathStepAnimator {
     this.duration = this.speedMap[this.options.speed];
 
     // 레지스트리에 등록
-    if (!window.mathAnimators) window.mathAnimators = {};
     window.mathAnimators[animationId] = this;
   }
 
@@ -581,4 +583,3 @@ class PerceptronTruthTable {
 window.MathStepAnimator = MathStepAnimator;
 window.NeuralNetDiagram = NeuralNetDiagram;
 window.PerceptronTruthTable = PerceptronTruthTable;
-window.mathAnimators = window.mathAnimators || {};

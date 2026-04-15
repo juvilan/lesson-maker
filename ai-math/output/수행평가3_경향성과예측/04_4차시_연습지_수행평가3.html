@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>4차시 연습지 — 수행평가3 준비 | 경향성과 예측</title>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+      font-size: 10.5pt;
+      color: #000;
+      background: #fff;
+    }
+    /* 고정 높이 페이지, 절대 위치 헤더/푸터 */
+    .page {
+      width: 180mm;
+      height: 277mm;
+      position: relative;
+      overflow: hidden;
+      margin: 0 auto;
+      border: 2px solid #000;
+    }
+    /* 헤더 (1페이지) */
+    .header {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 17mm;
+      border-bottom: 1.5px solid #000;
+      display: flex;
+    }
+    .hd-logo { width: 21mm; border-right: 1px solid #000; display: flex; align-items: center; justify-content: center; padding: 4px; flex-shrink: 0; }
+    .hd-title { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 14px; border-right: 1px solid #000; }
+    .hd-title .sub  { font-size: 8.5pt; }
+    .hd-title .main { font-size: 13pt; font-weight: bold; letter-spacing: 0.06em; }
+    .hd-title .sub2 { font-size: 8pt; color: #555; }
+    .hd-score { width: 26mm; display: flex; flex-direction: column; align-items: center; padding: 5px 8px; flex-shrink: 0; }
+    .hd-score .lbl { font-size: 10pt; font-weight: bold; }
+    .hd-score .box { flex: 1; width: 100%; border: 1px solid #000; margin-top: 3px; }
+    /* 정보행 */
+    .info-row {
+      position: absolute;
+      top: 17mm; left: 0; right: 0;
+      height: 9mm;
+      border-bottom: 1.5px solid #000;
+      padding: 0 14px;
+      display: flex; align-items: center;
+      font-size: 10.5pt; letter-spacing: 0.1em;
+    }
+    /* 2페이지 cont 헤더 */
+    .cont-hd {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 7mm;
+      border-bottom: 1px solid #aaa;
+      padding: 0 8px;
+      display: flex; align-items: center; justify-content: flex-end;
+      font-size: 8.5pt; color: #777;
+    }
+    /* 푸터 */
+    .footer {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 7mm;
+      border-top: 1px solid #777;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8.5pt; color: #666;
+    }
+    /* 본문 */
+    .body-p1 {
+      position: absolute;
+      top: 26mm; left: 12mm; right: 12mm;
+      bottom: 7mm;
+      overflow: hidden;
+    }
+    .body-p2 {
+      position: absolute;
+      top: 7mm; left: 12mm; right: 12mm;
+      bottom: 7mm;
+      overflow: hidden;
+    }
+    .sec { display: block; font-weight: bold; font-size: 10.5pt; background: #000; color: #fff; padding: 3px 8px; margin: 7px 0 4px 0; }
+    .sec:first-child { margin-top: 0; }
+    .score-tag { font-size: 8pt; color: #ccc; font-weight: normal; margin-left: 6px; }
+    .notice-box { border: 1.5px solid #555; padding: 4px 10px; margin-bottom: 6px; background: #f8f8f8; font-size: 9.5pt; line-height: 1.6; }
+    .prob { font-size: 10pt; line-height: 1.7; margin-bottom: 3px; }
+    table.freq { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 4px 0; }
+    table.freq th { background: #333; color: #fff; padding: 4px 7px; border: 1px solid #555; text-align: center; font-weight: 600; }
+    table.freq td { border: 1px solid #aaa; padding: 4px 7px; text-align: center; }
+    table.freq .total { background: #eee; font-weight: 700; }
+    table.lsq { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 4px 0; }
+    table.lsq th { background: #333; color: #fff; padding: 4px 5px; border: 1px solid #555; text-align: center; font-weight: 600; font-size: 9pt; }
+    table.lsq td { border: 1px solid #aaa; padding: 5px 5px; text-align: center; }
+    table.lsq .total { background: #eee; font-weight: 700; }
+    .q { font-size: 10pt; margin: 3px 0 1px 0; line-height: 1.65; }
+    .mini { font-size: 8.5pt; color: #555; }
+    .formula-ref { border: 1px solid #ccc; padding: 4px 10px; background: #fafafa; font-size: 9.5pt; line-height: 1.7; margin: 4px 0; }
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+
+<!-- ════ 1 페이지 ════ -->
+<div class="page">
+  <div class="header">
+    <div class="hd-logo">
+      <img src="교표.jpg" alt="교표" style="width:58px;height:58px;object-fit:contain;display:block;margin:0 auto;">
+    </div>
+    <div class="hd-title">
+      <div class="sub">2학년&nbsp;&nbsp;&nbsp;1학기&nbsp;&nbsp;&nbsp;[인공지능수학]</div>
+      <div class="main">4차시 연습지 — 수행평가 3</div>
+      <div class="sub2">경향성과 예측 — 조건부확률 · 최소제곱법</div>
+    </div>
+    <div class="hd-score">
+      <div class="lbl">점 수</div>
+      <div class="box"></div>
+    </div>
+  </div>
+  <div class="info-row">학년&nbsp;&nbsp;&nbsp;&nbsp;반&nbsp;&nbsp;&nbsp;&nbsp;번&nbsp;&nbsp;&nbsp;&nbsp;이름 :</div>
+
+  <div class="body-p1">
+
+    <div class="notice-box">
+      이 연습지는 수행평가 3과 <strong>동일한 유형</strong>으로 구성되어 있습니다. 풀이 과정을 반드시 작성하세요.
+    </div>
+
+    <span class="sec">STEP 1 — 조건부확률로 분류하기 <span class="score-tag">(8점)</span></span>
+
+    <p class="prob">어느 도서관에서 <strong>160명</strong>의 방문자의 유형과 대출 여부를 조사했다.</p>
+
+    <table class="freq">
+      <tr><th></th><th>대출 있음</th><th>대출 없음</th><th>합계</th></tr>
+      <tr><td>학생</td><td>56</td><td>24</td><td>80</td></tr>
+      <tr><td>성인</td><td>40</td><td>40</td><td>80</td></tr>
+      <tr class="total"><td>합계</td><td>96</td><td>64</td><td>160</td></tr>
+    </table>
+
+    <p class="q">(1) 학생 방문자 중 대출한 비율을 구하시오. <span class="mini">(2점)</span></p>
+    <br><br>
+
+    <p class="q">(2) 성인 방문자 중 대출한 비율을 구하시오. <span class="mini">(2점)</span></p>
+    <br><br>
+
+    <p class="q">(3) (1)과 (2)를 비교하시오. <span class="mini">(2점)</span></p>
+    <br><br>
+
+    <p class="q">(4) 새로운 방문자가 학생임을 알 때, 대출 여부를 예측하고 이유를 쓰시오. <span class="mini">(2점)</span></p>
+    <br><br>
+
+    <span class="sec">STEP 2 — 확률을 이용한 예측 <span class="score-tag">(8점)</span></span>
+
+    <p class="prob"><strong>180명</strong>의 학생의 수면 시간과 다음날 집중력을 조사했다.</p>
+
+    <table class="freq">
+      <tr><th></th><th>집중력 높음</th><th>집중력 낮음</th><th>합계</th></tr>
+      <tr><td>충분한 수면 (7시간 이상)</td><td>80</td><td>20</td><td>100</td></tr>
+      <tr><td>부족한 수면 (7시간 미만)</td><td>20</td><td>60</td><td>80</td></tr>
+      <tr class="total"><td>합계</td><td>100</td><td>80</td><td>180</td></tr>
+    </table>
+
+    <p class="q">(1) \(P(\text{집중력 높음} \mid \text{충분한 수면})\)을 구하시오. <span class="mini">(2점)</span></p>
+    <br><br>
+
+    <p class="q">(2) \(P(\text{집중력 높음} \mid \text{부족한 수면})\)을 구하시오. <span class="mini">(2점)</span></p>
+    <br><br>
+
+    <p class="q">(3) 어젯밤 8시간 잠을 잔 학생의 오늘 집중력을 예측하시오. <span class="mini">(2점)</span></p>
+    <br><br>
+
+    <p class="q">(4) 이 예측이 틀릴 수 있는 이유 1가지를 서술하시오. <span class="mini">(2점)</span></p>
+    <br><br>
+
+  </div>
+  <div class="footer">1 / 2 &nbsp;&nbsp; — 뒷면 계속 —</div>
+</div>
+
+<!-- ════ 2 페이지 ════ -->
+<div class="page">
+  <div class="cont-hd">인공지능수학 수행평가 3 연습지 · 2쪽</div>
+
+  <div class="body-p2">
+
+    <span class="sec" style="margin-top:0;">STEP 3 — 최소제곱법으로 경향성 분석 <span class="score-tag">(4점)</span></span>
+
+    <p class="prob">
+      5명의 주간 독서 시간 \(x\)(시간)과 독해력 점수 \(y\)(점)를 조사했다.
+      (\(\bar{x}=3,\ \bar{y}=60\))
+    </p>
+
+    <div class="formula-ref">
+      최소제곱법: \(a = \dfrac{\displaystyle\sum(x-\bar x)(y-\bar y)}{\displaystyle\sum(x-\bar x)^2}\), &ensp;
+      \(b = \bar y - a\bar x\), &ensp; \(f(x) = ax + b\)
+    </div>
+
+    <table class="lsq">
+      <tr>
+        <th>\(x\)</th><th>\(y\)</th>
+        <th>\(x-3\)</th><th>\(y-60\)</th>
+        <th>\((x-3)^2\)</th><th>\((x-3)(y-60)\)</th>
+      </tr>
+      <tr><td>1</td><td>40</td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>2</td><td>50</td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>3</td><td>60</td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>4</td><td>70</td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>5</td><td>80</td><td></td><td></td><td></td><td></td></tr>
+      <tr class="total"><td>합계</td><td></td><td></td><td></td><td></td><td></td></tr>
+    </table>
+
+    <p class="q">(1) 표를 완성하고 \(\sum(x-\bar x)^2\)과 \(\sum(x-\bar x)(y-\bar y)\)를 구하시오. <span class="mini">(1점)</span></p>
+    <br><br>
+
+    <p class="q">(2) \(a\)와 \(b\)를 계산하고 추세선 \(f(x)\)를 구하시오. <span class="mini">(1점)</span></p>
+    <p style="font-size:9.5pt; margin-left:6px;">
+      \(a = \) &emsp;&emsp;&emsp;&emsp;&emsp; , &ensp;
+      \(b = \) &emsp;&emsp;&emsp;&emsp;&emsp; , &ensp;
+      \(f(x) = \)
+    </p>
+    <br>
+
+    <p class="q">(3) 주간 독서 시간이 6시간인 학생의 독해력 점수를 예측하시오. <span class="mini">(1점)</span></p>
+    <br><br>
+
+    <p class="q">(4) 이 데이터의 경향성을 설명하고, 오차가 생기는 이유를 서술하시오. <span class="mini">(1점)</span></p>
+    <br><br><br>
+
+
+    <div style="margin-top:8px; border:1px solid #ccc; padding:6px 12px; background:#fafafa; font-size:9.5pt; line-height:1.8;">
+      <strong>핵심 공식</strong><br>
+      조건부확률: \(P(A \mid B) = \dfrac{\text{A∩B의 수}}{\text{B의 수}}\) &nbsp;→ 더 큰 쪽으로 분류<br>
+      최소제곱법: \(a = \dfrac{\sum(x-\bar x)(y-\bar y)}{\sum(x-\bar x)^2}\), \(b = \bar y - a\bar x\), &ensp; 오차 = \(y - f(x)\)
+    </div>
+
+  </div>
+  <div class="footer">2 / 2</div>
+</div>
+
+</body>
+</html>

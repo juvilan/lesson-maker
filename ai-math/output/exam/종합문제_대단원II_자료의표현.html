@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>대단원 II 종합문제 — 자료의 표현</title>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+@page{size:A4;margin:18mm 20mm 18mm 20mm}
+@media print{
+  .no-print{display:none!important}
+  body{font-size:10.5pt}
+  .page-break{page-break-before:always}
+  .answer-section{page-break-before:always}
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  font-size:11pt;color:#111;background:#fff;line-height:1.6;
+  max-width:800px;margin:0 auto;padding:20px 24px 40px;
+}
+.exam-header{border:2.5px solid #111;padding:14px 20px;margin-bottom:18px}
+.exam-title{font-size:1.6em;font-weight:900;text-align:center;letter-spacing:2px;margin-bottom:6px}
+.exam-subtitle{text-align:center;font-size:0.9em;color:#333;margin-bottom:10px}
+.exam-info-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1.5px solid #111}
+.exam-info-cell{padding:6px 10px;border-right:1px solid #111;font-size:0.85em}
+.exam-info-cell:last-child{border-right:none}
+.exam-info-cell span{font-weight:700}
+.notice{background:#f8f8f8;border-left:3px solid #333;padding:8px 12px;margin:12px 0;font-size:0.82em;line-height:1.7}
+.unit-header{background:#222;color:#fff;padding:5px 12px;font-size:0.85em;font-weight:700;margin:18px 0 10px;letter-spacing:1px}
+.q-block{margin-bottom:16px;padding-bottom:14px;border-bottom:1px dashed #ccc}
+.q-block:last-child{border-bottom:none}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.q-num{font-size:1.05em;font-weight:900;min-width:30px}
+.badge{font-size:0.7em;font-weight:700;padding:1px 7px;border-radius:10px;border:1px solid #999}
+.badge-하{background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7}
+.badge-중{background:#fff8e1;color:#e65100;border-color:#ffcc80}
+.badge-상{background:#fce4ec;color:#c62828;border-color:#ef9a9a}
+.badge-pt{background:#e3edf8;color:#1a4a7a;border-color:#90caf9}
+.badge-II-1-01{background:#f3e5f5;color:#6a1b9a;border-color:#ce93d8}
+.badge-II-1-02{background:#e8f4ff;color:#1a4a7a;border-color:#90caf9}
+.badge-II-1-03{background:#e8f5ec;color:#1a5e35;border-color:#a5d6a7}
+.badge-II-2-01{background:#fff3e0;color:#bf360c;border-color:#ffb74d}
+.badge-II-2-02{background:#fce4f5;color:#880e4f;border-color:#f48fb1}
+.stem{font-size:0.96em;line-height:1.7;margin-bottom:8px}
+.table-wrap{overflow-x:auto;margin:6px 0}
+table{border-collapse:collapse;font-size:0.85em;width:100%}
+table th{background:#f0f0f0;padding:4px 8px;border:1px solid #bbb;text-align:center;font-weight:700}
+table td{padding:4px 8px;border:1px solid #bbb;text-align:center}
+.choices{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:2px 20px;margin-top:4px}
+.choices li{font-size:0.88em;padding:2px 0}
+.choices.col1{grid-template-columns:1fr}
+.answer-box-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.answer-box{width:80px;border:1.5px solid #555;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:0.8em;color:#888}
+.score-table{width:100%;margin:14px 0;border-collapse:collapse;font-size:0.85em}
+.score-table th,.score-table td{border:1px solid #bbb;padding:5px 6px;text-align:center}
+.score-table th{background:#f0f0f0;font-weight:700}
+.score-total{font-weight:900;font-size:1.05em}
+.answer-section{margin-top:40px;padding-top:24px;border-top:3px double #333}
+.answer-section h2{font-size:1.2em;font-weight:900;margin-bottom:14px;text-align:center;letter-spacing:2px}
+.answer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.ans-item{border:1px solid #ccc;border-radius:6px;padding:6px 8px;text-align:center;font-size:0.82em}
+.ans-item .qn{font-weight:700;color:#1a4a7a;font-size:0.95em}
+.ans-item .ans{font-size:1.1em;font-weight:900;color:#c62828}
+.ans-item .pt{font-size:0.75em;color:#666}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#0066cc;color:#fff;border:none;
+  padding:10px 20px;border-radius:8px;cursor:pointer;font-size:0.9em;font-weight:700;
+  box-shadow:0 4px 12px rgba(0,102,204,.3);z-index:999}
+.print-btn:hover{background:#0052a3}
+.hint-box{font-size:0.88em;color:#333;background:#f9f6ff;border:1px solid #ce93d8;border-radius:6px;padding:8px 14px;margin:6px 0 8px;line-height:1.9}
+</style>
+</head>
+<body>
+
+<!-- ===== 시험지 헤더 ===== -->
+<div class="exam-header">
+  <div class="exam-title">대단원 II 종합문제</div>
+  <div class="exam-subtitle">자료의 표현 — II-1. 텍스트 자료의 표현 &amp; II-2. 이미지 자료의 표현</div>
+  <div class="exam-info-row">
+    <div class="exam-info-cell"><span>학년/반:</span> _______ 학년 ______ 반</div>
+    <div class="exam-info-cell"><span>이름:</span> ___________________</div>
+    <div class="exam-info-cell"><span>점수:</span> _______ / 100점</div>
+  </div>
+</div>
+
+<!-- 유의사항 -->
+<div class="notice">
+  ※ 유의사항<br>
+  1. 총 <strong>20문항</strong>이며 합계 <strong>100점</strong>입니다.<br>
+  2. 선택형(①~⑤) 문항입니다. 각 문항에서 가장 옳은 답 하나만 고르세요.<br>
+  3. 문항 배점: 1~5번 각 4점 / 6~10번 각 6점 / 11~13번 각 4점 / 14~16번 각 6점 / 17~20번 각 5점
+</div>
+
+<!-- 배점표 -->
+<table class="score-table">
+  <thead>
+    <tr>
+      <th>문항</th>
+      <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+      <th>6</th><th>7</th><th>8</th><th>9</th><th>10</th>
+      <th>11</th><th>12</th><th>13</th><th>14</th><th>15</th>
+      <th>16</th><th>17</th><th>18</th><th>19</th><th>20</th>
+      <th class="score-total">합계</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>배점</th>
+      <td>4</td><td>4</td><td>4</td><td>4</td><td>4</td>
+      <td>6</td><td>6</td><td>6</td><td>6</td><td>6</td>
+      <td>4</td><td>4</td><td>4</td><td>6</td><td>6</td>
+      <td>6</td><td>5</td><td>5</td><td>5</td><td>5</td>
+      <td class="score-total">100</td>
+    </tr>
+    <tr>
+      <th>득점</th>
+      <td></td><td></td><td></td><td></td><td></td>
+      <td></td><td></td><td></td><td></td><td></td>
+      <td></td><td></td><td></td><td></td><td></td>
+      <td></td><td></td><td></td><td></td><td></td>
+      <td class="score-total"></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- ============================= -->
+<!--   II-1. 텍스트 자료의 표현      -->
+<!-- ============================= -->
+<div class="unit-header">&#9632; II-1. 텍스트 자료의 표현 (1~10번)</div>
+
+<!-- 1번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">1.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge badge-II-1-01">II-1-01</span>
+  </div>
+  <div class="stem">다음 중 <strong>비정형 자료</strong>에 해당하는 것은?</div>
+  <ul class="choices">
+    <li>① 학생 성적표</li>
+    <li>② 출석부</li>
+    <li>③ SNS 댓글</li>
+    <li>④ 회계 장부</li>
+    <li>⑤ 주소록</li>
+  </ul>
+</div>
+
+<!-- 2번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">2.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge badge-II-1-01">II-1-01</span>
+  </div>
+  <div class="stem">텍스트 자료를 처리할 때 <strong>불용어(stopword)</strong>에 해당하는 것은?</div>
+  <ul class="choices">
+    <li>① 퍼셉트론</li>
+    <li>② 인공지능</li>
+    <li>③ 은 (조사)</li>
+    <li>④ 딥러닝</li>
+    <li>⑤ 행렬</li>
+  </ul>
+</div>
+
+<!-- 3번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">3.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge badge-II-1-01">II-1-01</span>
+  </div>
+  <div class="stem">
+    단어 사전 \(U = \{수제,\ 맛있다,\ 양,\ 많다,\ 치즈,\ 추천,\ 카레\}\)가 있을 때,
+    집합 \(B = \{치즈,\ 많다,\ 추천\}\)을 \(U\)의 순서대로 벡터로 나타낸 것은?
+    (포함이면 1, 불포함이면 0)
+  </div>
+  <ul class="choices col1">
+    <li>① \((1,\ 1,\ 1,\ 0,\ 0,\ 0,\ 0)\)</li>
+    <li>② \((0,\ 0,\ 0,\ 1,\ 1,\ 1,\ 0)\)</li>
+    <li>③ \((0,\ 0,\ 1,\ 0,\ 1,\ 1,\ 0)\)</li>
+    <li>④ \((1,\ 0,\ 0,\ 1,\ 1,\ 1,\ 0)\)</li>
+    <li>⑤ \((0,\ 0,\ 0,\ 1,\ 1,\ 0,\ 1)\)</li>
+  </ul>
+</div>
+
+<!-- 4번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">4.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge badge-II-1-02">II-1-02</span>
+  </div>
+  <div class="stem"><strong>단어 빈도수(TF, Term Frequency)</strong>의 정의로 옳은 것은?</div>
+  <ul class="choices col1">
+    <li>① 단어가 등장하는 문서의 수</li>
+    <li>② 단어가 해당 문서에서 등장한 횟수</li>
+    <li>③ 문서 빈도수의 역수</li>
+    <li>④ 말뭉치에서 단어의 최종 중요도 점수</li>
+    <li>⑤ 단어가 불용어인지 판단하는 기준값</li>
+  </ul>
+</div>
+
+<!-- 5번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">5.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge badge-II-1-01">II-1-01</span>
+  </div>
+  <div class="stem">
+    세 집합 \(A = \{영화,\ 긴장감,\ 감동\}\),
+    \(B = \{영화,\ 감동,\ 지루하다,\ 실망\}\),
+    \(C = \{추천,\ 눈물,\ 보다,\ 감동,\ 영화\}\)로 구성한
+    단어 사전 \(U = A \cup B \cup C\)의 원소의 개수는?
+  </div>
+  <ul class="choices">
+    <li>① 6</li>
+    <li>② 7</li>
+    <li>③ 8</li>
+    <li>④ 9</li>
+    <li>⑤ 12</li>
+  </ul>
+</div>
+
+<!-- 6번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">6.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge badge-II-1-02">II-1-02</span>
+  </div>
+  <div class="stem">
+    어느 음식점 후기: <em>"맛있다 맛있다 분위기 좋다 맛있다"</em><br>
+    단어 사전 \(U = \{맛있다,\ 분위기,\ 좋다,\ 오다\}\)일 때,
+    이 후기의 <strong>TF 벡터</strong> \(\vec{A}\)는?
+  </div>
+  <ul class="choices col1">
+    <li>① \((2,\ 1,\ 1,\ 0)\)</li>
+    <li>② \((3,\ 1,\ 1,\ 0)\)</li>
+    <li>③ \((3,\ 1,\ 0,\ 1)\)</li>
+    <li>④ \((2,\ 1,\ 0,\ 1)\)</li>
+    <li>⑤ \((1,\ 1,\ 1,\ 3)\)</li>
+  </ul>
+</div>
+
+<!-- 7번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">7.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge badge-II-1-02">II-1-02</span>
+  </div>
+  <div class="stem">
+    다음은 의류 쇼핑몰 후기 3개(\(n=3\))의 TF 표이다.
+    단어 <strong>'가격'</strong>의 DF(문서 빈도수)와 상대도수(\(DF/n\))를 올바르게 나타낸 것은?
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>후기</th><th>청바지</th><th>추천</th><th>예쁘다</th><th>저렴하다</th>
+          <th>가격</th><th>디자인</th><th>좋다</th><th>신축성</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>A</td><td>2</td><td>2</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>B</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>2</td><td>1</td><td>0</td></tr>
+        <tr><td>C</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>2</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="choices col1">
+    <li>① \(DF=1,\quad DF/n=\dfrac{1}{3}\)</li>
+    <li>② \(DF=2,\quad DF/n=\dfrac{2}{3}\)</li>
+    <li>③ \(DF=3,\quad DF/n=1\)</li>
+    <li>④ \(DF=2,\quad DF/n=\dfrac{1}{3}\)</li>
+    <li>⑤ \(DF=1,\quad DF/n=\dfrac{2}{3}\)</li>
+  </ul>
+</div>
+
+<!-- 8번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">8.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge badge-II-1-02">II-1-02</span>
+  </div>
+  <div class="stem">
+    날씨 기사 3개(\(n=3\))에서 단어 <strong>'한파'</strong>의 \(DF=2\)이고,
+    기사 A에서 \(TF=1\)일 때, TF&middot;IDF 값은?<br>
+    (단, \(IDF = \dfrac{n}{DF}\) 로 계산한다.)
+  </div>
+  <ul class="choices">
+    <li>① \(1\)</li>
+    <li>② \(\dfrac{3}{2}\)</li>
+    <li>③ \(2\)</li>
+    <li>④ \(\dfrac{2}{3}\)</li>
+    <li>⑤ \(3\)</li>
+  </ul>
+</div>
+
+<!-- 9번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">9.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge badge-II-1-03">II-1-03</span>
+  </div>
+  <div class="stem">텍스트 자료 시각화 방법에 대한 설명으로 <strong>옳지 않은 것</strong>은?</div>
+  <ul class="choices col1">
+    <li>① 표는 수치를 정확히 확인할 수 있지만 패턴 파악이 어렵다.</li>
+    <li>② 막대그래프는 범주별 빈도 크기를 비교하기 좋다.</li>
+    <li>③ 원그래프는 항목이 많아질수록 각 비율 비교가 더 쉬워진다.</li>
+    <li>④ 단어 구름은 핵심 단어를 한눈에 파악할 수 있다.</li>
+    <li>⑤ 시각화 방법은 목적에 따라 선택해야 한다.</li>
+  </ul>
+</div>
+
+<!-- 10번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">10.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge badge-II-1-02">II-1-02</span>
+  </div>
+  <div class="stem">
+    다음 표는 세 문서 A, B, C에서 단어별 TF&middot;IDF 값을 나타낸 것이다.
+    문서 <strong>B</strong>의 주제어(TF&middot;IDF 최댓값 단어)는?
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>단어</th><th>A</th><th>B</th><th>C</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>인공지능</td><td>0.5</td><td>0.8</td><td>0.3</td></tr>
+        <tr><td>학습</td><td>1.2</td><td>0.6</td><td>0.9</td></tr>
+        <tr><td>데이터</td><td>0.4</td><td>1.5</td><td>0.7</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="choices">
+    <li>① 인공지능</li>
+    <li>② 학습</li>
+    <li>③ 데이터</li>
+    <li>④ 인공지능, 학습</li>
+    <li>⑤ 학습, 데이터</li>
+  </ul>
+</div>
+
+
+<!-- ============================= -->
+<!--   II-2. 이미지 자료의 표현      -->
+<!-- ============================= -->
+<div class="unit-header">&#9632; II-2. 이미지 자료의 표현 (11~20번)</div>
+
+<!-- 11번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">11.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge badge-II-2-01">II-2-01</span>
+  </div>
+  <div class="stem">이미지를 구성하는 <strong>최소 단위의 작은 정사각형</strong>을 무엇이라 하는가?</div>
+  <ul class="choices">
+    <li>① 비트</li>
+    <li>② 벡터</li>
+    <li>③ 픽셀</li>
+    <li>④ 해상도</li>
+    <li>⑤ 행렬</li>
+  </ul>
+</div>
+
+<!-- 12번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">12.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge badge-II-2-01">II-2-01</span>
+  </div>
+  <div class="stem">
+    행렬 \(A = \begin{pmatrix}2 & -1 \\ 3 & 1\end{pmatrix}\)의
+    \((1,2)\) 성분과 \((2,1)\) 성분을 올바르게 짝지은 것은?
+  </div>
+  <ul class="choices col1">
+    <li>① \((1,2)\) 성분: \(2\),&ensp; \((2,1)\) 성분: \(-1\)</li>
+    <li>② \((1,2)\) 성분: \(-1\),&ensp; \((2,1)\) 성분: \(3\)</li>
+    <li>③ \((1,2)\) 성분: \(3\),&ensp; \((2,1)\) 성분: \(1\)</li>
+    <li>④ \((1,2)\) 성분: \(-1\),&ensp; \((2,1)\) 성분: \(1\)</li>
+    <li>⑤ \((1,2)\) 성분: \(2\),&ensp; \((2,1)\) 성분: \(3\)</li>
+  </ul>
+</div>
+
+<!-- 13번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">13.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge badge-II-2-01">II-2-01</span>
+  </div>
+  <div class="stem">
+    컬러 이미지에서 \(R=0,\ G=0,\ B=255\)인 픽셀의 색상은?
+  </div>
+  <ul class="choices">
+    <li>① 빨강 \((255,0,0)\)</li>
+    <li>② 초록 \((0,255,0)\)</li>
+    <li>③ 파랑 \((0,0,255)\)</li>
+    <li>④ 흰색 \((255,255,255)\)</li>
+    <li>⑤ 검은색 \((0,0,0)\)</li>
+  </ul>
+</div>
+
+<!-- 14번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">14.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge badge-II-2-02">II-2-02</span>
+  </div>
+  <div class="stem">
+    두 행렬 \(A = \begin{pmatrix}1 & 2 \\ 3 & 4\end{pmatrix}\),
+    \(B = \begin{pmatrix}2 & -4 \\ 5 & -1\end{pmatrix}\)에 대하여
+    \(A + B\)를 구한 것으로 옳은 것은?
+  </div>
+  <ul class="choices col1">
+    <li>① \(\begin{pmatrix}3 & -2 \\ 8 & 3\end{pmatrix}\)</li>
+    <li>② \(\begin{pmatrix}-1 & 6 \\ -2 & 5\end{pmatrix}\)</li>
+    <li>③ \(\begin{pmatrix}3 & 2 \\ 8 & -4\end{pmatrix}\)</li>
+    <li>④ \(\begin{pmatrix}2 & -8 \\ 15 & -4\end{pmatrix}\)</li>
+    <li>⑤ \(\begin{pmatrix}1 & 6 \\ -2 & 5\end{pmatrix}\)</li>
+  </ul>
+</div>
+
+<!-- 15번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">15.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge badge-II-2-02">II-2-02</span>
+  </div>
+  <div class="stem">
+    컬러 이미지를 <strong>흑백 이미지로 변환</strong>할 때 사용하는
+    그레이스케일 공식으로 옳은 것은?
+  </div>
+  <ul class="choices col1">
+    <li>① \(K = R + G + B\)</li>
+    <li>② \(K = \dfrac{1}{3}(R + G + B)\)</li>
+    <li>③ \(K = R - G - B\)</li>
+    <li>④ \(K = R \times G \times B\)</li>
+    <li>⑤ \(K = \dfrac{R+G}{2} + B\)</li>
+  </ul>
+</div>
+
+<!-- 16번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">16.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge badge-II-2-02">II-2-02</span>
+  </div>
+  <div class="stem">
+    행렬 \(A = \begin{pmatrix}120 & 64 \\ 64 & 120\end{pmatrix}\)을
+    \(\dfrac{1}{2}\)배 한 결과로 옳은 것은?
+  </div>
+  <ul class="choices col1">
+    <li>① \(\begin{pmatrix}240 & 128 \\ 128 & 240\end{pmatrix}\)</li>
+    <li>② \(\begin{pmatrix}60 & 32 \\ 32 & 60\end{pmatrix}\)</li>
+    <li>③ \(\begin{pmatrix}60 & 64 \\ 64 & 60\end{pmatrix}\)</li>
+    <li>④ \(\begin{pmatrix}120 & 32 \\ 64 & 60\end{pmatrix}\)</li>
+    <li>⑤ \(\begin{pmatrix}119.5 & 63.5 \\ 63.5 & 119.5\end{pmatrix}\)</li>
+  </ul>
+</div>
+
+<!-- 17번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">17.</span>
+    <span class="badge badge-상">상</span>
+    <span class="badge badge-pt">5점</span>
+    <span class="badge badge-II-2-02">II-2-02</span>
+  </div>
+  <div class="stem">
+    \(A = \begin{pmatrix}1 & 0 \\ 0 & 1\end{pmatrix}\),
+    \(B = \begin{pmatrix}3 & 1 \\ 2 & 4\end{pmatrix}\)일 때
+    \(AB\)를 구한 것으로 옳은 것은?
+  </div>
+  <ul class="choices col1">
+    <li>① \(\begin{pmatrix}1 & 0 \\ 0 & 1\end{pmatrix}\)</li>
+    <li>② \(\begin{pmatrix}3 & 1 \\ 2 & 4\end{pmatrix}\)</li>
+    <li>③ \(\begin{pmatrix}3 & 0 \\ 0 & 4\end{pmatrix}\)</li>
+    <li>④ \(\begin{pmatrix}4 & 1 \\ 2 & 5\end{pmatrix}\)</li>
+    <li>⑤ \(\begin{pmatrix}1 & 1 \\ 2 & 1\end{pmatrix}\)</li>
+  </ul>
+</div>
+
+<!-- 18번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">18.</span>
+    <span class="badge badge-상">상</span>
+    <span class="badge badge-pt">5점</span>
+    <span class="badge badge-II-2-02">II-2-02</span>
+  </div>
+  <div class="stem">
+    이미지 변환 행렬 \(T = \begin{pmatrix}0 & 1 \\ 1 & 0\end{pmatrix}\)을
+    픽셀 벡터 \(\begin{pmatrix}3 \\ 5\end{pmatrix}\)에 왼쪽에서 곱한 결과는?
+  </div>
+  <ul class="choices col1">
+    <li>① \(\begin{pmatrix}3 \\ 5\end{pmatrix}\)</li>
+    <li>② \(\begin{pmatrix}8 \\ 8\end{pmatrix}\)</li>
+    <li>③ \(\begin{pmatrix}5 \\ 3\end{pmatrix}\)</li>
+    <li>④ \(\begin{pmatrix}0 \\ 0\end{pmatrix}\)</li>
+    <li>⑤ \(\begin{pmatrix}15 \\ 15\end{pmatrix}\)</li>
+  </ul>
+</div>
+
+<!-- 19번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">19.</span>
+    <span class="badge badge-상">상</span>
+    <span class="badge badge-pt">5점</span>
+    <span class="badge badge-II-2-02">II-2-02</span>
+  </div>
+  <div class="stem">
+    \(A = \begin{pmatrix}1 & 2 \\ 0 & 1\end{pmatrix}\),
+    \(B = \begin{pmatrix}1 & 0 \\ 3 & 1\end{pmatrix}\)에 대해
+    \(AB\)와 \(BA\)를 계산하여 교환법칙 성립 여부를 판단한 것으로 옳은 것은?
+  </div>
+  <ul class="choices col1">
+    <li>① \(AB = BA = \begin{pmatrix}7 & 2 \\ 3 & 1\end{pmatrix}\)이므로 교환법칙이 성립한다.</li>
+    <li>② \(AB = BA = \begin{pmatrix}1 & 2 \\ 3 & 7\end{pmatrix}\)이므로 교환법칙이 성립한다.</li>
+    <li>③ \(AB = \begin{pmatrix}7 & 2 \\ 3 & 1\end{pmatrix},\ BA = \begin{pmatrix}1 & 2 \\ 3 & 7\end{pmatrix}\)이므로 교환법칙이 성립하지 않는다.</li>
+    <li>④ \(AB = \begin{pmatrix}1 & 2 \\ 3 & 7\end{pmatrix},\ BA = \begin{pmatrix}7 & 2 \\ 3 & 1\end{pmatrix}\)이므로 교환법칙이 성립하지 않는다.</li>
+    <li>⑤ 2&times;2 행렬의 곱셈에서는 항상 교환법칙이 성립한다.</li>
+  </ul>
+</div>
+
+<!-- 20번 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">20.</span>
+    <span class="badge badge-상">상</span>
+    <span class="badge badge-pt">5점</span>
+    <span class="badge badge-II-2-02">II-2-02</span>
+  </div>
+  <div class="stem">
+    행렬을 이용한 이미지 처리에 관한 &lt;보기&gt;의 설명 중 <strong>옳은 것만을 있는 대로</strong> 고른 것은?
+  </div>
+  <div class="hint-box">
+    ㄱ. 행렬의 곱셈에서 교환법칙 \(AB = BA\)는 일반적으로 성립하지 않는다.<br>
+    ㄴ. 이미지의 밝기를 2배 밝게 하려면 픽셀 행렬의 각 원소에 2를 곱한다.<br>
+    ㄷ. 컬러 이미지를 흑백 이미지로 변환할 때 사용하는 공식은 \(K = R + G + B\)이다.
+  </div>
+  <ul class="choices">
+    <li>① ㄱ</li>
+    <li>② ㄴ</li>
+    <li>③ ㄱ, ㄴ</li>
+    <li>④ ㄴ, ㄷ</li>
+    <li>⑤ ㄱ, ㄴ, ㄷ</li>
+  </ul>
+</div>
+
+
+<!-- ============================= -->
+<!--   정답지 (교사용)               -->
+<!-- ============================= -->
+<div class="answer-section">
+  <h2>&#9632; 정답 및 해설 (교사용)</h2>
+
+  <div class="answer-grid">
+    <div class="ans-item">
+      <div class="qn">1번</div>
+      <div class="ans">③</div>
+      <div class="pt">4점 · 하 · II-1-01</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">2번</div>
+      <div class="ans">③</div>
+      <div class="pt">4점 · 하 · II-1-01</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">3번</div>
+      <div class="ans">②</div>
+      <div class="pt">4점 · 하 · II-1-01</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">4번</div>
+      <div class="ans">②</div>
+      <div class="pt">4점 · 하 · II-1-02</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">5번</div>
+      <div class="ans">③</div>
+      <div class="pt">4점 · 하 · II-1-01</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">6번</div>
+      <div class="ans">②</div>
+      <div class="pt">6점 · 중 · II-1-02</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">7번</div>
+      <div class="ans">②</div>
+      <div class="pt">6점 · 중 · II-1-02</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">8번</div>
+      <div class="ans">②</div>
+      <div class="pt">6점 · 중 · II-1-02</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">9번</div>
+      <div class="ans">③</div>
+      <div class="pt">6점 · 중 · II-1-03</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">10번</div>
+      <div class="ans">③</div>
+      <div class="pt">6점 · 중 · II-1-02</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">11번</div>
+      <div class="ans">③</div>
+      <div class="pt">4점 · 하 · II-2-01</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">12번</div>
+      <div class="ans">②</div>
+      <div class="pt">4점 · 하 · II-2-01</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">13번</div>
+      <div class="ans">③</div>
+      <div class="pt">4점 · 하 · II-2-01</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">14번</div>
+      <div class="ans">①</div>
+      <div class="pt">6점 · 중 · II-2-02</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">15번</div>
+      <div class="ans">②</div>
+      <div class="pt">6점 · 중 · II-2-02</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">16번</div>
+      <div class="ans">②</div>
+      <div class="pt">6점 · 중 · II-2-02</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">17번</div>
+      <div class="ans">②</div>
+      <div class="pt">5점 · 상 · II-2-02</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">18번</div>
+      <div class="ans">③</div>
+      <div class="pt">5점 · 상 · II-2-02</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">19번</div>
+      <div class="ans">③</div>
+      <div class="pt">5점 · 상 · II-2-02</div>
+    </div>
+    <div class="ans-item">
+      <div class="qn">20번</div>
+      <div class="ans">③</div>
+      <div class="pt">5점 · 상 · II-2-02</div>
+    </div>
+  </div>
+
+  <!-- 핵심 해설 -->
+  <div style="margin-top:24px;">
+    <div class="unit-header">&#9632; 핵심 해설 요약</div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">1.</span>
+        <span class="badge badge-II-1-01">II-1-01</span>
+      </div>
+      <div class="stem">
+        비정형 자료는 정해진 형식 없이 자유로운 형태의 자료.
+        성적표·출석부·회계장부·주소록은 행·열로 구조화된 정형 자료이며,
+        SNS 댓글은 형식이 없는 비정형 자료이다.
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">2.</span>
+        <span class="badge badge-II-1-01">II-1-01</span>
+      </div>
+      <div class="stem">
+        불용어(stopword)는 조사·접속사 등 의미 분석에 기여하지 않는 단어.
+        '은'은 조사로 의미 없는 불용어에 해당한다.
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">3.</span>
+        <span class="badge badge-II-1-01">II-1-01</span>
+      </div>
+      <div class="stem">
+        \(U\) 순서: 수제(1)·맛있다(2)·양(3)·많다(4)·치즈(5)·추천(6)·카레(7)<br>
+        \(B = \{치즈,\ 많다,\ 추천\}\) → 4·5·6번 위치가 1, 나머지 0 → \((0,0,0,1,1,1,0)\)
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">5.</span>
+        <span class="badge badge-II-1-01">II-1-01</span>
+      </div>
+      <div class="stem">
+        \(U = \{영화,\ 긴장감,\ 감동,\ 지루하다,\ 실망,\ 추천,\ 눈물,\ 보다\}\)<br>
+        중복 제거 후 원소 개수 = 8
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">6.</span>
+        <span class="badge badge-II-1-02">II-1-02</span>
+      </div>
+      <div class="stem">
+        "맛있다 맛있다 분위기 좋다 맛있다": 맛있다(3)·분위기(1)·좋다(1)·오다(0) → \(\vec{A}=(3,1,1,0)\)
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">7.</span>
+        <span class="badge badge-II-1-02">II-1-02</span>
+      </div>
+      <div class="stem">
+        '가격'은 후기 B(TF=1)·C(TF=1)에 등장, A에는 미등장 → \(DF=2\), \(DF/n=2/3\)
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">8.</span>
+        <span class="badge badge-II-1-02">II-1-02</span>
+      </div>
+      <div class="stem">
+        \(IDF = n/DF = 3/2\),&ensp;
+        \(TF \cdot IDF = 1 \times \dfrac{3}{2} = \dfrac{3}{2}\)
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">9.</span>
+        <span class="badge badge-II-1-03">II-1-03</span>
+      </div>
+      <div class="stem">
+        원그래프는 항목이 많아지면 각 조각이 작아져 비율 비교가 <strong>어려워</strong>진다.
+        ③이 옳지 않은 설명.
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">10.</span>
+        <span class="badge badge-II-1-02">II-1-02</span>
+      </div>
+      <div class="stem">
+        문서 B의 TF·IDF: 인공지능(0.8)·학습(0.6)·데이터(1.5) → 최댓값은 데이터(1.5).
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">12.</span>
+        <span class="badge badge-II-2-01">II-2-01</span>
+      </div>
+      <div class="stem">
+        \((i,j)\) 성분 = \(i\)행 \(j\)열의 원소.<br>
+        \((1,2)\)=1행2열=\(-1\),&ensp; \((2,1)\)=2행1열=\(3\)
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">17.</span>
+        <span class="badge badge-II-2-02">II-2-02</span>
+      </div>
+      <div class="stem">
+        \(A\)는 단위 행렬 \(I\). 단위 행렬과의 곱 \(IB = B\) → \(AB = \begin{pmatrix}3 & 1 \\ 2 & 4\end{pmatrix}\)
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">18.</span>
+        <span class="badge badge-II-2-02">II-2-02</span>
+      </div>
+      <div class="stem">
+        \(T\begin{pmatrix}3\\5\end{pmatrix}
+        = \begin{pmatrix}0 \cdot 3+1 \cdot 5\\1 \cdot 3+0 \cdot 5\end{pmatrix}
+        = \begin{pmatrix}5\\3\end{pmatrix}\)&ensp;
+        (행과 열이 교환되는 변환)
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">19.</span>
+        <span class="badge badge-II-2-02">II-2-02</span>
+      </div>
+      <div class="stem">
+        \(AB = \begin{pmatrix}1+6 & 0+2\\0+3 & 0+1\end{pmatrix} = \begin{pmatrix}7&2\\3&1\end{pmatrix}\)<br>
+        \(BA = \begin{pmatrix}1+0 & 2+0\\3+0 & 6+1\end{pmatrix} = \begin{pmatrix}1&2\\3&7\end{pmatrix}\)<br>
+        \(AB \neq BA\) → 행렬 곱셈의 교환법칙은 일반적으로 성립하지 않는다.
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-meta">
+        <span class="q-num">20.</span>
+        <span class="badge badge-II-2-02">II-2-02</span>
+      </div>
+      <div class="stem">
+        ㄱ. <strong>참</strong> — 행렬 곱셈의 교환법칙은 일반적으로 성립하지 않음.<br>
+        ㄴ. <strong>참</strong> — 이미지 밝기를 2배로 하려면 픽셀 행렬의 각 원소에 2를 곱함 (실수배).<br>
+        ㄷ. <strong>거짓</strong> — 올바른 공식은 \(K = \dfrac{1}{3}(R+G+B)\)이며, \(R+G+B\)는 아님.<br>
+        → 정답: ③ ㄱ, ㄴ
+      </div>
+    </div>
+
+  </div><!-- end 핵심 해설 -->
+</div><!-- end answer-section -->
+
+<!-- 인쇄 버튼 -->
+<button class="print-btn no-print" onclick="window.print()">인쇄</button>
+
+</body>
+</html>

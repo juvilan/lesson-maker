@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>텍스트 자료의 처리 - 학습지</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 10pt; }
+    }
+
+    .ws-page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm 15mm 20mm 15mm;
+      margin: 0 auto;
+      background: #fff;
+      page-break-after: always;
+    }
+    .ws-page:last-child { page-break-after: auto; }
+
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+    .ws-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .ws-title { font-size: 14pt; font-weight: 700; letter-spacing: -0.3px; }
+    .ws-meta { font-size: 9pt; color: #666; text-align: right; }
+
+    .student-info {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    .student-field { display: flex; align-items: center; gap: 6px; font-size: 10pt; }
+    .student-field label { font-weight: 500; white-space: nowrap; color: #444; }
+    .field-line { width: 80px; border-bottom: 1px solid #999; height: 20px; }
+
+    .problem {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      margin-bottom: 20px;
+      padding: 10px 12px;
+    }
+    .problem-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .problem-number { font-weight: 700; font-size: 11pt; }
+    .problem-body { font-size: 11pt; line-height: 1.7; }
+    .problem-body p { margin-bottom: 6px; }
+
+    .choices {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 24px;
+      margin: 8px 0 8px 8px;
+      font-size: 10.5pt;
+    }
+    .choices li { display: flex; gap: 5px; align-items: baseline; }
+
+    .ws-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10pt; }
+    .ws-table th { background: #f0f0f0; border: 1px solid #ddd; padding: 5px 8px; text-align: center; font-weight: 600; }
+    .ws-table td { border: 1px solid #ddd; padding: 5px 8px; text-align: center; }
+    .ws-table td.left { text-align: left; font-weight: 600; background: #f8f8f8; }
+
+    .answer-space { min-height: 35mm; margin-top: 10px; }
+    .answer-space.sm { min-height: 20mm; }
+    .answer-space.md { min-height: 50mm; }
+    .answer-space.lg { min-height: 70mm; }
+
+    .section-title {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #555;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 3px;
+      margin: 16px 0 10px;
+    }
+
+    .info-box {
+      background: #f8f8f8;
+      border-left: 3px solid #bbb;
+      padding: 7px 10px;
+      margin: 8px 0;
+      font-size: 10pt;
+      color: #444;
+    }
+
+    .page-number { text-align: center; font-size: 9pt; color: #999; margin-top: 14px; padding-top: 6px; border-top: 1px solid #eee; }
+
+    .sub-q { margin: 4px 0 4px 12px; line-height: 1.7; font-size: 10.5pt; }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] }
+    };
+    window.safeTypeset = window.safeTypeset || function(elements) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body>
+
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">학습지 · II-1-02 텍스트 자료의 처리</span>
+      <span class="ws-meta">인공지능수학</span>
+    </div>
+  </div>
+
+  <div class="student-info">
+    <div class="student-field"><label>학번</label><div class="field-line"></div></div>
+    <div class="student-field"><label>이름</label><div class="field-line"></div></div>
+    <div class="student-field"><label>날짜</label><div class="field-line"></div></div>
+  </div>
+
+  <div class="section-title">개념 확인 (기억·이해)</div>
+
+  <!-- 문제 1 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">1.</span>
+    </div>
+    <div class="problem-body">
+      <p>TF·IDF를 계산하는 공식으로 올바른 것은?</p>
+      <ul class="choices">
+        <li>① TF·IDF = TF + IDF</li>
+        <li>② TF·IDF = TF × IDF</li>
+        <li>③ TF·IDF = TF ÷ IDF</li>
+        <li>④ TF·IDF = IDF ÷ TF</li>
+        <li>⑤ TF·IDF = TF − IDF</li>
+      </ul>
+    </div>
+    <div class="answer-space sm"></div>
+  </div>
+
+  <!-- 문제 2 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">2.</span>
+    </div>
+    <div class="problem-body">
+      <p>IDF(역문서 빈도수)는 단어가 등장하는 문서의 수(DF)와 어떤 관계인지 설명하시오. 또한, 전체 문서 수가 $n$일 때 IDF의 계산식을 쓰시오.</p>
+      <div class="info-box">IDF 공식: IDF = &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; ($n$ = 전체 문서 수, DF = 단어가 등장하는 문서의 수)</div>
+    </div>
+    <div class="answer-space sm"></div>
+  </div>
+
+  <!-- 문제 3 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">3.</span>
+    </div>
+    <div class="problem-body">
+      <p>아래 TF 표를 보고, TF만으로 각 문서의 핵심어를 찾을 때의 <strong>한계</strong>를 설명하시오.</p>
+      <table class="ws-table">
+        <thead>
+          <tr><th>후기</th><th>청바지</th><th>추천</th><th>예쁘다</th><th>저렴하다</th><th>가격</th><th>디자인</th><th>좋다</th><th>신축성</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">후기 A</td><td>2</td><td>2</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td class="left">후기 B</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>2</td><td>1</td><td>0</td></tr>
+          <tr><td class="left">후기 C</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>2</td><td>1</td></tr>
+          <tr><td class="left">합계</td><td>4</td><td>4</td><td>1</td><td>1</td><td>2</td><td>3</td><td>3</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="answer-space"></div>
+  </div>
+
+  <!-- 문제 4 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">4.</span>
+    </div>
+    <div class="problem-body">
+      <p>불용어(Stopword) 처리가 필요한 이유를 설명하고, 의류 쇼핑몰 후기에서 불용어가 될 수 있는 단어를 2가지 예로 들어 설명하시오.</p>
+    </div>
+    <div class="answer-space"></div>
+  </div>
+
+  <div class="page-number">- 1 -</div>
+</div>
+
+<div class="ws-page">
+
+  <div class="section-title">계산 및 적용</div>
+
+  <!-- 문제 5 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">5.</span>
+    </div>
+    <div class="problem-body">
+      <p>다음은 청바지 쇼핑몰 후기 3편에서 불용어를 제거한 단어 집합과 TF 표이다. TF·IDF를 4단계에 걸쳐 계산하고, 각 후기의 유용한 정보를 도출하시오. ($n = 3$)</p>
+      <div class="info-box">
+        A = {청바지, 추천, 예쁘다, 저렴하다} &nbsp;|&nbsp;
+        B = {청바지, 추천, 가격, 디자인, 좋다} &nbsp;|&nbsp;
+        C = {신축성, 디자인, 좋다, 가격, 청바지, 추천}
+      </div>
+      <p class="sub-q"><strong>① 단계 1 — TF 표</strong> (위 문제 3의 표 참조)</p>
+      <p class="sub-q"><strong>② 단계 2 — DF 및 상대도수(DF/n) 계산</strong></p>
+      <table class="ws-table">
+        <thead>
+          <tr><th>구분</th><th>청바지</th><th>추천</th><th>예쁘다</th><th>저렴하다</th><th>가격</th><th>디자인</th><th>좋다</th><th>신축성</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">DF</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td class="left">DF/n</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+      <p class="sub-q"><strong>③ 단계 3 — IDF = n/DF 계산</strong></p>
+      <table class="ws-table">
+        <thead>
+          <tr><th>구분</th><th>청바지</th><th>추천</th><th>예쁘다</th><th>저렴하다</th><th>가격</th><th>디자인</th><th>좋다</th><th>신축성</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">IDF</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+      <p class="sub-q"><strong>④ 단계 4 — TF·IDF = TF × IDF 계산</strong></p>
+      <table class="ws-table">
+        <thead>
+          <tr><th>후기</th><th>청바지</th><th>추천</th><th>예쁘다</th><th>저렴하다</th><th>가격</th><th>디자인</th><th>좋다</th><th>신축성</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">후기 A</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td class="left">후기 B</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td class="left">후기 C</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+      <p class="sub-q"><strong>⑤ 각 후기의 유용한 정보 도출 (TF·IDF 최고값 단어)</strong></p>
+      <div style="margin-left:12px; line-height:2.2; font-size:10pt;">
+        후기 A의 핵심 단어: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TF·IDF = &nbsp;&nbsp;&nbsp;&nbsp; )<br>
+        후기 B의 핵심 단어: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TF·IDF = &nbsp;&nbsp;&nbsp;&nbsp; )<br>
+        후기 C의 핵심 단어: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TF·IDF = &nbsp;&nbsp;&nbsp;&nbsp; )
+      </div>
+    </div>
+  </div>
+
+  <div class="page-number">- 2 -</div>
+</div>
+
+<div class="ws-page">
+
+  <!-- 문제 6 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">6.</span>
+    </div>
+    <div class="problem-body">
+      <p>날씨 기사 3편이 있다. 불용어 제거 후 단어사전 U = {한파, 눈, 예보, 일부, 비, 퇴근길, 조심, 그치다}이고, TF 표는 아래와 같다. DF와 IDF(= n/DF, $n = 3$)를 계산하시오.</p>
+      <table class="ws-table">
+        <thead>
+          <tr><th>구분</th><th>한파</th><th>눈</th><th>예보</th><th>일부</th><th>비</th><th>퇴근길</th><th>조심</th><th>그치다</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">TF(A)</td><td>1</td><td>1</td><td>2</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td class="left">TF(B)</td><td>0</td><td>2</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+          <tr><td class="left">TF(C)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>3</td><td>0</td><td>0</td><td>1</td></tr>
+          <tr><td class="left">DF</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td class="left">IDF = n/DF</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="answer-space sm"></div>
+  </div>
+
+  <!-- 문제 7 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">7.</span>
+    </div>
+    <div class="problem-body">
+      <p>위 문제 6의 IDF 값을 이용하여 기사 A의 TF·IDF를 계산하고, 기사 A의 핵심 단어를 구하시오.</p>
+      <table class="ws-table">
+        <thead>
+          <tr><th>구분</th><th>한파</th><th>눈</th><th>예보</th><th>일부</th><th>비</th><th>퇴근길</th><th>조심</th><th>그치다</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">TF(A)</td><td>1</td><td>1</td><td>2</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td class="left">IDF</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td class="left">TF·IDF(A)</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+      <p class="sub-q">기사 A의 핵심 단어: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TF·IDF = &nbsp;&nbsp;&nbsp;&nbsp; )</p>
+    </div>
+    <div class="answer-space sm"></div>
+  </div>
+
+  <div class="section-title">심화 사고 (분석·평가·창조)</div>
+
+  <!-- 문제 8 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">8.</span>
+    </div>
+    <div class="problem-body">
+      <p>TF와 TF·IDF를 비교하여 분석하시오. 아래 두 가지 측면에서 서술하시오.</p>
+      <p class="sub-q"><strong>① TF만 사용할 때의 문제점:</strong> "청바지"가 모든 후기에서 TF 최고값을 가질 때, 이것이 왜 각 후기의 유용한 정보를 제공하지 못하는가?</p>
+      <div class="answer-space sm"></div>
+      <p class="sub-q"><strong>② TF·IDF가 이 문제를 해결하는 원리:</strong> IDF가 "청바지"의 점수를 낮추는 수학적 이유를 DF 값을 이용하여 설명하시오.</p>
+      <div class="answer-space sm"></div>
+    </div>
+  </div>
+
+  <div class="page-number">- 3 -</div>
+</div>
+
+<div class="ws-page">
+
+  <!-- 문제 9 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">9.</span>
+    </div>
+    <div class="problem-body">
+      <p>실제 AI 검색엔진에서는 IDF를 계산할 때 역수($n$/DF) 대신 로그(log)를 적용한 IDF = $\log(n/\text{DF})$를 사용한다. 그 이유를 평가하고, 아래 예시를 참고하여 로그 적용의 필요성을 서술하시오.</p>
+      <div class="info-box">
+        예시: 전체 문서 수 $n = 10{,}000{,}000$, 단어 "이다"의 DF = 100이라 가정할 때<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;· $n/\text{DF} = 100{,}000$ &nbsp;&nbsp;&nbsp;&nbsp;· $\log(n/\text{DF}) = \log(100{,}000) \approx 5$
+      </div>
+    </div>
+    <div class="answer-space"></div>
+  </div>
+
+  <!-- 문제 10 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">10.</span>
+    </div>
+    <div class="problem-body">
+      <p>TF·IDF를 활용할 수 있는 새로운 AI 응용 사례를 한 가지 제안하시오. (단, 검색엔진, 음악 추천, 뉴스 분류 이외의 아이디어를 제시할 것)</p>
+      <p style="margin-top:8px; font-size:10pt;">아이디어 분야:</p>
+    </div>
+    <div class="answer-space lg"></div>
+  </div>
+
+  <div class="page-number">- 4 -</div>
+</div>
+
+</body>
+</html>

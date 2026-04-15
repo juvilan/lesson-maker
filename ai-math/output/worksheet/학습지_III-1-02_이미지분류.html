@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이미지 분류 - 학습지</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 10pt; }
+    }
+
+    .ws-page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm 15mm 20mm 15mm;
+      margin: 0 auto;
+      background: #fff;
+      page-break-after: always;
+    }
+    .ws-page:last-child { page-break-after: auto; }
+
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+    .ws-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .ws-title { font-size: 14pt; font-weight: 700; letter-spacing: -0.3px; }
+    .ws-meta { font-size: 9pt; color: #666; text-align: right; }
+
+    .student-info {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    .student-field { display: flex; align-items: center; gap: 6px; font-size: 10pt; }
+    .student-field label { font-weight: 500; white-space: nowrap; color: #444; }
+    .field-line { width: 80px; border-bottom: 1px solid #999; height: 20px; }
+
+    .problem {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      margin-bottom: 20px;
+      padding: 10px 12px;
+    }
+    .problem-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .problem-number { font-weight: 700; font-size: 11pt; }
+    .problem-body { font-size: 11pt; line-height: 1.7; }
+    .problem-body p { margin-bottom: 6px; }
+
+    .choices {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 24px;
+      margin: 8px 0 8px 8px;
+      font-size: 10.5pt;
+    }
+    .choices li { display: flex; gap: 5px; align-items: baseline; }
+
+    .ws-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10pt; }
+    .ws-table th { background: #f0f0f0; border: 1px solid #ddd; padding: 5px 8px; text-align: center; font-weight: 600; }
+    .ws-table td { border: 1px solid #ddd; padding: 5px 8px; text-align: center; }
+    .ws-table td.left { text-align: left; }
+
+    .answer-space { min-height: 35mm; margin-top: 10px; }
+    .answer-space.sm { min-height: 20mm; }
+    .answer-space.md { min-height: 50mm; }
+    .answer-space.lg { min-height: 70mm; }
+
+    .section-title {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #555;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 3px;
+      margin: 16px 0 10px;
+    }
+
+    .info-box {
+      background: #f8f8f8;
+      border-left: 3px solid #bbb;
+      padding: 7px 10px;
+      margin: 8px 0;
+      font-size: 10pt;
+      color: #444;
+    }
+
+    .page-number { text-align: center; font-size: 9pt; color: #999; margin-top: 14px; padding-top: 6px; border-top: 1px solid #eee; }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] }
+    };
+    window.safeTypeset = window.safeTypeset || function(elements) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body>
+
+<!-- 1페이지 -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">학습지 · 인공지능의 이미지 분류</span>
+      <span class="ws-meta">인공지능수학</span>
+    </div>
+  </div>
+
+  <div class="student-info">
+    <div class="student-field"><label>학번</label><div class="field-line"></div></div>
+    <div class="student-field"><label>이름</label><div class="field-line"></div></div>
+    <div class="student-field"><label>날짜</label><div class="field-line"></div></div>
+  </div>
+
+  <!-- 문제 1 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">1.</span>
+    </div>
+    <div class="problem-body">
+      <p>흑백 이미지에서 픽셀값을 나타내는 방법으로 옳은 것은?</p>
+      <ul class="choices">
+        <li>① 흰색 픽셀 = 0, 검은색 픽셀 = 1</li>
+        <li>② 흰색 픽셀 = 1, 검은색 픽셀 = 0</li>
+        <li>③ 흰색 픽셀 = 255, 검은색 픽셀 = 128</li>
+        <li>④ 모든 픽셀값은 −1 또는 1이다</li>
+        <li>⑤ 픽셀값은 항상 소수(0~1)이다</li>
+      </ul>
+    </div>
+    <div class="answer-space sm"></div>
+  </div>
+
+  <!-- 문제 2 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">2.</span>
+    </div>
+    <div class="problem-body">
+      <p>두 이미지를 나타내는 행렬 $A$, $B$에서 <strong>해밍 거리 $H(A, B)$</strong>의 정의를 쓰시오.</p>
+    </div>
+    <div class="answer-space sm"></div>
+  </div>
+
+  <!-- 문제 3 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">3.</span>
+    </div>
+    <div class="problem-body">
+      <p>행렬 $A = \begin{pmatrix} 1 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix}$의 성분을 일렬로 나열하여 입력 벡터 $(x_1, x_2, x_3, x_4, x_5, x_6)$을 구하시오.</p>
+    </div>
+    <div class="answer-space sm"></div>
+  </div>
+
+  <!-- 문제 4 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">4.</span>
+    </div>
+    <div class="problem-body">
+      <p>해밍 거리와 유클리드 유사도의 차이점을 이미지 분류의 관점에서 설명하시오.</p>
+    </div>
+    <div class="answer-space md"></div>
+  </div>
+
+  <div class="page-number">- 1 -</div>
+</div>
+
+<!-- 2페이지 -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">학습지 · 인공지능의 이미지 분류 (계속)</span>
+      <span class="ws-meta">인공지능수학</span>
+    </div>
+  </div>
+
+  <!-- 문제 5 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">5.</span>
+    </div>
+    <div class="problem-body">
+      <p>두 이미지를 나타내는 행렬이 다음과 같을 때, 해밍 거리 $H(P, Q)$를 구하시오.</p>
+      <p>$P = \begin{pmatrix} 0 & 1 & 1 \\ 1 & 0 & 0 \\ 0 & 1 & 1 \end{pmatrix}, \quad Q = \begin{pmatrix} 0 & 1 & 0 \\ 1 & 1 & 0 \\ 1 & 1 & 1 \end{pmatrix}$</p>
+    </div>
+    <div class="answer-space md"></div>
+  </div>
+
+  <!-- 문제 6 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">6.</span>
+    </div>
+    <div class="problem-body">
+      <p>이미지 $A$를 나타내는 행렬이 다음과 같을 때, 퍼셉트론 $P_A$의 가중치 행렬 $W_A$를 구하시오.</p>
+      <p>$A = \begin{pmatrix} 1 & 0 & 1 \\ 0 & 1 & 0 \\ 1 & 0 & 1 \end{pmatrix}$</p>
+    </div>
+    <div class="answer-space md"></div>
+  </div>
+
+  <!-- 문제 7 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">7.</span>
+    </div>
+    <div class="problem-body">
+      <p>두 이미지 $A$, $B$와 분류할 이미지 $C$가 다음과 같을 때, 해밍 거리를 이용하여 $C$가 $A$와 $B$ 중 어느 것으로 분류되는지 구하시오.</p>
+      <p>$A = \begin{pmatrix} 1 & 1 \\ 0 & 0 \end{pmatrix}, \quad B = \begin{pmatrix} 1 & 0 \\ 1 & 0 \end{pmatrix}, \quad C = \begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix}$</p>
+    </div>
+    <div class="answer-space md"></div>
+  </div>
+
+  <div class="page-number">- 2 -</div>
+</div>
+
+<!-- 3페이지 -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">학습지 · 인공지능의 이미지 분류 (계속)</span>
+      <span class="ws-meta">인공지능수학</span>
+    </div>
+  </div>
+
+  <!-- 문제 8 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">8.</span>
+    </div>
+    <div class="problem-body">
+      <p>이미지 $A$, $B$, $C$가 다음과 같을 때, 해밍 거리 방법과 퍼셉트론 방법의 분류 결과를 각각 구하고, 두 결과가 같은지 비교하시오.</p>
+      <p>$A = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}, \quad B = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}, \quad C = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}$</p>
+    </div>
+    <div class="answer-space lg"></div>
+  </div>
+
+  <!-- 문제 9 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">9.</span>
+    </div>
+    <div class="problem-body">
+      <p>해밍 거리 방법과 퍼셉트론 방법 중, 이미지 분류에 더 적합한 방법은 무엇이라고 생각하는가? 각 방법의 장단점을 근거로 서술하시오.</p>
+    </div>
+    <div class="answer-space md"></div>
+  </div>
+
+  <!-- 문제 10 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">10.</span>
+    </div>
+    <div class="problem-body">
+      <p>오늘 배운 이미지 분류 원리(픽셀 행렬 + 해밍 거리/퍼셉트론)를 활용할 수 있는 새로운 실생활 응용 사례를 하나 제안하고, 어떻게 적용되는지 설명하시오.</p>
+    </div>
+    <div class="answer-space md"></div>
+  </div>
+
+  <div class="page-number">- 3 -</div>
+</div>
+
+</body>
+</html>

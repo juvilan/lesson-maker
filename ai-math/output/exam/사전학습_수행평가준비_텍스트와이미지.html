@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>인공지능 수학 — 텍스트 벡터화 &amp; 이미지 행렬화</title>
+<style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  font-size: 10pt;
+  color: #111;
+  background: #f0f0f0;
+}
+
+/* ── A4 페이지 컨테이너 ── */
+.ws-page {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 13mm 16mm 11mm 16mm;
+  margin: 0 auto 20px;
+  background: #fff;
+}
+
+/* ── 헤더 ── */
+.exam-header {
+  border: 2.5px solid #111;
+  padding: 9px 16px 8px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.exam-title { font-size: 14pt; font-weight: 900; letter-spacing: 2px; margin-bottom: 2px; }
+.exam-sub   { font-size: 9.5pt; color: #444; margin-bottom: 8px; }
+.exam-info-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-top: 1.5px solid #111;
+}
+.exam-info-cell {
+  padding: 4px 10px; border-right: 1px solid #111;
+  font-size: 9pt; text-align: left;
+}
+.exam-info-cell:last-child { border-right: none; }
+.exam-info-cell span { font-weight: 700; }
+
+/* ── 2페이지 미니 헤더 ── */
+.mini-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1.5px solid #888;
+  padding-bottom: 5px; margin-bottom: 11px;
+  font-size: 9pt;
+}
+.mini-header strong { font-size: 9.5pt; }
+.mini-info { display: flex; gap: 8px; color: #444; }
+.mini-info .field { border-bottom: 1px solid #888; min-width: 64px; display: inline-block; height: 14px; }
+
+/* ── 문항 블록 ── */
+.q-block {
+  margin-bottom: 11px;
+  padding-bottom: 9px;
+  border-bottom: 1px dashed #ccc;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.q-block:last-child { border-bottom: none; margin-bottom: 0; }
+
+.q-num  { font-size: 10pt; font-weight: 900; margin-bottom: 3px; }
+.stem   { font-size: 9.5pt; line-height: 1.7; margin-bottom: 5px; }
+.stem em { font-style: normal; font-weight: 700; }
+.stem .note { font-size: 8.5pt; color: #555; }
+
+/* ── 보기 ── */
+.choices {
+  list-style: none; padding: 0;
+  display: grid; grid-template-columns: 1fr;
+  gap: 1px 0;
+}
+.choices li { font-size: 8.7pt; padding: 2px 3px; line-height: 1.6; }
+.choices.col2 { grid-template-columns: 1fr 1fr; gap: 1px 14px; }
+
+/* ── 인쇄 최적화 ── */
+@media print {
+  body { background: #fff; }
+  .ws-page {
+    margin: 0 auto;
+    padding: 13mm 16mm 11mm 16mm;
+  }
+  .ws-page + .ws-page {
+    page-break-before: always;
+    break-before: page;
+  }
+  .no-print { display: none !important; }
+}
+
+/* ── 인쇄 버튼 (화면용) ── */
+.print-btn {
+  position: fixed; bottom: 24px; right: 24px;
+  background: #0066cc; color: #fff; border: none;
+  padding: 10px 22px; border-radius: 8px; cursor: pointer;
+  font-size: 9pt; font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,102,204,.3);
+  z-index: 999;
+}
+.print-btn:hover { background: #0052a3; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ PAGE 1 ═══════════════ -->
+<div class="ws-page">
+
+  <div class="exam-header">
+    <div class="exam-title">인공지능 수학</div>
+    <div class="exam-sub">— 텍스트 벡터화 &amp; 이미지 행렬화 —</div>
+    <div class="exam-info-row">
+      <div class="exam-info-cell"><span>학번:</span> _______________________</div>
+      <div class="exam-info-cell"><span>이름:</span> _______________________</div>
+    </div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-block">
+    <div class="q-num">1.</div>
+    <div class="stem">텍스트 분석에서 <em>불용어(stopwords)</em>에 대한 설명으로 가장 옳은 것은?</div>
+    <ul class="choices">
+      <li>① 텍스트에서 가장 자주 등장하는 단어로, 해당 문서의 주제를 직접 나타내는 핵심어이다.</li>
+      <li>② 문서에서 단 한 번만 나타나는 희귀한 단어로, 오타일 가능성이 높아 제거하는 단어이다.</li>
+      <li>③ 의미를 구분하는 데 도움이 되지 않아 분석 전에 제거하는 단어로, '은, 는, 이, 가, 을, 를, 정말, 아주' 같은 조사·부사 등이 해당한다.</li>
+      <li>④ 두 단어가 합쳐진 합성어로, 분리하면 의미가 달라지기 때문에 하나의 단어로 처리하는 것이다.</li>
+      <li>⑤ 여러 문서에 공통으로 등장하는 단어를 묶어 하나의 대표 단어로 통일한 것이다.</li>
+    </ul>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-block">
+    <div class="q-num">2.</div>
+    <div class="stem">텍스트 전처리에서 <em>기본형(원형) 변환</em>을 하는 이유로 가장 적절한 것은?</div>
+    <ul class="choices">
+      <li>① 단어의 길이를 통일하여 행렬의 크기를 일정하게 만들기 위해서이다.</li>
+      <li>② '아름다워요', '아름다운', '아름답다'처럼 같은 뜻을 가진 활용형을 하나의 기본형으로 묶어, 같은 의미의 단어를 동일하게 세기 위해서이다.</li>
+      <li>③ 형용사와 명사를 구분하여 문장의 문법 구조를 분석하기 위해서이다.</li>
+      <li>④ 부정적인 표현을 긍정적으로 바꾸는 감성 분석의 전처리 단계이다.</li>
+      <li>⑤ 모든 단어를 대문자 또는 소문자로 통일하여 검색 효율을 높이기 위해서이다.</li>
+    </ul>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-block">
+    <div class="q-num">3.</div>
+    <div class="stem">여러 문서에서 <em>단어 사전(Vocabulary) U</em>를 만드는 방법으로 옳은 것은?</div>
+    <ul class="choices">
+      <li>① 각 문서에서 가장 자주 등장한 단어 한 개씩만 골라, 문서 수만큼의 단어로 사전을 구성한다.</li>
+      <li>② 불용어를 제거하고 기본형으로 변환한 후, 모든 문서에 등장한 단어들을 <strong>중복 없이</strong> 모아 하나의 집합으로 만든다.</li>
+      <li>③ 전체 문서에서 등장 횟수가 2회 이상인 단어만 포함하고, 1회만 등장한 단어는 제외한다.</li>
+      <li>④ 문서별로 별도의 단어 사전을 만들어 각 문서마다 독립적인 벡터 공간을 구성한다.</li>
+      <li>⑤ 단어를 알파벳 또는 가나다순으로 정렬하여, 순서에 따라 번호를 붙인 목록을 만든다. (단어의 의미나 등장 여부는 고려하지 않는다.)</li>
+    </ul>
+  </div>
+
+  <!-- Q4 -->
+  <div class="q-block">
+    <div class="q-num">4.</div>
+    <div class="stem"><em>TF(Term Frequency, 단어 빈도수)</em>에 대한 설명으로 옳은 것은?</div>
+    <ul class="choices">
+      <li>① 전체 문서 모음 중에서 특정 단어가 1번 이상 등장한 문서의 수를 나타내는 값이다.</li>
+      <li>② 특정 단어의 중요도를 나타내는 최종 지표로, 값이 높을수록 모든 문서에서 핵심어임을 의미한다.</li>
+      <li>③ 단어 사전에 있는 전체 단어 수 대비 해당 단어가 차지하는 비율이다.</li>
+      <li>④ 특정 문서 안에서 어떤 단어가 몇 번 등장했는지를 나타내는 값으로, 같은 단어라도 문서마다 TF 값이 다를 수 있다.</li>
+      <li>⑤ 두 문서 간의 유사도를 측정할 때 사용하는 정규화 계수이다.</li>
+    </ul>
+  </div>
+
+  <!-- Q5 -->
+  <div class="q-block">
+    <div class="q-num">5.</div>
+    <div class="stem"><em>DF(Document Frequency, 문서 빈도수)</em>에 대한 설명으로 옳은 것은?</div>
+    <ul class="choices">
+      <li>① 한 문서 안에서 특정 단어가 등장한 총 횟수를 의미한다.</li>
+      <li>② 전체 단어 사전의 크기, 즉 서로 다른 단어의 총 개수를 나타낸다.</li>
+      <li>③ 전체 문서 모음 중에서 특정 단어가 <strong>1번 이상 등장한 문서의 수</strong>를 세는 값이다.</li>
+      <li>④ 어떤 단어가 전체 어휘 목록에서 차지하는 빈도 비율이다.</li>
+      <li>⑤ 두 단어가 같은 문서 안에 함께 등장하는 횟수를 측정한 값으로, 단어 간 연관성을 나타낸다.</li>
+    </ul>
+  </div>
+
+  <!-- Q6 -->
+  <div class="q-block">
+    <div class="q-num">6.</div>
+    <div class="stem"><em>IDF(Inverse Document Frequency)</em>에 대한 설명으로 옳은 것은? (전체 문서 수 = n)</div>
+    <ul class="choices">
+      <li>① IDF = DF ÷ n 으로 계산하며, 많은 문서에 등장할수록 IDF 값이 커져 그 단어가 더 중요해진다.</li>
+      <li>② IDF = n ÷ DF 로 계산하며, 여러 문서에 두루 등장하는 단어(DF가 클수록)는 IDF 값이 작아진다.</li>
+      <li>③ IDF = TF × DF 로 계산하며, 한 문서에서 자주 나오고 많은 문서에도 등장할수록 중요한 단어이다.</li>
+      <li>④ IDF는 문서마다 따로 계산되므로, 같은 단어라도 문서에 따라 IDF 값이 달라진다.</li>
+      <li>⑤ IDF가 1이면 그 단어는 전체 문서 중 정확히 절반에 등장했음을 의미한다.</li>
+    </ul>
+  </div>
+
+  <!-- Q7 -->
+  <div class="q-block">
+    <div class="q-num">7.</div>
+    <div class="stem"><em>TF·IDF 값이 높은 단어</em>가 나타내는 의미로 가장 적절한 것은?</div>
+    <ul class="choices">
+      <li>① 특정 문서에서 자주 등장하지만(TF↑) 다른 문서에서는 거의 나타나지 않아(DF↓, IDF↑), 그 문서를 특징짓는 핵심어일 가능성이 높다.</li>
+      <li>② 모든 문서에서 고르게 자주 등장하는 단어로, 어떤 문서에서도 보편적으로 중요한 의미를 갖는다.</li>
+      <li>③ 단어의 길이가 길수록 TF·IDF 값이 높으므로, 긴 단어가 짧은 단어보다 더 중요한 정보를 담는다.</li>
+      <li>④ TF·IDF는 단어의 긍정·부정 감정(sentiment)을 수치화한 것으로, 감성 분석에 직접 활용된다.</li>
+      <li>⑤ TF와 IDF 중 어느 한쪽만 높아도 TF·IDF 전체가 높아지므로, 두 값은 서로 독립적으로 작용한다.</li>
+    </ul>
+  </div>
+
+  <!-- Q8 -->
+  <div class="q-block">
+    <div class="q-num">8.</div>
+    <div class="stem">인공지능이 텍스트 자료를 처리하기 위해 <em>수치 벡터로 변환</em>하는 이유로 가장 적절한 것은?</div>
+    <ul class="choices">
+      <li>① 텍스트를 벡터로 변환하면 원래 문장을 100% 복원할 수 있어 데이터 압축에 활용된다.</li>
+      <li>② 컴퓨터와 인공지능은 문자(글자)를 직접 연산할 수 없으며, 텍스트를 숫자 벡터로 변환해야 비교·덧셈·곱셈 등 수학적 연산과 기계학습이 가능해진다.</li>
+      <li>③ 벡터화된 텍스트는 인터넷 전송 속도가 빨라지므로, 주로 네트워크 최적화 목적으로 사용된다.</li>
+      <li>④ 텍스트 벡터화는 문법 오류를 자동으로 탐지·수정하는 교정 시스템에서 출발한 기술이다.</li>
+      <li>⑤ 벡터화를 통해 한국어 텍스트를 자동으로 영어로 번역하는 것이 주된 목적이다.</li>
+    </ul>
+  </div>
+
+</div><!-- /PAGE 1 -->
+
+
+<!-- ═══════════════ PAGE 2 ═══════════════ -->
+<div class="ws-page">
+
+  <div class="mini-header">
+    <strong>인공지능 수학 — 텍스트 벡터화 &amp; 이미지 행렬화</strong>
+    <div class="mini-info">
+      학번 <span class="field"></span> &nbsp;|&nbsp; 이름 <span class="field"></span>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="q-block">
+    <div class="q-num">9.</div>
+    <div class="stem">
+      후기 A: "경치가 아름다워요. 아름다운 경치를 보니 정말 좋아요."<br>
+      위 후기에서 불용어를 제거하고 기본형으로 변환했을 때, 올바른 결과는?
+    </div>
+    <ul class="choices col2">
+      <li>① {경치, 아름답다, 보다, 정말, 좋다}</li>
+      <li>② {경치, 아름다워요, 아름다운, 좋아요}</li>
+      <li>③ {경치, 아름답다, 좋다}</li>
+      <li>④ {경치가, 아름다워요, 아름다운, 보니, 정말, 좋아요}</li>
+      <li>⑤ {경치, 아름답다, 보다, 좋다}</li>
+    </ul>
+  </div>
+
+  <!-- Q10 -->
+  <div class="q-block">
+    <div class="q-num">10.</div>
+    <div class="stem">세 개의 후기를 분석할 때(n=3), 단어 '좋다'가 후기 A, B, C 모두에 등장하고 단어 '맛있다'는 후기 B에만 등장한다면, 두 단어의 IDF 값(n÷DF)으로 옳은 것은?</div>
+    <ul class="choices col2">
+      <li>① 좋다: 3, 맛있다: 1</li>
+      <li>② 좋다: 1, 맛있다: 3</li>
+      <li>③ 좋다: 3, 맛있다: 3</li>
+      <li>④ 좋다: 1/3, 맛있다: 1</li>
+      <li>⑤ 좋다: 0, 맛있다: 3</li>
+    </ul>
+  </div>
+
+  <!-- Q11 -->
+  <div class="q-block">
+    <div class="q-num">11.</div>
+    <div class="stem"><em>디지털 이미지와 행렬</em>의 관계에 대한 설명으로 옳은 것은?</div>
+    <ul class="choices">
+      <li>① 디지털 이미지는 격자(grid) 형태로 나뉜 작은 점인 <strong>픽셀(pixel)</strong>들의 집합이며, 각 픽셀의 밝기나 색상 값을 행렬의 원소에 대응시켜 이미지를 행렬로 표현한다.</li>
+      <li>② 행렬의 행 수는 이미지의 색상 수를 나타내고, 열 수는 이미지의 해상도(dpi)를 나타낸다.</li>
+      <li>③ 이미지를 행렬로 변환하면 원본 이미지를 더 이상 복원할 수 없는 손실 변환이다.</li>
+      <li>④ 이미지의 파일 크기가 클수록 행렬 원소의 값이 커지고, 파일 크기가 작을수록 값이 작아진다.</li>
+      <li>⑤ 디지털 이미지는 1차원 벡터로만 표현할 수 있으며, 2차원 행렬로는 직접 표현하지 않는다.</li>
+    </ul>
+  </div>
+
+  <!-- Q12 -->
+  <div class="q-block">
+    <div class="q-num">12.</div>
+    <div class="stem">흑백(이진) 이미지를 행렬로 표현할 때 픽셀 값 규칙으로 옳은 것은?</div>
+    <ul class="choices">
+      <li>① 검정 픽셀(■)은 255, 흰색 픽셀(□)은 0으로 대응시켜 밝을수록 작은 값을 갖는 행렬을 만든다.</li>
+      <li>② 검정 픽셀(■)은 −1, 흰색 픽셀(□)은 +1로 대응시켜 음수와 양수가 혼재하는 행렬을 만든다.</li>
+      <li>③ 검정 픽셀(■)은 0, 흰색 픽셀(□)은 1로 대응시켜 0과 1만으로 이루어진 행렬을 만든다.</li>
+      <li>④ 픽셀의 색상에 관계없이 모든 값을 1로 설정하고, 위치 정보만으로 이미지를 구분한다.</li>
+      <li>⑤ 이미지를 왼쪽 위부터 픽셀에 번호를 매겨 1, 2, 3, … 순서로 행렬 원소에 배치한다.</li>
+    </ul>
+  </div>
+
+  <!-- Q13 -->
+  <div class="q-block">
+    <div class="q-num">13.</div>
+    <div class="stem">
+      명암 이미지를 나타내는 행렬 A에서 <em>½A와 2A</em>의 의미로 옳은 것은?<br>
+      <span class="note">(단, 픽셀 값은 0~255 범위이며, 255를 초과하면 255로 처리한다.)</span>
+    </div>
+    <ul class="choices">
+      <li>① ½A는 이미지를 가로로 반 잘라낸 것이고, 2A는 이미지를 가로로 두 배 늘린 것이다.</li>
+      <li>② 실수배는 이미지의 크기(해상도)를 조절하는 연산으로, 숫자가 클수록 이미지 크기가 커진다.</li>
+      <li>③ ½A는 행렬 A의 각 원소를 2로 나누어 <strong>픽셀이 어두워진</strong> 이미지를 나타내고, 2A는 각 원소를 2배 곱하여 <strong>픽셀이 밝아진</strong> 이미지를 나타낸다.</li>
+      <li>④ ½A는 이미지의 색상을 반전시키는 연산이고, 2A는 이미지를 흑백으로 변환하는 연산이다.</li>
+      <li>⑤ 실수배는 이미지의 대비(contrast)가 아닌 색조(hue)만을 조절하는 연산이다.</li>
+    </ul>
+  </div>
+
+  <!-- Q14 -->
+  <div class="q-block">
+    <div class="q-num">14.</div>
+    <div class="stem">
+      컬러 이미지를 <em>그레이스케일</em>로 변환하는 방법에 대한 설명으로 옳은 것은?<br>
+      <span class="note">(단, 이 수업에서 사용하는 공식 기준. 소수점 이하는 버림.)</span>
+    </div>
+    <ul class="choices">
+      <li>① 컬러 이미지는 빨강(R), 초록(G), 파랑(B) 세 채널로 구성되며, 각 채널의 값은 0부터 255까지의 정수이다. (R=255, G=255, B=255는 흰색 / R=0, G=0, B=0은 검정)</li>
+      <li>② 그레이스케일 밝기 = (R + G + B) ÷ 3 으로, 세 채널의 <strong>평균 값</strong>을 구해 하나의 밝기 값으로 표현한다. 예) (240, 60, 60) → (240+60+60)÷3 = 120</li>
+      <li>③ 그레이스케일 변환 시 R 채널만 남기고 G, B는 0으로 설정한다.</li>
+      <li>④ 밝기 = R + G + B 로 세 채널을 단순 합산하여 최대 765까지의 값으로 표현한다.</li>
+      <li>⑤ 밝기 = max(R, G, B)로 세 채널 중 가장 큰 값 하나만 취해 그레이스케일로 변환한다.</li>
+    </ul>
+  </div>
+
+  <!-- Q15 -->
+  <div class="q-block">
+    <div class="q-num">15.</div>
+    <div class="stem">이미지 행렬 D와 변환 행렬을 <em>곱하여 이미지를 변환</em>하는 방법에 대한 설명으로 옳은 것은?</div>
+    <ul class="choices">
+      <li>① 행렬 곱셈은 이미지의 밝기만을 조절하며, 이미지의 형태나 구조(픽셀 위치)는 변경하지 않는다.</li>
+      <li>② 이미지 행렬에 단위행렬 I를 곱하면 이미지가 흑백으로 변환된다.</li>
+      <li>③ 이미지 행렬에 역행렬을 곱하면 항상 단위행렬이 되어 이미지가 완전히 지워진다.</li>
+      <li>④ 왼쪽에 특정 행렬 P를 곱하면(P×D) 이미지의 <strong>행</strong>이 바뀌어 상하 이동·반전 효과가 나타나고, 오른쪽에 행렬 Q를 곱하면(D×Q) 이미지의 <strong>열</strong>이 바뀌어 좌우 이동·반전 효과가 나타난다.</li>
+      <li>⑤ 변환 행렬의 원소가 모두 1이면 이미지가 180도 회전하고, 원소가 모두 0이면 이미지가 확대된다.</li>
+    </ul>
+  </div>
+
+</div><!-- /PAGE 2 -->
+
+<button class="print-btn no-print" onclick="window.print()">인쇄하기</button>
+
+</body>
+</html>

@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인공지능의 역사 | 인공지능수학 고2</title>
+
+  <!-- ─── Reveal.js (오프라인) ─── -->
+  <link rel="stylesheet" href="../../libs/reveal.min.css">
+  <link rel="stylesheet" href="../../libs/theme/black.css">
+
+  <!-- ─── MathJax 3.x (오프라인) ─── -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => {
+          MathJax.startup.defaultReady();
+          window.mathJaxReady = true;
+        }
+      },
+      chtml: { scale: 0.92 }
+    };
+  </script>
+  <script src="../../libs/mathjax/tex-chtml.js" id="MathJax-script" async></script>
+
+  <!-- ─── 외부 라이브러리 (오프라인) ─── -->
+  <script src="../../libs/gsap.min.js"></script>
+  <script src="../../libs/p5.min.js"></script>
+  <script src="../../libs/chart.min.js"></script>
+
+  <!-- ─── 공통 스타일 ─── -->
+  <style>
+    :root {
+      --accent: #f39c12;
+      --accent-dim: #f39c1288;
+      --success: #2ecc71;
+      --danger: #e74c3c;
+      --info: #3498db;
+      --text-muted: #95a5a6;
+      --text-dim: #706858;
+      --border: #1e1c18;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal .highlight { color: var(--accent); font-weight: bold; }
+    .reveal .num-sub   { color: var(--accent); font-size: 1.1em; }
+    .reveal .result    { color: var(--success); font-weight: bold; }
+    .reveal .wrong     { color: var(--danger); }
+    .reveal .step-box {
+      background: rgba(255,255,255,0.07);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 0;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+    }
+    .reveal .step-box.visible {
+      padding: 0.6em 1em;
+      margin: 0.5em 0;
+      max-height: 200px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal .step-box .step-label {
+      font-size: 0.75em;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .calc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85em;
+      margin: 0.8em auto;
+    }
+    .reveal .calc-table th {
+      background: var(--accent);
+      color: #000;
+      padding: 0.5em 0.8em;
+      text-align: center;
+      font-weight: 700;
+    }
+    .reveal .calc-table td {
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.45em 0.7em;
+      text-align: center;
+      transition: background 0.3s;
+    }
+    .reveal .calc-table td.fillable { color: var(--text-muted); font-style: italic; }
+    .reveal .calc-table td.filled   { color: #fff; font-style: normal; }
+    .reveal .calc-table tr:nth-child(even) td { background: rgba(255,255,255,0.04); }
+    .reveal .nn-container { display: flex; justify-content: center; align-items: center; }
+    .reveal .anim-controls {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.8em; margin-top: 0.7em;
+    }
+    .reveal .anim-btn {
+      background: var(--accent); color: #000; border: none; border-radius: 6px;
+      padding: 0.4em 1.2em; font-size: 0.85em; font-weight: 700;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .reveal .anim-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .reveal .anim-btn.reset-btn { background: rgba(255,255,255,0.15); color: #fff; }
+    .reveal .step-counter { color: var(--text-muted); font-size: 0.8em; min-width: 4em; text-align: center; }
+    .reveal .truth-table { margin: 0 auto; border-collapse: collapse; font-size: 0.9em; }
+    .reveal .truth-table th { background: var(--accent); color: #000; padding: 0.5em 1.2em; font-weight: 700; }
+    .reveal .truth-table td { border: 1px solid rgba(255,255,255,0.25); padding: 0.45em 1.2em; text-align: center; }
+    .reveal .truth-table .val-1 { color: var(--success); font-weight: bold; }
+    .reveal .truth-table .val-0 { color: var(--danger); }
+    .reveal .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; align-items: start; }
+    .reveal .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1em; }
+    .reveal .concept-card { background: rgba(255,255,255,0.08); border-radius: 10px; padding: 1em; text-align: center; }
+    .reveal .concept-card .icon { font-size: 2em; margin-bottom: 0.3em; }
+    .reveal .concept-card h4 { color: var(--accent); margin: 0.3em 0; }
+    .reveal .objective-list { list-style: none; padding: 0; text-align: left; }
+    .reveal .objective-list li { padding: 0.4em 0 0.4em 1.8em; position: relative; font-size: 0.95em; }
+    .reveal .objective-list li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+    .reveal .warning-box { background: rgba(231,76,60,0.15); border: 1px solid var(--danger); border-radius: 8px; padding: 0.7em 1em; font-size: 0.85em; }
+    .reveal .warning-box::before { content: '⚠️ '; }
+    .reveal .param-slider-group { display: flex; align-items: center; gap: 0.8em; font-size: 0.85em; margin: 0.3em 0; }
+    .reveal .param-slider-group label { min-width: 6em; color: var(--accent); }
+    .reveal .param-slider-group input[type=range] { flex: 1; }
+    .reveal .param-slider-group .val-display { min-width: 3em; text-align: right; font-family: monospace; }
+    .reveal aside.notes { font-size: 0.85em; line-height: 1.5; }
+    .reveal .progress { height: 4px; }
+    .reveal .progress span { background: var(--accent); }
+    .reveal { font-size: 28px; font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif; }
+    .reveal .slides section { box-sizing: border-box; overflow: hidden; }
+    .reveal mjx-container[jax="CHTML"][display="true"] { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+    .reveal .card { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 1em; }
+    .reveal .card-accent { border: 1px solid var(--accent); }
+    .reveal .formula-box { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 0.8em; text-align: center; margin: 0.4em 0; }
+    .reveal .definition-box { border-left: 4px solid var(--info); padding: 0.6em 1em; background: rgba(52,152,219,0.08); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+    .reveal .kw { color: var(--accent); font-weight: 600; }
+    .reveal .kw-info { color: var(--info); font-weight: 600; }
+    .reveal .kw-success { color: var(--success); font-weight: 600; }
+    .reveal .kw-danger { color: var(--danger); font-weight: 600; }
+    .reveal .terminal-badge {
+      font-family: var(--font-mono); font-size: 0.65em; color: var(--accent);
+      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.3em; display: inline-block;
+    }
+    .reveal .terminal-badge::before { content: '> '; animation: tblink 1s step-end infinite; }
+    @keyframes tblink { 50% { opacity: 0; } }
+    .reveal .badge {
+      display: inline-block; font-family: var(--font-mono); font-size: 0.6em; color: var(--accent);
+      padding: 0.2em 0.6em; border: 1px solid var(--accent-dim); border-radius: 100px; letter-spacing: 0.05em;
+    }
+    .reveal .accent-line { width: 50px; height: 2px; background: var(--accent); margin: 0.5em 0; }
+    .reveal .info-card {
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border, #1e1c18);
+      border-radius: 6px; padding: 0.9em 1.1em; width: 100%;
+    }
+    .reveal .info-card .card-title {
+      font-family: var(--font-mono); font-size: 0.65em; color: var(--text-dim, #706858);
+      margin-bottom: 0.5em; letter-spacing: 0.05em;
+    }
+    .reveal .split-card {
+      padding: 0.9em 1em; background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border, #1e1c18); border-radius: 6px;
+    }
+    /* 타임라인 애니메이션 전용 */
+    .era-block {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s ease;
+    }
+    .era-block.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ══ 슬라이드 1: 표지 ══ -->
+    <section data-slide-id="slide-01-cover">
+      <div style="text-align:center; padding:2em 0;">
+        <div style="font-size:0.7em; color:#f39c12; letter-spacing:0.1em; margin-bottom:0.5em;">I. 인공지능과 빅데이터</div>
+        <h1 style="font-size:1.6em; margin:0.3em 0; color:#fff;">2. 인공지능의 역사</h1>
+        <div style="width:60px; height:3px; background:#f39c12; margin:1em auto;"></div>
+        <div style="color:#95a5a6; font-size:0.8em;">인공지능수학 | 고2 | 2022 개정 미래엔</div>
+        <div style="margin-top:1.5em; display:flex; justify-content:center; gap:2em; font-size:0.75em; color:#7f8c8d;">
+          <span>📅 역사 타임라인</span>
+          <span>🔢 논리연산</span>
+          <span>🧠 퍼셉트론</span>
+          <span>🌐 딥러닝</span>
+        </div>
+      </div>
+      <aside class="notes">수업 시작 전 슬라이드. 오늘 배울 내용의 키워드를 소개하며 학생들의 흥미를 끌어낸다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 2: 학습목표 ══ -->
+    <section data-slide-id="slide-02-objectives">
+      <h2 style="color:#f39c12; font-size:1.1em; margin-bottom:0.8em;">학습 목표</h2>
+      <ul class="objective-list" style="max-width:800px; margin:0 auto;">
+        <li style="font-size:0.9em; margin-bottom:0.6em;">
+          AI 발전의 주요 역사적 사건을 <span class="kw">시대순</span>으로 설명할 수 있다.
+        </li>
+        <li style="font-size:0.9em; margin-bottom:0.6em;">
+          논리연산 <span class="kw">AND / OR / XOR</span>의 진리표를 작성할 수 있다.
+        </li>
+        <li style="font-size:0.9em; margin-bottom:0.6em;">
+          퍼셉트론으로 <span class="kw">AND / OR 게이트</span>를 구현하고,
+          <span class="kw-danger">XOR의 한계</span>와 해결 방법을 설명할 수 있다.
+        </li>
+      </ul>
+      <div style="margin-top:1.2em; display:flex; justify-content:center; gap:1em; flex-wrap:wrap;">
+        <div class="concept-card" style="min-width:140px; max-width:160px; font-size:0.75em;">
+          <div class="icon">🕰️</div>
+          <h4>역사</h4>
+          <div style="color:#bdc3c7;">1950s → 2020s</div>
+        </div>
+        <div class="concept-card" style="min-width:140px; max-width:160px; font-size:0.75em;">
+          <div class="icon">🔢</div>
+          <h4>논리연산</h4>
+          <div style="color:#bdc3c7;">AND / OR / XOR</div>
+        </div>
+        <div class="concept-card" style="min-width:140px; max-width:160px; font-size:0.75em;">
+          <div class="icon">🧠</div>
+          <h4>퍼셉트론</h4>
+          <div style="color:#bdc3c7;">단층 → 다층</div>
+        </div>
+      </div>
+      <aside class="notes">학생들에게 오늘 수업의 3가지 목표를 안내한다. 특히 "XOR 한계와 해결"이 핵심 서사임을 강조.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 3: AI 발전 타임라인 ══ -->
+    <section data-slide-id="slide-03-timeline" data-anim-id="anim-timeline-01">
+      <h2 style="color:#f39c12; font-size:1em; margin-bottom:0.6em;">AI 발전 타임라인</h2>
+      <div id="timeline-01" style="font-size:0.72em; overflow:hidden;">
+        <!-- 타임라인 바 -->
+        <div style="display:flex; align-items:center; margin-bottom:0.5em; position:relative;">
+          <div style="flex:1; height:3px; background:linear-gradient(to right, #3498db, #e74c3c, #f39c12, #2ecc71, #9b59b6);"></div>
+        </div>
+        <!-- 시대별 마커 -->
+        <div style="display:flex; justify-content:space-between; text-align:center; margin-bottom:0.6em;">
+          <div class="era-marker" onclick="showEra_timeline01('1950')" style="cursor:pointer; flex:1;">
+            <div style="width:14px; height:14px; background:#3498db; border-radius:50%; margin:0 auto 0.3em; border:2px solid #fff;"></div>
+            <div style="color:#3498db; font-weight:bold;">1950s</div>
+            <div style="color:#95a5a6; font-size:0.85em;">태동기</div>
+          </div>
+          <div class="era-marker" onclick="showEra_timeline01('1970')" style="cursor:pointer; flex:1;">
+            <div style="width:14px; height:14px; background:#e74c3c; border-radius:50%; margin:0 auto 0.3em; border:2px solid #fff;"></div>
+            <div style="color:#e74c3c; font-weight:bold;">1970~80s</div>
+            <div style="color:#95a5a6; font-size:0.85em;">AI 겨울</div>
+          </div>
+          <div class="era-marker" onclick="showEra_timeline01('1986')" style="cursor:pointer; flex:1;">
+            <div style="width:14px; height:14px; background:#f39c12; border-radius:50%; margin:0 auto 0.3em; border:2px solid #fff;"></div>
+            <div style="color:#f39c12; font-weight:bold;">1986</div>
+            <div style="color:#95a5a6; font-size:0.85em;">역전파</div>
+          </div>
+          <div class="era-marker" onclick="showEra_timeline01('2012')" style="cursor:pointer; flex:1;">
+            <div style="width:14px; height:14px; background:#2ecc71; border-radius:50%; margin:0 auto 0.3em; border:2px solid #fff;"></div>
+            <div style="color:#2ecc71; font-weight:bold;">2012~16</div>
+            <div style="color:#95a5a6; font-size:0.85em;">딥러닝</div>
+          </div>
+          <div class="era-marker" onclick="showEra_timeline01('2020')" style="cursor:pointer; flex:1;">
+            <div style="width:14px; height:14px; background:#9b59b6; border-radius:50%; margin:0 auto 0.3em; border:2px solid #fff;"></div>
+            <div style="color:#9b59b6; font-weight:bold;">2020s</div>
+            <div style="color:#95a5a6; font-size:0.85em;">생성형 AI</div>
+          </div>
+        </div>
+        <!-- 상세 정보 박스 -->
+        <div id="timeline-01-detail" style="margin-top:0.4em; min-height:3.5em; background:rgba(255,255,255,0.05); border-radius:6px; padding:0.7em; color:#bdc3c7; font-size:0.92em; border-left:3px solid #f39c12;">
+          시대 마커를 클릭하면 해당 시기의 주요 사건을 확인할 수 있습니다.
+        </div>
+        <!-- 핵심 키워드 요약 -->
+        <div style="display:flex; gap:0.5em; margin-top:0.6em; flex-wrap:wrap; justify-content:center;">
+          <span style="background:rgba(52,152,219,0.2); color:#3498db; border-radius:4px; padding:0.2em 0.6em; font-size:0.85em;">튜링 테스트 (1950)</span>
+          <span style="background:rgba(52,152,219,0.2); color:#3498db; border-radius:4px; padding:0.2em 0.6em; font-size:0.85em;">퍼셉트론 (1958)</span>
+          <span style="background:rgba(231,76,60,0.2); color:#e74c3c; border-radius:4px; padding:0.2em 0.6em; font-size:0.85em;">XOR 문제 (1969)</span>
+          <span style="background:rgba(243,156,18,0.2); color:#f39c12; border-radius:4px; padding:0.2em 0.6em; font-size:0.85em;">역전파 (1986)</span>
+          <span style="background:rgba(46,204,113,0.2); color:#2ecc71; border-radius:4px; padding:0.2em 0.6em; font-size:0.85em;">AlexNet (2012)</span>
+          <span style="background:rgba(46,204,113,0.2); color:#2ecc71; border-radius:4px; padding:0.2em 0.6em; font-size:0.85em;">AlphaGo (2016)</span>
+          <span style="background:rgba(155,89,182,0.2); color:#9b59b6; border-radius:4px; padding:0.2em 0.6em; font-size:0.85em;">노벨상 (2024)</span>
+        </div>
+      </div>
+      <aside class="notes">각 시대 마커를 클릭하면서 설명. "AI의 역사는 기대와 실망의 반복이에요. 오늘 그 이유를 수학으로 이해해봅니다."</aside>
+    </section>
+
+    <!-- ══ 슬라이드 4: 1950년대 — AI의 태동 ══ -->
+    <section data-slide-id="slide-04-1950s">
+      <h2 style="color:#3498db; font-size:1em; margin-bottom:0.6em;">1950년대 — AI의 태동</h2>
+      <div class="two-col">
+        <!-- 좌: 튜링 테스트 -->
+        <div>
+          <div style="color:#3498db; font-weight:bold; font-size:0.85em; margin-bottom:0.5em;">1950 | 튜링 테스트</div>
+          <div style="background:rgba(52,152,219,0.1); border:1px solid #3498db44; border-radius:8px; padding:0.8em; font-size:0.78em;">
+            <div style="font-size:1.1em; margin-bottom:0.4em;">🤔</div>
+            <div style="color:#bdc3c7; line-height:1.6;">
+              영국 수학자 <span class="kw-info">튜링(Turing, 1912~1954)</span><br>
+              <em>"기계가 생각할 수 있는가?"</em><br><br>
+              인간 평가자가 컴퓨터와 인간을 구별 못하면 <span class="kw">합격</span>
+            </div>
+            <div style="margin-top:0.6em; background:rgba(52,152,219,0.15); border-radius:6px; padding:0.5em; font-size:0.9em; color:#3498db;">
+              → 인간처럼 사고하는 기계 연구의 출발점
+            </div>
+          </div>
+        </div>
+        <!-- 우: 퍼셉트론 -->
+        <div>
+          <div style="color:#f39c12; font-weight:bold; font-size:0.85em; margin-bottom:0.5em;">1958 | 퍼셉트론</div>
+          <div style="background:rgba(243,156,18,0.1); border:1px solid #f39c1244; border-radius:8px; padding:0.8em; font-size:0.78em;">
+            <div style="font-size:1.1em; margin-bottom:0.4em;">🧠</div>
+            <div style="color:#bdc3c7; line-height:1.6;">
+              <span class="kw">로젠블라트(Rosenblatt)</span><br>
+              최초의 인공 신경망 모델<br><br>
+              입력 → 가중합 → 활성화 → 출력
+            </div>
+            <div style="margin-top:0.6em; display:flex; align-items:center; gap:0.5em; font-size:0.85em;">
+              <div style="background:#2c3e50; border:1px solid #7f8c8d; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:#ecf0f1; font-size:0.8em;">x₁</div>
+              <div style="color:#95a5a6; font-size:0.8em;">→ w₁</div>
+              <div style="background:#2c3e50; border:1px solid #f39c12; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:#f39c12; font-size:0.8em;">Σ</div>
+              <div style="color:#95a5a6; font-size:0.8em;">→ f(z)</div>
+              <div style="background:#2ecc71; border-radius:4px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:#000; font-size:0.8em; font-weight:bold;">y</div>
+            </div>
+          </div>
+          <div class="warning-box" style="margin-top:0.5em; font-size:0.72em;">과잉 기대 → 이후 실망으로 이어짐</div>
+        </div>
+      </div>
+      <aside class="notes">
+        "1950년에 튜링이라는 수학자가 '기계가 생각할 수 있는가?'라는 질문을 던집니다.
+        이게 AI 연구의 출발점이에요. 1958년엔 로젠블라트가 퍼셉트론을 만들었습니다.
+        '이제 기계가 학습할 수 있다!' 전 세계가 흥분했어요. 그런데..."
+      </aside>
+    </section>
+
+    <!-- ══ 슬라이드 5: AI 겨울 — XOR 문제 ══ -->
+    <section data-slide-id="slide-05-ai-winter" data-anim-id="anim-xor-scatter">
+      <h2 style="color:#e74c3c; font-size:1em; margin-bottom:0.6em;">AI 겨울 — XOR 문제의 등장</h2>
+      <div class="two-col" style="align-items:center;">
+        <!-- 좌: 역사 설명 -->
+        <div>
+          <div style="font-size:0.78em; line-height:1.7; color:#bdc3c7;">
+            <div style="color:#e74c3c; font-weight:bold; margin-bottom:0.4em;">1969 — 민스키(Minsky)의 증명</div>
+            <p style="margin:0 0 0.5em;">
+              배타적 논리합(XOR)은 퍼셉트론으로 구현 <span class="kw-danger">불가능</span>함을 수학적으로 증명
+            </p>
+            <div style="background:rgba(231,76,60,0.1); border:1px solid #e74c3c44; border-radius:6px; padding:0.7em; margin-bottom:0.5em;">
+              <div style="color:#e74c3c; font-size:0.9em; font-weight:bold;">제1차 AI 겨울 (1970~1980s)</div>
+              <ul style="margin:0.3em 0 0; padding-left:1.2em; font-size:0.9em; color:#95a5a6;">
+                <li>기대 → 실망 → 연구비 삭감</li>
+                <li>신경망 연구 침체기</li>
+                <li>전문가 시스템으로 관심 이동</li>
+              </ul>
+            </div>
+            <div style="color:#f39c12; font-size:0.85em; font-style:italic;">
+              "직선 하나로는 XOR을 절대 나눌 수 없다"
+            </div>
+          </div>
+        </div>
+        <!-- 우: XOR 산점도 -->
+        <div style="text-align:center;">
+          <div style="font-size:0.75em; color:#95a5a6; margin-bottom:0.3em;">XOR 산점도</div>
+          <canvas id="xor-scatter-01" width="260" height="260" style="border-radius:8px; max-height:260px;"></canvas>
+          <div style="font-size:0.7em; color:#e74c3c; margin-top:0.3em; font-weight:bold;">직선으로 분리 불가!</div>
+        </div>
+      </div>
+      <aside class="notes">
+        "퍼셉트론이 만능일 것 같았는데, 1969년에 민스키가 XOR은 못 푼다고 수학적으로 증명해버립니다.
+        이 그래프를 보세요. 초록 점(1)이 대각선으로 흩어져 있죠.
+        직선 하나로 빨간 점과 분리가 절대 안 됩니다. 이게 AI 겨울의 시작이에요."
+      </aside>
+    </section>
+
+    <!-- ══ 슬라이드 6: 논리연산과 진리표 (AND) ══ -->
+    <section data-slide-id="slide-06-logic-and">
+      <h2 style="color:#f39c12; font-size:1em; margin-bottom:0.5em;">논리연산과 진리표</h2>
+      <!-- 일상 예시 박스 -->
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.6em; margin-bottom:0.6em; font-size:0.72em;">
+        <div style="background:rgba(243,156,18,0.1); border:1px solid #f39c1266; border-radius:8px; padding:0.6em;">
+          <div style="font-size:1.1em; margin-bottom:0.2em;">🔐</div>
+          <strong style="color:#f39c12;">AND — 카드 잠금</strong>
+          <p style="margin:0.3em 0 0; color:#bdc3c7;">카드 인식 AND 비밀번호<br>→ 둘 다 1이어야 1</p>
+        </div>
+        <div style="background:rgba(52,152,219,0.1); border:1px solid #3498db66; border-radius:8px; padding:0.6em;">
+          <div style="font-size:1.1em; margin-bottom:0.2em;">🚨</div>
+          <strong style="color:#3498db;">OR — 화재 경보</strong>
+          <p style="margin:0.3em 0 0; color:#bdc3c7;">화재감지 OR 연기감지<br>→ 하나라도 1이면 1</p>
+        </div>
+        <div style="background:rgba(231,76,60,0.1); border:1px solid #e74c3c66; border-radius:8px; padding:0.6em;">
+          <div style="font-size:1.1em; margin-bottom:0.2em;">💡</div>
+          <strong style="color:#e74c3c;">XOR — 계단 스위치</strong>
+          <p style="margin:0.3em 0 0; color:#bdc3c7;">위 스위치 XOR 아래 스위치<br>→ 다르면 1, 같으면 0</p>
+        </div>
+      </div>
+      <!-- AND 진리표 -->
+      <div style="text-align:center;">
+        <div style="font-size:0.78em; color:#f39c12; font-weight:bold; margin-bottom:0.4em;">AND 게이트 진리표</div>
+        <table class="truth-table" id="truth-and-01">
+          <thead>
+            <tr><th>x₁</th><th>x₂</th><th>x₁ ∧ x₂</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+            <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:0.4em; font-size:0.72em; color:#f39c12; font-weight:bold;">
+          ✓ AND: 둘 다 1일 때만 1
+        </div>
+      </div>
+      <aside class="notes">
+        "논리연산을 일상에서 먼저 생각해봅시다. AND는 두 조건이 모두 참일 때만 1이에요.
+        카드도 있고 비밀번호도 맞아야 문이 열리는 것처럼요."
+      </aside>
+    </section>
+
+    <!-- ══ 슬라이드 7: OR과 XOR 진리표 ══ -->
+    <section data-slide-id="slide-07-or-xor">
+      <h2 style="color:#f39c12; font-size:1em; margin-bottom:0.6em;">OR과 XOR 진리표</h2>
+      <div class="two-col" style="gap:2em; align-items:start;">
+        <!-- OR -->
+        <div style="text-align:center;">
+          <div style="font-size:0.82em; color:#3498db; font-weight:bold; margin-bottom:0.5em;">OR 게이트 (논리합 ∨)</div>
+          <table class="truth-table">
+            <thead><tr><th>x₁</th><th>x₂</th><th>x₁ ∨ x₂</th></tr></thead>
+            <tbody>
+              <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+              <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+              <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+              <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:0.5em; background:rgba(52,152,219,0.15); border-radius:6px; padding:0.4em; font-size:0.72em; color:#3498db;">
+            하나라도 1이면 1
+          </div>
+        </div>
+        <!-- XOR -->
+        <div style="text-align:center;">
+          <div style="font-size:0.82em; color:#e74c3c; font-weight:bold; margin-bottom:0.5em;">XOR 게이트 (배타적 논리합 ⊻)</div>
+          <table class="truth-table">
+            <thead><tr><th>x₁</th><th>x₂</th><th>x₁ ⊻ x₂</th></tr></thead>
+            <tbody>
+              <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-0" style="background:rgba(231,76,60,0.15);">0</td></tr>
+              <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+              <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+              <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:0.5em; background:rgba(231,76,60,0.15); border-radius:6px; padding:0.4em; font-size:0.72em; color:#e74c3c; font-weight:bold;">
+            서로 다를 때만 1 (같으면 0)
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:0.8em; text-align:center; font-size:0.78em; color:#95a5a6;">
+        AND와 OR은 1인 점을 <span class="kw-success">직선 하나</span>로 분리 가능 &nbsp;|&nbsp;
+        XOR은 <span class="kw-danger">직선 분리 불가</span>
+      </div>
+      <aside class="notes">
+        "OR은 하나라도 참이면 1. XOR의 핵심은 '서로 다를 때만 1'입니다.
+        (1,1)→0, (0,0)→0, (1,0)→1, (0,1)→1. 이게 왜 문제인지 곧 봅시다."
+      </aside>
+    </section>
+
+    <!-- ══ 슬라이드 8: 퍼셉트론으로 AND 구현 ══ -->
+    <section data-slide-id="slide-08-and-perceptron" data-anim-id="anim-boundary-01">
+      <h2 style="color:#f39c12; font-size:1em; margin-bottom:0.5em;">퍼셉트론으로 AND 구현</h2>
+      <div class="two-col" style="align-items:center;">
+        <div>
+          <div style="font-size:0.78em; color:#bdc3c7; line-height:1.7; margin-bottom:0.5em;">
+            <span class="kw">가중치</span>: w₁ = 0.5, w₂ = 0.5 &nbsp; <span class="kw">임계값</span>: θ = 0.7
+          </div>
+          <!-- 단계별 유도 -->
+          <div id="step-and-1" class="step-box visible">
+            <div class="step-label">Step 1 | 판단 조건</div>
+            <div style="font-size:0.8em;">w₁x₁ + w₂x₂ ≥ θ 이면 y = 1</div>
+          </div>
+          <div id="step-and-2" class="step-box">
+            <div class="step-label">Step 2 | 경계선 정리</div>
+            <div style="font-size:0.8em;">0.5x₁ + 0.5x₂ = 0.7<br>
+            → x₂ = −x₁ + 1.4</div>
+          </div>
+          <div id="step-and-3" class="step-box">
+            <div class="step-label">Step 3 | θ 변화 효과</div>
+            <div style="font-size:0.8em;">θ↑ → 경계선 위로 → AND 범위 좁아짐<br>θ↓ → 경계선 아래로 → OR 범위 넓어짐</div>
+          </div>
+          <div class="anim-controls">
+            <button class="anim-btn" onclick="nextStepAnd()">다음 단계 ▶</button>
+            <button class="anim-btn reset-btn" onclick="resetStepsAnd()">초기화</button>
+          </div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:0.72em; color:#95a5a6; margin-bottom:0.3em;">AND 결정 경계 (슬라이더로 θ 조절)</div>
+          <canvas id="boundary-and-01" width="300" height="260" style="border-radius:8px; max-height:260px;"></canvas>
+          <div class="param-slider-group" style="margin-top:0.4em;">
+            <label>θ</label>
+            <input type="range" min="0.1" max="1.0" step="0.05" value="0.7"
+                   id="boundary-and-01-sl" oninput="updateBoundaryAnd(this.value)">
+            <span id="boundary-and-01-sv" class="val-display">0.70</span>
+          </div>
+          <div id="boundary-and-01-formula" style="font-size:0.72em; color:#f39c12; text-align:center; margin-top:0.2em;">
+            x₂ = −x₁ + 1.40
+          </div>
+        </div>
+      </div>
+      <aside class="notes">
+        "퍼셉트론이 AND를 어떻게 구현하는지 봅시다.
+        w₁=0.5, w₂=0.5, θ=0.7로 설정하면 경계선이 x₂ = -x₁ + 1.4가 됩니다.
+        슬라이더로 θ를 바꾸면 경계선이 이동하는 걸 보여주세요."
+      </aside>
+    </section>
+
+    <!-- ══ 슬라이드 9: 퍼셉트론으로 OR 구현 ══ -->
+    <section data-slide-id="slide-09-or-perceptron">
+      <h2 style="color:#3498db; font-size:1em; margin-bottom:0.5em;">퍼셉트론으로 OR 구현</h2>
+      <div class="two-col" style="align-items:center;">
+        <div>
+          <div style="font-size:0.78em; color:#bdc3c7; line-height:1.7; margin-bottom:0.4em;">
+            <span class="kw-info">OR 게이트</span>: w₁ = 0.5, w₂ = 0.5, θ = 0.2
+          </div>
+          <div class="formula-box" style="font-size:0.78em; margin-bottom:0.5em;">
+            0.5x₁ + 0.5x₂ = 0.2 → <span class="kw">x₂ = −x₁ + 0.4</span>
+          </div>
+          <!-- 집합 다이어그램 -->
+          <div style="display:flex; gap:1em; justify-content:center; align-items:flex-start; font-size:0.7em;">
+            <div style="text-align:center;">
+              <svg width="110" height="80" viewBox="0 0 110 80" style="overflow:hidden;">
+                <circle cx="38" cy="40" r="28" fill="rgba(46,204,113,0.25)" stroke="#2ecc71" stroke-width="2"/>
+                <circle cx="72" cy="40" r="28" fill="rgba(46,204,113,0.25)" stroke="#2ecc71" stroke-width="2"/>
+                <text x="22" y="44" text-anchor="middle" fill="#2ecc71" font-size="12" font-weight="bold">1</text>
+                <text x="55" y="44" text-anchor="middle" fill="#2ecc71" font-size="12" font-weight="bold">1</text>
+                <text x="88" y="44" text-anchor="middle" fill="#2ecc71" font-size="12" font-weight="bold">1</text>
+              </svg>
+              <div style="color:#2ecc71;">OR = A ∪ B</div>
+              <div style="color:#95a5a6;">직선 분리 ✓</div>
+            </div>
+            <div style="text-align:center;">
+              <svg width="110" height="80" viewBox="0 0 110 80" style="overflow:hidden;">
+                <circle cx="38" cy="40" r="28" fill="rgba(231,76,60,0.25)" stroke="#e74c3c" stroke-width="2"/>
+                <circle cx="72" cy="40" r="28" fill="rgba(231,76,60,0.25)" stroke="#e74c3c" stroke-width="2"/>
+                <path d="M55,16 Q72,28 72,40 Q72,52 55,64 Q38,52 38,40 Q38,28 55,16Z" fill="#1a1a2e" stroke="none"/>
+                <text x="22" y="44" text-anchor="middle" fill="#e74c3c" font-size="12" font-weight="bold">1</text>
+                <text x="88" y="44" text-anchor="middle" fill="#e74c3c" font-size="12" font-weight="bold">1</text>
+              </svg>
+              <div style="color:#e74c3c;">XOR = A △ B</div>
+              <div style="color:#e74c3c; font-weight:bold;">직선 분리 ✗</div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:0.72em; color:#95a5a6; margin-bottom:0.3em;">OR 결정 경계</div>
+          <canvas id="boundary-or-01" width="300" height="260" style="border-radius:8px; max-height:260px;"></canvas>
+          <div style="font-size:0.72em; color:#3498db; margin-top:0.3em;">x₂ = −x₁ + 0.40</div>
+        </div>
+      </div>
+      <aside class="notes">
+        "OR은 θ를 0.2로 낮추면 됩니다. 경계선이 아래로 내려가 (0,0)만 제외됩니다.
+        AND, OR은 직선 하나로 분리가 되는데, XOR은 오른쪽 그림처럼 대칭차집합이라
+        두 덩어리로 나뉘어 직선 분리가 안 됩니다."
+      </aside>
+    </section>
+
+    <!-- ══ 슬라이드 10: XOR — 단일 퍼셉트론의 한계 ══ -->
+    <section data-slide-id="slide-10-xor-limit" data-anim-id="anim-xor-01">
+      <h2 style="color:#e74c3c; font-size:1em; margin-bottom:0.5em;">XOR — 단일 퍼셉트론의 한계</h2>
+      <!-- 세 게이트 비교 -->
+      <div style="display:flex; gap:1em; justify-content:center; align-items:flex-start; margin-bottom:0.6em; font-size:0.7em;">
+        <div style="text-align:center;">
+          <svg width="120" height="90" viewBox="0 0 120 90" style="overflow:hidden;">
+            <circle cx="42" cy="45" r="30" fill="rgba(46,204,113,0.2)" stroke="#2ecc71" stroke-width="2"/>
+            <circle cx="78" cy="45" r="30" fill="rgba(46,204,113,0.2)" stroke="#2ecc71" stroke-width="2"/>
+            <text x="22" y="49" text-anchor="middle" fill="#2ecc71" font-size="13" font-weight="bold">1</text>
+            <text x="60" y="49" text-anchor="middle" fill="#2ecc71" font-size="13" font-weight="bold">1</text>
+            <text x="98" y="49" text-anchor="middle" fill="#2ecc71" font-size="13" font-weight="bold">1</text>
+          </svg>
+          <div style="color:#2ecc71; font-weight:bold;">OR</div>
+          <div style="color:#2ecc71; font-size:0.9em;">직선 분리 ✓</div>
+        </div>
+        <div style="text-align:center;">
+          <svg width="120" height="90" viewBox="0 0 120 90" style="overflow:hidden;">
+            <circle cx="42" cy="45" r="30" fill="rgba(149,165,166,0.1)" stroke="#7f8c8d" stroke-width="2"/>
+            <circle cx="78" cy="45" r="30" fill="rgba(149,165,166,0.1)" stroke="#7f8c8d" stroke-width="2"/>
+            <path d="M60,18 Q78,32 78,45 Q78,58 60,72 Q42,58 42,45 Q42,32 60,18Z" fill="rgba(46,204,113,0.4)" stroke="none"/>
+            <text x="60" y="49" text-anchor="middle" fill="#2ecc71" font-size="13" font-weight="bold">1</text>
+          </svg>
+          <div style="color:#f39c12; font-weight:bold;">AND</div>
+          <div style="color:#2ecc71; font-size:0.9em;">직선 분리 ✓</div>
+        </div>
+        <div style="text-align:center; position:relative;">
+          <svg width="120" height="90" viewBox="0 0 120 90" style="overflow:hidden;">
+            <circle cx="42" cy="45" r="30" fill="rgba(231,76,60,0.25)" stroke="#e74c3c" stroke-width="2"/>
+            <circle cx="78" cy="45" r="30" fill="rgba(231,76,60,0.25)" stroke="#e74c3c" stroke-width="2"/>
+            <path d="M60,18 Q78,32 78,45 Q78,58 60,72 Q42,58 42,45 Q42,32 60,18Z" fill="#1a1a2e" stroke="none"/>
+            <text x="22" y="49" text-anchor="middle" fill="#e74c3c" font-size="13" font-weight="bold">1</text>
+            <text x="98" y="49" text-anchor="middle" fill="#e74c3c" font-size="13" font-weight="bold">1</text>
+            <text x="60" y="75" text-anchor="middle" fill="#e74c3c" font-size="11">?</text>
+          </svg>
+          <div style="color:#e74c3c; font-weight:bold;">XOR</div>
+          <div style="color:#e74c3c; font-size:0.9em; font-weight:bold;">직선 분리 ✗</div>
+        </div>
+      </div>
+      <!-- 핵심 메시지 -->
+      <div style="background:rgba(231,76,60,0.1); border:1px solid #e74c3c; border-radius:8px; padding:0.8em; font-size:0.78em; text-align:center; margin-bottom:0.5em;">
+        <div style="color:#e74c3c; font-weight:bold; font-size:1em; margin-bottom:0.3em;">XOR의 결정적 문제</div>
+        <div style="color:#bdc3c7;">1인 영역이 <span class="kw-danger">두 덩어리</span>로 분리 → 직선 하나로는 절대 불가</div>
+        <div style="color:#f39c12; margin-top:0.3em; font-size:0.9em;">해결책 → 층을 쌓아야 한다 (다층 퍼셉트론)</div>
+      </div>
+      <aside class="notes">
+        "직선 하나로는 절대 불가입니다. 이게 핵심이에요.
+        AND, OR은 1인 점이 한 덩어리라 직선으로 분리가 되는데,
+        XOR은 1인 점이 (1,0)과 (0,1) — 대각선으로 흩어져 있어요.
+        그래서 층을 더 쌓아야 합니다."
+      </aside>
+    </section>
+
+    <!-- ══ 슬라이드 11: 1980년대 — 역전파의 등장 ══ -->
+    <section data-slide-id="slide-11-backprop">
+      <h2 style="color:#f39c12; font-size:1em; margin-bottom:0.5em;">1980년대 — 역전파 알고리즘</h2>
+      <div class="two-col" style="align-items:start;">
+        <div style="font-size:0.78em;">
+          <div style="color:#f39c12; font-weight:bold; margin-bottom:0.4em;">1986 — Rumelhart &amp; Hinton</div>
+          <div style="background:rgba(243,156,18,0.1); border:1px solid #f39c1244; border-radius:8px; padding:0.7em; margin-bottom:0.5em;">
+            역전파(backpropagation) 알고리즘 발표<br>
+            <span style="color:#2ecc71;">→ 다층 퍼셉트론 학습 가능해짐!</span>
+          </div>
+          <div id="bp-step-1" class="step-box visible">
+            <div class="step-label">Step 1 | 오차 계산</div>
+            <div style="font-size:0.85em;">출력층에서 오차(손실) 계산<br>L = (y − ŷ)²</div>
+          </div>
+          <div id="bp-step-2" class="step-box">
+            <div class="step-label">Step 2 | 역방향 전파</div>
+            <div style="font-size:0.85em;">오차를 출력 → 은닉 → 입력층으로 역전파</div>
+          </div>
+          <div id="bp-step-3" class="step-box">
+            <div class="step-label">Step 3 | 가중치 업데이트</div>
+            <div style="font-size:0.85em;">각 가중치를 경사하강법으로 조정<br>w ← w − η · ∂L/∂w</div>
+          </div>
+          <div class="anim-controls" style="margin-top:0.5em;">
+            <button class="anim-btn" onclick="nextStepBP()">다음 단계 ▶</button>
+            <button class="anim-btn reset-btn" onclick="resetStepsBP()">초기화</button>
+          </div>
+        </div>
+        <!-- 신경망 구조 SVG -->
+        <div style="text-align:center;">
+          <div style="font-size:0.72em; color:#95a5a6; margin-bottom:0.3em;">2층 신경망 (은닉층 추가)</div>
+          <svg width="280" height="200" viewBox="0 0 280 200" style="overflow:hidden;">
+            <!-- 입력층 -->
+            <circle cx="40" cy="70" r="20" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2"/>
+            <text x="40" y="75" text-anchor="middle" fill="#ecf0f1" font-size="11">x₁</text>
+            <circle cx="40" cy="130" r="20" fill="#2c3e50" stroke="#7f8c8d" stroke-width="2"/>
+            <text x="40" y="135" text-anchor="middle" fill="#ecf0f1" font-size="11">x₂</text>
+            <text x="40" y="165" text-anchor="middle" fill="#95a5a6" font-size="9">입력층</text>
+            <!-- 은닉층 -->
+            <circle cx="140" cy="55" r="20" fill="#2c3e50" stroke="#f39c12" stroke-width="2"/>
+            <text x="140" y="60" text-anchor="middle" fill="#f39c12" font-size="11">h₁</text>
+            <circle cx="140" cy="100" r="20" fill="#2c3e50" stroke="#f39c12" stroke-width="2"/>
+            <text x="140" y="105" text-anchor="middle" fill="#f39c12" font-size="11">h₂</text>
+            <circle cx="140" cy="145" r="20" fill="#2c3e50" stroke="#f39c12" stroke-width="2"/>
+            <text x="140" y="150" text-anchor="middle" fill="#f39c12" font-size="11">h₃</text>
+            <text x="140" y="180" text-anchor="middle" fill="#f39c12" font-size="9">은닉층</text>
+            <!-- 출력층 -->
+            <circle cx="240" cy="100" r="20" fill="#2c3e50" stroke="#2ecc71" stroke-width="2"/>
+            <text x="240" y="105" text-anchor="middle" fill="#2ecc71" font-size="11">y</text>
+            <text x="240" y="135" text-anchor="middle" fill="#2ecc71" font-size="9">출력층</text>
+            <!-- 엣지: 입력→은닉 -->
+            <line x1="60" y1="75" x2="120" y2="60" stroke="#7f8c8d" stroke-width="1.2"/>
+            <line x1="60" y1="75" x2="120" y2="100" stroke="#7f8c8d" stroke-width="1.2"/>
+            <line x1="60" y1="75" x2="120" y2="145" stroke="#7f8c8d" stroke-width="1.2"/>
+            <line x1="60" y1="125" x2="120" y2="60" stroke="#7f8c8d" stroke-width="1.2"/>
+            <line x1="60" y1="125" x2="120" y2="100" stroke="#7f8c8d" stroke-width="1.2"/>
+            <line x1="60" y1="125" x2="120" y2="145" stroke="#7f8c8d" stroke-width="1.2"/>
+            <!-- 엣지: 은닉→출력 -->
+            <line x1="160" y1="60" x2="220" y2="100" stroke="#7f8c8d" stroke-width="1.2"/>
+            <line x1="160" y1="100" x2="220" y2="100" stroke="#7f8c8d" stroke-width="1.2"/>
+            <line x1="160" y1="145" x2="220" y2="100" stroke="#7f8c8d" stroke-width="1.2"/>
+            <!-- 역전파 화살표 -->
+            <path d="M 230 115 Q 190 175 155 160" stroke="#e74c3c" stroke-width="1.5" fill="none" stroke-dasharray="5,3"/>
+            <polygon points="155,155 150,165 160,162" fill="#e74c3c"/>
+            <text x="190" y="175" text-anchor="middle" fill="#e74c3c" font-size="9">역전파</text>
+          </svg>
+        </div>
+      </div>
+      <aside class="notes">
+        "1986년 역전파 알고리즘이 발표되면서 다층 퍼셉트론을 학습시킬 수 있게 됩니다.
+        오차를 역방향으로 전파해서 각 가중치를 조금씩 수정하는 방법이에요.
+        이게 AI 부활의 씨앗이 됩니다."
+      </aside>
+    </section>
+
+    <!-- ══ 슬라이드 12: XOR = OR AND NAND ══ -->
+    <section data-slide-id="slide-12-xor-mlp" data-anim-id="anim-mlp-xor-01">
+      <h2 style="color:#f39c12; font-size:1em; margin-bottom:0.5em;">XOR = OR ∧ NAND 으로 해결!</h2>
+      <div class="two-col" style="align-items:start;">
+        <div style="font-size:0.78em;">
+          <div id="mlp-step-1" class="step-box visible">
+            <div class="step-label">Step 1 | 은닉층 설계</div>
+            <div style="font-size:0.85em;">
+              h₁ = OR(x₁, x₂) &nbsp; h₂ = NAND(x₁, x₂)<br>
+              <span style="color:#95a5a6; font-size:0.9em;">NAND = NOT(AND) = AND의 부정</span>
+            </div>
+          </div>
+          <div id="mlp-step-2" class="step-box">
+            <div class="step-label">Step 2 | NAND 설명</div>
+            <div style="font-size:0.85em;">
+              둘 다 1이면 0, 나머지는 1<br>
+              (1,1)→0 / (1,0)→1 / (0,1)→1 / (0,0)→1
+            </div>
+          </div>
+          <div id="mlp-step-3" class="step-box">
+            <div class="step-label">Step 3 | 출력 결합</div>
+            <div style="font-size:0.85em;">y = AND(h₁, h₂)</div>
+          </div>
+          <div id="mlp-step-4" class="step-box">
+            <div class="step-label">Step 4 | 핵심 통찰</div>
+            <div style="font-size:0.85em; color:#f39c12;">"복잡한 판단 = 단순한 판단들의 조합"</div>
+          </div>
+          <div class="anim-controls" style="margin-top:0.5em;">
+            <button class="anim-btn" onclick="nextStepMLP()">다음 단계 ▶</button>
+            <button class="anim-btn reset-btn" onclick="resetStepsMLP()">초기화</button>
+          </div>
+        </div>
+        <!-- XOR 진리표 단계별 -->
+        <div style="text-align:center; font-size:0.75em;">
+          <div style="color:#f39c12; font-weight:bold; margin-bottom:0.4em;">진리표로 확인</div>
+          <table class="truth-table" style="font-size:0.85em;">
+            <thead>
+              <tr>
+                <th>x₁</th><th>x₂</th>
+                <th style="color:#3498db;">h₁(OR)</th>
+                <th style="color:#9b59b6;">h₂(NAND)</th>
+                <th style="color:#f39c12;">y(AND)</th>
+                <th style="color:#2ecc71;">XOR?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="val-1">1</td><td class="val-1">1</td>
+                <td class="val-1" style="color:#3498db;">1</td>
+                <td class="val-0" style="color:#9b59b6;">0</td>
+                <td class="val-0">0</td>
+                <td class="val-1" style="color:#2ecc71;">✓ 0</td>
+              </tr>
+              <tr>
+                <td class="val-1">1</td><td class="val-0">0</td>
+                <td class="val-1" style="color:#3498db;">1</td>
+                <td class="val-1" style="color:#9b59b6;">1</td>
+                <td class="val-1">1</td>
+                <td class="val-1" style="color:#2ecc71;">✓ 1</td>
+              </tr>
+              <tr>
+                <td class="val-0">0</td><td class="val-1">1</td>
+                <td class="val-1" style="color:#3498db;">1</td>
+                <td class="val-1" style="color:#9b59b6;">1</td>
+                <td class="val-1">1</td>
+                <td class="val-1" style="color:#2ecc71;">✓ 1</td>
+              </tr>
+              <tr>
+                <td class="val-0">0</td><td class="val-0">0</td>
+                <td class="val-0" style="color:#3498db;">0</td>
+                <td class="val-1" style="color:#9b59b6;">1</td>
+                <td class="val-0">0</td>
+                <td class="val-1" style="color:#2ecc71;">✓ 0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <aside class="notes">
+        "XOR을 OR AND NAND 세 게이트로 분해할 수 있습니다.
+        은닉층에 OR과 NAND 두 퍼셉트론을 놓고, 그 출력을 AND로 합치면
+        XOR이 완성됩니다. 진리표로 확인해보세요. 전부 일치합니다."
+      </aside>
+    </section>
+
+    <!-- ══ 슬라이드 13: 2010년대 — 딥러닝 혁신 ══ -->
+    <section data-slide-id="slide-13-deeplearning">
+      <h2 style="color:#2ecc71; font-size:1em; margin-bottom:0.6em;">2010년대 — 딥러닝 혁신</h2>
+      <div class="two-col" style="align-items:start;">
+        <div style="font-size:0.78em;">
+          <div style="color:#2ecc71; font-weight:bold; margin-bottom:0.4em;">2012 | AlexNet — 딥러닝 르네상스</div>
+          <div style="background:rgba(46,204,113,0.1); border:1px solid #2ecc7144; border-radius:8px; padding:0.7em; margin-bottom:0.6em; line-height:1.7;">
+            ILSVRC 대회 우승<br>
+            이미지 분류 오류율: <span class="wrong">26%</span> → <span class="result">16%</span><br>
+            비결: <span class="kw">GPU 병렬 학습</span> + <span class="kw">빅데이터</span>
+          </div>
+          <div style="color:#f39c12; font-weight:bold; margin-bottom:0.4em;">2016 | AlphaGo — 전 세계 충격</div>
+          <div style="background:rgba(243,156,18,0.1); border:1px solid #f39c1244; border-radius:8px; padding:0.7em; line-height:1.7;">
+            딥마인드(DeepMind)의 바둑 AI<br>
+            이세돌 9단과의 대국 <span class="kw">4:1 승</span><br>
+            딥러닝이 이미지 분류를 넘어<br>
+            복잡한 전략 문제도 해결 가능함을 증명
+          </div>
+        </div>
+        <!-- 신경망 다이어그램 -->
+        <div style="text-align:center;">
+          <div style="font-size:0.72em; color:#95a5a6; margin-bottom:0.3em;">다층 신경망 구조</div>
+          <svg width="270" height="210" viewBox="0 0 270 210" style="overflow:hidden;">
+            <!-- 레이어 배경 -->
+            <rect x="10" y="10" width="40" height="190" fill="rgba(52,152,219,0.1)" rx="5"/>
+            <rect x="75" y="20" width="40" height="170" fill="rgba(243,156,18,0.1)" rx="5"/>
+            <rect x="140" y="30" width="40" height="150" fill="rgba(243,156,18,0.1)" rx="5"/>
+            <rect x="210" y="60" width="40" height="90" fill="rgba(46,204,113,0.1)" rx="5"/>
+            <!-- 입력층 노드 -->
+            <circle cx="30" cy="45" r="14" fill="#2c3e50" stroke="#3498db" stroke-width="2"/>
+            <circle cx="30" cy="90" r="14" fill="#2c3e50" stroke="#3498db" stroke-width="2"/>
+            <circle cx="30" cy="135" r="14" fill="#2c3e50" stroke="#3498db" stroke-width="2"/>
+            <circle cx="30" cy="180" r="14" fill="#2c3e50" stroke="#3498db" stroke-width="2"/>
+            <text x="30" y="205" text-anchor="middle" fill="#3498db" font-size="9">입력층</text>
+            <!-- 은닉층1 -->
+            <circle cx="95" cy="55" r="14" fill="#2c3e50" stroke="#f39c12" stroke-width="2"/>
+            <circle cx="95" cy="100" r="14" fill="#2c3e50" stroke="#f39c12" stroke-width="2"/>
+            <circle cx="95" cy="145" r="14" fill="#2c3e50" stroke="#f39c12" stroke-width="2"/>
+            <circle cx="95" cy="190" r="14" fill="#2c3e50" stroke="#f39c12" stroke-width="2"/>
+            <text x="95" y="205" text-anchor="middle" fill="#f39c12" font-size="9">은닉1</text>
+            <!-- 은닉층2 -->
+            <circle cx="160" cy="65" r="14" fill="#2c3e50" stroke="#f39c12" stroke-width="2"/>
+            <circle cx="160" cy="110" r="14" fill="#2c3e50" stroke="#f39c12" stroke-width="2"/>
+            <circle cx="160" cy="155" r="14" fill="#2c3e50" stroke="#f39c12" stroke-width="2"/>
+            <text x="160" y="205" text-anchor="middle" fill="#f39c12" font-size="9">은닉2</text>
+            <!-- 출력층 -->
+            <circle cx="230" cy="90" r="14" fill="#2c3e50" stroke="#2ecc71" stroke-width="2"/>
+            <circle cx="230" cy="125" r="14" fill="#2c3e50" stroke="#2ecc71" stroke-width="2"/>
+            <text x="230" y="205" text-anchor="middle" fill="#2ecc71" font-size="9">출력층</text>
+            <!-- 연결선 (일부) -->
+            <line x1="44" y1="50" x2="81" y2="60" stroke="#555" stroke-width="0.8"/>
+            <line x1="44" y1="90" x2="81" y2="60" stroke="#555" stroke-width="0.8"/>
+            <line x1="44" y1="90" x2="81" y2="105" stroke="#555" stroke-width="0.8"/>
+            <line x1="44" y1="135" x2="81" y2="105" stroke="#555" stroke-width="0.8"/>
+            <line x1="44" y1="135" x2="81" y2="150" stroke="#555" stroke-width="0.8"/>
+            <line x1="44" y1="180" x2="81" y2="150" stroke="#555" stroke-width="0.8"/>
+            <line x1="109" y1="60" x2="146" y2="70" stroke="#555" stroke-width="0.8"/>
+            <line x1="109" y1="100" x2="146" y2="70" stroke="#555" stroke-width="0.8"/>
+            <line x1="109" y1="100" x2="146" y2="115" stroke="#555" stroke-width="0.8"/>
+            <line x1="109" y1="145" x2="146" y2="115" stroke="#555" stroke-width="0.8"/>
+            <line x1="109" y1="145" x2="146" y2="160" stroke="#555" stroke-width="0.8"/>
+            <line x1="174" y1="70" x2="216" y2="95" stroke="#f39c12" stroke-width="1.2"/>
+            <line x1="174" y1="110" x2="216" y2="95" stroke="#f39c12" stroke-width="1.2"/>
+            <line x1="174" y1="110" x2="216" y2="130" stroke="#f39c12" stroke-width="1.2"/>
+            <line x1="174" y1="155" x2="216" y2="130" stroke="#f39c12" stroke-width="1.2"/>
+          </svg>
+        </div>
+      </div>
+      <aside class="notes">
+        "2012년 AlexNet이 이미지 인식 대회에서 오류율을 26%에서 16%로 낮추면서
+        딥러닝 시대가 열립니다. GPU와 빅데이터가 핵심이었어요.
+        2016년 알파고는 전 세계를 충격에 빠트렸습니다."
+      </aside>
+    </section>
+
+    <!-- ══ 슬라이드 14: 2020s — 생성형 AI와 노벨상 ══ -->
+    <section data-slide-id="slide-14-generative-ai" data-anim-id="anim-era-01">
+      <h2 style="color:#9b59b6; font-size:1em; margin-bottom:0.5em;">2020s — 생성형 AI와 노벨 물리학상</h2>
+      <div class="two-col" style="align-items:start;">
+        <div style="font-size:0.78em;">
+          <div style="color:#9b59b6; font-weight:bold; margin-bottom:0.4em;">생성형 AI의 등장</div>
+          <div style="background:rgba(155,89,182,0.1); border:1px solid #9b59b644; border-radius:8px; padding:0.7em; margin-bottom:0.6em; line-height:1.7;">
+            GPT-4, DALL-E, ChatGPT (2022~)<br>
+            자연어 처리 기술로 인간-AI 소통 혁신<br>
+            텍스트, 이미지, 코드 생성 가능
+          </div>
+          <div style="color:#f39c12; font-weight:bold; margin-bottom:0.4em;">2024 노벨 물리학상</div>
+          <div style="background:rgba(243,156,18,0.15); border:1px solid #f39c12; border-radius:8px; padding:0.7em; line-height:1.7;">
+            <span class="kw">Hopfield &amp; Hinton</span><br>
+            "인공신경망으로 기계학습을 가능하게 하는<br>기초적인 발견과 발명 공로"<br>
+            <span style="color:#2ecc71; font-size:0.9em;">→ AI가 이제 물리학만큼 세상을 바꾸는 도구로 인정!</span>
+          </div>
+        </div>
+        <!-- 타임라인 정리 -->
+        <div style="font-size:0.72em;">
+          <div style="color:#95a5a6; margin-bottom:0.4em; font-weight:bold;">전체 타임라인 정리</div>
+          <div class="era-block show" id="era-1950" style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <div style="width:8px; height:8px; background:#3498db; border-radius:50%; flex-shrink:0;"></div>
+            <span style="color:#3498db; min-width:4em;">1950s</span>
+            <span style="color:#bdc3c7;">튜링 테스트 / 퍼셉트론</span>
+          </div>
+          <div class="era-block show" id="era-1970" style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <div style="width:8px; height:8px; background:#e74c3c; border-radius:50%; flex-shrink:0;"></div>
+            <span style="color:#e74c3c; min-width:4em;">1969~</span>
+            <span style="color:#bdc3c7;">XOR 문제 / AI 겨울</span>
+          </div>
+          <div class="era-block show" id="era-1986" style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <div style="width:8px; height:8px; background:#f39c12; border-radius:50%; flex-shrink:0;"></div>
+            <span style="color:#f39c12; min-width:4em;">1986</span>
+            <span style="color:#bdc3c7;">역전파 알고리즘</span>
+          </div>
+          <div class="era-block show" id="era-2012" style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <div style="width:8px; height:8px; background:#2ecc71; border-radius:50%; flex-shrink:0;"></div>
+            <span style="color:#2ecc71; min-width:4em;">2012~16</span>
+            <span style="color:#bdc3c7;">AlexNet / AlphaGo</span>
+          </div>
+          <div class="era-block show" id="era-2020" style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <div style="width:8px; height:8px; background:#9b59b6; border-radius:50%; flex-shrink:0;"></div>
+            <span style="color:#9b59b6; min-width:4em;">2020s</span>
+            <span style="color:#bdc3c7;">생성형 AI / 노벨상</span>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">
+        "2024년 노벨 물리학상이 AI 연구자들에게 갔어요.
+        Hinton — 역전파를 만든 바로 그 사람입니다.
+        AI가 이제 물리학만큼 세상을 바꾸는 도구로 과학계에서 인정받은 거예요."
+      </aside>
+    </section>
+
+    <!-- ══ 슬라이드 15: 단원 정리 + 확인 문제 ══ -->
+    <section data-slide-id="slide-15-summary">
+      <h2 style="color:#f39c12; font-size:1em; margin-bottom:0.5em;">단원 정리 &amp; 확인 문제</h2>
+      <div class="two-col" style="gap:1.5em; align-items:start;">
+        <!-- 핵심 정리 -->
+        <div style="font-size:0.75em;">
+          <div style="color:#f39c12; font-weight:bold; margin-bottom:0.4em;">핵심 정리</div>
+          <div style="background:rgba(255,255,255,0.05); border-radius:8px; padding:0.8em; line-height:1.8;">
+            <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.3em;">
+              <span style="color:#3498db; font-weight:bold;">1950s</span> <span style="color:#95a5a6;">→</span>
+              <span style="color:#bdc3c7;">태동 (튜링 / 퍼셉트론)</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.3em;">
+              <span style="color:#e74c3c; font-weight:bold;">1969</span> <span style="color:#95a5a6;">→</span>
+              <span style="color:#bdc3c7;">XOR 한계 → AI 겨울</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.3em;">
+              <span style="color:#f39c12; font-weight:bold;">1986</span> <span style="color:#95a5a6;">→</span>
+              <span style="color:#bdc3c7;">역전파 → 다층 퍼셉트론</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.3em;">
+              <span style="color:#2ecc71; font-weight:bold;">2012</span> <span style="color:#95a5a6;">→</span>
+              <span style="color:#bdc3c7;">AlexNet → 딥러닝</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5em;">
+              <span style="color:#9b59b6; font-weight:bold;">2020s</span> <span style="color:#95a5a6;">→</span>
+              <span style="color:#bdc3c7;">생성형 AI / 노벨상</span>
+            </div>
+            <div style="margin-top:0.6em; border-top:1px solid rgba(255,255,255,0.1); padding-top:0.5em; color:#f39c12; font-size:0.9em; font-weight:bold;">
+              XOR 해결: 단층(불가) → OR + NAND 2층 구조
+            </div>
+          </div>
+        </div>
+        <!-- 확인 문제 -->
+        <div style="font-size:0.75em;">
+          <div style="color:#f39c12; font-weight:bold; margin-bottom:0.4em;">확인 문제</div>
+          <div style="background:rgba(243,156,18,0.05); border:1px solid #f39c1244; border-radius:8px; padding:0.8em;">
+            <div style="margin-bottom:0.8em;">
+              <span style="color:#f39c12; font-weight:bold;">문제 1</span>
+              <div style="color:#bdc3c7; margin-top:0.3em; line-height:1.6;">
+                XOR 게이트의 진리표를 완성하시오.
+              </div>
+              <table class="truth-table" style="margin-top:0.4em; font-size:0.9em;">
+                <thead><tr><th>x₁</th><th>x₂</th><th>x₁ ⊻ x₂</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td>1</td><td style="color:#95a5a6; font-style:italic;">&nbsp;&nbsp;&nbsp;</td></tr>
+                  <tr><td>1</td><td>0</td><td style="color:#95a5a6; font-style:italic;">&nbsp;&nbsp;&nbsp;</td></tr>
+                  <tr><td>0</td><td>1</td><td style="color:#95a5a6; font-style:italic;">&nbsp;&nbsp;&nbsp;</td></tr>
+                  <tr><td>0</td><td>0</td><td style="color:#95a5a6; font-style:italic;">&nbsp;&nbsp;&nbsp;</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <span style="color:#f39c12; font-weight:bold;">문제 2</span>
+              <div style="color:#bdc3c7; margin-top:0.3em; line-height:1.5;">
+                역전파 알고리즘이 AI 겨울을 극복하는 데 기여한 이유를 쓰시오.
+              </div>
+              <div style="height:40px; background:rgba(255,255,255,0.03); border-radius:4px; margin-top:0.4em;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">
+        "오늘 배운 내용을 정리합니다. AI의 역사는 기대와 실망의 반복이었고,
+        그 중심에 XOR 문제가 있었습니다. 다음 시간엔 퍼셉트론의 수학적 구조를 더 깊이 다룹니다."
+      </aside>
+    </section>
+
+  </div><!-- /slides -->
+</div><!-- /reveal -->
+
+<!-- ─── Reveal.js 초기화 ─── -->
+<script src="../../libs/reveal.min.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    progress: true,
+    controls: true,
+    controlsLayout: 'bottom-right',
+    transition: 'slide',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    center: true,
+    touch: true,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 1.5,
+    keyboard: {
+      78: () => {
+        const s = Reveal.getCurrentSlide();
+        const id = s.dataset.animId;
+        if (id && window.mathAnimators && window.mathAnimators[id]) window.mathAnimators[id].next();
+      },
+      80: () => {
+        const s = Reveal.getCurrentSlide();
+        const id = s.dataset.animId;
+        if (id && window.mathAnimators && window.mathAnimators[id]) window.mathAnimators[id].prev();
+      }
+    },
+    plugins: []
+  });
+
+  window.safeTypeset = function(elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => safeTypeset());
+  Reveal.on('ready', () => { safeTypeset(); });
+</script>
+
+<script src="../../templates/math_animation_lib.js"></script>
+
+<!-- ─── 인라인 스크립트 ─── -->
+<script>
+// ── 타임라인 시대 정보 ──
+(function() {
+  const eraData = {
+    '1950': { color:'#3498db', title:'1950년대 — AI의 태동', text:'1950 튜링 테스트 제안 ("기계가 생각할 수 있는가?") / 1958 퍼셉트론 고안 (Rosenblatt) / 1956 다트머스 회의 — AI라는 용어 탄생 / 신경망 연구 활성화, 과잉 기대' },
+    '1970': { color:'#e74c3c', title:'AI 겨울 (1969~1980s)', text:'1969 Minsky — XOR은 단층 퍼셉트론으로 불가능 수학적 증명 / 과잉 기대 → 예산 삭감 / 전문가 시스템으로 관심 이동 / 신경망 연구 침체기' },
+    '1986': { color:'#f39c12', title:'1986 — 역전파 알고리즘', text:'Rumelhart & Hinton — 역전파(backpropagation) 발표 / 다층 퍼셉트론 학습 가능해짐 / 1997 딥블루가 체스 챔피언 카스파로프를 꺾음 / 제2차 AI 붐의 씨앗' },
+    '2012': { color:'#2ecc71', title:'2012~2016 — 딥러닝 르네상스', text:'2012 AlexNet — ILSVRC 대회 오류율 26%→16% 혁신 / GPU 병렬 학습으로 대규모 신경망 가능 / 2016 AlphaGo — 이세돌 9단 4:1 승 / 이미지·언어·전략 등 전 영역으로 확장' },
+    '2020': { color:'#9b59b6', title:'2020s — 생성형 AI 시대', text:'GPT-4, DALL-E, ChatGPT 등장 (2022~) / 텍스트·이미지·코드 생성 가능 / 2024 노벨 물리학상: Hopfield & Hinton — "인공신경망으로 기계학습을 가능하게 한 공로" / AI가 일상 도구로 전환' }
+  };
+  window.showEra_timeline01 = function(era) {
+    const d = eraData[era];
+    const box = document.getElementById('timeline-01-detail');
+    box.style.borderLeft = '3px solid ' + d.color;
+    box.innerHTML = '<strong style="color:' + d.color + '">' + d.title + '</strong><br><span style="font-size:0.9em; color:#bdc3c7;">' + d.text + '</span>';
+  };
+})();
+
+// ── XOR 산점도 ──
+(function() {
+  const c = document.getElementById('xor-scatter-01');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const W=260, H=260, m=45, s=160;
+  ctx.fillStyle='#1a1a2e'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#3d3d5c'; ctx.lineWidth=1.5;
+  ctx.strokeRect(m,m,s,s);
+  // 축 레이블
+  ctx.fillStyle='#7f8c8d'; ctx.font='12px sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('0',m,H-6); ctx.fillText('1',m+s,H-6);
+  ctx.fillText('x₁',m+s/2,H-2);
+  ctx.textAlign='right';
+  ctx.fillText('0',m-6,H-m+5); ctx.fillText('1',m-6,m+5);
+  // 점 그리기
+  [[0,0,0],[0,1,1],[1,0,1],[1,1,0]].forEach(([x1,x2,lbl]) => {
+    const px=m+x1*s, py=H-m-x2*s;
+    ctx.beginPath(); ctx.arc(px,py,16,0,Math.PI*2);
+    ctx.fillStyle=lbl?'#2ecc71':'#e74c3c'; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.6)'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font='bold 13px sans-serif';
+    ctx.textAlign='center'; ctx.fillText(lbl,px,py+5);
+  });
+  ctx.fillStyle='#e74c3c'; ctx.font='bold 11px sans-serif';
+  ctx.textAlign='center'; ctx.fillText('직선으로 분리 불가!',W/2,18);
+  // 분리 시도 선 (취소선 효과)
+  ctx.setLineDash([6,4]);
+  ctx.beginPath(); ctx.moveTo(m-10, m+s*0.3); ctx.lineTo(m+s+10, m+s*0.7);
+  ctx.strokeStyle='rgba(231,76,60,0.4)'; ctx.lineWidth=2; ctx.stroke();
+  ctx.setLineDash([]);
+})();
+
+// ── AND 결정 경계 ──
+function drawBoundaryAnd(theta) {
+  const c = document.getElementById('boundary-and-01');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const W=300, H=260, m=50, s=170;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#1a1a2e'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#3d3d5c'; ctx.lineWidth=1.5;
+  ctx.strokeRect(m,m,s,s);
+  // 축 레이블
+  ctx.fillStyle='#7f8c8d'; ctx.font='11px sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('0',m,H-6); ctx.fillText('1',m+s,H-6); ctx.fillText('x₁',m+s/2+10,H-4);
+  ctx.textAlign='right';
+  ctx.fillText('0',m-5,H-m+5); ctx.fillText('1',m-5,m+5); ctx.fillText('x₂',m-4,m-4);
+  // AND 데이터 포인트
+  [[0,0,0],[0,1,0],[1,0,0],[1,1,1]].forEach(([x1,x2,lbl]) => {
+    const px=m+x1*s, py=H-m-x2*s;
+    ctx.beginPath(); ctx.arc(px,py,14,0,Math.PI*2);
+    ctx.fillStyle=lbl?'#2ecc71':'#e74c3c'; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(lbl,px,py+5);
+  });
+  // 경계선: x₂ = -x₁ + 2*theta (w1=w2=0.5 → x₂ = -(w1/w2)x₁ + theta/w2 = -x₁ + 2theta)
+  const b = 2 * theta;
+  const x1_start = 0, y1_val = b;
+  const x1_end = 1, y2_val = b - 1;
+  const px1 = m + x1_start * s, py1 = H - m - y1_val * s;
+  const px2 = m + x1_end * s,   py2 = H - m - y2_val * s;
+  ctx.beginPath(); ctx.moveTo(px1-30, py1+30); ctx.lineTo(px2+30, py2-30);
+  ctx.strokeStyle='#f39c12'; ctx.lineWidth=2; ctx.stroke();
+}
+
+function updateBoundaryAnd(val) {
+  const v = parseFloat(val).toFixed(2);
+  document.getElementById('boundary-and-01-sv').textContent = v;
+  document.getElementById('boundary-and-01-formula').textContent = 'x₂ = −x₁ + ' + (2*parseFloat(val)).toFixed(2);
+  drawBoundaryAnd(parseFloat(val));
+}
+
+// ── OR 결정 경계 ──
+(function() {
+  const c = document.getElementById('boundary-or-01');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const W=300, H=260, m=50, s=170;
+  ctx.fillStyle='#1a1a2e'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#3d3d5c'; ctx.lineWidth=1.5; ctx.strokeRect(m,m,s,s);
+  ctx.fillStyle='#7f8c8d'; ctx.font='11px sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('0',m,H-6); ctx.fillText('1',m+s,H-6);
+  ctx.textAlign='right';
+  ctx.fillText('0',m-5,H-m+5); ctx.fillText('1',m-5,m+5);
+  [[0,0,0],[0,1,1],[1,0,1],[1,1,1]].forEach(([x1,x2,lbl]) => {
+    const px=m+x1*s, py=H-m-x2*s;
+    ctx.beginPath(); ctx.arc(px,py,14,0,Math.PI*2);
+    ctx.fillStyle=lbl?'#2ecc71':'#e74c3c'; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(lbl,px,py+5);
+  });
+  // OR 경계선: theta=0.2 → b=0.4
+  const b = 0.4;
+  const px1=m-30, py1=H-m-b*s+30*1;
+  const px2=m+s+30, py2=H-m-(b-1)*s-30;
+  ctx.beginPath(); ctx.moveTo(px1,py1); ctx.lineTo(px2,py2);
+  ctx.strokeStyle='#3498db'; ctx.lineWidth=2; ctx.stroke();
+})();
+
+// ── Step 애니메이션들 ──
+var andStepIdx = 1;
+function nextStepAnd() {
+  andStepIdx++;
+  if (andStepIdx === 2) document.getElementById('step-and-2').classList.add('visible');
+  if (andStepIdx === 3) document.getElementById('step-and-3').classList.add('visible');
+}
+function resetStepsAnd() {
+  andStepIdx = 1;
+  document.getElementById('step-and-2').classList.remove('visible');
+  document.getElementById('step-and-3').classList.remove('visible');
+}
+
+var bpStepIdx = 1;
+function nextStepBP() {
+  bpStepIdx++;
+  if (bpStepIdx === 2) document.getElementById('bp-step-2').classList.add('visible');
+  if (bpStepIdx === 3) document.getElementById('bp-step-3').classList.add('visible');
+}
+function resetStepsBP() {
+  bpStepIdx = 1;
+  document.getElementById('bp-step-2').classList.remove('visible');
+  document.getElementById('bp-step-3').classList.remove('visible');
+}
+
+var mlpStepIdx = 1;
+function nextStepMLP() {
+  mlpStepIdx++;
+  if (mlpStepIdx === 2) document.getElementById('mlp-step-2').classList.add('visible');
+  if (mlpStepIdx === 3) document.getElementById('mlp-step-3').classList.add('visible');
+  if (mlpStepIdx === 4) document.getElementById('mlp-step-4').classList.add('visible');
+}
+function resetStepsMLP() {
+  mlpStepIdx = 1;
+  ['mlp-step-2','mlp-step-3','mlp-step-4'].forEach(id => document.getElementById(id).classList.remove('visible'));
+}
+
+// ── Reveal ready 후 초기 그리기 ──
+Reveal.on('ready', function() {
+  drawBoundaryAnd(0.7);
+});
+</script>
+
+</body>
+</html>

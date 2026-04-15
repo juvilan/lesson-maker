@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1~4차시 슬라이드 | 경향성과 예측 — 조건부확률·최소제곱법</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+    window.safeTypeset = function(el) {
+      if (window.MathJax && MathJax.typesetPromise)
+        MathJax.typesetPromise(el ? [el] : undefined).catch(console.error);
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0f1e; --text: #e8f4fd;
+      --cyan: #00d4ff; --amber: #ffb347; --green: #39d98a;
+      --red: #ff4757; --purple: #a78bfa;
+      --card-bg: rgba(255,255,255,0.07); --border: rgba(255,255,255,0.15);
+    }
+    .reveal-viewport { background: var(--bg); }
+    .reveal { font-family: 'Noto Sans KR','Apple SD Gothic Neo',sans-serif; font-size: 26px; color: var(--text); background: var(--bg); }
+    .reveal .slides section { text-align: left; padding: 0 20px; }
+    .reveal h1 { font-size: 1.9em; font-weight: 900; color: var(--cyan); line-height: 1.2; text-shadow: 0 0 30px rgba(0,212,255,0.4); }
+    .reveal h2 { font-size: 1.4em; font-weight: 700; color: var(--cyan); border-bottom: 2px solid rgba(0,212,255,0.3); padding-bottom: .3em; margin-bottom: .5em; }
+    .reveal h3 { font-size: 1.0em; font-weight: 700; color: var(--amber); margin-bottom: .3em; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; margin: 6px 0; }
+    .card-cyan   { border-left: 4px solid var(--cyan);   background: rgba(0,212,255,0.08); }
+    .card-amber  { border-left: 4px solid var(--amber);  background: rgba(255,179,71,0.08); }
+    .card-green  { border-left: 4px solid var(--green);  background: rgba(57,217,138,0.08); }
+    .card-purple { border-left: 4px solid var(--purple); background: rgba(167,139,250,0.10); }
+    .definition-box { background: rgba(0,212,255,0.06); border: 2px solid rgba(0,212,255,0.4); border-radius: 14px; padding: 14px 20px; margin: 10px 0; position: relative; }
+    .definition-box::before { content: '핵심'; position: absolute; top: -13px; left: 18px; background: var(--cyan); color: #0a0f1e; font-weight: 900; font-size: .68em; padding: 2px 12px; border-radius: 20px; }
+    .formula-box { background: rgba(167,139,250,0.08); border: 2px solid rgba(167,139,250,0.4); border-radius: 12px; padding: 12px 18px; margin: 8px 0; text-align: center; }
+    .practice-box { background: rgba(167,139,250,0.06); border: 2px solid rgba(167,139,250,0.35); border-radius: 14px; padding: 14px 20px; margin: 10px 0; position: relative; }
+    .practice-box::before { content: '확인 문제'; position: absolute; top: -13px; left: 18px; background: var(--purple); color: #fff; font-weight: 900; font-size: .65em; padding: 2px 12px; border-radius: 20px; }
+    .notice-box { background: rgba(255,179,71,0.06); border: 1px solid rgba(255,179,71,0.3); border-radius: 10px; padding: 10px 16px; margin: 8px 0; }
+    .cols { display: grid; gap: 14px; align-items: start; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .kw-cyan   { color: var(--cyan);   font-weight: 700; }
+    .kw-amber  { color: var(--amber);  font-weight: 700; }
+    .kw-green  { color: var(--green);  font-weight: 700; }
+    .kw-red    { color: var(--red);    font-weight: 700; }
+    .kw-purple { color: var(--purple); font-weight: 700; }
+    .arrow { font-size: 1.2em; color: var(--amber); margin: 0 6px; }
+    .chapter-badge { display: inline-block; background: rgba(0,212,255,0.15); border: 1px solid rgba(0,212,255,0.4); border-radius: 30px; padding: 5px 18px; font-size: .68em; color: var(--cyan); font-weight: 700; margin-bottom: 14px; }
+    .jichasi-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: .65em; font-weight: 700; letter-spacing: .04em; margin-right: 8px; vertical-align: middle; }
+    .jc1 { background: rgba(0,212,255,0.2); color: var(--cyan); border: 1px solid var(--cyan); }
+    .jc2 { background: rgba(255,179,71,0.2); color: var(--amber); border: 1px solid var(--amber); }
+    .jc3 { background: rgba(57,217,138,0.2); color: var(--green); border: 1px solid var(--green); }
+    .jc4 { background: rgba(167,139,250,0.2); color: var(--purple); border: 1px solid var(--purple); }
+    .title-meta { font-size: .65em; color: rgba(232,244,253,0.55); margin-top: 14px; }
+    .obj-list { list-style: none; padding: 0; margin: 0; }
+    .obj-list li { display: flex; align-items: flex-start; gap: 10px; padding: 9px 12px; margin: 5px 0; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); }
+    .obj-list .num { background: var(--cyan); color: #0a0f1e; font-weight: 900; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: .84em; }
+    /* 빈도표 */
+    .freq-table { width: 100%; border-collapse: collapse; font-size: .82em; margin: 8px 0; }
+    .freq-table th { background: rgba(0,212,255,0.12); color: var(--cyan); font-weight: 700; padding: 7px 10px; text-align: center; border: 1px solid rgba(0,212,255,0.25); }
+    .freq-table td { padding: 7px 10px; border: 1px solid var(--border); text-align: center; }
+    .freq-table tr:nth-child(odd) td { background: rgba(255,255,255,0.03); }
+    .freq-table .total-row td { background: rgba(255,179,71,0.08); font-weight: 700; color: var(--amber); }
+    /* 최소제곱법 표 */
+    .lsq-table { width: 100%; border-collapse: collapse; font-size: .78em; margin: 8px 0; }
+    .lsq-table th { background: rgba(167,139,250,0.15); color: var(--purple); font-weight: 700; padding: 6px 8px; text-align: center; border: 1px solid rgba(167,139,250,0.3); }
+    .lsq-table td { padding: 6px 8px; border: 1px solid var(--border); text-align: center; }
+    .lsq-table .sum-row td { background: rgba(57,217,138,0.08); font-weight: 700; color: var(--green); }
+    .highlight { background: rgba(57,217,138,0.12) !important; color: var(--green); font-weight: 700; }
+    /* 차시 구분 섹션 */
+    .jichasi-section { text-align: center; }
+    .jichasi-section .big-num { font-size: 5em; font-weight: 900; line-height: 1; }
+    .jichasi-section .jc-title { font-size: 1.4em; font-weight: 700; margin-top: 10px; }
+    .jichasi-section .jc-desc { font-size: .82em; color: rgba(232,244,253,0.65); margin-top: 8px; }
+    .reveal .progress { background: rgba(0,212,255,0.15); }
+    .reveal .progress span { background: var(--cyan); }
+    .reveal .slide-number { color: var(--cyan); font-size: 16px; }
+    .reveal .controls { color: var(--cyan); }
+    .reveal section p, .reveal section li, .reveal section td, .reveal section th { font-size: max(.8em, 20px); }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ──────────────────────────────────────
+     SLIDE 1: TITLE
+────────────────────────────────────────── -->
+<section data-transition="zoom" data-background-gradient="radial-gradient(ellipse at 30% 40%, rgba(0,212,255,0.08) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(57,217,138,0.06) 0%, transparent 60%)">
+  <div style="padding:16px 0; text-align:center;">
+    <div class="chapter-badge">III단원 · 분류와 예측 · 수행평가 3</div>
+    <h1>경향성과 예측</h1>
+    <p style="font-size:.9em; color:rgba(232,244,253,0.75); margin-top:10px;">
+      조건부확률로 범주를 분류하고,<br>최소제곱법으로 추세선을 구해 예측한다
+    </p>
+    <div class="title-meta">인공지능수학 · 2학년 · 1학기</div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────
+     SLIDE 2: 학습 목표 + 차시 구성
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2>학습 목표 &amp; 차시 구성</h2>
+  <div class="cols cols-2" style="gap:10px;">
+    <div>
+      <ul class="obj-list" style="margin-bottom:8px;">
+        <li><div class="num">1</div><div>빈도표에서 <span class="kw-cyan">조건부확률</span>을 계산할 수 있다</div></li>
+        <li><div class="num">2</div><div>조건부확률로 <span class="kw-amber">범주를 분류·예측</span>할 수 있다</div></li>
+        <li><div class="num">3</div><div><span class="kw-green">최소제곱법</span>으로 추세선을 구할 수 있다</div></li>
+        <li><div class="num">4</div><div>추세선으로 예측하고 <span class="kw-purple">오차</span>를 해석할 수 있다</div></li>
+      </ul>
+    </div>
+    <div style="font-size:.78em;">
+      <div class="card-cyan card" style="margin-bottom:6px; padding:8px 12px;">
+        <span class="jichasi-badge jc1">1차시</span><strong>확률 기초 + 조건부확률 개념</strong><br>
+        <span style="color:rgba(232,244,253,0.6); margin-left:4px;">→ 학습지 ①</span>
+      </div>
+      <div class="card-amber card" style="margin-bottom:6px; padding:8px 12px;">
+        <span class="jichasi-badge jc2">2차시</span><strong>조건부확률로 분류</strong><br>
+        <span style="color:rgba(232,244,253,0.6); margin-left:4px;">→ 학습지 ② 풀기</span>
+      </div>
+      <div class="card-green card" style="margin-bottom:6px; padding:8px 12px;">
+        <span class="jichasi-badge jc3">3차시</span><strong>최소제곱법 + 추세선</strong><br>
+        <span style="color:rgba(232,244,253,0.6); margin-left:4px;">→ 학습지 ③ 풀기</span>
+      </div>
+      <div class="card-purple card" style="padding:8px 12px;">
+        <span class="jichasi-badge jc4">4차시</span><strong>정리 + 연습지 → 수행평가</strong>
+      </div>
+    </div>
+  </div>
+  <div class="notice-box" style="margin-top:8px; font-size:.78em;">
+    수행평가 3: STEP 1 (조건부확률 분류 8점) + STEP 2 (확률 예측 8점) + STEP 3 (최소제곱법 4점) + 기본 8점 = <strong>28점</strong>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     1차시 — 확률 기초 + 조건부확률
+══════════════════════════════ -->
+
+<!-- ──────────────────────────────────────
+     SLIDE 3: 확률이란? (기초)
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2><span class="jichasi-badge jc1">1차시</span> 확률이란?</h2>
+  <h3>기본 개념 — 일어날 가능성을 수로 나타내기</h3>
+
+  <div class="definition-box">
+    어떤 실험이나 조사에서, 전체 경우 중 특정 사건이 일어나는 비율<br>
+    \[ P(A) = \frac{\text{사건 A에 해당하는 경우의 수}}{\text{전체 경우의 수}} \]
+    확률의 범위: \( 0 \leq P(A) \leq 1 \)
+  </div>
+
+  <div class="cols cols-3" style="margin-top:12px; font-size:.84em;">
+    <div class="card-cyan card" style="text-align:center;">
+      주사위를 던져서 짝수가 나올 확률<br><br>
+      \( P = \dfrac{3}{6} = \dfrac{1}{2} \)
+      <div style="font-size:.8em; margin-top:6px; color:rgba(232,244,253,0.65);">짝수: 2,4,6 → 3가지</div>
+    </div>
+    <div class="card-amber card" style="text-align:center;">
+      동전을 던져서 앞면이 나올 확률<br><br>
+      \( P = \dfrac{1}{2} \)
+      <div style="font-size:.8em; margin-top:6px; color:rgba(232,244,253,0.65);">앞·뒤 중 앞면만</div>
+    </div>
+    <div class="card card" style="text-align:center;">
+      빈도표에서도 같은 방법!<br><br>
+      \( P = \dfrac{\text{해당 칸의 수}}{\text{전체 합계}} \)
+      <div style="font-size:.8em; margin-top:6px; color:rgba(232,244,253,0.65);">합계 칸을 분모로</div>
+    </div>
+  </div>
+
+  <div class="card-amber card" style="margin-top:10px; font-size:.82em;">
+    <strong>빈도표 예시:</strong> 학생 100명 중 지각 없음이 70명이면
+    \( P(\text{지각 없음}) = \dfrac{70}{100} = 0.7 \)
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────
+     SLIDE 4: "~중에서" 직관 (조건부확률 전 단계)
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2>조건이 생기면 분모가 바뀐다</h2>
+  <h3>"~중에서" 라는 조건을 붙이면 어떻게 달라질까?</h3>
+
+  <div class="cols cols-2">
+    <div>
+      <div class="card card" style="font-size:.84em; margin-bottom:10px;">
+        <strong>조건 없을 때</strong><br>
+        전체 100명 중 지각 없는 학생<br>
+        \[ P(\text{지각 없음}) = \frac{70}{100} \]
+        <span style="color:rgba(232,244,253,0.6); font-size:.85em;">분모 = 전체 100명</span>
+      </div>
+      <div class="card-cyan card" style="font-size:.84em; margin-bottom:10px;">
+        <strong>"도보 통학" 중에서 보면?</strong><br>
+        도보 50명 중 지각 없는 학생<br>
+        \[ \frac{40}{50} \]
+        <span style="color:var(--cyan); font-size:.85em;">분모 = 도보 통학 50명으로 바뀜!</span>
+      </div>
+      <div class="card-amber card" style="font-size:.84em;">
+        <strong>"대중교통" 중에서 보면?</strong><br>
+        대중교통 50명 중 지각 없는 학생<br>
+        \[ \frac{30}{50} \]
+        <span style="color:var(--amber); font-size:.85em;">분모 = 대중교통 50명으로 바뀜!</span>
+      </div>
+    </div>
+    <div>
+      <table class="freq-table" style="margin-bottom:10px;">
+        <tr><th></th><th>지각 없음</th><th>지각 있음</th><th>합계</th></tr>
+        <tr><td>도보·자전거</td><td style="color:var(--cyan); font-weight:700;">40</td><td>10</td><td style="color:var(--cyan); font-weight:700;">50</td></tr>
+        <tr><td>대중교통</td><td style="color:var(--amber); font-weight:700;">30</td><td>20</td><td style="color:var(--amber); font-weight:700;">50</td></tr>
+        <tr class="total-row"><td>합계</td><td>70</td><td>30</td><td>100</td></tr>
+      </table>
+      <div class="definition-box" style="font-size:.82em;">
+        <strong>핵심 아이디어</strong><br>
+        "~중에서"라는 조건이 붙으면<br>
+        → <span class="kw-cyan">분모를 그 조건에 해당하는 수로 바꾼다</span><br>
+        → 분자는 두 조건을 모두 만족하는 수
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────
+     SLIDE 5: 조건부확률 공식
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2>조건부확률 — 공식으로 정리하기</h2>
+
+  <div class="definition-box">
+    <strong>조건부확률</strong> \(P(A \mid B)\) : 사건 B가 일어났다는 조건 아래서 A가 일어날 확률<br><br>
+    \[P(A \mid B) = \frac{P(A \cap B)}{P(B)} = \frac{\text{A와 B 모두 해당하는 수}}{\text{B에 해당하는 수}}\]
+  </div>
+
+  <div class="cols cols-2" style="margin-top:12px;">
+    <div class="card-cyan card" style="font-size:.85em;">
+      <strong>도보 통학(B)이 조건일 때<br>지각 없음(A)의 조건부확률</strong><br><br>
+      \[ P(A \mid B) = \frac{40}{50} = 0.8 \]
+      <span style="font-size:.8em; color:rgba(232,244,253,0.65);">분모: 도보 50명 / 분자: 둘 다 해당 40명</span>
+    </div>
+    <div class="card-amber card" style="font-size:.85em;">
+      <strong>대중교통(B')이 조건일 때<br>지각 없음(A)의 조건부확률</strong><br><br>
+      \[ P(A \mid B') = \frac{30}{50} = 0.6 \]
+      <span style="font-size:.8em; color:rgba(232,244,253,0.65);">분모: 대중교통 50명 / 분자: 둘 다 해당 30명</span>
+    </div>
+  </div>
+
+  <div class="card card" style="margin-top:10px; font-size:.82em;">
+    ※ 수업에서 배우는 조건부확률: <span class="kw-cyan">복잡한 공식 없이</span>
+    해당 행(또는 열)의 합계를 분모로, 교차하는 칸을 분자로 읽으면 된다
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────
+     SLIDE 6: 빈도표 실습 (1차시 마무리)
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2>빈도표에서 조건부확률 읽기 — 실습</h2>
+
+  <p style="font-size:.85em; margin-bottom:8px;">
+    학생 <strong>100명</strong>의 통학 방법과 지각 여부 (슬라이드 4의 표를 그대로 사용)
+  </p>
+
+  <table class="freq-table">
+    <tr><th></th><th>지각 없음</th><th>지각 있음</th><th>합계</th></tr>
+    <tr><td>도보·자전거</td><td>40</td><td>10</td><td>50</td></tr>
+    <tr><td>대중교통</td><td>30</td><td>20</td><td>50</td></tr>
+    <tr class="total-row"><td>합계</td><td>70</td><td>30</td><td>100</td></tr>
+  </table>
+
+  <div class="practice-box" style="margin-top:12px; font-size:.84em;">
+    다음 조건부확률을 표에서 직접 읽어 계산해 보자.<br>
+    ① \(P(\text{지각 없음} \mid \text{도보·자전거})\) = ?<br>
+    ② \(P(\text{지각 없음} \mid \text{대중교통})\) = ?<br>
+    ③ \(P(\text{지각 있음} \mid \text{도보·자전거})\) = ?
+  </div>
+
+  <div class="cols cols-3" style="margin-top:8px; font-size:.8em; text-align:center;">
+    <div class="card-cyan card">① \(\dfrac{40}{50} = \dfrac{4}{5}\)</div>
+    <div class="card-amber card">② \(\dfrac{30}{50} = \dfrac{3}{5}\)</div>
+    <div class="card card">③ \(\dfrac{10}{50} = \dfrac{1}{5}\)</div>
+  </div>
+
+  <div class="notice-box" style="margin-top:8px; font-size:.78em;">
+    <strong>1차시 정리 후</strong> → 학습지 ①(조건부확률) 1쪽을 작성하세요
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     2차시 — 조건부확률로 분류
+══════════════════════════════ -->
+
+<!-- ──────────────────────────────────────
+     SLIDE 7: 조건부확률로 분류하기
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2><span class="jichasi-badge jc2">2차시</span> 조건부확률로 분류하기</h2>
+  <h3>아이디어: 더 큰 확률 쪽으로 예측한다</h3>
+
+  <div class="card-cyan card" style="margin-bottom:12px; font-size:.88em;">
+    새로운 학생이 <strong>도보로 통학</strong>한다고 한다.<br>
+    이 학생이 지각할 가능성이 더 낮을지, 높을지 예측해 보자.
+  </div>
+
+  <div class="cols cols-2">
+    <div class="card-green card" style="font-size:.85em; text-align:center;">
+      \[ P(\text{지각 없음} \mid \text{도보}) = \frac{40}{50} = \mathbf{0.8} \]
+    </div>
+    <div class="card card" style="font-size:.85em; text-align:center;">
+      \[ P(\text{지각 있음} \mid \text{도보}) = \frac{10}{50} = 0.2 \]
+    </div>
+  </div>
+
+  <div class="definition-box" style="margin-top:14px;">
+    <span class="kw-green">0.8 > 0.2</span> 이므로
+    → <span class="kw-cyan">지각 없음</span>으로 분류 (예측)
+  </div>
+
+  <p style="margin-top:10px; font-size:.8em; color:rgba(232,244,253,0.65);">
+    ※ 조건이 주어졌을 때 <strong>조건부확률이 더 큰 쪽</strong>을 예측값으로 선택하는 것이
+    인공지능 분류 알고리즘의 기본 원리이다
+  </p>
+</section>
+
+<!-- ──────────────────────────────────────
+     SLIDE 8: 확인 문제 A
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2>확인 문제 A</h2>
+
+  <p style="font-size:.85em; margin-bottom:8px;">
+    학생 <strong>200명</strong>의 주간 독서량과 모의고사 등급을 조사했다.
+  </p>
+
+  <table class="freq-table">
+    <tr><th></th><th>상 등급</th><th>중·하 등급</th><th>합계</th></tr>
+    <tr><td>독서 많음 (주 3권 이상)</td><td>60</td><td>40</td><td>100</td></tr>
+    <tr><td>독서 적음 (주 3권 미만)</td><td>20</td><td>80</td><td>100</td></tr>
+    <tr class="total-row"><td>합계</td><td>80</td><td>120</td><td>200</td></tr>
+  </table>
+
+  <div class="practice-box" style="margin-top:12px; font-size:.84em;">
+    ① 독서가 많은 학생 중 상 등급인 비율 \(P(\text{상} \mid \text{독서 많음})\)을 구하시오.<br><br>
+    ② 독서가 적은 학생 중 상 등급인 비율 \(P(\text{상} \mid \text{독서 적음})\)을 구하시오.<br><br>
+    ③ 새로운 학생의 독서량이 많다면, 이 학생의 등급을 예측하고 이유를 말하시오.
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────
+     SLIDE 9: 확인 문제 A 풀이
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2>확인 문제 A — 풀이</h2>
+
+  <div class="cols cols-2" style="margin-bottom:12px;">
+    <div class="card-cyan card" style="font-size:.85em; text-align:center;">
+      ① \(P(\text{상} \mid \text{독서 많음}) = \dfrac{60}{100} = 0.6\)
+    </div>
+    <div class="card card" style="font-size:.85em; text-align:center;">
+      ② \(P(\text{상} \mid \text{독서 적음}) = \dfrac{20}{100} = 0.2\)
+    </div>
+  </div>
+
+  <div class="definition-box">
+    ③ <span class="kw-cyan">0.6 > 0.2</span> 이므로 → <strong>상 등급</strong>으로 예측
+  </div>
+
+  <div class="card-amber card" style="margin-top:12px; font-size:.82em;">
+    <strong>예측의 한계 — 오차가 생기는 이유</strong><br>
+    • 확률은 <em>경향성</em>이며, 개별 학생을 100% 보장하지 않는다<br>
+    • 독서 외 수업 집중도·학습 방법 등 다른 요인이 성적에 영향을 줄 수 있다<br>
+    • 표본 200명이 전체를 완벽히 대표하지 않을 수 있다
+  </div>
+
+  <div class="notice-box" style="margin-top:8px; font-size:.78em;">
+    <strong>2차시 정리 후</strong> → 학습지 ①(조건부확률) 2쪽을 작성하세요
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     3차시 — 최소제곱법 + 추세선
+══════════════════════════════ -->
+
+<!-- ──────────────────────────────────────
+     SLIDE 10: 산점도와 경향성
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2><span class="jichasi-badge jc3">3차시</span> 산점도와 경향성</h2>
+
+  <div class="cols cols-3">
+    <div class="card-cyan card" style="text-align:center; font-size:.82em;">
+      <strong>양의 상관</strong><br>x↑ → y↑<br>
+      <svg width="120" height="90" style="margin-top:6px;">
+        <line x1="10" y1="80" x2="110" y2="80" stroke="#666" stroke-width="1"/>
+        <line x1="10" y1="80" x2="10" y2="10" stroke="#666" stroke-width="1"/>
+        <circle cx="25" cy="65" r="4" fill="#00d4ff"/>
+        <circle cx="45" cy="52" r="4" fill="#00d4ff"/>
+        <circle cx="65" cy="38" r="4" fill="#00d4ff"/>
+        <circle cx="85" cy="28" r="4" fill="#00d4ff"/>
+        <circle cx="100" cy="18" r="4" fill="#00d4ff"/>
+        <line x1="18" y1="72" x2="105" y2="12" stroke="#ffb347" stroke-width="1.5" stroke-dasharray="3,2"/>
+      </svg>
+    </div>
+    <div class="card-amber card" style="text-align:center; font-size:.82em;">
+      <strong>음의 상관</strong><br>x↑ → y↓<br>
+      <svg width="120" height="90" style="margin-top:6px;">
+        <line x1="10" y1="80" x2="110" y2="80" stroke="#666" stroke-width="1"/>
+        <line x1="10" y1="80" x2="10" y2="10" stroke="#666" stroke-width="1"/>
+        <circle cx="25" cy="18" r="4" fill="#ffb347"/>
+        <circle cx="45" cy="30" r="4" fill="#ffb347"/>
+        <circle cx="65" cy="48" r="4" fill="#ffb347"/>
+        <circle cx="85" cy="62" r="4" fill="#ffb347"/>
+        <circle cx="100" cy="72" r="4" fill="#ffb347"/>
+        <line x1="18" y1="13" x2="105" y2="76" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="3,2"/>
+      </svg>
+    </div>
+    <div class="card card" style="text-align:center; font-size:.82em;">
+      <strong>무(無)상관</strong><br>x와 y 무관<br>
+      <svg width="120" height="90" style="margin-top:6px;">
+        <line x1="10" y1="80" x2="110" y2="80" stroke="#666" stroke-width="1"/>
+        <line x1="10" y1="80" x2="10" y2="10" stroke="#666" stroke-width="1"/>
+        <circle cx="25" cy="40" r="4" fill="#a78bfa"/>
+        <circle cx="45" cy="65" r="4" fill="#a78bfa"/>
+        <circle cx="55" cy="22" r="4" fill="#a78bfa"/>
+        <circle cx="75" cy="55" r="4" fill="#a78bfa"/>
+        <circle cx="95" cy="35" r="4" fill="#a78bfa"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="definition-box" style="margin-top:12px; font-size:.85em;">
+    <strong>추세선</strong> \(f(x) = ax + b\) : 데이터의 경향성을 가장 잘 나타내는 직선<br>
+    <span class="kw-amber">오차</span> = \(y - f(x)\) : 실제 값과 추세선 값의 차이
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────
+     SLIDE 11: 최소제곱법 개념 + 손실함수 연결
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2>최소제곱법 — 아이디어</h2>
+
+  <div class="card-cyan card" style="margin-bottom:12px; font-size:.88em;">
+    <strong>핵심 아이디어:</strong> 오차의 제곱합 \(\displaystyle\sum (y - f(x))^2\)이
+    <span class="kw-cyan">가장 작아지는</span> 직선을 구한다
+  </div>
+
+  <div class="definition-box">
+    <strong>최소제곱법 공식</strong> (공식만 제시, 직접 대입하면 됨)
+    \[
+      a = \frac{\displaystyle\sum (x - \bar{x})(y - \bar{y})}{\displaystyle\sum (x - \bar{x})^2},
+      \quad
+      b = \bar{y} - a\bar{x}
+    \]
+  </div>
+
+  <div class="cols cols-4" style="margin-top:10px; font-size:.78em; text-align:center;">
+    <div class="card-purple card">① \(\bar x, \bar y\)<br>계산</div>
+    <div class="card-purple card">② 편차<br>\(x-\bar x,\ y-\bar y\)</div>
+    <div class="card-purple card">③ 편차곱·<br>편차제곱 합산</div>
+    <div class="card-purple card">④ \(a, b\)<br>대입</div>
+  </div>
+
+  <div class="card-amber card" style="margin-top:10px; font-size:.80em;">
+    <strong>💡 인공지능과의 연결 — 손실함수(Loss Function)</strong><br>
+    "오차의 제곱합을 최소로 만드는 직선" = 바로 <span class="kw-amber">손실함수를 최소화</span>하는 것!<br>
+    인공지능은 이 손실함수 값이 작아지도록 가중치를 반복 조정하며 학습한다.<br>
+    <span style="font-size:.85em; color:rgba(232,244,253,0.65);">
+      → 이후 배울 개념: 경사하강법(Gradient Descent) — 손실함수를 최소화하는 최적화 알고리즘
+    </span>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────
+     SLIDE 12: 최소제곱법 예제
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2>최소제곱법 예제</h2>
+
+  <p style="font-size:.83em; margin-bottom:6px;">
+    4명의 주간 운동 시간 \(x\)(시간)과 체력 점수 \(y\)(점) — \(\bar{x}=5,\ \bar{y}=50\)
+  </p>
+
+  <table class="lsq-table">
+    <tr>
+      <th>\(x\)</th><th>\(y\)</th>
+      <th>\(x-\bar x\)</th><th>\(y-\bar y\)</th>
+      <th>\((x-\bar x)^2\)</th><th>\((x-\bar x)(y-\bar y)\)</th>
+    </tr>
+    <tr><td>2</td><td>44</td><td>-3</td><td>-6</td><td>9</td><td>18</td></tr>
+    <tr><td>4</td><td>49</td><td>-1</td><td>-1</td><td>1</td><td>1</td></tr>
+    <tr><td>6</td><td>50</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+    <tr><td>8</td><td>57</td><td>3</td><td>7</td><td>9</td><td>21</td></tr>
+    <tr class="sum-row"><td>합</td><td></td><td></td><td></td><td><strong>20</strong></td><td><strong>40</strong></td></tr>
+  </table>
+
+  <div class="cols cols-2" style="margin-top:10px;">
+    <div class="formula-box" style="font-size:.85em;">
+      \(a = \dfrac{40}{20} = 2\)<br><br>
+      \(b = 50 - 2 \times 5 = 40\)
+    </div>
+    <div class="card-green card" style="font-size:.85em;">
+      <strong>추세선:</strong> \(f(x) = 2x + 40\)<br><br>
+      <strong>예측:</strong> 운동 10시간이면?<br>
+      \(f(10) = 20+40 = \mathbf{60}\)점
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────
+     SLIDE 13: 오차 해석
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2>오차 해석</h2>
+
+  <div class="cols cols-2">
+    <div>
+      <div class="definition-box" style="margin-bottom:12px;">
+        <strong>오차 = 실제값 − 예측값</strong>
+        \[ \text{오차} = y - f(x) \]
+        <p style="margin-top:8px; font-size:.85em;">
+          예: 실제 체력 점수 58점이었다면<br>
+          오차 = \(58 - f(10) = 58 - 60 = -2\)점
+        </p>
+      </div>
+      <div class="card-amber card" style="font-size:.82em;">
+        <strong>오차가 생기는 이유</strong><br>
+        • 운동 외에 식사·수면 등 다른 요인이 체력에 영향<br>
+        • 추세선은 경향성만 반영, 개별 차이는 반영 못함
+      </div>
+    </div>
+    <div>
+      <svg viewBox="0 0 240 200" style="width:100%; max-height:200px; overflow:hidden;" preserveAspectRatio="xMidYMid meet">
+        <line x1="20" y1="180" x2="230" y2="180" stroke="#666" stroke-width="1.5"/>
+        <line x1="20" y1="180" x2="20" y2="10" stroke="#666" stroke-width="1.5"/>
+        <text x="125" y="196" text-anchor="middle" fill="#888" font-size="11">운동 시간</text>
+        <circle cx="50" cy="150" r="5" fill="#00d4ff"/>
+        <circle cx="90" cy="128" r="5" fill="#00d4ff"/>
+        <circle cx="130" cy="113" r="5" fill="#00d4ff"/>
+        <circle cx="170" cy="90" r="5" fill="#00d4ff"/>
+        <line x1="30" y1="162" x2="220" y2="70" stroke="#ffb347" stroke-width="2"/>
+        <circle cx="210" cy="95" r="5" fill="#ff4757"/>
+        <line x1="210" y1="74" x2="210" y2="95" stroke="#39d98a" stroke-width="2" stroke-dasharray="3,2"/>
+        <text x="214" y="84" fill="#39d98a" font-size="10">오차</text>
+      </svg>
+      <div class="notice-box" style="font-size:.78em; margin-top:6px;">
+        <strong>3차시 정리 후</strong> → 학습지 ②(최소제곱법) 풀기
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     4차시 — 확인 문제 + 정리
+══════════════════════════════ -->
+
+<!-- ──────────────────────────────────────
+     SLIDE 14: 확인 문제 B
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2><span class="jichasi-badge jc4">4차시</span> 확인 문제 B</h2>
+
+  <p style="font-size:.84em; margin-bottom:8px;">
+    5명의 하루 학습 시간 \(x\)(시간)과 영어 단어 암기 수 \(y\)(개) (\(\bar{x}=3,\ \bar{y}=25\))
+  </p>
+
+  <table class="lsq-table">
+    <tr>
+      <th>\(x\)</th><th>\(y\)</th>
+      <th>\(x-3\)</th><th>\(y-25\)</th>
+      <th>\((x-3)^2\)</th><th>\((x-3)(y-25)\)</th>
+    </tr>
+    <tr><td>1</td><td>10</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>2</td><td>20</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>3</td><td>25</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>4</td><td>30</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>5</td><td>40</td><td></td><td></td><td></td><td></td></tr>
+    <tr class="sum-row"><td>합</td><td></td><td></td><td></td><td><em>?</em></td><td><em>?</em></td></tr>
+  </table>
+
+  <div class="practice-box" style="margin-top:10px; font-size:.84em;">
+    ① 표의 빈칸을 채우고 \(\sum(x-\bar x)^2\)과 \(\sum(x-\bar x)(y-\bar y)\)를 구하시오.<br>
+    ② \(a\), \(b\)를 계산하고 추세선 \(f(x)\)를 구하시오.<br>
+    ③ 학습 시간이 6시간인 학생의 단어 암기 수를 예측하시오.
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────
+     SLIDE 15: 확인 문제 B 풀이
+────────────────────────────────────────── -->
+<section data-transition="slide">
+  <h2>확인 문제 B — 풀이</h2>
+
+  <table class="lsq-table">
+    <tr>
+      <th>\(x\)</th><th>\(y\)</th>
+      <th>\(x-3\)</th><th>\(y-25\)</th>
+      <th>\((x-3)^2\)</th><th>\((x-3)(y-25)\)</th>
+    </tr>
+    <tr><td>1</td><td>10</td><td class="highlight">-2</td><td class="highlight">-15</td><td class="highlight">4</td><td class="highlight">30</td></tr>
+    <tr><td>2</td><td>20</td><td class="highlight">-1</td><td class="highlight">-5</td><td class="highlight">1</td><td class="highlight">5</td></tr>
+    <tr><td>3</td><td>25</td><td class="highlight">0</td><td class="highlight">0</td><td class="highlight">0</td><td class="highlight">0</td></tr>
+    <tr><td>4</td><td>30</td><td class="highlight">1</td><td class="highlight">5</td><td class="highlight">1</td><td class="highlight">5</td></tr>
+    <tr><td>5</td><td>40</td><td class="highlight">2</td><td class="highlight">15</td><td class="highlight">4</td><td class="highlight">30</td></tr>
+    <tr class="sum-row"><td>합</td><td></td><td></td><td></td><td><strong>10</strong></td><td><strong>70</strong></td></tr>
+  </table>
+
+  <div class="cols cols-2" style="margin-top:8px;">
+    <div class="formula-box" style="font-size:.85em;">
+      \(a = \dfrac{70}{10} = 7,\quad b = 25 - 7 \times 3 = 4\)
+    </div>
+    <div class="card-green card" style="font-size:.85em;">
+      \(f(x) = 7x + 4\)<br>
+      \(f(6) = 42 + 4 = \mathbf{46}\)개
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────
+     SLIDE 16: 핵심 정리
+────────────────────────────────────────── -->
+<section data-transition="zoom" data-background-gradient="radial-gradient(ellipse at 50% 50%, rgba(0,212,255,0.06) 0%, transparent 70%)">
+  <h2>핵심 정리</h2>
+
+  <div class="cols cols-2">
+    <div>
+      <div class="card-cyan card" style="margin-bottom:8px; font-size:.82em;">
+        <strong>조건부확률로 분류</strong><br>
+        \(P(A \mid B)\) : B가 주어졌을 때 A의 확률<br>
+        분모 = 조건 B의 합계, 분자 = 교차 칸<br>
+        → <span class="kw-cyan">더 큰 확률 쪽으로 예측·분류</span>
+      </div>
+      <div class="card-amber card" style="font-size:.82em;">
+        <strong>수행평가 포인트</strong><br>
+        STEP 1·2: 빈도표 → 조건부확률 계산<br>
+        → 비교 → 분류·예측 + 이유 서술<br>
+        STEP 3: 편차표 → \(a, b\) → 예측값
+      </div>
+    </div>
+    <div>
+      <div class="formula-box" style="font-size:.80em; margin-bottom:8px;">
+        <strong>최소제곱법</strong><br>
+        \[ a = \frac{\sum(x-\bar x)(y-\bar y)}{\sum(x-\bar x)^2},\quad b = \bar y - a\bar x \]
+        \[ f(x) = ax + b \]
+      </div>
+      <div class="card-green card" style="font-size:.80em; margin-bottom:8px;">
+        <strong>오차</strong> = 실제값 − 예측값 = \(y - f(x)\)
+      </div>
+      <div class="card-amber card" style="font-size:.78em;">
+        <strong>인공지능 연결</strong><br>
+        오차의 제곱합 최소화 = <span class="kw-amber">손실함수</span> 최소화<br>
+        → 이후: 경사하강법으로 자동 최적화
+      </div>
+    </div>
+  </div>
+
+  <div class="notice-box" style="margin-top:8px; font-size:.76em;">
+    <strong>4차시 후</strong> → 연습지(수행평가 연습) 풀고 질문 정리 → 다음 차시 수행평가
+  </div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true, slideNumber: 'c/t', progress: true, controls: true,
+    transition: 'slide', transitionSpeed: 'default',
+    width: 1280, height: 720, margin: 0.04,
+    minScale: 0.2, maxScale: 2.0,
+    plugins: []
+  });
+  Reveal.on('slidechanged', e => window.safeTypeset(e.currentSlide));
+  window.safeTypeset();
+</script>
+</body>
+</html>

@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>행렬로 이미지 바꾸기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ─── Reset & Base ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-outer:   #0f172a;
+    --bg-slide:   #1e293b;
+    --text:       #f1f5f9;
+    --text-muted: #94a3b8;
+    --blue:       #3b82f6;
+    --green:      #10b981;
+    --yellow:     #f59e0b;
+    --red-px:     #ef4444;
+    --green-px:   #22c55e;
+    --blue-px:    #3b82f6;
+    --row-bg:     rgba(234,179,8,0.2);
+    --row-border: #eab308;
+    --col-bg:     rgba(16,185,129,0.2);
+    --col-border: #10b981;
+    --slide-w:    1200px;
+    --slide-h:    675px;
+  }
+
+  body {
+    background: var(--bg-outer);
+    font-family: 'Noto Sans KR', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--text);
+  }
+
+  /* ─── Stage ─── */
+  #stage {
+    width: var(--slide-w);
+    max-width: 100%;
+    aspect-ratio: 16/9;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+  }
+
+  /* ─── Slide ─── */
+  .slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-slide);
+    padding: 52px 64px;
+    display: none;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .slide.active {
+    display: flex;
+    opacity: 1;
+  }
+  .slide.fade-in { animation: fadeIn 0.4s ease forwards; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── Controls ─── */
+  #controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .ctrl-btn {
+    background: #334155;
+    border: none;
+    color: var(--text);
+    font-size: 20px;
+    width: 48px; height: 48px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ctrl-btn:hover { background: #475569; }
+  .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  #slide-counter {
+    color: var(--text-muted);
+    font-size: 15px;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* ─── Progress dots ─── */
+  #progress {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #334155;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--blue); transform: scale(1.4); }
+
+  /* ─── Typography helpers ─── */
+  .slide-tag {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--blue);
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .slide-title {
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .slide-subtitle {
+    font-size: 22px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .highlight-blue  { color: var(--blue); }
+  .highlight-green { color: var(--green); }
+  .highlight-yellow{ color: var(--yellow); }
+
+  .key-message {
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(16,185,129,0.1));
+    border-left: 4px solid var(--blue);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 17px;
+    font-weight: 500;
+    color: #e2e8f0;
+    margin-top: auto;
+  }
+
+  /* ─── Pixel Grid ─── */
+  .pixel-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 54px);
+    grid-template-rows: repeat(3, 54px);
+    gap: 2px;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .pixel-cell {
+    width: 54px; height: 54px;
+    border: 1px solid rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    color: rgba(255,255,255,0.85);
+    font-family: 'JetBrains Mono', monospace;
+    border-radius: 3px;
+    transition: all 0.3s;
+  }
+  .px-red   { background: var(--red-px); }
+  .px-green { background: var(--green-px); }
+  .px-blue  { background: var(--blue-px); }
+
+  /* Row / Col highlight wrappers */
+  .row-hl {
+    outline: 3px solid var(--row-border);
+    background: var(--row-bg) !important;
+  }
+  .col-hl {
+    outline: 3px solid var(--col-border);
+    background: var(--col-bg) !important;
+  }
+
+  /* ─── Matrix Bracket ─── */
+  .matrix-wrap {
+    display: inline-flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .bracket {
+    display: flex;
+    align-items: center;
+    font-size: 90px;
+    color: var(--text-muted);
+    line-height: 1;
+    font-weight: 200;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0 2px;
+    user-select: none;
+  }
+  .matrix-body {
+    display: grid;
+    gap: 4px 10px;
+    padding: 8px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    align-items: center;
+  }
+  .matrix-body.cols-3 { grid-template-columns: repeat(3, auto); }
+  .m-cell {
+    text-align: center;
+    padding: 4px 6px;
+    border-radius: 4px;
+    min-width: 28px;
+  }
+  .m-cell.r { color: #fca5a5; }
+  .m-cell.g { color: #86efac; }
+  .m-cell.b { color: #93c5fd; }
+  .m-cell.zero { color: #475569; }
+  .m-cell.one  { color: #f59e0b; font-weight: 700; }
+  .m-cell.row-hl-cell { background: var(--row-bg); outline: 2px solid var(--row-border); }
+  .m-cell.col-hl-cell { background: var(--col-bg); outline: 2px solid var(--col-border); }
+
+  /* ─── Equation layout ─── */
+  .equation {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .eq-sign {
+    font-size: 28px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .matrix-label {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .matrix-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ─── Arrow annotation ─── */
+  .arrow-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--yellow);
+    font-weight: 600;
+    margin-top: 10px;
+  }
+  .arrow-note .arr { font-size: 20px; }
+
+  /* ─── Two-column layout ─── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    flex: 1;
+    align-items: center;
+  }
+  .col-divider {
+    border-right: 1px solid rgba(255,255,255,0.1);
+    padding-right: 32px;
+  }
+
+  /* ─── Summary cards ─── */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+    flex: 1;
+  }
+  .summary-card {
+    border-radius: 12px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border: 2px solid transparent;
+  }
+  .card-blue  { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.4); }
+  .card-green { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.4); }
+  .card-title {
+    font-size: 22px;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .card-blue .card-title  { color: var(--blue); }
+  .card-green .card-title { color: var(--green); }
+  .card-body { font-size: 16px; line-height: 1.7; color: #cbd5e1; }
+  .card-icon { font-size: 32px; }
+
+  .bonus-card {
+    background: rgba(245,158,11,0.1);
+    border: 2px solid rgba(245,158,11,0.4);
+    border-radius: 10px;
+    padding: 18px 24px;
+    margin-top: 18px;
+    font-size: 16px;
+    color: #fde68a;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  /* ─── Slide 1 decorations ─── */
+  .deco-grid {
+    position: absolute;
+    right: 64px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    grid-template-columns: repeat(3, 44px);
+    gap: 5px;
+    opacity: 0.18;
+  }
+  .deco-cell {
+    width: 44px; height: 44px;
+    border-radius: 5px;
+  }
+
+  /* ─── Section heading ─── */
+  .section-head {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .sh-yellow { color: var(--yellow); }
+  .sh-green  { color: var(--green); }
+
+  /* ─── Row label badges ─── */
+  .row-badge {
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    text-align: right;
+    padding-right: 8px;
+    align-self: center;
+  }
+  .labeled-grid {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+  }
+  .badge-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-right: 6px;
+    padding-top: 0;
+  }
+  .badge-item {
+    height: 54px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* ─── Print ─── */
+  @media print {
+    body { background: white; padding: 0; }
+    #stage { width: 100%; max-width: none; box-shadow: none; border-radius: 0; }
+    .slide { position: relative; display: flex !important; opacity: 1 !important;
+             page-break-after: always; background: white; color: black; }
+    #controls, #progress { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- ══════════════════════════════════════
+       슬라이드 1: 제목
+  ══════════════════════════════════════ -->
+  <div class="slide" id="slide-1">
+    <!-- 배경 장식 픽셀 그리드 -->
+    <div class="deco-grid">
+      <div class="deco-cell" style="background:#ef4444"></div>
+      <div class="deco-cell" style="background:#ef4444"></div>
+      <div class="deco-cell" style="background:#ef4444"></div>
+      <div class="deco-cell" style="background:#22c55e"></div>
+      <div class="deco-cell" style="background:#22c55e"></div>
+      <div class="deco-cell" style="background:#22c55e"></div>
+      <div class="deco-cell" style="background:#3b82f6"></div>
+      <div class="deco-cell" style="background:#3b82f6"></div>
+      <div class="deco-cell" style="background:#3b82f6"></div>
+    </div>
+
+    <div style="margin-top:auto; margin-bottom:auto; max-width:640px;">
+      <div class="slide-tag">AI 수학 · 선형대수</div>
+      <div class="slide-title" style="font-size:52px; margin-bottom:18px;">
+        행렬로 이미지 바꾸기
+      </div>
+      <div class="slide-subtitle" style="font-size:24px;">
+        <span class="highlight-blue">왼쪽 곱</span>?&nbsp;
+        <span class="highlight-green">오른쪽 곱</span>?&nbsp;
+        무엇이 다를까?
+      </div>
+      <div style="margin-top:40px; display:flex; gap:32px; font-size:15px; color:var(--text-muted);">
+        <span>📐 행렬 곱셈</span>
+        <span>🖼 이미지 변환</span>
+        <span>🔁 선형대수 응용</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       슬라이드 2: 이미지 = 행렬
+  ══════════════════════════════════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-tag">기초 개념</div>
+    <div class="slide-title" style="font-size:36px; margin-bottom:28px;">
+      이미지 = 행렬 <span class="highlight-yellow">A</span>
+    </div>
+
+    <div class="two-col" style="align-items:center;">
+
+      <!-- 왼쪽: 픽셀 이미지 -->
+      <div class="col-divider" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="section-head sh-yellow">픽셀 이미지</div>
+        <div style="display:flex; gap:12px; align-items:flex-start;">
+          <div class="badge-col">
+            <div class="badge-item" style="color:#fca5a5; font-weight:700;">행 1</div>
+            <div class="badge-item" style="color:#86efac; font-weight:700;">행 2</div>
+            <div class="badge-item" style="color:#93c5fd; font-weight:700;">행 3</div>
+          </div>
+          <div class="pixel-grid">
+            <div class="pixel-cell px-red">R</div>
+            <div class="pixel-cell px-red">R</div>
+            <div class="pixel-cell px-red">R</div>
+            <div class="pixel-cell px-green">G</div>
+            <div class="pixel-cell px-green">G</div>
+            <div class="pixel-cell px-green">G</div>
+            <div class="pixel-cell px-blue">B</div>
+            <div class="pixel-cell px-blue">B</div>
+            <div class="pixel-cell px-blue">B</div>
+          </div>
+        </div>
+        <div style="font-size:14px; color:var(--text-muted); margin-top:4px;">각 픽셀 하나 = 행렬의 한 성분</div>
+      </div>
+
+      <!-- 오른쪽: 행렬 표기 -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="section-head sh-yellow">행렬 표기</div>
+        <div class="matrix-group">
+          <div class="matrix-wrap">
+            <div class="bracket">[</div>
+            <div class="matrix-body cols-3">
+              <div class="m-cell r">R</div><div class="m-cell r">R</div><div class="m-cell r">R</div>
+              <div class="m-cell g">G</div><div class="m-cell g">G</div><div class="m-cell g">G</div>
+              <div class="m-cell b">B</div><div class="m-cell b">B</div><div class="m-cell b">B</div>
+            </div>
+            <div class="bracket">]</div>
+          </div>
+          <div class="matrix-label">행렬 A</div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:6px; font-size:15px; margin-top:8px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:18px;height:18px;background:var(--red-px);border-radius:3px;"></div>
+            <span style="color:#fca5a5;">R = 빨간 픽셀</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:18px;height:18px;background:var(--green-px);border-radius:3px;"></div>
+            <span style="color:#86efac;">G = 초록 픽셀</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:18px;height:18px;background:var(--blue-px);border-radius:3px;"></div>
+            <span style="color:#93c5fd;">B = 파란 픽셀</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="key-message">
+      💡 이미지의 가로줄(행) 하나 = 행렬의 한 행(row) — 같은 색 픽셀들이 나란히 놓인 것
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       슬라이드 3: 행벡터 = 가로줄 전체
+  ══════════════════════════════════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-tag">핵심 개념 ①</div>
+    <div class="slide-title" style="font-size:34px; margin-bottom:26px;">
+      <span class="highlight-yellow">행벡터</span> = 이미지의 <span class="highlight-yellow">가로줄</span> 전체
+    </div>
+
+    <div class="two-col" style="align-items:center;">
+
+      <!-- 왼쪽: 이미지에서 행1 강조 -->
+      <div class="col-divider" style="display:flex; flex-direction:column; align-items:center; gap:20px;">
+        <div class="section-head sh-yellow">행 강조 시각화</div>
+        <div style="display:flex; gap:12px; align-items:flex-start;">
+          <div class="badge-col">
+            <div class="badge-item" style="color:var(--yellow); font-weight:800;">→ 행 1</div>
+            <div class="badge-item" style="color:#86efac;">행 2</div>
+            <div class="badge-item" style="color:#93c5fd;">행 3</div>
+          </div>
+          <div class="pixel-grid">
+            <!-- 행1 강조 -->
+            <div class="pixel-cell px-red row-hl">R</div>
+            <div class="pixel-cell px-red row-hl">R</div>
+            <div class="pixel-cell px-red row-hl">R</div>
+            <!-- 행2 -->
+            <div class="pixel-cell px-green">G</div>
+            <div class="pixel-cell px-green">G</div>
+            <div class="pixel-cell px-green">G</div>
+            <!-- 행3 -->
+            <div class="pixel-cell px-blue">B</div>
+            <div class="pixel-cell px-blue">B</div>
+            <div class="pixel-cell px-blue">B</div>
+          </div>
+        </div>
+        <div style="background:var(--row-bg); border:2px solid var(--row-border); border-radius:8px; padding:10px 20px; font-size:14px; font-family:'JetBrains Mono',monospace; color:#fde68a;">
+          노란 테두리 = 행 하이라이트
+        </div>
+      </div>
+
+      <!-- 오른쪽: 행벡터 표기 -->
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <div class="section-head sh-yellow">행벡터로 표현</div>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; align-items:center; gap:12px; font-size:16px;">
+            <div style="width:12px;height:12px;background:var(--row-border);border-radius:2px;flex-shrink:0;"></div>
+            <span style="font-family:'JetBrains Mono',monospace; color:#fde68a;">r₁ = [R, R, R]</span>
+            <span style="color:var(--text-muted); font-size:13px;">← 이미지의 첫 번째 가로줄</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; font-size:16px;">
+            <div style="width:12px;height:12px;background:#22c55e;border-radius:2px;flex-shrink:0;"></div>
+            <span style="font-family:'JetBrains Mono',monospace; color:#86efac;">r₂ = [G, G, G]</span>
+            <span style="color:var(--text-muted); font-size:13px;">← 두 번째 가로줄</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; font-size:16px;">
+            <div style="width:12px;height:12px;background:#3b82f6;border-radius:2px;flex-shrink:0;"></div>
+            <span style="font-family:'JetBrains Mono',monospace; color:#93c5fd;">r₃ = [B, B, B]</span>
+            <span style="color:var(--text-muted); font-size:13px;">← 세 번째 가로줄</span>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <div class="matrix-group">
+            <div class="matrix-wrap">
+              <div class="bracket">[</div>
+              <div class="matrix-body cols-3">
+                <div class="m-cell r row-hl-cell">R</div><div class="m-cell r row-hl-cell">R</div><div class="m-cell r row-hl-cell">R</div>
+                <div class="m-cell g">G</div><div class="m-cell g">G</div><div class="m-cell g">G</div>
+                <div class="m-cell b">B</div><div class="m-cell b">B</div><div class="m-cell b">B</div>
+              </div>
+              <div class="bracket">]</div>
+            </div>
+            <div class="matrix-label">A — 행1 강조</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="key-message" style="border-left-color:var(--yellow);">
+      🔑 행벡터 하나 = 이미지의 한 <strong style="color:var(--yellow);">가로줄</strong> — r₁은 첫 번째 행의 모든 픽셀을 담는다
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       슬라이드 4: 왼쪽 곱 → 행 재배치
+  ══════════════════════════════════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-tag">핵심 개념 ② — 왼쪽 곱</div>
+    <div class="slide-title" style="font-size:32px; margin-bottom:22px;">
+      <span class="highlight-blue">P · A</span>&nbsp;→&nbsp;행(가로줄)들의 재배치
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex:1;">
+
+      <!-- P 행렬 -->
+      <div class="matrix-group">
+        <div class="matrix-wrap">
+          <div class="bracket">[</div>
+          <div class="matrix-body cols-3">
+            <div class="m-cell zero">0</div><div class="m-cell zero">0</div><div class="m-cell one">1</div>
+            <div class="m-cell zero">0</div><div class="m-cell one">1</div><div class="m-cell zero">0</div>
+            <div class="m-cell one">1</div><div class="m-cell zero">0</div><div class="m-cell zero">0</div>
+          </div>
+          <div class="bracket">]</div>
+        </div>
+        <div class="matrix-label" style="color:var(--blue);">P (행교환 행렬)</div>
+      </div>
+
+      <div class="eq-sign">×</div>
+
+      <!-- A 원본 -->
+      <div class="matrix-group">
+        <div class="matrix-wrap">
+          <div class="bracket">[</div>
+          <div class="matrix-body cols-3">
+            <div class="m-cell r">R</div><div class="m-cell r">R</div><div class="m-cell r">R</div>
+            <div class="m-cell g">G</div><div class="m-cell g">G</div><div class="m-cell g">G</div>
+            <div class="m-cell b">B</div><div class="m-cell b">B</div><div class="m-cell b">B</div>
+          </div>
+          <div class="bracket">]</div>
+        </div>
+        <div class="matrix-label">A (원본)</div>
+      </div>
+
+      <div class="eq-sign">=</div>
+
+      <!-- P·A 결과 -->
+      <div class="matrix-group">
+        <div class="matrix-wrap">
+          <div class="bracket">[</div>
+          <div class="matrix-body cols-3">
+            <div class="m-cell b">B</div><div class="m-cell b">B</div><div class="m-cell b">B</div>
+            <div class="m-cell g">G</div><div class="m-cell g">G</div><div class="m-cell g">G</div>
+            <div class="m-cell r">R</div><div class="m-cell r">R</div><div class="m-cell r">R</div>
+          </div>
+          <div class="bracket">]</div>
+        </div>
+        <div class="matrix-label" style="color:var(--blue);">P·A (상하 대칭)</div>
+      </div>
+    </div>
+
+    <!-- 이동 화살표 시각화 -->
+    <div style="display:flex; justify-content:center; gap:32px; margin-bottom:14px;">
+      <div class="arrow-note">
+        <span class="arr">↑</span>
+        <span style="color:#93c5fd;">행3(B)이 위로 올라옴</span>
+      </div>
+      <div class="arrow-note">
+        <span class="arr">↓</span>
+        <span style="color:#fca5a5;">행1(R)이 아래로 내려감</span>
+      </div>
+      <div class="arrow-note">
+        <span class="arr">↔</span>
+        <span style="color:#86efac;">행2(G)는 그대로 유지</span>
+      </div>
+    </div>
+
+    <!-- 픽셀 이미지 비교 -->
+    <div style="display:flex; justify-content:center; gap:48px; margin-bottom:14px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+        <div style="font-size:13px;color:var(--text-muted);">원본 A</div>
+        <div class="pixel-grid">
+          <div class="pixel-cell px-red"></div><div class="pixel-cell px-red"></div><div class="pixel-cell px-red"></div>
+          <div class="pixel-cell px-green"></div><div class="pixel-cell px-green"></div><div class="pixel-cell px-green"></div>
+          <div class="pixel-cell px-blue"></div><div class="pixel-cell px-blue"></div><div class="pixel-cell px-blue"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;font-size:32px;color:var(--blue);">→</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+        <div style="font-size:13px;color:var(--blue);">P·A (상하 반전)</div>
+        <div class="pixel-grid">
+          <div class="pixel-cell px-blue"></div><div class="pixel-cell px-blue"></div><div class="pixel-cell px-blue"></div>
+          <div class="pixel-cell px-green"></div><div class="pixel-cell px-green"></div><div class="pixel-cell px-green"></div>
+          <div class="pixel-cell px-red"></div><div class="pixel-cell px-red"></div><div class="pixel-cell px-red"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="key-message" style="border-left-color:var(--blue);">
+      🔑 <strong style="color:var(--blue);">P · A</strong>에서 P는 행들의 순서를 지시한다 — P의 각 행이 "어느 행을 가져올지" 결정
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       슬라이드 5: 열벡터 = 세로줄 전체
+  ══════════════════════════════════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-tag">핵심 개념 ③</div>
+    <div class="slide-title" style="font-size:34px; margin-bottom:26px;">
+      <span class="highlight-green">열벡터</span> = 이미지의 <span class="highlight-green">세로줄</span> 전체
+    </div>
+
+    <div class="two-col" style="align-items:center;">
+
+      <!-- 왼쪽: 열 강조 이미지 -->
+      <div class="col-divider" style="display:flex; flex-direction:column; align-items:center; gap:20px;">
+        <div class="section-head sh-green">열 강조 시각화</div>
+        <!-- 열 라벨 -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+          <div style="display:flex; gap:2px; margin-bottom:4px; width:162px; justify-content:space-around;">
+            <div style="width:54px;text-align:center;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:800;">열 1 ↓</div>
+            <div style="width:54px;text-align:center;font-size:12px;font-family:'JetBrains Mono',monospace;color:#86efac;">열 2</div>
+            <div style="width:54px;text-align:center;font-size:12px;font-family:'JetBrains Mono',monospace;color:#93c5fd;">열 3</div>
+          </div>
+          <div class="pixel-grid">
+            <!-- 열1 강조 (R R R 세로) -->
+            <div class="pixel-cell px-red col-hl">R</div>
+            <div class="pixel-cell px-green">G</div>
+            <div class="pixel-cell px-blue">B</div>
+            <div class="pixel-cell px-red col-hl">R</div>
+            <div class="pixel-cell px-green">G</div>
+            <div class="pixel-cell px-blue">B</div>
+            <div class="pixel-cell px-red col-hl">R</div>
+            <div class="pixel-cell px-green">G</div>
+            <div class="pixel-cell px-blue">B</div>
+          </div>
+        </div>
+        <div style="background:var(--col-bg); border:2px solid var(--col-border); border-radius:8px; padding:10px 20px; font-size:14px; font-family:'JetBrains Mono',monospace; color:#6ee7b7;">
+          초록 테두리 = 열 하이라이트
+        </div>
+      </div>
+
+      <!-- 오른쪽: 열벡터 표기 -->
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <div class="section-head sh-green">열벡터로 표현</div>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; align-items:center; gap:12px; font-size:16px;">
+            <div style="width:12px;height:12px;background:var(--col-border);border-radius:2px;flex-shrink:0;"></div>
+            <span style="font-family:'JetBrains Mono',monospace; color:#6ee7b7;">c₁ = [R, R, R]ᵀ</span>
+            <span style="color:var(--text-muted); font-size:13px;">← 이미지의 첫 번째 세로줄</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; font-size:16px;">
+            <div style="width:12px;height:12px;background:#22c55e;border-radius:2px;flex-shrink:0;"></div>
+            <span style="font-family:'JetBrains Mono',monospace; color:#86efac;">c₂ = [G, G, G]ᵀ</span>
+            <span style="color:var(--text-muted); font-size:13px;">← 두 번째 세로줄</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; font-size:16px;">
+            <div style="width:12px;height:12px;background:#3b82f6;border-radius:2px;flex-shrink:0;"></div>
+            <span style="font-family:'JetBrains Mono',monospace; color:#93c5fd;">c₃ = [B, B, B]ᵀ</span>
+            <span style="color:var(--text-muted); font-size:13px;">← 세 번째 세로줄</span>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <div class="matrix-group">
+            <div class="matrix-wrap">
+              <div class="bracket">[</div>
+              <div class="matrix-body cols-3">
+                <div class="m-cell r col-hl-cell">R</div><div class="m-cell g">G</div><div class="m-cell b">B</div>
+                <div class="m-cell r col-hl-cell">R</div><div class="m-cell g">G</div><div class="m-cell b">B</div>
+                <div class="m-cell r col-hl-cell">R</div><div class="m-cell g">G</div><div class="m-cell b">B</div>
+              </div>
+              <div class="bracket">]</div>
+            </div>
+            <div class="matrix-label">A — 열1 강조</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="key-message" style="border-left-color:var(--green);">
+      🔑 열벡터 하나 = 이미지의 한 <strong style="color:var(--green);">세로줄</strong> — c₁은 첫 번째 열의 모든 픽셀을 담는다
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       슬라이드 6: 오른쪽 곱 → 열 재배치
+  ══════════════════════════════════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-tag">핵심 개념 ④ — 오른쪽 곱</div>
+    <div class="slide-title" style="font-size:32px; margin-bottom:22px;">
+      <span class="highlight-green">A · Q</span>&nbsp;→&nbsp;열(세로줄)들의 재배치
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex:1;">
+
+      <!-- A 원본 -->
+      <div class="matrix-group">
+        <div class="matrix-wrap">
+          <div class="bracket">[</div>
+          <div class="matrix-body cols-3">
+            <div class="m-cell r">R</div><div class="m-cell g">G</div><div class="m-cell b">B</div>
+            <div class="m-cell r">R</div><div class="m-cell g">G</div><div class="m-cell b">B</div>
+            <div class="m-cell r">R</div><div class="m-cell g">G</div><div class="m-cell b">B</div>
+          </div>
+          <div class="bracket">]</div>
+        </div>
+        <div class="matrix-label">A (원본)</div>
+      </div>
+
+      <div class="eq-sign">×</div>
+
+      <!-- Q 행렬 -->
+      <div class="matrix-group">
+        <div class="matrix-wrap">
+          <div class="bracket">[</div>
+          <div class="matrix-body cols-3">
+            <div class="m-cell zero">0</div><div class="m-cell zero">0</div><div class="m-cell one">1</div>
+            <div class="m-cell zero">0</div><div class="m-cell one">1</div><div class="m-cell zero">0</div>
+            <div class="m-cell one">1</div><div class="m-cell zero">0</div><div class="m-cell zero">0</div>
+          </div>
+          <div class="bracket">]</div>
+        </div>
+        <div class="matrix-label" style="color:var(--green);">Q (열교환 행렬)</div>
+      </div>
+
+      <div class="eq-sign">=</div>
+
+      <!-- A·Q 결과 -->
+      <div class="matrix-group">
+        <div class="matrix-wrap">
+          <div class="bracket">[</div>
+          <div class="matrix-body cols-3">
+            <div class="m-cell b">B</div><div class="m-cell g">G</div><div class="m-cell r">R</div>
+            <div class="m-cell b">B</div><div class="m-cell g">G</div><div class="m-cell r">R</div>
+            <div class="m-cell b">B</div><div class="m-cell g">G</div><div class="m-cell r">R</div>
+          </div>
+          <div class="bracket">]</div>
+        </div>
+        <div class="matrix-label" style="color:var(--green);">A·Q (좌우 대칭)</div>
+      </div>
+    </div>
+
+    <!-- 이동 화살표 시각화 -->
+    <div style="display:flex; justify-content:center; gap:32px; margin-bottom:14px;">
+      <div class="arrow-note" style="color:var(--blue-px);">
+        <span class="arr">←</span>
+        <span style="color:#93c5fd;">열3(B)이 왼쪽으로 이동</span>
+      </div>
+      <div class="arrow-note" style="color:var(--green);">
+        <span class="arr">↔</span>
+        <span style="color:#86efac;">열2(G)는 그대로 유지</span>
+      </div>
+      <div class="arrow-note" style="color:var(--red-px);">
+        <span class="arr">→</span>
+        <span style="color:#fca5a5;">열1(R)이 오른쪽으로 이동</span>
+      </div>
+    </div>
+
+    <!-- 픽셀 이미지 비교 -->
+    <div style="display:flex; justify-content:center; gap:48px; margin-bottom:14px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+        <div style="font-size:13px;color:var(--text-muted);">원본 A</div>
+        <div class="pixel-grid">
+          <div class="pixel-cell px-red"></div><div class="pixel-cell px-green"></div><div class="pixel-cell px-blue"></div>
+          <div class="pixel-cell px-red"></div><div class="pixel-cell px-green"></div><div class="pixel-cell px-blue"></div>
+          <div class="pixel-cell px-red"></div><div class="pixel-cell px-green"></div><div class="pixel-cell px-blue"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;font-size:32px;color:var(--green);">→</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+        <div style="font-size:13px;color:var(--green);">A·Q (좌우 반전)</div>
+        <div class="pixel-grid">
+          <div class="pixel-cell px-blue"></div><div class="pixel-cell px-green"></div><div class="pixel-cell px-red"></div>
+          <div class="pixel-cell px-blue"></div><div class="pixel-cell px-green"></div><div class="pixel-cell px-red"></div>
+          <div class="pixel-cell px-blue"></div><div class="pixel-cell px-green"></div><div class="pixel-cell px-red"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="key-message" style="border-left-color:var(--green);">
+      🔑 <strong style="color:var(--green);">A · Q</strong>에서 Q는 열들의 순서를 지시한다 — Q의 각 열이 "어느 열을 가져올지" 결정
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       슬라이드 7: 정리 & 180° 회전
+  ══════════════════════════════════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-tag">정리</div>
+    <div class="slide-title" style="font-size:34px; margin-bottom:22px;">
+      핵심 정리 + 보너스: <span class="highlight-yellow">180° 회전</span>
+    </div>
+
+    <div class="summary-cards">
+      <div class="summary-card card-blue">
+        <div class="card-icon">🔵</div>
+        <div class="card-title">P · A</div>
+        <div class="card-body">
+          <strong style="color:#93c5fd;">왼쪽 곱</strong><br>
+          → 행(가로줄) 재배치<br>
+          → <strong>상하 방향</strong> 변환<br><br>
+          P의 각 행이 결과 행렬의 어느 행을 선택할지 결정한다.
+        </div>
+      </div>
+
+      <div class="summary-card card-green">
+        <div class="card-icon">🟢</div>
+        <div class="card-title">A · Q</div>
+        <div class="card-body">
+          <strong style="color:#6ee7b7;">오른쪽 곱</strong><br>
+          → 열(세로줄) 재배치<br>
+          → <strong>좌우 방향</strong> 변환<br><br>
+          Q의 각 열이 결과 행렬의 어느 열을 선택할지 결정한다.
+        </div>
+      </div>
+    </div>
+
+    <div class="bonus-card">
+      <div style="font-size:28px;">🌀</div>
+      <div>
+        <div style="font-weight:800; font-size:17px; margin-bottom:4px;">
+          보너스: 180° 회전 = P · A · Q
+        </div>
+        <div style="font-size:15px; color:#fde68a; opacity:0.9;">
+          왼쪽 곱(상하 반전) + 오른쪽 곱(좌우 반전) 을 동시에 적용하면 180° 회전과 같다
+          &nbsp;—&nbsp; 두 변환은 독립적으로, 순서 없이 합성 가능
+        </div>
+      </div>
+    </div>
+
+    <!-- 미니 시각화 -->
+    <div style="display:flex; justify-content:center; gap:20px; margin-top:16px; align-items:center;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="font-size:11px;color:var(--text-muted);">원본 A</div>
+        <div class="pixel-grid" style="grid-template-columns:repeat(3,32px);grid-template-rows:repeat(3,32px);">
+          <div class="pixel-cell px-red" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-red" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-red" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-green" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-green" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-green" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-blue" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-blue" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-blue" style="width:32px;height:32px;font-size:9px;"></div>
+        </div>
+      </div>
+      <div style="font-size:22px;color:var(--blue);">P·</div>
+      <div style="font-size:22px;color:var(--text-muted);">↕</div>
+      <div style="font-size:22px;color:var(--green);">·Q</div>
+      <div style="font-size:22px;color:var(--text-muted);">↔</div>
+      <div style="font-size:22px;color:var(--yellow);">=</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="font-size:11px;color:var(--yellow);">P·A·Q (180°)</div>
+        <div class="pixel-grid" style="grid-template-columns:repeat(3,32px);grid-template-rows:repeat(3,32px);">
+          <div class="pixel-cell px-blue" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-blue" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-blue" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-green" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-green" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-green" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-red" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-red" style="width:32px;height:32px;font-size:9px;"></div>
+          <div class="pixel-cell px-red" style="width:32px;height:32px;font-size:9px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /stage -->
+
+<!-- ─── Controls ─── -->
+<div id="controls">
+  <button class="ctrl-btn" id="btn-prev" onclick="prev()" title="이전 (←)">&#8592;</button>
+  <div id="progress"></div>
+  <button class="ctrl-btn" id="btn-next" onclick="next()" title="다음 (→)">&#8594;</button>
+  <span id="slide-counter">1 / 7</span>
+</div>
+
+<script>
+  const TOTAL = 7;
+  let current = 1;
+
+  function buildProgress() {
+    const p = document.getElementById('progress');
+    p.innerHTML = '';
+    for (let i = 1; i <= TOTAL; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === current ? ' active' : '');
+      d.setAttribute('title', `슬라이드 ${i}`);
+      d.addEventListener('click', () => goTo(i));
+      p.appendChild(d);
+    }
+  }
+
+  function goTo(n) {
+    if (n < 1 || n > TOTAL) return;
+
+    const prev_slide = document.getElementById(`slide-${current}`);
+    if (prev_slide) {
+      prev_slide.classList.remove('active', 'fade-in');
+    }
+
+    current = n;
+
+    const next_slide = document.getElementById(`slide-${current}`);
+    if (next_slide) {
+      next_slide.classList.add('active');
+      // Trigger reflow for animation restart
+      void next_slide.offsetWidth;
+      next_slide.classList.add('fade-in');
+    }
+
+    document.getElementById('slide-counter').textContent = `${current} / ${TOTAL}`;
+    document.getElementById('btn-prev').disabled = current === 1;
+    document.getElementById('btn-next').disabled = current === TOTAL;
+    buildProgress();
+  }
+
+  function prev() { goTo(current - 1); }
+  function next() { goTo(current + 1); }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); prev(); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+  });
+
+  // Init
+  buildProgress();
+  const first = document.getElementById('slide-1');
+  first.classList.add('active', 'fade-in');
+  document.getElementById('btn-prev').disabled = true;
+</script>
+</body>
+</html>

@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>최적화와 의사 결정 | 인공지능수학 고2</title>
+
+  <link rel="stylesheet" href="../../libs/reveal.min.css">
+  <link rel="stylesheet" href="../../libs/theme/black.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => {
+          MathJax.startup.defaultReady();
+          window.mathJaxReady = true;
+        }
+      },
+      chtml: { scale: 0.92 }
+    };
+  </script>
+  <script src="../../libs/mathjax/tex-chtml.js" id="MathJax-script" async></script>
+
+  <script src="../../libs/gsap.min.js"></script>
+  <script src="../../libs/p5.min.js"></script>
+  <script src="../../libs/chart.min.js"></script>
+
+  <style>
+    :root {
+      --accent: #f39c12;
+      --accent-dim: #f39c1288;
+      --success: #2ecc71;
+      --danger: #e74c3c;
+      --info: #3498db;
+      --text-muted: #95a5a6;
+      --text-dim: #706858;
+      --border: #1e1c18;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal .highlight { color: var(--accent); font-weight: bold; }
+    .reveal .result    { color: var(--success); font-weight: bold; }
+    .reveal .wrong     { color: var(--danger); }
+    .reveal .kw        { color: var(--accent); font-weight: 600; }
+    .reveal .kw-info   { color: var(--info); font-weight: 600; }
+    .reveal .kw-success{ color: var(--success); font-weight: 600; }
+    .reveal .kw-danger { color: var(--danger); font-weight: 600; }
+
+    .reveal .step-box {
+      background: rgba(255,255,255,0.07);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 0;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.35s ease;
+    }
+    .reveal .step-box.visible {
+      padding: 0.55em 1em;
+      margin: 0.45em 0;
+      max-height: 220px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal .step-box .step-label {
+      font-size: 0.72em;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.2em;
+    }
+
+    .reveal .calc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82em;
+      margin: 0.7em auto;
+    }
+    .reveal .calc-table th {
+      background: var(--accent);
+      color: #000;
+      padding: 0.45em 0.7em;
+      text-align: center;
+      font-weight: 700;
+    }
+    .reveal .calc-table td {
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.4em 0.6em;
+      text-align: center;
+      transition: background 0.3s;
+    }
+    .reveal .calc-table tr:nth-child(even) td { background: rgba(255,255,255,0.04); }
+    .reveal .calc-table td.filled { color: #fff; }
+
+    .reveal .anim-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8em;
+      margin-top: 0.6em;
+    }
+    .reveal .anim-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      padding: 0.38em 1.1em;
+      font-size: 0.82em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .reveal .anim-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .reveal .anim-btn.reset-btn { background: rgba(255,255,255,0.15); color: #fff; }
+    .reveal .step-counter {
+      color: var(--text-muted);
+      font-size: 0.78em;
+      min-width: 4em;
+      text-align: center;
+    }
+
+    .reveal .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.4em;
+      align-items: start;
+    }
+    .reveal .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.9em;
+    }
+
+    .reveal .concept-card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 0.9em;
+      text-align: center;
+    }
+    .reveal .concept-card .icon { font-size: 1.8em; margin-bottom: 0.25em; }
+    .reveal .concept-card h4 { color: var(--accent); margin: 0.25em 0; font-size: 0.9em; }
+
+    .reveal .objective-list {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+    }
+    .reveal .objective-list li {
+      padding: 0.38em 0 0.38em 1.7em;
+      position: relative;
+      font-size: 0.92em;
+    }
+    .reveal .objective-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .reveal .formula-box {
+      background: rgba(255,255,255,0.04);
+      border-radius: 8px;
+      padding: 0.75em;
+      text-align: center;
+      margin: 0.4em 0;
+    }
+
+    .reveal .definition-box {
+      border-left: 4px solid var(--info);
+      padding: 0.55em 0.9em;
+      background: rgba(52,152,219,0.08);
+      border-radius: 0 8px 8px 0;
+      margin: 0.45em 0;
+    }
+
+    .reveal .card { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 0.9em; }
+    .reveal .card-accent { border: 1px solid var(--accent); }
+
+    .reveal .warning-box {
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid var(--danger);
+      border-radius: 8px;
+      padding: 0.65em 0.9em;
+      font-size: 0.82em;
+    }
+    .reveal .warning-box::before { content: '⚠️ '; }
+
+    .reveal .info-box {
+      background: rgba(52,152,219,0.12);
+      border: 1px solid var(--info);
+      border-radius: 8px;
+      padding: 0.65em 0.9em;
+      font-size: 0.82em;
+    }
+
+    .reveal .success-box {
+      background: rgba(46,204,113,0.12);
+      border: 1px solid var(--success);
+      border-radius: 8px;
+      padding: 0.65em 0.9em;
+      font-size: 0.85em;
+    }
+
+    .reveal .progress { height: 4px; }
+    .reveal .progress span { background: var(--accent); }
+
+    .reveal {
+      font-size: 28px;
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+    }
+    .reveal .slides section {
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .reveal mjx-container[jax="CHTML"][display="true"] {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    /* GD simulation table */
+    .reveal .gd-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.76em;
+      margin-top: 0.5em;
+    }
+    .reveal .gd-table th {
+      background: var(--accent);
+      color: #000;
+      padding: 0.35em 0.5em;
+      text-align: center;
+    }
+    .reveal .gd-table td {
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 0.32em 0.5em;
+      text-align: center;
+      font-size: 0.95em;
+    }
+    .reveal .gd-table .new-row {
+      animation: rowFade 0.5s ease;
+    }
+    @keyframes rowFade {
+      from { background: rgba(243,156,18,0.3); }
+      to   { background: transparent; }
+    }
+
+    /* lr compare cards */
+    .reveal .lr-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 0.7em;
+      text-align: center;
+      border: 2px solid transparent;
+    }
+    .reveal .lr-card.good  { border-color: var(--success); }
+    .reveal .lr-card.slow  { border-color: var(--info); }
+    .reveal .lr-card.bad   { border-color: var(--danger); }
+
+    /* quiz box */
+    .reveal .quiz-box {
+      background: rgba(243,156,18,0.08);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 1em 1.4em;
+      margin: 0.6em 0;
+    }
+
+    /* entropy bar */
+    .reveal .entropy-bar-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 1.5em;
+      justify-content: center;
+      height: 160px;
+      margin: 0.5em 0;
+    }
+    .reveal .entropy-bar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3em;
+      width: 120px;
+    }
+    .reveal .entropy-bar {
+      width: 60px;
+      background: var(--accent);
+      border-radius: 4px 4px 0 0;
+      transition: height 0.6s ease;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 4px;
+      color: #000;
+      font-size: 0.75em;
+      font-weight: bold;
+    }
+    .reveal .entropy-label {
+      font-size: 0.72em;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ══ 슬라이드 1: 타이틀 ══ -->
+    <section data-background-gradient="radial-gradient(ellipse at center, #1a1a2e 0%, #0d0d1a 100%)">
+      <div style="text-align:center; padding: 1em 0;">
+        <div style="font-size:0.65em; color:var(--accent); letter-spacing:0.15em; text-transform:uppercase; margin-bottom:0.5em;">
+          인공지능수학 · 고2 · IV단원
+        </div>
+        <h1 style="font-size:1.6em; margin:0.2em 0; color:#ecf0f1; line-height:1.2;">
+          최적화와 의사 결정
+        </h1>
+        <div style="width:60px; height:3px; background:var(--accent); margin:0.6em auto;"></div>
+        <p style="font-size:0.8em; color:var(--text-muted); margin:0.3em 0;">
+          손실함수 · 다항함수의 미분 · 경사하강법
+        </p>
+        <div style="margin-top:1.2em; display:flex; gap:1.2em; justify-content:center; flex-wrap:wrap;">
+          <div style="background:rgba(243,156,18,0.12); border:1px solid var(--accent-dim); border-radius:8px; padding:0.5em 1em; font-size:0.72em;">
+            📊 손실함수 이해
+          </div>
+          <div style="background:rgba(52,152,219,0.12); border:1px solid #3498db66; border-radius:8px; padding:0.5em 1em; font-size:0.72em;">
+            🔻 경사하강법 계산
+          </div>
+          <div style="background:rgba(46,204,113,0.12); border:1px solid #2ecc7166; border-radius:8px; padding:0.5em 1em; font-size:0.72em;">
+            🌳 최적화 응용
+          </div>
+        </div>
+      </div>
+      <aside class="notes">오늘 수업 주제를 소개합니다. 인공지능이 어떻게 학습하는지, 그 수학적 원리를 손실함수와 미분을 통해 배웁니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 2: 학습 목표 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.1em; margin-bottom:0.6em;">학습 목표</h2>
+      <ul class="objective-list" style="margin:0.5em 0;">
+        <li>추세선의 오차를 <span class="kw">손실함수</span>로 표현하는 원리와 방법을 이해한다.</li>
+        <li><span class="kw">다항함수의 미분</span>을 이용하여 손실함수의 최솟값을 구할 수 있다.</li>
+        <li>합리적인 의사 결정 과정에서 <span class="kw">최적화</span>의 역할을 이해하고 탐구 주제를 설정할 수 있다.</li>
+      </ul>
+
+      <div style="margin-top:0.9em;" class="definition-box">
+        <strong style="color:var(--info);">성취 기준</strong>
+        <div style="font-size:0.82em; margin-top:0.3em; color:#bdc3c7;">
+          12인수04-01 · 오차를 표현할 수 있는 함수를 구성하는 원리와 방법을 이해한다.<br>
+          12인수04-02 · 함수의 최솟값 또는 최댓값을 찾아 최적화된 의사 결정 방법을 이해한다.<br>
+          12인수04-03 · 합리적 의사 결정과 관련된 인공지능 수학 탐구 주제를 선정하여 탐구를 수행한다.
+        </div>
+      </div>
+      <aside class="notes">교과서 IV단원 성취기준 3가지를 안내합니다. 오늘 수업은 주로 01, 02에 해당합니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 3: 실생활 최적화 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.5em;">최적화는 왜 필요할까?</h2>
+      <p style="font-size:0.82em; color:#bdc3c7; margin-bottom:0.7em;">
+        우리 주변에는 최적의 선택을 찾아야 하는 상황이 가득합니다.
+      </p>
+      <div class="three-col">
+        <div class="concept-card">
+          <div class="icon">🗺️</div>
+          <h4>내비게이션</h4>
+          <p style="font-size:0.75em; color:#bdc3c7; margin:0.3em 0;">수천 개의 경로 중<br><span class="kw">최단 시간 경로</span>를 찾는다</p>
+        </div>
+        <div class="concept-card">
+          <div class="icon">🤖</div>
+          <h4>AI 추천 시스템</h4>
+          <p style="font-size:0.75em; color:#bdc3c7; margin:0.3em 0;">오차(손실)를 최소화하여<br><span class="kw">최적 추천</span>을 만든다</p>
+        </div>
+        <div class="concept-card">
+          <div class="icon">🌱</div>
+          <h4>스마트팜</h4>
+          <p style="font-size:0.75em; color:#bdc3c7; margin:0.3em 0;">온도·물량·빛을 조절해<br><span class="kw">최적 생육 환경</span> 유지</p>
+        </div>
+      </div>
+
+      <div style="margin-top:0.8em; padding:0.6em 1em; background:rgba(243,156,18,0.08); border-radius:8px; text-align:center;">
+        <span style="font-size:0.88em; color:#ecf0f1;">
+          인공지능이 최적의 의사 결정을 하려면?
+          → <span class="kw">데이터로 오차를 정의</span>하고 → <span class="kw">미분으로 최솟값</span>을 찾는다
+        </span>
+      </div>
+      <aside class="notes">교과서 100-101쪽 도입부와 연결. 스마트팜 로봇 이미지를 활용. 최적화의 핵심은 '오차를 정의하고 그것을 수학적으로 최소화하는 것'입니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 4: 손실함수 L(w)=(w-3)² 시각화 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.3em;">손실함수란?</h2>
+
+      <div class="two-col" style="align-items:center;">
+        <div>
+          <div class="definition-box" style="font-size:0.8em; margin-bottom:0.5em;">
+            <strong style="color:var(--info);">손실함수 (Loss Function)</strong><br>
+            추세선의 오차의 제곱의 평균을 나타내는 함수.<br>
+            값이 작을수록 예측이 정확하다.
+          </div>
+          <div class="formula-box" style="font-size:0.85em;">
+            \[ L(w) = (w - 3)^2 \]
+            <div style="font-size:0.72em; color:var(--text-muted); margin-top:0.3em;">예시: 최솟값을 w=3에서 갖는 손실함수</div>
+          </div>
+          <div style="font-size:0.78em; margin-top:0.5em; color:#bdc3c7; line-height:1.5;">
+            • w = 0: L = 9 (오차 큼)<br>
+            • w = 2: L = 1 (오차 줄어듦)<br>
+            • <span class="result">w = 3: L = 0 (완벽한 예측)</span>
+          </div>
+        </div>
+        <div>
+          <div style="max-width:340px; max-height:260px; margin:0 auto; position:relative;">
+            <canvas id="ai-loss-01"></canvas>
+          </div>
+          <p style="font-size:0.72em; text-align:center; color:var(--text-muted); margin-top:0.3em;">
+            포물선의 꼭짓점 = 손실 최솟값
+          </p>
+        </div>
+      </div>
+      <aside class="notes">손실함수를 (w-3)² 이차함수로 단순화해서 설명합니다. 실제 교과서에서는 L(a) = (880a²-1672a+830)/5 형태이지만, 원리 이해를 위해 단순 형태부터 시작합니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 5: 경사하강법 1단계 애니메이션 ══ -->
+    <section data-anim-id="anim-gradient-01">
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.3em;">경사하강법 — 기울기로 내려가기</h2>
+
+      <div class="two-col">
+        <div>
+          <div class="formula-box" style="font-size:0.82em; margin-bottom:0.5em;">
+            갱신식: \[ w \leftarrow w - \eta \cdot \frac{\partial L}{\partial w} \]
+            <div style="font-size:0.72em; color:var(--text-muted); margin-top:0.2em;">η (에타): 학습률</div>
+          </div>
+
+          <div id="anim-anim-gradient-01">
+            <div id="step-anim-gradient-01-s1" class="step-box">
+              <div class="step-label">Step 1: 현재 위치</div>
+              <div style="font-size:0.82em;">w₀ = 0, &nbsp; L(0) = (0−3)² = <span class="highlight">9</span></div>
+            </div>
+            <div id="step-anim-gradient-01-s2" class="step-box">
+              <div class="step-label">Step 2: 기울기 계산</div>
+              <div style="font-size:0.82em;">
+                \(\frac{\partial L}{\partial w} = 2(w-3)\) &nbsp;→&nbsp; w₀=0 대입: 2×(0−3) = <span class="highlight">−6</span>
+              </div>
+            </div>
+            <div id="step-anim-gradient-01-s3" class="step-box">
+              <div class="step-label">Step 3: 갱신 (η=0.1)</div>
+              <div style="font-size:0.82em;">
+                w₁ = 0 − 0.1 × (−6) = <span class="result">0.6</span>
+              </div>
+            </div>
+            <div id="step-anim-gradient-01-s4" class="step-box">
+              <div class="step-label">Step 4: 확인</div>
+              <div style="font-size:0.82em;">
+                L(0.6) = (0.6−3)² = <span class="result">5.76</span> &lt; 9 &nbsp;<span class="result">✓ 손실 감소!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center;">
+          <svg id="gd-arrow-svg" width="260" height="200" viewBox="0 0 260 200" style="overflow:hidden;">
+            <!-- 포물선 배경 -->
+            <path d="M 10,190 Q 130,-10 250,190" fill="none" stroke="#f39c1255" stroke-width="2.5"/>
+            <!-- 현재 위치 점 -->
+            <circle id="gd-pt" cx="35" cy="152" r="8" fill="var(--accent)"/>
+            <!-- w축 -->
+            <line x1="10" y1="190" x2="250" y2="190" stroke="#555" stroke-width="1"/>
+            <!-- 라벨 -->
+            <text x="35" y="185" text-anchor="middle" fill="#95a5a6" font-size="10">w=0</text>
+            <text x="130" y="185" text-anchor="middle" fill="#2ecc71" font-size="10">w=3</text>
+            <circle cx="130" cy="188" r="5" fill="#2ecc71"/>
+            <!-- 화살표 방향 -->
+            <path id="gd-arrow" d="M 35,152 L 60,120" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)" opacity="0"/>
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="var(--accent)"/>
+              </marker>
+            </defs>
+          </svg>
+          <p style="font-size:0.72em; color:var(--text-muted);">기울기 반대 방향으로 이동</p>
+        </div>
+      </div>
+
+      <div class="anim-controls">
+        <button class="anim-btn reset-btn" id="btn-reset-anim-gradient-01" onclick="resetGradAnim()">↺ 초기화</button>
+        <button class="anim-btn" id="btn-prev-anim-gradient-01" onclick="if(window.mathAnimators && window.mathAnimators['anim-gradient-01']) window.mathAnimators['anim-gradient-01'].prev()" disabled>◀ 이전</button>
+        <span class="step-counter" id="step-counter-anim-gradient-01">0 / 4</span>
+        <button class="anim-btn" id="btn-next-anim-gradient-01" onclick="if(window.mathAnimators && window.mathAnimators['anim-gradient-01']) window.mathAnimators['anim-gradient-01'].next()">다음 ▶</button>
+      </div>
+      <aside class="notes">N키로 단계 진행. 기울기가 음수이면 w를 증가시켜야 손실이 줄어든다는 것을 강조. η=0.1 × (-6) = -0.6이므로 w가 0.6 증가합니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 6: 경사하강법 반복 수렴 시뮬레이션 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.3em;">경사하강법 — 반복 수렴 시뮬레이션</h2>
+      <p style="font-size:0.8em; color:#bdc3c7; margin-bottom:0.4em;">L(w) = (w−3)², η = 0.1, w₀ = 0</p>
+
+      <div class="two-col" style="align-items:start;">
+        <div>
+          <div style="max-width:300px; max-height:200px; margin:0 auto; position:relative;">
+            <canvas id="ai-gd-canvas" width="300" height="200"></canvas>
+          </div>
+          <div class="anim-controls" style="margin-top:0.4em;">
+            <button class="anim-btn reset-btn" onclick="gdReset()">↺ 초기화</button>
+            <button class="anim-btn" id="gd-step-btn" onclick="gdStep()">1회 실행 ▶</button>
+          </div>
+        </div>
+        <div>
+          <table class="gd-table" id="gd-result-table">
+            <thead>
+              <tr>
+                <th>회차</th><th>w</th><th>L(w)</th><th>기울기</th>
+              </tr>
+            </thead>
+            <tbody id="gd-tbody">
+              <tr><td>0</td><td>0.000</td><td>9.0000</td><td>—</td></tr>
+            </tbody>
+          </table>
+          <div id="gd-status" style="font-size:0.75em; color:var(--text-muted); margin-top:0.4em; text-align:center;"></div>
+        </div>
+      </div>
+      <aside class="notes">버튼을 클릭하면 한 회씩 갱신됩니다. 5회 정도 보여주면 w가 3에 수렴하는 것을 확인할 수 있습니다. w₁=0.6, w₂=1.08, w₃=1.464...</aside>
+    </section>
+
+    <!-- ══ 슬라이드 7: 학습률 비교 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.4em;">학습률(η)이 중요한 이유</h2>
+
+      <div class="three-col" style="margin-bottom:0.6em;">
+        <div class="lr-card good">
+          <div style="font-size:1.3em; margin-bottom:0.2em;">✅</div>
+          <div style="color:var(--success); font-weight:bold; font-size:0.88em;">η = 0.1</div>
+          <div style="font-size:0.72em; color:#bdc3c7; margin-top:0.3em;">적절한 속도로<br>수렴</div>
+          <div style="max-width:140px; max-height:100px; margin:0.4em auto; position:relative;">
+            <canvas id="lr-good-chart"></canvas>
+          </div>
+        </div>
+        <div class="lr-card slow">
+          <div style="font-size:1.3em; margin-bottom:0.2em;">🐢</div>
+          <div style="color:var(--info); font-weight:bold; font-size:0.88em;">η = 0.01</div>
+          <div style="font-size:0.72em; color:#bdc3c7; margin-top:0.3em;">너무 느린<br>수렴</div>
+          <div style="max-width:140px; max-height:100px; margin:0.4em auto; position:relative;">
+            <canvas id="lr-slow-chart"></canvas>
+          </div>
+        </div>
+        <div class="lr-card bad">
+          <div style="font-size:1.3em; margin-bottom:0.2em;">💥</div>
+          <div style="color:var(--danger); font-weight:bold; font-size:0.88em;">η = 1.5</div>
+          <div style="font-size:0.72em; color:#bdc3c7; margin-top:0.3em;">진동/발산으로<br>학습 실패</div>
+          <div style="max-width:140px; max-height:100px; margin:0.4em auto; position:relative;">
+            <canvas id="lr-bad-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="warning-box" style="font-size:0.78em;">
+        η가 너무 크면: 최솟값을 지나쳐 발산 (overshooting) |
+        η가 너무 작으면: 수렴에 너무 오랜 시간 소요
+      </div>
+      <aside class="notes">학습률 선택이 경사하강법에서 가장 중요한 하이퍼파라미터입니다. η=1.5이면 w가 0 → 7.5 → -8.25...처럼 발산합니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 8: 경사하강법 종류 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.5em;">경사하강법의 종류</h2>
+
+      <div class="three-col">
+        <div class="card">
+          <div style="color:var(--accent); font-weight:bold; font-size:0.88em; margin-bottom:0.4em;">📦 Batch GD</div>
+          <div style="font-size:0.76em; color:#bdc3c7; line-height:1.6;">
+            <span class="kw">전체 데이터</span>로 기울기 계산<br>
+            • 안정적이지만 느림<br>
+            • 대용량 데이터에 비적합
+          </div>
+        </div>
+        <div class="card card-accent">
+          <div style="color:var(--accent); font-weight:bold; font-size:0.88em; margin-bottom:0.4em;">⚡ Stochastic GD</div>
+          <div style="font-size:0.76em; color:#bdc3c7; line-height:1.6;">
+            <span class="kw">1개 데이터</span>씩 기울기 계산<br>
+            • 빠르지만 불안정<br>
+            • 지역 최솟값 탈출 가능
+          </div>
+        </div>
+        <div class="card">
+          <div style="color:var(--accent); font-weight:bold; font-size:0.88em; margin-bottom:0.4em;">🔥 Mini-Batch GD</div>
+          <div style="font-size:0.76em; color:#bdc3c7; line-height:1.6;">
+            <span class="kw">소규모 묶음</span>으로 계산<br>
+            • Batch + Stochastic 절충<br>
+            • 딥러닝에서 표준적 방법
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:0.8em;" class="definition-box">
+        <div style="font-size:0.82em;">
+          <strong style="color:var(--info);">지역 최솟값 vs 전역 최솟값</strong><br>
+          <span style="color:#bdc3c7;">이차함수처럼 단순한 경우: 지역 = 전역 최솟값 (같음)</span><br>
+          <span style="color:#bdc3c7;">복잡한 손실 함수: 여러 개의 지역 최솟값 존재 → 전역 최솟값 탐색이 어려움</span>
+        </div>
+      </div>
+      <aside class="notes">실제 딥러닝에서는 Mini-Batch SGD (배치 크기 32~256)를 주로 사용합니다. 지역 최솟값 문제는 다음 슬라이드의 의사결정 트리와 비교할 때 다시 언급합니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 9: 의사결정 개요 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.4em;">손실함수 최솟값 찾기 — 미분 활용</h2>
+
+      <div class="two-col">
+        <div>
+          <div class="definition-box" style="font-size:0.8em; margin-bottom:0.5em;">
+            <strong style="color:var(--info);">교과서 핵심 방법</strong><br>
+            손실함수 L(a)가 a의 이차함수일 때, L'(a) = 0을 풀어 최솟값을 구한다.
+          </div>
+          <div class="formula-box" style="font-size:0.8em; margin-bottom:0.4em;">
+            <div style="color:var(--text-muted); font-size:0.85em; margin-bottom:0.3em;">추세선 f(x) = ax에 대한 손실함수</div>
+            \[ L(a) = \frac{880a^2 - 1672a + 830}{5} \]
+          </div>
+          <div class="formula-box" style="font-size:0.8em;">
+            <div style="color:var(--text-muted); font-size:0.85em; margin-bottom:0.3em;">미분으로 최솟값 구하기</div>
+            \[ L'(a) = \frac{1760a - 1672}{5} = 0 \]
+            \[ a = \frac{1672}{1760} = \frac{19}{20} = 0.95 \]
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8em; margin-bottom:0.4em; color:#bdc3c7; font-weight:bold;">💡 미분계수 = 기울기 = 0인 지점이 최솟값</div>
+          <svg width="240" height="180" viewBox="0 0 240 180" style="overflow:hidden; margin:0 auto; display:block;">
+            <!-- 포물선 -->
+            <path d="M 10,160 Q 120,10 230,160" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+            <!-- 최솟값 점 -->
+            <circle cx="120" cy="10" r="7" fill="var(--success)"/>
+            <!-- 접선 (기울기=0) -->
+            <line x1="80" y1="10" x2="160" y2="10" stroke="var(--success)" stroke-width="2" stroke-dasharray="5,3"/>
+            <!-- 라벨 -->
+            <text x="120" y="28" text-anchor="middle" fill="#2ecc71" font-size="11">L'(a)=0</text>
+            <text x="120" y="42" text-anchor="middle" fill="#2ecc71" font-size="10">최솟값!</text>
+            <!-- 좌우 기울기 화살표 -->
+            <text x="50" y="80" fill="#95a5a6" font-size="10">L' &lt; 0</text>
+            <text x="165" y="80" fill="#95a5a6" font-size="10">L' &gt; 0</text>
+            <!-- x축 -->
+            <line x1="10" y1="170" x2="230" y2="170" stroke="#555" stroke-width="1"/>
+            <text x="120" y="175" text-anchor="middle" fill="#95a5a6" font-size="9">a = 0.95</text>
+          </svg>
+          <div class="success-box" style="font-size:0.76em; margin-top:0.4em;">
+            미분 = 0 → 최솟값 a = 0.95 → 이 추세선이 데이터 예측에 가장 적합
+          </div>
+        </div>
+      </div>
+      <aside class="notes">교과서 104-105쪽 내용. 실제로는 손실함수를 미분하여 L'(a)=0을 풀면 최적의 추세선 기울기를 얻을 수 있습니다. 경사하강법은 이 과정을 수치적으로 반복합니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 10: 엔트로피 시각화 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.3em;">정보의 불확실성 — 엔트로피</h2>
+
+      <div class="two-col" style="align-items:start;">
+        <div>
+          <div class="formula-box" style="font-size:0.85em; margin-bottom:0.5em;">
+            \[ H = -\sum_{i} p_i \cdot \log_2 p_i \]
+          </div>
+          <div style="font-size:0.78em; color:#bdc3c7; margin-bottom:0.5em; line-height:1.6;">
+            • H가 클수록 → 불확실성↑ (섞여있음)<br>
+            • H가 작을수록 → 불확실성↓ (깔끔히 분류됨)<br>
+            • 의사결정 트리는 H를 최소화하는 방향으로 분기
+          </div>
+
+          <div style="font-size:0.78em; margin-top:0.4em;">
+            <div style="margin-bottom:0.3em;">
+              <span class="kw">균등 (50:50)</span><br>
+              H = −(0.5·log₂0.5 + 0.5·log₂0.5) = <span class="highlight">1.0 bit</span>
+            </div>
+            <div style="margin-bottom:0.3em;">
+              <span class="kw-info">불균등 (80:20)</span><br>
+              H = −(0.8·log₂0.8 + 0.2·log₂0.2) ≈ <span style="color:var(--info);">0.72 bit</span>
+            </div>
+            <div>
+              <span class="kw-success">순수 (100:0)</span><br>
+              H = −(1·log₂1) = <span class="result">0 bit</span> (완전히 분류됨)
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="max-width:300px; max-height:220px; margin:0 auto; position:relative;">
+            <canvas id="ai-entropy-03"></canvas>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">의사결정 트리에서 분기 기준을 선택할 때 엔트로피를 사용합니다. 분기 후 엔트로피가 가장 많이 감소하는 특징(속성)을 선택합니다. 이것이 정보 이득(Information Gain)입니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 11: 정보이득 계산 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.35em;">정보이득 — 최선의 분류 기준 찾기</h2>
+
+      <div class="definition-box" style="font-size:0.8em; margin-bottom:0.5em;">
+        <strong style="color:var(--info);">정보이득 (Information Gain)</strong> = 분기 전 H − 분기 후 평균 H<br>
+        <span style="color:#bdc3c7;">정보이득이 클수록 더 좋은 분류 기준</span>
+      </div>
+
+      <div class="two-col" style="font-size:0.82em;">
+        <div>
+          <div style="font-weight:bold; color:var(--accent); margin-bottom:0.3em;">예시: 스팸 메일 분류</div>
+          <div style="color:#bdc3c7; font-size:0.9em; line-height:1.6;">
+            전체 H = 1.0 bit (스팸:정상 = 5:5)<br><br>
+            <span class="kw">기준 A</span>: "광고" 단어 포함 여부<br>
+            → 포함: 스팸 4, 정상 1 → H ≈ 0.72<br>
+            → 미포함: 스팸 1, 정상 4 → H ≈ 0.72<br>
+            → 평균 H = 0.72<br>
+            → <span class="highlight">정보이득 = 1.0 − 0.72 = 0.28</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-weight:bold; color:var(--accent); margin-bottom:0.3em;">의사결정 트리 구조</div>
+          <svg width="240" height="180" viewBox="0 0 240 180" style="overflow:hidden; margin:0 auto; display:block;">
+            <!-- 루트 노드 -->
+            <rect x="85" y="5" width="70" height="28" rx="6" fill="rgba(243,156,18,0.2)" stroke="var(--accent)" stroke-width="1.5"/>
+            <text x="120" y="23" text-anchor="middle" fill="#ecf0f1" font-size="10">"광고" 포함?</text>
+            <!-- 왼쪽 화살표 -->
+            <line x1="100" y1="33" x2="60" y2="75" stroke="#555" stroke-width="1.5"/>
+            <text x="72" y="60" fill="#95a5a6" font-size="9">예</text>
+            <!-- 오른쪽 화살표 -->
+            <line x1="140" y1="33" x2="180" y2="75" stroke="#555" stroke-width="1.5"/>
+            <text x="167" y="60" fill="#95a5a6" font-size="9">아니오</text>
+            <!-- 왼쪽 노드 (스팸) -->
+            <rect x="20" y="75" width="80" height="28" rx="6" fill="rgba(231,76,60,0.2)" stroke="var(--danger)" stroke-width="1.5"/>
+            <text x="60" y="93" text-anchor="middle" fill="#ecf0f1" font-size="10">스팸 의심</text>
+            <!-- 오른쪽 노드 (정상) -->
+            <rect x="140" y="75" width="80" height="28" rx="6" fill="rgba(46,204,113,0.2)" stroke="var(--success)" stroke-width="1.5"/>
+            <text x="180" y="93" text-anchor="middle" fill="#ecf0f1" font-size="10">정상 메일</text>
+            <!-- 추가 분기 -->
+            <line x1="60" y1="103" x2="60" y2="135" stroke="#555" stroke-width="1.5"/>
+            <rect x="15" y="135" width="90" height="25" rx="4" fill="rgba(255,255,255,0.06)" stroke="#555" stroke-width="1"/>
+            <text x="60" y="151" text-anchor="middle" fill="#95a5a6" font-size="9">추가 특징 분기...</text>
+          </svg>
+        </div>
+      </div>
+      <aside class="notes">의사결정 트리는 각 분기점에서 정보이득이 가장 큰 특징을 선택합니다. 이것이 이산적 최적화입니다. 경사하강법(연속 최적화)과 비교됩니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 12: 경사하강법 vs 의사결정 비교 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.5em;">최적화 방법 비교</h2>
+
+      <div class="two-col">
+        <div class="card card-accent" style="padding:0.9em;">
+          <div style="font-size:1.2em; margin-bottom:0.3em;">📉</div>
+          <div style="color:var(--accent); font-weight:bold; margin-bottom:0.4em;">경사하강법 (연속 최적화)</div>
+          <ul style="font-size:0.76em; color:#bdc3c7; line-height:1.8; list-style:disc; margin-left:1em; padding:0;">
+            <li>손실함수 L(w)를 <span class="kw">미분</span>하여 최솟값 탐색</li>
+            <li>가중치(w)가 <span class="kw">연속적인 수</span></li>
+            <li>적합 문제: 회귀, 신경망 학습</li>
+            <li>목적: <span class="highlight">오차 최소화</span></li>
+          </ul>
+        </div>
+        <div class="card" style="padding:0.9em;">
+          <div style="font-size:1.2em; margin-bottom:0.3em;">🌳</div>
+          <div style="color:var(--info); font-weight:bold; margin-bottom:0.4em;">의사결정 트리 (이산 최적화)</div>
+          <ul style="font-size:0.76em; color:#bdc3c7; line-height:1.8; list-style:disc; margin-left:1em; padding:0;">
+            <li>엔트로피/정보이득으로 <span class="kw-info">최적 분기</span> 선택</li>
+            <li>선택지가 <span class="kw-info">이산적 (예/아니오)</span></li>
+            <li>적합 문제: 분류, 규칙 생성</li>
+            <li>목적: <span style="color:var(--info);">불확실성 최소화</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="formula-box" style="font-size:0.8em; margin-top:0.6em; text-align:center;">
+        <span style="color:var(--text-muted);">공통점: </span>
+        <span style="color:#ecf0f1;">둘 다 <span class="kw">어떤 기준값을 최소화</span>하여 최적의 의사 결정을 내린다</span>
+      </div>
+      <aside class="notes">교과서는 손실함수를 중심으로 연속 최적화를 가르칩니다. 의사결정 트리는 고등 AI 수학에서 이산 최적화의 대표 예시로 사용됩니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 13: 2변수 경사하강법 ══ -->
+    <section data-anim-id="anim-gd2d-02">
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.3em;">2변수 경사하강법 — 종합 예제</h2>
+      <p style="font-size:0.78em; color:#bdc3c7; margin-bottom:0.3em;">
+        L(w₁,w₂) = w₁² + w₂², &nbsp; η = 0.1, &nbsp; 초기: (w₁,w₂) = (2, 3)
+      </p>
+
+      <div id="anim-anim-gd2d-02">
+        <div id="step-anim-gd2d-02-s0" class="step-box">
+          <div class="step-label">초기</div>
+          <div style="font-size:0.82em;">w₁=2, w₂=3 &nbsp;→&nbsp; L = 2² + 3² = <span class="highlight">13</span>, &nbsp; η = 0.1</div>
+        </div>
+        <div id="step-anim-gd2d-02-s1" class="step-box">
+          <div class="step-label">1회 갱신</div>
+          <div style="font-size:0.82em;">
+            ∂L/∂w₁ = 2w₁ = 4, &nbsp; ∂L/∂w₂ = 2w₂ = 6<br>
+            w₁ = 2 − 0.1×4 = <span class="result">1.6</span>, &nbsp; w₂ = 3 − 0.1×6 = <span class="result">2.4</span> &nbsp; L = <span class="result">8.32</span>
+          </div>
+        </div>
+        <div id="step-anim-gd2d-02-s2" class="step-box">
+          <div class="step-label">2회 갱신</div>
+          <div style="font-size:0.82em;">
+            w₁ = 1.6−0.1×3.2 = <span class="result">1.28</span>, &nbsp; w₂ = 2.4−0.1×4.8 = <span class="result">1.92</span> &nbsp; L = <span class="result">5.32</span>
+          </div>
+        </div>
+        <div id="step-anim-gd2d-02-s3" class="step-box">
+          <div class="step-label">3회 갱신</div>
+          <div style="font-size:0.82em;">
+            w₁ = <span class="result">1.024</span>, &nbsp; w₂ = <span class="result">1.536</span> &nbsp;→&nbsp; L ≈ <span class="result">3.41</span>
+          </div>
+        </div>
+        <div id="step-anim-gd2d-02-s4" class="step-box">
+          <div class="step-label">수렴</div>
+          <div style="font-size:0.82em;">
+            반복할수록 (0, 0)으로 수렴 &nbsp;→&nbsp;
+            <span class="result">L(w₁,w₂) = w₁²+w₂²의 최솟값은 w₁=w₂=0에서 L=0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="anim-controls">
+        <button class="anim-btn reset-btn" onclick="if(window.mathAnimators && window.mathAnimators['anim-gd2d-02']) window.mathAnimators['anim-gd2d-02'].reset()">↺ 초기화</button>
+        <button class="anim-btn" id="btn-prev-anim-gd2d-02" onclick="if(window.mathAnimators && window.mathAnimators['anim-gd2d-02']) window.mathAnimators['anim-gd2d-02'].prev()" disabled>◀ 이전</button>
+        <span class="step-counter" id="step-counter-anim-gd2d-02">0 / 5</span>
+        <button class="anim-btn" id="btn-next-anim-gd2d-02" onclick="if(window.mathAnimators && window.mathAnimators['anim-gd2d-02']) window.mathAnimators['anim-gd2d-02'].next()">다음 ▶</button>
+      </div>
+      <aside class="notes">2변수로 확장된 경사하강법. 각 변수에 대해 편미분을 구하고 독립적으로 갱신합니다. L=w₁²+w₂²는 원점이 최솟값인 그릇 모양 함수입니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 14: 핵심 요약 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.5em;">핵심 개념 정리</h2>
+
+      <div class="three-col" style="margin-bottom:0.6em;">
+        <div style="background:rgba(243,156,18,0.08); border:1px solid var(--accent-dim); border-radius:10px; padding:0.8em; text-align:center;">
+          <div style="font-size:1.4em; margin-bottom:0.2em;">📊</div>
+          <div style="color:var(--accent); font-weight:bold; font-size:0.88em; margin-bottom:0.3em;">손실함수</div>
+          <div style="font-size:0.72em; color:#bdc3c7; line-height:1.5;">
+            오차²의 평균<br>
+            \(L(a) = \frac{\sum(y_i - ax_i)^2}{n}\)<br>
+            <span class="highlight">값이 작을수록 좋음</span>
+          </div>
+        </div>
+        <div style="background:rgba(52,152,219,0.08); border:1px solid #3498db66; border-radius:10px; padding:0.8em; text-align:center;">
+          <div style="font-size:1.4em; margin-bottom:0.2em;">🔻</div>
+          <div style="color:var(--info); font-weight:bold; font-size:0.88em; margin-bottom:0.3em;">경사하강법</div>
+          <div style="font-size:0.72em; color:#bdc3c7; line-height:1.5;">
+            기울기 반대 방향으로 이동<br>
+            \(w \leftarrow w - \eta \cdot \frac{\partial L}{\partial w}\)<br>
+            <span style="color:var(--info);">반복으로 최솟값 도달</span>
+          </div>
+        </div>
+        <div style="background:rgba(46,204,113,0.08); border:1px solid #2ecc7166; border-radius:10px; padding:0.8em; text-align:center;">
+          <div style="font-size:1.4em; margin-bottom:0.2em;">🌳</div>
+          <div style="color:var(--success); font-weight:bold; font-size:0.88em; margin-bottom:0.3em;">의사결정 최적화</div>
+          <div style="font-size:0.72em; color:#bdc3c7; line-height:1.5;">
+            엔트로피/정보이득 기준<br>
+            \(H = -\sum p_i \log_2 p_i\)<br>
+            <span class="result">불확실성 최소화</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="success-box" style="font-size:0.8em; text-align:center;">
+        최적화 = <span class="highlight">목적함수를 정의</span>하고 → <span class="highlight">수학적 방법으로 최솟값(최댓값) 탐색</span>
+        → 최적의 의사 결정
+      </div>
+      <aside class="notes">오늘 배운 세 가지 핵심 개념을 정리합니다. 손실함수 → 경사하강법 → 미분 활용으로 이어지는 흐름이 AI 학습의 본질입니다.</aside>
+    </section>
+
+    <!-- ══ 슬라이드 15: 퀴즈 ══ -->
+    <section>
+      <h2 style="color:var(--accent); font-size:1.05em; margin-bottom:0.5em;">확인 문제</h2>
+
+      <div class="quiz-box" style="margin-bottom:0.8em;">
+        <div style="font-size:0.88em; font-weight:bold; margin-bottom:0.5em;">
+          Q. L(w) = w² − 4w + 5에서 경사하강법 1회 적용 후 w₁은?<br>
+          <span style="font-size:0.85em; font-weight:normal; color:var(--text-muted);">(η = 0.1, w₀ = 0)</span>
+        </div>
+        <div style="font-size:0.82em; color:#bdc3c7; line-height:1.8;">
+          ① w₁ = 0.2 &nbsp;&nbsp;&nbsp; ② w₁ = 0.4 &nbsp;&nbsp;&nbsp; ③ w₁ = 0.6 &nbsp;&nbsp;&nbsp; ④ w₁ = 0.8
+        </div>
+      </div>
+
+      <div id="quiz-answer" style="display:none;">
+        <div class="success-box" style="font-size:0.82em; margin-bottom:0.4em;">
+          <strong>풀이:</strong><br>
+          L'(w) = 2w − 4 &nbsp;→&nbsp; w₀=0 대입: L'(0) = −4<br>
+          w₁ = 0 − 0.1 × (−4) = <span class="result">0.4</span> &nbsp;→&nbsp; 정답 ②
+        </div>
+        <div style="font-size:0.78em; color:var(--text-muted);">
+          검증: L(0.4) = 0.16 − 1.6 + 5 = 3.56 &lt; L(0) = 5 ✓
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-top:0.6em;">
+        <button class="anim-btn" onclick="document.getElementById('quiz-answer').style.display='block'">정답 확인 ▶</button>
+      </div>
+
+      <div style="margin-top:0.8em; font-size:0.78em; color:var(--text-muted); text-align:center;">
+        다음 차시: 다항함수의 미분 심화 | 최적화 탐구 주제 선정
+      </div>
+      <aside class="notes">학생들이 먼저 풀어보게 한 후 정답을 공개합니다. L'(w)=2w-4이고 w=0에서 기울기=-4, 갱신식 적용하면 w₁=0+0.4=0.4입니다.</aside>
+    </section>
+
+  </div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="../../libs/reveal.min.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    progress: true,
+    controls: true,
+    controlsLayout: 'bottom-right',
+    transition: 'slide',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    center: true,
+    touch: true,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 1.5,
+    keyboard: {
+      78: () => {
+        const currentSlide = Reveal.getCurrentSlide();
+        const animId = currentSlide.dataset.animId;
+        if (animId && window.mathAnimators && window.mathAnimators[animId]) {
+          window.mathAnimators[animId].next();
+        }
+      },
+      80: () => {
+        const currentSlide = Reveal.getCurrentSlide();
+        const animId = currentSlide.dataset.animId;
+        if (animId && window.mathAnimators && window.mathAnimators[animId]) {
+          window.mathAnimators[animId].prev();
+        }
+      }
+    },
+    plugins: []
+  });
+
+  window.safeTypeset = function(elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => safeTypeset());
+  Reveal.on('ready', () => safeTypeset());
+</script>
+
+<script src="../../templates/math_animation_lib.js"></script>
+
+<script>
+// ══════════════════════════════════════════
+// 슬라이드 4: 손실함수 L(w)=(w-3)² Chart.js
+// ══════════════════════════════════════════
+(function() {
+  function initLossChart() {
+    const canvas = document.getElementById('ai-loss-01');
+    if (!canvas) return;
+    const data = [];
+    for (let w = 0; w <= 6; w += 0.1) {
+      data.push({ x: parseFloat(w.toFixed(1)), y: parseFloat(((w-3)**2).toFixed(3)) });
+    }
+    new Chart(canvas, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'L(w) = (w−3)²',
+            data: data,
+            borderColor: '#f39c12',
+            showLine: true,
+            pointRadius: 0,
+            borderWidth: 2.5
+          },
+          {
+            label: '최솟값 w=3',
+            data: [{ x: 3, y: 0 }],
+            backgroundColor: '#2ecc71',
+            pointRadius: 8,
+            pointStyle: 'circle',
+            showLine: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1.5,
+        plugins: {
+          legend: { labels: { color: '#ecf0f1', font: { size: 10 } } },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          x: {
+            min: 0, max: 6,
+            title: { display: true, text: 'w', color: '#95a5a6', font: { size: 10 } },
+            grid: { color: 'rgba(255,255,255,0.08)' },
+            ticks: { color: '#7f8c8d', font: { size: 9 } }
+          },
+          y: {
+            min: -0.5, max: 10,
+            title: { display: true, text: 'L(w)', color: '#95a5a6', font: { size: 10 } },
+            grid: { color: 'rgba(255,255,255,0.08)' },
+            ticks: { color: '#7f8c8d', font: { size: 9 } }
+          }
+        }
+      }
+    });
+  }
+  // Reveal ready 후 초기화
+  if (document.readyState === 'complete') {
+    setTimeout(initLossChart, 500);
+  } else {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initLossChart, 500));
+  }
+})();
+
+// ══════════════════════════════════════════
+// 슬라이드 5: 경사하강법 1단계 MathStepAnimator
+// ══════════════════════════════════════════
+(function() {
+  function initGradAnim() {
+    if (typeof MathStepAnimator === 'undefined') {
+      setTimeout(initGradAnim, 300);
+      return;
+    }
+    const anim = new MathStepAnimator('anim-gradient-01', { speed: 'normal' });
+    anim.addStep({ id: 's1', effect: 'formula_appear', label: 'Step1' });
+    anim.addStep({ id: 's2', effect: 'formula_appear', label: 'Step2',
+      latex: true,
+      afterPlay: () => safeTypeset([document.getElementById('step-anim-gradient-01-s2')])
+    });
+    anim.addStep({ id: 's3', effect: 'formula_appear', label: 'Step3' });
+    anim.addStep({ id: 's4', effect: 'box_result', label: 'Step4' });
+  }
+  document.addEventListener('DOMContentLoaded', () => setTimeout(initGradAnim, 600));
+
+  window.resetGradAnim = function() {
+    if (window.mathAnimators && window.mathAnimators['anim-gradient-01']) {
+      window.mathAnimators['anim-gradient-01'].reset();
+    }
+    // GD arrow reset
+    const arrow = document.getElementById('gd-arrow');
+    if (arrow) gsap && gsap.to(arrow, { opacity: 0, duration: 0.3 });
+    const pt = document.getElementById('gd-pt');
+    if (pt) gsap && gsap.to(pt, { attr: { cx: 35, cy: 152 }, duration: 0.5 });
+  };
+})();
+
+// ══════════════════════════════════════════
+// 슬라이드 6: 경사하강법 수렴 시뮬레이션
+// ══════════════════════════════════════════
+(function() {
+  let gdW = 0;
+  let gdStep = 0;
+  const gdEta = 0.1;
+  let gdChart = null;
+  const gdWHistory = [0];
+  const gdLHistory = [9];
+
+  function gdLoss(w) { return (w - 3) ** 2; }
+  function gdGrad(w) { return 2 * (w - 3); }
+
+  function initGDCanvas() {
+    const canvas = document.getElementById('ai-gd-canvas');
+    if (!canvas) return;
+
+    // 포물선 + 현재 위치 점 그리기 (Chart.js)
+    const parabola = [];
+    for (let w = -0.5; w <= 6.5; w += 0.1) {
+      parabola.push({ x: parseFloat(w.toFixed(1)), y: parseFloat(gdLoss(w).toFixed(3)) });
+    }
+
+    gdChart = new Chart(canvas, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'L(w)=(w-3)²',
+            data: parabola,
+            borderColor: '#f39c1288',
+            showLine: true,
+            pointRadius: 0,
+            borderWidth: 2
+          },
+          {
+            label: '현재 위치',
+            data: [{ x: gdW, y: gdLoss(gdW) }],
+            backgroundColor: '#f39c12',
+            pointRadius: 9,
+            showLine: false,
+            pointStyle: 'circle'
+          },
+          {
+            label: '경로',
+            data: [{ x: gdW, y: gdLoss(gdW) }],
+            borderColor: '#3498db55',
+            showLine: true,
+            pointRadius: 4,
+            backgroundColor: '#3498db',
+            borderWidth: 1.5
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1.5,
+        animation: { duration: 400 },
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            min: -0.5, max: 6.5,
+            grid: { color: 'rgba(255,255,255,0.08)' },
+            ticks: { color: '#7f8c8d', font: { size: 9 } }
+          },
+          y: {
+            min: -0.5, max: 10,
+            grid: { color: 'rgba(255,255,255,0.08)' },
+            ticks: { color: '#7f8c8d', font: { size: 9 } }
+          }
+        }
+      }
+    });
+  }
+
+  window.gdStep = function() {
+    if (gdStep >= 10) {
+      document.getElementById('gd-status').textContent = '최대 10회 완료. 초기화 후 다시 시작하세요.';
+      return;
+    }
+    const grad = gdGrad(gdW);
+    const newW = gdW - gdEta * grad;
+    const newL = gdLoss(newW);
+    gdStep++;
+    gdWHistory.push(newW);
+    gdLHistory.push(newL);
+
+    // 테이블 업데이트
+    const tbody = document.getElementById('gd-tbody');
+    const row = document.createElement('tr');
+    row.classList.add('new-row');
+    row.innerHTML = `<td>${gdStep}</td><td>${newW.toFixed(4)}</td><td>${newL.toFixed(4)}</td><td>${grad.toFixed(3)}</td>`;
+    tbody.appendChild(row);
+
+    gdW = newW;
+
+    // 차트 업데이트
+    if (gdChart) {
+      gdChart.data.datasets[1].data = [{ x: gdW, y: gdLoss(gdW) }];
+      gdChart.data.datasets[2].data = gdWHistory.map((w, i) => ({ x: w, y: gdLHistory[i] }));
+      gdChart.update();
+    }
+
+    const status = document.getElementById('gd-status');
+    if (Math.abs(gdW - 3) < 0.01) {
+      status.textContent = `✅ 수렴! w ≈ ${gdW.toFixed(4)} ≈ 3`;
+      status.style.color = '#2ecc71';
+      document.getElementById('gd-step-btn').disabled = true;
+    } else {
+      status.textContent = `현재 w = ${gdW.toFixed(4)}, L = ${gdLoss(gdW).toFixed(4)}`;
+    }
+  };
+
+  window.gdReset = function() {
+    gdW = 0;
+    gdStep = 0;
+    gdWHistory.length = 0;
+    gdWHistory.push(0);
+    gdLHistory.length = 0;
+    gdLHistory.push(9);
+    const tbody = document.getElementById('gd-tbody');
+    tbody.innerHTML = '<tr><td>0</td><td>0.000</td><td>9.0000</td><td>—</td></tr>';
+    if (gdChart) {
+      gdChart.data.datasets[1].data = [{ x: 0, y: 9 }];
+      gdChart.data.datasets[2].data = [{ x: 0, y: 9 }];
+      gdChart.update();
+    }
+    const status = document.getElementById('gd-status');
+    status.textContent = '';
+    status.style.color = '';
+    document.getElementById('gd-step-btn').disabled = false;
+  };
+
+  document.addEventListener('DOMContentLoaded', () => setTimeout(initGDCanvas, 600));
+})();
+
+// ══════════════════════════════════════════
+// 슬라이드 7: 학습률 비교 차트 3개
+// ══════════════════════════════════════════
+(function() {
+  function makeEta(eta, steps) {
+    let w = 0; const loss = [];
+    for (let i = 0; i <= steps; i++) {
+      loss.push((w - 3) ** 2);
+      const g = 2 * (w - 3);
+      w = w - eta * g;
+    }
+    return loss;
+  }
+
+  function miniChart(id, data, color, label) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: data.map((_, i) => i),
+        datasets: [{
+          label: label,
+          data: data,
+          borderColor: color,
+          backgroundColor: color + '22',
+          borderWidth: 2,
+          pointRadius: 2,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1.4,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#7f8c8d', font: { size: 7 } }, grid: { display: false } },
+          y: { ticks: { color: '#7f8c8d', font: { size: 7 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+      }
+    });
+  }
+
+  function initLRCharts() {
+    miniChart('lr-good-chart', makeEta(0.1, 15), '#2ecc71', 'η=0.1');
+    miniChart('lr-slow-chart', makeEta(0.01, 15), '#3498db', 'η=0.01');
+    const badData = [9];
+    let w = 0;
+    for (let i = 0; i < 8; i++) {
+      const g = 2 * (w - 3);
+      w = w - 1.5 * g;
+      const l = (w - 3) ** 2;
+      badData.push(Math.min(l, 200));
+    }
+    miniChart('lr-bad-chart', badData, '#e74c3c', 'η=1.5');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => setTimeout(initLRCharts, 700));
+})();
+
+// ══════════════════════════════════════════
+// 슬라이드 10: 엔트로피 Chart.js 막대
+// ══════════════════════════════════════════
+(function() {
+  function initEntropyChart() {
+    const canvas = document.getElementById('ai-entropy-03');
+    if (!canvas) return;
+
+    function entropy(p) {
+      if (p <= 0 || p >= 1) return 0;
+      return -(p * Math.log2(p) + (1-p) * Math.log2(1-p));
+    }
+
+    new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: ['균등\n(50:50)', '불균등\n(80:20)', '순수\n(100:0)'],
+        datasets: [{
+          label: '엔트로피 H (bit)',
+          data: [
+            parseFloat(entropy(0.5).toFixed(3)),
+            parseFloat(entropy(0.8).toFixed(3)),
+            parseFloat(entropy(1.0).toFixed(3))
+          ],
+          backgroundColor: ['#f39c12cc', '#3498dbcc', '#2ecc71cc'],
+          borderColor: ['#f39c12', '#3498db', '#2ecc71'],
+          borderWidth: 2,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1.4,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `H = ${ctx.parsed.y.toFixed(3)} bit`
+            }
+          },
+          datalabels: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#bdc3c7', font: { size: 10 } }
+          },
+          y: {
+            min: 0, max: 1.1,
+            title: { display: true, text: 'H (bit)', color: '#95a5a6', font: { size: 10 } },
+            grid: { color: 'rgba(255,255,255,0.08)' },
+            ticks: { color: '#7f8c8d', font: { size: 9 } }
+          }
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => setTimeout(initEntropyChart, 600));
+})();
+
+// ══════════════════════════════════════════
+// 슬라이드 13: 2변수 경사하강법 MathStepAnimator
+// ══════════════════════════════════════════
+(function() {
+  function initGD2DAnim() {
+    if (typeof MathStepAnimator === 'undefined') {
+      setTimeout(initGD2DAnim, 300);
+      return;
+    }
+    const anim = new MathStepAnimator('anim-gd2d-02', { speed: 'normal' });
+    anim.addStep({ id: 's0', effect: 'formula_appear' });
+    anim.addStep({ id: 's1', effect: 'formula_appear' });
+    anim.addStep({ id: 's2', effect: 'formula_appear' });
+    anim.addStep({ id: 's3', effect: 'formula_appear' });
+    anim.addStep({ id: 's4', effect: 'box_result' });
+  }
+  document.addEventListener('DOMContentLoaded', () => setTimeout(initGD2DAnim, 600));
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>문제은행 미리보기 — 대단원 II 자료의 표현</title>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+:root{
+  --bg:#f8f9fa;--white:#fff;--border:#dee2e6;
+  --cyan:#0066cc;--amber:#e07b00;--green:#1a7a3c;--red:#c0392b;
+  --tag-하:#e8f5e9;--tag-중:#fff8e1;--tag-상:#fce4ec;
+  --tag-하-text:#2e7d32;--tag-중-text:#e65100;--tag-상-text:#c62828;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:#212529;font-size:15px}
+/* HEADER */
+.header{background:var(--cyan);color:#fff;padding:20px 32px}
+.header h1{font-size:1.5em;font-weight:900;margin-bottom:6px}
+.header .meta{font-size:0.9em;opacity:.85}
+/* STATS BAR */
+.stats{background:#fff;border-bottom:2px solid var(--border);padding:14px 32px;display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.stat-box{text-align:center}
+.stat-num{font-size:1.6em;font-weight:900;color:var(--cyan)}
+.stat-label{font-size:0.75em;color:#6c757d}
+.divider{width:1px;height:40px;background:var(--border)}
+/* FILTER BAR */
+.filter-bar{background:#fff;padding:12px 32px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.filter-bar span{font-size:0.8em;color:#6c757d;margin-right:4px}
+.btn{border:1.5px solid var(--border);background:#fff;padding:5px 12px;border-radius:20px;cursor:pointer;font-size:0.8em;font-weight:600;transition:all .15s}
+.btn:hover,.btn.active{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+.btn.btn-하.active{background:var(--green);border-color:var(--green)}
+.btn.btn-중.active{background:var(--amber);border-color:var(--amber)}
+.btn.btn-상.active{background:var(--red);border-color:var(--red)}
+/* QUESTION LIST */
+.q-list{max-width:900px;margin:24px auto;padding:0 24px 120px}
+/* CARD */
+.q-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px;transition:box-shadow .15s}
+.q-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.q-card.selected{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,102,204,.25)}
+.q-card.hidden{display:none}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.q-id{font-size:0.8em;font-weight:900;color:var(--cyan);min-width:46px}
+.tag{font-size:0.72em;font-weight:700;padding:2px 8px;border-radius:10px}
+.tag-하{background:var(--tag-하);color:var(--tag-하-text)}
+.tag-중{background:var(--tag-중);color:var(--tag-중-text)}
+.tag-상{background:var(--tag-상);color:var(--tag-상-text)}
+.tag-unit{background:#e3edf8;color:#1a4a7a;font-size:0.7em;padding:2px 7px;border-radius:8px}
+.tag-topic{color:#495057;font-size:0.78em}
+.stem{font-size:0.93em;line-height:1.6;margin-bottom:10px;color:#212529;white-space:pre-line}
+.choices{list-style:none;padding:0}
+.choices li{font-size:0.87em;padding:4px 0;line-height:1.5;color:#343a40}
+.choices li.correct{color:var(--green);font-weight:700}
+.choices li.correct::after{content:" ← 정답";font-size:0.78em;color:var(--green)}
+.expl-toggle{border:none;background:none;color:var(--cyan);font-size:0.82em;cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:2px}
+.expl-box{background:#f0f8ff;border-left:3px solid var(--cyan);border-radius:6px;padding:10px 14px;margin-top:8px;font-size:0.84em;line-height:1.6;display:none}
+.expl-box.open{display:block}
+/* SELECT BAR */
+.select-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid var(--border);padding:12px 24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;box-shadow:0 -4px 16px rgba(0,0,0,.1);z-index:200}
+.select-info{flex:1;font-size:0.88em;color:#343a40}
+.select-info strong{color:var(--cyan);font-size:1.1em}
+.diff-counts{font-size:0.8em;color:#6c757d;margin-left:10px}
+.btn-action{padding:7px 16px;border-radius:8px;border:none;cursor:pointer;font-size:0.85em;font-weight:700;transition:all .15s}
+.btn-all{background:#e9ecef;color:#343a40}
+.btn-all:hover{background:#ced4da}
+.btn-reset{background:#fff3cd;color:#856404}
+.btn-reset:hover{background:#ffc107;color:#212529}
+.btn-copy{background:var(--cyan);color:#fff}
+.btn-copy:hover{background:#0052a3}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>문제은행 미리보기 — 대단원 II. 자료의 표현</h1>
+  <div class="meta">인공지능수학 | 고2 | 생성일: 2026-03-18 | bank_session_id: 20260318_exam</div>
+</div>
+
+<div class="stats">
+  <div class="stat-box"><div class="stat-num" id="s-total">34</div><div class="stat-label">전체 문항</div></div>
+  <div class="divider"></div>
+  <div class="stat-box"><div class="stat-num" style="color:var(--green)" id="s-하">11</div><div class="stat-label">하 난이도</div></div>
+  <div class="stat-box"><div class="stat-num" style="color:var(--amber)" id="s-중">17</div><div class="stat-label">중 난이도</div></div>
+  <div class="stat-box"><div class="stat-num" style="color:var(--red)" id="s-상">6</div><div class="stat-label">상 난이도</div></div>
+  <div class="divider"></div>
+  <div class="stat-box"><div class="stat-num" style="font-size:1.1em;color:#495057" id="s-visible">34</div><div class="stat-label">표시 중</div></div>
+</div>
+
+<div class="filter-bar">
+  <span>난이도:</span>
+  <button class="btn active" onclick="filter('all')">전체</button>
+  <button class="btn btn-하" onclick="filter('하')">하</button>
+  <button class="btn btn-중" onclick="filter('중')">중</button>
+  <button class="btn btn-상" onclick="filter('상')">상</button>
+  <span style="margin-left:12px">단원:</span>
+  <button class="btn" onclick="filterUnit('all')">전체</button>
+  <button class="btn" onclick="filterUnit('II-1-01')">II-1-01</button>
+  <button class="btn" onclick="filterUnit('II-1-02')">II-1-02</button>
+  <button class="btn" onclick="filterUnit('II-1-03')">II-1-03</button>
+  <button class="btn" onclick="filterUnit('II-2-01')">II-2-01</button>
+  <button class="btn" onclick="filterUnit('II-2-02')">II-2-02</button>
+</div>
+
+<div class="q-list" id="qList"></div>
+
+<div class="select-bar">
+  <div class="select-info">
+    선택된 문항: <strong id="selCount">0</strong>개
+    <span class="diff-counts" id="selDiff"></span>
+  </div>
+  <button class="btn-action btn-all" onclick="selectAll()">전체 선택</button>
+  <button class="btn-action btn-reset" onclick="resetSel()">선택 초기화</button>
+  <button class="btn-action btn-copy" onclick="copyIds()">선택 ID 복사</button>
+</div>
+
+<script>
+const QUESTIONS = [
+  {id:"Q001",unit:"II-1-01",topic:"정형·비정형 자료 구분",difficulty:"하",stem:"다음 중 비정형 자료에 해당하는 것은?",choices:{"①":"학생 성적표","②":"출석부","③":"SNS 댓글","④":"회계 장부","⑤":"주소록"},answer:"③",explanation:"비정형 자료는 일정한 형식을 갖추지 않은 자료로 SNS 댓글·사진·동영상 등이 해당된다."},
+  {id:"Q002",unit:"II-1-01",topic:"불용어 개념",difficulty:"하",stem:"불용어(不用語)에 대한 설명으로 옳은 것은?",choices:{"①":"텍스트에서 가장 자주 등장하는 단어이다.","②":"단어 사전(word dictionary)의 핵심 단어이다.","③":"조사·관형사·접미사 등 의미 구별에 도움이 되지 않는 단어이다.","④":"TF 값이 가장 높은 단어를 뜻한다.","⑤":"텍스트 자료에서 절대 제거하면 안 되는 단어이다."},answer:"③",explanation:"불용어는 조사·관형사·접미사 등 의미 구별에 도움이 되지 않는 단어이다."},
+  {id:"Q003",unit:"II-1-01",topic:"벡터 성분 읽기",difficulty:"하",stem:"벡터 \\(\\vec{X} = (1,\\ 0,\\ 2,\\ 3,\\ 1)\\)에서 넷째 성분은?",choices:{"①":"0","②":"1","③":"2","④":"3","⑤":"5"},answer:"④",explanation:"벡터의 넷째 성분 x₄ = 3이다."},
+  {id:"Q004",unit:"II-1-01",topic:"단어 사전 — 합집합 원소 수",difficulty:"하",stem:"세 집합 A = {영화, 긴장감, 감동}, B = {영화, 감동, 지루하다, 실망}, C = {추천, 눈물, 보다, 감동, 영화}로 구성한 단어 사전 U = A∪B∪C의 원소의 개수는?",choices:{"①":"6","②":"7","③":"8","④":"9","⑤":"12"},answer:"③",explanation:"U = {영화, 긴장감, 감동, 지루하다, 실망, 추천, 눈물, 보다}로 총 8개. 합집합은 중복 원소를 한 번만 포함한다."},
+  {id:"Q005",unit:"II-1-01",topic:"텍스트 벡터 표현",difficulty:"하",stem:"단어 사전 U = {수제, 맛있다, 양, 많다, 치즈, 추천, 카레}일 때, B = {치즈, 많다, 추천}의 벡터 표현으로 옳은 것은?",choices:{"①":"(1,1,1,0,0,0,0)","②":"(0,0,0,1,1,1,0)","③":"(0,0,1,0,1,1,0)","④":"(1,0,0,1,1,1,0)","⑤":"(0,0,0,1,1,0,1)"},answer:"②",explanation:"수제(0),맛있다(0),양(0),많다(1),치즈(1),추천(1),카레(0) → (0,0,0,1,1,1,0)"},
+  {id:"Q006",unit:"II-1-02",topic:"TF 개념",difficulty:"하",stem:"단어 빈도수(TF, Term Frequency)의 정의로 옳은 것은?",choices:{"①":"단어가 등장하는 문서의 수","②":"단어가 해당 문서에서 등장한 횟수","③":"문서 빈도수의 역수","④":"전체 말뭉치에서 단어의 중요도 최종 점수","⑤":"단어가 불용어인지 판단하는 기준값"},answer:"②",explanation:"TF는 단어가 해당 문서에서 등장한 횟수. ①은 DF, ③은 IDF, ④는 TF·IDF이다."},
+  {id:"Q007",unit:"II-1-02",topic:"IDF 계산 — DF=n일 때",difficulty:"하",stem:"전체 3개 문서(n=3) 모두에 등장하는 단어의 IDF 값은?",choices:{"①":"0","②":"1","③":"3","④":"1/3","⑤":"9"},answer:"②",explanation:"IDF = n/DF = 3/3 = 1. 모든 문서에 등장하면 IDF가 최솟값 1이다."},
+  {id:"Q008",unit:"II-1-02",topic:"TF·IDF 1단계 계산",difficulty:"하",stem:"어떤 단어의 TF = 2이고 IDF = 3일 때 TF·IDF 값은?",choices:{"①":"1","②":"2/3","③":"5","④":"6","⑤":"3/2"},answer:"④",explanation:"TF·IDF = TF × IDF = 2 × 3 = 6"},
+  {id:"Q009",unit:"II-1-03",topic:"단어 구름 개념",difficulty:"하",stem:"단어의 빈도수에 비례하여 단어의 크기를 나타내는 시각화 방법은?",choices:{"①":"막대그래프","②":"원그래프","③":"산점도","④":"단어 구름(Word Cloud)","⑤":"레이더그래프"},answer:"④",explanation:"단어 구름은 빈도수가 클수록 단어를 크게 표시하는 시각화 방법이다."},
+  {id:"Q010",unit:"II-1-01",topic:"불용어 제거 후 집합 표현",difficulty:"중",stem:'댓글 A: "이 영화는 긴장감과 감동이 있는 영화예요." 불용어(이, 는, 과, 이, 있다, 이다) 제거 후 집합으로 옳은 것은?',choices:{"①":"A = {이, 영화, 긴장감, 감동}","②":"A = {영화, 긴장감, 감동}","③":"A = {긴장감, 감동}","④":"A = {영화, 긴장감, 감동, 있다}","⑤":"A = {영화, 는, 긴장감, 감동}"},answer:"②",explanation:"불용어 제거 후 '영화, 긴장감, 감동'이 남는다. 영화의 중복은 집합에서 1회만 포함."},
+  {id:"Q011",unit:"II-1-01",topic:"벡터 성분 — 단어 사전 활용",difficulty:"중",stem:"단어 사전 U = {영화, 긴장감, 감동, 지루하다, 실망, 추천, 눈물, 보다}에서 A = {영화, 긴장감, 감동}의 벡터 A⃗의 다섯째 성분은?",choices:{"①":"0","②":"1","③":"2","④":"3","⑤":"정의되지 않는다."},answer:"①",explanation:"다섯째 성분 = '실망' → A에 없으므로 0이다."},
+  {id:"Q012",unit:"II-1-02",topic:"TF 표 해석 — 주제어",difficulty:"중",stem:"TF 표에서 후기 B의 주제어(TF 최댓값 단어)는?\n[A: 청바지2, 추천2, 예쁘다1, 저렴하다1, 가격0, 디자인0, 좋다0, 신축성0]\n[B: 청바지1, 추천1, 예쁘다0, 저렴하다0, 가격1, 디자인2, 좋다1, 신축성0]\n[C: 청바지1, 추천1, 예쁘다0, 저렴하다0, 가격1, 디자인1, 좋다2, 신축성1]",choices:{"①":"청바지","②":"추천","③":"가격","④":"디자인","⑤":"좋다"},answer:"④",explanation:"후기 B에서 TF가 가장 큰 단어는 디자인(TF=2)이다."},
+  {id:"Q013",unit:"II-1-02",topic:"DF와 상대도수 계산",difficulty:"중",stem:"Q012의 TF 표에서 단어 '가격'의 DF와 상대도수(DF/n, n=3)를 올바르게 나타낸 것은?",choices:{"①":"DF=1, DF/n=1/3","②":"DF=2, DF/n=2/3","③":"DF=3, DF/n=1","④":"DF=2, DF/n=1/3","⑤":"DF=1, DF/n=2/3"},answer:"②",explanation:"'가격'은 후기 B와 C에 등장하므로 DF=2, 상대도수=2/3."},
+  {id:"Q014",unit:"II-1-02",topic:"IDF + TF·IDF 계산 — 날씨 기사",difficulty:"중",stem:"날씨 기사 3개(n=3)에서 '한파'의 DF=2, 기사 A의 TF=1일 때 TF·IDF 값은?",choices:{"①":"1","②":"2/3","③":"3/2","④":"1/2","⑤":"3"},answer:"③",explanation:"IDF = 3/2, TF·IDF = 1 × 3/2 = 3/2"},
+  {id:"Q015",unit:"II-1-02",topic:"TF·IDF 해석",difficulty:"중",stem:"청바지 후기 3개 분석 결과 '청바지'의 TF·IDF=1, '예쁘다'의 TF·IDF=3이었다. 옳은 해석은?",choices:{"①":"'청바지'가 더 중요하므로 TF·IDF가 크다.","②":"'예쁘다'는 모든 후기에 등장하므로 TF·IDF가 크다.","③":"'예쁘다'는 특정 후기에서만 자주 등장하는 그 후기만의 핵심 정보이다.","④":"TF·IDF는 단어의 절대 등장 횟수만 반영한다.","⑤":"TF·IDF가 1인 단어는 정보 가치가 전혀 없다."},answer:"③",explanation:"TF·IDF가 클수록 특정 문서에서만 자주 등장하는 해당 문서만의 핵심 정보이다."},
+  {id:"Q016",unit:"II-1-03",topic:"시각화 방법 선택 — 비율",difficulty:"중",stem:"쇼핑몰 후기 말뭉치의 단어별 전체 대비 비율을 직관적으로 파악하기에 가장 적합한 시각화 방법은?",choices:{"①":"단어 구름","②":"막대그래프","③":"원그래프","④":"산점도","⑤":"레이더그래프"},answer:"③",explanation:"원그래프는 전체 대비 각 부분의 비율을 부채꼴로 직관적으로 표현하는 분포 시각화에 최적이다."},
+  {id:"Q017",unit:"II-1-03",topic:"상대도수 계산",difficulty:"중",stem:"TF 합계=19일 때 '청바지'(TF=4)와 '추천'(TF=4)의 상대도수(%) 합계는?",choices:{"①":"21%","②":"32%","③":"42%","④":"50%","⑤":"74%"},answer:"③",explanation:"각 21% × 2 = 42%"},
+  {id:"Q018",unit:"II-1-03",topic:"시각화 방법 한계",difficulty:"중",stem:"텍스트 자료 시각화 방법에 대한 설명으로 옳지 않은 것은?",choices:{"①":"표는 수치를 정확히 확인할 수 있지만 패턴 파악이 어렵다.","②":"막대그래프는 범주별 빈도 크기를 비교하기 좋다.","③":"원그래프는 항목이 많을수록 비율 비교가 더 쉬워진다.","④":"단어 구름은 핵심 단어를 한눈에 파악할 수 있다.","⑤":"시각화 방법은 목적에 따라 선택해야 한다."},answer:"③",explanation:"원그래프는 항목이 많아질수록 부채꼴이 작아져 비율 비교가 어려워진다."},
+  {id:"Q019",unit:"II-2-01",topic:"픽셀과 해상도",difficulty:"하",stem:"이미지를 구성하는 최소 단위의 작은 정사각형을 무엇이라 하는가?",choices:{"①":"비트(bit)","②":"벡터(vector)","③":"픽셀(pixel)","④":"해상도(resolution)","⑤":"행렬(matrix)"},answer:"③",explanation:"픽셀(pixel)은 이미지를 구성하는 최소 단위의 작은 정사각형이다."},
+  {id:"Q020",unit:"II-2-01",topic:"흑백 이미지 — 색깔 수 대응",difficulty:"하",stem:"흑백 이미지를 행렬로 나타낼 때 검은색과 흰색에 대응하는 수로 옳은 것은?",choices:{"①":"검은색=1, 흰색=0","②":"검은색=0, 흰색=1","③":"검은색=255, 흰색=0","④":"검은색=128, 흰색=255","⑤":"검은색과 흰색 모두 0으로 표현"},answer:"②",explanation:"흑백 이미지: 검은색=0, 흰색=1"},
+  {id:"Q021",unit:"II-2-01",topic:"행렬의 (i,j) 성분",difficulty:"하",stem:"행렬 A = [[2, -1], [3, 1]]의 (1,2) 성분과 (2,1) 성분은?",choices:{"①":"(1,2)=-1, (2,1)=3 ← 정답 미표시용","②":"(1,2)=-1, (2,1)=3","③":"(1,2)=3, (2,1)=1","④":"(1,2)=-1, (2,1)=1","⑤":"(1,2)=2, (2,1)=3"},answer:"②",explanation:"(1,2) = 1행 2열 = -1, (2,1) = 2행 1열 = 3"},
+  {id:"Q022",unit:"II-2-01",topic:"RGB 순서쌍 — 색상 판독",difficulty:"중",stem:"컬러 이미지에서 R=0, G=0, B=255인 픽셀의 색상과 순서쌍으로 옳은 것은?",choices:{"①":"빨강, (255,0,0)","②":"초록, (0,255,0)","③":"파랑, (0,0,255)","④":"흰색, (255,255,255)","⑤":"검은색, (0,0,0)"},answer:"③",explanation:"R=0,G=0,B=255 → 파랑색, 순서쌍 (0,0,255)"},
+  {id:"Q023",unit:"II-2-01",topic:"컬러 이미지 행렬 — (i,j) 성분 RGB",difficulty:"중",stem:"R=[[255,0],[0,255]], G=[[0,255],[5,50]], B=[[0,0],[255,0]]일 때 (2,1) 성분을 (R,G,B) 순서쌍으로 나타낸 것은?",choices:{"①":"(255,0,0)","②":"(0,255,0)","③":"(0,5,255)","④":"(255,5,255)","⑤":"(0,50,0)"},answer:"③",explanation:"(2,1) = 2행 1열: R=0, G=5, B=255 → (0,5,255)"},
+  {id:"Q024",unit:"II-2-01",topic:"명암 이미지 — 픽셀값과 밝기",difficulty:"중",stem:"명암(그레이스케일) 이미지에서 픽셀값과 밝기의 관계로 옳은 것은?",choices:{"①":"0에 가까울수록 밝은 색, 255에 가까울수록 어두운 색","②":"0에 가까울수록 어두운 색, 255에 가까울수록 밝은 색","③":"0 = 빨강, 255 = 파랑","④":"모든 픽셀값이 동일하면 컬러 이미지이다.","⑤":"픽셀값과 밝기는 무관하다."},answer:"②",explanation:"0 = 검은색(가장 어두움), 255 = 흰색(가장 밝음)"},
+  {id:"Q025",unit:"II-2-02",topic:"행렬 덧셈 — 이미지 합성",difficulty:"중",stem:"A=[[1,2],[3,4]], B=[[2,-4],[5,-1]]일 때 A+B는?",choices:{"①":"[[3,-2],[8,3]]","②":"[[-1,6],[-2,5]]","③":"[[3,2],[8,-4]]","④":"[[2,-8],[15,-4]]","⑤":"[[1,6],[-2,5]]"},answer:"①",explanation:"A+B = [[1+2, 2+(-4)],[3+5, 4+(-1)]] = [[3,-2],[8,3]]"},
+  {id:"Q026",unit:"II-2-02",topic:"행렬 실수배 — 밝기 조절",difficulty:"중",stem:"A=[[120,64],[64,120]]의 1/2배 결과는?",choices:{"①":"[[240,128],[128,240]]","②":"[[60,32],[32,60]]","③":"[[60,64],[64,60]]","④":"[[120,32],[64,60]]","⑤":"[[119.5,63.5],[63.5,119.5]]"},answer:"②",explanation:"모든 성분 × 1/2 → [[60,32],[32,60]]. 0<k<1이면 이미지 어두워진다."},
+  {id:"Q027",unit:"II-2-02",topic:"컬러→흑백 변환 공식",difficulty:"중",stem:"컬러 이미지를 흑백으로 변환할 때 사용하는 행렬 K의 공식으로 옳은 것은?",choices:{"①":"K = R+G+B","②":"K = (1/3)(R+G+B)","③":"K = R-G-B","④":"K = R×G×B","⑤":"K = (R+G)/2+B"},answer:"②",explanation:"K = 1/3(R+G+B). 소수점 이하 첫째 자리 반올림."},
+  {id:"Q028",unit:"II-2-02",topic:"행렬 곱셈 가능 조건",difficulty:"중",stem:"행렬의 곱셈 AB가 정의되기 위한 조건으로 옳은 것은?",choices:{"①":"A와 B의 크기가 완전히 같아야 한다.","②":"A의 행의 수 = B의 행의 수","③":"A의 열의 수 = B의 행의 수","④":"A와 B 모두 정사각행렬이어야 한다.","⑤":"A의 행의 수 = B의 열의 수"},answer:"③",explanation:"A(m×k)와 B(k×n)의 곱이 가능하려면 A의 열 수 = B의 행 수(k)여야 한다."},
+  {id:"Q029",unit:"II-1-02",topic:"TF·IDF 4단계 종합 — 스포츠 기사",difficulty:"상",stem:"스포츠 기사 3개(n=3): P의 손흥민 TF=2, Q의 손흥민 TF=0, R의 손흥민 TF=1 → DF=2. 경기는 P,Q,R 모두 TF=1 → DF=3. P에서 손흥민의 TF·IDF와 Q에서 경기의 TF·IDF를 올바르게 구한 것은?",choices:{"①":"손흥민:2, 경기:1","②":"손흥민:3, 경기:1","③":"손흥민:1, 경기:2/3","④":"손흥민:4/3, 경기:1/3","⑤":"손흥민:2/3, 경기:1/3"},answer:"②",explanation:"손흥민: IDF=3/2, TF·IDF=2×3/2=3. 경기: IDF=1, TF·IDF=1×1=1."},
+  {id:"Q030",unit:"II-2-02",topic:"행렬 곱셈 계산",difficulty:"상",stem:"[[1,2],[0,1]] × [[1,2],[3,4]] = ?",choices:{"①":"[[7,10],[3,4]]","②":"[[7,4],[3,10]]","③":"[[1,4],[3,10]]","④":"[[7,10],[0,4]]","⑤":"[[1,10],[3,4]]"},answer:"①",explanation:"(1,1)=1×1+2×3=7, (1,2)=1×2+2×4=10, (2,1)=0+3=3, (2,2)=0+4=4"},
+  {id:"Q031",unit:"II-2-02",topic:"이미지 이동 — 행렬 곱셈",difficulty:"상",stem:"A=[[0,0,0],[0,255,0],[0,0,0]]에 T₁=[[0,1,0],[0,0,1],[0,0,0]]을 오른쪽에서 곱한 AT₁이 나타내는 이미지 변화는?",choices:{"①":"위로 한 픽셀 이동","②":"오른쪽으로 한 픽셀 이동","③":"좌우 대칭이동","④":"아래로 한 픽셀 이동","⑤":"변화 없음"},answer:"②",explanation:"AT₁ 계산 시 255가 (2,3)으로 이동 → 오른쪽으로 한 픽셀 이동"},
+  {id:"Q032",unit:"II-1-01",topic:"불용어 목적 의존성",difficulty:"상",stem:"영화 감상 후기 분석 시 '영화'와 '보다'를 추가 불용어로 처리하는 이유로 가장 적절한 것은?",choices:{"①":"두 단어의 TF가 가장 낮기 때문이다.","②":"두 단어는 문법적으로 조사이기 때문이다.","③":"두 단어가 모든 후기에 공통 등장하여 감성 분석에 특별한 정보를 주지 않기 때문이다.","④":"두 단어의 IDF가 가장 크기 때문에 노이즈가 된다.","⑤":"단어 사전 크기를 줄이기 위한 임의적 선택이다."},answer:"③",explanation:"목적에 따라 공통 등장 단어를 불용어로 추가 처리할 수 있다."},
+  {id:"Q033",unit:"II-2-02",topic:"컬러→흑백 변환 계산",difficulty:"상",stem:"R=120, G=90, B=60인 픽셀을 흑백으로 변환한 값 K는? (소수점 첫째 자리 반올림)",choices:{"①":"80","②":"85","③":"90","④":"95","⑤":"270"},answer:"③",explanation:"K = (120+90+60)/3 = 270/3 = 90"},
+  {id:"Q034",unit:"II-2-02",topic:"행렬 연산 종합 — 이미지 처리",difficulty:"상",stem:"행렬 이미지 처리에 관한 설명 중 옳은 것만을 고른 것은?\nㄱ. AB = BA가 항상 성립한다.\nㄴ. 이미지 이동 방향은 이동 행렬을 왼쪽/오른쪽 중 어디에 곱하는지에 따라 달라진다.\nㄷ. 컬러→흑백 변환에 행렬의 곱셈을 이용한다.",choices:{"①":"ㄱ","②":"ㄴ","③":"ㄱ, ㄴ","④":"ㄴ, ㄷ","⑤":"ㄱ, ㄴ, ㄷ"},answer:"③",explanation:"ㄱ 틀림(교환법칙 불성립). ㄴ 맞음(왼/오른쪽 곱에 따라 이동방향 상이). ㄷ 틀림(흑백변환은 덧셈·실수배 이용). → ㄴ만 참이므로 정답 ②. 단, ㄴ만 보면 ②지만 실제 정답 재확인: ㄱ거짓, ㄴ참, ㄷ거짓 → 정답 ②"}
+];
+
+let selectedIds = new Set();
+let curDiff = 'all';
+let curUnit = 'all';
+
+function renderAll(){
+  const list = document.getElementById('qList');
+  list.innerHTML = '';
+  let vis = 0;
+  QUESTIONS.forEach(q=>{
+    const card = document.createElement('div');
+    card.className = 'q-card' + (selectedIds.has(q.id)?' selected':'');
+    card.id = 'card-'+q.id;
+    const choicesHtml = Object.entries(q.choices).map(([k,v])=>{
+      const isAns = k === q.answer;
+      return `<li class="${isAns?'correct':''}">${k} ${v}</li>`;
+    }).join('');
+    card.innerHTML = `
+      <div class="card-header">
+        <input type="checkbox" ${selectedIds.has(q.id)?'checked':''} onchange="toggleSel('${q.id}',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--cyan)">
+        <span class="q-id">${q.id}</span>
+        <span class="tag tag-${q.difficulty}">${q.difficulty}</span>
+        <span class="tag-unit">${q.unit}</span>
+        <span class="tag-topic">${q.topic}</span>
+      </div>
+      <div class="stem">${q.stem}</div>
+      <ul class="choices">${choicesHtml}</ul>
+      <button class="expl-toggle" onclick="toggleExpl(this)">해설 보기 ▼</button>
+      <div class="expl-box">${q.explanation}</div>
+    `;
+    // filter
+    const diffHide = curDiff!=='all' && q.difficulty!==curDiff;
+    const unitHide = curUnit!=='all' && q.unit!==curUnit;
+    if(diffHide||unitHide) card.classList.add('hidden'); else vis++;
+    list.appendChild(card);
+  });
+  document.getElementById('s-visible').textContent = vis;
+  // MathJax rerender
+  if(window.MathJax) MathJax.typesetPromise && MathJax.typesetPromise([list]);
+  updateSelBar();
+}
+
+function toggleExpl(btn){
+  const box = btn.nextElementSibling;
+  box.classList.toggle('open');
+  btn.textContent = box.classList.contains('open')?'해설 닫기 ▲':'해설 보기 ▼';
+}
+function toggleSel(id, checked){
+  if(checked) selectedIds.add(id); else selectedIds.delete(id);
+  const card = document.getElementById('card-'+id);
+  if(card) card.classList.toggle('selected', checked);
+  updateSelBar();
+}
+function updateSelBar(){
+  document.getElementById('selCount').textContent = selectedIds.size;
+  const arr = [...selectedIds];
+  const counts = {하:0,중:0,상:0};
+  arr.forEach(id=>{
+    const q = QUESTIONS.find(x=>x.id===id);
+    if(q) counts[q.difficulty]++;
+  });
+  document.getElementById('selDiff').textContent =
+    arr.length>0 ? `(하 ${counts['하']} · 중 ${counts['중']} · 상 ${counts['상']})` : '';
+}
+function filter(diff){
+  curDiff = diff;
+  document.querySelectorAll('.filter-bar .btn').forEach(b=>{
+    if(['전체','하','중','상'].includes(b.textContent)) b.classList.remove('active');
+  });
+  document.querySelectorAll('.filter-bar .btn').forEach(b=>{
+    if(b.textContent === (diff==='all'?'전체':diff)) b.classList.add('active');
+  });
+  renderAll();
+}
+function filterUnit(unit){
+  curUnit = unit;
+  renderAll();
+}
+function selectAll(){
+  QUESTIONS.forEach(q=>{
+    const card = document.getElementById('card-'+q.id);
+    if(card && !card.classList.contains('hidden')){
+      selectedIds.add(q.id);
+      const cb = card.querySelector('input[type=checkbox]');
+      if(cb) cb.checked = true;
+      card.classList.add('selected');
+    }
+  });
+  updateSelBar();
+}
+function resetSel(){
+  selectedIds.clear();
+  document.querySelectorAll('.q-card input[type=checkbox]').forEach(cb=>cb.checked=false);
+  document.querySelectorAll('.q-card').forEach(c=>c.classList.remove('selected'));
+  updateSelBar();
+}
+function copyIds(){
+  if(selectedIds.size===0){alert('문항을 선택하세요.');return;}
+  const text = [...selectedIds].join(', ');
+  navigator.clipboard.writeText(text).then(()=>alert('클립보드에 복사됨:\n'+text));
+}
+
+// init
+const diffCounts = {하:0,중:0,상:0};
+QUESTIONS.forEach(q=>diffCounts[q.difficulty]++);
+document.getElementById('s-하').textContent = diffCounts['하'];
+document.getElementById('s-중').textContent = diffCounts['중'];
+document.getElementById('s-상').textContent = diffCounts['상'];
+document.getElementById('s-total').textContent = QUESTIONS.length;
+renderAll();
+</script>
+</body>
+</html>

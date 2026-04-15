@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>유사도 분석 - 학습지</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page {
+      size: A4;
+      margin: 15mm 15mm 20mm 15mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        font-size: 10pt;
+      }
+    }
+
+    .ws-page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm 15mm 20mm 15mm;
+      margin: 0 auto;
+      background: #fff;
+      page-break-after: always;
+    }
+
+    .ws-page:last-child {
+      page-break-after: auto;
+    }
+
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+
+    .ws-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .ws-title {
+      font-size: 14pt;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .ws-meta {
+      font-size: 9pt;
+      color: #666;
+      text-align: right;
+    }
+
+    .student-info {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .student-field {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10pt;
+    }
+
+    .student-field label {
+      font-weight: 500;
+      white-space: nowrap;
+      color: #444;
+    }
+
+    .field-line {
+      width: 80px;
+      border-bottom: 1px solid #999;
+      height: 20px;
+    }
+
+    .problem {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      margin-bottom: 20px;
+      padding: 10px 12px;
+    }
+
+    .problem-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .problem-number {
+      font-weight: 700;
+      font-size: 11pt;
+    }
+
+    .problem-body {
+      font-size: 11pt;
+      line-height: 1.7;
+    }
+
+    .problem-body p {
+      margin-bottom: 6px;
+    }
+
+    .choices {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 24px;
+      margin: 8px 0 8px 8px;
+      font-size: 10.5pt;
+    }
+
+    .choices li {
+      display: flex;
+      gap: 5px;
+      align-items: baseline;
+    }
+
+    .ws-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      font-size: 10pt;
+    }
+
+    .ws-table th {
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      padding: 5px 8px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .ws-table td {
+      border: 1px solid #ddd;
+      padding: 5px 8px;
+      text-align: center;
+    }
+
+    .ws-table td.left {
+      text-align: left;
+    }
+
+    .answer-space {
+      min-height: 35mm;
+      margin-top: 10px;
+    }
+
+    .answer-space.sm {
+      min-height: 20mm;
+    }
+
+    .answer-space.md {
+      min-height: 50mm;
+    }
+
+    .answer-space.lg {
+      min-height: 70mm;
+    }
+
+    .section-title {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #555;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 3px;
+      margin: 16px 0 10px;
+    }
+
+    .info-box {
+      background: #f8f8f8;
+      border-left: 3px solid #bbb;
+      padding: 7px 10px;
+      margin: 8px 0;
+      font-size: 10pt;
+      color: #444;
+    }
+
+    .page-number {
+      text-align: center;
+      font-size: 9pt;
+      color: #999;
+      margin-top: 14px;
+      padding-top: 6px;
+      border-top: 1px solid #eee;
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] }
+    };
+    window.safeTypeset = window.safeTypeset || function (elements) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+
+<body>
+
+  <!-- 1페이지 -->
+  <div class="ws-page">
+    <div class="ws-header">
+      <div class="ws-header-top">
+        <span class="ws-title">학습지 · 인공지능의 텍스트 분류 (유사도 분석)</span>
+        <span class="ws-meta">인공지능수학</span>
+      </div>
+    </div>
+
+    <div class="student-info">
+      <div class="student-field"><label>학번</label>
+        <div class="field-line"></div>
+      </div>
+      <div class="student-field"><label>이름</label>
+        <div class="field-line"></div>
+      </div>
+      <div class="student-field"><label>날짜</label>
+        <div class="field-line"></div>
+      </div>
+    </div>
+
+    <!-- 문제 1 -->
+    <div class="problem">
+      <div class="problem-header">
+        <span class="problem-number">1.</span>
+      </div>
+      <div class="problem-body">
+        <p>유클리드 유사도에 대한 설명으로 옳은 것은?</p>
+        <ul class="choices">
+          <li>① 값이 1에 가까울수록 유사하다.</li>
+          <li>② 두 벡터의 내적을 크기의 곱으로 나눈 값이다.</li>
+          <li>③ 두 집합의 교집합을 합집합으로 나눈 값이다.</li>
+          <li>④ 값이 0에 가까울수록 두 벡터가 유사하다.</li>
+          <li>⑤ 범위가 항상 0에서 1 사이이다.</li>
+        </ul>
+      </div>
+      <div class="answer-space sm"></div>
+    </div>
+
+    <!-- 문제 2 -->
+    <div class="problem">
+      <div class="problem-header">
+        <span class="problem-number">2.</span>
+      </div>
+      <div class="problem-body">
+        <p>코사인 유사도 $C(P,Q) = \dfrac{P \cdot Q}{|P||Q|}$ 에서 분자와 분모는 각각 무엇을 의미하는지 쓰시오.</p>
+      </div>
+      <div class="answer-space sm"></div>
+    </div>
+
+    <!-- 문제 3 -->
+    <div class="problem">
+      <div class="problem-header">
+        <span class="problem-number">3.</span>
+      </div>
+      <div class="problem-body">
+        <p>$P = \{수학, 물리, 화학\}$, $Q = \{물리, 화학, 생물\}$일 때, 자카드 유사도 $J(P,Q)$를 구하시오.</p>
+      </div>
+      <div class="answer-space md"></div>
+    </div>
+
+    <!-- 문제 4 -->
+    <div class="problem">
+      <div class="problem-header">
+        <span class="problem-number">4.</span>
+      </div>
+      <div class="problem-body">
+        <p>코사인 유사도와 유클리드 유사도의 차이점을 두 가지 측면에서 서술하시오.</p>
+      </div>
+      <div class="answer-space md"></div>
+    </div>
+
+    <!-- 문제 5 -->
+    <div class="problem">
+      <div class="problem-header">
+        <span class="problem-number">5.</span>
+      </div>
+      <div class="problem-body">
+        <p>벡터 $P = (3, 0, 4)$, $Q = (0, 3, 0)$의 유클리드 유사도 $L(P,Q)$를 구하시오.</p>
+      </div>
+      <div class="answer-space md"></div>
+    </div>
+
+    <div class="page-number">- 1 -</div>
+  </div>
+
+  <!-- 2페이지 -->
+  <div class="ws-page">
+    <div class="ws-header">
+      <div class="ws-header-top">
+        <span class="ws-title">학습지 · 인공지능의 텍스트 분류 (유사도 분석) (계속)</span>
+        <span class="ws-meta">인공지능수학</span>
+      </div>
+    </div>
+
+    <!-- 문제 6 -->
+    <div class="problem">
+      <div class="problem-header">
+        <span class="problem-number">6.</span>
+      </div>
+      <div class="problem-body">
+        <p>벡터 $P = (1, 2, 0)$, $Q = (2, 1, 2)$의 코사인 유사도 $C(P,Q)$를 구하시오.</p>
+        <p>(단, 분수 또는 소수 둘째 자리까지 나타낼 것)</p>
+      </div>
+      <div class="answer-space md"></div>
+    </div>
+
+    <!-- 문제 7 -->
+    <div class="problem">
+      <div class="problem-header">
+        <span class="problem-number">7.</span>
+      </div>
+      <div class="problem-body">
+        <p>문서 $A = \{인공지능, 데이터, 학습\}$, $B = \{데이터, 분석, 학습, 통계\}$의 자카드 유사도 $J(A,B)$를 구하시오.</p>
+      </div>
+      <div class="answer-space md"></div>
+    </div>
+
+    <!-- 문제 8 -->
+    <div class="problem">
+      <div class="problem-header">
+        <span class="problem-number">8.</span>
+      </div>
+      <div class="problem-body">
+        <p>세 벡터 $P=(1,0,1)$, $Q=(0,1,2)$, $R=(1,1,0)$에 대해 코사인 유사도 행렬을 완성하고, 가장 유사한 두 벡터의 쌍을 구하시오.</p>
+        <table class="ws-table" style="width:auto; margin: 8px 0;">
+          <thead>
+            <tr>
+              <th></th>
+              <th>P</th>
+              <th>Q</th>
+              <th>R</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>P</strong></td>
+              <td>1.000</td>
+              <td style="color:#bbb;">?</td>
+              <td style="color:#bbb;">?</td>
+            </tr>
+            <tr>
+              <td><strong>Q</strong></td>
+              <td style="color:#bbb;">?</td>
+              <td>1.000</td>
+              <td style="color:#bbb;">?</td>
+            </tr>
+            <tr>
+              <td><strong>R</strong></td>
+              <td style="color:#bbb;">?</td>
+              <td style="color:#bbb;">?</td>
+              <td>1.000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="answer-space md"></div>
+    </div>
+
+    <!-- 문제 9 -->
+    <div class="problem">
+      <div class="problem-header">
+        <span class="problem-number">9.</span>
+      </div>
+      <div class="problem-body">
+        <p>표절 검사 시스템을 설계할 때 코사인 유사도와 자카드 유사도 중 어느 것이 더 적합한지 판단하고, 그 이유를 서술하시오.</p>
+      </div>
+      <div class="answer-space md"></div>
+    </div>
+
+    <!-- 문제 10 -->
+    <div class="problem">
+      <div class="problem-header">
+        <span class="problem-number">10.</span>
+      </div>
+      <div class="problem-body">
+        <p>학교 도서관 추천 시스템을 설계한다고 가정하자. '학생이 읽은 책의 장르 벡터'를 이용하여 비슷한 취향의 책을 추천하는 방법을 유사도 분석 개념을 활용하여 서술하시오.</p>
+      </div>
+      <div class="answer-space md"></div>
+    </div>
+
+    <div class="page-number">- 2 -</div>
+  </div>
+
+</body>
+
+</html>

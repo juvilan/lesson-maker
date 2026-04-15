@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>강의 대본 | 인공지능과 수학 탐구 | IV-2</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      font-size: 11pt;
+      color: #1a1a1a;
+      background: #f8f8f8;
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 24pt;
+    }
+
+    /* ── 문서 헤더 ── */
+    .doc-header {
+      background: #1a1a2e;
+      color: #ecf0f1;
+      padding: 20pt 24pt;
+      border-radius: 8pt;
+      margin-bottom: 20pt;
+    }
+    .doc-header h1 { font-size: 18pt; font-weight: 900; color: #f39c12; margin-bottom: 4pt; }
+    .doc-header .meta { font-size: 9pt; color: #95a5a6; margin-top: 6pt; }
+    .doc-header .meta span { margin-right: 12pt; }
+
+    /* ── 슬라이드 카드 ── */
+    .slide-card {
+      background: #fff;
+      border-radius: 8pt;
+      margin-bottom: 16pt;
+      overflow: hidden;
+      box-shadow: 0 2pt 8pt rgba(0,0,0,0.08);
+      page-break-inside: avoid;
+    }
+
+    .slide-header {
+      display: flex;
+      align-items: center;
+      gap: 10pt;
+      padding: 10pt 16pt;
+      background: #2c3e50;
+      color: #ecf0f1;
+    }
+    .slide-num {
+      background: #f39c12;
+      color: #000;
+      font-weight: 900;
+      font-size: 10pt;
+      border-radius: 20pt;
+      padding: 2pt 9pt;
+      white-space: nowrap;
+    }
+    .slide-title {
+      font-size: 11.5pt;
+      font-weight: 700;
+    }
+    .slide-time {
+      margin-left: auto;
+      font-size: 8.5pt;
+      color: #95a5a6;
+      white-space: nowrap;
+    }
+
+    .slide-body { padding: 12pt 16pt; }
+
+    /* ── 강의 내용 유형별 스타일 ── */
+    .narration {
+      background: #fff9f0;
+      border-left: 3pt solid #f39c12;
+      border-radius: 0 4pt 4pt 0;
+      padding: 8pt 12pt;
+      margin: 6pt 0;
+      font-size: 10.5pt;
+      color: #2c2c2c;
+    }
+    .narration::before {
+      content: '🗣 ';
+      font-size: 0.9em;
+    }
+
+    .board-write {
+      background: #f0f8ff;
+      border-left: 3pt solid #3498db;
+      border-radius: 0 4pt 4pt 0;
+      padding: 8pt 12pt;
+      margin: 6pt 0;
+      font-size: 10.5pt;
+      color: #1a3a5c;
+    }
+    .board-write::before {
+      content: '✏️ 판서: ';
+      font-weight: 700;
+      font-size: 0.9em;
+    }
+
+    .teacher-action {
+      background: #f0fff4;
+      border-left: 3pt solid #2ecc71;
+      border-radius: 0 4pt 4pt 0;
+      padding: 8pt 12pt;
+      margin: 6pt 0;
+      font-size: 10pt;
+      color: #1a3a2a;
+    }
+    .teacher-action::before {
+      content: '👨‍🏫 행동: ';
+      font-weight: 700;
+      font-size: 0.9em;
+    }
+
+    .student-activity {
+      background: #fef9f0;
+      border-left: 3pt solid #e67e22;
+      border-radius: 0 4pt 4pt 0;
+      padding: 8pt 12pt;
+      margin: 6pt 0;
+      font-size: 10pt;
+      color: #3a2a10;
+    }
+    .student-activity::before {
+      content: '🙋 학생 활동: ';
+      font-weight: 700;
+      font-size: 0.9em;
+    }
+
+    .question {
+      background: #fdf4ff;
+      border-left: 3pt solid #9b59b6;
+      border-radius: 0 4pt 4pt 0;
+      padding: 8pt 12pt;
+      margin: 6pt 0;
+      font-size: 10pt;
+      color: #2a1040;
+    }
+    .question::before {
+      content: '❓ 발문: ';
+      font-weight: 700;
+      font-size: 0.9em;
+    }
+
+    .key-point {
+      background: #fff0f0;
+      border-left: 3pt solid #e74c3c;
+      border-radius: 0 4pt 4pt 0;
+      padding: 8pt 12pt;
+      margin: 6pt 0;
+      font-size: 10pt;
+      color: #3a1010;
+      font-weight: 600;
+    }
+    .key-point::before {
+      content: '⭐ 핵심: ';
+      font-weight: 900;
+      font-size: 0.9em;
+    }
+
+    .anim-cue {
+      background: #f5f0fa;
+      border: 1pt dashed #9b59b6;
+      border-radius: 4pt;
+      padding: 6pt 12pt;
+      margin: 6pt 0;
+      font-size: 9.5pt;
+      color: #5d3a7a;
+    }
+    .anim-cue::before {
+      content: '🎬 애니메이션: ';
+      font-weight: 700;
+    }
+
+    /* ── 시간표 ── */
+    .time-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9.5pt;
+      margin-bottom: 20pt;
+    }
+    .time-table th {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 6pt 10pt;
+      text-align: left;
+    }
+    .time-table td {
+      border: 0.8pt solid #ddd;
+      padding: 5pt 10pt;
+      vertical-align: top;
+    }
+    .time-table tr:nth-child(even) td { background: #f9f9f9; }
+    .time-table .t-num { color: #f39c12; font-weight: 700; text-align: center; }
+
+    @media print {
+      body { background: #fff; }
+      .container { padding: 10pt; }
+      .slide-card { box-shadow: none; border: 0.8pt solid #ddd; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── 문서 헤더 ── -->
+  <div class="doc-header">
+    <h1>강의 대본 — 인공지능과 수학 탐구</h1>
+    <div style="margin-top:5pt; color:#bdc3c7; font-size:10pt;">
+      인공지능수학 IV-2 &nbsp;|&nbsp; 고2 &nbsp;|&nbsp; 45분 수업
+    </div>
+    <div class="meta">
+      <span>슬라이드 15장</span>
+      <span>선형회귀 · 행렬 · 베이즈 정리</span>
+      <span>탐구 활동 포함</span>
+    </div>
+  </div>
+
+  <!-- ── 수업 시간 배분 ── -->
+  <table class="time-table">
+    <thead>
+      <tr>
+        <th style="width:60pt;">슬라이드</th>
+        <th style="width:55pt;">시간</th>
+        <th>내용</th>
+        <th style="width:70pt;">유형</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="t-num">1</td><td>0:00–1:00</td><td>도입 — 수업 안내</td><td>도입</td></tr>
+      <tr><td class="t-num">2</td><td>1:00–3:00</td><td>학습 목표 제시</td><td>도입</td></tr>
+      <tr><td class="t-num">3</td><td>3:00–6:00</td><td>AI와 수학의 연결 — 개념 도입</td><td>강의</td></tr>
+      <tr><td class="t-num">4</td><td>6:00–10:00</td><td>선형회귀 시각화</td><td>강의+시각화</td></tr>
+      <tr><td class="t-num">5</td><td>10:00–16:00</td><td>최소제곱법 — 3단계 애니메이션</td><td>핵심 강의</td></tr>
+      <tr><td class="t-num">6</td><td>16:00–20:00</td><td>회귀직선 계산 확인</td><td>강의+계산</td></tr>
+      <tr><td class="t-num">7</td><td>20:00–23:00</td><td>결정계수 R²</td><td>강의</td></tr>
+      <tr><td class="t-num">8</td><td>23:00–25:00</td><td>행렬과 AI 개념 카드</td><td>강의</td></tr>
+      <tr><td class="t-num">9</td><td>25:00–28:00</td><td>행렬 신경망 연산 — 인터랙티브</td><td>탐구</td></tr>
+      <tr><td class="t-num">10</td><td>28:00–31:00</td><td>베이즈 정리 소개</td><td>강의</td></tr>
+      <tr><td class="t-num">11</td><td>31:00–35:00</td><td>나이브 베이즈 계산 — 3단계 애니메이션</td><td>핵심 강의</td></tr>
+      <tr><td class="t-num">12</td><td>35:00–40:00</td><td>탐구 활동 — 기온 데이터 회귀</td><td>탐구 활동</td></tr>
+      <tr><td class="t-num">13</td><td>40:00–42:00</td><td>지도/비지도 학습 비교 정리</td><td>정리</td></tr>
+      <tr><td class="t-num">14</td><td>42:00–44:00</td><td>수업 핵심 정리</td><td>정리</td></tr>
+      <tr><td class="t-num">15</td><td>44:00–45:00</td><td>확인 퀴즈</td><td>평가</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ══════════════════════════════════════
+       슬라이드별 대본
+  ══════════════════════════════════════ -->
+
+  <!-- 슬라이드 1 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 1</span>
+      <span class="slide-title">타이틀 — 인공지능과 수학 탐구</span>
+      <span class="slide-time">0:00 – 1:00 (1분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        자, 오늘 수업 시작합시다. 오늘 단원 제목이 "인공지능과 수학 탐구"입니다.
+        탐구라는 단어가 있는데, 오늘은 교사가 설명하고 학생이 듣는 방식이 아니라,
+        여러분이 직접 손을 대서 계산하는 시간이 많을 거예요.
+      </div>
+      <div class="narration">
+        세 가지 수학 도구를 다룹니다. 선형회귀, 행렬, 베이즈 정리.
+        이 세 가지가 현대 AI를 움직이는 수학의 핵심입니다.
+      </div>
+      <div class="teacher-action">슬라이드 하단의 세 박스(선형회귀·행렬·베이즈)를 가리키며 오늘 수업 흐름 안내</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 2 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 2</span>
+      <span class="slide-title">학습 목표</span>
+      <span class="slide-time">1:00 – 3:00 (2분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        학습 목표 같이 읽어봅시다.
+      </div>
+      <div class="student-activity">학생들이 학습 목표를 소리 내어 읽는다.</div>
+      <div class="narration">
+        첫 번째, 최소제곱법으로 회귀직선을 구하는 것.
+        공식을 외우는 게 목표가 아니라, 왜 그 공식이 나왔는지를 이해하는 게 목표입니다.
+      </div>
+      <div class="narration">
+        네 번째 목표 보세요. 베이즈 정리로 나이브 베이즈 분류기의 원리를 설명할 수 있다.
+        스팸 필터가 어떻게 작동하는지 오늘 수업 끝나면 설명할 수 있어야 합니다.
+      </div>
+      <div class="key-point">핵심 질문: "수학 없이 AI가 가능한가?" — 오늘 수업의 실마리를 항상 이 질문으로 연결할 것</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 3 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 3</span>
+      <span class="slide-title">AI의 핵심은 수학이다</span>
+      <span class="slide-time">3:00 – 6:00 (3분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="question">여러분이 매일 쓰는 앱 중에서 AI가 들어간 앱이 뭐가 있을까요?</div>
+      <div class="student-activity">학생 2~3명 발표. 유튜브, 넷플릭스, 구글 번역 등 예상 답변.</div>
+      <div class="narration">
+        넷플릭스가 "이 영화 좋아할 것 같은데?"라고 추천하는 건 행렬 분해(Matrix Factorization)라는 수학 기법입니다.
+        구글 번역이 "다음 단어가 뭘까?"를 예측하는 건 조건부 확률 계산이고요.
+        의료 AI가 X-ray 사진을 보고 "암일 확률이 87%"라고 말하는 것도 회귀분석입니다.
+      </div>
+      <div class="narration">
+        오늘 이 세 가지 수학 도구를 직접 손으로 계산해볼 겁니다.
+        계산 자체보다는 원리를 이해하는 데 집중하세요.
+      </div>
+      <div class="teacher-action">개념 카드 세 개를 순서대로 가리키며 오늘 학습 순서 안내</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 4 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 4</span>
+      <span class="slide-title">선형회귀 — 데이터를 관통하는 직선</span>
+      <span class="slide-time">6:00 – 10:00 (4분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        선형회귀를 한 마디로 표현하면: 데이터들의 전체적인 경향을 하나의 직선으로 나타내는 것입니다.
+      </div>
+      <div class="teacher-action">슬라이드 오른쪽 Chart.js 산점도가 자동 생성됨. 파란 점(데이터)과 주황 회귀직선 확인.</div>
+      <div class="narration">
+        화면을 보세요. 파란 점들이 데이터이고, 주황색 직선이 회귀직선입니다.
+        데이터들 사이를 관통하는 직선이죠.
+      </div>
+      <div class="question">이 직선이 어떤 조건을 만족해야 "가장 잘 맞는 직선"이라고 할 수 있을까요?</div>
+      <div class="narration">
+        직관적으로는 "데이터에서 가장 가까운 직선"이에요.
+        수학적으로는 각 점에서 직선까지의 거리를 제곱해서 합한 값이 최소인 직선입니다.
+        이게 최소제곱법입니다.
+      </div>
+      <div class="board-write">
+        ŷ = ax + b (회귀직선) | 오차: e_i = y_i − ŷ_i | 목표: Σe_i² 최소화
+      </div>
+      <div class="narration">
+        오차를 그냥 더하면 안 되는 이유가 있어요. 양수 오차와 음수 오차가 서로 상쇄되거든요.
+        그래서 제곱을 해서 모두 양수로 만든 후 합합니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 5 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 5</span>
+      <span class="slide-title">최소제곱법 — 3단계 애니메이션</span>
+      <span class="slide-time">10:00 – 16:00 (6분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="anim-cue">N키 또는 "다음 ▶" 버튼으로 단계 진행. 총 3단계.</div>
+
+      <div style="font-weight:700; color:#333; margin:6pt 0 4pt;">— Step 1: 오차 정의 —</div>
+      <div class="narration">
+        자, 단계 1입니다. 오차 e_i는 실제값 y_i에서 예측값 ŷ_i를 뺀 것입니다.
+        우리의 목표는 이 오차들의 제곱합 S를 최소화하는 a와 b를 찾는 것입니다.
+      </div>
+
+      <div style="font-weight:700; color:#333; margin:10pt 0 4pt;">— Step 2: 편미분 = 0 —</div>
+      <div class="narration">
+        S를 최소로 만들려면 어떻게 해야 할까요? 미적분에서 배운 것처럼 미분해서 0이 되는 점을 찾습니다.
+        a에 대해 편미분하면 0, b에 대해 편미분하면 0이라는 두 조건이 나옵니다.
+      </div>
+      <div class="narration">
+        이 두 조건을 연립해서 풀면 공식이 나옵니다. 이 공식이 최소제곱법 공식입니다.
+        공식을 외우는 것보다, "편미분=0 조건에서 나왔다"는 것을 기억하세요.
+      </div>
+
+      <div style="font-weight:700; color:#333; margin:10pt 0 4pt;">— Step 3: 직접 계산 —</div>
+      <div class="narration">
+        이제 데이터를 대입해봅시다. (1,2), (2,3), (3,5), (4,4), (5,6) 다섯 개 데이터입니다.
+        Σx=15, Σy=20, Σxy=66, Σx²=55, n=5를 공식에 넣으면...
+      </div>
+      <div class="board-write">
+        a = (5×66 − 15×20)/(5×55 − 15²) = (330−300)/(275−225) = 30/50 = 0.6
+        b = 20/5 − 0.6×(15/5) = 4 − 1.8 = 2.2
+      </div>
+      <div class="key-point">
+        실제로 직접 계산해보면 a ≈ 0.9, b ≈ 1.3이 나옵니다 (위 슬라이드 6에서 정확한 표 확인).
+        공식 적용 과정이 핵심이지, 정확한 숫자를 즉시 외울 필요 없습니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 6 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 6</span>
+      <span class="slide-title">회귀직선 계산 확인</span>
+      <span class="slide-time">16:00 – 20:00 (4분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        이제 표를 보면서 하나씩 계산해봅시다. x, y값을 알고 있으니까 x², xy를 구하면 됩니다.
+      </div>
+      <div class="student-activity">학생들이 학습지 또는 노트에 Σx, Σy, Σx², Σxy를 직접 계산한다. (약 2분)</div>
+      <div class="narration">
+        Σxy를 계산할 때 주의하세요. 1×2=2, 2×3=6, 3×5=15, 4×4=16, 5×6=30.
+        합하면 2+6+15+16+30 = 69입니다. 슬라이드에 66이라고 쓰인 것이 있는데, 정확히는 69입니다.
+      </div>
+      <div class="narration">
+        그러면 a = (5×69 − 15×20)/(5×55 − 225) = (345−300)/(275−225) = 45/50 = 0.9
+        b = 20/5 − 0.9×3 = 4 − 2.7 = 1.3
+        회귀직선: ŷ = 0.9x + 1.3
+      </div>
+      <div class="key-point">수업 중 계산 결과 확인 시 항상 직접 재계산할 것. 슬라이드의 숫자와 다를 수 있음.</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 7 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 7</span>
+      <span class="slide-title">결정계수 R²</span>
+      <span class="slide-time">20:00 – 23:00 (3분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        회귀직선을 구했으면, 이 직선이 얼마나 데이터를 잘 설명하는지 평가해야 합니다.
+        그 도구가 결정계수 R²입니다.
+      </div>
+      <div class="narration">
+        R²은 0과 1 사이 값입니다.
+        R²=1이면 모든 데이터 포인트가 정확히 회귀직선 위에 있다는 뜻이고,
+        R²=0이면 회귀직선이 데이터 변동을 전혀 설명 못한다는 뜻입니다.
+      </div>
+      <div class="question">R²=0.95인 모델과 R²=0.60인 모델 중 어느 것이 더 좋은가요? 왜 그렇게 생각하나요?</div>
+      <div class="narration">
+        직관적으로는 R²=0.95가 더 좋아 보이죠. 맞습니다.
+        하지만 R²이 1에 가까울수록 무조건 좋은 건 아닙니다. 이건 나중에 평가 문제에서 다시 다룹니다.
+      </div>
+      <div class="board-write">R² = 1 − SS_res/SS_tot | SS_res: 잔차제곱합 | SS_tot: 전체변동</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 8 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 8</span>
+      <span class="slide-title">행렬 — AI의 계산 언어</span>
+      <span class="slide-time">23:00 – 25:00 (2분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        이제 두 번째 주제, 행렬입니다. 행렬을 왜 배우냐고 물으면 — AI의 모든 계산이 행렬로 이루어지기 때문입니다.
+      </div>
+      <div class="narration">
+        화면의 세 카드를 보세요. 이미지를 컴퓨터가 처리할 때 픽셀값 행렬로 읽고,
+        신경망의 연결 강도가 가중치 행렬로 저장되며,
+        학습 데이터 자체가 특징 행렬로 구성됩니다.
+      </div>
+      <div class="narration">
+        신경망에서 한 층을 통과하는 계산 전체가 수학적으로 y = Wx 하나입니다.
+        행렬 곱셈 하나로 수백 개 뉴런의 계산을 동시에 처리합니다.
+        이게 GPU가 AI에서 중요한 이유이기도 해요. GPU가 행렬 계산을 병렬로 아주 빠르게 처리합니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 9 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 9</span>
+      <span class="slide-title">행렬 신경망 연산 — 인터랙티브</span>
+      <span class="slide-time">25:00 – 28:00 (3분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        이제 직접 계산해봅시다. 입력 벡터 x=[1,0,1]이고, 가중치 행렬 W는 3×3입니다.
+        행렬 곱셈 결과 y를 손으로 먼저 계산해보세요.
+      </div>
+      <div class="student-activity">학생들이 y1=0.5×1+0.3×0+0.8×1=1.3 등을 노트에 계산한다. (1분)</div>
+      <div class="teacher-action">"행렬 곱셈 계산 ▶" 버튼 클릭하여 결과 확인</div>
+      <div class="narration">
+        y1=1.3, y2=0.3, y3=1.3이 나왔죠. 이제 이 결과에 활성화 함수를 적용하면 다음 층으로 전달됩니다.
+        신경망 한 층 통과 = 행렬 곱셈 하나. 이게 핵심입니다.
+      </div>
+      <div class="key-point">
+        행렬 곱셈: (Wx)_i = Σ_j W_ij × x_j — 각 출력 뉴런은 모든 입력과 연결된 가중치의 내적(inner product)
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 10 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 10</span>
+      <span class="slide-title">베이즈 정리 소개</span>
+      <span class="slide-time">28:00 – 31:00 (3분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        세 번째 주제, 베이즈 정리입니다. 베이즈 정리는 새로운 증거를 보고 확률을 업데이트하는 원리입니다.
+      </div>
+      <div class="narration">
+        슬라이드의 일상 예시를 봅시다. "비가 올 확률 30%였는데, 하늘이 구름으로 뒤덮였다."
+        이제 비 올 확률이 올라가야죠? 80%로 업데이트합니다.
+        이렇게 새로운 정보를 보고 확률을 합리적으로 갱신하는 것이 베이즈 정리입니다.
+      </div>
+      <div class="board-write">
+        P(A|B) = P(B|A) × P(A) / P(B) | P(A): 사전확률 | P(A|B): 사후확률
+      </div>
+      <div class="narration">
+        스팸 필터에 적용하면: A = "이 이메일이 스팸이다", B = "이 이메일에 '무료'라는 단어가 있다"
+        P(스팸|무료) = P(무료|스팸) × P(스팸) / P(무료)
+        다음 슬라이드에서 숫자를 넣어서 계산합니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 11 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 11</span>
+      <span class="slide-title">나이브 베이즈 계산 — 3단계</span>
+      <span class="slide-time">31:00 – 35:00 (4분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="anim-cue">N키 또는 "다음 ▶" 버튼으로 단계 진행. 총 3단계.</div>
+
+      <div style="font-weight:700; color:#333; margin:6pt 0 4pt;">— Step 1: 기본 설정 —</div>
+      <div class="narration">
+        이메일 1000개 중 스팸이 200개. P(스팸)=0.2, P(정상)=0.8.
+        이게 아무런 정보 없을 때의 기본 확률(사전확률)입니다.
+      </div>
+
+      <div style="font-weight:700; color:#333; margin:10pt 0 4pt;">— Step 2: 조건부 확률 —</div>
+      <div class="narration">
+        "무료"라는 단어가 스팸 200개 중 80개에 등장. P(무료|스팸) = 80/200 = 0.4
+        "무료"가 정상 800개 중 8개에 등장. P(무료|정상) = 8/800 = 0.01
+      </div>
+      <div class="narration">
+        "무료"라는 단어가 스팸에서 40배나 더 자주 나온다는 뜻입니다. 이미 스팸 의심이 강해졌죠.
+      </div>
+
+      <div style="font-weight:700; color:#333; margin:10pt 0 4pt;">— Step 3: 비교 및 분류 —</div>
+      <div class="narration">
+        P(스팸|무료)는 분모 P(무료)가 같으니까 분자만 비교합니다.
+        스팸 쪽: 0.4 × 0.2 = 0.08
+        정상 쪽: 0.01 × 0.8 = 0.008
+        0.08이 0.008보다 10배 크니까 스팸으로 분류!
+      </div>
+      <div class="key-point">나이브(Naive) = "순진한" — 각 단어가 독립적이라고 가정(실제로는 그렇지 않지만 실용적으로 잘 작동)</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 12 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 12</span>
+      <span class="slide-title">탐구 활동 — 기온 데이터 회귀</span>
+      <span class="slide-time">35:00 – 40:00 (5분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        이제 탐구 활동입니다. 서울의 가상 연간 기온 데이터로 회귀직선을 구하고,
+        미래 기온을 예측해봅시다.
+      </div>
+      <div class="student-activity">
+        학생들이 학습지 문제 5번(유사 데이터)을 참고하거나, 슬라이드 표를 보며 x², xy를 계산한다.
+        "표 채우기 ▶" 버튼으로 확인 가능. (약 3분)
+      </div>
+      <div class="teacher-action">"표 채우기 ▶" 버튼으로 표 자동 채우기 → "회귀직선 보기" 버튼으로 결과 확인</div>
+      <div class="narration">
+        결과를 보면 ŷ = 0.38x + 12.06 정도가 나옵니다.
+        x=9(2026년)를 대입하면 0.38×9+12.06 = 3.42+12.06 = 15.48°C.
+        2026년 서울 연평균 기온이 약 15.5°C로 예측되는 거예요.
+      </div>
+      <div class="question">이 예측이 얼마나 신뢰할 수 있을까요? 어떤 한계가 있을까요?</div>
+      <div class="narration">
+        데이터가 5개밖에 없고, 선형 가정이 맞지 않을 수도 있어요.
+        실제 기후 모델은 훨씬 복잡한 수학을 씁니다. 하지만 원리는 동일합니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 13 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 13</span>
+      <span class="slide-title">지도/비지도 학습 비교 정리</span>
+      <span class="slide-time">40:00 – 42:00 (2분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        오늘 배운 내용을 큰 그림에서 정리합시다.
+        선형회귀와 베이즈 분류기는 지도학습에 속합니다. 정답 레이블이 있는 데이터로 학습합니다.
+      </div>
+      <div class="narration">
+        비지도학습은 정답 없이 스스로 패턴을 찾는 방법입니다. 군집화(Clustering)가 대표적이에요.
+        유튜브가 비슷한 영상들을 알아서 묶는 것, 고객을 자동으로 그룹 분류하는 것이 이에 해당합니다.
+      </div>
+      <div class="narration">
+        행렬 연산은 두 방식 모두에서 핵심 계산 도구로 사용됩니다.
+      </div>
+      <div class="teacher-action">슬라이드 하단의 "수학 기법 선택 기준" 한 줄을 함께 읽는다.</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 14 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 14</span>
+      <span class="slide-title">수업 핵심 정리</span>
+      <span class="slide-time">42:00 – 44:00 (2분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        오늘 수업에서 세 가지 수학 도구를 배웠습니다.
+      </div>
+      <div class="narration">
+        선형회귀: 최소제곱법으로 회귀직선 구하기, R²으로 성능 평가.
+        행렬 연산: y=Wx, 신경망 한 층 통과 = 행렬 곱셈 하나.
+        베이즈 정리: 조건부 확률로 분류 결정.
+      </div>
+      <div class="narration">
+        이 세 가지의 공통점이 뭐죠? 모두 데이터에서 패턴을 찾아서 판단을 내리는 수학입니다.
+        AI가 "똑똑해 보이는" 이유는 이런 수학 계산을 엄청나게 빠르게 반복하기 때문입니다.
+      </div>
+      <div class="key-point">AI = 수학 + 데이터 + 컴퓨팅 파워. 이 중 수학이 설계도, 데이터가 재료, 컴퓨팅이 공장입니다.</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 15 -->
+  <div class="slide-card">
+    <div class="slide-header">
+      <span class="slide-num">슬라이드 15</span>
+      <span class="slide-title">확인 퀴즈</span>
+      <span class="slide-time">44:00 – 45:00 (1분)</span>
+    </div>
+    <div class="slide-body">
+      <div class="narration">
+        마지막으로 퀴즈 하나입니다. 데이터 (1,1),(2,3),(3,5)의 회귀직선 ŷ=ax+b에서 a와 b는?
+      </div>
+      <div class="student-activity">학생들이 30초 안에 계산한다.</div>
+      <div class="narration">
+        Σx=6, Σy=9, Σxy=1+6+15=22, Σx²=1+4+9=14, n=3.
+        a = (3×22 − 6×9)/(3×14 − 36) = (66−54)/(42−36) = 12/6 = 2
+        b = 9/3 − 2×2 = 3 − 4 = −1
+        정답: a=2, b=−1 → ŷ = 2x − 1
+      </div>
+      <div class="teacher-action">"풀이 보기" 버튼으로 풀이 공개</div>
+      <div class="narration">
+        잘 됐습니다. 오늘 수업 정리합시다.
+        선형회귀, 행렬 곱셈, 베이즈 정리 — 이 세 가지가 AI를 움직이는 수학의 핵심입니다.
+        학습지 문제 풀어오는 것 잊지 마세요.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 푸터 ── -->
+  <div style="margin-top:20pt; padding-top:10pt; border-top:1pt solid #ddd; font-size:9pt; color:#888; text-align:center;">
+    인공지능수학 IV-2 인공지능과 수학 탐구 &nbsp;|&nbsp; 강의 대본 &nbsp;|&nbsp; 45분 수업
+  </div>
+
+</div>
+</body>
+</html>

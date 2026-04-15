@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>모범답안 — 수행평가 3 경향성과 예측</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <style>
+    @page { size: A4; margin: 18mm 18mm 16mm 18mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 10.5pt;
+      color: #1a1a1a;
+      background: #fff;
+      padding: 10px;
+      line-height: 1.6;
+    }
+    .header {
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #1a1a1a;
+      margin-bottom: 12px;
+    }
+    .header .tag { font-size: 8.5pt; color: #888; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .header h1 { font-size: 15pt; font-weight: bold; letter-spacing: 0.04em; }
+    .header h2 { font-size: 10.5pt; font-weight: normal; color: #555; margin-top: 2px; }
+    .header .ans-badge {
+      display: inline-block; margin-top: 5px;
+      background: #2a6ecc; color: #fff; font-size: 9pt;
+      padding: 2px 12px; border-radius: 2px; letter-spacing: 0.05em;
+    }
+    hr.section { border: none; border-top: 1px solid #ddd; margin: 10px 0; }
+    .step-header { display: flex; align-items: center; gap: 8px; margin: 12px 0 6px 0; }
+    .step-badge {
+      font-size: 8pt; font-weight: bold; color: #fff;
+      background: #444; padding: 2px 8px; border-radius: 2px; letter-spacing: 0.05em;
+    }
+    .step-title { font-size: 10.5pt; font-weight: bold; }
+    .step-score { font-size: 9pt; color: #888; margin-left: auto; }
+    .q-row { margin: 6px 0 3px 0; font-size: 10pt; }
+    /* 정답 표시 */
+    .ans { color: #2a6ecc; font-weight: 700; }
+    .ans-line {
+      display: inline-block;
+      border-bottom: 1.5px solid #2a6ecc;
+      min-width: 100px;
+      color: #2a6ecc;
+      font-weight: 700;
+      padding: 0 4px;
+      vertical-align: bottom;
+    }
+    .ans-box {
+      border: 1.5px solid #2a6ecc;
+      background: #eef4ff;
+      color: #2a6ecc;
+      font-weight: 700;
+      padding: 5px 12px;
+      margin: 4px 0 8px 0;
+      font-size: 10pt;
+      line-height: 1.75;
+    }
+    .note {
+      background: #f7f7f7; border-left: 3px solid #bbb;
+      padding: 5px 10px; margin-bottom: 6px; font-size: 9.5pt; color: #444; line-height: 1.6;
+    }
+    table.freq { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 6px 0; }
+    table.freq th { background: #444; color: #fff; padding: 5px 8px; border: 1px solid #555; text-align: center; font-weight: 600; }
+    table.freq td { border: 1px solid #bbb; padding: 5px 8px; text-align: center; }
+    table.freq .total { background: #f0f0f0; font-weight: 700; }
+    table.lsq { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 6px 0; }
+    table.lsq th { background: #444; color: #fff; padding: 5px 6px; border: 1px solid #555; text-align: center; font-weight: 600; font-size: 9.5pt; }
+    table.lsq td { border: 1px solid #bbb; padding: 6px 6px; text-align: center; }
+    table.lsq .total { background: #f0f0f0; font-weight: 700; }
+    table.lsq .ans-cell { color: #2a6ecc; font-weight: 700; background: #eef4ff; }
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="tag">인공지능수학 · 2학년 1학기 · 수행평가 3</div>
+  <h1>경향성과 예측</h1>
+  <h2>조건부확률 · 최소제곱법 · 추세선</h2>
+  <div class="ans-badge">모범답안</div>
+</div>
+
+<div class="note">
+  <strong>채점 기준 요약</strong>: STEP 1 (8점) + STEP 2 (8점) + STEP 3 (4점) + 기본점수 (8점) = <strong>28점</strong><br>
+  ※ 풀이 과정이 있고 결론이 맞으면 정답으로 인정. 오차 원인 서술은 의미가 통하면 정답.
+</div>
+
+<hr class="section">
+
+<!-- ══ STEP 1 ══ -->
+<div class="step-header">
+  <span class="step-badge">STEP 1</span>
+  <span class="step-title">분류 원리 이해</span>
+  <span class="step-score">8점</span>
+</div>
+
+<p style="font-size:10pt; margin-bottom:6px;">학생 100명의 통학 방법과 지각 여부 자료</p>
+<table class="freq">
+  <tr><th></th><th>지각 없음</th><th>지각 있음</th><th>합계</th></tr>
+  <tr><td>도보·자전거</td><td>40</td><td>10</td><td>50</td></tr>
+  <tr><td>대중교통</td><td>30</td><td>20</td><td>50</td></tr>
+  <tr class="total"><td>합계</td><td>70</td><td>30</td><td>100</td></tr>
+</table>
+
+<p class="q-row">(1) 도보·자전거 중 지각 없는 비율</p>
+<div class="ans-box">
+  \(P(\text{지각 없음} \mid \text{도보·자전거}) = \dfrac{40}{50} = \dfrac{4}{5}\) &nbsp; <span class="ans">(2점)</span>
+</div>
+
+<p class="q-row">(2) 대중교통 중 지각 없는 비율</p>
+<div class="ans-box">
+  \(P(\text{지각 없음} \mid \text{대중교통}) = \dfrac{30}{50} = \dfrac{3}{5}\) &nbsp; <span class="ans">(2점)</span>
+</div>
+
+<p class="q-row">(3) 비교</p>
+<div class="ans-box">
+  \(\dfrac{4}{5} = 0.8 > \dfrac{3}{5} = 0.6\) 이므로, 도보·자전거 통학 학생이 지각이 없는 비율이 더 높다. <span class="ans">(2점)</span>
+</div>
+
+<p class="q-row">(4) 도보 통학 학생의 지각 여부 예측 및 이유</p>
+<div class="ans-box">
+  <strong class="ans">지각 없음</strong>으로 예측한다. <span class="ans">(2점)</span><br>
+  도보·자전거 통학 학생 중 지각이 없는 비율(\(\frac{4}{5}=0.8\))이 지각이 있는 비율(\(\frac{1}{5}=0.2\))보다 높으므로,
+  조건부확률이 더 큰 쪽인 '지각 없음'으로 분류·예측한다.
+</div>
+
+<hr class="section">
+
+<!-- ══ STEP 2 ══ -->
+<div class="step-header">
+  <span class="step-badge">STEP 2</span>
+  <span class="step-title">확률과 예측</span>
+  <span class="step-score">8점</span>
+</div>
+
+<p style="font-size:10pt; margin-bottom:6px;">학생 200명의 주간 독서량과 모의고사 등급 자료</p>
+<table class="freq">
+  <tr><th></th><th>상 등급</th><th>중·하 등급</th><th>합계</th></tr>
+  <tr><td>독서 많음</td><td>60</td><td>40</td><td>100</td></tr>
+  <tr><td>독서 적음</td><td>20</td><td>80</td><td>100</td></tr>
+  <tr class="total"><td>합계</td><td>80</td><td>120</td><td>200</td></tr>
+</table>
+
+<p class="q-row">(1) \(P(\text{상} \mid \text{독서 많음})\)</p>
+<div class="ans-box">
+  \(\dfrac{60}{100} = \dfrac{3}{5} = 0.6\) &nbsp; <span class="ans">(2점)</span>
+</div>
+
+<p class="q-row">(2) \(P(\text{상} \mid \text{독서 적음})\)</p>
+<div class="ans-box">
+  \(\dfrac{20}{100} = \dfrac{1}{5} = 0.2\) &nbsp; <span class="ans">(2점)</span>
+</div>
+
+<p class="q-row">(3) 독서량이 많은 학생의 등급 예측</p>
+<div class="ans-box">
+  <strong class="ans">상 등급</strong>으로 예측한다. &nbsp; <span class="ans">(2점)</span><br>
+  \(P(\text{상} \mid \text{독서 많음}) = 0.6 > P(\text{중·하} \mid \text{독서 많음}) = 0.4\) 이므로, 더 큰 확률 쪽인 상 등급으로 예측.
+</div>
+
+<p class="q-row">(4) 예측이 항상 맞지 않는 이유</p>
+<div class="ans-box">
+  <span class="ans">(2점)</span> &nbsp; 다음 중 1가지 이상 서술 시 정답.<br>
+  • 확률은 경향성을 나타낼 뿐, 개별 학생의 경우를 100% 보장하지 않는다.<br>
+  • 독서량 외에도 수업 집중도, 학습 시간, 학습 방법 등 다른 요인이 성적에 영향을 미친다.<br>
+  • 표본 200명이 전체 학생을 완벽히 대표하지 않을 수 있다.
+</div>
+
+<hr class="section">
+
+<!-- ══ STEP 3 ══ -->
+<div class="step-header">
+  <span class="step-badge">STEP 3</span>
+  <span class="step-title">경향성 분석</span>
+  <span class="step-score">4점</span>
+</div>
+
+<p style="font-size:10pt; margin-bottom:6px;">
+  주간 운동 시간 \(x\)(시간)과 체력 점수 \(y\)(점) · \(\bar x=5,\ \bar y=50\)
+</p>
+
+<table class="lsq">
+  <tr>
+    <th>\(x\)</th><th>\(y\)</th>
+    <th>\(x-5\)</th><th>\(y-50\)</th>
+    <th>\((x-5)^2\)</th><th>\((x-5)(y-50)\)</th>
+  </tr>
+  <tr>
+    <td>2</td><td>44</td>
+    <td class="ans-cell">−3</td><td class="ans-cell">−6</td>
+    <td class="ans-cell">9</td><td class="ans-cell">18</td>
+  </tr>
+  <tr>
+    <td>4</td><td>49</td>
+    <td class="ans-cell">−1</td><td class="ans-cell">−1</td>
+    <td class="ans-cell">1</td><td class="ans-cell">1</td>
+  </tr>
+  <tr>
+    <td>6</td><td>50</td>
+    <td class="ans-cell">1</td><td class="ans-cell">0</td>
+    <td class="ans-cell">1</td><td class="ans-cell">0</td>
+  </tr>
+  <tr>
+    <td>8</td><td>57</td>
+    <td class="ans-cell">3</td><td class="ans-cell">7</td>
+    <td class="ans-cell">9</td><td class="ans-cell">21</td>
+  </tr>
+  <tr class="total">
+    <td>합계</td><td></td><td></td><td></td>
+    <td class="ans-cell"><strong>20</strong></td>
+    <td class="ans-cell"><strong>40</strong></td>
+  </tr>
+</table>
+
+<p class="q-row">(1) 합계</p>
+<div class="ans-box">
+  \(\displaystyle\sum(x-\bar x)^2 = 20\), &ensp;
+  \(\displaystyle\sum(x-\bar x)(y-\bar y) = 40\) &nbsp; <span class="ans">(1점)</span>
+</div>
+
+<p class="q-row">(2) \(a, b\) 계산 및 추세선</p>
+<div class="ans-box">
+  \(a = \dfrac{40}{20} = \mathbf{2}\), &ensp;
+  \(b = 50 - 2 \times 5 = \mathbf{40}\), &ensp;
+  \(\mathbf{f(x) = 2x + 40}\) &nbsp; <span class="ans">(1점)</span>
+</div>
+
+<p class="q-row">(3) 운동 시간 10시간 예측</p>
+<div class="ans-box">
+  \(f(10) = 2 \times 10 + 40 = \mathbf{60}\)점 &nbsp; <span class="ans">(1점)</span>
+</div>
+
+<p class="q-row">(4) 경향성 설명 및 오차 원인</p>
+<div class="ans-box">
+  <span class="ans">(1점)</span> &nbsp; 다음을 포함하면 정답.<br>
+  <strong>경향성:</strong> 운동 시간이 많을수록 체력 점수가 높아지는 <strong>양의 상관</strong> 관계를 보인다.<br>
+  <strong>오차 원인:</strong> 운동 외에 식사, 수면, 체질 등 다른 요인이 체력에 영향을 미치기 때문에, 추세선은 경향성만 반영하며 개별 차이를 완벽히 설명하지 못한다.
+</div>
+
+</body>
+</html>

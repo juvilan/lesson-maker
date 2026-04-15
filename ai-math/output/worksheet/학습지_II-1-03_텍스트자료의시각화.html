@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>텍스트 자료의 시각화 - 학습지</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 10pt; }
+    }
+
+    .ws-page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm 15mm 20mm 15mm;
+      margin: 0 auto;
+      background: #fff;
+      page-break-after: always;
+    }
+    .ws-page:last-child { page-break-after: auto; }
+
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+    .ws-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .ws-title { font-size: 14pt; font-weight: 700; letter-spacing: -0.3px; }
+    .ws-meta { font-size: 9pt; color: #666; text-align: right; }
+
+    .student-info {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    .student-field { display: flex; align-items: center; gap: 6px; font-size: 10pt; }
+    .student-field label { font-weight: 500; white-space: nowrap; color: #444; }
+    .field-line { width: 80px; border-bottom: 1px solid #999; height: 20px; }
+
+    .problem {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      margin-bottom: 20px;
+      padding: 10px 12px;
+    }
+    .problem-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .problem-number { font-weight: 700; font-size: 11pt; }
+    .problem-body { font-size: 11pt; line-height: 1.7; }
+    .problem-body p { margin-bottom: 6px; }
+
+    .choices {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 24px;
+      margin: 8px 0 8px 8px;
+      font-size: 10.5pt;
+    }
+    .choices li { display: flex; gap: 5px; align-items: baseline; }
+
+    .ws-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10pt; }
+    .ws-table th { background: #f0f0f0; border: 1px solid #ddd; padding: 5px 8px; text-align: center; font-weight: 600; }
+    .ws-table td { border: 1px solid #ddd; padding: 5px 8px; text-align: center; }
+    .ws-table td.left { text-align: left; padding-left: 10px; }
+
+    .answer-space { min-height: 35mm; margin-top: 10px; }
+    .answer-space.sm { min-height: 20mm; }
+    .answer-space.md { min-height: 50mm; }
+    .answer-space.lg { min-height: 70mm; }
+
+    .section-title {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #555;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 3px;
+      margin: 16px 0 10px;
+    }
+
+    .info-box {
+      background: #f8f8f8;
+      border-left: 3px solid #bbb;
+      padding: 7px 10px;
+      margin: 8px 0;
+      font-size: 10pt;
+      color: #444;
+    }
+
+    .page-number { text-align: center; font-size: 9pt; color: #999; margin-top: 14px; padding-top: 6px; border-top: 1px solid #eee; }
+
+    /* 빈 좌표계 박스 */
+    .coord-box {
+      border: 1px solid #888;
+      width: 115mm;
+      height: 72mm;
+      margin: 8px 0;
+      position: relative;
+    }
+    .coord-box::after {
+      content: '';
+      position: absolute;
+      left: 12mm;
+      bottom: 10mm;
+      width: calc(100% - 14mm);
+      height: 1px;
+      background: #aaa;
+    }
+    .coord-box::before {
+      content: '';
+      position: absolute;
+      left: 12mm;
+      bottom: 10mm;
+      width: 1px;
+      height: calc(100% - 12mm);
+      background: #aaa;
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] }
+    };
+    window.safeTypeset = window.safeTypeset || function(elements) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body>
+
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">학습지 · II-1-03 텍스트 자료의 시각화</span>
+      <span class="ws-meta">인공지능수학</span>
+    </div>
+  </div>
+
+  <div class="student-info">
+    <div class="student-field"><label>학번</label><div class="field-line"></div></div>
+    <div class="student-field"><label>이름</label><div class="field-line"></div></div>
+    <div class="student-field"><label>날짜</label><div class="field-line"></div></div>
+  </div>
+
+  <div class="info-box">
+    <strong>학습 목표</strong><br>
+    1. 시각화의 의미와 6가지 유형을 설명할 수 있다.<br>
+    2. 텍스트 자료를 표, 막대그래프, 원그래프, 단어 구름으로 시각화할 수 있다.<br>
+    3. 텍스트 자료에 가장 적합한 시각화 방법을 선택하고 그 이유를 설명할 수 있다.
+  </div>
+
+  <!-- 문제 1 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">1.</span>
+    </div>
+    <div class="problem-body">
+      <p>단어 구름(Word Cloud)에서 단어의 글자 크기가 결정되는 기준으로 옳은 것은?</p>
+      <ul class="choices">
+        <li>① 단어의 글자 수(길이)</li>
+        <li>② 단어의 등장 빈도수(TF)</li>
+        <li>③ 단어의 사전적 의미</li>
+        <li>④ 문서에서의 등장 순서</li>
+        <li>⑤ 알파벳(가나다) 순서</li>
+      </ul>
+      <p style="font-size:10pt; margin-top:6px;">정답: &nbsp;(　　　)</p>
+    </div>
+  </div>
+
+  <!-- 문제 2 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">2.</span>
+    </div>
+    <div class="problem-body">
+      <p>시각화(Visualization)란 무엇인지 교과서의 정의에 근거하여 한 문장으로 서술하시오.</p>
+    </div>
+    <div class="answer-space sm"></div>
+  </div>
+
+  <!-- 문제 3 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">3.</span>
+    </div>
+    <div class="problem-body">
+      <p>아래 표는 시각화의 6가지 유형을 나타낸 것이다. 각 유형에 해당하는 설명을 연결하여 빈칸을 채우시오.</p>
+      <table class="ws-table">
+        <thead>
+          <tr><th style="width:22%;">유형</th><th>설명 및 대표 그래프</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>시간 시각화</td><td class="left">시간에 따른 자료의 변화량 표현 — 막대그래프, 선 그래프</td></tr>
+          <tr><td>분포 시각화</td><td class="left">전체 대비 각 부분의 비율 표현 — &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;, 도넛그래프, <strong>단어 구름</strong></td></tr>
+          <tr><td>관계 시각화</td><td class="left">두 변수 사이의 관계·패턴 표현 — 산점도, 버블그래프</td></tr>
+          <tr><td>비교 시각화</td><td class="left">여러 변수를 동시에 비교 — 레이더그래프, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>
+          <tr><td>공간 시각화</td><td class="left">지도 등 공간 정보 표현 — 지도 매핑</td></tr>
+          <tr><td>구조 시각화</td><td class="left">계층적 정보 표현 — &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;, 표</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:9.5pt; color:#555; margin-top:4px;">(단어 구름이 속하는 유형을 확인하며 빈칸을 완성할 것)</p>
+    </div>
+  </div>
+
+  <div class="page-number">- 1 -</div>
+</div>
+
+<div class="ws-page">
+
+  <!-- 문제 4 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">4.</span>
+    </div>
+    <div class="problem-body">
+      <p>워드 클라우드(단어 구름)와 막대그래프는 모두 단어 빈도수를 시각화하는 데 사용된다. 각각이 더 효과적인 상황을 비교하여 서술하시오.</p>
+    </div>
+    <div class="answer-space"></div>
+  </div>
+
+  <!-- 문제 5 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">5.</span>
+    </div>
+    <div class="problem-body">
+      <p>다음은 의류 쇼핑몰 후기 말뭉치에서 추출한 단어 빈도수 데이터이다. 이 데이터를 이용하여 아래 빈 좌표계에 막대그래프를 직접 그리시오. (각 막대의 높이는 빈도수에 비례하게 그릴 것)</p>
+      <table class="ws-table">
+        <thead>
+          <tr><th>단어</th><th>청바지</th><th>추천</th><th>예쁘다</th><th>저렴하다</th><th>가격</th><th>디자인</th><th>좋다</th><th>신축성</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>빈도수(TF)</td><td>4</td><td>4</td><td>1</td><td>1</td><td>2</td><td>3</td><td>3</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <div class="coord-box">
+        <div style="position:absolute; left:2px; top:4px; font-size:8.5pt; color:#888;">(빈도수)</div>
+        <div style="position:absolute; right:4px; bottom:2px; font-size:8.5pt; color:#888;">(단어)</div>
+      </div>
+      <p style="font-size:9.5pt; color:#555; margin-top:4px;">※ Y축에는 0~4 사이 적절한 눈금을 표시하고, X축에는 각 단어를 기재하시오.</p>
+    </div>
+  </div>
+
+  <!-- 문제 6 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">6.</span>
+    </div>
+    <div class="problem-body">
+      <p>위 문제 5의 단어 빈도수 데이터를 원그래프로 나타낼 때, 각 단어의 상대도수와 중심각을 구하시오. (전체 빈도수 합 = 19, 반올림하여 소수점 둘째 자리까지 표시, 중심각은 정수로 반올림)</p>
+      <table class="ws-table">
+        <thead>
+          <tr><th>단어</th><th>빈도수(TF)</th><th>상대도수</th><th>중심각 (°)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>청바지</td><td>4</td><td></td><td></td></tr>
+          <tr><td>추천</td><td>4</td><td></td><td></td></tr>
+          <tr><td>예쁘다</td><td>1</td><td></td><td></td></tr>
+          <tr><td>저렴하다</td><td>1</td><td></td><td></td></tr>
+          <tr><td>가격</td><td>2</td><td></td><td></td></tr>
+          <tr><td>디자인</td><td>3</td><td></td><td></td></tr>
+          <tr><td>좋다</td><td>3</td><td></td><td></td></tr>
+          <tr><td>신축성</td><td>1</td><td></td><td></td></tr>
+          <tr><td><strong>합계</strong></td><td><strong>19</strong></td><td><strong>1.00</strong></td><td><strong>360°</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="page-number">- 2 -</div>
+</div>
+
+<div class="ws-page">
+
+  <!-- 문제 7 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">7.</span>
+    </div>
+    <div class="problem-body">
+      <p>다음 표는 시각화 방법별 특징을 정리한 것이다. 빈칸 (가)~(라)에 알맞은 내용을 채우시오.</p>
+      <table class="ws-table">
+        <thead>
+          <tr><th style="width:18%;">방법</th><th style="width:30%;">특징(장점)</th><th style="width:28%;">적합한 상황</th><th style="width:24%;">한계</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>표</td><td class="left">정확한 수치 확인 가능</td><td class="left">(가)</td><td class="left">패턴 파악 어려움</td></tr>
+          <tr><td>막대그래프</td><td class="left">범주별 크기 비교 용이</td><td class="left">빈도 비교, 순위 파악</td><td class="left">(나)</td></tr>
+          <tr><td>원그래프</td><td class="left">(다)</td><td class="left">구성 비율 파악</td><td class="left">항목 많으면 복잡</td></tr>
+          <tr><td>단어 구름</td><td class="left">핵심 단어 즉시 파악</td><td class="left">텍스트 분석, 주제 파악</td><td class="left">(라)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 문제 8 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">8.</span>
+    </div>
+    <div class="problem-body">
+      <p>다음은 의류 쇼핑몰 A와 B의 후기 말뭉치에서 추출한 단어 빈도수 데이터이다.</p>
+      <table class="ws-table">
+        <thead>
+          <tr><th>쇼핑몰</th><th>청바지</th><th>추천</th><th>가격</th><th>디자인</th><th>배송</th><th>불만</th><th>반품</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>A</strong></td><td>8</td><td>7</td><td>3</td><td>6</td><td>2</td><td>1</td><td>1</td></tr>
+          <tr><td><strong>B</strong></td><td>3</td><td>2</td><td>4</td><td>2</td><td>5</td><td>8</td><td>7</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;">(1) 쇼핑몰 A와 B의 단어 구름에서 가장 크게 표시될 단어를 각각 쓰시오.</p>
+      <p style="margin: 6px 0 10px 12px; font-size:10.5pt;">쇼핑몰 A: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 쇼핑몰 B:</p>
+      <p>(2) 두 쇼핑몰 후기 데이터를 비교하여 각 쇼핑몰의 특성을 분석하고, 소비자라면 어느 쇼핑몰을 선택할지와 그 이유를 시각화 결과에 근거하여 서술하시오.</p>
+    </div>
+    <div class="answer-space md"></div>
+  </div>
+
+  <div class="page-number">- 3 -</div>
+</div>
+
+<div class="ws-page">
+
+  <!-- 문제 9 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">9.</span>
+    </div>
+    <div class="problem-body">
+      <p>교사가 학생들에게 "인공지능과 관련된 뉴스 기사의 핵심 주제가 무엇인지"를 가장 직관적으로 파악하게 하려고 한다. 아래 4가지 시각화 방법 중 이 목적에 가장 적합한 방법을 선택하고, 선택하지 않은 나머지 방법들과 비교하여 선택 근거를 서술하시오.</p>
+      <div style="margin: 6px 0 10px 12px; font-size:10.5pt; display:flex; gap:30px;">
+        <span>① 표</span>
+        <span>② 막대그래프</span>
+        <span>③ 원그래프</span>
+        <span>④ 단어 구름</span>
+      </div>
+    </div>
+    <div class="answer-space"></div>
+  </div>
+
+  <!-- 문제 10 -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="problem-number">10.</span>
+    </div>
+    <div class="problem-body">
+      <p>SNS(트위터, 인스타그램 등)에서 수집한 텍스트 데이터를 시각화하여 사회적 이슈를 분석하는 방법을 제안하시오. 어떤 시각화 도구를 어떻게 활용할지, 그리고 그 시각화에서 어떤 정보를 얻을 수 있는지를 포함하여 서술하시오.</p>
+    </div>
+    <div class="answer-space lg"></div>
+  </div>
+
+  <div class="page-number">- 4 -</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>대단원 I 종합문제 — 인공지능과 수학</title>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+@page{size:A4;margin:18mm 20mm 18mm 20mm}
+@media print{
+  .no-print{display:none!important}
+  body{font-size:10.5pt}
+  .page-break{page-break-before:always}
+  .answer-section{page-break-before:always}
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  font-size:11pt;color:#111;background:#fff;line-height:1.6;
+  max-width:800px;margin:0 auto;padding:20px 24px 40px;
+}
+.exam-header{border:2.5px solid #111;padding:14px 20px;margin-bottom:18px}
+.exam-title{font-size:1.6em;font-weight:900;text-align:center;letter-spacing:2px;margin-bottom:6px}
+.exam-subtitle{text-align:center;font-size:0.9em;color:#333;margin-bottom:10px}
+.exam-info-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1.5px solid #111}
+.exam-info-cell{padding:6px 10px;border-right:1px solid #111;font-size:0.85em}
+.exam-info-cell:last-child{border-right:none}
+.exam-info-cell span{font-weight:700}
+.notice{background:#f8f8f8;border-left:3px solid #333;padding:8px 12px;margin:12px 0;font-size:0.82em;line-height:1.7}
+.unit-header{background:#222;color:#fff;padding:5px 12px;font-size:0.85em;font-weight:700;margin:18px 0 10px;letter-spacing:1px}
+.q-block{margin-bottom:16px;padding-bottom:14px;border-bottom:1px dashed #ccc}
+.q-block:last-child{border-bottom:none}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.q-num{font-size:1.05em;font-weight:900;min-width:30px}
+.badge{font-size:0.7em;font-weight:700;padding:1px 7px;border-radius:10px;border:1px solid #999}
+.badge-하{background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7}
+.badge-중{background:#fff8e1;color:#e65100;border-color:#ffcc80}
+.badge-상{background:#fce4ec;color:#c62828;border-color:#ef9a9a}
+.badge-pt{background:#e3edf8;color:#1a4a7a;border-color:#90caf9}
+.stem{font-size:0.96em;line-height:1.7;margin-bottom:8px}
+.stem-box{background:#f8f8f8;border:1px solid #bbb;border-radius:6px;padding:8px 14px;margin:6px 0;font-size:0.9em;line-height:1.8}
+.table-wrap{overflow-x:auto;margin:6px 0}
+table{border-collapse:collapse;font-size:0.85em;width:auto}
+table th{background:#f0f0f0;padding:4px 10px;border:1px solid #bbb;text-align:center;font-weight:700}
+table td{padding:4px 10px;border:1px solid #bbb;text-align:center}
+.choices{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:2px 20px;margin-top:4px}
+.choices li{font-size:0.88em;padding:2px 0}
+.choices.col1{grid-template-columns:1fr}
+.answer-box-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.answer-box{width:80px;border:1.5px solid #555;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:0.8em;color:#888}
+.score-table{width:100%;margin:14px 0;border-collapse:collapse;font-size:0.85em}
+.score-table th,.score-table td{border:1px solid #bbb;padding:5px 6px;text-align:center}
+.score-table th{background:#f0f0f0;font-weight:700}
+.score-total{font-weight:900;font-size:1.05em}
+.answer-section{margin-top:40px;padding-top:24px;border-top:3px double #333}
+.answer-section h2{font-size:1.2em;font-weight:900;margin-bottom:14px;text-align:center;letter-spacing:2px}
+.answer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.ans-item{border:1px solid #ccc;border-radius:6px;padding:6px 8px;text-align:center;font-size:0.82em}
+.ans-item .qn{font-weight:700;color:#1a4a7a;font-size:0.95em}
+.ans-item .ans{font-size:1.1em;font-weight:900;color:#c62828}
+.ans-item .pt{font-size:0.75em;color:#666}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#0066cc;color:#fff;border:none;
+  padding:10px 20px;border-radius:8px;cursor:pointer;font-size:0.9em;font-weight:700;
+  box-shadow:0 4px 12px rgba(0,102,204,.3);z-index:999}
+.print-btn:hover{background:#0052a3}
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">인쇄 / PDF 저장</button>
+
+<div class="exam-header">
+  <div class="exam-title">대단원 I 종합문제</div>
+  <div class="exam-subtitle">인공지능과 수학 &nbsp;|&nbsp; 인공지능수학 &nbsp;|&nbsp; 고등학교 2학년</div>
+  <div class="exam-info-row">
+    <div class="exam-info-cell"><span>이름:</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+    <div class="exam-info-cell"><span>학번:</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+    <div class="exam-info-cell"><span>총점:</span> &nbsp;&nbsp; / 100점</div>
+  </div>
+</div>
+
+<div class="notice">
+  ◦ 이 시험은 5지 선다형 20문항으로 구성되어 있으며, 합계 100점입니다.<br>
+  ◦ 각 문항의 배점은 문항 번호 옆에 표시되어 있습니다.<br>
+  ◦ 정답은 문항마다 하나이며, 답안란에 번호를 기입하시오.<br>
+  ◦ 정답지는 본 시험지 마지막 페이지에 수록되어 있습니다(교사용).
+</div>
+
+<table class="score-table">
+  <tr>
+    <th>문항</th>
+    <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+    <th>6</th><th>7</th><th>8</th><th>9</th><th>10</th>
+    <th>11</th><th>12</th><th>13</th><th>14</th><th>15</th>
+    <th>16</th><th>17</th><th>18</th><th>19</th><th>20</th>
+    <th class="score-total">합계</th>
+  </tr>
+  <tr>
+    <th>배점</th>
+    <td>4</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    <td>6</td><td>6</td><td>6</td><td>6</td><td>6</td>
+    <td>4</td><td>4</td><td>4</td><td>6</td><td>6</td>
+    <td>6</td><td>5</td><td>5</td><td>5</td><td>5</td>
+    <td class="score-total">100</td>
+  </tr>
+  <tr>
+    <th>득점</th>
+    <td></td><td></td><td></td><td></td><td></td>
+    <td></td><td></td><td></td><td></td><td></td>
+    <td></td><td></td><td></td><td></td><td></td>
+    <td></td><td></td><td></td><td></td><td></td>
+    <td></td>
+  </tr>
+</table>
+
+<!-- ■ I-1. 인공지능과 수학의 이해 (1~10번) -->
+<div class="unit-header">■ I-1. 인공지능과 수학의 이해 (1~10번)</div>
+
+<!-- Q1 하 4점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">1.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge" style="background:#e8f5e9;color:#1a5e20;border-color:#a5d6a7">I-1-01</span>
+  </div>
+  <div class="stem">인공지능(AI)에 대한 설명으로 <strong>옳은 것</strong>은?</div>
+  <ul class="choices col1">
+    <li>① 인공지능은 정해진 명령만 수행하므로 기존 프로그램과 차이가 없다.</li>
+    <li>② 기계학습은 인공지능의 하위 개념이고, 딥러닝은 기계학습과 무관하다.</li>
+    <li>③ 딥러닝⊂인공지능⊂기계학습의 포함 관계가 성립한다.</li>
+    <li>④ <strong>딥러닝은 기계학습의 한 기술로, 인간의 신경망을 모방하여 정보를 처리한다.</strong></li>
+    <li>⑤ 인공지능은 챗봇과 같은 특정 분야에만 적용된다.</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q2 하 4점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">2.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge" style="background:#e8f5e9;color:#1a5e20;border-color:#a5d6a7">I-1-01</span>
+  </div>
+  <div class="stem">인공지능(AI), 기계학습(ML), 딥러닝(DL)의 포함 관계를 집합으로 올바르게 나타낸 것은?</div>
+  <ul class="choices">
+    <li>① AI⊂ML⊂DL</li>
+    <li>② ML⊂AI⊂DL</li>
+    <li>③ DL⊂AI⊂ML</li>
+    <li>④ ML⊂DL⊂AI</li>
+    <li>⑤ <strong>DL⊂ML⊂AI</strong></li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q3 하 4점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">3.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge" style="background:#e8f5e9;color:#1a5e20;border-color:#a5d6a7">I-1-01</span>
+  </div>
+  <div class="stem">다음에서 설명하는 것은?</div>
+  <div class="stem-box">
+    인간 평가자가 격리된 공간에서 컴퓨터와 인간에게 각각 문자로 질문하여,
+    어느 쪽이 컴퓨터인지 구별하지 못한다면 그 컴퓨터가 인간 수준의 지능을 가졌다고 판단하는 방법
+  </div>
+  <ul class="choices">
+    <li>① 알고리즘</li>
+    <li>② 순서도</li>
+    <li>③ <strong>튜링 테스트</strong></li>
+    <li>④ 전문가 시스템</li>
+    <li>⑤ 다층 퍼셉트론</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q4 하 4점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">4.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge" style="background:#e8f4ff;color:#1a4a7a;border-color:#90caf9">I-1-02</span>
+  </div>
+  <div class="stem">기계학습과 기존 프로그래밍의 차이를 바르게 설명한 것은?</div>
+  <ul class="choices col1">
+    <li>① 기계학습은 인간이 제시한 규칙을 바탕으로 답을 구한다.</li>
+    <li>② <strong>기계학습은 컴퓨터가 충분한 학습을 통해 스스로 규칙을 찾아낸다.</strong></li>
+    <li>③ 기존 프로그래밍은 대용량 데이터에서 스스로 패턴을 발견한다.</li>
+    <li>④ 기계학습에서는 인간이 먼저 결과를 예측하여 규칙을 설정한다.</li>
+    <li>⑤ 기계학습과 기존 프로그래밍은 처리 방식이 동일하다.</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q5 하 4점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">5.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge" style="background:#e8f5e9;color:#1a5e20;border-color:#a5d6a7">I-1-01</span>
+  </div>
+  <div class="stem">다음 인공지능의 역사적 사건을 시간 순서에 맞게 나열한 것은?</div>
+  <div class="stem-box">
+    ㄱ. 퍼셉트론 탄생 &nbsp;&nbsp; ㄴ. 전문가 시스템 등장 &nbsp;&nbsp; ㄷ. 튜링 테스트 제안 &nbsp;&nbsp; ㄹ. 알파고의 바둑 승리
+  </div>
+  <ul class="choices">
+    <li>① ㄱ-ㄴ-ㄷ-ㄹ</li>
+    <li>② ㄷ-ㄴ-ㄱ-ㄹ</li>
+    <li>③ <strong>ㄷ-ㄱ-ㄴ-ㄹ</strong></li>
+    <li>④ ㄱ-ㄷ-ㄴ-ㄹ</li>
+    <li>⑤ ㄴ-ㄷ-ㄱ-ㄹ</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q6 중 6점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">6.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge" style="background:#e8f4ff;color:#1a4a7a;border-color:#90caf9">I-1-02</span>
+  </div>
+  <div class="stem">다음 중 <strong>텍스트 자료</strong>를 인식하는 인공지능에 활용되는 수학 개념으로 옳은 것은?</div>
+  <ul class="choices">
+    <li>① 행렬</li>
+    <li>② 미분</li>
+    <li>③ <strong>벡터</strong></li>
+    <li>④ 이동 변환</li>
+    <li>⑤ 확률분포</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q7 중 6점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">7.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge" style="background:#e8f4ff;color:#1a4a7a;border-color:#90caf9">I-1-02</span>
+  </div>
+  <div class="stem">인공지능에 활용되는 수학 개념과 AI 분야의 연결이 모두 옳은 것은?</div>
+  <ul class="choices col1">
+    <li>① 벡터 — 이미지 인식 &nbsp;/&nbsp; 행렬 — 텍스트 인식</li>
+    <li>② 행렬 — 이미지 인식 &nbsp;/&nbsp; 함수 — 텍스트 인식</li>
+    <li>③ <strong>행렬 — 이미지 인식 &nbsp;/&nbsp; 벡터 — 텍스트 인식</strong></li>
+    <li>④ 함수 — 이미지 인식 &nbsp;/&nbsp; 행렬 — 경향성 분석</li>
+    <li>⑤ 벡터 — 경향성 분석 &nbsp;/&nbsp; 함수 — 이미지 인식</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q8 중 6점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">8.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge" style="background:#fff3e0;color:#bf360c;border-color:#ffb74d">I-1-03</span>
+  </div>
+  <div class="stem">논리곱(AND) 게이트에서 결과값 \(X = 1\)이 되는 경우로 옳은 것은?</div>
+  <ul class="choices">
+    <li>① \(x_1=1,\ x_2=0\) 일 때</li>
+    <li>② \(x_1=0,\ x_2=1\) 일 때</li>
+    <li>③ \(x_1=0,\ x_2=0\) 일 때</li>
+    <li>④ <strong>\(x_1=1,\ x_2=1\) 일 때</strong></li>
+    <li>⑤ \(x_1=0,\ x_2=0\) 일 때와 \(x_1=1,\ x_2=1\) 일 때</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q9 중 6점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">9.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge" style="background:#fff3e0;color:#bf360c;border-color:#ffb74d">I-1-03</span>
+  </div>
+  <div class="stem">배타적 논리합(XOR) 게이트에 대한 설명으로 <strong>옳은 것</strong>은?</div>
+  <ul class="choices col1">
+    <li>① \(x_1=1,\ x_2=1\) 일 때 \(X=1\)이다.</li>
+    <li>② 두 입력이 같을 때 출력이 1이다.</li>
+    <li>③ 논리합(OR)과 진리표가 동일하다.</li>
+    <li>④ <strong>두 입력 중 하나만 1일 때 출력이 1이고, 두 입력이 같을 때는 0이다.</strong></li>
+    <li>⑤ 단층 퍼셉트론 하나로 XOR 문제를 해결할 수 있다.</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q10 중 6점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">10.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge" style="background:#fff3e0;color:#bf360c;border-color:#ffb74d">I-1-03</span>
+  </div>
+  <div class="stem">퍼셉트론에 대한 설명으로 <strong>옳지 않은 것</strong>은?</div>
+  <ul class="choices col1">
+    <li>① 진릿값이 같은 점들을 하나의 직선으로 구분하는 원리를 이용한다.</li>
+    <li>② 논리곱(AND)과 논리합(OR) 문제는 단층 퍼셉트론으로 해결할 수 있다.</li>
+    <li>③ 미국의 심리학자 로젠블랫이 개발하였다.</li>
+    <li>④ <strong>배타적 논리합(XOR) 문제도 단층 퍼셉트론 하나로 해결할 수 있다.</strong></li>
+    <li>⑤ 다층 퍼셉트론을 이용하면 XOR 문제를 해결할 수 있다.</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- ■ I-2. 퍼셉트론과 논리 게이트 (11~20번) -->
+<div class="unit-header">■ I-2. 퍼셉트론과 논리 게이트 (11~20번)</div>
+
+<!-- Q11 하 4점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">11.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge" style="background:#e8f5e9;color:#1a5e20;border-color:#a5d6a7">I-1-01</span>
+  </div>
+  <div class="stem">1980년대에 등장한 전문가 시스템에 대한 설명으로 <strong>옳지 않은 것</strong>은?</div>
+  <ul class="choices col1">
+    <li>① 특정 분야의 전문 지식을 컴퓨터에 기억시켜 일반인도 이용할 수 있다.</li>
+    <li>② 퍼지(fuzzy) 이론과 확률적 방법이 활용되었다.</li>
+    <li>③ 자연스러운 대화로 호텔을 예약하는 시스템도 전문가 시스템의 사례이다.</li>
+    <li>④ 전문가 시스템의 등장으로 인공지능에 대한 관심이 다시 높아졌다.</li>
+    <li>⑤ <strong>전문가 시스템 등장 이후 인공지능 연구는 완전히 사라지고 부활하지 못하였다.</strong></li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q12 하 4점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">12.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge" style="background:#e8f5e9;color:#1a5e20;border-color:#a5d6a7">I-1-01</span>
+  </div>
+  <div class="stem">다음 중 이미지 자료를 인식하는 인공지능의 사례가 <strong>아닌 것</strong>은?</div>
+  <ul class="choices">
+    <li>① 생체 인식 (지문, 홍채, 안면 인식)</li>
+    <li>② 자동차 번호판 인식 시스템</li>
+    <li>③ 의료 영상 판독</li>
+    <li>④ <strong>스팸 메일 자동 분류</strong></li>
+    <li>⑤ 동작 인식 시스템</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q13 하 4점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">13.</span>
+    <span class="badge badge-하">하</span>
+    <span class="badge badge-pt">4점</span>
+    <span class="badge" style="background:#fff3e0;color:#bf360c;border-color:#ffb74d">I-1-03</span>
+  </div>
+  <div class="stem">퍼셉트론에서 \(w_1=1,\ w_2=1,\ \theta=2\)일 때, 입력 \((x_1, x_2) = (1, 0)\)에서의 출력은?<br>
+  (가중합 \(\geq \theta\)이면 출력 1, 미만이면 출력 0)</div>
+  <ul class="choices">
+    <li>① -1</li>
+    <li>② <strong>0</strong></li>
+    <li>③ 1</li>
+    <li>④ 2</li>
+    <li>⑤ 결정 불가</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q14 중 6점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">14.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge" style="background:#fff3e0;color:#bf360c;border-color:#ffb74d">I-1-03</span>
+  </div>
+  <div class="stem">퍼셉트론에서 \(w_1=2,\ w_2=1,\ \theta=2\)로 설정하였다. 다음 4가지 입력에 대해 출력이 1인 경우의 수는?</div>
+  <div class="table-wrap">
+    <table>
+      <tr><th>\(x_1\)</th><th>\(x_2\)</th></tr>
+      <tr><td>0</td><td>0</td></tr>
+      <tr><td>0</td><td>1</td></tr>
+      <tr><td>1</td><td>0</td></tr>
+      <tr><td>1</td><td>1</td></tr>
+    </table>
+  </div>
+  <ul class="choices">
+    <li>① 0개</li>
+    <li>② 1개</li>
+    <li>③ <strong>2개</strong></li>
+    <li>④ 3개</li>
+    <li>⑤ 4개</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q15 중 6점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">15.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge" style="background:#fff3e0;color:#bf360c;border-color:#ffb74d">I-1-03</span>
+  </div>
+  <div class="stem">다음 표는 어떤 논리 게이트의 진리표이다. 이 게이트의 이름은?</div>
+  <div class="table-wrap">
+    <table>
+      <tr><th>\(x_1\)</th><th>\(x_2\)</th><th>출력</th></tr>
+      <tr><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>0</td><td>1</td><td>1</td></tr>
+      <tr><td>1</td><td>0</td><td>1</td></tr>
+      <tr><td>1</td><td>1</td><td>1</td></tr>
+    </table>
+  </div>
+  <ul class="choices">
+    <li>① NOT</li>
+    <li>② AND</li>
+    <li>③ XOR</li>
+    <li>④ <strong>OR</strong></li>
+    <li>⑤ NAND</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q16 중 6점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">16.</span>
+    <span class="badge badge-중">중</span>
+    <span class="badge badge-pt">6점</span>
+    <span class="badge" style="background:#fff3e0;color:#bf360c;border-color:#ffb74d">I-1-03</span>
+  </div>
+  <div class="stem">퍼셉트론의 가중치 \(w_1=1,\ w_2=1,\ \theta=1\)로 설정하면 어느 논리 게이트를 나타내는가?</div>
+  <ul class="choices">
+    <li>① NOT</li>
+    <li>② AND</li>
+    <li>③ XOR</li>
+    <li>④ <strong>OR</strong></li>
+    <li>⑤ NAND</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q17 상 5점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">17.</span>
+    <span class="badge badge-상">상</span>
+    <span class="badge badge-pt">5점</span>
+    <span class="badge" style="background:#fff3e0;color:#bf360c;border-color:#ffb74d">I-1-03</span>
+  </div>
+  <div class="stem">퍼셉트론에서 \(w_1=2,\ w_2=2,\ \theta=3\)으로 설정하였을 때, 이 퍼셉트론이 구현하는 논리 게이트는?</div>
+  <ul class="choices">
+    <li>① OR</li>
+    <li>② <strong>AND</strong></li>
+    <li>③ XOR</li>
+    <li>④ NOT</li>
+    <li>⑤ NAND</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q18 상 5점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">18.</span>
+    <span class="badge badge-상">상</span>
+    <span class="badge badge-pt">5점</span>
+    <span class="badge" style="background:#fff3e0;color:#bf360c;border-color:#ffb74d">I-1-03</span>
+  </div>
+  <div class="stem">다음 보기에서 단층 퍼셉트론으로 구현 가능한 논리 게이트만을 있는 대로 고른 것은?</div>
+  <div class="stem-box">ㄱ. AND &nbsp;&nbsp; ㄴ. OR &nbsp;&nbsp; ㄷ. XOR &nbsp;&nbsp; ㄹ. NOT</div>
+  <ul class="choices">
+    <li>① ㄷ</li>
+    <li>② ㄱ, ㄷ</li>
+    <li>③ ㄴ, ㄷ</li>
+    <li>④ <strong>ㄱ, ㄴ, ㄹ</strong></li>
+    <li>⑤ ㄱ, ㄴ, ㄷ, ㄹ</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q19 상 5점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">19.</span>
+    <span class="badge badge-상">상</span>
+    <span class="badge badge-pt">5점</span>
+    <span class="badge" style="background:#fff3e0;color:#bf360c;border-color:#ffb74d">I-1-03</span>
+  </div>
+  <div class="stem">퍼셉트론에서 \(w_1=1,\ w_2=2,\ \theta=2\)로 설정할 때 출력이 1인 입력 \((x_1, x_2)\)를 모두 고른 것은?</div>
+  <ul class="choices col1">
+    <li>① \((0, 0)\)만</li>
+    <li>② \((1, 0)\)만</li>
+    <li>③ <strong>\((0, 1)\)과 \((1, 1)\)</strong></li>
+    <li>④ \((1, 0)\)과 \((1, 1)\)</li>
+    <li>⑤ \((0, 0)\)과 \((1, 0)\)</li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- Q20 상 5점 -->
+<div class="q-block">
+  <div class="q-meta">
+    <span class="q-num">20.</span>
+    <span class="badge badge-상">상</span>
+    <span class="badge badge-pt">5점</span>
+    <span class="badge" style="background:#fff3e0;color:#bf360c;border-color:#ffb74d">I-1-03</span>
+  </div>
+  <div class="stem">단층 퍼셉트론으로 XOR 게이트를 구현할 수 없는 이유로 가장 적절한 것은?</div>
+  <ul class="choices col1">
+    <li>① XOR의 진리표에 오류가 있기 때문이다.</li>
+    <li>② XOR은 입력이 3개 이상이어야 하기 때문이다.</li>
+    <li>③ XOR은 퍼셉트론의 가중치를 0으로만 설정해야 하기 때문이다.</li>
+    <li>④ XOR의 출력이 항상 0이어서 의미가 없기 때문이다.</li>
+    <li>⑤ <strong>XOR의 출력이 다른 네 점을 좌표 평면에서 하나의 직선으로 분리할 수 없기 때문이다.</strong></li>
+  </ul>
+  <div class="answer-box-row no-print"><div class="answer-box">답: &nbsp;&nbsp;&nbsp;</div></div>
+</div>
+
+<!-- ===================== 정답지 (교사용) ===================== -->
+<div class="answer-section">
+  <h2>【 정 답 지 】 — 교사용</h2>
+  <div class="answer-grid">
+    <div class="ans-item"><div class="qn">1번</div><div class="ans">④</div><div class="pt">4점</div></div>
+    <div class="ans-item"><div class="qn">2번</div><div class="ans">⑤</div><div class="pt">4점</div></div>
+    <div class="ans-item"><div class="qn">3번</div><div class="ans">③</div><div class="pt">4점</div></div>
+    <div class="ans-item"><div class="qn">4번</div><div class="ans">②</div><div class="pt">4점</div></div>
+    <div class="ans-item"><div class="qn">5번</div><div class="ans">③</div><div class="pt">4점</div></div>
+    <div class="ans-item"><div class="qn">6번</div><div class="ans">③</div><div class="pt">6점</div></div>
+    <div class="ans-item"><div class="qn">7번</div><div class="ans">③</div><div class="pt">6점</div></div>
+    <div class="ans-item"><div class="qn">8번</div><div class="ans">④</div><div class="pt">6점</div></div>
+    <div class="ans-item"><div class="qn">9번</div><div class="ans">④</div><div class="pt">6점</div></div>
+    <div class="ans-item"><div class="qn">10번</div><div class="ans">④</div><div class="pt">6점</div></div>
+    <div class="ans-item"><div class="qn">11번</div><div class="ans">⑤</div><div class="pt">4점</div></div>
+    <div class="ans-item"><div class="qn">12번</div><div class="ans">④</div><div class="pt">4점</div></div>
+    <div class="ans-item"><div class="qn">13번</div><div class="ans">②</div><div class="pt">4점</div></div>
+    <div class="ans-item"><div class="qn">14번</div><div class="ans">③</div><div class="pt">6점</div></div>
+    <div class="ans-item"><div class="qn">15번</div><div class="ans">④</div><div class="pt">6점</div></div>
+    <div class="ans-item"><div class="qn">16번</div><div class="ans">④</div><div class="pt">6점</div></div>
+    <div class="ans-item"><div class="qn">17번</div><div class="ans">②</div><div class="pt">5점</div></div>
+    <div class="ans-item"><div class="qn">18번</div><div class="ans">④</div><div class="pt">5점</div></div>
+    <div class="ans-item"><div class="qn">19번</div><div class="ans">③</div><div class="pt">5점</div></div>
+    <div class="ans-item"><div class="qn">20번</div><div class="ans">⑤</div><div class="pt">5점</div></div>
+  </div>
+
+  <div style="margin-top:20px;font-size:0.82em;line-height:1.9;background:#f8f8f8;padding:12px 16px;border-radius:6px">
+    <strong>핵심 해설 요약</strong><br>
+    1. 딥러닝은 기계학습의 한 기술, 인간 신경망 모방. DL⊂ML⊂AI 포함 관계.<br>
+    2. DL⊂ML⊂AI. 딥러닝은 기계학습의 일부, 기계학습은 인공지능의 일부.<br>
+    3. 튜링 테스트: 1950년 앨런 튜링 제안. 평가자가 컴퓨터와 인간 구별 못 하면 지능 인정.<br>
+    4. 기계학습은 컴퓨터가 스스로 규칙을 찾아냄. 기존 프로그래밍은 인간이 규칙 제시.<br>
+    5. 튜링 테스트(1950) → 퍼셉트론(1957) → 전문가 시스템(1980년대) → 알파고(2016).<br>
+    6. 벡터→텍스트 AI, 행렬→이미지 AI, 함수→경향성·의사결정 AI.<br>
+    7. 행렬→이미지 인식, 벡터→텍스트 인식. (같이 묶어서 확인)<br>
+    8. AND는 두 입력 모두 1일 때만 출력 1. 나머지 경우 모두 0.<br>
+    9. XOR: 입력이 서로 다를 때(0,1)·(1,0)만 출력 1. 같을 때(0,0)·(1,1)은 0.<br>
+    10. XOR은 단층 퍼셉트론으로 선형 분리 불가. 1969년 민스키·페퍼트 수학적 증명.<br>
+    11. 전문가 시스템은 2차 암흑기 후 딥러닝 발전으로 AI 부흥기 시작.<br>
+    12. 스팸 메일 분류는 텍스트 분석 AI. 나머지(생체·번호판·의료·동작)는 이미지 AI.<br>
+    13. w₁x₁+w₂x₂ = 1×1+1×0 = 1 &lt; θ=2 → 출력 y=0.<br>
+    14. w₁=2, w₂=1, θ=2: (0,0)→0, (0,1)→1&lt;2→0, (1,0)→2≥2→1, (1,1)→3≥2→1. 출력1: 2개.<br>
+    15. 진리표: (0,0)→0, (0,1)→1, (1,0)→1, (1,1)→1 → OR 게이트.<br>
+    16. w₁=1, w₂=1, θ=1: (0,0)→0, (0,1)→1, (1,0)→1, (1,1)→2≥1→1 → OR 진리표.<br>
+    17. w₁=2, w₂=2, θ=3: (0,0)→0, (0,1)→2&lt;3→0, (1,0)→2&lt;3→0, (1,1)→4≥3→1 → AND.<br>
+    18. AND·OR·NOT은 단층 퍼셉트론으로 선형 분리 가능. XOR만 불가.<br>
+    19. (0,1)→1×0+2×1=2≥2→1, (1,1)→1×1+2×1=3≥2→1. 출력1인 경우: (0,1), (1,1).<br>
+    20. XOR의 출력0인 점 (0,0),(1,1)과 출력1인 점 (0,1),(1,0)은 직선 하나로 분리 불가. 비선형 문제.
+  </div>
+</div>
+
+</body>
+</html>

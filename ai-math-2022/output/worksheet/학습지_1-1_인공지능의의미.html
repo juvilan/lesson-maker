@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>학습지_1-1_인공지능의의미</title>
+  <style>
+    @page { size: A4; margin: 15mm 20mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Apple SD Gothic Neo', '맑은 고딕', 'Noto Sans KR', sans-serif;
+      font-size: 11pt;
+      color: #111;
+      background: #fff;
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 15mm 20mm;
+    }
+    .header {
+      border-bottom: 2.5px solid #f39c12;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+    .header h1 {
+      font-size: 15pt;
+      color: #f39c12;
+      margin: 0 0 4px;
+      font-weight: 700;
+    }
+    .header .meta {
+      font-size: 9pt;
+      color: #666;
+    }
+    .student-info {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 14px;
+      font-size: 10pt;
+      align-items: center;
+    }
+    .field {
+      display: inline-block;
+      border-bottom: 1px solid #999;
+      min-width: 90px;
+      padding-bottom: 1px;
+    }
+    .problem {
+      page-break-inside: avoid;
+      margin-bottom: 18px;
+    }
+    .problem-header {
+      display: flex;
+      align-items: baseline;
+      margin-bottom: 5px;
+    }
+    .num {
+      color: #f39c12;
+      font-weight: bold;
+      font-size: 11.5pt;
+      min-width: 1.8em;
+    }
+    .bloom {
+      font-size: 8pt;
+      color: #aaa;
+      margin-left: 4px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 1px 5px;
+    }
+    .score {
+      margin-left: auto;
+      font-size: 9pt;
+      color: #666;
+      border: 1px solid #f39c12;
+      border-radius: 3px;
+      padding: 1px 7px;
+      color: #f39c12;
+    }
+    .q {
+      margin: 0 0 8px;
+      line-height: 1.75;
+      font-size: 10.5pt;
+    }
+    .answer-space {
+      min-height: 52px;
+      background: #fafafa;
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin-top: 4px;
+      font-size: 10pt;
+      color: #bbb;
+    }
+    .answer-space-md {
+      min-height: 70px;
+      background: #fafafa;
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin-top: 4px;
+      font-size: 10pt;
+      color: #bbb;
+    }
+    .answer-space-lg {
+      min-height: 90px;
+      background: #fafafa;
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin-top: 4px;
+      font-size: 10pt;
+      color: #bbb;
+    }
+    .table-q {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10pt;
+      margin: 7px 0;
+    }
+    .table-q th {
+      background: #f39c12;
+      color: #fff;
+      padding: 5px 10px;
+      text-align: center;
+      font-weight: 700;
+      border: 1px solid #f39c12;
+    }
+    .table-q td {
+      border: 1px solid #ddd;
+      padding: 6px 10px;
+      text-align: center;
+      min-height: 28px;
+    }
+    .table-q td.empty {
+      color: #bbb;
+      font-style: italic;
+    }
+    .choice-list {
+      list-style: none;
+      padding: 0;
+      margin: 6px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px 20px;
+    }
+    .choice-list li {
+      padding: 2px 0 2px 0;
+      font-size: 10pt;
+      line-height: 1.6;
+    }
+    .section-title {
+      background: #f39c12;
+      color: #fff;
+      padding: 3px 12px;
+      border-radius: 3px;
+      font-size: 10pt;
+      font-weight: bold;
+      margin: 14px 0 8px;
+      display: inline-block;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 14px 0;
+    }
+    .tip-box {
+      background: #fff8e1;
+      border-left: 3px solid #f39c12;
+      padding: 5px 10px;
+      font-size: 9.5pt;
+      color: #666;
+      border-radius: 0 4px 4px 0;
+      margin: 6px 0;
+    }
+    .formula-inline {
+      font-family: 'Times New Roman', serif;
+      font-style: italic;
+    }
+    @media print {
+      body { padding: 0; margin: 0 auto; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>1-1. 인공지능의 의미</h1>
+    <div class="meta">인공지능수학 | 고2 | 2022 개정 미래엔 | 총 100점</div>
+  </div>
+
+  <div class="student-info">
+    <span>이름:&nbsp;<span class="field">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span>
+    <span>학번:&nbsp;<span class="field">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span>
+    <span>날짜:&nbsp;<span class="field">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span>
+    <span>점수:&nbsp;<span class="field">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ──────────── 1번 ──────────── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="num">1.</span>
+      <span class="bloom">[기억]</span>
+      <span class="score">10점</span>
+    </div>
+    <div class="q">
+      다음 중 인공지능(AI)의 올바른 정의를 고르시오.
+      <ul class="choice-list">
+        <li>① 컴퓨터가 인터넷에 연결된 모든 기능</li>
+        <li>② 인간의 지능적 행동을 컴퓨터로 구현하는 기술</li>
+        <li>③ 빠른 계산을 위한 하드웨어 장치</li>
+        <li>④ 데이터베이스를 관리하는 소프트웨어</li>
+        <li>⑤ 인터넷 검색 엔진</li>
+      </ul>
+    </div>
+    <div class="answer-space">답:&nbsp;&nbsp;&nbsp;&nbsp;</div>
+  </div>
+
+  <!-- ──────────── 2번 ──────────── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="num">2.</span>
+      <span class="bloom">[기억]</span>
+      <span class="score">10점</span>
+    </div>
+    <div class="q">
+      다음 빈칸 ㉠, ㉡, ㉢을 채워 퍼셉트론의 가중합 계산식을 완성하시오.<br>
+      <div style="margin: 8px 0 4px; font-size:11pt; text-align:center;">
+        z &nbsp;=&nbsp; w₁ <strong>( ㉠ )</strong> &nbsp;+&nbsp; w₂ <strong>( ㉡ )</strong> &nbsp;+&nbsp; <strong>( ㉢ )</strong>
+      </div>
+    </div>
+    <div class="answer-space">㉠:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ㉡:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ㉢:</div>
+  </div>
+
+  <hr class="divider">
+  <div class="section-title">이해 · 적용</div>
+
+  <!-- ──────────── 3번 ──────────── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="num">3.</span>
+      <span class="bloom">[이해]</span>
+      <span class="score">10점</span>
+    </div>
+    <div class="q">
+      기존 프로그래밍과 기계학습의 차이를 아래 표를 완성하여 설명하시오.
+      <table class="table-q">
+        <thead>
+          <tr>
+            <th style="width:30%"></th>
+            <th>입력</th>
+            <th>+</th>
+            <th>→</th>
+            <th>출력</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:bold; text-align:left; padding-left:10px;">기존 프로그래밍</td>
+            <td>데이터</td>
+            <td>규칙(프로그램)</td>
+            <td>→</td>
+            <td class="empty">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="font-weight:bold; text-align:left; padding-left:10px;">기계학습</td>
+            <td>데이터</td>
+            <td class="empty">&nbsp;</td>
+            <td>→</td>
+            <td>규칙(모델)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ──────────── 4번 ──────────── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="num">4.</span>
+      <span class="bloom">[이해]</span>
+      <span class="score">10점</span>
+    </div>
+    <div class="q">
+      다음 학습 방식의 특징과 예시를 표에 채우시오.
+      <table class="table-q">
+        <thead>
+          <tr>
+            <th style="width:28%">학습 방식</th>
+            <th>특징 (정답 레이블 있음/없음/보상)</th>
+            <th>예시</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:bold;">지도학습</td>
+            <td class="empty">&nbsp;</td>
+            <td class="empty">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="font-weight:bold;">비지도학습</td>
+            <td class="empty">&nbsp;</td>
+            <td class="empty">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="font-weight:bold;">강화학습</td>
+            <td class="empty">&nbsp;</td>
+            <td class="empty">&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ──────────── 5번 ──────────── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="num">5.</span>
+      <span class="bloom">[적용]</span>
+      <span class="score">10점</span>
+    </div>
+    <div class="q">
+      다음 데이터를 정형/비정형, 그리고 수치형/범주형으로 분류하시오.
+      <table class="table-q">
+        <thead>
+          <tr>
+            <th>데이터</th>
+            <th>정형 / 비정형</th>
+            <th>수치형 / 범주형 (해당 시)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>키 (175 cm)</td><td class="empty">&nbsp;</td><td class="empty">&nbsp;</td></tr>
+          <tr><td>혈액형 (A형)</td><td class="empty">&nbsp;</td><td class="empty">&nbsp;</td></tr>
+          <tr><td>SNS 게시글</td><td class="empty">&nbsp;</td><td style="text-align:center; color:#bbb;">—</td></tr>
+          <tr><td>체온 (36.8 °C)</td><td class="empty">&nbsp;</td><td class="empty">&nbsp;</td></tr>
+          <tr><td>얼굴 사진</td><td class="empty">&nbsp;</td><td style="text-align:center; color:#bbb;">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ──────────── 6번 ──────────── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="num">6.</span>
+      <span class="bloom">[적용]</span>
+      <span class="score">10점</span>
+    </div>
+    <div class="q">
+      퍼셉트론의 가중치 w₁=0.5, w₂=0.5, 편향 b=−0.7일 때,
+      다음 입력에 대한 가중합 <span class="formula-inline">z</span>와 출력 <span class="formula-inline">y</span>를 계단함수를 사용하여 계산하시오.<br>
+      <span style="font-size:9.5pt; color:#888;">(계단함수: z ≥ 0이면 y=1, z &lt; 0이면 y=0)</span>
+      <table class="table-q" style="margin-top:8px;">
+        <thead>
+          <tr>
+            <th>입력 조건</th>
+            <th>가중합 z 계산 과정</th>
+            <th>z 값</th>
+            <th>출력 y</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>(1) x₁=1, x₂=0</td>
+            <td class="empty">&nbsp;</td>
+            <td class="empty">&nbsp;</td>
+            <td class="empty">&nbsp;</td>
+          </tr>
+          <tr>
+            <td>(2) x₁=1, x₂=1</td>
+            <td class="empty">&nbsp;</td>
+            <td class="empty">&nbsp;</td>
+            <td class="empty">&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ──────────── 7번 ──────────── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="num">7.</span>
+      <span class="bloom">[적용]</span>
+      <span class="score">10점</span>
+    </div>
+    <div class="q">
+      다음 중 <strong>비지도학습</strong>의 사례를 <strong>2가지</strong> 고르시오.
+      <ul class="choice-list">
+        <li>① 이메일 스팸 분류</li>
+        <li>② 고객 구매 패턴 군집화</li>
+        <li>③ 주택 가격 예측</li>
+        <li>④ 신용카드 이상 거래 탐지</li>
+        <li>⑤ AlphaGo의 바둑 학습</li>
+      </ul>
+    </div>
+    <div class="answer-space">답:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+  </div>
+
+  <hr class="divider">
+  <div class="section-title">분석 · 평가 · 창조</div>
+
+  <!-- ──────────── 8번 ──────────── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="num">8.</span>
+      <span class="bloom">[분석]</span>
+      <span class="score">15점</span>
+    </div>
+    <div class="q">
+      계단함수 대신 시그모이드나 ReLU 함수를 사용하는 이유를 아래 두 가지 관점에서 서술하시오.
+      <div class="tip-box">힌트: ① 미분 가능 여부(역전파 학습) &nbsp;&nbsp; ② 비선형성과 층을 쌓는 의미</div>
+    </div>
+    <div class="answer-space-lg"></div>
+  </div>
+
+  <!-- ──────────── 9번 ──────────── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="num">9.</span>
+      <span class="bloom">[평가]</span>
+      <span class="score">10점</span>
+    </div>
+    <div class="q">
+      "AI가 기존 프로그래밍보다 항상 우월하다"는 주장에 동의하는지,
+      구체적인 근거를 들어 자신의 견해를 서술하시오.<br>
+      <span style="font-size:9.5pt; color:#888;">(동의 또는 반론 모두 가능. 근거가 타당하면 점수 부여)</span>
+    </div>
+    <div class="answer-space-lg"></div>
+  </div>
+
+  <!-- ──────────── 10번 ──────────── -->
+  <div class="problem">
+    <div class="problem-header">
+      <span class="num">10.</span>
+      <span class="bloom">[창조]</span>
+      <span class="score">5점</span>
+    </div>
+    <div class="q">
+      강화학습의 개념을 활용하여, 실생활에서 적용할 수 있는 새로운 AI 아이디어를 하나 제안하고,
+      <strong>에이전트, 환경, 보상</strong>이 각각 무엇인지 간략히 설명하시오.
+    </div>
+    <div class="answer-space-lg"></div>
+  </div>
+
+</body>
+</html>

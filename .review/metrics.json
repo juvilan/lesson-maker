@@ -1,0 +1,133 @@
+{
+  "sessions": [
+    {
+      "taskId": "R01",
+      "agent": "code-reviewer",
+      "durationMs": 72867,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T08:34:55.916Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "code-reviewer",
+      "durationMs": 91422,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T08:36:27.345Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "code-reviewer",
+      "durationMs": 98060,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T08:38:05.417Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "code-reviewer",
+      "durationMs": 300747,
+      "exitCode": 143,
+      "timestamp": "2026-03-24T08:43:06.175Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "code-reviewer",
+      "durationMs": 252896,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T08:47:19.082Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "code-reviewer",
+      "durationMs": 445387,
+      "exitCode": 143,
+      "timestamp": "2026-03-24T08:54:44.477Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "code-reviewer",
+      "durationMs": 2096013,
+      "exitCode": 1,
+      "timestamp": "2026-03-24T09:29:40.502Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "code-reviewer",
+      "durationMs": 7818697,
+      "exitCode": 143,
+      "timestamp": "2026-03-24T11:39:59.209Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "code-reviewer",
+      "durationMs": 7996416,
+      "exitCode": 1,
+      "timestamp": "2026-03-24T13:53:15.631Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "security-reviewer",
+      "durationMs": 146324,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T21:41:47.427Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "security-reviewer",
+      "durationMs": 39889,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T21:42:27.324Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "security-reviewer",
+      "durationMs": 43236,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T21:43:10.571Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "security-reviewer",
+      "durationMs": 43218,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T21:43:53.803Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "security-reviewer",
+      "durationMs": 67601,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T21:45:01.415Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "security-reviewer",
+      "durationMs": 44058,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T21:45:45.480Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "security-reviewer",
+      "durationMs": 38002,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T21:46:23.492Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "security-reviewer",
+      "durationMs": 92932,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T21:47:56.431Z"
+    },
+    {
+      "taskId": "R01",
+      "agent": "security-reviewer",
+      "durationMs": 81949,
+      "exitCode": 0,
+      "timestamp": "2026-03-24T21:49:18.385Z"
+    }
+  ],
+  "totalSessions": 18,
+  "totalDurationMs": 19769714,
+  "startedAt": "2026-03-24T08:34:55.916Z"
+}
