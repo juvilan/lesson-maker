@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{LESSON_TITLE}} | {{SUBJECT}} {{GRADE}}</title>
 
-  <!-- ─── Reveal.js (오프라인) ─── -->
-  <link rel="stylesheet" href="../../libs/reveal.min.css">
-  <link rel="stylesheet" href="../../libs/theme/{{THEME}}.css">
+  <!-- ────────────────────────────────────────────────────────────
+       Reveal.js (CDN)
+       ─────────────────────────────────────────────────────────── -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
 
-  <!-- ─── MathJax 3.x (오프라인) ─── -->
+  <!-- ────────────────────────────────────────────────────────────
+       MathJax 3.x (CDN)
+       ─────────────────────────────────────────────────────────── -->
   <script>
     window.MathJax = {
       tex: {
@@ -26,488 +30,138 @@
           window.mathJaxReady = true;
         }
       },
-      chtml: { scale: 0.92 }
+      chtml: { scale: 1.0 }
     };
   </script>
-  <script src="../../libs/mathjax/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
 
-  <!-- ─── 외부 라이브러리 (오프라인) ─── -->
-  <script src="../../libs/gsap.min.js"></script>
-  <script src="../../libs/p5.min.js"></script>
-  <script src="../../libs/chart.min.js"></script>
+  <!-- ────────────────────────────────────────────────────────────
+       외부 라이브러리 (CDN)
+       ─────────────────────────────────────────────────────────── -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-  <!-- ─── 공통 스타일 ─── -->
+  <!-- ────────────────────────────────────────────────────────────
+       lesson-maker 디자인 시스템
+       ─────────────────────────────────────────────────────────── -->
+  <link rel="stylesheet" href="../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../_shared/templates/slide-system.css">
+
   <style>
-    /* 기본 색상 변수 */
-    :root {
-      --accent: {{ACCENT_COLOR}};
-      --accent-dim: {{ACCENT_COLOR}}88;
-      --success: #2ecc71;
-      --danger: #e74c3c;
-      --info: #3498db;
-      --text-muted: #95a5a6;
-      /* ── ppt-maker 디자인 시스템 토큰 ── */
-      --text-dim: #706858;
-      --border: #1e1c18;
-      --font-mono: 'JetBrains Mono', monospace;
-      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    /* ── 수식/숫자 강조 ── */
-    .reveal .highlight { color: var(--accent); font-weight: bold; }
-    .reveal .num-sub   { color: var(--accent); font-size: 1.1em; }
-    .reveal .result    { color: var(--success); font-weight: bold; }
-    .reveal .wrong     { color: var(--danger); }
-
-    /* ── 계산 단계 박스 ── */
-    .reveal .step-box {
-      background: rgba(255,255,255,0.07);
-      border-left: 4px solid var(--accent);
-      border-radius: 0 8px 8px 0;
-      padding: 0;
-      margin: 0;
-      max-height: 0;
-      overflow: hidden;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.3s ease;
-    }
-    .reveal .step-box.visible {
-      padding: 0.6em 1em;
-      margin: 0.5em 0;
-      max-height: 200px;
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .reveal .step-box .step-label {
-      font-size: 0.75em;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.2em;
-    }
-
-    /* ── 계산표 ── */
-    .reveal .calc-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85em;
-      margin: 0.8em auto;
-    }
-    .reveal .calc-table th {
-      background: var(--accent);
-      color: #000;
-      padding: 0.5em 0.8em;
-      text-align: center;
-      font-weight: 700;
-    }
-    .reveal .calc-table td {
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 0.45em 0.7em;
-      text-align: center;
-      transition: background 0.3s;
-    }
-    .reveal .calc-table td.fillable {
-      color: var(--text-muted);
-      font-style: italic;
-    }
-    .reveal .calc-table td.filled {
-      color: #fff;
-      font-style: normal;
-    }
-    .reveal .calc-table tr:nth-child(even) td { background: rgba(255,255,255,0.04); }
-
-    /* ── 신경망 다이어그램 컨테이너 ── */
-    .reveal .nn-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .reveal .nn-container svg .nn-edge { transition: stroke 0.4s, stroke-width 0.4s; }
-    .reveal .nn-container svg .nn-node circle { transition: fill 0.5s; }
-
-    /* ── 애니메이션 컨트롤 버튼 ── */
-    .reveal .anim-controls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.8em;
-      margin-top: 0.7em;
-    }
-    .reveal .anim-btn {
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      padding: 0.4em 1.2em;
-      font-size: 0.85em;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .reveal .anim-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .reveal .anim-btn.reset-btn { background: rgba(255,255,255,0.15); color: #fff; }
-    .reveal .step-counter {
-      color: var(--text-muted);
-      font-size: 0.8em;
-      min-width: 4em;
-      text-align: center;
-    }
-
-    /* ── 진리표 ── */
-    .reveal .truth-table {
-      margin: 0 auto;
-      border-collapse: collapse;
-      font-size: 0.9em;
-    }
-    .reveal .truth-table th {
-      background: var(--accent);
-      color: #000;
-      padding: 0.5em 1.2em;
-      font-weight: 700;
-    }
-    .reveal .truth-table td {
-      border: 1px solid rgba(255,255,255,0.25);
-      padding: 0.45em 1.2em;
-      text-align: center;
-    }
-    .reveal .truth-table .val-1 { color: var(--success); font-weight: bold; }
-    .reveal .truth-table .val-0 { color: var(--danger); }
-
-    /* ── 슬라이드별 레이아웃 ── */
-    .reveal .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5em;
-      align-items: start;
-    }
-    .reveal .three-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1em;
-    }
-
-    /* ── 개념 카드 ── */
-    .reveal .concept-card {
-      background: rgba(255,255,255,0.08);
-      border-radius: 10px;
-      padding: 1em;
-      text-align: center;
-    }
-    .reveal .concept-card .icon { font-size: 2em; margin-bottom: 0.3em; }
-    .reveal .concept-card h4 { color: var(--accent); margin: 0.3em 0; }
-
-    /* ── 학습 목표 ── */
-    .reveal .objective-list {
-      list-style: none;
-      padding: 0;
-      text-align: left;
-    }
-    .reveal .objective-list li {
-      padding: 0.4em 0 0.4em 1.8em;
-      position: relative;
-      font-size: 0.95em;
-    }
-    .reveal .objective-list li::before {
-      content: '✓';
-      position: absolute;
-      left: 0;
-      color: var(--accent);
-      font-weight: bold;
-    }
-
-    /* ── 오답 방지 박스 ── */
-    .reveal .warning-box {
-      background: rgba(231, 76, 60, 0.15);
-      border: 1px solid var(--danger);
-      border-radius: 8px;
-      padding: 0.7em 1em;
-      font-size: 0.85em;
-    }
-    .reveal .warning-box::before { content: '⚠️ '; }
-
-    /* ── 인터랙티브 슬라이더 ── */
-    .reveal .param-slider-group {
-      display: flex;
-      align-items: center;
-      gap: 0.8em;
-      font-size: 0.85em;
-      margin: 0.3em 0;
-    }
-    .reveal .param-slider-group label { min-width: 6em; color: var(--accent); }
-    .reveal .param-slider-group input[type=range] { flex: 1; }
-    .reveal .param-slider-group .val-display {
-      min-width: 3em;
-      text-align: right;
-      font-family: monospace;
-    }
-
-    /* ── 발표자 노트 ── */
-    .reveal aside.notes { font-size: 0.85em; line-height: 1.5; }
-
-    /* ── 진행 바 커스터마이징 ── */
-    .reveal .progress { height: 4px; }
-    .reveal .progress span { background: var(--accent); }
-
-    /* ── 슬라이드 오버플로우 보호 ── */
-    .reveal {
-      font-size: 28px;
-      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
-    }
-    .reveal .slides section {
-      box-sizing: border-box;
-      overflow: hidden;
-    }
-
-    /* ── MathJax display math 오버플로우 방지 ── */
-    .reveal mjx-container[jax="CHTML"][display="true"] {
-      max-width: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
-    }
-
-    /* ── 카드 변형 ── */
-    .reveal .card { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 1em; }
-    .reveal .card-accent { border: 1px solid var(--accent); }
-
-    /* ── 수식 박스 ── */
-    .reveal .formula-box {
-      background: rgba(255,255,255,0.04);
-      border-radius: 8px;
-      padding: 0.8em;
-      text-align: center;
-      margin: 0.4em 0;
-    }
-
-    /* ── 정의 박스 ── */
-    .reveal .definition-box {
-      border-left: 4px solid var(--info);
-      padding: 0.6em 1em;
-      background: rgba(52,152,219,0.08);
-      border-radius: 0 8px 8px 0;
-      margin: 0.5em 0;
-    }
-
-    /* ── 키워드 하이라이트 ── */
-    .reveal .kw { color: var(--accent); font-weight: 600; }
-    .reveal .kw-info { color: var(--info); font-weight: 600; }
-    .reveal .kw-success { color: var(--success); font-weight: 600; }
-    .reveal .kw-danger { color: var(--danger); font-weight: 600; }
-
-    /* ════════════════════════════════════════
-       ppt-maker 컴포넌트 (업그레이드)
-    ════════════════════════════════════════ */
-
-    /* ── terminal-badge: > 커서 블링크 라벨 ── */
-    .reveal .terminal-badge {
-      font-family: var(--font-mono);
-      font-size: 0.65em;
-      color: var(--accent);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 0.3em;
-      display: inline-block;
-    }
-    .reveal .terminal-badge::before {
-      content: '> ';
-      animation: tblink 1s step-end infinite;
-    }
-    @keyframes tblink { 50% { opacity: 0; } }
-
-    /* ── badge: 알약형 태그 ── */
-    .reveal .badge {
-      display: inline-block;
-      font-family: var(--font-mono);
-      font-size: 0.6em;
-      color: var(--accent);
-      padding: 0.2em 0.6em;
-      border: 1px solid var(--accent-dim);
-      border-radius: 100px;
-      letter-spacing: 0.05em;
-    }
-
-    /* ── accent-line: 강조 구분선 ── */
-    .reveal .accent-line {
-      width: 50px;
-      height: 2px;
-      background: var(--accent);
-      margin: 0.5em 0;
-    }
-
-    /* ── info-card: 정보 카드 ── */
-    .reveal .info-card {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--border, #1e1c18);
-      border-radius: 6px;
-      padding: 0.9em 1.1em;
-      width: 100%;
-    }
-    .reveal .info-card .card-title {
-      font-family: var(--font-mono);
-      font-size: 0.65em;
-      color: var(--text-dim, #706858);
-      margin-bottom: 0.5em;
-      letter-spacing: 0.05em;
-    }
-
-    /* ── split-card: split 내부 카드 ── */
-    .reveal .split-card {
-      padding: 0.9em 1em;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--border, #1e1c18);
-      border-radius: 6px;
-    }
-
-    /* ── code-block: 줄번호 + 하이라이트 코드 블록 ── */
-    .reveal .code-block {
-      background: #111118;
-      border: 1px solid var(--border, #1e1c18);
-      border-radius: 6px;
-      overflow: hidden;
-      font-family: var(--font-mono);
-      font-size: 0.65em;
-      line-height: 1.7;
-      counter-reset: line-number;
-      width: 100%;
-      text-align: left;
-    }
-    .reveal .code-block::before {
-      content: attr(data-language);
-      display: block;
-      background: rgba(198,165,92,0.06);
-      color: var(--text-dim, #706858);
-      font-size: 0.8em;
-      padding: 0.4em 1em;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      border-bottom: 1px solid var(--border, #1e1c18);
-    }
-    .reveal .code-block code { display: block; padding: 0.8rem 1rem; overflow-x: auto; }
-    .reveal .code-block .line {
-      display: block;
-      padding: 2px 0 2px 3em;
-      position: relative;
-      counter-increment: line-number;
-      transition: background-color 0.3s ease, opacity 0.3s ease;
-      color: #B8B0A0;
-    }
-    .reveal .code-block .line::before {
-      content: counter(line-number);
-      position: absolute;
-      left: 0;
-      width: 2.5em;
-      text-align: right;
-      color: #3a3830;
-      font-size: 0.85em;
-      user-select: none;
-    }
-    .reveal .code-block .line--highlight {
-      background: rgba(198,165,92,0.08);
-      border-left: 3px solid var(--accent);
-      padding-left: calc(3em - 3px);
-    }
-    .reveal .code-block .line--highlight::before { color: var(--accent); }
-    .reveal .code-block.dim-others .line:not(.line--highlight) { opacity: 0.3; }
-
-    /* 신택스 컬러 (ppt-maker 기준) */
-    .reveal .code-block .fn  { color: #D4B87A; }
-    .reveal .code-block .str { color: #A89070; }
-    .reveal .code-block .cmt { color: #555040; font-style: italic; }
-    .reveal .code-block .var { color: #E0D0B0; }
-    .reveal .code-block .op  { color: #8A8070; }
-    .reveal .code-block .tag { color: #C6A55C; }
-    .reveal .code-block .attr { color: #D4B87A; }
-    .reveal .code-block .val { color: #A89070; }
-    .reveal .code-block .kw  { color: #C6A55C; font-weight: normal; }
+    /* Reveal.js 캔버스 & 뷰포트 오버라이드 (고정 1920×1080) */
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
   </style>
 </head>
-<body>
-<div class="reveal">
-  <div class="slides">
 
-    <!-- ══════════════════════════════════════════
-         슬라이드 섹션들이 여기에 삽입됩니다
-         (slide_creator 에이전트가 생성)
-    ══════════════════════════════════════════ -->
-    {{SLIDES_HTML}}
+<body data-subject="{{SUBJECT_KEY}}">
 
-  </div><!-- /slides -->
-</div><!-- /reveal -->
+  <div class="reveal">
+    <div class="slides">
 
-<!-- ─── Reveal.js 초기화 ─── -->
-<script src="../../libs/reveal.min.js"></script>
-<script>
-  Reveal.initialize({
-    hash: true,
-    slideNumber: 'c/t',
-    progress: true,
-    controls: true,
-    controlsLayout: 'bottom-right',
-    transition: 'slide',
-    transitionSpeed: 'default',
-    backgroundTransition: 'fade',
-    center: true,
-    touch: true,
-    width: 1280,
-    height: 720,
-    margin: 0.04,
-    minScale: 0.2,
-    maxScale: 1.5,
-    keyboard: {
-      // 왼쪽/오른쪽 화살표: 슬라이드 이동 (기본)
-      // 위/아래 화살표: 수직 슬라이드 이동 (기본)
-      78: () => {  // N 키: 현재 슬라이드의 수학 애니메이션 다음 단계
-        const currentSlide = Reveal.getCurrentSlide();
-        const animId = currentSlide.dataset.animId;
-        if (animId && window.mathAnimators[animId]) {
-          window.mathAnimators[animId].next();
+      <!-- ══════════════════════════════════════════════════════════
+           슬라이드 섹션은 slide_creator 에이전트가 생성하여
+           아래 플레이스홀더를 치환한다
+           ══════════════════════════════════════════════════════════ -->
+      {{SLIDES_HTML}}
+
+    </div>
+  </div>
+
+
+  <!-- ────────────────────────────────────────────────────────────
+       Reveal.js 초기화 (고정 크기 · 상단 정렬 · 업스케일 금지)
+       ─────────────────────────────────────────────────────────── -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      /* ── 캔버스 고정 ── */
+      width:  1920,
+      height: 1080,
+      margin: 0.04,
+      minScale: 0.2,   /* 작은 뷰포트에서 비례 축소만 허용 */
+      maxScale: 1.0,   /* 1920보다 큰 뷰포트에서도 업스케일 안 함 */
+
+      /* ── 레이아웃 ── */
+      center: false,   /* 상단 정렬 (자동 수직 센터링 없음) */
+
+      /* ── UI ── */
+      hash: true,
+      slideNumber: 'c/t',
+      progress: true,
+      controls: true,
+      controlsLayout: 'bottom-right',
+
+      /* ── 전환 ── */
+      transition: 'fade',
+      transitionSpeed: 'default',
+      backgroundTransition: 'fade',
+
+      /* ── 입력 ── */
+      touch: true,
+      keyboard: {
+        /* N: 현재 슬라이드의 수학 애니메이션 다음 단계 */
+        78: () => {
+          const currentSlide = Reveal.getCurrentSlide();
+          const animId = currentSlide && currentSlide.dataset.animId;
+          if (animId && window.mathAnimators && window.mathAnimators[animId]) {
+            window.mathAnimators[animId].next();
+          }
+        },
+        /* P: 이전 단계 */
+        80: () => {
+          const currentSlide = Reveal.getCurrentSlide();
+          const animId = currentSlide && currentSlide.dataset.animId;
+          if (animId && window.mathAnimators && window.mathAnimators[animId]) {
+            window.mathAnimators[animId].prev();
+          }
         }
       },
-      80: () => {  // P 키: 이전 단계
-        const currentSlide = Reveal.getCurrentSlide();
-        const animId = currentSlide.dataset.animId;
-        if (animId && window.mathAnimators[animId]) {
-          window.mathAnimators[animId].prev();
-        }
-      }
-    },
-    plugins: []
-  });
-
-  // 안전한 MathJax 호출 유틸리티
-  window.safeTypeset = function(elements) {
-    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
-    }
-    return Promise.resolve();
-  };
-
-  Reveal.on('slidechanged', () => safeTypeset());
-  Reveal.on('ready', () => {
-    safeTypeset();
-    // code-block 하이라이트 적용
-    document.querySelectorAll('.code-block[data-highlight-lines]').forEach(pre => {
-      const ranges = new Set();
-      pre.dataset.highlightLines.split(',').forEach(part => {
-        part = part.trim();
-        if (part.includes('-')) {
-          const [a, b] = part.split('-').map(Number);
-          for (let i = a; i <= b; i++) ranges.add(i);
-        } else { ranges.add(Number(part)); }
-      });
-      pre.querySelectorAll('.line').forEach((line, i) => {
-        if (ranges.has(i + 1)) line.classList.add('line--highlight');
-      });
-      if (ranges.size > 0) pre.classList.add('dim-others');
+      plugins: []
     });
-  });
-</script>
 
-<!-- ─── MathStepAnimator + NeuralNetDiagram 라이브러리 ─── -->
-<script src="../../templates/math_animation_lib.js"></script>
+    /* MathJax 안전 호출 유틸 (에이전트 생성 코드에서 공통 사용) */
+    window.safeTypeset = function(elements) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+      }
+      return Promise.resolve();
+    };
 
-<!-- ─── 슬라이드별 인라인 스크립트 (math_animator/visual_creator 에이전트 생성) ─── -->
-{{INLINE_SCRIPTS}}
+    Reveal.on('slidechanged', () => window.safeTypeset());
+    Reveal.on('ready', () => {
+      window.safeTypeset();
+
+      /* code-block data-highlight-lines 처리 */
+      document.querySelectorAll('.code-block[data-highlight-lines]').forEach(pre => {
+        const ranges = new Set();
+        pre.dataset.highlightLines.split(',').forEach(part => {
+          part = part.trim();
+          if (part.includes('-')) {
+            const [a, b] = part.split('-').map(Number);
+            for (let i = a; i <= b; i++) ranges.add(i);
+          } else {
+            ranges.add(Number(part));
+          }
+        });
+        pre.querySelectorAll('.line').forEach((line, i) => {
+          if (ranges.has(i + 1)) line.classList.add('line--highlight');
+        });
+        if (ranges.size > 0) pre.classList.add('dim-others');
+      });
+    });
+  </script>
+
+  <!-- ────────────────────────────────────────────────────────────
+       MathStepAnimator · NeuralNetDiagram 라이브러리
+       ─────────────────────────────────────────────────────────── -->
+  <script src="../../_shared/templates/math_animation_lib.js"></script>
+
+  <!-- ────────────────────────────────────────────────────────────
+       슬라이드별 인라인 스크립트 (math_animator·visual_creator 생성)
+       ─────────────────────────────────────────────────────────── -->
+  {{INLINE_SCRIPTS}}
 
 </body>
 </html>

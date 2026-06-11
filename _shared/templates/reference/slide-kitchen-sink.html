@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>슬라이드 컴포넌트 레퍼런스 | lesson-maker</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']], tags: 'ams' },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: { typeset: false, ready: () => { MathJax.startup.defaultReady(); } },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+  <link rel="stylesheet" href="../design-tokens.css">
+  <link rel="stylesheet" href="../slide-system.css">
+
+  <style>
+    html, body, .reveal-viewport { background: var(--lm-paper); }
+  </style>
+</head>
+
+<body data-subject="ai_math">
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ══════════════════════════════════════════════════════════
+           1. 타이틀 슬라이드
+           ══════════════════════════════════════════════════════════ -->
+      <section class="title-slide">
+        <div class="chapter-tag">컴포넌트 레퍼런스 · Slide kitchen sink</div>
+        <h1>lesson-maker 디자인 시스템</h1>
+        <p class="slide-sub">슬라이드에서 사용 가능한 모든 컴포넌트 · 과목별 액센트 적용 예시</p>
+        <div class="title-meta">
+          <span>영일고등학교 · 교무부</span>
+          <span>2026 · 인공지능수학</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           2. 타이포그래피 위계
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Typography</div>
+        <h2>타이포그래피 위계</h2>
+        <h1 style="margin-top: var(--lm-space-4);">H1 · 단원 제목</h1>
+        <h2>H2 · 섹션 제목</h2>
+        <h3>H3 · 개념 라벨</h3>
+        <h4>H4 · 보조 라벨</h4>
+        <p>본문 문장입니다. 코사인 유사도는 두 벡터가 이루는 각 \(\theta\)에 대해 \(\cos\theta\)로 정의된다.</p>
+        <p class="chip chip-muted">캡션 스타일</p>
+        <aside class="notes">발표자 노트 샘플입니다.</aside>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           3. 정의 · 공식 · 예제 박스
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Concept blocks</div>
+        <h2>정의 · 공식 · 예제 박스</h2>
+        <div class="definition-box">
+          두 텍스트 \(P\), \(Q\)의 벡터가 \(\vec{P}=(p_1,\ldots,p_n)\), \(\vec{Q}=(q_1,\ldots,q_n)\)일 때,
+          <span class="kw">코사인 유사도</span>는 두 벡터가 이루는 각 \(\theta\)의 코사인으로 정의한다.
+        </div>
+        <div class="formula-box">
+          \[C(\vec{P},\vec{Q}) = \dfrac{\vec{P}\cdot\vec{Q}}{|\vec{P}||\vec{Q}|} = \cos\theta\]
+        </div>
+        <div class="example-box">
+          \(\vec{P}=(1,1,0)\), \(\vec{Q}=(2,0,0)\)일 때 \(C(\vec{P},\vec{Q})\)를 구하시오.
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           4. 시맨틱 박스 (경고 · 결론 · 정보)
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Semantic boxes</div>
+        <h2>경고 · 결론 · 정보 박스</h2>
+        <div class="warning-box">
+          코사인 유사도는 벡터의 <span class="kw-danger">크기가 아닌 방향</span>만 비교한다. 단어 빈도가 모두 2배여도 유사도는 동일하다.
+        </div>
+        <div class="result-box">
+          세 쌍 중 \(C(P,Q)\)가 가장 크므로 <span class="kw-success">P와 Q</span>가 가장 유사하다.
+        </div>
+        <div class="info-box">
+          자카드 유사도는 집합의 원소 비율만 비교하므로 벡터 공간이 아닌 <span class="kw-info">집합 대수</span> 관점의 지표이다.
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           5. 학습 목표 리스트
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Objectives</div>
+        <h2>학습 목표</h2>
+        <ul class="objective-list">
+          <li><div class="num">1</div><div><span class="kw">유클리드 유사도</span> \(L(\vec{P}, \vec{Q})\)를 구할 수 있다.</div></li>
+          <li><div class="num">2</div><div><span class="kw">코사인 유사도</span> \(C(\vec{P}, \vec{Q})\)를 구할 수 있다.</div></li>
+          <li><div class="num">3</div><div><span class="kw">자카드 유사도</span> \(J(P, Q)\)를 구할 수 있다.</div></li>
+          <li><div class="num">4</div><div>유사도 분석을 이용해 텍스트를 <span class="kw-success">분류</span>할 수 있다.</div></li>
+        </ul>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           6. 개념 카드 3열 그리드
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Concept cards</div>
+        <h2>세 가지 유사도 척도</h2>
+        <div class="three-col">
+          <div class="concept-card">
+            <div class="icon">📐</div>
+            <h4>유클리드 유사도</h4>
+            <p>두 벡터 사이의 <span class="kw">거리</span>로 측정. 값이 작을수록 유사.</p>
+          </div>
+          <div class="concept-card">
+            <div class="icon">∠</div>
+            <h4>코사인 유사도</h4>
+            <p>두 벡터가 이루는 <span class="kw">각도의 코사인</span>. 1에 가까울수록 유사.</p>
+          </div>
+          <div class="concept-card">
+            <div class="icon">∩</div>
+            <h4>자카드 유사도</h4>
+            <p>두 집합의 <span class="kw">공통 원소 비율</span>. 1에 가까울수록 유사.</p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           7. 2단 레이아웃 (two-col)
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Layouts · two-col</div>
+        <h2>코사인 유사도</h2>
+        <div class="two-col">
+          <div class="definition-box">
+            두 벡터 \(\vec{P}\), \(\vec{Q}\)에 대해 <span class="kw">코사인 유사도</span>는 두 벡터가 이루는 각 \(\theta\)의 코사인으로 정의한다.
+          </div>
+          <div class="formula-box">
+            \[C(\vec{P},\vec{Q}) = \dfrac{\vec{P}\cdot\vec{Q}}{|\vec{P}||\vec{Q}|}\]
+          </div>
+        </div>
+        <div class="example-box" style="margin-top: var(--lm-space-4);">
+          \(\vec{P}=(1,1,0)\), \(\vec{Q}=(2,0,0)\)일 때 \(C(\vec{P},\vec{Q}) = \dfrac{2}{2\sqrt{2}} = \dfrac{1}{\sqrt{2}} \approx 0.71\)
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           8. 계산표
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Tables · calc-table</div>
+        <h2>세 벡터 쌍의 코사인 유사도 비교</h2>
+        <table class="calc-table">
+          <thead>
+            <tr><th>쌍</th><th>내적 \(\vec{P}\cdot\vec{Q}\)</th><th>\(|\vec{P}|\)</th><th>\(|\vec{Q}|\)</th><th>\(C\)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>\((P, Q)\)</td><td>2</td><td>\(\sqrt{2}\)</td><td>2</td><td class="result-cell">\(1/\sqrt{2}\)</td></tr>
+            <tr><td>\((Q, R)\)</td><td>2</td><td>2</td><td>\(\sqrt{5}\)</td><td>\(1/\sqrt{5}\)</td></tr>
+            <tr><td>\((R, P)\)</td><td>1</td><td>\(\sqrt{5}\)</td><td>\(\sqrt{2}\)</td><td>\(1/\sqrt{10}\)</td></tr>
+          </tbody>
+        </table>
+        <div class="result-box">\(C(P, Q)\)가 가장 크므로 \(P\)와 \(Q\)가 가장 유사하다.</div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           9. 진리표
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Truth table</div>
+        <h2>AND 게이트의 진리표</h2>
+        <table class="truth-table">
+          <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(y = x_1 \land x_2\)</th></tr></thead>
+          <tbody>
+            <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+            <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           10. 코드 블록 (Python)
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Code · Python</div>
+        <h2>코사인 유사도 구현</h2>
+        <pre class="code-block" data-language="python" data-highlight-lines="4-5"><code><span class="line"><span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span></span><span class="line"></span><span class="line"><span class="kw">def</span> <span class="fn">cosine_similarity</span>(<span class="var">p</span>, <span class="var">q</span>):</span><span class="line">    <span class="var">dot</span> <span class="op">=</span> <span class="fn">np.dot</span>(<span class="var">p</span>, <span class="var">q</span>)</span><span class="line">    <span class="var">norm</span> <span class="op">=</span> <span class="fn">np.linalg.norm</span>(<span class="var">p</span>) <span class="op">*</span> <span class="fn">np.linalg.norm</span>(<span class="var">q</span>)</span><span class="line">    <span class="kw">return</span> <span class="var">dot</span> <span class="op">/</span> <span class="var">norm</span></span></code></pre>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           11. 인터랙티브 슬라이더 · 애니메이션 컨트롤
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Interactive · sliders</div>
+        <h2>가중치 조정으로 출력 변화 관찰</h2>
+        <div class="two-col">
+          <div>
+            <div class="param-slider-group">
+              <label>가중치 \(w_1\)</label>
+              <input type="range" min="-1" max="1" step="0.1" value="0.5">
+              <span class="val-display">0.5</span>
+            </div>
+            <div class="param-slider-group">
+              <label>가중치 \(w_2\)</label>
+              <input type="range" min="-1" max="1" step="0.1" value="0.5">
+              <span class="val-display">0.5</span>
+            </div>
+            <div class="param-slider-group">
+              <label>편향 \(b\)</label>
+              <input type="range" min="-1" max="1" step="0.1" value="-0.7">
+              <span class="val-display">-0.7</span>
+            </div>
+            <div class="anim-controls">
+              <button class="anim-btn">다음 단계 ▶</button>
+              <span class="step-counter">1 / 5</span>
+              <button class="anim-btn reset-btn">처음으로</button>
+            </div>
+          </div>
+          <div class="formula-box">
+            \[y = \sigma(w_1 x_1 + w_2 x_2 + b)\]
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           12. 칩 · 배지 · 키워드
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Chips · badges · keywords</div>
+        <h2>소규모 라벨 요소</h2>
+        <h3>칩 (chip)</h3>
+        <div style="display: flex; gap: var(--lm-space-3); flex-wrap: wrap; margin-bottom: var(--lm-space-5);">
+          <span class="chip chip-accent">정의</span>
+          <span class="chip chip-success">결론</span>
+          <span class="chip chip-danger">주의</span>
+          <span class="chip chip-info">참고</span>
+          <span class="chip chip-warning">함정</span>
+          <span class="chip chip-muted">메타</span>
+        </div>
+        <h3>배지 (badge) · 액센트선</h3>
+        <div style="display: flex; gap: var(--lm-space-3); align-items: center; margin-bottom: var(--lm-space-5);">
+          <span class="badge">12인수03-01</span>
+          <span class="badge">심화</span>
+          <hr class="accent-line" style="width: 80px;">
+        </div>
+        <h3>키워드 강조</h3>
+        <p>
+          <span class="kw">오크 액센트</span>,
+          <span class="kw-info">정보 남색</span>,
+          <span class="kw-success">성공 녹색</span>,
+          <span class="kw-danger">주의 버건디</span>가
+          본문 안에서 자연스럽게 구분됩니다.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           13. 과목별 액센트
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Subject accents</div>
+        <h2>과목별 액센트 팔레트</h2>
+        <p>body에 <span class="kw">data-subject</span> 속성을 바꾸면 모든 액센트 컬러가 해당 과목 것으로 자동 전환됩니다.</p>
+        <div class="three-col" style="margin-top: var(--lm-space-5);">
+          <div data-subject="ai_math" class="concept-card">
+            <h4>인공지능수학</h4>
+            <p class="chip chip-accent">AI_MATH</p>
+            <p>오크 #8F6A1F</p>
+          </div>
+          <div data-subject="math1" class="concept-card">
+            <h4>수학Ⅰ</h4>
+            <p class="chip chip-accent">MATH1</p>
+            <p>네이비 #2C5282</p>
+          </div>
+          <div data-subject="math2" class="concept-card">
+            <h4>수학Ⅱ</h4>
+            <p class="chip chip-accent">MATH2</p>
+            <p>머브 #6B4C8A</p>
+          </div>
+        </div>
+        <div class="three-col" style="margin-top: var(--lm-space-4);">
+          <div data-subject="calculus" class="concept-card">
+            <h4>미적분</h4>
+            <p class="chip chip-accent">CALCULUS</p>
+            <p>버건디 #8B3A2E</p>
+          </div>
+          <div data-subject="statistics" class="concept-card">
+            <h4>확률과통계</h4>
+            <p class="chip chip-accent">STATISTICS</p>
+            <p>포레스트 #3F6B3E</p>
+          </div>
+          <div data-subject="geometry" class="concept-card">
+            <h4>기하</h4>
+            <p class="chip chip-accent">GEOMETRY</p>
+            <p>딥틸 #2D6B66</p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           14. 에이전트 참조 규칙
+           ══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="chapter-tag">Design principles</div>
+        <h2>에이전트 참조 규칙</h2>
+        <ul style="font-size: var(--lm-slide-small); line-height: 1.8;">
+          <li><span class="kw">고정 캔버스</span> — 모든 슬라이드는 1920×1080 기준. 내용이 넘치면 슬라이드를 쪼갤 것.</li>
+          <li><span class="kw">토큰만 사용</span> — 하드코딩 hex/px 금지. 모두 <code>var(--lm-*)</code> 경유.</li>
+          <li><span class="kw">과목 전환</span> — body에 <code>data-subject="{subject_key}"</code>만 부여. 색상은 자동.</li>
+          <li><span class="kw">검증된 클래스만</span> — 이 파일에 등장하는 클래스 사용. 새 클래스 필요 시 slide-system.css에도 추가.</li>
+          <li><span class="kw">safeTypeset 사용</span> — MathJax 직접 호출 금지. <code>window.safeTypeset()</code> 경유.</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1920, height: 1080, margin: 0.04,
+      minScale: 0.2, maxScale: 1.0,
+      center: false,
+      hash: true, slideNumber: 'c/t', progress: true, controls: true,
+      transition: 'fade'
+    });
+
+    window.safeTypeset = function(elements) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+      }
+      return Promise.resolve();
+    };
+    Reveal.on('slidechanged', () => window.safeTypeset());
+    Reveal.on('ready', () => {
+      window.safeTypeset();
+      document.querySelectorAll('.code-block[data-highlight-lines]').forEach(pre => {
+        const ranges = new Set();
+        pre.dataset.highlightLines.split(',').forEach(part => {
+          part = part.trim();
+          if (part.includes('-')) {
+            const [a, b] = part.split('-').map(Number);
+            for (let i = a; i <= b; i++) ranges.add(i);
+          } else { ranges.add(Number(part)); }
+        });
+        pre.querySelectorAll('.line').forEach((line, i) => {
+          if (ranges.has(i + 1)) line.classList.add('line--highlight');
+        });
+        if (ranges.size > 0) pre.classList.add('dim-others');
+      });
+    });
+  </script>
+
+</body>
+</html>

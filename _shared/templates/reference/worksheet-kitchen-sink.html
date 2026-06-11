@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학습지·시험지 컴포넌트 레퍼런스 | lesson-maker</title>
+
+  <link rel="stylesheet" href="../design-tokens.css">
+  <link rel="stylesheet" href="../worksheet-system.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] },
+      chtml: { scale: 0.95 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+  <style>
+    /* 레퍼런스 전용: 화면에서 A4 경계 시각화 (인쇄 시 자동 해제) */
+    @media screen {
+      body { background: #EEE; padding: 20px 0; }
+      .ws-page {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body data-subject="ai_math">
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PAGE 1 · 객관식 위주 (3+3 구성, 5지선다 기본)
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div class="ws-page">
+
+    <header class="ws-head">
+      <div class="ws-title-group">
+        <div class="ws-chapter">Ⅲ-1-03</div>
+        <h1 class="ws-title">유사도 분석</h1>
+      </div>
+      <div class="ws-meta">인공지능수학 · 2학년 · 영일고등학교</div>
+    </header>
+
+    <div class="ws-student">
+      <span class="ws-student-field"><label>학년</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>반</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>번호</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>이름</label><span class="line"></span></span>
+    </div>
+
+    <div class="ws-body">
+
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">1.</span>두 벡터 $\vec{P}=(1,0,1)$, $\vec{Q}=(0,1,2)$의 유클리드 유사도의 값은?
+        </div>
+        <ol class="ws-choices">
+          <li>① $\dfrac{1}{1+\sqrt{2}}$</li>
+          <li>② $\dfrac{1}{1+\sqrt{3}}$</li>
+          <li>③ $\dfrac{1}{1+\sqrt{5}}$</li>
+          <li>④ $\dfrac{1}{1+\sqrt{6}}$</li>
+          <li>⑤ $\dfrac{1}{1+\sqrt{7}}$</li>
+        </ol>
+      </article>
+
+      <!-- 표 편집 기법 ① · 4열 이하 compact 표 -->
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">2.</span>아래 표는 세 문서의 단어 빈도이다. 가장 유사한 두 문서의 쌍으로 옳은 것은?
+        </div>
+        <table class="ws-table">
+          <thead>
+            <tr><th class="left">문서</th><th>인공지능</th><th>수학</th><th>알고리즘</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="left">A</td><td>3</td><td>2</td><td>1</td></tr>
+            <tr><td class="left">B</td><td>1</td><td>3</td><td>0</td></tr>
+            <tr><td class="left">C</td><td>0</td><td>1</td><td>3</td></tr>
+          </tbody>
+        </table>
+        <ol class="ws-choices">
+          <li>① A와 B</li>
+          <li>② A와 C</li>
+          <li>③ B와 C</li>
+          <li>④ 모두 같은 유사도를 가진다</li>
+          <li>⑤ 비교할 수 없다</li>
+        </ol>
+      </article>
+
+      <!-- 표 편집 기법 ④ · <보기> 서술 -->
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">3.</span>다음 &lt;보기&gt;에서 옳은 것만을 있는 대로 고른 것은?
+        </div>
+        <aside class="ws-info">
+          <strong>&lt;보기&gt;</strong><br>
+          ㄱ. 코사인 유사도는 벡터의 크기와 무관하다.<br>
+          ㄴ. 자카드 유사도는 두 집합의 합집합 대비 교집합의 비율이다.<br>
+          ㄷ. 유클리드 거리는 값이 작을수록 두 점이 유사하다.
+        </aside>
+        <ol class="ws-choices">
+          <li>① ㄱ</li>
+          <li>② ㄱ, ㄴ</li>
+          <li>③ ㄴ, ㄷ</li>
+          <li>④ ㄱ, ㄷ</li>
+          <li>⑤ ㄱ, ㄴ, ㄷ</li>
+        </ol>
+      </article>
+
+      <!-- 표 편집 기법 ② · transpose (단어를 행, 문서를 열) -->
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">4.</span>네 문서의 단어 빈도가 다음과 같을 때, 문서 <strong>D</strong>와 가장 유사한 문서는?
+        </div>
+        <table class="ws-table">
+          <thead>
+            <tr><th class="left">단어</th><th>A</th><th>B</th><th>C</th><th>D</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="left">인공지능</td><td>3</td><td>1</td><td>0</td><td>2</td></tr>
+            <tr><td class="left">수학</td><td>2</td><td>3</td><td>1</td><td>2</td></tr>
+            <tr><td class="left">알고리즘</td><td>1</td><td>0</td><td>3</td><td>1</td></tr>
+            <tr><td class="left">데이터</td><td>1</td><td>2</td><td>0</td><td>1</td></tr>
+          </tbody>
+        </table>
+        <ol class="ws-choices">
+          <li>① 문서 A</li>
+          <li>② 문서 B</li>
+          <li>③ 문서 C</li>
+          <li>④ A와 B가 동률</li>
+          <li>⑤ 비교할 수 없다</li>
+        </ol>
+      </article>
+
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">5.</span>두 벡터의 코사인 유사도가 $\dfrac{1}{2}$일 때, 두 벡터가 이루는 예각의 크기는?
+        </div>
+        <ol class="ws-choices">
+          <li>① $30°$</li>
+          <li>② $45°$</li>
+          <li>③ $60°$</li>
+          <li>④ $90°$</li>
+          <li>⑤ $120°$</li>
+        </ol>
+      </article>
+
+      <!-- 표 편집 기법 ③ · 행 묶어 밀도 높이기 (2×2) -->
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">6.</span>$P=\{a,b,c\}$, $Q=\{a,c,d\}$일 때, 다음 중 자카드 유사도 $J(P,Q)$의 값은?
+        </div>
+        <table class="ws-table">
+          <thead>
+            <tr><th class="left">연산</th><th>값</th><th class="left">연산</th><th>값</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="left">$|P\cap Q|$</td><td>2</td><td class="left">$|P\cup Q|$</td><td>4</td></tr>
+            <tr><td class="left">$|P\setminus Q|$</td><td>1</td><td class="left">$|Q\setminus P|$</td><td>1</td></tr>
+          </tbody>
+        </table>
+        <ol class="ws-choices">
+          <li>① $\dfrac{1}{4}$</li>
+          <li>② $\dfrac{1}{3}$</li>
+          <li>③ $\dfrac{1}{2}$</li>
+          <li>④ $\dfrac{2}{3}$</li>
+          <li>⑤ $\dfrac{3}{4}$</li>
+        </ol>
+      </article>
+
+    </div>
+
+    <div class="ws-pagenum">1 / 3</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PAGE 2 · 서답형 (2+2 구성, 답란 기본 30mm · lg 65mm)
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div class="ws-page">
+
+    <header class="ws-head">
+      <div class="ws-title-group">
+        <div class="ws-chapter">Ⅲ-1-03</div>
+        <h1 class="ws-title">유사도 분석</h1>
+      </div>
+      <div class="ws-meta">서답형 · 풀이과정 포함</div>
+    </header>
+
+    <h2 class="ws-section">서술형 문항</h2>
+
+    <div class="ws-body">
+
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">1.</span>$\vec{P}=(3,1,2)$, $\vec{Q}=(1,2,2)$에 대하여 $C(\vec{P},\vec{Q})$의 값을 풀이 과정과 함께 구하시오.
+        </div>
+        <div class="ws-answer-space"></div>
+      </article>
+
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">2.</span>두 집합 $P=\{$사과, 배, 감$\}$, $Q=\{$사과, 감, 귤$\}$의 자카드 유사도 $J(P,Q)$를 구하고, 풀이 과정을 쓰시오.
+        </div>
+        <div class="ws-answer-space"></div>
+      </article>
+
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">3.</span>아래 세 벡터에 대하여, 가장 유사한 두 벡터의 쌍을 코사인 유사도를 이용하여 찾고 그 근거를 수치적으로 서술하시오.
+        </div>
+        <aside class="ws-info">
+          <strong>벡터</strong> $\vec{A}=(2,1,0,1)$, $\vec{B}=(1,2,0,1)$, $\vec{C}=(0,1,2,0)$
+        </aside>
+        <div class="ws-answer-space lg"></div>
+      </article>
+
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">4.</span>자카드 유사도와 코사인 유사도의 <strong>공통점</strong>과 <strong>차이점</strong>을 각각 두 가지씩 서술하고, 각 유사도 지표가 유리한 상황의 예를 하나씩 드시오.
+        </div>
+        <div class="ws-answer-space lg"></div>
+      </article>
+
+    </div>
+
+    <div class="ws-pagenum">2 / 3</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PAGE 3 · 수행평가 (1+1 구성, 답란 xl 90mm + 루브릭)
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div class="ws-page">
+
+    <header class="ws-head">
+      <div class="ws-title-group">
+        <div class="ws-chapter">수행평가</div>
+        <h1 class="ws-title">유사도 지표 선택의 타당성</h1>
+      </div>
+      <div class="ws-meta">2026학년도 1학기 · 수행 40점 중 15점</div>
+    </header>
+
+    <div class="ws-student">
+      <span class="ws-student-field"><label>학년</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>반</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>번호</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>이름</label><span class="line"></span></span>
+    </div>
+
+    <aside class="ws-info">
+      <strong>유의사항</strong> 답안은 논리적 서술로 작성하며, 수치적 근거가 포함되어야 한다. 채점은 아래 루브릭에 따라 이루어진다.
+    </aside>
+
+    <div class="ws-body">
+
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">1.</span>다음 네 문서의 단어 빈도 벡터가 주어져 있다. 문서 D를 가장 유사한 문서로 분류하고자 할 때, 코사인 유사도와 자카드 유사도 중 어느 지표가 더 타당한지 수치적 근거를 들어 판단하고, 그렇게 결정한 이유를 서술하시오.
+        </div>
+        <table class="ws-table">
+          <thead>
+            <tr><th class="left">단어</th><th>A</th><th>B</th><th>C</th><th>D</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="left">인공지능</td><td>3</td><td>1</td><td>0</td><td>2</td></tr>
+            <tr><td class="left">수학</td><td>2</td><td>3</td><td>1</td><td>2</td></tr>
+            <tr><td class="left">알고리즘</td><td>1</td><td>0</td><td>3</td><td>1</td></tr>
+            <tr><td class="left">데이터</td><td>1</td><td>2</td><td>0</td><td>1</td></tr>
+          </tbody>
+        </table>
+        <div class="ws-answer-space xl"></div>
+      </article>
+
+    </div>
+
+    <h2 class="ws-section">채점 루브릭</h2>
+
+    <table class="ws-rubric">
+      <thead>
+        <tr>
+          <th style="width: 22%;">평가 요소</th>
+          <th class="center" style="width: 10%;">수준</th>
+          <th>기술 수준 서술</th>
+          <th class="center" style="width: 10%;">배점</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="3">유사도 계산의 정확성</td>
+          <td class="lvl">상</td>
+          <td>두 지표의 유사도를 모두 정확히 계산하고, 풀이 과정이 논리적이며 완결되어 있다.</td>
+          <td class="pts">8</td>
+        </tr>
+        <tr>
+          <td class="lvl">중</td>
+          <td>한 지표는 정확히 계산하였으나 다른 지표에서 계산 오류가 있다.</td>
+          <td class="pts">5</td>
+        </tr>
+        <tr>
+          <td class="lvl">하</td>
+          <td>두 지표 모두 개념을 오해하였거나 계산이 부정확하다.</td>
+          <td class="pts">2</td>
+        </tr>
+        <tr>
+          <td rowspan="3">지표 선택의 타당성</td>
+          <td class="lvl">상</td>
+          <td>선택한 지표가 상황에 적합함을 수치적 근거와 개념적 이유를 모두 들어 설명하였다.</td>
+          <td class="pts">7</td>
+        </tr>
+        <tr>
+          <td class="lvl">중</td>
+          <td>결론은 타당하나 근거 서술이 수치 또는 개념 중 한 쪽에 치우쳐 있다.</td>
+          <td class="pts">4</td>
+        </tr>
+        <tr>
+          <td class="lvl">하</td>
+          <td>결론이 타당하지 않거나 근거 제시가 거의 없다.</td>
+          <td class="pts">1</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="ws-pagenum">3 / 3</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PAGE 4 · 시험지 헤더 예시 (지필평가)
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div class="ws-page">
+
+    <header class="exam-head">
+      <div class="exam-title">2026학년도 1학기 1차 지필평가</div>
+      <div class="exam-sub">인공지능수학 · 2학년 · 50분 · 100점 만점</div>
+      <div class="exam-metrics">
+        <span>과목코드 14</span>
+        <span>시행 2026-05-07</span>
+        <span>출제 교무부</span>
+      </div>
+    </header>
+
+    <div class="ws-student">
+      <span class="ws-student-field"><label>학년</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>반</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>번호</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>이름</label><span class="line"></span></span>
+    </div>
+
+    <aside class="ws-info">
+      <strong>유의사항</strong> 답안은 모두 답안지에 작성하시오. 계산 과정은 이 문제지의 여백을 활용할 수 있으며, 채점 대상에는 포함되지 않는다.
+    </aside>
+
+    <div class="ws-body">
+
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">1.</span>두 벡터 $\vec{a}=(1,2)$, $\vec{b}=(3,-1)$에 대하여 $\vec{a}\cdot\vec{b}$의 값은?
+        </div>
+        <ol class="ws-choices">
+          <li>① $-2$</li>
+          <li>② $-1$</li>
+          <li>③ $0$</li>
+          <li>④ $1$</li>
+          <li>⑤ $2$</li>
+        </ol>
+      </article>
+
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">2.</span>두 벡터의 코사인 유사도가 $\dfrac{\sqrt{3}}{2}$일 때, 두 벡터가 이루는 예각의 크기는?
+        </div>
+        <ol class="ws-choices">
+          <li>① $15°$</li>
+          <li>② $30°$</li>
+          <li>③ $45°$</li>
+          <li>④ $60°$</li>
+          <li>⑤ $75°$</li>
+        </ol>
+      </article>
+
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">3.</span>$\vec{P}=(2,0,1,1)$, $\vec{Q}=(1,1,2,0)$의 내적 $\vec{P}\cdot\vec{Q}$의 값은?
+        </div>
+        <ol class="ws-choices">
+          <li>① $2$</li>
+          <li>② $3$</li>
+          <li>③ $4$</li>
+          <li>④ $5$</li>
+          <li>⑤ $6$</li>
+        </ol>
+      </article>
+
+      <article class="ws-problem">
+        <div class="ws-problem-body">
+          <span class="ws-problem-number">4.</span>두 집합 $A=\{1,2,3,4\}$, $B=\{2,3,5\}$의 자카드 유사도 $J(A,B)$의 값은?
+        </div>
+        <ol class="ws-choices">
+          <li>① $\dfrac{1}{5}$</li>
+          <li>② $\dfrac{2}{5}$</li>
+          <li>③ $\dfrac{1}{2}$</li>
+          <li>④ $\dfrac{3}{5}$</li>
+          <li>⑤ $\dfrac{2}{3}$</li>
+        </ol>
+      </article>
+
+    </div>
+
+    <div class="ws-pagenum">지필평가 예시 · 1</div>
+  </div>
+
+</body>
+</html>

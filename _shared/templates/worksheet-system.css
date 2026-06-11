@@ -1,0 +1,490 @@
+/* ============================================================================
+ * lesson-maker · worksheet-system.css
+ *
+ * 학습지·시험지·수행평가 공통 컴포넌트.
+ *
+ * 설계 원칙:
+ *   1. 순백 바탕, 장식 최소, 타이포그래피와 하이라인으로만 위계 형성
+ *   2. 2단 레이아웃 — 수능·EBS 문제집 스타일
+ *   3. 문제 번호는 발문 앞에 인라인, 점수 표기 없음
+ *   4. 답안 공간은 완전한 공백 (밑줄·박스·점선 없음)
+ *   5. 모든 간격은 design-tokens.css의 토큰으로만 통제
+ *   6. A4 인쇄가 최종 매체 — pt·mm 단위 사용
+ *
+ * 한 페이지당 문항 수 규칙:
+ *   - 최대 6문항 (한 단에 최대 3문항)
+ *   - 최소 2문항 (1+1, 긴 서술형 수행평가)
+ *   - 가능한 분포: 1+1, 2+1, 1+2, 2+2, 3+2, 2+3, 3+3
+ *   - 7문항 이상은 다음 페이지로 분할
+ *
+ * 의존성: design-tokens.css (먼저 로드)
+ * ============================================================================ */
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 페이지 & 인쇄
+ * ────────────────────────────────────────────────────────────────────────── */
+@page {
+  size: A4;
+  margin: 15mm 15mm 20mm 15mm;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--lm-font-sans);
+  font-size: var(--lm-page-body);
+  line-height: var(--lm-page-line-body);
+  color: var(--lm-page-ink);
+  background: var(--lm-page);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum";
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { font-size: var(--lm-page-body); }
+}
+
+.ws-page {
+  width: 210mm;
+  padding: 15mm 15mm 20mm 15mm;
+  margin: 0 auto;
+  background: var(--lm-page);
+  page-break-after: always;
+  display: flex;
+  flex-direction: column;
+  min-height: 297mm;
+}
+.ws-page:last-child {
+  page-break-after: auto;
+}
+@media print {
+  .ws-page {
+    padding: 0;            /* @page margin이 여백 담당 */
+    width: auto;
+    min-height: auto;
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 헤더 영역
+ *   <header class="ws-head">
+ *     <div class="ws-title-group">
+ *       <div class="ws-chapter">Ⅲ-1-03</div>
+ *       <h1 class="ws-title">유사도 분석</h1>
+ *     </div>
+ *     <div class="ws-meta">인공지능수학 · 2학년 · 영일고</div>
+ *   </header>
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--lm-space-4);
+  padding-bottom: var(--lm-space-2);
+  margin-bottom: var(--lm-space-3);
+  border-bottom: var(--lm-border-heavy) solid var(--lm-page-rule-heavy);
+}
+.ws-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: var(--lm-space-3);
+}
+.ws-chapter {
+  font-size: var(--lm-page-caption);
+  font-weight: 500;
+  color: var(--lm-accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.ws-title {
+  font-size: var(--lm-page-h1);
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  letter-spacing: -0.01em;
+}
+.ws-meta {
+  font-size: var(--lm-page-small);
+  color: var(--lm-page-ink-2);
+  text-align: right;
+  white-space: nowrap;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 학생 정보란
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-student {
+  display: flex;
+  gap: var(--lm-space-5);
+  font-size: var(--lm-page-small);
+  color: var(--lm-page-ink-2);
+  padding-bottom: var(--lm-space-2);
+  margin-bottom: var(--lm-space-3);
+  border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+}
+.ws-student-field {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--lm-space-1);
+}
+.ws-student-field label {
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  white-space: nowrap;
+}
+.ws-student-field .line {
+  display: inline-block;
+  width: 22mm;
+  border-bottom: var(--lm-border-hair) solid var(--lm-page-ink-2);
+  height: 1.4em;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 섹션 구분선
+ *   <h2 class="ws-section">서답형 문항</h2>
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-section {
+  font-size: var(--lm-page-h3);
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  letter-spacing: 0.02em;
+  padding-bottom: var(--lm-space-1);
+  margin: var(--lm-section-gap) 0 var(--lm-space-3);
+  border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+}
+.ws-section:first-child {
+  margin-top: 0;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * 2단 본문 컨테이너 — 수능·EBS 문제집 스타일
+ *
+ *   <div class="ws-body">
+ *     <article class="ws-problem">...</article>
+ *     <article class="ws-problem">...</article>
+ *     ...
+ *   </div>
+ *
+ * column-fill: auto → 왼쪽 단부터 차곡차곡 채우고 넘치면 오른쪽 단으로.
+ * break-inside: avoid 는 .ws-problem에 걸려있어 문제 단위가 단 경계에서 잘리지 않음.
+ * ══════════════════════════════════════════════════════════════════════════ */
+.ws-body {
+  column-count: var(--lm-column-count);
+  column-gap: var(--lm-column-gap);
+  column-fill: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 문제 (하나의 단위로 묶어 단·페이지 분할 방지)
+ *
+ *   <article class="ws-problem">
+ *     <div class="ws-problem-body">
+ *       <span class="ws-problem-number">1.</span>발문 내용 ...
+ *     </div>
+ *     <ol class="ws-choices">...</ol>        <!-- 객관식 -->
+ *     <div class="ws-answer-space"></div>     <!-- 서답형 -->
+ *   </article>
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-problem {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: var(--lm-problem-gap);
+}
+.ws-problem:last-child {
+  margin-bottom: 0;
+}
+
+/* 문제 번호 — 발문 앞에 인라인으로 붙음. 점수 표기 없음. */
+.ws-problem-number {
+  font-weight: 500;
+  font-size: var(--lm-page-body-lg);
+  color: var(--lm-page-ink);
+  margin-right: var(--lm-space-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.ws-problem-body {
+  font-size: var(--lm-page-body);
+  line-height: var(--lm-page-line-body);
+  color: var(--lm-page-ink);
+}
+.ws-problem-body > p {
+  margin-bottom: var(--lm-space-2);
+}
+.ws-problem-body > p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 객관식 선택지
+ *
+ * 기본 규칙: 5지선다 · 1열 (수능·내신 표준)
+ *
+ *   <ol class="ws-choices">
+ *     <li>① 값1</li> <li>② 값2</li> <li>③ 값3</li> <li>④ 값4</li> <li>⑤ 값5</li>
+ *   </ol>
+ *
+ * 예외: 4지선다이고 선택지가 매우 짧을 때만 .two-col
+ *   <ol class="ws-choices two-col"> ... </ol>
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-choices {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--lm-choice-row-gap) var(--lm-space-4);
+  margin: var(--lm-problem-inner-gap) 0 0 var(--lm-space-3);
+  font-size: var(--lm-page-body);
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.ws-choices li {
+  display: flex;
+  gap: var(--lm-space-1);
+  align-items: baseline;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.ws-choices.two-col {
+  grid-template-columns: 1fr 1fr;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 답안 공간 (서답형 · 풀이 과정)
+ *
+ * 설계 원칙: 순수한 공백만 제공. 밑줄·줄선·네모 상자·바탕 탠트 등
+ * 어떠한 시각적 장식도 넣지 않는다. 학생이 자유롭게 여백을 활용하도록 한다.
+ *
+ * 크기 ↔ 한 페이지 권장 문항 수 매핑:
+ *   sm (18mm)  → 페이지당 5~6문항   단답
+ *   기본 (30mm) → 페이지당 3~4문항   짧은 계산
+ *   md (45mm)  → 페이지당 3~4문항   중간 계산·간단 서술
+ *   lg (65mm)  → 페이지당 2~3문항   서술형
+ *   xl (90mm)  → 페이지당 1~2문항   긴 서술형 (수행평가)
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-answer-space {
+  min-height: var(--lm-answer-md);
+  margin-top: var(--lm-problem-inner-gap);
+  page-break-inside: avoid;
+  break-inside: avoid;
+  /* 의도적으로 비어있음: background, border, outline 없음 */
+}
+.ws-answer-space.sm  { min-height: var(--lm-answer-sm); }
+.ws-answer-space.md  { min-height: var(--lm-answer-lg); }   /* 실제 45mm */
+.ws-answer-space.lg  { min-height: var(--lm-answer-xl); }   /* 실제 65mm */
+.ws-answer-space.xl  { min-height: var(--lm-answer-2xl); }  /* 실제 90mm */
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 참고·제시 박스 (<보기>, 자료 제시, 유의사항)
+ *
+ *   <aside class="ws-info">
+ *     <strong>&lt;보기&gt;</strong> ...
+ *   </aside>
+ *
+ * 왼쪽 얇은 세로선만으로 구분. 바탕색 없음.
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-info {
+  border-left: var(--lm-border-heavy) solid var(--lm-page-ink);
+  padding: var(--lm-space-1) var(--lm-space-3);
+  margin: var(--lm-aside-gap) 0;
+  font-size: var(--lm-page-small);
+  color: var(--lm-page-ink);
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.ws-info strong {
+  font-weight: 500;
+  margin-right: var(--lm-space-2);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 표 (공통 · 계산표 · 자료표)
+ *
+ * 단 폭(약 85mm)에 맞춰 compact 기본값.
+ * 수능 문제집 스타일: 상·하단 굵은 선, 내부는 hairline.
+ *
+ * 표가 넓어서 단에 안 들어갈 때 편집 기법:
+ *   ① 4열 이하 compact 유지
+ *   ② transpose (행↔열 축 바꾸기)
+ *   ③ 짝 데이터는 한 행에 2쌍씩 묶기
+ *   ④ 조건·명제는 표 대신 <보기> ㄱ·ㄴ·ㄷ 서술
+ *
+ * 위 네 기법 모두 불가능한 비상 상황에만 .ws-span-all 사용 (아래 참조).
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--lm-aside-gap) 0;
+  font-size: var(--lm-page-small);
+  page-break-inside: avoid;
+  break-inside: avoid;
+  font-variant-numeric: tabular-nums;
+  table-layout: auto;
+}
+.ws-table th {
+  background: transparent;
+  border-top: var(--lm-border-thin) solid var(--lm-page-ink);
+  border-bottom: var(--lm-border-thin) solid var(--lm-page-ink);
+  padding: var(--lm-space-1) var(--lm-space-2);
+  text-align: center;
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  white-space: nowrap;
+}
+.ws-table td {
+  border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+  padding: var(--lm-space-1) var(--lm-space-2);
+  text-align: center;
+  color: var(--lm-page-ink);
+}
+.ws-table td.left,
+.ws-table th.left   { text-align: left; }
+.ws-table td.right,
+.ws-table th.right  { text-align: right; }
+.ws-table tr:last-child td {
+  border-bottom: var(--lm-border-thin) solid var(--lm-page-ink);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * [예외 · 비권장] 2단을 가로지르는 문제 · 자료
+ *
+ * 기본 원칙: 모든 표·자료는 위 4가지 편집 기법으로 한 단 안에 들어가도록 한다.
+ * .ws-span-all은 정말로 어쩔 수 없을 때만 (예: 6열 이상 원본 자료, 넓은 그림)
+ * 사용하며, 해당 문제는 페이지의 맨 위 또는 맨 아래에 배치해야 2단 흐름이
+ * 가장 적게 끊긴다.
+ *
+ *   <article class="ws-problem ws-span-all">...</article>
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-problem.ws-span-all {
+  column-span: all;
+  margin: var(--lm-space-3) 0 var(--lm-problem-gap);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 루브릭 (수행평가 채점표)
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-rubric {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--lm-page-small);
+  margin: var(--lm-aside-gap) 0;
+  page-break-inside: avoid;
+  break-inside: avoid;
+  font-variant-numeric: tabular-nums;
+}
+.ws-rubric th {
+  border-top: var(--lm-border-thin) solid var(--lm-page-ink);
+  border-bottom: var(--lm-border-thin) solid var(--lm-page-ink);
+  padding: var(--lm-space-2) var(--lm-space-3);
+  text-align: left;
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  font-size: var(--lm-page-caption);
+  letter-spacing: 0.02em;
+}
+.ws-rubric th.center {
+  text-align: center;
+}
+.ws-rubric td {
+  border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+  padding: var(--lm-space-2) var(--lm-space-3);
+  vertical-align: top;
+  color: var(--lm-page-ink);
+  line-height: 1.55;
+}
+.ws-rubric td.lvl {
+  font-weight: 500;
+  white-space: nowrap;
+  text-align: center;
+}
+.ws-rubric td.pts {
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ws-rubric tr:last-child td {
+  border-bottom: var(--lm-border-thin) solid var(--lm-page-ink);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 시험지 전용 헤더 (지필평가·수행평가)
+ *
+ *   <header class="exam-head">
+ *     <div class="exam-title">2026학년도 1학기 1차 지필평가</div>
+ *     <div class="exam-sub">인공지능수학 · 2학년 · 50분 · 100점 만점</div>
+ *     <div class="exam-metrics">
+ *       <span>과목코드 ···</span>
+ *       <span>일시 YYYY-MM-DD</span>
+ *     </div>
+ *   </header>
+ * ────────────────────────────────────────────────────────────────────────── */
+.exam-head {
+  text-align: center;
+  padding: var(--lm-space-4) 0 var(--lm-space-5);
+  border-bottom: var(--lm-border-thin) solid var(--lm-page-ink);
+  margin-bottom: var(--lm-space-4);
+}
+.exam-head .exam-title {
+  font-size: var(--lm-page-h1);
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--lm-space-2);
+}
+.exam-head .exam-sub {
+  font-size: var(--lm-page-body);
+  color: var(--lm-page-ink-2);
+  margin-bottom: var(--lm-space-3);
+}
+.exam-head .exam-metrics {
+  display: flex;
+  justify-content: center;
+  gap: var(--lm-space-5);
+  font-size: var(--lm-page-caption);
+  color: var(--lm-page-ink-2);
+  letter-spacing: 0.04em;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 페이지 번호
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-pagenum {
+  text-align: center;
+  font-size: var(--lm-page-caption);
+  color: var(--lm-page-ink-3);
+  margin-top: var(--lm-space-4);
+  padding-top: var(--lm-space-2);
+  border-top: var(--lm-border-hair) solid var(--lm-page-rule);
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * MathJax 조정 (인쇄 최적화)
+ * ────────────────────────────────────────────────────────────────────────── */
+mjx-container {
+  color: var(--lm-page-ink) !important;
+}
+mjx-container[jax="CHTML"][display="true"] {
+  margin: var(--lm-space-2) 0 !important;
+}
