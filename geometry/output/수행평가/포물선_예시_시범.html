@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>포물선의 광학적 성질 시뮬레이션 (시범 예시)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --ink: #0f172a;
+      --ink-2: #475569;
+      --ink-3: #94a3b8;
+      --line: #e2e8f0;
+      --line-soft: #f1f5f9;
+      --curve: #1e40af;
+      --focus: #dc2626;
+      --incident: #64748b;
+      --reflected: #16a34a;
+      --tangent: #f59e0b;
+      --normal: #7c3aed;
+      --angle: #dc2626;
+    }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      padding: 20px 16px 60px;
+    }
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .head {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .head h1 {
+      font-size: 1.55rem;
+      color: var(--curve);
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+    }
+    .head .sub {
+      font-size: 0.9rem;
+      color: var(--ink-3);
+    }
+
+    .def {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 12px 16px;
+      margin: 14px 0;
+      border-radius: 0 6px 6px 0;
+      color: #1e3a8a;
+    }
+    .def .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #1e40af;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .def .formula {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 1.1rem;
+      color: #1e3a8a;
+      margin: 4px 0;
+    }
+    .def p { font-size: 0.92rem; margin-top: 4px; }
+
+    .sim {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 14px 0;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+      height: auto;
+      touch-action: none;
+      cursor: grab;
+      background: #fff;
+      border-radius: 4px;
+    }
+    canvas:active { cursor: grabbing; }
+
+    .hint {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--ink-3);
+      margin: 10px 0 0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px 18px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding: 10px 12px;
+      background: var(--line-soft);
+      border-radius: 6px;
+    }
+    .ctrl {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.88rem;
+      color: var(--ink);
+      cursor: pointer;
+      user-select: none;
+    }
+    .ctrl input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--curve);
+      cursor: pointer;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px 16px;
+      margin-top: 12px;
+      font-size: 0.82rem;
+      color: var(--ink-2);
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; }
+    .sw-line { display: inline-block; width: 20px; height: 3px; border-radius: 2px; }
+    .sw-dashed { display: inline-block; width: 20px; border-top: 2px dashed currentColor; }
+    .sw-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
+
+    .reasoning {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin: 14px 0;
+    }
+    .reasoning h2 {
+      font-size: 1rem;
+      color: var(--ink);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media (min-width: 720px) {
+      .steps { grid-template-columns: 1fr 1fr; }
+    }
+    .step {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px 14px;
+      background: #fafbfc;
+    }
+    .step .tag {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      background: var(--curve);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-right: 6px;
+    }
+    .step .ttl {
+      display: inline-block;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .step .body {
+      font-size: 0.88rem;
+      color: var(--ink-2);
+      line-height: 1.6;
+      margin-top: 6px;
+    }
+    .step .body em {
+      font-style: normal;
+      background: #eff6ff;
+      padding: 1px 4px;
+      border-radius: 3px;
+      color: #1e40af;
+    }
+    .step .formula {
+      font-family: 'Georgia', serif;
+      font-size: 0.95rem;
+      color: var(--curve);
+      margin-top: 4px;
+    }
+
+    .conclusion {
+      background: linear-gradient(to right, #dcfce7, #f0fdf4);
+      border-left: 4px solid var(--reflected);
+      padding: 12px 16px;
+      margin: 14px 0;
+      border-radius: 0 6px 6px 0;
+    }
+    .conclusion .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #14532d;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .conclusion p {
+      font-size: 0.95rem;
+      color: #14532d;
+      line-height: 1.55;
+    }
+    .conclusion strong { color: #14532d; font-weight: 700; }
+
+    .distance {
+      text-align: center;
+      margin-top: 8px;
+      font-family: 'Georgia', serif;
+      font-size: 0.92rem;
+      color: var(--ink-2);
+      letter-spacing: 0.02em;
+    }
+    .distance .value {
+      color: var(--curve);
+      font-weight: 700;
+    }
+    .distance .eq {
+      color: var(--reflected);
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #fef3c7;
+      color: #92400e;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="head">
+    <h1>포물선의 광학적 성질</h1>
+    <div class="sub">축에 평행하게 들어온 빛은 반사 후 반드시 초점을 지난다</div>
+  </header>
+
+  <!-- 정의 -->
+  <div class="def">
+    <div class="lbl">출발 — 포물선의 수학적 정의</div>
+    <div class="formula">PF = PH</div>
+    <p>포물선 위의 임의의 점 P에서 <strong>초점 F까지의 거리</strong>와 <strong>준선까지의 거리(P에서 준선에 내린 수선의 발 H)</strong>는 같습니다.</p>
+  </div>
+
+  <!-- 시뮬레이션 -->
+  <div class="sim">
+    <canvas id="cv" width="820" height="500"></canvas>
+    <p class="hint">점 <strong>P</strong>를 드래그해서 포물선 위에서 움직여보세요. 어디로 옮겨도 평행광선은 반드시 초점 F로 모입니다.</p>
+
+    <div class="controls">
+      <label class="ctrl">
+        <input type="checkbox" id="opt-tangent" checked>
+        접선 · 법선 · 각도
+      </label>
+      <label class="ctrl">
+        <input type="checkbox" id="opt-distance" checked>
+        정의 보조선 (PF, PH)
+      </label>
+      <label class="ctrl">
+        <input type="checkbox" id="opt-animate">
+        빛 입자 애니메이션
+      </label>
+    </div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="sw-line" style="background:#1e40af"></span>포물선</span>
+      <span class="legend-item"><span class="sw-dashed" style="color:#64748b"></span>평행광선 (입사)</span>
+      <span class="legend-item"><span class="sw-line" style="background:#16a34a"></span>반사 광선 (→ F)</span>
+      <span class="legend-item"><span class="sw-line" style="background:#f59e0b"></span>접선</span>
+      <span class="legend-item"><span class="sw-line" style="background:#7c3aed"></span>법선</span>
+      <span class="legend-item"><span class="sw-dot" style="background:#dc2626"></span>초점 F</span>
+    </div>
+
+    <div class="distance" id="distance">
+      PF = <span class="value" id="d1">·</span>
+      &nbsp;<span class="eq">=</span>&nbsp;
+      PH = <span class="value" id="d2">·</span>
+      &nbsp;<span style="color:var(--ink-3); font-size:0.85em;">(정의에 의해 항상 같음)</span>
+    </div>
+  </div>
+
+  <!-- 추론 흐름 -->
+  <div class="reasoning">
+    <h2>왜 그렇게 되는가 — 추론의 4단계</h2>
+    <div class="steps">
+      <div class="step">
+        <span class="tag">①</span>
+        <span class="ttl">정의</span>
+        <div class="body">
+          포물선은 한 점(<em>초점 F</em>)과 한 직선(<em>준선</em>)까지의 거리가 같은 점들의 집합.
+          <div class="formula">PF = PH</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="tag">②</span>
+        <span class="ttl">접선의 성질 <span class="badge">주어진 사실</span></span>
+        <div class="body">
+          포물선 위의 점 P에서의 접선은 <em>∠FPH를 이등분</em>한다. (정의 PF = PH로부터 유도되는 성질)
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="tag">③</span>
+        <span class="ttl">반사법칙과의 연결</span>
+        <div class="body">
+          ∠FPH의 이등분은 곧, <em>법선(접선과 수직)을 기준</em>으로 입사각(축에 평행한 빛)과 반사각(P→F)이 같다는 뜻. 이것이 반사법칙.
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="tag">④</span>
+        <span class="ttl">광학적 성질</span>
+        <div class="body">
+          축에 평행하게 들어온 빛은 곡선 위 <em>어느 점에서 반사되든</em> 반드시 초점 F를 지난다. P의 위치와 무관.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 결론 -->
+  <div class="conclusion">
+    <div class="lbl">결론</div>
+    <p>포물선의 정의 <strong>PF = PH</strong> 가 접선의 ∠FPH 이등분 성질을 보장하고, 그것이 곧 <strong>법선 기준 반사법칙</strong>으로 이어진다. 따라서 축에 평행한 빛은 <strong>반드시 초점에서 모인다</strong>. 위 시뮬레이션에서 P를 어디로 옮겨도 PF = PH이고, 평행광선이 초점으로 향함을 확인할 수 있다.</p>
+  </div>
+
+</div>
+
+<script>
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  const p = 2;
+  const F = { x: p, y: 0 };
+
+  const origin = { x: W * 0.38, y: H / 2 };
+  const unit = 55;
+  const toX = x => origin.x + x * unit;
+  const toY = y => origin.y - y * unit;
+
+  const yMax = 3.2;
+  // 배경 평행광선들의 y 좌표
+  const bgRaysY = [-2.4, -1.2, 1.2, 2.4];
+  // 광선 시작 x (오른쪽 끝)
+  const rayStartX = (W - origin.x) / unit - 0.3;
+
+  let yInteractive = 1.8;
+
+  const opt = {
+    tangent: true,
+    distance: true,
+    animate: false,
+  };
+
+  let animPhase = 0;
+  let animRaf = null;
+
+  function drawAxes() {
+    ctx.strokeStyle = '#eef2f6';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, origin.y);
+    ctx.lineTo(W, origin.y);
+    ctx.moveTo(origin.x, 0);
+    ctx.lineTo(origin.x, H);
+    ctx.stroke();
+  }
+
+  function drawDirectrix() {
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(toX(-p), 30);
+    ctx.lineTo(toX(-p), H - 30);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '12px sans-serif';
+    ctx.fillText('준선 x = −p', toX(-p) - 75, 24);
+  }
+
+  function drawParabola() {
+    ctx.strokeStyle = '#1e40af';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    let first = true;
+    for (let y = -yMax; y <= yMax; y += 0.015) {
+      const x = (y * y) / (4 * p);
+      const cx = toX(x), cy = toY(y);
+      if (first) { ctx.moveTo(cx, cy); first = false; }
+      else ctx.lineTo(cx, cy);
+    }
+    ctx.stroke();
+  }
+
+  function drawFocus() {
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath();
+    ctx.arc(toX(F.x), toY(F.y), 5.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('F', toX(F.x) + 10, toY(F.y) + 5);
+  }
+
+  function arrowhead(x1, y1, x2, y2, color, size) {
+    size = size || 7.5;
+    const ang = Math.atan2(y2 - y1, x2 - x1);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - size * Math.cos(ang - 0.4), y2 - size * Math.sin(ang - 0.4));
+    ctx.lineTo(x2 - size * Math.cos(ang + 0.4), y2 - size * Math.sin(ang + 0.4));
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawAngleArc(cx, cy, r, a1, a2) {
+    let diff = a2 - a1;
+    while (diff > Math.PI) diff -= 2 * Math.PI;
+    while (diff < -Math.PI) diff += 2 * Math.PI;
+    ctx.beginPath();
+    if (diff > 0) ctx.arc(cx, cy, r, a1, a2);
+    else ctx.arc(cx, cy, r, a2, a1);
+    ctx.stroke();
+  }
+
+  function drawBgRay(y0) {
+    const px = (y0 * y0) / (4 * p);
+    const PX = toX(px), PY = toY(y0);
+    const SX = toX(rayStartX);
+
+    // 입사 (평행)
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.setLineDash([5, 4]);
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(SX, PY);
+    ctx.lineTo(PX, PY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    arrowhead(SX, PY, SX + (PX - SX) * 0.5, PY, '#cbd5e1', 6);
+
+    // 반사
+    const FX = toX(F.x), FY = toY(F.y);
+    ctx.strokeStyle = '#86efac';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(PX, PY);
+    ctx.lineTo(FX, FY);
+    ctx.stroke();
+    arrowhead(PX, PY, PX + (FX - PX) * 0.6, PY + (FY - PY) * 0.6, '#86efac', 6);
+
+    // 작은 점
+    ctx.fillStyle = '#cbd5e1';
+    ctx.beginPath();
+    ctx.arc(PX, PY, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawHighlightedRay() {
+    const y0 = yInteractive;
+    const px = (y0 * y0) / (4 * p);
+    const PX = toX(px), PY = toY(y0);
+    const SX = toX(rayStartX);
+    const FX = toX(F.x), FY = toY(F.y);
+
+    // 강조 입사 광선
+    ctx.strokeStyle = '#64748b';
+    ctx.setLineDash([6, 4]);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(SX, PY);
+    ctx.lineTo(PX, PY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    arrowhead(SX, PY, SX + (PX - SX) * 0.5, PY, '#64748b', 8);
+
+    // 강조 반사 광선
+    ctx.strokeStyle = '#16a34a';
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(PX, PY);
+    ctx.lineTo(FX, FY);
+    ctx.stroke();
+    arrowhead(PX, PY, PX + (FX - PX) * 0.6, PY + (FY - PY) * 0.6, '#16a34a', 8);
+
+    // 정의 보조선 (PH)
+    if (opt.distance) {
+      const HX = toX(-p);
+      const HY = PY;
+
+      // PH 선분
+      ctx.strokeStyle = '#94a3b8';
+      ctx.setLineDash([2, 3]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(PX, PY);
+      ctx.lineTo(HX, HY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // H 점
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.arc(HX, HY, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.fillText('H', HX - 16, HY + 5);
+    }
+
+    // 접선 · 법선 · 각도
+    if (opt.tangent) {
+      // 접선 방향 (y, 2p) 정규화
+      let tdx = y0;
+      let tdy = 2 * p;
+      const tl = Math.sqrt(tdx * tdx + tdy * tdy);
+      tdx /= tl; tdy /= tl;
+      const tLen = 1.7;
+
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.moveTo(toX(px + tdx * tLen), toY(y0 + tdy * tLen));
+      ctx.lineTo(toX(px - tdx * tLen), toY(y0 - tdy * tLen));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 내향 법선 (2p, -y) 정규화 - 곡선 안쪽
+      let ndx = 2 * p;
+      let ndy = -y0;
+      const nl = Math.sqrt(ndx * ndx + ndy * ndy);
+      ndx /= nl; ndy /= nl;
+      const nLen = 1.6;
+
+      ctx.strokeStyle = '#7c3aed';
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(PX, PY);
+      ctx.lineTo(toX(px + ndx * nLen), toY(y0 + ndy * nLen));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 법선 라벨
+      ctx.fillStyle = '#7c3aed';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('법선', toX(px + ndx * nLen) + 5, toY(y0 + ndy * nLen) + 4);
+
+      // 각도 호 (법선 기준)
+      const NX = toX(px + ndx * nLen);
+      const NY = toY(y0 + ndy * nLen);
+      const angNormal = Math.atan2(NY - PY, NX - PX);
+      const angInc = Math.atan2(0, SX - PX);   // 입사 광선 방향: P→오른쪽 (수평)
+      const angRefl = Math.atan2(FY - PY, FX - PX);
+
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 1.4;
+      const arcR = 30;
+      drawAngleArc(PX, PY, arcR, angNormal, angInc);
+      drawAngleArc(PX, PY, arcR, angNormal, angRefl);
+
+      // θ 라벨
+      ctx.fillStyle = '#dc2626';
+      ctx.font = 'italic bold 13px Georgia, serif';
+      const fixAvg = (a1, a2) => {
+        let d = a2 - a1;
+        while (d > Math.PI) d -= 2 * Math.PI;
+        while (d < -Math.PI) d += 2 * Math.PI;
+        return a1 + d / 2;
+      };
+      const mi = fixAvg(angNormal, angInc);
+      const mr = fixAvg(angNormal, angRefl);
+      ctx.fillText('θ', PX + Math.cos(mi) * (arcR + 12) - 4, PY + Math.sin(mi) * (arcR + 12) + 4);
+      ctx.fillText('θ', PX + Math.cos(mr) * (arcR + 12) - 4, PY + Math.sin(mr) * (arcR + 12) + 4);
+    }
+
+    // 강조 점 P
+    ctx.fillStyle = '#1e40af';
+    ctx.beginPath();
+    ctx.arc(PX, PY, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('P', PX + 10, PY - 8);
+
+    // 빛 입자 애니메이션 (강조 광선 위로)
+    if (opt.animate) {
+      let particle;
+      if (animPhase < 1) {
+        particle = {
+          x: SX + (PX - SX) * animPhase,
+          y: PY,
+        };
+      } else {
+        const t = animPhase - 1;
+        particle = {
+          x: PX + (FX - PX) * t,
+          y: PY + (FY - PY) * t,
+        };
+      }
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(particle.x, particle.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  }
+
+  function drawScene() {
+    ctx.clearRect(0, 0, W, H);
+    drawAxes();
+    drawDirectrix();
+    drawParabola();
+    drawFocus();
+
+    // 배경 평행광선들 (옅게)
+    bgRaysY.forEach(y0 => {
+      if (Math.abs(y0 - yInteractive) > 0.3) drawBgRay(y0);
+    });
+
+    drawHighlightedRay();
+
+    // 거리 텍스트 갱신
+    if (opt.distance) {
+      const y0 = yInteractive;
+      const px = (y0 * y0) / (4 * p);
+      const PF = Math.sqrt((p - px) ** 2 + y0 * y0);
+      const PH = px + p;
+      document.getElementById('d1').textContent = PF.toFixed(2);
+      document.getElementById('d2').textContent = PH.toFixed(2);
+      document.getElementById('distance').style.display = '';
+    } else {
+      document.getElementById('distance').style.display = 'none';
+    }
+  }
+
+  // 인터랙션 — 캔버스 클릭/드래그로 y좌표 선택
+  function pickY(clientX, clientY) {
+    const rect = cv.getBoundingClientRect();
+    const scaleY = cv.height / rect.height;
+    const y = (clientY - rect.top) * scaleY;
+    const my = -(y - origin.y) / unit;
+    yInteractive = Math.max(-yMax + 0.3, Math.min(yMax - 0.3, my));
+    drawScene();
+  }
+
+  let dragging = false;
+  cv.addEventListener('pointerdown', e => {
+    dragging = true;
+    cv.setPointerCapture(e.pointerId);
+    pickY(e.clientX, e.clientY);
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    pickY(e.clientX, e.clientY);
+  });
+  cv.addEventListener('pointerup', e => {
+    dragging = false;
+    cv.releasePointerCapture(e.pointerId);
+  });
+
+  document.getElementById('opt-tangent').addEventListener('change', e => {
+    opt.tangent = e.target.checked;
+    drawScene();
+  });
+  document.getElementById('opt-distance').addEventListener('change', e => {
+    opt.distance = e.target.checked;
+    drawScene();
+  });
+  document.getElementById('opt-animate').addEventListener('change', e => {
+    opt.animate = e.target.checked;
+    if (opt.animate) startAnim();
+    else stopAnim();
+    drawScene();
+  });
+
+  function startAnim() {
+    if (animRaf) return;
+    let last = performance.now();
+    const tick = (now) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      animPhase += dt * 0.6;
+      if (animPhase >= 2) animPhase -= 2;
+      drawScene();
+      animRaf = requestAnimationFrame(tick);
+    };
+    animRaf = requestAnimationFrame(tick);
+  }
+  function stopAnim() {
+    if (animRaf) { cancelAnimationFrame(animRaf); animRaf = null; }
+  }
+
+  drawScene();
+</script>
+
+</body>
+</html>

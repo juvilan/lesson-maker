@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>모범답안 - 카페 음료 선택 예측하기 ①</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page { size: A4; margin: 14mm 15mm 16mm 15mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 10.5pt; line-height: 1.6; color: #1a1a1a; background: #fff;
+    }
+    @media screen {
+      body { background: #f0f0f0; }
+      .ws-page { box-shadow: 0 2px 10px rgba(0,0,0,.15); margin: 10mm auto; }
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 10pt; background: #fff; }
+      .ws-page { box-shadow: none !important; margin: 0 !important; border: none !important; }
+    }
+
+    .ws-page {
+      width: 210mm; height: 297mm;
+      padding: 14mm 15mm 16mm 15mm;
+      background: #fff; page-break-after: always;
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .ws-page:last-child { page-break-after: auto; }
+
+    /* 헤더 */
+    .ws-header { border-bottom: 2.5px solid #1a1a1a; padding-bottom: 7px; margin-bottom: 10px; flex-shrink: 0; }
+    .ws-header-top { display: flex; justify-content: space-between; align-items: flex-end; }
+    .ws-title { font-size: 13pt; font-weight: 700; letter-spacing: -0.3px; }
+    .ws-meta { font-size: 8.5pt; color: #666; }
+    .answer-badge {
+      display: inline-block; background: #c0392b; color: #fff;
+      font-size: 9pt; font-weight: 700; padding: 2px 10px; border-radius: 2px;
+      margin-left: 10px; letter-spacing: 0.5px; vertical-align: middle;
+    }
+
+    /* 내용 박스 */
+    .ans-page-box {
+      border: 1.5px solid #c0392b; border-radius: 4px;
+      padding: 11px 14px; background: #fffdf8;
+      flex: 1; display: flex; flex-direction: column;
+    }
+    .q-block { margin-bottom: 12px; }
+    .q-block:last-child { margin-bottom: 0; flex: 1; display: flex; flex-direction: column; }
+
+    .q-num { font-weight: 700; font-size: 10.5pt; margin-bottom: 5px; }
+    .q-sub-label { font-size: 10pt; font-weight: 600; margin: 8px 0 4px 10px; }
+
+    /* 표 */
+    .ws-table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+    .ws-table th { background: #e4e4e4; border: 1px solid #b0b0b0; padding: 4px 6px; text-align: center; font-weight: 600; }
+    .ws-table td { border: 1px solid #b0b0b0; padding: 4px 6px; text-align: center; }
+    .ws-table td.ans { background: #fff9c4; font-weight: 700; color: #b71c1c; }
+    .ws-table th.total, .ws-table td.total { background: #ebebeb; font-weight: 600; }
+    .ws-table td.ans-total { background: #fff3cd; font-weight: 700; color: #b71c1c; }
+
+    .table-pair { display: flex; gap: 16px; margin: 6px 0; }
+    .table-pair > div { flex: 1; }
+    .table-caption { font-size: 9pt; font-weight: 700; color: #444; margin-bottom: 3px; text-align: center; }
+
+    /* 계산 풀이 */
+    .calc-box {
+      background: #f9f9f9; border: 1px solid #ddd; border-radius: 3px;
+      padding: 8px 12px; margin: 5px 0; font-size: 10pt; line-height: 1.9;
+    }
+    .calc-step { display: flex; align-items: baseline; gap: 6px; margin-bottom: 2px; }
+    .step-label { font-size: 8.5pt; color: #888; white-space: nowrap; min-width: 80px; }
+    .calc-result {
+      background: #fff9c4; border: 1px solid #f5c200;
+      border-radius: 2px; padding: 1px 8px;
+      font-weight: 700; color: #b71c1c; margin-left: 6px;
+    }
+
+    /* 예측 결론 */
+    .conclude-box {
+      background: #fce4e4; border: 1.5px solid #c0392b;
+      border-radius: 3px; padding: 8px 12px; margin-top: 8px;
+      font-size: 10pt;
+    }
+    .conclude-label { font-size: 8.5pt; color: #c0392b; font-weight: 700; margin-bottom: 3px; }
+
+    .section-div { border: none; border-top: 1px solid #eee; margin: 10px 0; }
+    .page-number {
+      text-align: center; font-size: 8.5pt; color: #aaa;
+      margin-top: 8px; padding-top: 5px; border-top: 1px solid #eee; flex-shrink: 0;
+    }
+    .prob-line { font-size: 10pt; margin: 6px 0 6px 2px; }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+    };
+    window.safeTypeset = function(el) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise)
+        return MathJax.typesetPromise(el ? [].concat(el) : undefined);
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+          async onload="safeTypeset()"></script>
+</head>
+<body>
+
+<!-- PAGE 1 (앞면): ❶ ❷ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">
+        활동 학습지 &middot; 조건에 따른 확률의 계산과 예측
+        <span class="answer-badge">모범답안</span>
+      </span>
+      <span class="ws-meta">카페 음료 선택 예측하기 ① &nbsp;|&nbsp; 인공지능수학</span>
+    </div>
+  </div>
+
+  <div class="ans-page-box">
+
+    <!-- ❶ -->
+    <div class="q-block">
+      <div class="q-num">❶ 전체 표 완성 및 확률 계산</div>
+      <table class="ws-table" style="width:auto; margin-top:6px;">
+        <thead>
+          <tr><th>음료선택</th><th style="min-width:60px;">H (따뜻한)</th><th style="min-width:60px;">C (차가운)</th><th class="total" style="min-width:50px;">합계</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>일수 (일)</td>
+            <td class="ans">9</td>
+            <td class="ans">5</td>
+            <td class="ans-total">14</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="prob-line" style="margin-top:8px;">
+        따뜻한 음료를 선택할 확률 &nbsp;$=\dfrac{9}{14}$
+      </div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❷ -->
+    <div class="q-block">
+      <div class="q-num">❷ 날씨별 / 기온별 표 완성</div>
+      <div class="table-pair" style="margin-top:8px;">
+        <div>
+          <div class="table-caption">〔 날씨별 음료 선택 〕</div>
+          <table class="ws-table">
+            <thead><tr><th>날씨</th><th>H</th><th>C</th><th class="total">합계</th></tr></thead>
+            <tbody>
+              <tr><td>맑음</td><td class="ans">1</td><td class="ans">2</td><td class="ans-total">3</td></tr>
+              <tr><td>흐림</td><td class="ans">4</td><td class="ans">3</td><td class="ans-total">7</td></tr>
+              <tr><td>비</td><td class="ans">4</td><td class="ans">0</td><td class="ans-total">4</td></tr>
+              <tr><td class="total">합계</td><td class="ans-total">9</td><td class="ans-total">5</td><td class="ans-total">14</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="table-caption">〔 기온별 음료 선택 〕</div>
+          <table class="ws-table">
+            <thead><tr><th>기온</th><th>H</th><th>C</th><th class="total">합계</th></tr></thead>
+            <tbody>
+              <tr><td>더움</td><td class="ans">0</td><td class="ans">3</td><td class="ans-total">3</td></tr>
+              <tr><td>보통</td><td class="ans">4</td><td class="ans">2</td><td class="ans-total">6</td></tr>
+              <tr><td>시원</td><td class="ans">5</td><td class="ans">0</td><td class="ans-total">5</td></tr>
+              <tr><td class="total">합계</td><td class="ans-total">9</td><td class="ans-total">5</td><td class="ans-total">14</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-number">- 1 / 2 &nbsp;(앞면) -</div>
+</div>
+
+
+<!-- PAGE 2 (뒷면): ❸ ❹ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">
+        활동 학습지 &middot; 조건에 따른 확률의 계산과 예측
+        <span class="answer-badge">모범답안</span>
+      </span>
+      <span class="ws-meta">카페 음료 선택 예측하기 ① &nbsp;|&nbsp; 인공지능수학</span>
+    </div>
+  </div>
+
+  <div class="ans-page-box">
+
+    <!-- ❸ -->
+    <div class="q-block">
+      <div class="q-num">❸ 100일 예측</div>
+
+      <div class="q-sub-label">(1) &nbsp;따뜻한 음료(H) 선택, 날씨가 비이고 기온이 시원할 때</div>
+      <div class="calc-box">
+        <div class="calc-step">
+          <span class="step-label">① H 선택 일수</span>
+          <span>$100 \times \dfrac{9}{14} = \dfrac{450}{7} \approx 64.3$ &nbsp;→&nbsp;</span>
+          <span class="calc-result">약 65일</span>
+        </div>
+        <div class="calc-step">
+          <span class="step-label">② H 중 날씨가 비</span>
+          <span>$65 \times \dfrac{4}{9} \approx 28.9$ &nbsp;→&nbsp;</span>
+          <span class="calc-result">약 29일</span>
+        </div>
+        <div class="calc-step">
+          <span class="step-label">③ 위 중 기온이 시원</span>
+          <span>$29 \times \dfrac{5}{9} \approx 16.1$ &nbsp;→&nbsp;</span>
+          <span class="calc-result" style="font-size:11pt;">약 16일</span>
+        </div>
+      </div>
+
+      <div class="q-sub-label" style="margin-top:10px;">(2) &nbsp;차가운 음료(C) 선택, 날씨가 맑음이고 기온이 더울 때</div>
+      <div class="calc-box">
+        <div class="calc-step">
+          <span class="step-label">① C 선택 일수</span>
+          <span>$100 \times \dfrac{5}{14} = \dfrac{250}{7} \approx 35.7$ &nbsp;→&nbsp;</span>
+          <span class="calc-result">약 36일</span>
+        </div>
+        <div class="calc-step">
+          <span class="step-label">② C 중 날씨가 맑음</span>
+          <span>$36 \times \dfrac{2}{5} = 14.4$ &nbsp;→&nbsp;</span>
+          <span class="calc-result">약 14일</span>
+        </div>
+        <div class="calc-step">
+          <span class="step-label">③ 위 중 기온이 더움</span>
+          <span>$14 \times \dfrac{3}{5} = 8.4$ &nbsp;→&nbsp;</span>
+          <span class="calc-result" style="font-size:11pt;">약 8일</span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❹ -->
+    <div class="q-block">
+      <div class="q-num">❹ 날씨 흐림 + 기온 보통일 때 음료 예측</div>
+
+      <div class="calc-box" style="margin-top:6px;">
+        <div style="margin-bottom:6px; font-size:9.5pt; color:#555;">
+          ※ 날씨와 기온이 서로 독립이라 가정하고, 각 음료를 선택할 확률에 비례하는 값을 비교한다.
+        </div>
+        <div class="calc-step">
+          <span class="step-label" style="min-width:90px;">P(H 비례값)</span>
+          <span>$\dfrac{9}{14} \times \dfrac{4}{9} \times \dfrac{4}{9} = \dfrac{16}{126} \approx 0.127$</span>
+        </div>
+        <div class="calc-step" style="margin-top:4px;">
+          <span class="step-label" style="min-width:90px;">P(C 비례값)</span>
+          <span>$\dfrac{5}{14} \times \dfrac{3}{5} \times \dfrac{2}{5} = \dfrac{6}{70} \approx 0.086$</span>
+        </div>
+        <div style="margin-top:8px; font-size:10pt;">
+          $0.127 > 0.086$ 이므로, 따뜻한 음료(H)를 선택할 가능성이 더 높다.
+        </div>
+      </div>
+
+      <div class="conclude-box" style="margin-top:10px;">
+        <div class="conclude-label">예측 결론</div>
+        이 손님은 &nbsp;<strong>따뜻한 음료 (H)</strong>&nbsp; 를 선택할 것으로 예측한다.
+      </div>
+    </div>
+
+  </div>
+  <div class="page-number">- 2 / 2 &nbsp;(뒷면) -</div>
+</div>
+
+</body>
+</html>

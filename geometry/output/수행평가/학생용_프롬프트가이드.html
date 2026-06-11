@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>프롬프트 가이드 · 이차곡선의 광학적 성질 탐구하기</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --ink: #0f172a;
+      --ink-2: #475569;
+      --ink-3: #94a3b8;
+      --line: #e2e8f0;
+      --accent: #2D6B66;
+      --accent-soft: #e6f4f2;
+      --warn: #b45309;
+      --warn-soft: #fef3c7;
+      --code-bg: #0f172a;
+      --code-ink: #e2e8f0;
+    }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      padding: 16px 14px 60px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* 헤더 */
+    .head {
+      margin-bottom: 18px;
+    }
+    .head .eyebrow {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .head h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      color: var(--ink);
+    }
+    .head .meta {
+      font-size: 0.82rem;
+      color: var(--ink-3);
+      margin-top: 4px;
+    }
+
+    /* 발문 강조 박스 */
+    .quest {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 14px 0 20px;
+    }
+    .quest .tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .quest .text {
+      font-size: 1.02rem;
+      line-height: 1.55;
+      color: var(--ink);
+      font-weight: 500;
+    }
+    .quest .text em {
+      font-style: normal;
+      background: var(--accent-soft);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    /* 섹션 */
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    section h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    section h2 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+    }
+    section h2 .hint {
+      font-size: 0.72rem;
+      color: var(--ink-3);
+      font-weight: 500;
+      margin-left: auto;
+    }
+    section p { font-size: 0.9rem; color: var(--ink-2); }
+    section ul, section ol {
+      margin: 4px 0 0 4px;
+      padding-left: 20px;
+      font-size: 0.9rem;
+      color: var(--ink);
+    }
+    section ul li, section ol li { margin-bottom: 5px; line-height: 1.55; }
+    section strong { color: var(--ink); font-weight: 600; }
+
+    /* 흐름 단계 */
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .flow .step {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: baseline;
+      font-size: 0.9rem;
+    }
+    .flow .step .n {
+      color: var(--accent);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .flow .step .arrow {
+      grid-column: 1 / -1;
+      padding-left: 8px;
+      color: var(--ink-3);
+      font-size: 0.85rem;
+      line-height: 1;
+      margin: -2px 0;
+    }
+
+    /* 복사 가능 코드 박스 */
+    .copybox {
+      background: var(--code-bg);
+      color: var(--code-ink);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-family: 'SF Mono', Menlo, 'Cascadia Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      position: relative;
+      margin-top: 8px;
+    }
+    .copybox .btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 4px;
+      padding: 3px 9px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .copybox .btn:hover { background: rgba(255,255,255,0.22); }
+    .copybox .btn.copied { background: #16a34a; border-color: #16a34a; }
+
+    /* 필수 요소 카드 */
+    .req-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    @media (min-width: 600px) {
+      .req-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .req {
+      background: var(--accent-soft);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+    .req .label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .req .body { font-size: 0.85rem; color: var(--ink); line-height: 1.5; }
+
+    /* 학생이 직접 써야 할 부분 강조 */
+    .self {
+      background: var(--warn-soft);
+      border-left: 3px solid var(--warn);
+      border-radius: 0 6px 6px 0;
+      padding: 8px 12px;
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: #78350f;
+      line-height: 1.55;
+    }
+    .self strong { color: #78350f; font-weight: 700; }
+
+    /* 시뮬 선택 옵션 */
+    .options { display: grid; gap: 8px; margin-top: 6px; }
+    @media (min-width: 600px) {
+      .options { grid-template-columns: 1fr 1fr; }
+    }
+    .opt {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: #fafbfc;
+    }
+    .opt .ttl { font-size: 0.85rem; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+    .opt .desc { font-size: 0.8rem; color: var(--ink-2); line-height: 1.55; }
+    .choose {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #f1f5f9;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--ink);
+    }
+
+    /* 제출 박스 */
+    .submit {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      align-items: start;
+      font-size: 0.9rem;
+      padding: 8px 0;
+    }
+    .submit .icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .submit .body { padding-top: 3px; }
+    .submit .body strong { display: block; margin-bottom: 2px; }
+
+    /* 차시 안내 박스 */
+    .sessions {
+      background: var(--accent-soft);
+      border: 1px solid #b9dfd9;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: -8px 0 18px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    @media (min-width: 520px) {
+      .sessions { grid-template-columns: 1fr 1fr; gap: 12px; }
+    }
+    .sessions .s-item { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: baseline; }
+    .sessions .s-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      padding: 2px 7px;
+      border-radius: 10px;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .sessions .s-body strong { color: var(--accent); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <header class="head">
+    <div class="eyebrow">기하 · 수행평가</div>
+    <h1>이차곡선의 광학적 성질 탐구하기</h1>
+    <div class="meta">학생용 프롬프트 가이드 · 2학년</div>
+  </header>
+
+  <!-- 발문 -->
+  <div class="quest">
+    <div class="tag">평가 과제</div>
+    <div class="text">
+      <em>선택한 이차곡선</em>의 <em>수학적 정의와 성질</em>로부터 <em>반사법칙과 맞아떨어지는 광학적 성질</em>을 <em>추론</em>하고, <em>그 이유</em>를 <em>시뮬레이션으로 설명</em>하시오.
+    </div>
+  </div>
+
+  <!-- 차시 안내 -->
+  <div class="sessions">
+    <div class="s-item">
+      <span class="s-tag">1차시</span>
+      <span class="s-body"><strong>포물선으로 함께 연습</strong> — 예시를 보고 어디가 잘못됐는지 찾아 고치는 과정을 경험합니다.</span>
+    </div>
+    <div class="s-item">
+      <span class="s-tag">2차시</span>
+      <span class="s-body"><strong>본평가</strong> — 포물선·타원·쌍곡선 <strong>중 하나를 자유롭게 선택</strong>해서 직접 작품을 만듭니다.</span>
+    </div>
+  </div>
+
+  <!-- 1. 탐구의 흐름 -->
+  <section>
+    <h2><span class="num">1</span> 탐구의 흐름 <span class="hint">발문이 이 흐름을 그대로 담고 있어요</span></h2>
+    <div class="flow">
+      <div class="step"><span class="n">①</span><span>이차곡선의 <strong>수학적 정의</strong>를 떠올린다 (예: 포물선의 정의)</span></div>
+      <div class="step arrow">↓</div>
+      <div class="step"><span class="n">②</span><span>그 정의가 <strong>반사법칙(입사각=반사각)과 어떻게 맞아떨어지는지</strong> 추론한다</span></div>
+      <div class="step arrow">↓</div>
+      <div class="step"><span class="n">③</span><span>그 결과로 어떤 <strong>광학적 성질</strong>이 나타날지 예측한다</span></div>
+      <div class="step arrow">↓</div>
+      <div class="step"><span class="n">④</span><span>그 이유를 보여주는 <strong>시뮬레이션</strong>을 Gemini에게 만들어 달라고 한다</span></div>
+    </div>
+  </section>
+
+  <!-- 2. 알아둘 것: 반사법칙 -->
+  <section>
+    <h2><span class="num">2</span> 알아둘 것 — 반사법칙 <span class="hint">물리 시간에 배운 사실</span></h2>
+    <p>빛이 면에서 반사할 때 <strong>입사각 = 반사각</strong>이고, 두 각은 모두 <strong>법선(면에 수직인 직선)을 기준으로</strong> 측정한다.</p>
+    <p style="margin-top:6px;">이건 출발점이에요. 여기에 여러분이 알고 있는 <strong>이차곡선의 수학적 성질</strong>을 연결해야 합니다.</p>
+  </section>
+
+  <!-- 3. 결과물에 반드시 들어가야 할 것 -->
+  <section>
+    <h2><span class="num">3</span> 결과물(HTML)에 반드시 들어갈 3가지</h2>
+    <div class="req-grid">
+      <div class="req">
+        <div class="label">① 애니메이션</div>
+        <div class="body">빛이 실제로 움직이며 반사되는 모습</div>
+      </div>
+      <div class="req">
+        <div class="label">② 반사법칙 시각화</div>
+        <div class="body">입사각·반사각이 법선 기준으로 같음이 보이는 표시</div>
+      </div>
+      <div class="req">
+        <div class="label">③ 수학적 설명</div>
+        <div class="body">정의→광학적 성질로 이어지는 추론을 시각/텍스트로</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 시뮬레이션 두 가지 관점 -->
+  <section>
+    <h2><span class="num">4</span> 시뮬레이션의 두 가지 관점</h2>
+    <div class="options">
+      <div class="opt">
+        <div class="ttl">① 수학적 설명형</div>
+        <div class="desc">"왜 그렇게 되는가"를 보여줌. 접선·법선·각도·정의 요소 표시</div>
+      </div>
+      <div class="opt">
+        <div class="ttl">② 현상 애니메이션형</div>
+        <div class="desc">"그래서 어떻게 보이는가"를 보여줌. 여러 광선이 반사되는 결과</div>
+      </div>
+    </div>
+    <div class="choose">
+      <strong>선택은 여러분이</strong>: 시뮬레이션 <strong>1개에 두 관점을 합쳐도 되고</strong>, <strong>2개로 나눠 만들어도</strong> 됩니다. 자신의 설명이 가장 명확해지는 쪽으로.
+    </div>
+  </section>
+
+  <!-- 5. 프롬프트 작성법 -->
+  <section>
+    <h2><span class="num">5</span> 프롬프트는 이렇게 — 고정 문구 + 직접 쓸 부분</h2>
+
+    <p style="margin-bottom:4px;"><strong>① 고정 문구 (그대로 복사)</strong></p>
+    <div class="copybox">
+      <button class="btn" data-copy="fixed">복사</button>
+<span id="fixed">HTML 단일 파일로 만들어줘. 태블릿 터치스크린 환경의 크롬 브라우저에서 작동해야 해. 다른 라이브러리·서버 없이 파일 하나로 열리도록 해줘.</span></div>
+
+    <p style="margin-top:14px; margin-bottom:4px;"><strong>② 학생이 직접 써야 할 부분 — 수학적 이해가 드러나는 곳</strong></p>
+    <div class="self">
+      아래 4가지를 <strong>내 언어로 구체적으로</strong> 적어 프롬프트에 함께 넣으세요.
+      <strong>막연한 표현은 막연한 결과를 만듭니다.</strong>
+      <ul style="margin:6px 0 0 18px; color:#78350f;">
+        <li>내가 선택한 곡선의 <strong>수학적 정의</strong> (예: 포물선은 한 점과 한 직선까지의 거리가 같은 점들의 집합)</li>
+        <li>빛이 <strong>어느 방향에서</strong> 들어오는지 (그림에서 어디서 어디로 향하는지)</li>
+        <li>화면에 <strong>표시되어야 할 기하 요소</strong> (예: 접선, 법선, 초점, 준선, 각도 표시)</li>
+        <li>반사가 성립하는 <strong>수학적 근거</strong> (정의로부터 어떻게 입사각=반사각이 도출되는지)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6. 제출 -->
+  <section>
+    <h2><span class="num">6</span> 제출 방법</h2>
+    <div class="submit">
+      <div class="icon">1</div>
+      <div class="body">
+        <strong>HTML 파일</strong>
+        Gemini가 만든 HTML을 다운로드해서 제출 (한 개든 두 개든)
+      </div>
+    </div>
+    <div class="submit">
+      <div class="icon">2</div>
+      <div class="body">
+        <strong>대화 시작 시 인적사항 기재</strong>
+        Gemini와 대화를 시작할 때 "○학년 ○반 ○번 ○○○입니다"라고 먼저 적어주세요. 채점 시 누구의 대화인지 확인합니다.
+      </div>
+    </div>
+    <div class="submit">
+      <div class="icon">3</div>
+      <div class="body">
+        <strong>대화 공유 URL</strong>
+        Gemini 대화의 공유 링크도 함께 제출 (제출 방법은 수업 시간에 안내)
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.querySelectorAll('.copybox .btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.copy;
+        const text = document.getElementById(id)?.innerText || '';
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = '복사됨';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = '복사';
+            btn.classList.remove('copied');
+          }, 1500);
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

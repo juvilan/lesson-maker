@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>모범답안 - 두 주변 자료로 전체 구매 패턴 예측하기</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page { size: A4; margin: 13mm 14mm 15mm 14mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 10.5pt; line-height: 1.6; color: #1a1a1a; background: #fff;
+    }
+    @media screen {
+      body { background: #f0f0f0; }
+      .ws-page { box-shadow: 0 2px 10px rgba(0,0,0,.15); margin: 10mm auto; }
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 10pt; background: #fff; }
+      .ws-page { box-shadow: none !important; margin: 0 !important; border: none !important; }
+    }
+
+    .ws-page {
+      width: 210mm; height: 297mm;
+      padding: 13mm 14mm 15mm 14mm;
+      background: #fff; page-break-after: always;
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .ws-page:last-child { page-break-after: auto; }
+
+    .ws-header { border-bottom: 2.5px solid #1a1a1a; padding-bottom: 6px; margin-bottom: 8px; flex-shrink: 0; }
+    .ws-header-top { display: flex; justify-content: space-between; align-items: flex-end; }
+    .ws-title { font-size: 12pt; font-weight: 700; letter-spacing: -0.3px; }
+    .ws-meta { font-size: 8.5pt; color: #666; }
+    .answer-badge {
+      display: inline-block; background: #c0392b; color: #fff;
+      font-size: 9pt; font-weight: 700; padding: 2px 10px; border-radius: 2px;
+      margin-left: 10px; letter-spacing: 0.5px; vertical-align: middle;
+    }
+
+    .ans-page-box {
+      border: 1.5px solid #c0392b; border-radius: 4px;
+      padding: 10px 13px; background: #fffdf8;
+      flex: 1; display: flex; flex-direction: column;
+    }
+    .q-block { margin-bottom: 11px; }
+    .q-block:last-child { margin-bottom: 0; flex: 1; display: flex; flex-direction: column; }
+
+    .q-num { font-weight: 700; font-size: 10.5pt; margin-bottom: 4px; }
+
+    /* 표 공통 */
+    .ws-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+    .ws-table th { background: #e4e4e4; border: 1px solid #b0b0b0; padding: 3px 5px; text-align: center; font-weight: 600; }
+    .ws-table td { border: 1px solid #b0b0b0; padding: 3px 5px; text-align: center; }
+    .ws-table td.left { text-align: left; font-weight: 500; padding-left: 6px; }
+    .ws-table td.ans { background: #fff9c4; font-weight: 700; color: #b71c1c; }
+    .ws-table th.total, .ws-table td.total { background: #ebebeb; font-weight: 600; }
+    .ws-table td.ans-total { background: #fff3cd; font-weight: 700; color: #b71c1c; }
+    .ws-table td.ex { background: #e8f5e9; font-weight: 700; color: #1b5e20; }   /* 예시 셀 */
+    .ws-table td.note { background: #fce4e4; font-weight: 700; color: #b71c1c; } /* 주목 셀 */
+
+    /* 계산 참고 표 */
+    .ref-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+    .ref-table th { background: #e8f5e9; border: 1px solid #b0b0b0; padding: 3px 5px; text-align: center; font-weight: 600; color: #1b5e20; }
+    .ref-table td { border: 1px solid #b0b0b0; padding: 3px 6px; text-align: center; }
+    .ref-table td.prod { background: #f0f0f0; font-weight: 700; }
+    .ref-table td.frac { font-size: 8pt; }
+
+    /* 설명 박스 */
+    .insight-box {
+      background: #fff8e1; border-left: 3px solid #f9a825;
+      padding: 5px 9px; font-size: 8.5pt; color: #4a3000;
+      margin: 4px 0; line-height: 1.65; border-radius: 0 3px 3px 0;
+    }
+    .find-box {
+      background: #fce4ec; border-left: 3px solid #c62828;
+      padding: 5px 9px; font-size: 8.5pt; color: #3e0000;
+      margin: 4px 0; line-height: 1.65; border-radius: 0 3px 3px 0;
+    }
+    .conclude-box {
+      background: #fce4e4; border: 1.5px solid #c0392b;
+      border-radius: 3px; padding: 7px 12px; margin-top: 7px; font-size: 9.5pt;
+    }
+    .conclude-label { font-size: 8.5pt; color: #c0392b; font-weight: 700; margin-bottom: 3px; }
+
+    /* ❹ 비교 답안 목록 */
+    .ans-list { list-style: none; padding: 0; margin: 4px 0 0 4px; }
+    .ans-list li {
+      background: #f9f9f9; border: 1px solid #ddd; border-radius: 3px;
+      padding: 5px 10px; margin-bottom: 5px; font-size: 9pt; line-height: 1.7;
+    }
+    .ans-list li .li-num { font-weight: 700; color: #1565c0; margin-right: 4px; }
+
+    /* ❺ 서술형 답안 */
+    .essay-box {
+      background: #f9f9f9; border: 1px solid #ddd; border-radius: 3px;
+      padding: 8px 12px; font-size: 9pt; line-height: 1.85;
+      color: #1a1a1a;
+    }
+
+    .section-div { border: none; border-top: 1px solid #eee; margin: 9px 0; }
+    .table-pair { display: flex; gap: 14px; margin: 5px 0; }
+    .table-pair > div { flex: 1; }
+    .table-caption { font-size: 8.5pt; font-weight: 700; color: #444; margin-bottom: 2px; text-align: center; }
+
+    .page-number {
+      text-align: center; font-size: 8.5pt; color: #aaa;
+      margin-top: 7px; padding-top: 5px; border-top: 1px solid #eee; flex-shrink: 0;
+    }
+
+    /* 계산 강조 뱃지 */
+    .badge-exact {
+      display: inline-block; background: #e8f5e9; border: 1px solid #66bb6a;
+      border-radius: 2px; padding: 0 6px; font-size: 8pt; font-weight: 700;
+      color: #1b5e20; margin-left: 5px; vertical-align: middle;
+    }
+    .badge-warn {
+      display: inline-block; background: #fff3e0; border: 1px solid #fb8c00;
+      border-radius: 2px; padding: 0 6px; font-size: 8pt; font-weight: 700;
+      color: #e65100; margin-left: 5px; vertical-align: middle;
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+    };
+    window.safeTypeset = function(el) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise)
+        return MathJax.typesetPromise(el ? [].concat(el) : undefined);
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+          async onload="safeTypeset()"></script>
+</head>
+<body>
+
+<!-- PAGE 1 (앞면): ❸ 예측 교차표 -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">
+        활동 학습지 &middot; 두 주변 자료로 전체 구매 패턴 예측하기
+        <span class="answer-badge">모범답안</span>
+      </span>
+      <span class="ws-meta">인공지능수학 &nbsp;|&nbsp; Ⅲ-1. 자료의 분석과 예측</span>
+    </div>
+  </div>
+
+  <div class="ans-page-box">
+
+    <!-- ❸ -->
+    <div class="q-block">
+      <div class="q-num">❸ &nbsp;독립 가정으로 전체 교차표 예측</div>
+
+      <!-- 조건부 확률 참고표 -->
+      <div style="font-size:8.5pt; color:#555; margin-bottom:4px;">
+        ▪ 주변 표에서 구한 조건부 확률 (계산의 근거)
+      </div>
+      <table class="ref-table" style="margin-bottom:8px;">
+        <thead>
+          <tr>
+            <th style="width:46px;">상품</th>
+            <th>$P(\text{상품})$</th>
+            <th>$P(\text{1학년}|\text{상품})$</th>
+            <th>$P(\text{2학년}|\text{상품})$</th>
+            <th>$P(\text{남}|\text{상품})$</th>
+            <th>$P(\text{여}|\text{상품})$</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="prod">A</td>
+            <td class="frac">$\dfrac{90}{180}=\dfrac{1}{2}$</td>
+            <td class="frac">$\dfrac{18}{90}=\dfrac{1}{5}$</td>
+            <td class="frac">$\dfrac{72}{90}=\dfrac{4}{5}$</td>
+            <td class="frac">$\dfrac{45}{90}=\dfrac{1}{2}$</td>
+            <td class="frac">$\dfrac{45}{90}=\dfrac{1}{2}$</td>
+          </tr>
+          <tr>
+            <td class="prod">B</td>
+            <td class="frac">$\dfrac{60}{180}=\dfrac{1}{3}$</td>
+            <td class="frac">$\dfrac{12}{60}=\dfrac{1}{5}$</td>
+            <td class="frac">$\dfrac{48}{60}=\dfrac{4}{5}$</td>
+            <td class="frac">$\dfrac{20}{60}=\dfrac{1}{3}$</td>
+            <td class="frac">$\dfrac{40}{60}=\dfrac{2}{3}$</td>
+          </tr>
+          <tr>
+            <td class="prod">C</td>
+            <td class="frac">$\dfrac{30}{180}=\dfrac{1}{6}$</td>
+            <td class="frac">$\dfrac{6}{30}=\dfrac{1}{5}$</td>
+            <td class="frac">$\dfrac{24}{30}=\dfrac{4}{5}$</td>
+            <td class="frac">$\dfrac{20}{30}=\dfrac{2}{3}$</td>
+            <td class="frac">$\dfrac{10}{30}=\dfrac{1}{3}$</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="insight-box" style="margin-bottom:7px;">
+        🔍 &nbsp;$P(\text{1학년}|\text{상품})$이 A·B·C 모두 $\dfrac{1}{5}$로 <strong>동일</strong>합니다.
+        즉 학년 조건은 세 상품을 구분하지 못하므로, 예측의 핵심은 <strong>성별 조건부 확률</strong>입니다.
+      </div>
+
+      <!-- 예측 교차표 정답 -->
+      <div style="font-size:8.5pt; color:#555; margin-bottom:4px;">
+        ▪ 예측 교차표 &nbsp;&nbsp;예측 인원 = 상품합계 × P(학년|상품) × P(성별|상품)
+      </div>
+      <table class="ws-table">
+        <thead>
+          <tr>
+            <th style="width:70px;">학년·성별</th>
+            <th>상품 A &nbsp;<span style="font-size:8pt; font-weight:400;">(합계 90)</span></th>
+            <th>상품 B &nbsp;<span style="font-size:8pt; font-weight:400;">(합계 60)</span></th>
+            <th>상품 C &nbsp;<span style="font-size:8pt; font-weight:400;">(합계 30)</span></th>
+            <th class="total">합계</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="left">1학년 남</td>
+            <td class="ans">$90\times\tfrac{1}{5}\times\tfrac{1}{2}=\mathbf{9}$</td>
+            <td class="ans">$60\times\tfrac{1}{5}\times\tfrac{1}{3}=\mathbf{4}$</td>
+            <td class="ans">$30\times\tfrac{1}{5}\times\tfrac{2}{3}=\mathbf{4}$</td>
+            <td class="ans-total">17</td>
+          </tr>
+          <tr>
+            <td class="left">1학년 여</td>
+            <td class="ans">$90\times\tfrac{1}{5}\times\tfrac{1}{2}=\mathbf{9}$</td>
+            <td class="ex">8 &nbsp;<span style="font-size:8pt; font-weight:400;">(예시)</span></td>
+            <td class="ans">$30\times\tfrac{1}{5}\times\tfrac{1}{3}=\mathbf{2}$</td>
+            <td class="ans-total">19</td>
+          </tr>
+          <tr>
+            <td class="left">2학년 남</td>
+            <td class="ans">$90\times\tfrac{4}{5}\times\tfrac{1}{2}=\mathbf{36}$</td>
+            <td class="ans">$60\times\tfrac{4}{5}\times\tfrac{1}{3}=\mathbf{16}$</td>
+            <td class="ans">$30\times\tfrac{4}{5}\times\tfrac{2}{3}=\mathbf{16}$</td>
+            <td class="ans-total">68</td>
+          </tr>
+          <tr>
+            <td class="left">2학년 여</td>
+            <td class="ans">$90\times\tfrac{4}{5}\times\tfrac{1}{2}=\mathbf{36}$</td>
+            <td class="ans">$60\times\tfrac{4}{5}\times\tfrac{2}{3}=\mathbf{32}$</td>
+            <td class="ans">$30\times\tfrac{4}{5}\times\tfrac{1}{3}=\mathbf{8}$</td>
+            <td class="ans-total">76</td>
+          </tr>
+          <tr>
+            <td class="total">합계</td>
+            <td class="total">90</td>
+            <td class="total">60</td>
+            <td class="total">30</td>
+            <td class="total">180</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="find-box" style="margin-top:7px;">
+        📌 &nbsp;<strong>1학년 남 = 1학년 여 (A열, 9 = 9)</strong>:
+        $P(\text{남}|A) = P(\text{여}|A) = \dfrac{1}{2}$이므로 성별이 상품 A에 차이를 만들지 않는다.
+        &nbsp;반면 <strong>B·C에서는 성별 비율이 달라</strong> (B: 남1/3·여2/3, C: 남2/3·여1/3)
+        예측값이 달라진다.
+      </div>
+    </div>
+
+  </div>
+  <div class="page-number">- 1 / 2 &nbsp;(앞면) -</div>
+</div>
+
+
+<!-- PAGE 2 (뒷면): ❹ ❺ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">
+        활동 학습지 &middot; 두 주변 자료로 전체 구매 패턴 예측하기
+        <span class="answer-badge">모범답안</span>
+      </span>
+      <span class="ws-meta">인공지능수학 &nbsp;|&nbsp; Ⅲ-1. 자료의 분석과 예측</span>
+    </div>
+  </div>
+
+  <div class="ans-page-box">
+
+    <!-- ❹ 비교 답안 -->
+    <div class="q-block">
+      <div class="q-num">❹ &nbsp;예측 vs 실측 비교</div>
+
+      <div class="table-pair" style="margin-top:5px;">
+        <div>
+          <div class="table-caption">〔 예측 교차표 〕 ← ❸ 결과</div>
+          <table class="ws-table" style="font-size:8.5pt;">
+            <thead><tr><th style="width:65px;">학년·성별</th><th>A</th><th>B</th><th>C</th><th class="total">합계</th></tr></thead>
+            <tbody>
+              <tr><td class="left">1학년 남</td><td>9</td><td>4</td><td>4</td><td class="total">17</td></tr>
+              <tr style="background:#fffde7;">
+                <td class="left" style="background:#fffde7;">1학년 여</td>
+                <td style="font-weight:700; color:#b71c1c;">9</td>
+                <td style="font-weight:700; color:#b71c1c;">8</td>
+                <td style="font-weight:700; color:#b71c1c;">2</td>
+                <td class="total" style="background:#fff3cd; font-weight:700; color:#b71c1c;">19</td>
+              </tr>
+              <tr><td class="left">2학년 남</td><td>36</td><td>16</td><td>16</td><td class="total">68</td></tr>
+              <tr><td class="left">2학년 여</td><td>36</td><td>32</td><td>8</td><td class="total">76</td></tr>
+              <tr><td class="total">합계</td><td class="total">90</td><td class="total">60</td><td class="total">30</td><td class="total">180</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="table-caption">〔 실측 자료 〕</div>
+          <table class="ws-table" style="font-size:8.5pt;">
+            <thead><tr><th style="width:65px;">학년·성별</th><th>A</th><th>B</th><th>C</th><th class="total">합계</th></tr></thead>
+            <tbody>
+              <tr><td class="left">1학년 남</td><td>16</td><td>10</td><td>4</td><td class="total">30</td></tr>
+              <tr style="background:#fffde7;">
+                <td class="left" style="background:#fffde7;">1학년 여</td>
+                <td>2</td><td>2</td><td>2</td>
+                <td class="total" style="background:#fff3cd;">6</td>
+              </tr>
+              <tr><td class="left">2학년 남</td><td>29</td><td>10</td><td>16</td><td class="total">55</td></tr>
+              <tr><td class="left">2학년 여</td><td>43</td><td>38</td><td>8</td><td class="total">89</td></tr>
+              <tr><td class="total">합계</td><td class="total">90</td><td class="total">60</td><td class="total">30</td><td class="total">180</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <ul class="ans-list" style="margin-top:7px;">
+        <li>
+          <span class="li-num">① 1학년 여학생 비교</span>
+          예측 A=9, B=8, C=2 &nbsp;vs&nbsp; 실측 A=2, B=2, C=2.<br>
+          실측은 동률(예측 불가)이지만, 독립 가정 예측은 <strong>A &gt; B &gt; C</strong>로 상품 A를 명확히 가리킨다.
+          실측값의 동률은 표본이 6명에 불과해 생긴 우연의 결과로 볼 수 있다.
+        </li>
+        <li>
+          <span class="li-num">② 행(그룹) 합계가 다른 이유</span>
+          독립 가정 하에서는 <em>학년 비율</em>과 <em>성별 비율</em>이 상품마다 균등하게 배분된다.
+          실제로는 <strong>학년과 성별 사이에 상관</strong>이 있어(예: 1학년남이 상품A를 예측보다 훨씬 많이 구매),
+          행 합계가 크게 달라진다.
+          <span class="badge-warn">독립 가정의 한계</span>
+        </li>
+        <li>
+          <span class="li-num">③ 잘 맞는 그룹 / 차이가 큰 그룹</span>
+          <strong>열(상품별) 합계</strong>는 예측·실측 모두 90·60·30으로 완전 일치.
+          <span class="badge-exact">항상 성립</span><br>
+          <strong>잘 맞는 셀</strong>: 1학년남C = 4(예측=실측), 2학년남C = 16(예측=실측) 등 C상품 일부.<br>
+          <strong>차이가 큰 그룹</strong>: 1학년남(예측 17 vs 실측 30), 2학년여(예측 76 vs 실측 89).
+        </li>
+      </ul>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❺ 서술형 답안 -->
+    <div class="q-block">
+      <div class="q-num">❺ &nbsp;독립 가정의 유효성 서술 — 예시 답안</div>
+      <div class="essay-box">
+        이 자료에서 독립 가정은 <strong>부분적으로만 유효</strong>하다.<br>
+        먼저 열(상품별) 합계는 예측과 실측이 완전히 일치하므로, 각 상품의 전체 선호도는
+        독립 가정으로도 정확히 보존된다.<br>
+        그러나 행(그룹별) 합계와 개별 셀에서는 상당한 차이가 나타난다.
+        예를 들어 1학년 남학생은 실측 30명이지만 예측은 17명으로 크게 낮고,
+        1학년 여학생은 반대로 실측 6명보다 예측이 19명으로 높다.
+        이는 학년과 성별 사이에 실제로 상관관계가 있음(독립이 완전히 성립하지 않음)을 나타낸다.<br>
+        다만 표본이 극히 적어 직접 분석이 불가능한 <strong>1학년 여학생</strong>의 경우,
+        독립 가정을 통해 상품 A로 명확히 예측할 수 있다는 점에서
+        이 방법의 <strong>실용적 가치</strong>는 충분하다.
+      </div>
+
+      <div class="conclude-box" style="margin-top:9px;">
+        <div class="conclude-label">핵심 정리</div>
+        독립 가정은 <strong>열 합계를 항상 보존</strong>하지만, <strong>행 합계는 보장하지 않는다.</strong><br>
+        실측과 예측의 차이가 클수록 학년·성별 간 상관이 강하다는 신호다.<br>
+        표본이 적은 집단 예측에는 여전히 유용하며, 이것이 나이브 베이즈(Naive Bayes) 분류의 핵심 원리다.
+      </div>
+    </div>
+
+  </div>
+  <div class="page-number">- 2 / 2 &nbsp;(뒷면) -</div>
+</div>
+
+</body>
+</html>

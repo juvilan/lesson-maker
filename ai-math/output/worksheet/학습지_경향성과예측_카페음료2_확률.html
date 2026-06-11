@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>경향성과 예측 활동 2 - 카페 음료 선택 (확률 버전)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page { size: A4; margin: 14mm 15mm 16mm 15mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    @media screen {
+      body { background: #f0f0f0; }
+      .ws-page { box-shadow: 0 2px 10px rgba(0,0,0,.15); margin: 10mm auto; }
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 10pt; background: #fff; }
+      .ws-page { box-shadow: none !important; margin: 0 !important; border: none !important; }
+    }
+
+    .ws-page {
+      width: 210mm; height: 297mm;
+      padding: 14mm 15mm 16mm 15mm;
+      background: #fff;
+      page-break-after: always;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .ws-page:last-child { page-break-after: auto; }
+
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 7px; margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .ws-header-top { display: flex; justify-content: space-between; align-items: flex-end; }
+    .ws-title { font-size: 13pt; font-weight: 700; letter-spacing: -0.3px; }
+    .ws-meta { font-size: 8.5pt; color: #666; }
+
+    .student-info {
+      display: flex; gap: 18px;
+      margin-bottom: 10px; padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+      flex-shrink: 0;
+    }
+    .student-field { display: flex; align-items: center; gap: 5px; font-size: 9.5pt; }
+    .student-field label { font-weight: 600; white-space: nowrap; color: #444; }
+    .field-line { width: 72px; border-bottom: 1px solid #999; height: 18px; }
+
+    .activity-box {
+      border: 1.5px solid #555; border-radius: 4px;
+      padding: 11px 14px; background: #fafafa;
+      flex: 1; display: flex; flex-direction: column;
+    }
+    .activity-label {
+      display: inline-block; background: #1a1a1a; color: #fff;
+      font-size: 9pt; font-weight: 700;
+      padding: 2px 9px; border-radius: 2px;
+      margin-bottom: 6px;
+    }
+    .activity-title { font-size: 11pt; font-weight: 700; margin-bottom: 8px; }
+    .situation { font-size: 10pt; line-height: 1.7; margin-bottom: 10px; }
+
+    .raw-data-wrap { display: flex; gap: 16px; margin-bottom: 9px; }
+    .raw-data-wrap .ws-table { flex: 1; }
+
+    .ws-table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+    .ws-table th {
+      background: #e4e4e4; border: 1px solid #b0b0b0;
+      padding: 4px 6px; text-align: center; font-weight: 600;
+    }
+    .ws-table td { border: 1px solid #b0b0b0; padding: 4px 6px; text-align: center; }
+    .ws-table td.blank { background: #fff; min-width: 26px; }
+    .ws-table th.total, .ws-table td.total { background: #ebebeb; font-weight: 600; }
+
+    .info-box {
+      background: #f2f2f2; border-left: 3px solid #888;
+      padding: 5px 9px; margin: 7px 0;
+      font-size: 9.5pt; color: #333; line-height: 1.6;
+    }
+    .table-pair { display: flex; gap: 16px; margin: 6px 0 0 0; }
+    .table-pair > div { flex: 1; }
+    .table-caption { font-size: 9pt; font-weight: 700; color: #444; margin-bottom: 3px; text-align: center; }
+
+    .q-num { font-weight: 700; font-size: 10.5pt; margin-bottom: 3px; }
+    .q-text { font-size: 10pt; line-height: 1.65; }
+    .q-sub { margin-left: 10px; margin-top: 3px; font-size: 10pt; line-height: 1.65; }
+
+    .ans-box { border: 1px dashed #aaa; border-radius: 3px; margin: 5px 0; }
+
+    .predict-box {
+      border: 1.5px solid #555; border-radius: 3px;
+      padding: 7px 12px; font-size: 10pt;
+    }
+    .predict-label { font-size: 8.5pt; color: #666; font-weight: 700; margin-bottom: 3px; }
+    .section-div { border: none; border-top: 1px solid #ddd; margin: 10px 0; }
+
+    .page-number {
+      text-align: center; font-size: 8.5pt; color: #aaa;
+      margin-top: 8px; padding-top: 5px; border-top: 1px solid #eee;
+      flex-shrink: 0;
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+    };
+    window.safeTypeset = function(el) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise)
+        return MathJax.typesetPromise(el ? [].concat(el) : undefined);
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+          async onload="safeTypeset()"></script>
+</head>
+<body>
+
+<!-- PAGE 1 (앞면) -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">활동 학습지 &middot; 조건에 따른 확률의 계산과 예측</span>
+      <span class="ws-meta">인공지능수학 &nbsp;|&nbsp; Ⅲ-1. 자료의 분석과 예측</span>
+    </div>
+  </div>
+
+  <div class="student-info">
+    <div class="student-field"><label>학번</label><div class="field-line"></div></div>
+    <div class="student-field"><label>이름</label><div class="field-line"></div></div>
+    <div class="student-field"><label>날짜</label><div class="field-line"></div></div>
+  </div>
+
+  <div class="activity-box">
+    <div class="activity-label">스스로 활동</div>
+    <div class="activity-title">☕ 카페 음료 선택 예측하기 ②</div>
+
+    <div class="situation">
+      다음은 민재가 카페 아르바이트를 하면서, 단골손님 한 명이
+      <strong>요일(평일 / 주말)</strong>과 <strong>날씨(맑음 / 흐림)</strong>에 따라
+      따뜻한 음료(H)와 차가운 음료(C) 중 어떤 음료를 선택하는지
+      <strong>20일 동안 기록</strong>한 자료이다.
+    </div>
+
+    <div class="raw-data-wrap">
+      <table class="ws-table">
+        <thead><tr><th>요일</th><th>날씨</th><th>음료</th></tr></thead>
+        <tbody>
+          <tr><td>평일</td><td>맑음</td><td>H</td></tr>
+          <tr><td>평일</td><td>맑음</td><td>H</td></tr>
+          <tr><td>평일</td><td>맑음</td><td>H</td></tr>
+          <tr><td>평일</td><td>맑음</td><td>H</td></tr>
+          <tr><td>평일</td><td>맑음</td><td>C</td></tr>
+          <tr><td>평일</td><td>맑음</td><td>C</td></tr>
+          <tr><td>평일</td><td>흐림</td><td>H</td></tr>
+          <tr><td>평일</td><td>흐림</td><td>H</td></tr>
+          <tr><td>평일</td><td>흐림</td><td>H</td></tr>
+          <tr><td>평일</td><td>흐림</td><td>H</td></tr>
+        </tbody>
+      </table>
+      <table class="ws-table">
+        <thead><tr><th>요일</th><th>날씨</th><th>음료</th></tr></thead>
+        <tbody>
+          <tr><td>평일</td><td>흐림</td><td>C</td></tr>
+          <tr><td>평일</td><td>흐림</td><td>C</td></tr>
+          <tr><td>주말</td><td>맑음</td><td>H</td></tr>
+          <tr><td>주말</td><td>맑음</td><td>H</td></tr>
+          <tr><td>주말</td><td>맑음</td><td>C</td></tr>
+          <tr><td>주말</td><td>맑음</td><td>C</td></tr>
+          <tr><td>주말</td><td>맑음</td><td>C</td></tr>
+          <tr><td>주말</td><td>맑음</td><td>C</td></tr>
+          <tr><td>주말</td><td>흐림</td><td>H</td></tr>
+          <tr><td>주말</td><td>흐림</td><td>H</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box">
+      ※ &nbsp;H : 따뜻한 음료(Hot) &nbsp;&nbsp;|&nbsp;&nbsp; C : 차가운 음료(Cold)<br>
+      ※ &nbsp;요일과 날씨는 서로 영향을 주지 않는다고 가정한다.
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❶ -->
+    <div style="margin-bottom:11px;">
+      <div class="q-num">❶</div>
+      <div class="q-text">
+        이 손님이 따뜻한 음료를 선택한 날과 차가운 음료를 선택한 날의 일수를 정리하여
+        아래 표를 완성하시오. 또, 따뜻한 음료를 선택할 확률을 구하시오.
+      </div>
+      <div style="display:flex; gap:20px; align-items:center; margin-top:7px;">
+        <table class="ws-table" style="width:auto;">
+          <thead>
+            <tr>
+              <th>음료선택</th>
+              <th style="min-width:52px;">H (따뜻한)</th>
+              <th style="min-width:52px;">C (차가운)</th>
+              <th class="total" style="min-width:44px;">합계</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>일수 (일)</td>
+              <td class="blank" style="height:22px;"></td>
+              <td class="blank"></td>
+              <td class="total blank"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="font-size:10pt; white-space:nowrap;">
+          따뜻한 음료 선택 확률 &nbsp;=&nbsp;
+          <span style="display:inline-block; width:52px; border-bottom:1px solid #666; vertical-align:middle;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ❷ -->
+    <div>
+      <div class="q-num">❷</div>
+      <div class="q-text">
+        요일과 날씨에 따라 따뜻한 음료(H)와 차가운 음료(C)를 선택한 날의 일수를 정리하여
+        다음 두 표를 완성하시오.
+      </div>
+      <div class="table-pair">
+        <div>
+          <div class="table-caption">〔 요일별 음료 선택 〕</div>
+          <table class="ws-table">
+            <thead>
+              <tr><th>요일</th><th>H</th><th>C</th><th class="total">합계</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>평일</td><td class="blank" style="height:22px;"></td><td class="blank"></td><td class="total blank"></td></tr>
+              <tr><td>주말</td><td class="blank"></td><td class="blank"></td><td class="total blank"></td></tr>
+              <tr><td class="total">합계</td><td class="total blank"></td><td class="total blank"></td><td class="total blank"></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="table-caption">〔 날씨별 음료 선택 〕</div>
+          <table class="ws-table">
+            <thead>
+              <tr><th>날씨</th><th>H</th><th>C</th><th class="total">합계</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>맑음</td><td class="blank" style="height:22px;"></td><td class="blank"></td><td class="total blank"></td></tr>
+              <tr><td>흐림</td><td class="blank"></td><td class="blank"></td><td class="total blank"></td></tr>
+              <tr><td class="total">합계</td><td class="total blank"></td><td class="total blank"></td><td class="total blank"></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-number">- 1 / 2 &nbsp;(앞면) -</div>
+</div>
+
+
+<!-- PAGE 2 (뒷면) -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">활동 학습지 &middot; 조건에 따른 확률의 계산과 예측</span>
+      <span class="ws-meta">인공지능수학 &nbsp;|&nbsp; Ⅲ-1. 자료의 분석과 예측</span>
+    </div>
+  </div>
+
+  <div class="activity-box">
+
+    <!-- ❸ -->
+    <div style="margin-bottom:14px;">
+      <div class="q-num">❸</div>
+      <div class="q-text">
+        ❷에서 완성한 표를 이용하여, 다음 확률을 각각 구하시오.
+      </div>
+
+      <div class="q-sub" style="margin-top:8px;">
+        (1) &nbsp;이 손님이 <strong>따뜻한 음료(H)</strong>를 선택하면서,
+        그 날이 <strong>평일</strong>이고 날씨가 <strong>맑을</strong> 확률
+      </div>
+      <div class="ans-box" style="height:48mm; margin:6px 0 0 10px;"></div>
+
+      <div class="q-sub" style="margin-top:12px;">
+        (2) &nbsp;이 손님이 <strong>차가운 음료(C)</strong>를 선택하면서,
+        그 날이 <strong>주말</strong>이고 날씨가 <strong>흐릴</strong> 확률
+      </div>
+      <div class="ans-box" style="height:48mm; margin:6px 0 0 10px;"></div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❹ -->
+    <div style="flex:1; display:flex; flex-direction:column;">
+      <div class="q-num">❹</div>
+      <div class="q-text">
+        내일 실제 <strong>평일</strong>이고 날씨가 <strong>흐림</strong>인 경우,
+        이 손님이 어떤 음료를 선택할지 예측하고, 확률 계산을 근거로 설명하시오.
+      </div>
+      <div class="ans-box" style="height:58mm; margin:6px 0 10px 0;"></div>
+      <div class="predict-box">
+        <div class="predict-label">예측 결론</div>
+        <div style="padding-top:4px; line-height:2;">
+          이 손님은 &nbsp;
+          <span style="display:inline-block; width:120px; border-bottom:1.5px solid #333; vertical-align:middle;"></span>
+          &nbsp;를 선택할 것으로 예측한다.
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-number">- 2 / 2 &nbsp;(뒷면) -</div>
+</div>
+
+</body>
+</html>

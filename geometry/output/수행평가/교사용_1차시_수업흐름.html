@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>교사용 1차시 수업 흐름 · 이차곡선의 광학적 성질 탐구하기</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --ink: #0f172a;
+      --ink-2: #475569;
+      --ink-3: #94a3b8;
+      --line: #e2e8f0;
+      --line-soft: #f1f5f9;
+      --accent: #2D6B66;
+      --accent-soft: #e6f4f2;
+      --warn: #b45309;
+      --warn-soft: #fef3c7;
+      --error: #b91c1c;
+      --error-soft: #fee2e2;
+      --info: #1d4ed8;
+      --info-soft: #dbeafe;
+    }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      padding: 20px 18px 80px;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    /* 헤더 */
+    .head { margin-bottom: 20px; }
+    .head .eyebrow {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .head h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      color: var(--ink);
+    }
+    .head .meta {
+      font-size: 0.85rem;
+      color: var(--ink-3);
+      margin-top: 4px;
+    }
+
+    /* 발문 강조 박스 */
+    .quest {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 14px 0 22px;
+    }
+    .quest .tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .quest .text {
+      font-size: 1.05rem;
+      line-height: 1.55;
+      color: var(--ink);
+      font-weight: 500;
+    }
+    .quest .text em {
+      font-style: normal;
+      background: var(--accent-soft);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    /* 섹션 */
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    section > h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    section > h2 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    section > h2 .hint {
+      font-size: 0.75rem;
+      color: var(--ink-3);
+      font-weight: 500;
+      margin-left: auto;
+    }
+    section p { font-size: 0.92rem; color: var(--ink-2); margin-bottom: 6px; }
+    section p:last-child { margin-bottom: 0; }
+    section strong { color: var(--ink); font-weight: 600; }
+
+    /* 개요 그리드 */
+    .overview {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    @media (min-width: 640px) {
+      .overview { grid-template-columns: 1fr 1fr; }
+    }
+    .ov-item {
+      background: var(--line-soft);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+    }
+    .ov-item .k {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .ov-item .v { color: var(--ink); line-height: 1.5; }
+
+    /* 목표 리스트 */
+    ul.goals { list-style: none; padding: 0; margin-top: 8px; }
+    ul.goals li {
+      padding: 6px 0 6px 24px;
+      position: relative;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+    ul.goals li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 6px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* 차시 흐름 표 */
+    .session-flow {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 0.9rem;
+    }
+    .session-flow .when {
+      font-weight: 700;
+      color: var(--accent);
+      padding: 8px 10px;
+      background: var(--accent-soft);
+      border-radius: 4px;
+      text-align: center;
+    }
+    .session-flow .what {
+      padding: 8px 10px;
+      color: var(--ink);
+      line-height: 1.55;
+    }
+
+    /* 시간표 박스 */
+    .timebox {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin: 10px 0;
+      background: #fafbfc;
+    }
+    .timebox-head {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed var(--line);
+    }
+    .timebox-head .time {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      padding: 2px 8px;
+      border-radius: 10px;
+      letter-spacing: 0.02em;
+    }
+    .timebox-head .stage {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .timebox-head .tagline {
+      font-size: 0.82rem;
+      color: var(--ink-3);
+      margin-left: auto;
+    }
+    .timebox h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 10px 0 4px;
+    }
+    .timebox h4:first-of-type { margin-top: 0; }
+    .timebox ul, .timebox ol {
+      margin: 4px 0 6px 8px;
+      padding-left: 18px;
+      font-size: 0.9rem;
+      color: var(--ink);
+    }
+    .timebox ul li, .timebox ol li { margin-bottom: 4px; line-height: 1.55; }
+    .timebox p { font-size: 0.9rem; color: var(--ink); margin-bottom: 4px; }
+
+    /* 발문 인용 */
+    .say {
+      background: #fff;
+      border-left: 3px solid var(--accent);
+      padding: 8px 12px;
+      margin: 6px 0;
+      font-size: 0.92rem;
+      color: var(--ink);
+      font-style: italic;
+      border-radius: 0 4px 4px 0;
+    }
+    .say::before {
+      content: "💬 ";
+      font-style: normal;
+    }
+
+    /* 의도적 오류 박스 */
+    .error-block {
+      background: var(--error-soft);
+      border-left: 3px solid var(--error);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 12px;
+      margin: 8px 0;
+      font-size: 0.88rem;
+      color: #7f1d1d;
+    }
+    .error-block .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--error);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .error-block strong { color: #7f1d1d; }
+
+    /* 예상 답변 박스 */
+    .expect {
+      background: var(--info-soft);
+      border-left: 3px solid var(--info);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 12px;
+      margin: 8px 0;
+      font-size: 0.88rem;
+      color: #1e3a8a;
+    }
+    .expect .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--info);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .expect ul { margin: 4px 0 0 8px; padding-left: 18px; }
+    .expect ul li { margin-bottom: 3px; line-height: 1.55; color: var(--ink); }
+
+    /* 메모 박스 */
+    .note {
+      background: var(--warn-soft);
+      border-left: 3px solid var(--warn);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 12px;
+      margin: 8px 0;
+      font-size: 0.88rem;
+      color: #78350f;
+      line-height: 1.55;
+    }
+    .note .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--warn);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .note strong { color: #78350f; }
+
+    /* placeholder */
+    .placeholder {
+      background: repeating-linear-gradient(
+        45deg,
+        #f1f5f9,
+        #f1f5f9 8px,
+        #e2e8f0 8px,
+        #e2e8f0 16px
+      );
+      border: 1px dashed var(--ink-3);
+      border-radius: 6px;
+      padding: 14px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--ink-2);
+      margin: 8px 0;
+    }
+    .placeholder .ic { font-size: 1.2rem; margin-bottom: 4px; display: block; }
+  </style>
+</head>
+<body>
+
+  <header class="head">
+    <div class="eyebrow">기하 · 수행평가</div>
+    <h1>이차곡선의 광학적 성질 탐구하기</h1>
+    <div class="meta">교사용 · 1차시 수업 흐름</div>
+  </header>
+
+  <!-- 발문 -->
+  <div class="quest">
+    <div class="tag">평가 과제 (학생에게 제시할 발문)</div>
+    <div class="text">
+      <em>선택한 이차곡선</em>의 <em>수학적 정의와 성질</em>로부터 <em>반사법칙과 맞아떨어지는 광학적 성질</em>을 <em>추론</em>하고, <em>그 이유</em>를 <em>시뮬레이션으로 설명</em>하시오.
+    </div>
+  </div>
+
+  <!-- 1. 수업 개요 -->
+  <section>
+    <h2><span class="num">1</span> 수업 개요</h2>
+    <div class="overview">
+      <div class="ov-item">
+        <div class="k">단원</div>
+        <div class="v">기하 · 이차곡선</div>
+      </div>
+      <div class="ov-item">
+        <div class="k">차시 구성</div>
+        <div class="v">총 2차시 (1차시 함께 연습 / 2차시 본평가)</div>
+      </div>
+      <div class="ov-item">
+        <div class="k">학생 도구</div>
+        <div class="v">디벗 태블릿 + Gemini + 크롬 브라우저</div>
+      </div>
+      <div class="ov-item">
+        <div class="k">결과물 형태</div>
+        <div class="v">단일 HTML 파일 + Gemini 대화 공유 URL</div>
+      </div>
+    </div>
+
+    <h3 style="font-size:0.85rem; font-weight:700; color:var(--ink); margin:14px 0 0;">핵심 학습 목표</h3>
+    <ul class="goals">
+      <li>이차곡선의 <strong>수학적 정의</strong>로부터 <strong>광학적 성질</strong>을 <strong>스스로 추론</strong>할 수 있다.</li>
+      <li>반사법칙(입사각=반사각, 법선 기준)이 그 정의와 어떻게 맞물리는지 <strong>설명</strong>할 수 있다.</li>
+      <li>생성형 AI에게 <strong>수학적으로 정확한 요구사항</strong>을 담은 프롬프트를 작성할 수 있다.</li>
+      <li>AI가 만든 결과물을 <strong>수학적 관점에서 비판적으로 검증</strong>할 수 있다.</li>
+    </ul>
+  </section>
+
+  <!-- 2. 차시 구성 -->
+  <section>
+    <h2><span class="num">2</span> 차시 구성</h2>
+    <div class="session-flow">
+      <div class="when">1차시</div>
+      <div class="what">
+        <strong>포물선으로 고정 · 함께 연습</strong> — 의도적 오류가 있는 <strong>포물선 예시 HTML</strong>을 보고, "수학적으로 맞나?"를 함께 점검하면서 <strong>수정 프롬프트</strong>를 작성·검증하는 과정을 경험.
+      </div>
+      <div class="when">2차시</div>
+      <div class="what">
+        <strong>곡선 자유 선택 · 본평가</strong> — 포물선·타원·쌍곡선 중 <strong>학생이 자유롭게 1개 선택</strong>. 정의→광학적 성질을 직접 추론하고 Gemini에게 시뮬을 만들게 한 뒤 HTML과 대화 URL을 제출.
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 1차시 흐름 -->
+  <section>
+    <h2><span class="num">3</span> 1차시 흐름 <span class="hint">총 50분</span></h2>
+
+    <!-- 도입 -->
+    <div class="timebox">
+      <div class="timebox-head">
+        <span class="time">0~5분</span>
+        <span class="stage">도입 — 발문과 미션 안내</span>
+        <span class="tagline">5분</span>
+      </div>
+      <h4>교사 행동</h4>
+      <ul>
+        <li>발문 제시 (위 강조 박스 그대로): "<strong>이차곡선의 수학적 정의로부터 광학적 성질을 추론하고, 그 이유를 시뮬레이션으로 설명한다</strong>."</li>
+        <li>2차시 본평가 구조 간단히 안내 (1차시는 함께 포물선으로 연습, 2차시는 세 곡선 중 택1 본평가).</li>
+        <li><strong>오늘 활동의 의미를 명확히</strong>: "AI에게 처음 프롬프트를 넣으면 이렇게 잘못 나오는 경우가 많다. <strong>그 오류를 찾아 고칠 수 있어야 한다</strong>. 그게 오늘 연습하는 능력이다."</li>
+      </ul>
+
+      <div class="say">"여러분이 직접 프롬프트를 써서 받았다면 처음엔 이런 결과가 나올 수 있어요. 어디가 잘못됐는지 찾고, 어떻게 고쳐달라고 말할지 연습해봅시다."</div>
+    </div>
+
+    <!-- 활동 1 -->
+    <div class="timebox">
+      <div class="timebox-head">
+        <span class="time">5~15분</span>
+        <span class="stage">활동 1 — 예시 HTML 살펴보기</span>
+        <span class="tagline">10분</span>
+      </div>
+
+      <h4>학생 활동</h4>
+      <ul>
+        <li>교사가 제공한 <strong>포물선 예시 HTML</strong>을 디벗 태블릿에서 열어 동작 확인.</li>
+        <li>"이 시뮬, 수학적으로 맞아?"라는 질문에 답하기 위해 관찰.</li>
+        <li>의심되는 부분을 모둠 또는 짝과 짧게 공유.</li>
+      </ul>
+
+      <div class="placeholder">
+        <span class="ic">📄</span>
+        예시 HTML 파일: <strong>포물선_예시(의도적_오류포함).html</strong> [추후 제작 · 학생에게 배포]
+      </div>
+
+      <h4>예시 HTML에 심어둔 의도적 오류 <span style="font-weight:500; color:var(--ink-3); font-size:0.78rem;">(교사가 알고 있어야 할 것)</span></h4>
+
+      <div class="error-block">
+        <div class="lbl">오류 ①</div>
+        <strong>각도 표시가 법선이 아니라 접선 기준</strong> — 입사각·반사각이 접선과의 각으로 표시되어 있어, "반사법칙이 성립한다"는 시각적 근거가 무너짐. 입사각=반사각이라도 그 기준이 잘못되어 있다.
+      </div>
+
+      <div class="error-block">
+        <div class="lbl">오류 ②</div>
+        <strong>빛 방향이 반대</strong> — 포물선의 평행광선 수렴 성질은 "축에 평행한 빛이 곡면에서 반사되어 초점으로 모이는" 것인데, 예시에서는 <strong>준선 쪽(곡선 바깥)</strong>에서 빛이 들어오게 그려져 있어 수학적으로 의미가 없는 경로가 된다.
+      </div>
+
+      <div class="expect">
+        <div class="lbl">학생들이 보일 수 있는 반응</div>
+        <ul>
+          <li>"각도는 같은데… 뭔가 어색해요" (오류 ①을 직관적으로 느끼지만 언어화 못 함)</li>
+          <li>"법선을 안 그렸어요" / "법선 기준이어야 하는 거 아니에요?" (오류 ① 언어화)</li>
+          <li>"포물선은 무한대에서 평행하게 와야 하는데, 빛이 거꾸로 가는 것 같아요" (오류 ② 포착)</li>
+          <li>"이 시뮬은 그냥 광선만 그렸지, 수학적인 이유가 안 보여요" (시뮬의 본질 지적)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 활동 2 -->
+    <div class="timebox">
+      <div class="timebox-head">
+        <span class="time">15~35분</span>
+        <span class="stage">활동 2 — 오류 찾고 수정 프롬프트 작성</span>
+        <span class="tagline">20분</span>
+      </div>
+
+      <h4>학생 활동</h4>
+      <ol>
+        <li>모둠 또는 개인으로 <strong>오류 2가지</strong>를 정리.</li>
+        <li>각 오류를 <strong>수학적 언어</strong>로 적어본다. <em>(막연한 표현 금지 — 학생용 가이드에 명시됨)</em></li>
+        <li>Gemini와 대화 시작 — 첫 줄에 <strong>학년·반·번호·이름</strong> 기재.</li>
+        <li>예시 HTML을 첨부하거나 코드를 붙여 넣은 뒤, 수정 요청 프롬프트 작성.</li>
+        <li>Gemini가 새로 만든 HTML을 열어 결과 검증.</li>
+      </ol>
+
+      <h4>교사 행동</h4>
+      <ul>
+        <li>모둠 순회하며 막연한 표현("이상해요", "법칙이 안 맞아요")이 보이면 <strong>"무엇이 어떻게 어긋났는지 한 문장으로"</strong> 다시 묻기.</li>
+        <li>학생용 가이드의 <strong>"직접 써야 할 4가지"</strong>(정의 / 빛 방향 / 표시 요소 / 수학적 근거)를 참조하도록 안내.</li>
+        <li>Gemini 결과에 오류가 또 있으면 <strong>"한 번에 끝낼 필요 없다, 대화로 다듬어 가자"</strong>고 안심시키기.</li>
+      </ul>
+
+      <div class="say">"'법선을 그려줘' 만으로 충분할까요? 왜 법선이어야 하는지 한 줄 더 적어보면 어떨까요?"</div>
+
+      <div class="note">
+        <div class="lbl">관찰 포인트</div>
+        학생이 <strong>정의 → 광학적 성질 → 시뮬 요구사항</strong>으로 연결하고 있는지, 아니면 <strong>"고쳐줘"</strong> 같은 막연한 지시에 머무는지. 후자라면 한 번 더 끌어올려 주기.
+      </div>
+    </div>
+
+    <!-- 활동 3 -->
+    <div class="timebox">
+      <div class="timebox-head">
+        <span class="time">35~45분</span>
+        <span class="stage">활동 3 — 공유와 점검</span>
+        <span class="tagline">10분</span>
+      </div>
+
+      <h4>학생 활동</h4>
+      <ul>
+        <li>1~2 모둠이 자신들의 <strong>프롬프트와 결과</strong>를 발표.</li>
+        <li>발표 들으며 "내 프롬프트와 어떻게 다른가?"를 메모.</li>
+      </ul>
+
+      <h4>교사 행동</h4>
+      <ul>
+        <li>발표마다 다음 한 가지를 짚어 강조:
+          <ul>
+            <li><strong>수학적 정의가 프롬프트에 들어갔는가?</strong></li>
+            <li><strong>반사법칙(법선·각)이 시뮬에 살아 있는가?</strong></li>
+            <li><strong>"왜 그렇게 되는가"가 시각으로 보이는가?</strong></li>
+          </ul>
+        </li>
+        <li>틀린 프롬프트나 미완성 시뮬도 <strong>"여기까지 왔다는 점"</strong>을 인정. 평가의 핵심은 결과의 완성도가 아니라 추론 과정.</li>
+      </ul>
+
+      <div class="say">"이 모둠의 결과물에는 정의가 한 줄로 들어가 있었네요. 우리 모둠은 그게 빠져있지 않았나요?"</div>
+    </div>
+
+    <!-- 마무리 -->
+    <div class="timebox">
+      <div class="timebox-head">
+        <span class="time">45~50분</span>
+        <span class="stage">마무리 — 2차시 본평가 안내</span>
+        <span class="tagline">5분</span>
+      </div>
+      <h4>교사 행동</h4>
+      <ul>
+        <li>2차시는 본평가임을 다시 확인. <strong>포물선 / 타원 / 쌍곡선 중 1개 선택</strong>.</li>
+        <li><strong>선택 가이드를 직접 말로 안내</strong>:
+          <ul>
+            <li>"새로운 곡선(<strong>타원·쌍곡선</strong>)에 도전하고 싶은 사람은 그쪽으로 가도 좋고,"</li>
+            <li>"오늘 한 <strong>포물선을 더 다듬어서 본인 작품으로 만들고 싶은 사람</strong>은 그렇게 해도 된다."</li>
+            <li>"중요한 건 곡선의 난이도가 아니라, <strong>수학적 정의로부터 광학적 성질을 끌어내는 추론과 그 설명의 완성도</strong>다."</li>
+          </ul>
+        </li>
+        <li>학생용 가이드의 <strong>"제출 방법 3가지"</strong> (HTML 파일 / 첫 메시지 인적사항 / 대화 공유 URL) 강조.</li>
+        <li>준비물 안내: 디벗 태블릿, Gemini 로그인 확인.</li>
+      </ul>
+
+      <div class="say">"오늘은 예시를 고치는 연습이었다면, 다음 시간은 여러분의 작품을 만드는 시간입니다. 새 곡선에 도전해도 좋고, 오늘 했던 포물선을 더 깊이 파고들어도 좋아요. 선택은 여러분 몫입니다."</div>
+    </div>
+  </section>
+
+  <!-- 4. 2차시 본평가 연결 -->
+  <section>
+    <h2><span class="num">4</span> 2차시 본평가 연결 <span class="hint">곡선 선택은 학생 자율</span></h2>
+    <p>1차시는 <strong>"AI 결과물을 비판적으로 점검 + 수정 프롬프트로 다듬기"</strong>를 체험하는 시간. 2차시는 <strong>학생이 직접 곡선을 선택해 추론 → 프롬프트 → 시뮬 → 제출</strong>까지 단독 수행.</p>
+
+    <h4 style="font-size:0.9rem; font-weight:700; color:var(--ink); margin:14px 0 6px;">곡선 선택의 두 갈래</h4>
+
+    <div class="overview" style="grid-template-columns: 1fr;">
+      <div class="ov-item" style="background:var(--accent-soft);">
+        <div class="k" style="color:var(--accent);">A. 새 곡선에 도전 (타원 또는 쌍곡선)</div>
+        <div class="v">
+          1차시 활동이 수월했거나, <strong>새로운 곡선의 정의로부터 광학적 성질을 직접 추론해보고 싶은 학생</strong>에게 적합. 두 초점 구조가 등장해 정의→성질의 연결이 한층 흥미로워짐.
+        </div>
+      </div>
+      <div class="ov-item" style="background:var(--warn-soft);">
+        <div class="k" style="color:var(--warn);">B. 포물선을 더 다듬기</div>
+        <div class="v">
+          1차시 활동에서 막힘이 있었거나 <strong>포물선의 추론을 더 깊이 가져가고 싶은 학생</strong>에게 적합. 1차시 결과물에서 출발하되, <strong>본인의 표현으로 다시 만들어 제출</strong>해야 함 (1차시 예시 그대로는 불가).
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:12px;">
+      <div class="lbl">선택 가이드 안내 시 강조할 것</div>
+      평가의 핵심은 <strong>곡선의 난이도가 아니라 추론과 설명의 완성도</strong>. 어려운 곡선을 골랐다고 자동으로 점수가 높지 않음을 명확히 해서, 학생이 <strong>스스로의 수준에 맞게 선택</strong>하도록 유도.
+    </div>
+
+    <h4 style="font-size:0.9rem; font-weight:700; color:var(--ink); margin:14px 0 6px;">곡선별 핵심 정의·성질 (교사용 참고)</h4>
+    <ul style="font-size:0.88rem; padding-left:20px;">
+      <li><strong>포물선</strong> — 정의: <em>한 점(초점)과 한 직선(준선)까지의 거리가 같은 점들의 집합</em>. 광학적 성질: <em>축에 평행한 빛 ↔ 초점</em>으로 모이거나 발산. 접선이 초점과 준선 방향의 각을 이등분.</li>
+      <li><strong>타원</strong> — 정의: <em>두 초점까지의 거리의 합이 일정한 점들의 집합 (PF₁ + PF₂ = 2a)</em>. 광학적 성질: <em>한 초점에서 출발한 빛 → 반사 → 다른 초점</em>. 접선이 두 초점 방향의 <strong>외각</strong>을 이등분.</li>
+      <li><strong>쌍곡선</strong> — 정의: <em>두 초점까지의 거리의 차의 절댓값이 일정한 점들의 집합 (|PF₁ − PF₂| = 2a)</em>. 광학적 성질: <em>한 초점을 향해 가던 빛 → 반사 → 마치 다른 초점에서 출발한 듯</em> 발산. 접선이 두 초점 방향의 <strong>내각</strong>을 이등분.</li>
+    </ul>
+
+    <h4 style="font-size:0.9rem; font-weight:700; color:var(--ink); margin:14px 0 6px;">예상 분포</h4>
+    <p>경험상 학급 1/3은 새 곡선(주로 타원), 절반 가량은 포물선 심화, 소수가 쌍곡선에 도전하는 분포가 자연스러움. 한쪽으로 쏠리지 않도록 도입 시 두 갈래의 선택지를 <strong>균형 있게 제시</strong>.</p>
+  </section>
+
+  <!-- 5. 보조 안내 -->
+  <section>
+    <h2><span class="num">5</span> 보조 안내</h2>
+
+    <h4 style="font-size:0.88rem; font-weight:700; color:var(--ink); margin-bottom:6px;">학생이 자주 막히는 지점</h4>
+    <ul style="font-size:0.9rem; padding-left:20px;">
+      <li><strong>"수학적 정의"를 적지 않고 곡선 이름만 적음</strong> → 학생용 가이드 ①번 항목 다시 가리키기.</li>
+      <li><strong>Gemini 결과가 첫 시도에 완벽하지 않다고 좌절</strong> → 대화로 다듬는 게 정상임을 안내. 대화 자체가 평가 대상.</li>
+      <li><strong>HTML이 너무 화려하게 나옴</strong> → "수학적 설명이 우선, 디자인은 그다음"이라고 방향 잡아주기.</li>
+      <li><strong>접선·법선·각도 표시가 빠짐</strong> → 학생용 가이드 ③번 "표시되어야 할 기하 요소" 항목 강조.</li>
+    </ul>
+
+    <h4 style="font-size:0.88rem; font-weight:700; color:var(--ink); margin:14px 0 6px;">예시 HTML 배포 방법 (1차시용)</h4>
+    <p>구글 드라이브 공유 폴더 또는 학급 게시판에 단일 HTML 파일로 업로드. 학생은 다운로드 후 크롬에서 직접 열거나, Gemini 대화에 첨부.</p>
+
+    <div class="placeholder" style="margin-top:6px;">
+      <span class="ic">⚠️</span>
+      <strong>채점 기준(루브릭)</strong>은 본 문서에 포함하지 않습니다. 추후 별도 문서로 정리 예정.
+    </div>
+  </section>
+
+</body>
+</html>

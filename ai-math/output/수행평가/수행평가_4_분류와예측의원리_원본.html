@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>수행평가 · 분류와 예측의 원리 (원본)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 11pt;
+      line-height: 1.7;
+      color: #1a1a1a;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 40px 44px;
+      border-radius: 6px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.12);
+    }
+
+    /* ─── 헤더 ─── */
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .ws-header-top { display: flex; justify-content: space-between; align-items: flex-end; }
+    .ws-title { font-size: 15pt; font-weight: 700; letter-spacing: -0.3px; }
+    .ws-meta { font-size: 9pt; color: #555; }
+    .ws-sub { font-size: 9pt; color: #777; margin-top: 3px; }
+
+    /* ─── 학생 정보 ─── */
+    .student-info {
+      display: flex; gap: 24px;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    .student-field { display: flex; align-items: center; gap: 6px; font-size: 10pt; }
+    .student-field label { font-weight: 600; white-space: nowrap; color: #444; }
+    .field-line { width: 80px; border-bottom: 1px solid #999; height: 20px; }
+
+    /* ─── 배점 안내 ─── */
+    .score-guide {
+      display: flex; gap: 8px;
+      margin-bottom: 14px;
+    }
+    .sg-item {
+      flex: 1; border: 1px solid #bbb; border-radius: 4px;
+      padding: 6px 8px; text-align: center;
+      background: #fafafa;
+    }
+    .sg-name { font-size: 9pt; color: #555; }
+    .sg-pts { font-size: 14pt; font-weight: 700; color: #1a1a1a; line-height: 1.2; }
+    .sg-item.highlight { border-color: #333; background: #f0f0f0; }
+
+    /* ─── 파트 구분 ─── */
+    .part-divider {
+      margin: 30px 0 16px;
+      border-top: 2px solid #1a1a1a;
+      padding-top: 10px;
+    }
+    .part-label {
+      display: inline-block; background: #1a1a1a; color: #fff;
+      font-size: 9pt; font-weight: 700;
+      padding: 2px 10px; border-radius: 2px;
+      margin-bottom: 4px;
+    }
+    .part-title { font-size: 12pt; font-weight: 700; margin-bottom: 10px; }
+
+    /* ─── 공통 표 ─── */
+    .ws-table { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 8px 0; }
+    .ws-table th {
+      background: #e4e4e4; border: 1px solid #b0b0b0;
+      padding: 5px 8px; text-align: center; font-weight: 600;
+    }
+    .ws-table td { border: 1px solid #b0b0b0; padding: 5px 8px; text-align: center; }
+    .ws-table td.left { text-align: left; }
+    .ws-table td.blank { background: #fff; min-width: 30px; min-height: 26px; }
+    .ws-table th.total, .ws-table td.total { background: #e8e8e8; font-weight: 600; }
+
+    /* ─── 안내 박스 ─── */
+    .info-box {
+      background: #f4f4f4; border-left: 3px solid #888;
+      padding: 7px 12px; margin: 8px 0;
+      font-size: 10pt; color: #333; line-height: 1.7;
+    }
+
+    /* ─── 리뷰 박스 ─── */
+    .review-wrap { display: flex; gap: 12px; margin: 10px 0; }
+    .review-card {
+      flex: 1; border: 1px solid #bbb; border-radius: 4px;
+      background: #fff; padding: 8px 12px; font-size: 10pt; line-height: 1.75;
+    }
+    .review-card .label { font-weight: 700; font-size: 9pt; color: #555; display: block; margin-bottom: 3px; }
+
+    /* ─── 문제 ─── */
+    .q-block { margin: 14px 0; }
+    .q-num { font-weight: 700; font-size: 11pt; margin-bottom: 5px; }
+    .q-pts { font-weight: 400; font-size: 9pt; color: #777; }
+    .q-text { font-size: 10.5pt; line-height: 1.7; margin-bottom: 7px; }
+
+    /* ─── 수식 줄 ─── */
+    .formula-line {
+      font-size: 10.5pt; line-height: 2.1;
+      margin: 4px 0 4px 10px;
+    }
+    .fill { display: inline-block; border-bottom: 1.5px solid #555; min-width: 50px; height: 20px; vertical-align: middle; }
+    .fill.lg { min-width: 90px; }
+    .fill.sm { min-width: 32px; }
+
+    /* ─── 답란 ─── */
+    .ans-box {
+      border: 1px dashed #aaa; border-radius: 4px;
+      background: #fefefe; margin: 6px 0;
+      min-height: 45px;
+    }
+
+    /* ─── 표 쌍 ─── */
+    .table-pair { display: flex; gap: 20px; margin: 8px 0; }
+    .table-pair > div { flex: 1; }
+    .table-caption { font-size: 9.5pt; font-weight: 700; color: #444; margin-bottom: 4px; text-align: center; }
+
+    /* ─── 원자료 표 쌍 ─── */
+    .raw-data-wrap { display: flex; gap: 16px; margin-bottom: 10px; }
+    .raw-data-wrap .ws-table { flex: 1; }
+
+    /* ─── 구분선 ─── */
+    .section-div { border: none; border-top: 1px solid #ddd; margin: 16px 0; }
+
+    /* ─── 결론 박스 ─── */
+    .predict-box {
+      border: 1.5px solid #555; border-radius: 4px;
+      padding: 9px 14px; margin-top: 10px; background: #fff; font-size: 10.5pt;
+    }
+    .predict-label { font-size: 9pt; color: #666; font-weight: 700; margin-bottom: 4px; }
+
+    /* ─── 소문항 ─── */
+    .sub-q { margin: 10px 0 5px 12px; font-size: 10.5pt; }
+    .sub-ans { margin-left: 22px; }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+
+  <!-- ═══ 헤더 ═══ -->
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">수행평가 · 분류와 예측의 원리</span>
+      <span class="ws-meta">인공지능수학 &nbsp;|&nbsp; 3학년 1학기</span>
+    </div>
+    <div class="ws-sub">
+      성취기준: [12인수03-01] 텍스트 분류의 수학적 방법을 이해한다. &nbsp;
+      [12인수03-03] 자료를 분석하여 확률을 구하고 예측에 이용한다.
+    </div>
+  </div>
+
+  <!-- ═══ 학생 정보 ═══ -->
+  <div class="student-info">
+    <div class="student-field"><label>학번</label><div class="field-line"></div></div>
+    <div class="student-field"><label>이름</label><div class="field-line"></div></div>
+    <div class="student-field"><label>날짜</label><div class="field-line"></div></div>
+  </div>
+
+  <!-- ═══ 배점 안내 ═══ -->
+  <div class="score-guide">
+    <div class="sg-item"><div class="sg-name">기본점수</div><div class="sg-pts">8점</div></div>
+    <div class="sg-item highlight"><div class="sg-name">파트 1 · 감성 분석</div><div class="sg-pts">8점</div></div>
+    <div class="sg-item highlight"><div class="sg-name">파트 2 · 확률 계산</div><div class="sg-pts">8점</div></div>
+    <div class="sg-item highlight"><div class="sg-name">파트 2 · 예측 활용</div><div class="sg-pts">4점</div></div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       파트 1 · 감성 분석
+  ══════════════════════════════════════════ -->
+  <div class="part-divider">
+    <div class="part-label">파트 1</div>
+    <div class="part-title">🔍 맛집·카페 리뷰 감성 분석하기</div>
+  </div>
+
+  <!-- 감성 사전 -->
+  <table class="ws-table">
+    <thead>
+      <tr><th style="width:16%;">분류</th><th>단어 목록</th><th style="width:13%;">감성 점수</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="background:#e8f0e8; font-weight:600;">긍정</td>
+        <td class="left">맛있다, 친절하다, 훌륭하다, 깔끔하다, 만족스럽다</td>
+        <td>+1</td>
+      </tr>
+      <tr>
+        <td style="background:#f0e8e8; font-weight:600;">부정</td>
+        <td class="left">불친절하다, 실망스럽다, 느리다, 불결하다, 맛없다</td>
+        <td>−1</td>
+      </tr>
+      <tr>
+        <td style="background:#f0f0f0; font-weight:600;">중립</td>
+        <td class="left">카페, 음식, 직원, 인테리어, 가격, 위치</td>
+        <td>0</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <strong>감성 점수 계산 방법</strong>: &nbsp;
+    score $=$ (긍정 단어 수) $-$ (부정 단어 수)<br>
+    score $> 0$ → 긍정 &nbsp;|&nbsp; score $< 0$ → 부정 &nbsp;|&nbsp; score $= 0$ → 중립
+  </div>
+
+  <!-- 리뷰 텍스트 -->
+  <div class="review-wrap">
+    <div class="review-card">
+      <span class="label">리뷰 A</span>
+      "카페 인테리어가 훌륭하고 직원도 친절했다. 가격도 만족스러웠다."
+    </div>
+    <div class="review-card">
+      <span class="label">리뷰 B</span>
+      "음식이 맛없고 직원이 불친절했다. 위치는 괜찮았다."
+    </div>
+  </div>
+
+  <div class="section-div"></div>
+
+  <!-- ❶ -->
+  <div class="q-block">
+    <div class="q-num">❶ &nbsp;<span class="q-pts">[2점]</span></div>
+    <div class="q-text">리뷰 A에서 감성 사전의 단어를 찾아 아래 표를 완성하시오.</div>
+    <table class="ws-table">
+      <thead>
+        <tr><th style="width:14%;">분류</th><th>찾은 단어</th><th style="width:13%;">단어 수</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="background:#e8f0e8;">긍정</td>
+          <td class="blank left" style="height:28px;"></td>
+          <td class="blank"></td>
+        </tr>
+        <tr>
+          <td style="background:#f0e8e8;">부정</td>
+          <td class="blank left" style="height:28px;"></td>
+          <td class="blank"></td>
+        </tr>
+        <tr>
+          <td style="background:#f0f0f0;">중립</td>
+          <td class="blank left" style="height:28px;"></td>
+          <td class="blank"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ❷ -->
+  <div class="q-block">
+    <div class="q-num">❷ &nbsp;<span class="q-pts">[2점]</span></div>
+    <div class="q-text">리뷰 A를 벡터로 표현하고, 감성 점수를 계산하여 분류를 판단하시오.</div>
+    <div class="formula-line">
+      벡터 &nbsp;$\vec{v} = $ (긍정 수, 부정 수, 중립 수) $= \bigl($<span class="fill sm"></span>,&nbsp;<span class="fill sm"></span>,&nbsp;<span class="fill sm"></span>$\bigr)$
+    </div>
+    <div class="formula-line">
+      감성 점수 &nbsp;$\text{score} = $<span class="fill sm"></span>$ \;-\; $<span class="fill sm"></span>$\; = \;$<span class="fill sm"></span>
+      &nbsp;&nbsp;→&nbsp;&nbsp; 분류: <span class="fill lg"></span>
+    </div>
+  </div>
+
+  <div class="section-div"></div>
+
+  <!-- ❸ -->
+  <div class="q-block">
+    <div class="q-num">❸ &nbsp;<span class="q-pts">[2점]</span></div>
+    <div class="q-text">리뷰 B에 대해 ❶, ❷와 같은 방법으로 분석하시오.</div>
+    <table class="ws-table">
+      <thead>
+        <tr><th style="width:14%;">분류</th><th>찾은 단어</th><th style="width:13%;">단어 수</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="background:#e8f0e8;">긍정</td><td class="blank left" style="height:28px;"></td><td class="blank"></td></tr>
+        <tr><td style="background:#f0e8e8;">부정</td><td class="blank left" style="height:28px;"></td><td class="blank"></td></tr>
+        <tr><td style="background:#f0f0f0;">중립</td><td class="blank left" style="height:28px;"></td><td class="blank"></td></tr>
+      </tbody>
+    </table>
+    <div class="formula-line" style="margin-top:6px;">
+      벡터 &nbsp;$\vec{v} = \bigl($<span class="fill sm"></span>,&nbsp;<span class="fill sm"></span>,&nbsp;<span class="fill sm"></span>$\bigr)$
+      &nbsp;&nbsp; 감성 점수 $= $<span class="fill sm"></span>$ \;-\; $<span class="fill sm"></span>$\; = \;$<span class="fill sm"></span>
+      &nbsp;&nbsp;→&nbsp;&nbsp; 분류: <span class="fill lg"></span>
+    </div>
+  </div>
+
+  <!-- ❹ -->
+  <div class="q-block">
+    <div class="q-num">❹ &nbsp;<span class="q-pts">[2점]</span></div>
+    <div class="q-text">두 리뷰 중 더 부정적인 리뷰를 고르고, 감성 점수를 근거로 그 이유를 설명하시오.</div>
+    <div class="ans-box" style="min-height:55px;"></div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       파트 2 · 확률 계산 + 예측 활용
+  ══════════════════════════════════════════ -->
+  <div class="part-divider">
+    <div class="part-label">파트 2</div>
+    <div class="part-title">📊 공부 장소 선택 예측하기</div>
+  </div>
+
+  <!-- 상황 -->
+  <p style="font-size:10.5pt; line-height:1.8; margin-bottom:10px;">
+    다음은 수험생 소연이가 자율학습 시간에
+    <strong>요일(평일 / 주말)</strong>과 <strong>날씨(맑음 / 흐림)</strong>에 따라
+    <strong>도서관(L)</strong>과 <strong>카페(C)</strong> 중 어느 곳에서 공부하는지
+    <strong>20일 동안 기록</strong>한 자료이다.
+  </p>
+
+  <!-- 원자료 -->
+  <div class="raw-data-wrap">
+    <table class="ws-table">
+      <thead><tr><th>요일</th><th>날씨</th><th>장소</th></tr></thead>
+      <tbody>
+        <tr><td>평일</td><td>맑음</td><td>L</td></tr>
+        <tr><td>평일</td><td>맑음</td><td>L</td></tr>
+        <tr><td>평일</td><td>맑음</td><td>L</td></tr>
+        <tr><td>평일</td><td>맑음</td><td>L</td></tr>
+        <tr><td>평일</td><td>맑음</td><td>C</td></tr>
+        <tr><td>평일</td><td>맑음</td><td>C</td></tr>
+        <tr><td>평일</td><td>흐림</td><td>L</td></tr>
+        <tr><td>평일</td><td>흐림</td><td>L</td></tr>
+        <tr><td>평일</td><td>흐림</td><td>L</td></tr>
+        <tr><td>평일</td><td>흐림</td><td>L</td></tr>
+      </tbody>
+    </table>
+    <table class="ws-table">
+      <thead><tr><th>요일</th><th>날씨</th><th>장소</th></tr></thead>
+      <tbody>
+        <tr><td>평일</td><td>흐림</td><td>C</td></tr>
+        <tr><td>평일</td><td>흐림</td><td>C</td></tr>
+        <tr><td>주말</td><td>맑음</td><td>L</td></tr>
+        <tr><td>주말</td><td>맑음</td><td>L</td></tr>
+        <tr><td>주말</td><td>맑음</td><td>C</td></tr>
+        <tr><td>주말</td><td>맑음</td><td>C</td></tr>
+        <tr><td>주말</td><td>맑음</td><td>C</td></tr>
+        <tr><td>주말</td><td>맑음</td><td>C</td></tr>
+        <tr><td>주말</td><td>흐림</td><td>L</td></tr>
+        <tr><td>주말</td><td>흐림</td><td>C</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="info-box">
+    ※ &nbsp;L : 도서관(Library) &nbsp;&nbsp;|&nbsp;&nbsp; C : 카페(Café)<br>
+    ※ &nbsp;요일과 날씨는 서로 독립적이라고 가정한다.
+  </div>
+
+  <div class="section-div"></div>
+
+  <!-- ❶ -->
+  <div class="q-block">
+    <div class="q-num">❶ &nbsp;<span class="q-pts">[2점]</span></div>
+    <div class="q-text">소연이가 도서관(L)과 카페(C)를 선택한 일수를 정리하고, 도서관을 선택할 확률을 구하시오.</div>
+    <div style="display:flex; gap:24px; align-items:center; margin-top:8px;">
+      <table class="ws-table" style="width:auto;">
+        <thead>
+          <tr>
+            <th>장소 선택</th>
+            <th style="min-width:55px;">L (도서관)</th>
+            <th style="min-width:55px;">C (카페)</th>
+            <th class="total" style="min-width:46px;">합계</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>일수 (일)</td>
+            <td class="blank" style="height:26px;"></td>
+            <td class="blank"></td>
+            <td class="total blank"></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:10.5pt; white-space:nowrap;">
+        $P(L) \;=\;$ <span class="fill sm"></span> $/\; 20$
+      </div>
+    </div>
+  </div>
+
+  <!-- ❷ -->
+  <div class="q-block">
+    <div class="q-num">❷ &nbsp;<span class="q-pts">[2점]</span></div>
+    <div class="q-text">요일과 날씨에 따른 장소 선택 일수를 정리하여 두 표를 완성하시오.</div>
+    <div class="table-pair">
+      <div>
+        <div class="table-caption">〔 요일별 장소 선택 〕</div>
+        <table class="ws-table">
+          <thead><tr><th>요일</th><th>L</th><th>C</th><th class="total">합계</th></tr></thead>
+          <tbody>
+            <tr><td>평일</td><td class="blank" style="height:26px;"></td><td class="blank"></td><td class="total blank"></td></tr>
+            <tr><td>주말</td><td class="blank"></td><td class="blank"></td><td class="total blank"></td></tr>
+            <tr><td class="total">합계</td><td class="total blank"></td><td class="total blank"></td><td class="total blank"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="table-caption">〔 날씨별 장소 선택 〕</div>
+        <table class="ws-table">
+          <thead><tr><th>날씨</th><th>L</th><th>C</th><th class="total">합계</th></tr></thead>
+          <tbody>
+            <tr><td>맑음</td><td class="blank" style="height:26px;"></td><td class="blank"></td><td class="total blank"></td></tr>
+            <tr><td>흐림</td><td class="blank"></td><td class="blank"></td><td class="total blank"></td></tr>
+            <tr><td class="total">합계</td><td class="total blank"></td><td class="total blank"></td><td class="total blank"></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-div"></div>
+
+  <!-- ❸ -->
+  <div class="q-block">
+    <div class="q-num">❸ &nbsp;<span class="q-pts">[각 2점]</span></div>
+    <div class="q-text">소연이가 앞으로 <strong>100일 동안</strong> 같은 방법으로 공부 장소를 선택한다고 할 때, 아래 물음에 답하시오.</div>
+
+    <div class="sub-q">
+      (1) &nbsp;도서관(L)을 선택하면서, <strong>평일</strong>이고 날씨가 <strong>맑음</strong>일 것으로 예상되는 날의 수를 구하시오.
+    </div>
+    <div class="ans-box sub-ans" style="min-height:50px;"></div>
+
+    <div class="sub-q" style="margin-top:12px;">
+      (2) &nbsp;카페(C)를 선택하면서, <strong>주말</strong>이고 날씨가 <strong>흐림</strong>일 것으로 예상되는 날의 수를 구하시오.
+    </div>
+    <div class="ans-box sub-ans" style="min-height:50px;"></div>
+  </div>
+
+  <div class="section-div"></div>
+
+  <!-- ❹ -->
+  <div class="q-block">
+    <div class="q-num">❹ &nbsp;<span class="q-pts">[4점]</span></div>
+    <div class="q-text">
+      내일이 <strong>평일</strong>이고 날씨가 <strong>흐림</strong>인 경우,
+      소연이가 어느 곳에서 공부할지 예측하고,
+      확률 계산을 근거로 설명하시오.
+    </div>
+    <div class="ans-box" style="min-height:70px;"></div>
+    <div class="predict-box">
+      <div class="predict-label">예측 결론</div>
+      <div style="padding-top:5px; line-height:2.2;">
+        소연이는 &nbsp;
+        <span style="display:inline-block; width:130px; border-bottom:1.5px solid #333; vertical-align:middle;"></span>
+        &nbsp;에서 공부할 것으로 예측한다.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+</body>
+</html>

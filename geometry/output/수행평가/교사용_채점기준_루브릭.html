@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>교사용 채점 기준 · 이차곡선의 광학적 성질 탐구하기</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --ink: #0f172a;
+      --ink-2: #475569;
+      --ink-3: #94a3b8;
+      --line: #e2e8f0;
+      --line-soft: #f1f5f9;
+      --accent: #2D6B66;
+      --accent-soft: #e6f4f2;
+      --warn: #b45309;
+      --warn-soft: #fef3c7;
+      --good: #15803d;
+      --good-soft: #dcfce7;
+      --mid: #ca8a04;
+      --mid-soft: #fef9c3;
+      --low: #b91c1c;
+      --low-soft: #fee2e2;
+    }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      padding: 20px 18px 80px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .head { margin-bottom: 20px; }
+    .head .eyebrow {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .head h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+    .head .meta {
+      font-size: 0.85rem;
+      color: var(--ink-3);
+      margin-top: 4px;
+    }
+
+    .quest {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 14px 0 22px;
+    }
+    .quest .tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .quest .text {
+      font-size: 1.02rem;
+      line-height: 1.55;
+      color: var(--ink);
+      font-weight: 500;
+    }
+    .quest .text em {
+      font-style: normal;
+      background: var(--accent-soft);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    section > h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    section > h2 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    section > h2 .hint {
+      font-size: 0.75rem;
+      color: var(--ink-3);
+      font-weight: 500;
+      margin-left: auto;
+    }
+    section p { font-size: 0.92rem; color: var(--ink-2); margin-bottom: 6px; }
+    section p:last-child { margin-bottom: 0; }
+    section strong { color: var(--ink); font-weight: 600; }
+
+    /* 평가 대상 카드 */
+    .targets {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    @media (min-width: 640px) {
+      .targets { grid-template-columns: 1fr 1fr; }
+    }
+    .tgt {
+      background: var(--line-soft);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+    .tgt .k {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .tgt .v { font-size: 0.9rem; color: var(--ink); line-height: 1.5; }
+
+    /* 루브릭 테이블 */
+    .rubric {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.88rem;
+      margin-top: 4px;
+    }
+    .rubric thead th {
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 8px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-right: 1px solid rgba(255,255,255,0.15);
+    }
+    .rubric thead th:first-child {
+      border-top-left-radius: 6px;
+    }
+    .rubric thead th:last-child {
+      border-top-right-radius: 6px;
+      border-right: none;
+    }
+    .rubric thead th .pts {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 6px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .rubric tbody td {
+      padding: 10px 10px;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      background: #fff;
+      line-height: 1.55;
+    }
+    .rubric tbody td:last-child { border-right: none; }
+    .rubric tbody tr:last-child td { border-bottom: none; }
+    .rubric td.dim {
+      background: var(--line-soft);
+      font-weight: 600;
+      color: var(--ink);
+      width: 18%;
+    }
+    .rubric td.dim .axis {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .rubric td.good { border-top: 3px solid var(--good); }
+    .rubric td.mid { border-top: 3px solid var(--mid); }
+    .rubric td.low { border-top: 3px solid var(--low); }
+    .rubric td .ex {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--ink-3);
+      font-style: italic;
+    }
+
+    /* 점수 요약 */
+    .score-summary {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    @media (min-width: 640px) {
+      .score-summary { grid-template-columns: repeat(2, 1fr); }
+    }
+    .ss-card {
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+    .ss-card .lvl {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .ss-good { background: var(--good-soft); color: #14532d; }
+    .ss-good .lvl { color: var(--good); }
+    .ss-mid { background: var(--mid-soft); color: #713f12; }
+    .ss-mid .lvl { color: var(--mid); }
+    .ss-low { background: var(--low-soft); color: #7f1d1d; }
+    .ss-low .lvl { color: var(--low); }
+    .ss-zero { background: var(--line-soft); color: var(--ink-2); }
+    .ss-zero .lvl { color: var(--ink-2); }
+
+    /* 곡선별 참고 */
+    .curve-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media (min-width: 720px) {
+      .curve-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .curve {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px 14px;
+      background: #fafbfc;
+    }
+    .curve h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px dashed var(--line);
+    }
+    .curve .row {
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+    }
+    .curve .row:last-child { margin-bottom: 0; }
+    .curve .row .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--ink-3);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .curve .row .val {
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .curve .row .val em {
+      font-style: normal;
+      background: var(--accent-soft);
+      padding: 1px 3px;
+      border-radius: 2px;
+    }
+
+    /* 주의 박스 */
+    .alert {
+      background: var(--warn-soft);
+      border-left: 3px solid var(--warn);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 12px;
+      margin: 10px 0;
+      font-size: 0.9rem;
+      color: #78350f;
+      line-height: 1.55;
+    }
+    .alert .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--warn);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .alert strong { color: #78350f; }
+
+    /* 제외 항목 */
+    .exclude {
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      font-size: 0.88rem;
+      color: var(--ink-2);
+    }
+    .exclude .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--ink-3);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .exclude ul { margin: 4px 0 0 8px; padding-left: 18px; }
+    .exclude ul li { margin-bottom: 3px; line-height: 1.5; }
+
+    /* 채점 시트 양식 */
+    .score-sheet {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-top: 8px;
+    }
+    .score-sheet th, .score-sheet td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .score-sheet th {
+      background: var(--line-soft);
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .score-sheet td.center { text-align: center; }
+    .score-sheet td.score-cell { background: #fdfdfd; }
+    .score-sheet tfoot td {
+      background: var(--accent-soft);
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    @media print {
+      body { background: #fff; padding: 14px; }
+      section { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="head">
+    <div class="eyebrow">기하 · 수행평가</div>
+    <h1>이차곡선의 광학적 성질 탐구하기</h1>
+    <div class="meta">교사용 · 채점 기준(루브릭)</div>
+  </header>
+
+  <!-- 발문 -->
+  <div class="quest">
+    <div class="tag">평가 과제</div>
+    <div class="text">
+      <em>선택한 이차곡선</em>의 <em>수학적 정의와 성질</em>로부터 <em>반사법칙과 맞아떨어지는 광학적 성질</em>을 <em>추론</em>하고, <em>그 이유</em>를 <em>시뮬레이션으로 설명</em>하시오.
+    </div>
+  </div>
+
+  <!-- 1. 평가 철학 -->
+  <section>
+    <h2><span class="num">1</span> 평가 철학</h2>
+    <p>이 평가는 <strong>"학생이 무엇을 만들었는가"</strong>보다 <strong>"수학적 정의로부터 광학적 성질로 이어지는 추론을 얼마나 명료하게 표현했는가"</strong>를 본다.</p>
+    <p style="margin-top:6px;">AI는 도구일 뿐 평가 대상이 아니다. 따라서 <strong>화려한 시각 효과·코드 복잡도·곡선의 난이도</strong>는 점수에 직접 반영하지 않는다. 평가의 무게중심은 <strong>추론의 완성도</strong>와 <strong>그 추론이 결과물에 살아 있는가</strong>에 있다.</p>
+    <div class="alert" style="margin-top:12px;">
+      <div class="lbl">두 갈래 선택의 공정성</div>
+      <strong>포물선 심화</strong>를 선택한 학생도, <strong>타원·쌍곡선에 도전</strong>한 학생도 같은 루브릭으로 채점한다. 쌍곡선을 골랐다는 사실 자체가 가산점이 되지 않는다. 단, 같은 점수대에서 미세한 우열을 가릴 때 도전의 깊이는 정성적으로 참고할 수 있다.
+    </div>
+  </section>
+
+  <!-- 2. 평가 대상 -->
+  <section>
+    <h2><span class="num">2</span> 평가 대상</h2>
+    <div class="targets">
+      <div class="tgt">
+        <div class="k">① 시뮬레이션 HTML</div>
+        <div class="v">학생이 제출한 단일 HTML 파일 (1개 또는 2개). 브라우저에서 직접 열어 작동·표현을 확인.</div>
+      </div>
+      <div class="tgt">
+        <div class="k">② Gemini 대화 공유 URL</div>
+        <div class="v">첫 메시지의 인적사항 + 프롬프트 작성 흐름 + 수정 과정을 본다. <strong>대화 자체가 평가 대상의 절반</strong>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 루브릭 -->
+  <section>
+    <h2><span class="num">3</span> 루브릭 <span class="hint">4개 차원 × 3단계 (총 12점)</span></h2>
+
+    <table class="rubric">
+      <thead>
+        <tr>
+          <th style="width:18%;">차원</th>
+          <th style="width:28%;">우수<span class="pts">3점</span></th>
+          <th style="width:28%;">보통<span class="pts">2점</span></th>
+          <th style="width:26%;">미흡<span class="pts">1점</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="dim">
+            <span class="axis">A</span>
+            수학적 정의의 명시·정확성
+          </td>
+          <td class="good">
+            선택한 곡선의 정의를 <strong>수식과 언어 양쪽으로</strong> 정확히 기술. 프롬프트와 시뮬에 모두 등장.
+            <span class="ex">예: "포물선은 한 점(초점)과 한 직선(준선)까지의 거리가 같은 점들의 집합. PF = PH."</span>
+          </td>
+          <td class="mid">
+            정의를 언급했으나 <strong>일부 부정확</strong>하거나 모호. 또는 한쪽(프롬프트/시뮬)에만 등장.
+            <span class="ex">예: "포물선은 초점이 있는 곡선이다" 수준.</span>
+          </td>
+          <td class="low">
+            정의가 거의 등장하지 않거나 <strong>곡선 이름만 기재</strong>.
+            <span class="ex">예: "포물선을 그려줘."</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="dim">
+            <span class="axis">B</span>
+            추론과 연결<br>
+            <span style="font-weight:400; font-size:0.78rem; color:var(--ink-3);">(가장 중요)</span>
+          </td>
+          <td class="good">
+            <strong>정의 → 반사법칙(법선 기준 입사각=반사각) → 광학적 성질</strong>의 세 단계가 <strong>논리적으로 연결</strong>됨. 접선의 이등분 성질이 매개로 들어가 있음.
+            <span class="ex">예: "정의에 의해 PF=PH이고, 접선이 ∠FPH를 이등분하므로 입사각=반사각이 성립 → 평행광선이 초점으로 모인다."</span>
+          </td>
+          <td class="mid">
+            일부 연결은 보이나 <strong>중간 단계가 비어 있음</strong>. 추론의 일부가 결과로 점프.
+            <span class="ex">예: "정의가 있으니까 빛이 초점으로 모인다."</span>
+          </td>
+          <td class="low">
+            정의-반사법칙-광학적 성질 사이가 <strong>막연하거나 잘못된 연결</strong>.
+            <span class="ex">예: "포물선은 빛을 모은다." (이유 없음)</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="dim">
+            <span class="axis">C</span>
+            시뮬레이션 표현
+          </td>
+          <td class="good">
+            <strong>① 빛의 반사 애니메이션</strong> + <strong>② 법선 기준 각도 표시</strong> + <strong>③ 정의 보조선(거리·준선·초점 등)</strong>이 모두 시각적으로 드러남. 학생용 가이드의 ③번 항목 충족.
+          </td>
+          <td class="mid">
+            일부 요소만 표현. 예: 광선 경로는 있으나 <strong>각도 표시가 없음</strong>, 또는 법선 없이 접선만, 또는 정의 보조선이 빠짐.
+          </td>
+          <td class="low">
+            <strong>단순한 그림 수준</strong>이거나 수학적 요소가 거의 빠짐. 광선이 곡선과 무관하게 그려짐 등.
+          </td>
+        </tr>
+        <tr>
+          <td class="dim">
+            <span class="axis">D</span>
+            프롬프트와 대화 흐름
+          </td>
+          <td class="good">
+            첫 프롬프트가 <strong>학생용 가이드 4가지 요소(정의/빛 방향/표시 요소/수학적 근거)</strong>를 갖춤. 결과의 오류를 <strong>스스로 발견하고 수정 프롬프트</strong>로 다듬은 흔적이 대화에 명확.
+          </td>
+          <td class="mid">
+            첫 프롬프트가 일부 요소가 빠졌으나 <strong>대화로 다듬은 흔적은 있음</strong>. 또는 한두 번의 보완 시도.
+          </td>
+          <td class="low">
+            막연한 지시("그려줘")로 시작. 결과 점검·수정 없이 <strong>첫 결과를 그대로 제출</strong>.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 점수 구간 -->
+    <h4 style="font-size:0.88rem; font-weight:700; margin:16px 0 6px; color:var(--ink);">총점 구간 의미</h4>
+    <div class="score-summary">
+      <div class="ss-card ss-good">
+        <div class="lvl">10 ~ 12점 · 우수</div>
+        추론이 완결되어 있고 결과물에 일관되게 살아 있음. 모범 사례로 활용 가능.
+      </div>
+      <div class="ss-card ss-mid">
+        <div class="lvl">7 ~ 9점 · 보통</div>
+        주요 요소는 갖췄으나 추론·표현 중 한두 곳에 빈틈. 어디가 약했는지 피드백 필요.
+      </div>
+      <div class="ss-card ss-low">
+        <div class="lvl">4 ~ 6점 · 미흡</div>
+        정의나 추론의 핵심이 빠짐. 재학습·재시도 안내 권장.
+      </div>
+      <div class="ss-card ss-zero">
+        <div class="lvl">0 ~ 3점 · 미제출/심각한 미달</div>
+        결과물이 없거나 평가 과제와 무관. 별도 보완 절차.
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 곡선별 채점 시 참고 -->
+  <section>
+    <h2><span class="num">4</span> 곡선별 채점 시 참고 <span class="hint">차원 B의 "올바른 연결" 판단용</span></h2>
+    <p>각 곡선에서 학생의 답안이 <strong>이 표의 흐름</strong>을 어느 정도 따르는지 보고 차원 B를 판단한다. 표현은 학생마다 다양해도 무방하나, 핵심 노드(정의·이등분 성질·광학적 결과)는 모두 등장해야 우수 판정.</p>
+
+    <div class="curve-grid">
+      <div class="curve">
+        <h4>포물선</h4>
+        <div class="row">
+          <div class="lbl">정의</div>
+          <div class="val"><em>PF = PH</em> (한 점·한 직선까지 거리가 같음)</div>
+        </div>
+        <div class="row">
+          <div class="lbl">접선의 성질</div>
+          <div class="val">접선이 <em>∠FPH</em>를 이등분</div>
+        </div>
+        <div class="row">
+          <div class="lbl">광학적 성질</div>
+          <div class="val">축에 평행한 빛 ↔ 초점으로 수렴/발산</div>
+        </div>
+      </div>
+
+      <div class="curve">
+        <h4>타원</h4>
+        <div class="row">
+          <div class="lbl">정의</div>
+          <div class="val"><em>PF₁ + PF₂ = 2a</em> (두 초점까지 거리의 합 일정)</div>
+        </div>
+        <div class="row">
+          <div class="lbl">접선의 성질</div>
+          <div class="val">접선이 <em>두 선분의 외각</em>을 이등분</div>
+        </div>
+        <div class="row">
+          <div class="lbl">광학적 성질</div>
+          <div class="val">한 초점 → 반사 → 다른 초점</div>
+        </div>
+      </div>
+
+      <div class="curve">
+        <h4>쌍곡선</h4>
+        <div class="row">
+          <div class="lbl">정의</div>
+          <div class="val"><em>|PF₁ − PF₂| = 2a</em> (두 초점까지 거리의 차 일정)</div>
+        </div>
+        <div class="row">
+          <div class="lbl">접선의 성질</div>
+          <div class="val">접선이 <em>두 선분의 내각</em>을 이등분</div>
+        </div>
+        <div class="row">
+          <div class="lbl">광학적 성질</div>
+          <div class="val">한 초점을 향한 빛 → 반사 → 다른 초점에서 온 듯 발산</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 채점 시 유의사항 -->
+  <section>
+    <h2><span class="num">5</span> 채점 시 유의사항</h2>
+
+    <h4 style="font-size:0.88rem; font-weight:700; margin-bottom:6px; color:var(--ink);">차원 D(프롬프트·대화) 채점 시</h4>
+    <ul style="font-size:0.9rem; padding-left:20px;">
+      <li><strong>첫 프롬프트 한 번에 완벽한 결과</strong>가 나왔다면 D는 "보통"으로 보수적으로. 수정 과정이 보이지 않기 때문 — 운인지 실력인지 구별 어려움.</li>
+      <li>대화에서 학생이 <strong>"어디가 왜 잘못됐는지"</strong>를 수학적 언어로 짚고 있는지 확인. "이상해요", "다시 해줘" 식 막연한 표현은 미흡.</li>
+      <li>여러 번의 수정 시도가 보이더라도 <strong>마지막 결과가 의미 있게 개선</strong>되었는지 함께 본다.</li>
+    </ul>
+
+    <h4 style="font-size:0.88rem; font-weight:700; margin:14px 0 6px; color:var(--ink);">차원 C(시뮬) 채점 시</h4>
+    <ul style="font-size:0.9rem; padding-left:20px;">
+      <li>1차시에서 다룬 <strong>의도적 오류 2가지(접선 기준 각도 / 빛 방향 반대)</strong>가 학생 결과물에서 <strong>그대로 재현되지 않았는지</strong> 점검. 재현되었으면 차원 C 한 단계 하향.</li>
+      <li>시뮬에 인터랙티브 요소가 있어도 <strong>"수학적 설명이 살아 있는가"</strong>가 우선. 화려한 UI는 가산점 아님.</li>
+    </ul>
+
+    <h4 style="font-size:0.88rem; font-weight:700; margin:14px 0 6px; color:var(--ink);">포물선 심화를 선택한 학생</h4>
+    <ul style="font-size:0.9rem; padding-left:20px;">
+      <li>1차시 예시 HTML을 단순히 수정만 한 결과물은 차원 D에서 감점. <strong>본인의 프롬프트로 다시 만들었는지</strong> 대화 URL에서 확인.</li>
+      <li>같은 포물선이라도 <strong>설명의 깊이·표현의 명료함</strong>에 따라 우수 판정 가능.</li>
+    </ul>
+
+    <div class="exclude">
+      <div class="lbl">점수에 직접 반영하지 않는 요소</div>
+      <ul>
+        <li>HTML 디자인의 미려함 (색·레이아웃·폰트)</li>
+        <li>코드의 복잡도·기술적 정교함</li>
+        <li>선택한 곡선의 난이도 (포물선/타원/쌍곡선)</li>
+        <li>결과물의 분량 (페이지 수·코드 줄 수)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6. 채점 시트 양식 -->
+  <section>
+    <h2><span class="num">6</span> 채점 시트 양식 <span class="hint">학생 1명당 1장</span></h2>
+
+    <table class="score-sheet">
+      <thead>
+        <tr>
+          <th style="width:35%;">학생 정보</th>
+          <th>기재 사항</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>학년 / 반 / 번호 / 이름</td><td>&nbsp;</td></tr>
+        <tr><td>선택한 곡선</td><td>□ 포물선 &nbsp;&nbsp; □ 타원 &nbsp;&nbsp; □ 쌍곡선</td></tr>
+        <tr><td>제출물</td><td>□ HTML &nbsp;&nbsp; □ Gemini 대화 URL</td></tr>
+      </tbody>
+    </table>
+
+    <table class="score-sheet" style="margin-top:10px;">
+      <thead>
+        <tr>
+          <th style="width:38%;">차원</th>
+          <th class="center" style="width:14%;">우수(3)</th>
+          <th class="center" style="width:14%;">보통(2)</th>
+          <th class="center" style="width:14%;">미흡(1)</th>
+          <th class="center" style="width:20%;">점수</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A. 수학적 정의의 명시·정확성</td>
+          <td class="center">□</td><td class="center">□</td><td class="center">□</td>
+          <td class="score-cell">&nbsp;</td>
+        </tr>
+        <tr>
+          <td>B. 추론과 연결</td>
+          <td class="center">□</td><td class="center">□</td><td class="center">□</td>
+          <td class="score-cell">&nbsp;</td>
+        </tr>
+        <tr>
+          <td>C. 시뮬레이션 표현</td>
+          <td class="center">□</td><td class="center">□</td><td class="center">□</td>
+          <td class="score-cell">&nbsp;</td>
+        </tr>
+        <tr>
+          <td>D. 프롬프트와 대화 흐름</td>
+          <td class="center">□</td><td class="center">□</td><td class="center">□</td>
+          <td class="score-cell">&nbsp;</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4" style="text-align:right;">총점 / 12</td>
+          <td class="score-cell">&nbsp;</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <table class="score-sheet" style="margin-top:10px;">
+      <thead>
+        <tr><th>피드백 메모 (학생에게 돌려줄 한 줄 코멘트)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="height:60px;">&nbsp;</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</body>
+</html>
