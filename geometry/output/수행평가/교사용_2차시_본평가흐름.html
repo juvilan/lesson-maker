@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>교사용 2차시 본평가 흐름 · 이차곡선의 광학적 성질 탐구하기</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --ink: #0f172a;
+      --ink-2: #475569;
+      --ink-3: #94a3b8;
+      --line: #e2e8f0;
+      --line-soft: #f1f5f9;
+      --accent: #2D6B66;
+      --accent-soft: #e6f4f2;
+      --warn: #b45309;
+      --warn-soft: #fef3c7;
+      --error: #b91c1c;
+      --error-soft: #fee2e2;
+      --info: #1d4ed8;
+      --info-soft: #dbeafe;
+      --eval: #7c2d12;
+      --eval-soft: #fed7aa;
+    }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      padding: 20px 18px 80px;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    /* 헤더 */
+    .head { margin-bottom: 20px; }
+    .head .eyebrow {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .head h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      color: var(--ink);
+    }
+    .head .meta {
+      font-size: 0.85rem;
+      color: var(--ink-3);
+      margin-top: 4px;
+    }
+    .head .badge-eval {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 3px 10px;
+      background: var(--eval-soft);
+      color: var(--eval);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    /* 발문 강조 박스 */
+    .quest {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 14px 0 22px;
+    }
+    .quest .tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .quest .text {
+      font-size: 1.05rem;
+      line-height: 1.55;
+      color: var(--ink);
+      font-weight: 500;
+    }
+    .quest .text em {
+      font-style: normal;
+      background: var(--accent-soft);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    /* 평가 환경 강조 박스 (2차시 전용) */
+    .eval-frame {
+      background: linear-gradient(to right, var(--eval-soft), #fef3c7);
+      border-left: 4px solid var(--eval);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 0 0 22px;
+    }
+    .eval-frame .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--eval);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .eval-frame .text {
+      font-size: 0.95rem;
+      color: #5a1a0a;
+      line-height: 1.6;
+    }
+    .eval-frame .text strong { color: var(--eval); }
+
+    /* 1차시와의 대비 */
+    .contrast {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    @media (min-width: 640px) {
+      .contrast { grid-template-columns: 1fr 1fr; }
+    }
+    .ctr-card {
+      padding: 12px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+    .ctr-card .lvl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .ctr-prev {
+      background: var(--info-soft);
+      color: #1e3a8a;
+    }
+    .ctr-prev .lvl { color: var(--info); }
+    .ctr-now {
+      background: var(--eval-soft);
+      color: #5a1a0a;
+    }
+    .ctr-now .lvl { color: var(--eval); }
+
+    /* 섹션 */
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    section > h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    section > h2 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    section > h2 .hint {
+      font-size: 0.75rem;
+      color: var(--ink-3);
+      font-weight: 500;
+      margin-left: auto;
+    }
+    section p { font-size: 0.92rem; color: var(--ink-2); margin-bottom: 6px; }
+    section p:last-child { margin-bottom: 0; }
+    section strong { color: var(--ink); font-weight: 600; }
+
+    /* 시간표 박스 */
+    .timebox {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin: 10px 0;
+      background: #fafbfc;
+    }
+    .timebox-head {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed var(--line);
+    }
+    .timebox-head .time {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      padding: 2px 8px;
+      border-radius: 10px;
+      letter-spacing: 0.02em;
+    }
+    .timebox-head .stage {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .timebox-head .tagline {
+      font-size: 0.82rem;
+      color: var(--ink-3);
+      margin-left: auto;
+    }
+    .timebox h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 10px 0 4px;
+    }
+    .timebox h4:first-of-type { margin-top: 0; }
+    .timebox ul, .timebox ol {
+      margin: 4px 0 6px 8px;
+      padding-left: 18px;
+      font-size: 0.9rem;
+      color: var(--ink);
+    }
+    .timebox ul li, .timebox ol li { margin-bottom: 4px; line-height: 1.55; }
+    .timebox p { font-size: 0.9rem; color: var(--ink); margin-bottom: 4px; }
+
+    /* 발문 인용 */
+    .say {
+      background: #fff;
+      border-left: 3px solid var(--accent);
+      padding: 8px 12px;
+      margin: 6px 0;
+      font-size: 0.92rem;
+      color: var(--ink);
+      font-style: italic;
+      border-radius: 0 4px 4px 0;
+    }
+    .say::before { content: "💬 "; font-style: normal; }
+
+    /* 금지 사항 박스 */
+    .forbid {
+      background: var(--error-soft);
+      border-left: 3px solid var(--error);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 12px;
+      margin: 8px 0;
+      font-size: 0.88rem;
+      color: #7f1d1d;
+    }
+    .forbid .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--error);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .forbid ul { margin: 4px 0 0 8px; padding-left: 18px; }
+    .forbid ul li { margin-bottom: 3px; line-height: 1.55; color: var(--ink); }
+    .forbid strong { color: #7f1d1d; }
+
+    /* 허용·권장 박스 */
+    .allow {
+      background: var(--info-soft);
+      border-left: 3px solid var(--info);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 12px;
+      margin: 8px 0;
+      font-size: 0.88rem;
+      color: #1e3a8a;
+    }
+    .allow .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--info);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .allow ul { margin: 4px 0 0 8px; padding-left: 18px; }
+    .allow ul li { margin-bottom: 3px; line-height: 1.55; color: var(--ink); }
+    .allow strong { color: #1e3a8a; }
+
+    /* 메모/유의 박스 */
+    .note {
+      background: var(--warn-soft);
+      border-left: 3px solid var(--warn);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 12px;
+      margin: 8px 0;
+      font-size: 0.88rem;
+      color: #78350f;
+      line-height: 1.55;
+    }
+    .note .lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--warn);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .note strong { color: #78350f; }
+
+    /* 체크리스트 */
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin-top: 6px;
+    }
+    .checklist li {
+      padding: 8px 10px 8px 32px;
+      position: relative;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: var(--ink);
+      background: var(--line-soft);
+      border-radius: 4px;
+      margin-bottom: 6px;
+    }
+    .checklist li::before {
+      content: "☐";
+      position: absolute;
+      left: 10px;
+      top: 7px;
+      font-size: 1.1rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .checklist li strong { color: var(--ink); }
+
+    /* 교사 역할 vs 학생 활동 */
+    .roles {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media (min-width: 720px) {
+      .roles { grid-template-columns: 1fr 1fr; }
+    }
+    .role {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px 14px;
+      background: #fff;
+    }
+    .role h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px dashed var(--line);
+    }
+    .role ul {
+      margin: 4px 0 0 8px;
+      padding-left: 16px;
+      font-size: 0.88rem;
+    }
+    .role ul li { margin-bottom: 4px; line-height: 1.55; color: var(--ink); }
+  </style>
+</head>
+<body>
+
+  <header class="head">
+    <div class="eyebrow">기하 · 수행평가</div>
+    <h1>이차곡선의 광학적 성질 탐구하기</h1>
+    <div class="meta">교사용 · 2차시 본평가 흐름</div>
+    <div class="badge-eval">● 평가 시간 · 채점 진행</div>
+  </header>
+
+  <!-- 발문 -->
+  <div class="quest">
+    <div class="tag">평가 과제 (학생에게 제시할 발문)</div>
+    <div class="text">
+      <em>선택한 이차곡선</em>의 <em>수학적 정의와 성질</em>로부터 <em>반사법칙과 맞아떨어지는 광학적 성질</em>을 <em>추론</em>하고, <em>그 이유</em>를 <em>시뮬레이션으로 설명</em>하시오.
+    </div>
+  </div>
+
+  <!-- 평가 환경 안내 -->
+  <div class="eval-frame">
+    <div class="lbl">⚠ 평가 환경 — 1차시와 본질적으로 다른 점</div>
+    <div class="text">
+      2차시는 <strong>본평가가 진행되는 시험 시간</strong>입니다. 학생 단독 수행, 모둠 협력·공유 발표 없음, 교사는 답을 주지 않습니다. 50분 안에 학생이 <strong>처음부터 끝까지 자기 작품</strong>을 완성하고 제출해야 합니다.
+    </div>
+  </div>
+
+  <!-- 1. 1차시와의 차이 -->
+  <section>
+    <h2><span class="num">1</span> 1차시와의 결정적 차이 <span class="hint">교사·학생 모두 인지해야 함</span></h2>
+
+    <div class="contrast">
+      <div class="ctr-card ctr-prev">
+        <div class="lvl">1차시 (지난 시간)</div>
+        <strong>워크숍.</strong> 모둠 협력 가능, 의도적 오류 예시 함께 분석, 1~2 모둠 발표·공유. 교사는 함께 발견하는 진행자.
+      </div>
+      <div class="ctr-card ctr-now">
+        <div class="lvl">2차시 (오늘 · 본평가)</div>
+        <strong>시험.</strong> 개인 단독 수행, 학생 간 공유 금지, 발표 없음. 교사는 환경 관리·시간 안내·공정성 유지. 채점 시작.
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 평가 환경 설정 (수업 전) -->
+  <section>
+    <h2><span class="num">2</span> 수업 전 준비 <span class="hint">시작 5분 전까지 점검</span></h2>
+    <ul class="checklist">
+      <li>학생 디벗 태블릿 충전 상태 + 크롬 브라우저 정상 작동</li>
+      <li>Gemini 로그인 상태 — 학생 본인 계정으로 로그인했는지</li>
+      <li>제출 채널 (구글 드라이브 폴더 / 클래스룸 / 패들렛 등) 활성화 + 학생 접근 권한 확인</li>
+      <li>학생용 프롬프트 가이드를 태블릿에서 다시 열 수 있도록 안내 준비 (1차시 때 본 것)</li>
+      <li>채점 시트(루브릭 문서의 6번 양식) 학생 수만큼 출력 또는 디지털 양식 준비</li>
+      <li><strong>1차시 예시 HTML은 학생에게 더 이상 배포하지 않음</strong> — 1차시 때 받은 사본도 복사·재활용 금지임을 알릴 예정</li>
+    </ul>
+  </section>
+
+  <!-- 3. 2차시 흐름 -->
+  <section>
+    <h2><span class="num">3</span> 2차시 흐름 <span class="hint">총 50분 · 본평가</span></h2>
+
+    <!-- 도입 -->
+    <div class="timebox">
+      <div class="timebox-head">
+        <span class="time">0~5분</span>
+        <span class="stage">도입 — 평가 안내와 곡선 선택 확정</span>
+        <span class="tagline">5분</span>
+      </div>
+
+      <h4>교사 안내</h4>
+      <ul>
+        <li>발문 다시 한 번 (강조 박스 그대로 낭독).</li>
+        <li>"오늘은 평가 시간이다. 모둠 활동·발표 없이 각자 작업한다." 명시.</li>
+        <li><strong>곡선 선택 안내</strong>: "1차시는 포물선으로 고정이었지만, <strong>오늘은 세 곡선(포물선·타원·쌍곡선) 중 자유 선택</strong>이다. 지금 이 자리에서 최종 확정하고, 시작 후에는 변경 불가."</li>
+        <li>제출 방법 3가지 환기: ① HTML 파일 / ② 첫 메시지 인적사항 / ③ 대화 공유 URL.</li>
+        <li>시간 관리: "40분에 제출 안내, 50분에 일괄 마감".</li>
+      </ul>
+
+      <div class="forbid">
+        <div class="lbl">금지 사항 (시작 전 학생에게 분명히)</div>
+        <ul>
+          <li><strong>1차시 예시 HTML을 그대로 또는 일부 복사해서 제출 금지</strong> — 본인 프롬프트로 처음부터 만들어야 함.</li>
+          <li><strong>다른 학생의 화면·결과물·프롬프트를 보거나 공유 금지</strong>.</li>
+          <li><strong>외부 인터넷 검색을 통한 기존 시뮬레이션 복제 금지</strong> — Gemini 대화만 허용.</li>
+          <li><strong>친구나 외부에 도움 요청 금지</strong> (메시지·통화 포함).</li>
+        </ul>
+      </div>
+
+      <div class="allow">
+        <div class="lbl">허용되는 것</div>
+        <ul>
+          <li>학생용 프롬프트 가이드(1차시 때 본 그 문서) 다시 열어보기.</li>
+          <li>교과서·자신의 노트 참조 (수학적 정의·성질 확인용).</li>
+          <li>Gemini와의 <strong>여러 차례 수정 대화</strong> — 완벽한 첫 시도보다 다듬는 과정이 중요.</li>
+        </ul>
+      </div>
+
+      <div class="say">"오늘은 채점이 시작되는 시간입니다. 1차시처럼 모둠으로 얘기하지 않고, 각자의 작품을 만듭니다. 곡선은 지금 이 순간에 최종 결정하세요."</div>
+    </div>
+
+    <!-- 개인 추론 정리 -->
+    <div class="timebox">
+      <div class="timebox-head">
+        <span class="time">5~12분</span>
+        <span class="stage">개인 추론 정리 — Gemini를 열기 전 단계</span>
+        <span class="tagline">7분</span>
+      </div>
+
+      <h4>학생 활동 (각자 노트 또는 디지털 메모)</h4>
+      <ul>
+        <li>선택한 곡선의 <strong>수학적 정의</strong>를 수식과 언어로 적기.</li>
+        <li>접선의 이등분 성질을 떠올리기 (포물선: ∠FPH 이등분 / 타원: 외각 / 쌍곡선: 내각).</li>
+        <li>예상되는 <strong>광학적 성질</strong>을 추론 — 어떤 빛이 어디로 가는가.</li>
+        <li>시뮬에 들어가야 할 <strong>표시 요소</strong> 목록화 (접선·법선·각도·정의 보조선 등).</li>
+      </ul>
+
+      <h4>교사 행동</h4>
+      <ul>
+        <li>조용히 순회. <strong>설명·지도 금지</strong>. 학생이 멍하니 있으면 학생용 가이드의 "직접 써야 할 4가지" 항목을 손으로 짚어주는 정도까지만.</li>
+        <li>"답을 알려달라"는 요청은 정중히 거절: "그건 평가의 핵심이라 알려줄 수 없어요. 가이드 다시 한 번 보세요."</li>
+        <li>학생들 사이의 대화가 발생하면 즉시 분리.</li>
+      </ul>
+
+      <div class="note">
+        <div class="lbl">이 단계의 의미</div>
+        Gemini를 켜자마자 막연하게 "타원의 광학적 성질을 보여줘"라고 적는 학생을 막기 위함. <strong>추론을 먼저 정리한 학생은 프롬프트의 질이 다르다</strong>. 차원 D(프롬프트·대화)와 차원 B(추론)에 직접 영향.
+      </div>
+    </div>
+
+    <!-- 프롬프트·생성·다듬기 -->
+    <div class="timebox">
+      <div class="timebox-head">
+        <span class="time">12~40분</span>
+        <span class="stage">프롬프트 작성 · 시뮬 생성 · 다듬기</span>
+        <span class="tagline">28분</span>
+      </div>
+
+      <h4>학생 활동</h4>
+      <ol>
+        <li>Gemini 새 대화 시작 — <strong>첫 메시지에 인적사항</strong>(학년·반·번호·이름) 기재.</li>
+        <li>준비한 추론을 바탕으로 <strong>첫 프롬프트</strong> 작성 (고정 문구 + 4가지 직접 쓸 부분).</li>
+        <li>결과 HTML 확인 → 다운로드하여 브라우저에서 직접 작동 점검.</li>
+        <li>오류·부족함 발견 → <strong>수정 프롬프트</strong>로 다시 요청 (반복 가능).</li>
+        <li>30분 시점에 "이쯤이면 제출해도 될까" 자기 점검.</li>
+      </ol>
+
+      <h4>교사 행동</h4>
+      <ul>
+        <li><strong>순회 + 시간 안내</strong>가 주 역할. 25분 / 35분 시점에 남은 시간 공지.</li>
+        <li>기술적 문제(태블릿 멈춤, 로그인 오류, Gemini 응답 지연 등)만 직접 해결.</li>
+        <li>수학적 내용·추론·프롬프트 작성에 대한 <strong>직접 지도는 하지 않음</strong>. "가이드 다시 보세요" 정도까지만.</li>
+        <li>1차시 예시를 화면에 띄워놓고 그대로 베끼는 학생 발견 시 <strong>주의 + 채점 시 차원 D 감점 명시</strong>.</li>
+        <li>학생 간 화면 엿보기·대화 발견 시 즉시 분리·기록.</li>
+      </ul>
+
+      <div class="say">"막힌다고 손 들지 마세요. 가이드가 답을 알려주는 게 아니라 방향을 잡아줍니다. 한 번 더 읽어보세요."</div>
+
+      <div class="note">
+        <div class="lbl">시간 관리 팁</div>
+        12~25분: 첫 프롬프트와 1차 결과. 25~35분: 수정·다듬기. 35~40분: 최종 점검과 제출 준비. <strong>15분 안에 완벽한 결과가 나온 학생</strong>은 의심해볼 만함 — 1차시 예시 복사 가능성, 또는 너무 단순한 결과물.
+      </div>
+    </div>
+
+    <!-- 제출 -->
+    <div class="timebox">
+      <div class="timebox-head">
+        <span class="time">40~50분</span>
+        <span class="stage">제출 — 마지막 점검과 마감</span>
+        <span class="tagline">10분</span>
+      </div>
+
+      <h4>학생 활동</h4>
+      <ol>
+        <li>HTML 파일 다운로드 (파일명에 본인 정보 포함 권장: <code>2-3-15_홍길동_타원.html</code> 등 — 학교 양식 따름).</li>
+        <li>Gemini 대화의 <strong>공유 링크</strong> 생성 → URL 복사.</li>
+        <li>제출 채널에 HTML 파일 + 공유 URL 함께 업로드.</li>
+        <li>제출 완료 확인 → 자리 정리.</li>
+      </ol>
+
+      <h4>교사 행동</h4>
+      <ul>
+        <li>40분 시점에 "이제 제출 단계입니다" 공지.</li>
+        <li>제출 채널에 파일이 들어오는지 실시간 확인.</li>
+        <li>45분 / 48분 시점에 잔여 시간 카운트다운.</li>
+        <li>50분: 일괄 마감. 미제출 학생 별도 메모.</li>
+      </ul>
+
+      <div class="say">"파일 이름에 본인 정보가 들어가 있는지 한 번만 더 확인하세요. 대화 공유 URL도 빠뜨리지 마세요."</div>
+    </div>
+  </section>
+
+  <!-- 4. 교사 역할 vs 학생 활동 -->
+  <section>
+    <h2><span class="num">4</span> 교사 역할 vs 학생 활동 <span class="hint">한눈에 정리</span></h2>
+    <div class="roles">
+      <div class="role">
+        <h4>교사가 할 일</h4>
+        <ul>
+          <li>평가 환경 유지 (조용함·집중·공정성)</li>
+          <li>시간 안내 (25분·35분·40분·45분 시점)</li>
+          <li>기술적 문제 즉각 해결 (태블릿·네트워크·Gemini)</li>
+          <li>금지 행위 발견 시 주의·분리·기록</li>
+          <li>제출 채널 실시간 모니터링</li>
+          <li>가이드 위치 안내 (열어볼 수 있도록만)</li>
+        </ul>
+      </div>
+      <div class="role">
+        <h4>교사가 하지 않을 일</h4>
+        <ul>
+          <li>수학적 내용·정의·성질에 대한 설명</li>
+          <li>프롬프트 어떻게 쓸지 직접 지도</li>
+          <li>시뮬에 무엇을 넣을지 알려주기</li>
+          <li>Gemini 결과의 오류 지적해주기</li>
+          <li>학생끼리 의논하도록 유도</li>
+          <li>특정 학생에게만 시간 연장</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 예상 상황 대응 -->
+  <section>
+    <h2><span class="num">5</span> 예상 상황과 대응</h2>
+
+    <h4 style="font-size:0.88rem; font-weight:700; margin-bottom:6px; color:var(--ink);">"막혀서 못 하겠어요"</h4>
+    <p>"답을 알려줄 수는 없어요. 가이드의 4가지 항목 중 어디서 막혔는지만 말해보세요." → 학생이 "정의를 모르겠어요"라고 답하면 교과서 페이지만 안내. 추론 자체는 본인이 해야 함을 명확히.</p>
+
+    <h4 style="font-size:0.88rem; font-weight:700; margin:14px 0 6px; color:var(--ink);">"Gemini가 자꾸 이상한 걸 만들어요"</h4>
+    <p>"1차시에서 했던 것처럼 어디가 잘못됐는지 적어서 다시 요청해보세요." → 수정 능력은 차원 D 평가의 일부.</p>
+
+    <h4 style="font-size:0.88rem; font-weight:700; margin:14px 0 6px; color:var(--ink);">"시간이 부족해요"</h4>
+    <p>원칙적으로 시간 연장 없음. 학생에게 "지금까지 작업한 것을 제출하세요. 미완성도 평가 대상이며 점수가 차등 적용됩니다." 안내. 형평성 유지가 우선.</p>
+
+    <h4 style="font-size:0.88rem; font-weight:700; margin:14px 0 6px; color:var(--ink);">"태블릿 문제 / Gemini 응답 지연"</h4>
+    <p>실제 기술적 문제로 확인되면 해당 학생만큼의 시간을 별도 기록하고, 수업 후 보충 시간 부여 검토. 전반적 네트워크 장애 시 일괄 연장.</p>
+
+    <h4 style="font-size:0.88rem; font-weight:700; margin:14px 0 6px; color:var(--ink);">"1차시 예시를 그대로 복사한 흔적 발견"</h4>
+    <p>대화 URL을 채점 시 확인. 학생 본인의 추론·프롬프트가 보이지 않으면 차원 D 미흡 처리. 명백한 복사는 별도 조치.</p>
+
+    <h4 style="font-size:0.88rem; font-weight:700; margin:14px 0 6px; color:var(--ink);">"옆 학생과 얘기하거나 화면 들여다봄"</h4>
+    <p>1회: 구두 주의. 2회: 자리 분리. 반복: 평가 부정행위로 기록·별도 조치.</p>
+  </section>
+
+  <!-- 6. 평가 종료 후 -->
+  <section>
+    <h2><span class="num">6</span> 평가 종료 후</h2>
+    <ul style="font-size:0.9rem; padding-left:20px;">
+      <li>미제출·미완성 학생 명단 별도 정리 → 보충 시간 또는 사후 처리 검토.</li>
+      <li>모든 제출물(HTML + 대화 URL) <strong>1주일 내</strong> 채점 완료를 학생들에게 약속.</li>
+      <li>채점은 별도 시간에 <strong>교사용 채점 기준 루브릭</strong> 문서를 기준으로 진행 (학생 1명당 채점 시트 1장).</li>
+      <li>피드백은 학생용 한 줄 코멘트 + 차원별 점수 형태로 돌려줌. 모범 결과물은 차후 수업에 예시로 활용 가능 (학생 동의 시).</li>
+    </ul>
+
+    <div class="note" style="margin-top:10px;">
+      <div class="lbl">루브릭 연결</div>
+      채점은 <strong>4차원 × 3단계 = 총 12점</strong> 루브릭 기준. 자세한 채점 가이드는 별도 문서 "교사용 채점 기준(루브릭)" 참조. 본 문서와 분리되어 있는 이유는 채점 기준이 학생에게 공개되지 않기 때문.
+    </div>
+  </section>
+
+</body>
+</html>

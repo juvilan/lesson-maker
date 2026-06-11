@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>두 주변 자료로 전체 구매 패턴 예측하기</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page { size: A4; margin: 13mm 14mm 15mm 14mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 10.5pt; line-height: 1.6; color: #1a1a1a; background: #fff;
+    }
+    @media screen {
+      body { background: #f0f0f0; }
+      .ws-page { box-shadow: 0 2px 10px rgba(0,0,0,.15); margin: 10mm auto; }
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 10pt; background: #fff; }
+      .ws-page { box-shadow: none !important; margin: 0 !important; border: none !important; }
+    }
+
+    .ws-page {
+      width: 210mm; height: 297mm;
+      padding: 13mm 14mm 15mm 14mm;
+      background: #fff; page-break-after: always;
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .ws-page:last-child { page-break-after: auto; }
+
+    .ws-header { border-bottom: 2.5px solid #1a1a1a; padding-bottom: 6px; margin-bottom: 8px; flex-shrink: 0; }
+    .ws-header-top { display: flex; justify-content: space-between; align-items: flex-end; }
+    .ws-title { font-size: 12pt; font-weight: 700; letter-spacing: -0.3px; }
+    .ws-meta { font-size: 8.5pt; color: #666; }
+
+    .student-info {
+      display: flex; gap: 18px; margin-bottom: 8px; padding-bottom: 6px;
+      border-bottom: 1px solid #ddd; flex-shrink: 0;
+    }
+    .student-field { display: flex; align-items: center; gap: 5px; font-size: 9.5pt; }
+    .student-field label { font-weight: 600; white-space: nowrap; color: #444; }
+    .field-line { width: 70px; border-bottom: 1px solid #999; height: 18px; }
+
+    .activity-box {
+      border: 1.5px solid #555; border-radius: 4px;
+      padding: 9px 12px; background: #fafafa;
+      flex: 1; display: flex; flex-direction: column;
+    }
+    .activity-label {
+      display: inline-block; background: #1a1a1a; color: #fff;
+      font-size: 9pt; font-weight: 700; padding: 2px 9px; border-radius: 2px; margin-bottom: 4px;
+    }
+    .activity-title { font-size: 11pt; font-weight: 700; margin-bottom: 6px; }
+
+    /* 표 공통 */
+    .ws-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+    .ws-table th { background: #e4e4e4; border: 1px solid #b0b0b0; padding: 3px 5px; text-align: center; font-weight: 600; }
+    .ws-table td { border: 1px solid #b0b0b0; padding: 3px 5px; text-align: center; }
+    .ws-table td.left { text-align: left; font-weight: 500; padding-left: 6px; }
+    .ws-table td.blank { background: #fff; min-width: 22px; }
+    .ws-table th.total, .ws-table td.total { background: #ebebeb; font-weight: 600; }
+    /* 주어진 자료 셀 */
+    .ws-table td.gv { background: #e8f5e9; font-weight: 600; }
+    .ws-table td.total.gv { background: #c8e6c9; font-weight: 700; }
+
+    .table-pair { display: flex; gap: 12px; margin: 5px 0; }
+    .table-pair > div { flex: 1; }
+    .table-caption { font-size: 8.5pt; font-weight: 700; color: #444; margin-bottom: 2px; text-align: center; }
+
+    .q-num { font-weight: 700; font-size: 10.5pt; margin-bottom: 3px; }
+    .q-text { font-size: 9pt; line-height: 1.65; }
+    .ans-box { border: 1px dashed #aaa; border-radius: 3px; }
+    .section-div { border: none; border-top: 1px solid #ddd; margin: 7px 0; }
+
+    /* 설명 박스 */
+    .insight-box {
+      background: #fff8e1; border-left: 3px solid #f9a825;
+      padding: 5px 9px; font-size: 8.5pt; color: #4a3000;
+      margin: 4px 0; line-height: 1.65; border-radius: 0 3px 3px 0;
+    }
+    .method-box {
+      background: #e3f2fd; border-left: 3px solid #1565c0;
+      padding: 5px 9px; font-size: 8.5pt; color: #0d2d5e;
+      margin: 4px 0; line-height: 1.8; border-radius: 0 3px 3px 0;
+    }
+    .find-box {
+      background: #fce4ec; border-left: 3px solid #c62828;
+      padding: 5px 9px; font-size: 8.5pt; color: #3e0000;
+      margin: 4px 0; line-height: 1.65; border-radius: 0 3px 3px 0;
+    }
+
+    /* ❷ 워크드 예시 calc 표 */
+    .calc-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+    .calc-table th { background: #e4e4e4; border: 1px solid #b0b0b0; padding: 3px 6px; text-align: center; font-weight: 600; }
+    .calc-table td { border: 1px solid #b0b0b0; padding: 4px 6px; text-align: center; }
+    .calc-table td.prod { background: #f0f0f0; font-weight: 700; }
+    .calc-table td.ex { background: #e8f5e9; font-weight: 700; color: #1b5e20; }
+    .calc-table td.ex-result { background: #c8e6c9; font-weight: 700; color: #1b5e20; }
+
+    /* ❸ 예측 교차표 */
+    .pred-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+    .pred-table th { background: #e4e4e4; border: 1px solid #b0b0b0; padding: 3px 6px; text-align: center; font-weight: 600; }
+    .pred-table td { border: 1px solid #b0b0b0; padding: 4px 6px; text-align: center; }
+    .pred-table td.grp { background: #f0f0f0; font-weight: 600; text-align: left; padding-left: 6px; }
+    .pred-table td.blank { background: #fff; height: 23px; }
+    .pred-table td.ex { background: #e8f5e9; font-weight: 700; color: #1b5e20; }
+    .pred-table th.total, .pred-table td.total { background: #ebebeb; font-weight: 600; }
+    .pred-table td.total.blank { background: #f5f5f5; }
+
+    .page-number {
+      text-align: center; font-size: 8.5pt; color: #aaa;
+      margin-top: 6px; padding-top: 4px; border-top: 1px solid #eee; flex-shrink: 0;
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+    };
+    window.safeTypeset = function(el) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise)
+        return MathJax.typesetPromise(el ? [].concat(el) : undefined);
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+          async onload="safeTypeset()"></script>
+</head>
+<body>
+
+<!-- ═══════════ PAGE 1 (앞면) ═══════════ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">활동 학습지 &middot; 두 주변 자료로 전체 구매 패턴 예측하기</span>
+      <span class="ws-meta">인공지능수학 &nbsp;|&nbsp; Ⅲ-1. 자료의 분석과 예측</span>
+    </div>
+  </div>
+
+  <div class="student-info">
+    <div class="student-field"><label>학번</label><div class="field-line"></div></div>
+    <div class="student-field"><label>이름</label><div class="field-line"></div></div>
+    <div class="student-field"><label>날짜</label><div class="field-line"></div></div>
+  </div>
+
+  <div class="activity-box">
+    <div class="activity-label">스스로 활동</div>
+    <div class="activity-title">🛒 두 주변 자료만 주어졌을 때, 전체 구매 패턴을 예측할 수 있을까?</div>
+
+    <!-- 주어진 두 주변 표 -->
+    <div style="font-size:9pt; margin-bottom:5px; color:#444;">
+      온라인 쇼핑몰에서 상품 A·B·C를 구매한 고등학생 <strong>180명</strong>의 자료를
+      학년별·성별로 정리한 두 표가 아래와 같이 주어져 있다.
+    </div>
+    <div class="table-pair">
+      <div>
+        <div class="table-caption">〔 학년별 상품 구매 〕 (단위: 명)</div>
+        <table class="ws-table">
+          <thead><tr><th>학년</th><th>A</th><th>B</th><th>C</th><th class="total">합계</th></tr></thead>
+          <tbody>
+            <tr><td>1학년</td><td class="gv">18</td><td class="gv">12</td><td class="gv">6</td><td class="total gv">36</td></tr>
+            <tr><td>2학년</td><td class="gv">72</td><td class="gv">48</td><td class="gv">24</td><td class="total gv">144</td></tr>
+            <tr><td class="total">합계</td><td class="total gv">90</td><td class="total gv">60</td><td class="total gv">30</td><td class="total gv">180</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="table-caption">〔 성별 상품 구매 〕 (단위: 명)</div>
+        <table class="ws-table">
+          <thead><tr><th>성별</th><th>A</th><th>B</th><th>C</th><th class="total">합계</th></tr></thead>
+          <tbody>
+            <tr><td>남</td><td class="gv">45</td><td class="gv">20</td><td class="gv">20</td><td class="total gv">85</td></tr>
+            <tr><td>여</td><td class="gv">45</td><td class="gv">40</td><td class="gv">10</td><td class="total gv">95</td></tr>
+            <tr><td class="total">합계</td><td class="total gv">90</td><td class="total gv">60</td><td class="total gv">30</td><td class="total gv">180</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❶ 직접 추출의 한계 -->
+    <div style="margin-bottom:8px;">
+      <div class="q-num">❶ &nbsp;1학년 여학생 자료를 직접 보면?</div>
+      <div class="q-text" style="margin-bottom:4px;">
+        실측 자료에서 1학년 여학생 <strong>6명</strong>을 직접 추출하면 아래와 같다.
+      </div>
+      <table class="ws-table" style="width:auto; margin-bottom:5px;">
+        <thead>
+          <tr>
+            <th style="min-width:58px;">상품</th>
+            <th style="min-width:46px;">A</th>
+            <th style="min-width:46px;">B</th>
+            <th style="min-width:46px;">C</th>
+            <th class="total" style="min-width:46px;">합계</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>인원(명)</td>
+            <td>2</td><td>2</td><td>2</td>
+            <td class="total">6</td>
+          </tr>
+          <tr>
+            <td>확률</td>
+            <td>$\dfrac{1}{3}$</td>
+            <td>$\dfrac{1}{3}$</td>
+            <td>$\dfrac{1}{3}$</td>
+            <td class="total">1</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="insight-box">
+        ⚠️ &nbsp;A, B, C의 확률이 모두 $\dfrac{1}{3}$으로 <strong>완전히 같습니다 → 예측 불가능!</strong>
+        &nbsp;이것은 1학년 여학생이 <strong>6명</strong>뿐이라 표본이 너무 적기 때문입니다.<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;그런데 위의 두 주변 표에는 <strong>180명 전체</strong>의 정보가 담겨 있습니다.
+        이걸 활용하면 더 의미 있는 예측이 가능하지 않을까요?
+      </div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❷ 독립 가정 워크드 예시 -->
+    <div>
+      <div class="q-num">❷ &nbsp;주변 자료 + 독립 가정으로 예측 — 1학년 여학생은 어떤 상품을 살까?</div>
+      <div class="method-box">
+        💡 <strong>방법</strong>: 학년과 성별이 서로 독립이라 가정하면,
+        각 상품을 선택할 <em>비례값</em> &nbsp;$P(\text{상품}) \times P(\text{1학년}|\text{상품}) \times P(\text{여}|\text{상품})$
+        을 비교하여 예측할 수 있다.
+        (세 조건부 확률은 위 두 주변 표에서 바로 구할 수 있다.)
+      </div>
+
+      <table class="calc-table" style="margin-top:5px;">
+        <thead>
+          <tr>
+            <th style="width:42px;">상품</th>
+            <th>$P(\text{상품})$</th>
+            <th>$P(\text{1학년}|\text{상품})$</th>
+            <th>$P(\text{여}|\text{상품})$</th>
+            <th style="min-width:90px; background:#e8f5e9;">세 확률의 곱</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="prod">A</td>
+            <td class="ex">$\dfrac{90}{180}=\dfrac{1}{2}$</td>
+            <td class="ex">$\dfrac{18}{90}=\dfrac{1}{5}$</td>
+            <td class="ex">$\dfrac{45}{90}=\dfrac{1}{2}$</td>
+            <td class="ex-result">$\dfrac{1}{2}\times\dfrac{1}{5}\times\dfrac{1}{2}=\dfrac{1}{20}$</td>
+          </tr>
+          <tr>
+            <td class="prod">B</td>
+            <td class="ex">$\dfrac{60}{180}=\dfrac{1}{3}$</td>
+            <td class="ex">$\dfrac{12}{60}=\dfrac{1}{5}$</td>
+            <td class="ex">$\dfrac{40}{60}=\dfrac{2}{3}$</td>
+            <td class="ex-result">$\dfrac{1}{3}\times\dfrac{1}{5}\times\dfrac{2}{3}=\dfrac{2}{45}$</td>
+          </tr>
+          <tr>
+            <td class="prod">C</td>
+            <td class="ex">$\dfrac{30}{180}=\dfrac{1}{6}$</td>
+            <td class="ex">$\dfrac{6}{30}=\dfrac{1}{5}$</td>
+            <td class="ex">$\dfrac{10}{30}=\dfrac{1}{3}$</td>
+            <td class="ex-result">$\dfrac{1}{6}\times\dfrac{1}{5}\times\dfrac{1}{3}=\dfrac{1}{90}$</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:5px; font-size:9pt; background:#f9f9f9; border:1px solid #ddd; border-radius:3px; padding:5px 10px; line-height:1.9;">
+        통분 (LCM = 180): &nbsp;
+        $\dfrac{1}{20}=\dfrac{9}{180}$ &nbsp;,&nbsp;
+        $\dfrac{2}{45}=\dfrac{8}{180}$ &nbsp;,&nbsp;
+        $\dfrac{1}{90}=\dfrac{2}{180}$
+        &nbsp;&nbsp;→&nbsp;&nbsp; <strong>A : B : C = 9 : 8 : 2</strong>
+        &nbsp;&nbsp;→&nbsp;&nbsp; <strong>상품 A 예측!</strong>
+      </div>
+      <div class="find-box" style="margin-top:5px;">
+        🔍 <strong>발견</strong>: 1학년 여학생을 직접 보면 1/3씩 같았지만,
+        전체 180명의 주변 자료를 활용하면 <strong>A가 더 유력</strong>하다는 결론이 나옵니다.
+        두 표에서 읽어낸 조건부 확률에 &nbsp;$P(\text{1학년}|\text{상품})$이 A·B·C 모두 <strong>1/5로 같다</strong>는 점도 눈여겨보세요.
+        학년보다 <strong>성별</strong> 조건이 예측의 핵심입니다.
+      </div>
+    </div>
+
+  </div>
+  <div class="page-number">- 1 / 2 &nbsp;(앞면) -</div>
+</div>
+
+
+<!-- ═══════════ PAGE 2 (뒷면) ═══════════ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">활동 학습지 &middot; 두 주변 자료로 전체 구매 패턴 예측하기</span>
+      <span class="ws-meta">인공지능수학 &nbsp;|&nbsp; Ⅲ-1. 자료의 분석과 예측</span>
+    </div>
+  </div>
+
+  <div class="activity-box">
+
+    <!-- ❸ 전체 예측 교차표 -->
+    <div style="margin-bottom:10px;">
+      <div class="q-num">❸ &nbsp;독립 가정으로 전체 교차표 예측하기 &nbsp;<span style="font-size:9pt; font-weight:400; color:#555;">(앞면의 두 주변 표를 참고하시오)</span></div>
+
+      <div class="method-box" style="margin-bottom:5px;">
+        💡 <strong>계산식</strong>:
+        &nbsp;예측 인원 &nbsp;$= \text{상품 합계} \times P(\text{학년}|\text{상품}) \times P(\text{성별}|\text{상품})$<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<strong>예시</strong> (1학년 여, 상품 B):
+        &nbsp;$60 \times \dfrac{12}{60} \times \dfrac{40}{60}
+        = 60 \times \dfrac{1}{5} \times \dfrac{2}{3} = 8$ 명
+        &nbsp;&nbsp;← 초록색 셀
+      </div>
+
+      <table class="pred-table">
+        <thead>
+          <tr>
+            <th style="width:70px;">학년·성별</th>
+            <th>상품 A &nbsp;<span style="font-size:8pt; font-weight:400;">(합계 90명)</span></th>
+            <th>상품 B &nbsp;<span style="font-size:8pt; font-weight:400;">(합계 60명)</span></th>
+            <th>상품 C &nbsp;<span style="font-size:8pt; font-weight:400;">(합계 30명)</span></th>
+            <th class="total">합계</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="grp">1학년 남</td>
+            <td class="blank"></td>
+            <td class="blank"></td>
+            <td class="blank"></td>
+            <td class="total blank"></td>
+          </tr>
+          <tr>
+            <td class="grp">1학년 여</td>
+            <td class="blank"></td>
+            <td class="ex">8</td>
+            <td class="blank"></td>
+            <td class="total blank"></td>
+          </tr>
+          <tr>
+            <td class="grp">2학년 남</td>
+            <td class="blank"></td>
+            <td class="blank"></td>
+            <td class="blank"></td>
+            <td class="total blank"></td>
+          </tr>
+          <tr>
+            <td class="grp">2학년 여</td>
+            <td class="blank"></td>
+            <td class="blank"></td>
+            <td class="blank"></td>
+            <td class="total blank"></td>
+          </tr>
+          <tr>
+            <td class="total">합계</td>
+            <td class="total">90</td>
+            <td class="total">60</td>
+            <td class="total">30</td>
+            <td class="total">180</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❹ 실측과 비교 -->
+    <div style="margin-bottom:9px;">
+      <div class="q-num">❹ &nbsp;예측 교차표 vs 실측 자료 비교</div>
+      <div style="font-size:8.5pt; color:#555; margin-bottom:4px;">
+        아래 실측 자료와 ❸에서 완성한 예측 교차표를 비교하시오. (1학년 여학생 행에 주목)
+      </div>
+      <div class="table-pair">
+        <div>
+          <div class="table-caption">〔 실측 자료 〕 (단위: 명)</div>
+          <table class="ws-table" style="font-size:8.5pt;">
+            <thead><tr><th style="width:65px;">학년·성별</th><th>A</th><th>B</th><th>C</th><th class="total">합계</th></tr></thead>
+            <tbody>
+              <tr><td class="left">1학년 남</td><td>16</td><td>10</td><td>4</td><td class="total">30</td></tr>
+              <tr style="background:#fffde7;">
+                <td class="left" style="background:#fffde7;">1학년 여</td>
+                <td>2</td><td>2</td><td>2</td>
+                <td class="total" style="background:#fff3cd;">6</td>
+              </tr>
+              <tr><td class="left">2학년 남</td><td>29</td><td>10</td><td>16</td><td class="total">55</td></tr>
+              <tr><td class="left">2학년 여</td><td>43</td><td>38</td><td>8</td><td class="total">89</td></tr>
+              <tr><td class="total">합계</td><td class="total">90</td><td class="total">60</td><td class="total">30</td><td class="total">180</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:5px; font-size:9pt; justify-content:flex-start;">
+          <div class="insight-box" style="margin:0;">
+            ✅ <strong>열(상품) 합계</strong>는 예측·실측 모두 90·60·30으로 일치한다.<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;독립 가정을 해도 전체 분포는 보존됨을 확인하자.
+          </div>
+          <div style="margin-top:4px;">
+            <div style="font-size:9pt; font-weight:600; margin-bottom:3px;">비교 질문</div>
+            <div style="font-size:8.5pt; line-height:1.7;">
+              ① 1학년 여학생 예측값(A·B·C)과 실측값은 어떻게 다른가?<br>
+              ② 예측에서 행(학년·성별) 합계가 실측과 왜 다를 수 있는가?<br>
+              ③ 어느 그룹의 예측이 실측과 가장 비슷한가?
+            </div>
+          </div>
+          <div class="ans-box" style="flex:1; min-height:28mm; margin-top:3px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❺ 정리 -->
+    <div style="flex:1; display:flex; flex-direction:column;">
+      <div class="q-num">❺ &nbsp;정리 — 이 방법의 의미와 한계</div>
+      <div class="method-box" style="margin-bottom:4px;">
+        ✅ <strong>의미</strong>: 표본이 적어 직접 분석이 어려운 집단도,
+        독립 가정을 통해 <strong>전체 자료를 간접 활용</strong>하면 의미 있는 예측이 가능하다.<br>
+        ⚠️ <strong>한계</strong>: 학년과 성별이 실제로 상관이 있다면 예측과 실측 사이에 오차가 생길 수 있다.
+        실측과 예측의 차이가 클수록 독립 가정이 현실을 잘 반영하지 못한다는 신호다.
+      </div>
+      <div style="font-size:9pt; margin-bottom:3px;">
+        ❹의 비교 결과를 바탕으로, 이 자료에서 독립 가정이 얼마나 유효한지 자신의 언어로 서술하시오.
+      </div>
+      <div class="ans-box" style="flex:1; min-height:28mm;"></div>
+    </div>
+
+  </div>
+  <div class="page-number">- 2 / 2 &nbsp;(뒷면) -</div>
+</div>
+
+</body>
+</html>

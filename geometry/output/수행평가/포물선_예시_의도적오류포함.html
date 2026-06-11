@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>포물선의 광학적 성질 시뮬레이션</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      padding: 20px 16px 40px;
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 880px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    h1 {
+      font-size: 1.5rem;
+      color: #1e40af;
+      text-align: center;
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
+    }
+    .sub {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-bottom: 18px;
+    }
+    .info {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 12px 16px;
+      margin: 14px 0;
+      border-radius: 0 6px 6px 0;
+      color: #1e3a8a;
+      font-size: 0.95rem;
+    }
+    .info p { margin: 3px 0; }
+    .info strong { color: #1e40af; }
+
+    .canvas-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 14px 0;
+    }
+    canvas {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px 18px;
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: #374151;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sw-line {
+      display: inline-block;
+      width: 22px;
+      height: 3px;
+      border-radius: 2px;
+    }
+    .sw-dashed {
+      display: inline-block;
+      width: 22px;
+      border-top: 2px dashed #64748b;
+    }
+    .sw-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .formula {
+      text-align: center;
+      margin-top: 18px;
+      padding: 10px 14px;
+      background: #f3f4f6;
+      border-radius: 6px;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 1rem;
+      color: #1f2937;
+      letter-spacing: 0.02em;
+    }
+    .formula .sep { color: #9ca3af; padding: 0 8px; }
+
+    footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>포물선의 광학적 성질</h1>
+  <div class="sub">평행하게 들어온 빛이 초점으로 모이는 원리</div>
+
+  <div class="info">
+    <p>포물선은 <strong>평행하게 들어오는 빛</strong>을 한 점(<strong>초점 F</strong>)으로 모으는 성질이 있습니다.</p>
+    <p>포물선 위의 한 점에서 그은 <strong>접선</strong>은 입사각과 반사각을 같게 만들어, 빛이 반사 후 초점으로 향합니다.</p>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="cv" width="800" height="500"></canvas>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="sw-line" style="background:#1e40af"></span>포물선</span>
+    <span class="legend-item"><span class="sw-dashed"></span>입사 광선</span>
+    <span class="legend-item"><span class="sw-line" style="background:#16a34a"></span>반사 광선</span>
+    <span class="legend-item"><span class="sw-line" style="background:#f59e0b"></span>접선</span>
+    <span class="legend-item"><span class="sw-dot" style="background:#dc2626"></span>초점 F</span>
+  </div>
+
+  <div class="formula">
+    포물선: y² = 4px
+    <span class="sep">|</span>
+    초점 F(p, 0)
+    <span class="sep">|</span>
+    준선 x = −p
+    <span class="sep">|</span>
+    p = 2
+  </div>
+
+  <footer>Generated simulation — 빛은 입사각=반사각의 원리에 따라 반사됩니다.</footer>
+</div>
+
+<script>
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  // 수학 좌표 ↔ 캔버스 좌표
+  const origin = { x: W * 0.42, y: H / 2 };
+  const unit = 56;
+  const toX = x => origin.x + x * unit;
+  const toY = y => origin.y - y * unit;
+
+  const p = 2;
+  const F = { x: p, y: 0 };
+
+  function drawAxes() {
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, origin.y);
+    ctx.lineTo(W, origin.y);
+    ctx.moveTo(origin.x, 0);
+    ctx.lineTo(origin.x, H);
+    ctx.stroke();
+  }
+
+  function drawDirectrix() {
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(toX(-p), 30);
+    ctx.lineTo(toX(-p), H - 30);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '12px sans-serif';
+    ctx.fillText('준선 x = −p', toX(-p) - 70, 24);
+  }
+
+  function drawParabola() {
+    ctx.strokeStyle = '#1e40af';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    let first = true;
+    for (let y = -3.6; y <= 3.6; y += 0.015) {
+      const x = (y * y) / (4 * p);
+      const px = toX(x), py = toY(y);
+      if (first) { ctx.moveTo(px, py); first = false; }
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+
+  function drawFocus() {
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath();
+    ctx.arc(toX(F.x), toY(F.y), 5.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 15px sans-serif';
+    ctx.fillText('F', toX(F.x) + 10, toY(F.y) + 5);
+  }
+
+  function arrowhead(x1, y1, x2, y2, color, size) {
+    size = size || 7.5;
+    const ang = Math.atan2(y2 - y1, x2 - x1);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - size * Math.cos(ang - 0.4), y2 - size * Math.sin(ang - 0.4));
+    ctx.lineTo(x2 - size * Math.cos(ang + 0.4), y2 - size * Math.sin(ang + 0.4));
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawAngleArc(cx, cy, r, a1, a2) {
+    let diff = a2 - a1;
+    while (diff > Math.PI) diff -= 2 * Math.PI;
+    while (diff < -Math.PI) diff += 2 * Math.PI;
+    ctx.beginPath();
+    if (diff > 0) ctx.arc(cx, cy, r, a1, a2);
+    else ctx.arc(cx, cy, r, a2, a1);
+    ctx.stroke();
+  }
+
+  function angleDiff(a, b) {
+    let d = a - b;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d < -Math.PI) d += 2 * Math.PI;
+    return Math.abs(d);
+  }
+
+  function drawRay(yVal) {
+    // 포물선 위의 점 P
+    const Px = (yVal * yVal) / (4 * p);
+    const Py = yVal;
+    const PX = toX(Px), PY = toY(Py);
+
+    // 의도적 오류 ②: 빛이 왼쪽 (준선 너머)에서 출발
+    const Sx = -4.5;
+    const Sy = yVal;
+    const SX = toX(Sx), SY = toY(Sy);
+
+    // 입사 광선 (점선)
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 1.8;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(SX, SY);
+    ctx.lineTo(PX, PY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // 입사 화살표 (중간쯤, S → P 방향)
+    const midIX = SX + (PX - SX) * 0.55;
+    const midIY = SY + (PY - SY) * 0.55;
+    arrowhead(SX, SY, midIX, midIY, '#64748b', 7);
+
+    // 반사 광선 (실선, P → F)
+    const FX = toX(F.x), FY = toY(F.y);
+    ctx.strokeStyle = '#16a34a';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(PX, PY);
+    ctx.lineTo(FX, FY);
+    ctx.stroke();
+    // 반사 화살표
+    const midRX = PX + (FX - PX) * 0.62;
+    const midRY = PY + (FY - PY) * 0.62;
+    arrowhead(PX, PY, midRX, midRY, '#16a34a', 7);
+
+    // 접선 (오류 ①: 접선만 그리고 법선은 그리지 않음)
+    // y² = 4px → dy/dx = 2p/y → 방향벡터 (y, 2p)
+    let tdx, tdy;
+    if (Math.abs(yVal) < 0.01) {
+      tdx = 0; tdy = 1;
+    } else {
+      tdx = yVal; tdy = 2 * p;
+      const L = Math.sqrt(tdx * tdx + tdy * tdy);
+      tdx /= L; tdy /= L;
+    }
+    const tLen = 1.4;
+    const T1x = Px + tdx * tLen, T1y = Py + tdy * tLen;
+    const T2x = Px - tdx * tLen, T2y = Py - tdy * tLen;
+
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([5, 3]);
+    ctx.beginPath();
+    ctx.moveTo(toX(T1x), toY(T1y));
+    ctx.lineTo(toX(T2x), toY(T2y));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 각도 호 (오류 ①: 접선 기준)
+    const T1X = toX(T1x), T1Y = toY(T1y);
+    const T2X = toX(T2x), T2Y = toY(T2y);
+    const angT1 = Math.atan2(T1Y - PY, T1X - PX);
+    const angT2 = Math.atan2(T2Y - PY, T2X - PX);
+    const angInc = Math.atan2(SY - PY, SX - PX);
+    const angRefl = Math.atan2(FY - PY, FX - PX);
+
+    let angTInc, angTRefl;
+    if (angleDiff(angT1, angInc) < angleDiff(angT2, angInc)) {
+      angTInc = angT1; angTRefl = angT2;
+    } else {
+      angTInc = angT2; angTRefl = angT1;
+    }
+
+    ctx.strokeStyle = '#dc2626';
+    ctx.lineWidth = 1.3;
+    const arcR = 22;
+    drawAngleArc(PX, PY, arcR, angTInc, angInc);
+    drawAngleArc(PX, PY, arcR, angTRefl, angRefl);
+
+    // 각도 라벨 (호 안쪽에 작게)
+    ctx.fillStyle = '#dc2626';
+    ctx.font = 'italic bold 12px Georgia, serif';
+    // 입사쪽 호 중간점
+    const midA1 = (angTInc + angInc) / 2;
+    ctx.fillText('θ', PX + Math.cos(midA1) * (arcR + 10) - 4, PY + Math.sin(midA1) * (arcR + 10) + 4);
+    const midA2 = (angTRefl + angRefl) / 2;
+    ctx.fillText('θ', PX + Math.cos(midA2) * (arcR + 10) - 4, PY + Math.sin(midA2) * (arcR + 10) + 4);
+
+    // 점 P
+    ctx.fillStyle = '#1e40af';
+    ctx.beginPath();
+    ctx.arc(PX, PY, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  drawAxes();
+  drawDirectrix();
+  drawParabola();
+  drawFocus();
+
+  // 광선 3개
+  [2, 0.8, -2].forEach(y => drawRay(y));
+</script>
+
+</body>
+</html>

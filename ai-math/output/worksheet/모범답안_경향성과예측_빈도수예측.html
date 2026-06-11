@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>모범답안 - 빈도수가 적은 경우 어떻게 예측하는가</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page { size: A4; margin: 13mm 14mm 15mm 14mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 10.5pt; line-height: 1.6; color: #1a1a1a; background: #fff;
+    }
+    @media screen {
+      body { background: #f0f0f0; }
+      .ws-page { box-shadow: 0 2px 10px rgba(0,0,0,.15); margin: 10mm auto; }
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 10pt; background: #fff; }
+      .ws-page { box-shadow: none !important; margin: 0 !important; border: none !important; }
+    }
+
+    .ws-page {
+      width: 210mm; height: 297mm;
+      padding: 13mm 14mm 15mm 14mm;
+      background: #fff; page-break-after: always;
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .ws-page:last-child { page-break-after: auto; }
+
+    .ws-header { border-bottom: 2.5px solid #1a1a1a; padding-bottom: 6px; margin-bottom: 9px; flex-shrink: 0; }
+    .ws-header-top { display: flex; justify-content: space-between; align-items: flex-end; }
+    .ws-title { font-size: 12.5pt; font-weight: 700; letter-spacing: -0.3px; }
+    .ws-meta { font-size: 8.5pt; color: #666; }
+    .answer-badge {
+      display: inline-block; background: #c0392b; color: #fff;
+      font-size: 9pt; font-weight: 700; padding: 2px 10px; border-radius: 2px;
+      margin-left: 10px; letter-spacing: 0.5px; vertical-align: middle;
+    }
+
+    .ans-page-box {
+      border: 1.5px solid #c0392b; border-radius: 4px;
+      padding: 10px 13px; background: #fffdf8;
+      flex: 1; display: flex; flex-direction: column;
+    }
+    .q-block { margin-bottom: 11px; }
+    .q-block:last-child { margin-bottom: 0; flex: 1; display: flex; flex-direction: column; }
+
+    .q-num { font-weight: 700; font-size: 10.5pt; margin-bottom: 4px; }
+    .q-sub-label { font-size: 9.5pt; font-weight: 600; margin: 6px 0 3px 8px; }
+
+    /* 표 */
+    .ws-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+    .ws-table th { background: #e4e4e4; border: 1px solid #b0b0b0; padding: 4px 5px; text-align: center; font-weight: 600; }
+    .ws-table td { border: 1px solid #b0b0b0; padding: 4px 5px; text-align: center; }
+    .ws-table td.left { text-align: left; font-weight: 500; }
+    .ws-table td.ans { background: #fff9c4; font-weight: 700; color: #b71c1c; }
+    .ws-table th.total, .ws-table td.total { background: #ebebeb; font-weight: 600; }
+    .ws-table td.ans-total { background: #fff3cd; font-weight: 700; color: #b71c1c; }
+    .ws-table td.highlight { background: #fffde7; }
+
+    .table-pair { display: flex; gap: 14px; margin: 5px 0; }
+    .table-pair > div { flex: 1; }
+    .table-caption { font-size: 8.5pt; font-weight: 700; color: #444; margin-bottom: 2px; text-align: center; }
+
+    /* 계산 풀이 */
+    .calc-box {
+      background: #f9f9f9; border: 1px solid #ddd; border-radius: 3px;
+      padding: 8px 12px; margin: 5px 0; font-size: 9.5pt; line-height: 2;
+    }
+    .calc-step { display: flex; align-items: baseline; gap: 6px; margin-bottom: 1px; }
+    .step-label { font-size: 8.5pt; color: #888; white-space: nowrap; min-width: 70px; }
+    .calc-result {
+      background: #fff9c4; border: 1px solid #f5c200;
+      border-radius: 2px; padding: 1px 7px;
+      font-weight: 700; color: #b71c1c; margin-left: 4px;
+    }
+    .calc-exact {
+      background: #e8f5e9; border: 1px solid #66bb6a;
+      border-radius: 2px; padding: 1px 7px;
+      font-weight: 700; color: #1b5e20; margin-left: 4px;
+    }
+
+    /* 확률 계산 표 (❸용) */
+    .calc-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+    .calc-table th { background: #e4e4e4; border: 1px solid #b0b0b0; padding: 4px 6px; text-align: center; font-weight: 600; }
+    .calc-table td { border: 1px solid #b0b0b0; padding: 4px 6px; text-align: center; }
+    .calc-table td.prod { background: #f0f0f0; font-weight: 700; }
+    .calc-table td.ans { background: #fff9c4; font-weight: 700; color: #b71c1c; }
+    .calc-table td.ans-result { background: #e8f5e9; font-weight: 700; color: #1b5e20; }
+
+    /* 결론 박스 */
+    .conclude-box {
+      background: #fce4e4; border: 1.5px solid #c0392b;
+      border-radius: 3px; padding: 7px 12px; margin-top: 7px; font-size: 10pt;
+    }
+    .conclude-label { font-size: 8.5pt; color: #c0392b; font-weight: 700; margin-bottom: 3px; }
+
+    /* 비교표 텍스트 셀 */
+    .ws-table td.text-ans {
+      background: #fff9c4; font-weight: 600; color: #1a1a1a;
+      font-size: 8.5pt; text-align: left; padding-left: 6px;
+    }
+
+    /* 심화 답안 */
+    .explain-box {
+      background: #f9f9f9; border: 1px solid #ddd; border-radius: 3px;
+      padding: 8px 12px; margin-top: 5px; font-size: 9.5pt; line-height: 1.8;
+      color: #1a1a1a;
+    }
+
+    .note-box {
+      background: #fff8e1; border-left: 3px solid #f9a825;
+      padding: 4px 8px; font-size: 8.5pt; color: #5d4037; margin: 5px 0;
+    }
+
+    .section-div { border: none; border-top: 1px solid #eee; margin: 9px 0; }
+    .page-number {
+      text-align: center; font-size: 8.5pt; color: #aaa;
+      margin-top: 7px; padding-top: 5px; border-top: 1px solid #eee; flex-shrink: 0;
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+    };
+    window.safeTypeset = function(el) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise)
+        return MathJax.typesetPromise(el ? [].concat(el) : undefined);
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+          async onload="safeTypeset()"></script>
+</head>
+<body>
+
+<!-- PAGE 1 (앞면): ❶ ❷ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">
+        활동 학습지 &middot; 빈도수가 적은 경우 어떻게 예측하는가?
+        <span class="answer-badge">모범답안</span>
+      </span>
+      <span class="ws-meta">인공지능수학 &nbsp;|&nbsp; Ⅲ-1. 자료의 분석과 예측</span>
+    </div>
+  </div>
+
+  <div class="ans-page-box">
+
+    <!-- ❶ -->
+    <div class="q-block">
+      <div class="q-num">❶ 1학년 여학생 직접 추출</div>
+      <div style="display:flex; gap:16px; align-items:flex-start; margin-top:6px;">
+        <table class="ws-table" style="width:auto;">
+          <thead>
+            <tr><th style="min-width:56px;">상품</th><th style="min-width:44px;">A</th><th style="min-width:44px;">B</th><th style="min-width:44px;">C</th><th class="total" style="min-width:44px;">합계</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>인원(명)</td>
+              <td class="ans">2</td><td class="ans">2</td><td class="ans">2</td>
+              <td class="ans-total">6</td>
+            </tr>
+            <tr>
+              <td>확률</td>
+              <td class="ans">$\dfrac{1}{3}$</td>
+              <td class="ans">$\dfrac{1}{3}$</td>
+              <td class="ans">$\dfrac{1}{3}$</td>
+              <td class="ans-total">1</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="flex:1; background:#fce4e4; border:1px solid #e57373; border-radius:3px; padding:6px 10px; font-size:9pt; line-height:1.7;">
+          <div style="font-size:8pt; font-weight:700; color:#c0392b; margin-bottom:3px;">결론 및 문제점</div>
+          A, B, C 각 $\dfrac{1}{3}$로 모두 같음<br>
+          → <strong>예측 불가</strong> (동률)<br>
+          표본이 <strong>6명</strong>으로 너무 적어 신뢰도 낮음
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❷ -->
+    <div class="q-block">
+      <div class="q-num">❷ 학년별 / 성별 주변 표 완성</div>
+      <div class="table-pair" style="margin-top:6px;">
+        <div>
+          <div class="table-caption">〔 학년별 상품 구매 〕 (단위: 명)</div>
+          <table class="ws-table">
+            <thead><tr><th>학년</th><th>A</th><th>B</th><th>C</th><th class="total">합계</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>1학년</td>
+                <td class="ans">18</td><td class="ans">12</td><td class="ans">6</td>
+                <td class="ans-total">36</td>
+              </tr>
+              <tr>
+                <td>2학년</td>
+                <td class="ans">72</td><td class="ans">48</td><td class="ans">24</td>
+                <td class="ans-total">144</td>
+              </tr>
+              <tr>
+                <td class="total">합계</td>
+                <td class="ans-total">90</td><td class="ans-total">60</td><td class="ans-total">30</td>
+                <td class="ans-total">180</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="table-caption">〔 성별 상품 구매 〕 (단위: 명)</div>
+          <table class="ws-table">
+            <thead><tr><th>성별</th><th>A</th><th>B</th><th>C</th><th class="total">합계</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>남</td>
+                <td class="ans">45</td><td class="ans">20</td><td class="ans">20</td>
+                <td class="ans-total">85</td>
+              </tr>
+              <tr>
+                <td>여</td>
+                <td class="ans">45</td><td class="ans">40</td><td class="ans">10</td>
+                <td class="ans-total">95</td>
+              </tr>
+              <tr>
+                <td class="total">합계</td>
+                <td class="ans-total">90</td><td class="ans-total">60</td><td class="ans-total">30</td>
+                <td class="ans-total">180</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div style="margin-top:7px; font-size:9pt; color:#555; background:#f5f5f5; border-radius:3px; padding:5px 10px;">
+        <strong>계산 확인</strong> &nbsp;(1학년 A: 16+2=18, B: 10+2=12, C: 4+2=6) &nbsp;·&nbsp;
+        (여 A: 2+43=45, B: 2+38=40, C: 2+8=10)
+      </div>
+    </div>
+
+  </div>
+  <div class="page-number">- 1 / 2 &nbsp;(앞면) -</div>
+</div>
+
+
+<!-- PAGE 2 (뒷면): ❸ ❹ ❺ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">
+        활동 학습지 &middot; 빈도수가 적은 경우 어떻게 예측하는가?
+        <span class="answer-badge">모범답안</span>
+      </span>
+      <span class="ws-meta">인공지능수학 &nbsp;|&nbsp; Ⅲ-1. 자료의 분석과 예측</span>
+    </div>
+  </div>
+
+  <div class="ans-page-box">
+
+    <!-- ❸ -->
+    <div class="q-block">
+      <div class="q-num">❸ 독립 가정으로 1학년 여학생 구매 상품 예측</div>
+
+      <table class="calc-table" style="margin-top:5px;">
+        <thead>
+          <tr>
+            <th style="width:46px;">상품</th>
+            <th>$P(\text{상품})$</th>
+            <th>$P(\text{1학년}|\text{상품})$</th>
+            <th>$P(\text{여}|\text{상품})$</th>
+            <th style="background:#e8f5e9;">세 확률의 곱</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="prod">A</td>
+            <td class="ans">$\dfrac{90}{180}=\dfrac{1}{2}$</td>
+            <td class="ans">$\dfrac{18}{90}=\dfrac{1}{5}$</td>
+            <td class="ans">$\dfrac{45}{90}=\dfrac{1}{2}$</td>
+            <td class="ans-result">$\dfrac{1}{2}\times\dfrac{1}{5}\times\dfrac{1}{2}=\dfrac{1}{20}$</td>
+          </tr>
+          <tr>
+            <td class="prod">B</td>
+            <td class="ans">$\dfrac{60}{180}=\dfrac{1}{3}$</td>
+            <td class="ans">$\dfrac{12}{60}=\dfrac{1}{5}$</td>
+            <td class="ans">$\dfrac{40}{60}=\dfrac{2}{3}$</td>
+            <td class="ans-result">$\dfrac{1}{3}\times\dfrac{1}{5}\times\dfrac{2}{3}=\dfrac{2}{45}$</td>
+          </tr>
+          <tr>
+            <td class="prod">C</td>
+            <td class="ans">$\dfrac{30}{180}=\dfrac{1}{6}$</td>
+            <td class="ans">$\dfrac{6}{30}=\dfrac{1}{5}$</td>
+            <td class="ans">$\dfrac{10}{30}=\dfrac{1}{3}$</td>
+            <td class="ans-result">$\dfrac{1}{6}\times\dfrac{1}{5}\times\dfrac{1}{3}=\dfrac{1}{90}$</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="calc-box" style="margin-top:6px;">
+        <div style="font-size:8.5pt; color:#555; margin-bottom:3px;">
+          ▪ 통분: LCM(20, 45, 90) = <strong>180</strong>
+        </div>
+        <div style="font-size:10pt; line-height:2.1;">
+          $\dfrac{1}{20} = \dfrac{9}{180}$ &nbsp;,&nbsp;
+          $\dfrac{2}{45} = \dfrac{8}{180}$ &nbsp;,&nbsp;
+          $\dfrac{1}{90} = \dfrac{2}{180}$
+        </div>
+        <div style="font-size:10pt; margin-top:3px;">
+          $\dfrac{9}{180} > \dfrac{8}{180} > \dfrac{2}{180}$
+          &nbsp;&nbsp;→&nbsp;&nbsp; A : B : C = <strong>9 : 8 : 2</strong>
+        </div>
+      </div>
+
+      <div class="conclude-box" style="margin-top:7px;">
+        <div class="conclude-label">예측 결론</div>
+        이 손님(1학년 여학생)은 &nbsp;<strong>상품 A</strong>&nbsp; 를 구매할 것으로 예측한다.
+      </div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❹ -->
+    <div class="q-block">
+      <div class="q-num">❹ 두 방법 비교</div>
+      <table class="ws-table" style="margin-top:5px; font-size:9pt;">
+        <thead>
+          <tr><th style="width:86px;">구분</th><th>❶ 직접 추출</th><th>❸ 독립 가정</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600;">사용 자료 수</td>
+            <td class="text-ans">6명 (1학년 여학생만)</td>
+            <td class="text-ans">180명 전체</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">예측 결과</td>
+            <td class="text-ans">예측 불가 (A=B=C, 동률)</td>
+            <td class="text-ans">상품 A (A:B:C = 9:8:2)</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">신뢰성</td>
+            <td class="text-ans" style="color:#c0392b;">낮음 (표본 너무 적음)</td>
+            <td class="text-ans" style="color:#1b5e20;">높음 (전체 자료 활용)</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:6px; font-size:9.5pt; background:#f9f9f9; border:1px solid #ddd; border-radius:3px; padding:7px 11px; line-height:1.8;">
+        <strong>❸의 방법이 더 신뢰할 수 있는 이유:</strong><br>
+        독립 가정 방법은 전체 180명의 자료를 활용하므로, 표본이 6명에 불과한 직접 추출보다
+        통계적 안정성이 훨씬 높다. 표본이 적을수록 우연에 의한 오차가 커지며,
+        독립 가정을 통해 더 많은 데이터를 간접적으로 활용할 수 있다.
+      </div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❺ (심화) -->
+    <div class="q-block">
+      <div class="q-num">❺ &nbsp;<span style="font-size:9pt; font-weight:400; color:#888;">(심화)</span> 독립 가정의 한계</div>
+      <div class="explain-box">
+        학년과 성별이 실제로 독립적이지 않다면(예: 2학년 여학생이 상품 A를 특히 선호하는 경향이 있다면),
+        각 조건의 확률을 단순히 곱하는 것은 그 상관관계를 무시하게 된다.<br>
+        이 경우 계산된 예측값과 실제 구매 패턴 사이에 차이가 생길 수 있으며,
+        독립 가정 방법이 정확도를 과대 또는 과소평가할 수 있다.<br>
+        따라서 가능하다면 더 많은 자료를 수집하거나, 조건 간 상관관계를 별도로 분석하여 예측 정확도를 높이는 것이 바람직하다.
+      </div>
+    </div>
+
+  </div>
+  <div class="page-number">- 2 / 2 &nbsp;(뒷면) -</div>
+</div>
+
+</body>
+</html>

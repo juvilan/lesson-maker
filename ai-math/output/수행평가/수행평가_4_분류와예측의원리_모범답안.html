@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>수행평가 모범답안 · 분류와 예측의 원리</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    @page { size: A4; margin: 14mm 15mm 16mm 15mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 10.5pt; line-height: 1.6; color: #1a1a1a; background: #fff;
+    }
+    @media screen {
+      body { background: #e0e0e0; }
+      .ws-page { box-shadow: 0 2px 12px rgba(0,0,0,.18); margin: 10mm auto; }
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff; }
+      .ws-page { box-shadow: none !important; margin: 0 !important; }
+    }
+
+    .ws-page {
+      width: 210mm; height: 297mm;
+      padding: 14mm 15mm 14mm 15mm;
+      background: #fff;
+      page-break-after: always;
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .ws-page:last-child { page-break-after: auto; }
+
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 6px; margin-bottom: 9px; flex-shrink: 0;
+    }
+    .ws-header-top { display: flex; justify-content: space-between; align-items: flex-end; }
+    .ws-title { font-size: 13pt; font-weight: 700; }
+    .ws-meta { font-size: 8.5pt; color: #555; }
+
+    .ans-tag {
+      display: inline-block;
+      background: #d44; color: #fff;
+      font-size: 8pt; font-weight: 700;
+      padding: 1px 7px; border-radius: 2px;
+      margin-bottom: 5px;
+    }
+    .activity-box {
+      border: 1.5px solid #555; border-radius: 4px;
+      padding: 10px 13px; background: #fafafa;
+      flex: 1; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .activity-label {
+      display: inline-block; background: #1a1a1a; color: #fff;
+      font-size: 8.5pt; font-weight: 700;
+      padding: 2px 9px; border-radius: 2px; margin-bottom: 5px;
+    }
+    .activity-title { font-size: 11pt; font-weight: 700; margin-bottom: 7px; }
+
+    .ws-table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+    .ws-table th { background: #e4e4e4; border: 1px solid #b0b0b0; padding: 4px 6px; text-align: center; font-weight: 600; }
+    .ws-table td { border: 1px solid #b0b0b0; padding: 4px 6px; text-align: center; }
+    .ws-table td.left { text-align: left; }
+    .ws-table td.ans { background: #fff8e1; font-weight: 600; color: #c62828; }
+    .ws-table th.total, .ws-table td.total { background: #e8e8e8; font-weight: 600; }
+    .ws-table td.ans-total { background: #fff0b3; font-weight: 700; color: #c62828; }
+
+    .info-box {
+      background: #f2f2f2; border-left: 3px solid #888;
+      padding: 5px 9px; margin: 6px 0;
+      font-size: 9.5pt; color: #333; line-height: 1.65;
+    }
+    .ans-box {
+      background: #fff8e1; border: 1px solid #f9a825; border-radius: 3px;
+      padding: 7px 10px; margin: 5px 0; font-size: 10pt; line-height: 1.75;
+      color: #1a1a1a;
+    }
+    .ans-box .key { font-weight: 700; color: #c62828; }
+    .q-num { font-weight: 700; font-size: 10.5pt; margin: 8px 0 3px; }
+    .q-pts { font-weight: 400; font-size: 8.5pt; color: #777; }
+
+    .table-pair { display: flex; gap: 14px; margin: 5px 0; }
+    .table-pair > div { flex: 1; }
+    .table-caption { font-size: 9pt; font-weight: 700; color: #444; margin-bottom: 3px; text-align: center; }
+
+    .section-div { border: none; border-top: 1px solid #ddd; margin: 8px 0; }
+
+    .predict-box {
+      border: 1.5px solid #c62828; border-radius: 3px;
+      padding: 7px 12px; background: #fff8e1;
+      margin-top: 6px; font-size: 10pt;
+    }
+    .predict-label { font-size: 8.5pt; color: #c62828; font-weight: 700; margin-bottom: 3px; }
+
+    .page-number {
+      text-align: center; font-size: 8.5pt; color: #aaa;
+      margin-top: 7px; padding-top: 5px; border-top: 1px solid #eee; flex-shrink: 0;
+    }
+    .raw-data-wrap { display: flex; gap: 14px; margin-bottom: 8px; }
+    .raw-data-wrap .ws-table { flex: 1; }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$','$'],['\\(','\\)']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body>
+
+
+<!-- ════════════════════════════════
+     1페이지 · 파트 1 모범답안
+════════════════════════════════ -->
+<div class="ws-page">
+
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">수행평가 모범답안 &middot; 분류와 예측의 원리</span>
+      <span class="ws-meta" style="color:#c62828; font-weight:700;">⚠ 채점·교사 전용</span>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="activity-label">파트 1</div>
+    <div class="activity-title">🔍 맛집·카페 리뷰 감성 분석하기</div>
+
+    <!-- 감성 사전 재제시 -->
+    <div class="info-box" style="margin-bottom:7px;">
+      <strong>감성 사전</strong> &nbsp;|&nbsp;
+      긍정(+1): 맛있다, 친절하다, 훌륭하다, 깔끔하다, 만족스럽다 &nbsp;/&nbsp;
+      부정(−1): 불친절하다, 실망스럽다, 느리다, 불결하다, 맛없다 &nbsp;/&nbsp;
+      중립(0): 카페, 음식, 직원, 인테리어, 가격, 위치
+    </div>
+
+    <div class="info-box" style="margin-bottom:8px;">
+      <strong>리뷰 A</strong>: "카페 인테리어가 훌륭하고 직원도 친절했다. 가격도 만족스러웠다."<br>
+      <strong>리뷰 B</strong>: "음식이 맛없고 직원이 불친절했다. 위치는 괜찮았다."
+    </div>
+
+    <!-- ❶ 답안 -->
+    <div style="margin-bottom:8px;">
+      <div class="q-num">❶ &nbsp;<span class="q-pts">[2점]</span> &nbsp; 리뷰 A 단어 분류</div>
+      <table class="ws-table">
+        <thead>
+          <tr><th style="width:14%;">분류</th><th>찾은 단어</th><th style="width:14%;">단어 수</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="background:#e8f0e8;">긍정</td>
+            <td class="ans left">훌륭하다, 친절하다, 만족스럽다</td>
+            <td class="ans">3</td>
+          </tr>
+          <tr>
+            <td style="background:#f0e8e8;">부정</td>
+            <td class="ans left">(없음)</td>
+            <td class="ans">0</td>
+          </tr>
+          <tr>
+            <td style="background:#f0f0f0;">중립</td>
+            <td class="ans left">카페, 인테리어, 직원, 가격</td>
+            <td class="ans">4</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ❷ 답안 -->
+    <div style="margin-bottom:8px;">
+      <div class="q-num">❷ &nbsp;<span class="q-pts">[2점]</span> &nbsp; 리뷰 A 벡터·점수·분류</div>
+      <div class="ans-box">
+        벡터 &nbsp;$\vec{v} = (3,\; 0,\; 4)$<br>
+        감성 점수 &nbsp;$\text{score} = 3 - 0 = \mathbf{3}$<br>
+        분류: <span class="key">긍정</span> &nbsp;(score &gt; 0이므로)
+      </div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❸ 답안 -->
+    <div style="margin-bottom:8px;">
+      <div class="q-num">❸ &nbsp;<span class="q-pts">[2점]</span> &nbsp; 리뷰 B 분석</div>
+      <table class="ws-table" style="margin-bottom:5px;">
+        <thead>
+          <tr><th style="width:14%;">분류</th><th>찾은 단어</th><th style="width:14%;">단어 수</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="background:#e8f0e8;">긍정</td>
+            <td class="ans left">(없음)</td>
+            <td class="ans">0</td>
+          </tr>
+          <tr>
+            <td style="background:#f0e8e8;">부정</td>
+            <td class="ans left">맛없다, 불친절하다</td>
+            <td class="ans">2</td>
+          </tr>
+          <tr>
+            <td style="background:#f0f0f0;">중립</td>
+            <td class="ans left">음식, 직원, 위치</td>
+            <td class="ans">3</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="ans-box">
+        벡터 &nbsp;$\vec{v} = (0,\; 2,\; 3)$<br>
+        감성 점수 &nbsp;$\text{score} = 0 - 2 = \mathbf{-2}$<br>
+        분류: <span class="key">부정</span> &nbsp;(score &lt; 0이므로)
+      </div>
+    </div>
+
+    <!-- ❹ 답안 -->
+    <div style="flex:1; display:flex; flex-direction:column;">
+      <div class="q-num">❹ &nbsp;<span class="q-pts">[2점]</span> &nbsp; 비교 서술</div>
+      <div class="ans-box" style="flex:1;">
+        <span class="key">리뷰 B</span>가 더 부정적이다.<br>
+        리뷰 A의 감성 점수는 $+3$이고, 리뷰 B의 감성 점수는 $-2$이다.<br>
+        리뷰 B의 점수($-2$)가 리뷰 A의 점수($+3$)보다 낮으므로, 리뷰 B가 더 부정적인 평가임을 알 수 있다.<br>
+        <span style="font-size:9pt; color:#666;">(※ 긍정 단어 수와 부정 단어 수를 비교하거나 두 점수의 대소 관계를 명확히 서술한 경우 인정)</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-number">— 1 / 2 &nbsp;(앞면 모범답안) —</div>
+</div>
+
+
+<!-- ════════════════════════════════
+     2페이지 · 파트 2 모범답안
+════════════════════════════════ -->
+<div class="ws-page">
+
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">수행평가 모범답안 &middot; 분류와 예측의 원리</span>
+      <span class="ws-meta" style="color:#c62828; font-weight:700;">⚠ 채점·교사 전용</span>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="activity-label">파트 2</div>
+    <div class="activity-title">📊 공부 장소 선택 예측하기</div>
+
+    <!-- 데이터 요약 -->
+    <div class="info-box" style="margin-bottom:7px; font-size:9pt;">
+      <strong>원자료 요약 (20일)</strong><br>
+      평일-맑음: L 4, C 2 (6일) &nbsp;|&nbsp;
+      평일-흐림: L 4, C 2 (6일) &nbsp;|&nbsp;
+      주말-맑음: L 2, C 4 (6일) &nbsp;|&nbsp;
+      주말-흐림: L 1, C 1 (2일)
+    </div>
+
+    <!-- ❶ 답안 -->
+    <div style="margin-bottom:8px;">
+      <div class="q-num">❶ &nbsp;<span class="q-pts">[2점]</span></div>
+      <div style="display:flex; gap:20px; align-items:center; margin-top:5px;">
+        <table class="ws-table" style="width:auto;">
+          <thead>
+            <tr>
+              <th>장소 선택</th>
+              <th style="min-width:50px;">L (도서관)</th>
+              <th style="min-width:50px;">C (카페)</th>
+              <th class="total" style="min-width:42px;">합계</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>일수 (일)</td>
+              <td class="ans">11</td>
+              <td class="ans">9</td>
+              <td class="ans-total">20</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="font-size:10pt;">
+          $P(L) = \dfrac{11}{20}$
+        </div>
+      </div>
+    </div>
+
+    <!-- ❷ 답안 -->
+    <div style="margin-bottom:8px;">
+      <div class="q-num">❷ &nbsp;<span class="q-pts">[2점]</span></div>
+      <div class="table-pair" style="margin-top:5px;">
+        <div>
+          <div class="table-caption">〔 요일별 장소 선택 〕</div>
+          <table class="ws-table">
+            <thead><tr><th>요일</th><th>L</th><th>C</th><th class="total">합계</th></tr></thead>
+            <tbody>
+              <tr><td>평일</td><td class="ans">8</td><td class="ans">4</td><td class="ans-total">12</td></tr>
+              <tr><td>주말</td><td class="ans">3</td><td class="ans">5</td><td class="ans-total">8</td></tr>
+              <tr><td class="total">합계</td><td class="ans-total">11</td><td class="ans-total">9</td><td class="ans-total">20</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="table-caption">〔 날씨별 장소 선택 〕</div>
+          <table class="ws-table">
+            <thead><tr><th>날씨</th><th>L</th><th>C</th><th class="total">합계</th></tr></thead>
+            <tbody>
+              <tr><td>맑음</td><td class="ans">6</td><td class="ans">6</td><td class="ans-total">12</td></tr>
+              <tr><td>흐림</td><td class="ans">5</td><td class="ans">3</td><td class="ans-total">8</td></tr>
+              <tr><td class="total">합계</td><td class="ans-total">11</td><td class="ans-total">9</td><td class="ans-total">20</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❸ 답안 -->
+    <div style="margin-bottom:8px;">
+      <div class="q-num">❸ &nbsp;<span class="q-pts">[각 2점]</span></div>
+
+      <div style="margin: 5px 0 3px 8px; font-size:10pt; font-weight:500;">(1) 도서관(L) 선택, 평일이고 맑음인 날의 수</div>
+      <div class="ans-box" style="margin-left:18px;">
+        원자료에서 '평일 + 맑음 + L'인 날의 수 = <span class="key">4일</span><br>
+        비율: $\dfrac{4}{20}$<br>
+        100일 중 예상 일수 $= 100 \times \dfrac{4}{20} = $ <span class="key">20일</span>
+      </div>
+
+      <div style="margin: 7px 0 3px 8px; font-size:10pt; font-weight:500;">(2) 카페(C) 선택, 주말이고 흐림인 날의 수</div>
+      <div class="ans-box" style="margin-left:18px;">
+        원자료에서 '주말 + 흐림 + C'인 날의 수 = <span class="key">1일</span><br>
+        비율: $\dfrac{1}{20}$<br>
+        100일 중 예상 일수 $= 100 \times \dfrac{1}{20} = $ <span class="key">5일</span>
+      </div>
+    </div>
+
+    <hr class="section-div">
+
+    <!-- ❹ 답안 -->
+    <div style="flex:1; display:flex; flex-direction:column;">
+      <div class="q-num">❹ &nbsp;<span class="q-pts">[4점]</span></div>
+      <div class="ans-box" style="flex:1;">
+        원자료에서 '평일 + 흐림'인 날의 장소 선택을 확인한다.<br>
+        &nbsp;&nbsp;• 평일 + 흐림 → L (도서관): <span class="key">4</span>일<br>
+        &nbsp;&nbsp;• 평일 + 흐림 → C (카페): <span class="key">2</span>일<br>
+        &nbsp;&nbsp;• 합계: 6일<br><br>
+        조건부 확률:
+        $$P(L\mid\text{평일}\cap\text{흐림}) = \frac{4}{6} = \frac{2}{3} \approx 0.67$$
+        $$P(C\mid\text{평일}\cap\text{흐림}) = \frac{2}{6} = \frac{1}{3} \approx 0.33$$
+        $P(L)$이 $P(C)$보다 높으므로, 소연이는 <span class="key">도서관</span>을 선택할 것으로 예측한다.
+      </div>
+      <div class="predict-box">
+        <div class="predict-label">예측 결론 (정답)</div>
+        <div style="padding-top:4px; font-weight:700; color:#c62828; line-height:1.8;">
+          도서관(L) —  $P(L|\text{평일}\cap\text{흐림}) = \tfrac{2}{3} > \tfrac{1}{2}$ 이므로
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-number">— 2 / 2 &nbsp;(뒷면 모범답안) —</div>
+</div>
+
+
+</body>
+</html>
