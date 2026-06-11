@@ -1,0 +1,716 @@
+/* ============================================================================
+ * lesson-maker · slide-system.css
+ *
+ * 슬라이드(Reveal.js) 전용 컴포넌트.
+ * 캔버스는 1920×1080으로 고정되어 있으므로 px 단위 직접 사용 가능.
+ *
+ * 의존성: design-tokens.css (먼저 로드)
+ * ============================================================================ */
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 베이스
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal-viewport {
+  background: var(--lm-paper);
+}
+.reveal {
+  font-family: var(--lm-font-sans);
+  font-size: var(--lm-slide-body);
+  color: var(--lm-ink);
+  background: var(--lm-paper);
+  font-weight: 400;
+  font-feature-settings: "tnum", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+.reveal .slides {
+  text-align: left;
+}
+.reveal .slides section {
+  box-sizing: border-box;
+  padding: 72px 96px;
+  line-height: var(--lm-slide-line-body);
+  /* 슬라이드는 고정 1920×1080, 내용이 넘치지 않도록 저작 책임 */
+  overflow: hidden;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 타이포그래피
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal h1 {
+  font-size: var(--lm-slide-h1);
+  font-weight: 500;
+  color: var(--lm-ink);
+  letter-spacing: -0.02em;
+  line-height: var(--lm-slide-line-tight);
+  margin: 0 0 var(--lm-space-3);
+}
+.reveal h2 {
+  font-size: var(--lm-slide-h2);
+  font-weight: 500;
+  color: var(--lm-ink);
+  letter-spacing: -0.01em;
+  line-height: var(--lm-slide-line-tight);
+  margin: 0 0 var(--lm-space-4);
+  padding-bottom: var(--lm-space-3);
+  border-bottom: var(--lm-border-thin) solid var(--lm-rule);
+}
+.reveal h3 {
+  font-size: var(--lm-slide-h3);
+  font-weight: 500;
+  color: var(--lm-ink);
+  margin: 0 0 var(--lm-space-3);
+}
+.reveal h4 {
+  font-size: var(--lm-slide-body-lg);
+  font-weight: 500;
+  color: var(--lm-accent);
+  margin: 0 0 var(--lm-space-2);
+  letter-spacing: 0.01em;
+}
+.reveal p,
+.reveal li {
+  font-size: var(--lm-slide-body);
+  color: var(--lm-ink);
+  line-height: var(--lm-slide-line-body);
+  margin: 0 0 var(--lm-space-3);
+}
+.reveal strong,
+.reveal b {
+  font-weight: 500;
+  color: var(--lm-ink);
+}
+.reveal em {
+  font-style: italic;
+  color: var(--lm-ink-2);
+}
+.reveal a {
+  color: var(--lm-info);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 메타 라벨 · 챕터 태그 · 칩
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .chapter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lm-space-3);
+  font-size: var(--lm-slide-caption);
+  font-weight: 500;
+  color: var(--lm-accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 var(--lm-space-3);
+}
+.reveal .chapter-tag::before {
+  content: "";
+  display: inline-block;
+  width: 40px;
+  height: 2px;
+  background: var(--lm-accent);
+}
+.reveal .chip {
+  display: inline-block;
+  font-size: var(--lm-slide-caption);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: var(--lm-space-2);
+}
+.reveal .chip-accent  { color: var(--lm-accent); }
+.reveal .chip-success { color: var(--lm-success); }
+.reveal .chip-danger  { color: var(--lm-danger); }
+.reveal .chip-info    { color: var(--lm-info); }
+.reveal .chip-warning { color: var(--lm-warning); }
+.reveal .chip-muted   { color: var(--lm-ink-3); }
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 키워드 하이라이트 (본문 내 인라인)
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .kw         { color: var(--lm-accent);  font-weight: 500; }
+.reveal .kw-info    { color: var(--lm-info);    font-weight: 500; }
+.reveal .kw-success { color: var(--lm-success); font-weight: 500; }
+.reveal .kw-danger  { color: var(--lm-danger);  font-weight: 500; }
+.reveal .highlight  { color: var(--lm-accent);  font-weight: 500; }
+.reveal .result     { color: var(--lm-success); font-weight: 500; }
+.reveal .wrong      { color: var(--lm-danger); }
+.reveal .num-sub    { color: var(--lm-accent); font-size: 1.05em; }
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 카드 & 정의/예제/공식/경고/결론 박스
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .card {
+  background: var(--lm-page);
+  border: var(--lm-border-thin) solid var(--lm-rule);
+  border-radius: var(--lm-radius-md);
+  padding: var(--lm-space-4) var(--lm-space-5);
+  margin: var(--lm-space-3) 0;
+}
+.reveal .card-accent {
+  border-color: var(--lm-accent);
+}
+.reveal .card-soft {
+  background: var(--lm-paper-soft);
+  border-color: transparent;
+}
+
+.reveal .definition-box {
+  background: var(--lm-paper-tint);
+  border-left: var(--lm-border-accent) solid var(--lm-accent);
+  border-radius: 0;
+  padding: var(--lm-space-4) var(--lm-space-5);
+  margin: var(--lm-space-4) 0;
+}
+.reveal .definition-box::before {
+  content: "정의";
+  display: inline-block;
+  font-size: var(--lm-slide-caption);
+  font-weight: 500;
+  color: var(--lm-accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: var(--lm-space-2);
+}
+
+.reveal .formula-box {
+  background: var(--lm-paper-tint);
+  border-radius: var(--lm-radius-md);
+  padding: var(--lm-space-5) var(--lm-space-5);
+  margin: var(--lm-space-4) auto;
+  text-align: center;
+  font-size: var(--lm-slide-body-lg);
+}
+
+.reveal .example-box {
+  background: var(--lm-page);
+  border: var(--lm-border-thin) solid var(--lm-rule-strong);
+  border-radius: var(--lm-radius-md);
+  padding: var(--lm-space-4) var(--lm-space-5);
+  margin: var(--lm-space-4) 0;
+}
+.reveal .example-box::before {
+  content: "예제";
+  display: inline-block;
+  font-size: var(--lm-slide-caption);
+  font-weight: 500;
+  color: var(--lm-accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: var(--lm-space-2);
+}
+
+.reveal .warning-box {
+  background: var(--lm-danger-tint);
+  border-left: var(--lm-border-accent) solid var(--lm-danger);
+  border-radius: 0;
+  padding: var(--lm-space-3) var(--lm-space-4);
+  margin: var(--lm-space-4) 0;
+  color: var(--lm-ink);
+  font-size: var(--lm-slide-body);
+}
+.reveal .warning-box::before {
+  content: "주의";
+  display: inline-block;
+  font-size: var(--lm-slide-caption);
+  font-weight: 500;
+  color: var(--lm-danger);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-right: var(--lm-space-3);
+}
+
+.reveal .result-box {
+  background: var(--lm-success-tint);
+  border-left: var(--lm-border-accent) solid var(--lm-success);
+  border-radius: 0;
+  padding: var(--lm-space-3) var(--lm-space-4);
+  margin: var(--lm-space-4) 0;
+  color: var(--lm-ink);
+  font-size: var(--lm-slide-body);
+}
+.reveal .result-box::before {
+  content: "결론";
+  display: inline-block;
+  font-size: var(--lm-slide-caption);
+  font-weight: 500;
+  color: var(--lm-success);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-right: var(--lm-space-3);
+}
+
+.reveal .info-box {
+  background: var(--lm-info-tint);
+  border-left: var(--lm-border-accent) solid var(--lm-info);
+  border-radius: 0;
+  padding: var(--lm-space-3) var(--lm-space-4);
+  margin: var(--lm-space-4) 0;
+  color: var(--lm-ink);
+  font-size: var(--lm-slide-body);
+}
+.reveal .info-box::before {
+  content: "참고";
+  display: inline-block;
+  font-size: var(--lm-slide-caption);
+  font-weight: 500;
+  color: var(--lm-info);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-right: var(--lm-space-3);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 계산 단계 박스 (step-by-step)
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .step-box {
+  background: var(--lm-paper-tint);
+  border-left: var(--lm-border-accent) solid var(--lm-accent);
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+}
+.reveal .step-box.visible {
+  padding: var(--lm-space-3) var(--lm-space-4);
+  margin: var(--lm-space-3) 0;
+  max-height: 600px;
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal .step-box .step-label {
+  font-size: var(--lm-slide-caption);
+  font-weight: 500;
+  color: var(--lm-accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: var(--lm-space-2);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 학습 목표 리스트
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .objective-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--lm-space-4) 0;
+}
+.reveal .objective-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lm-space-4);
+  padding: var(--lm-space-4) var(--lm-space-5);
+  margin: var(--lm-space-3) 0;
+  background: var(--lm-page);
+  border: var(--lm-border-thin) solid var(--lm-rule);
+  border-radius: var(--lm-radius-md);
+  font-size: var(--lm-slide-body);
+}
+.reveal .objective-list .num {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--lm-accent);
+  color: var(--lm-page);
+  font-weight: 500;
+  font-size: var(--lm-slide-small);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 개념 카드 (그리드용)
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .concept-card {
+  background: var(--lm-page);
+  border: var(--lm-border-thin) solid var(--lm-rule);
+  border-radius: var(--lm-radius-md);
+  padding: var(--lm-space-5);
+  text-align: center;
+}
+.reveal .concept-card .icon {
+  font-size: 48px;
+  margin-bottom: var(--lm-space-2);
+  color: var(--lm-accent);
+}
+.reveal .concept-card h4 {
+  color: var(--lm-accent);
+  margin: var(--lm-space-2) 0;
+  font-size: var(--lm-slide-body-lg);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 계산표
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .calc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--lm-slide-small);
+  margin: var(--lm-space-4) auto;
+  font-variant-numeric: tabular-nums;
+}
+.reveal .calc-table th {
+  background: var(--lm-paper-tint);
+  color: var(--lm-ink);
+  font-weight: 500;
+  padding: var(--lm-space-2) var(--lm-space-4);
+  text-align: center;
+  border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong);
+  letter-spacing: 0.02em;
+}
+.reveal .calc-table td {
+  border-bottom: var(--lm-border-hair) solid var(--lm-rule);
+  padding: var(--lm-space-2) var(--lm-space-4);
+  text-align: center;
+  color: var(--lm-ink);
+  transition: background 0.3s;
+}
+.reveal .calc-table tr:last-child td {
+  border-bottom: none;
+}
+.reveal .calc-table td.fillable {
+  color: var(--lm-ink-4);
+  font-style: italic;
+}
+.reveal .calc-table td.filled {
+  color: var(--lm-ink);
+  font-style: normal;
+}
+.reveal .calc-table td.result-cell {
+  background: var(--lm-success-tint);
+  color: var(--lm-success);
+  font-weight: 500;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 진리표
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .truth-table {
+  margin: var(--lm-space-4) auto;
+  border-collapse: collapse;
+  font-size: var(--lm-slide-body);
+  font-variant-numeric: tabular-nums;
+}
+.reveal .truth-table th {
+  background: var(--lm-paper-tint);
+  color: var(--lm-ink);
+  font-weight: 500;
+  padding: var(--lm-space-2) var(--lm-space-5);
+  border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong);
+}
+.reveal .truth-table td {
+  border: var(--lm-border-hair) solid var(--lm-rule);
+  padding: var(--lm-space-2) var(--lm-space-5);
+  text-align: center;
+}
+.reveal .truth-table .val-1 { color: var(--lm-success); font-weight: 500; }
+.reveal .truth-table .val-0 { color: var(--lm-ink-3); }
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 레이아웃 유틸
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--lm-space-5);
+  align-items: start;
+  margin: var(--lm-space-4) 0;
+}
+.reveal .three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--lm-space-4);
+  align-items: start;
+  margin: var(--lm-space-4) 0;
+}
+.reveal .two-col.ratio-2-1 {
+  grid-template-columns: 2fr 1fr;
+}
+.reveal .two-col.ratio-1-2 {
+  grid-template-columns: 1fr 2fr;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 신경망 다이어그램 컨테이너
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .nn-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: var(--lm-space-4) 0;
+}
+.reveal .nn-container svg .nn-edge {
+  transition: stroke 0.4s, stroke-width 0.4s;
+}
+.reveal .nn-container svg .nn-node circle {
+  transition: fill 0.5s;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 애니메이션 컨트롤 버튼
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .anim-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lm-space-3);
+  margin-top: var(--lm-space-4);
+}
+.reveal .anim-btn {
+  background: var(--lm-accent);
+  color: var(--lm-page);
+  border: none;
+  border-radius: var(--lm-radius-md);
+  padding: var(--lm-space-2) var(--lm-space-5);
+  font-family: inherit;
+  font-size: var(--lm-slide-small);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.reveal .anim-btn:hover {
+  opacity: 0.85;
+}
+.reveal .anim-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.reveal .anim-btn.reset-btn {
+  background: transparent;
+  color: var(--lm-ink-2);
+  border: var(--lm-border-thin) solid var(--lm-rule-strong);
+}
+.reveal .step-counter {
+  color: var(--lm-ink-3);
+  font-size: var(--lm-slide-small);
+  font-variant-numeric: tabular-nums;
+  min-width: 4em;
+  text-align: center;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 인터랙티브 슬라이더
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .param-slider-group {
+  display: flex;
+  align-items: center;
+  gap: var(--lm-space-3);
+  font-size: var(--lm-slide-small);
+  margin: var(--lm-space-2) 0;
+}
+.reveal .param-slider-group label {
+  min-width: 6em;
+  color: var(--lm-accent);
+  font-weight: 500;
+}
+.reveal .param-slider-group input[type=range] {
+  flex: 1;
+  accent-color: var(--lm-accent);
+}
+.reveal .param-slider-group .val-display {
+  min-width: 3.5em;
+  text-align: right;
+  font-family: var(--lm-font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--lm-ink-2);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 코드 블록 (AI수학의 파이썬 예시 등)
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .code-block {
+  background: var(--lm-page);
+  border: var(--lm-border-thin) solid var(--lm-rule-strong);
+  border-radius: var(--lm-radius-md);
+  overflow: hidden;
+  font-family: var(--lm-font-mono);
+  font-size: var(--lm-slide-small);
+  line-height: 1.7;
+  counter-reset: line-number;
+  width: 100%;
+  text-align: left;
+  margin: var(--lm-space-4) 0;
+}
+.reveal .code-block::before {
+  content: attr(data-language);
+  display: block;
+  background: var(--lm-paper-tint);
+  color: var(--lm-ink-2);
+  font-family: var(--lm-font-sans);
+  font-size: var(--lm-slide-caption);
+  font-weight: 500;
+  padding: var(--lm-space-2) var(--lm-space-4);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: var(--lm-border-thin) solid var(--lm-rule);
+}
+.reveal .code-block code {
+  display: block;
+  padding: var(--lm-space-4);
+  overflow-x: auto;
+  color: var(--lm-ink);
+}
+.reveal .code-block .line {
+  display: block;
+  padding: 2px 0 2px 3em;
+  position: relative;
+  counter-increment: line-number;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+.reveal .code-block .line::before {
+  content: counter(line-number);
+  position: absolute;
+  left: 0;
+  width: 2.5em;
+  text-align: right;
+  color: var(--lm-ink-4);
+  font-size: 0.85em;
+  user-select: none;
+}
+.reveal .code-block .line--highlight {
+  background: var(--lm-accent-tint);
+  border-left: var(--lm-border-accent) solid var(--lm-accent);
+  padding-left: calc(3em - var(--lm-border-accent));
+}
+.reveal .code-block.dim-others .line:not(.line--highlight) {
+  opacity: 0.35;
+}
+
+/* 신택스 컬러 (차분한 톤) */
+.reveal .code-block .fn   { color: var(--lm-info); }
+.reveal .code-block .str  { color: var(--lm-success); }
+.reveal .code-block .cmt  { color: var(--lm-ink-4); font-style: italic; }
+.reveal .code-block .var  { color: var(--lm-ink); }
+.reveal .code-block .op   { color: var(--lm-ink-2); }
+.reveal .code-block .kw   { color: var(--lm-accent); }
+.reveal .code-block .tag  { color: var(--lm-accent); }
+.reveal .code-block .attr { color: var(--lm-info); }
+.reveal .code-block .val  { color: var(--lm-success); }
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 배지 · 액센트선 · 터미널 스타일 (보조 장식)
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .badge {
+  display: inline-block;
+  font-family: var(--lm-font-mono);
+  font-size: var(--lm-slide-caption);
+  color: var(--lm-accent);
+  padding: 3px 10px;
+  border: var(--lm-border-thin) solid var(--lm-accent);
+  border-radius: 100px;
+  letter-spacing: 0.05em;
+}
+.reveal .accent-line {
+  width: 60px;
+  height: 2px;
+  background: var(--lm-accent);
+  margin: var(--lm-space-3) 0;
+  border: none;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 발표자 노트
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal aside.notes {
+  font-family: var(--lm-font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--lm-ink-2);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * Reveal.js 진행 바 / 슬라이드 번호 / 컨트롤
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .progress {
+  height: 3px;
+  color: var(--lm-accent);
+  background: var(--lm-rule);
+}
+.reveal .progress span {
+  background: var(--lm-accent);
+}
+.reveal .slide-number {
+  background: transparent;
+  color: var(--lm-ink-3);
+  font-family: var(--lm-font-mono);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.reveal .controls {
+  color: var(--lm-accent);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * MathJax 오버플로우 방지
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal mjx-container[jax="CHTML"][display="true"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 타이틀 슬라이드 전용 레이아웃
+ *   <section class="title-slide">
+ *     <div class="chapter-tag">...</div>
+ *     <h1>...</h1>
+ *     <p class="slide-sub">...</p>
+ *     <div class="title-meta">...</div>
+ *   </section>
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal .title-slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 140px 120px !important;
+}
+.reveal .title-slide h1 {
+  font-size: var(--lm-slide-display);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin: 0 0 var(--lm-space-4);
+}
+.reveal .title-slide .slide-sub {
+  font-size: var(--lm-slide-h3);
+  color: var(--lm-ink-3);
+  margin: 0 0 var(--lm-space-7);
+  font-weight: 400;
+}
+.reveal .title-slide .title-meta {
+  margin-top: auto;
+  padding-top: var(--lm-space-5);
+  border-top: var(--lm-border-thin) solid var(--lm-rule);
+  font-size: var(--lm-slide-small);
+  color: var(--lm-ink-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
