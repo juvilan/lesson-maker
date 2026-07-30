@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인공지능수학 1학기 핵심 정리 (Ⅰ~Ⅱ단원)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+    @page { size: A4; margin: 12mm 12mm 14mm 12mm; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      font-size: 10pt;
+      line-height: 1.45;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { font-size: 9.5pt; }
+    }
+
+    .ws-page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 12mm 12mm 14mm 12mm;
+      margin: 0 auto;
+      background: #fff;
+      page-break-after: always;
+    }
+    .ws-page:last-child { page-break-after: auto; }
+
+    /* ── 헤더 ── */
+    .ws-header {
+      border-bottom: 2.5px solid #1a1a1a;
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+    }
+    .ws-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .ws-title { font-size: 15pt; font-weight: 900; letter-spacing: -0.4px; }
+    .ws-sub { font-size: 9pt; color: #666; }
+    .ws-name { font-size: 9pt; color: #444; }
+    .ws-name .ln { display: inline-block; width: 70px; border-bottom: 1px solid #999; }
+
+    /* ── 대단원 배너 ── */
+    .unit-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a2b4a;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 5px;
+      margin: 12px 0 8px;
+    }
+    .unit-banner:first-of-type { margin-top: 4px; }
+    .unit-banner .no { font-size: 13pt; font-weight: 900; }
+    .unit-banner .nm { font-size: 12pt; font-weight: 700; }
+
+    /* ── 소단원 제목 ── */
+    .sub-title {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #1a2b4a;
+      border-left: 4px solid #3a5a9a;
+      padding-left: 7px;
+      margin: 12px 0 7px;
+    }
+
+    /* ── 개념 카드 그리드 ── */
+    .cards { display: grid; gap: 7px; margin-bottom: 4px; }
+    .cards.c2 { grid-template-columns: 1fr 1fr; }
+    .card {
+      border: 1px solid #d5dbe6;
+      border-radius: 5px;
+      padding: 7px 9px;
+      background: #fafbfd;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .card h4 {
+      font-size: 9.8pt;
+      font-weight: 700;
+      color: #16305c;
+      margin-bottom: 3px;
+    }
+    .card p { font-size: 9pt; color: #333; margin: 1px 0; }
+    .card .en { color: #888; font-weight: 400; font-size: 8.5pt; }
+    .hl { background: #fff2cc; font-weight: 700; padding: 0 2px; border-radius: 2px; }
+    .key { color: #b5322e; font-weight: 700; }
+
+    /* ── 공식 박스 ── */
+    .formula {
+      background: #eef3fb;
+      border: 1px solid #c6d4ec;
+      border-radius: 4px;
+      padding: 5px 9px;
+      margin: 4px 0;
+      font-size: 9.5pt;
+      text-align: center;
+    }
+
+    /* ── 타임라인 ── */
+    .timeline { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+    .tl {
+      flex: 1 1 30%;
+      border: 1px solid #d5dbe6;
+      border-top: 3px solid #3a5a9a;
+      border-radius: 4px;
+      padding: 5px 8px;
+      background: #fff;
+      page-break-inside: avoid;
+    }
+    .tl .yr { font-weight: 900; color: #16305c; font-size: 10pt; }
+    .tl .ev { font-size: 8.8pt; color: #333; }
+
+    /* ── 표 ── */
+    .mini-table { width: 100%; border-collapse: collapse; margin: 5px 0; font-size: 8.8pt; }
+    .mini-table th { background: #1a2b4a; color: #fff; border: 1px solid #1a2b4a; padding: 3px 6px; text-align: center; font-weight: 600; }
+    .mini-table td { border: 1px solid #cfd6e2; padding: 3px 6px; text-align: center; }
+    .mini-table td.l { text-align: left; }
+
+    /* ── 포인트 배지 ── */
+    .badge {
+      display: inline-block;
+      background: #e8eef8;
+      color: #16305c;
+      font-size: 8.3pt;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      margin-right: 3px;
+    }
+
+    .note { font-size: 8.6pt; color: #666; margin-top: 2px; }
+    .page-number { text-align: center; font-size: 8.5pt; color: #999; margin-top: 10px; padding-top: 5px; border-top: 1px solid #eee; }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] }
+    };
+    window.safeTypeset = window.safeTypeset || function(elements) {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body>
+
+<!-- ═══════════════ 1페이지 (앞면) ═══════════════ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title">인공지능수학 1학기 핵심 정리</span>
+      <span class="ws-name">이름 <span class="ln"></span></span>
+    </div>
+    <div class="ws-sub">Ⅰ. 인공지능과 수학 &nbsp;·&nbsp; Ⅱ. 자료의 표현 &nbsp;|&nbsp; 시험·복습용 요약</div>
+  </div>
+
+  <!-- 대단원 Ⅰ -->
+  <div class="unit-banner">
+    <span class="no">Ⅰ</span><span class="nm">인공지능과 수학</span>
+  </div>
+
+  <!-- Ⅰ-1 역사 -->
+  <div class="sub-title">Ⅰ-1. 인공지능의 역사 — 핵심 사건 흐름</div>
+  <div class="timeline">
+    <div class="tl"><div class="yr">1950</div><div class="ev"><b>튜링 테스트</b> — 기계가 지능을 가졌는지 판별하는 기준 (앨런 튜링)</div></div>
+    <div class="tl"><div class="yr">1956</div><div class="ev"><b>다트머스 회의</b> — <span class="hl">"인공지능(AI)"</span> 용어가 처음 공식 사용</div></div>
+    <div class="tl"><div class="yr">1957~</div><div class="ev"><b>퍼셉트론</b> 등장 → <span class="key">단층은 XOR 문제 해결 불가</span> (선형으로 분리 안 됨)</div></div>
+    <div class="tl"><div class="yr">1970·80s</div><div class="ev"><b>두 차례 AI 겨울</b> — 한계 노출로 투자·관심 급감</div></div>
+    <div class="tl"><div class="yr">2012</div><div class="ev"><b>딥러닝 혁명</b> — 알렉스넷의 ImageNet 우승</div></div>
+    <div class="tl"><div class="yr">2016</div><div class="ev"><b>알파고</b> — 바둑에서 이세돌 9단에게 승리</div></div>
+  </div>
+  <div class="cards c2">
+    <div class="card">
+      <h4>포함 관계</h4>
+      <p><span class="hl">인공지능 ⊃ 머신러닝 ⊃ 딥러닝</span></p>
+      <p class="note">딥러닝은 머신러닝의 한 갈래, 머신러닝은 인공지능의 한 갈래.</p>
+    </div>
+    <div class="card">
+      <h4>딥러닝 혁명의 3요소</h4>
+      <p><span class="badge">빅데이터</span><span class="badge">GPU 연산</span><span class="badge">알고리즘</span></p>
+      <p class="note">방대한 데이터 + 강력한 계산력 + 학습 알고리즘이 동시에 갖춰짐.</p>
+    </div>
+  </div>
+
+  <!-- Ⅰ-2 인공지능과 수학 -->
+  <div class="sub-title">Ⅰ-2. 인공지능을 떠받치는 수학</div>
+  <div class="cards c2">
+    <div class="card">
+      <h4>① 벡터 · 행렬 <span class="en">Vector · Matrix</span></h4>
+      <p>데이터(텍스트·이미지)를 <span class="key">수로 표현</span>하는 핵심 구조.</p>
+      <div class="formula">$A=\begin{pmatrix}1&2\\0&3\end{pmatrix},\ v=\begin{pmatrix}2\\1\end{pmatrix}\Rightarrow Av=\begin{pmatrix}4\\3\end{pmatrix}$</div>
+    </div>
+    <div class="card">
+      <h4>② 함수 <span class="en">Function</span></h4>
+      <p>입력 $x$ → 출력 $y$ 를 정하는 규칙.</p>
+      <p><span class="key">최솟값</span>은 미분으로: $f'(x)=0$ 인 곳을 찾음.</p>
+      <p class="note">예) $f(x)=x^2-4x+5$ → $x=2$ 에서 최소.</p>
+    </div>
+    <div class="card">
+      <h4>③ 확률 <span class="en">Probability</span></h4>
+      <p>불확실한 상황에서 <span class="key">의사결정·예측</span>에 사용.</p>
+      <div class="formula">조건부확률 $P(A\mid B)=\dfrac{P(A\cap B)}{P(B)}$ &nbsp;/&nbsp; 베이즈 정리</div>
+    </div>
+    <div class="card">
+      <h4>한눈에</h4>
+      <p><span class="badge">벡터·행렬</span> 데이터 표현</p>
+      <p><span class="badge">함수</span> 입력→출력 관계·최적화</p>
+      <p><span class="badge">확률</span> 예측·분류의 근거</p>
+    </div>
+  </div>
+
+  <div class="page-number">- 1 -</div>
+</div>
+
+<!-- ═══════════════ 2페이지 (뒷면) ═══════════════ -->
+<div class="ws-page">
+  <div class="ws-header">
+    <div class="ws-header-top">
+      <span class="ws-title" style="font-size:13pt;">Ⅱ. 자료의 표현</span>
+      <span class="ws-sub">텍스트 · 이미지를 수와 행렬로</span>
+    </div>
+  </div>
+
+  <!-- 대단원 Ⅱ -->
+  <div class="unit-banner">
+    <span class="no">Ⅱ</span><span class="nm">자료의 표현</span>
+  </div>
+
+  <!-- Ⅱ-1 텍스트 -->
+  <div class="sub-title">Ⅱ-1. 텍스트 자료 — 글을 수(벡터)로</div>
+  <div class="cards c2">
+    <div class="card">
+      <h4>원-핫 벡터 <span class="en">One-hot</span></h4>
+      <p>단어 사전에서 <span class="key">해당 단어 자리만 1</span>, 나머지는 0.</p>
+      <p class="note">사전 {영화, 긴장감, 감동} → "긴장감" = (0, 1, 0)</p>
+    </div>
+    <div class="card">
+      <h4>BoW <span class="en">Bag of Words</span></h4>
+      <p>사전 각 단어의 <span class="key">등장 빈도</span>로 만든 벡터.</p>
+      <p class="key">단어 순서를 무시</p> — "나는 학교가 좋다" = "학교가 나는 좋다"
+    </div>
+    <div class="card">
+      <h4>불용어 <span class="en">Stopword</span></h4>
+      <p>의미가 적어 <span class="key">분석 전에 제거</span>하는 단어.</p>
+      <p class="note">예) 은/는/이/가, 그리고, ~하다 …</p>
+    </div>
+    <div class="card">
+      <h4>TF · IDF — 핵심어 찾기</h4>
+      <div class="formula">$TF=\dfrac{\text{단어 등장 횟수}}{\text{문서 전체 단어 수}}$</div>
+      <div class="formula">$IDF=\log\dfrac{n}{DF}$ &nbsp; ($n$=총 문서 수, $DF$=단어가 나온 문서 수)</div>
+      <p class="note"><b>TF·IDF = TF × IDF</b> → 값이 클수록 그 문서의 핵심어. 흔한 단어는 IDF가 작아 걸러짐.</p>
+    </div>
+  </div>
+
+  <div class="sub-title">Ⅱ-1(보충). 텍스트 자료의 시각화</div>
+  <div class="cards c2">
+    <div class="card">
+      <h4>워드 클라우드</h4>
+      <p><span class="key">글자 크기 = 단어 빈도</span>. 어떤 단어가 자주 쓰였는지 한눈에.</p>
+    </div>
+    <div class="card">
+      <h4>막대 · 원그래프</h4>
+      <p>막대: 빈도 비교. 원: <span class="key">상대도수</span>와 중심각($=\text{상대도수}\times360^\circ$)으로 비율 표현.</p>
+    </div>
+  </div>
+
+  <!-- Ⅱ-2 이미지 -->
+  <div class="sub-title">Ⅱ-2. 이미지 자료 — 사진을 행렬로</div>
+  <div class="cards c2">
+    <div class="card">
+      <h4>픽셀 → 행렬</h4>
+      <p>이미지는 픽셀의 격자 = <span class="key">행렬</span>. 성분 표기 $a_{ij}$ ($i$행 $j$열).</p>
+      <table class="mini-table">
+        <tr><th>흑백(이진)</th><th>그레이스케일</th><th>컬러</th></tr>
+        <tr><td>0 또는 1</td><td class="l"><span class="key">0=검정 ~ 255=흰색</span></td><td>RGB 3채널</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h4>이미지 처리 = 행렬 연산</h4>
+      <p><b>스칼라배 $kA$</b>: <span class="key">$k<1$ 어둡게, $k>1$ 밝게</span>.</p>
+      <p class="note">밝게 할 때 255를 넘으면 255로 처리(클리핑).</p>
+      <p><b>덧셈·뺄셈 $A\pm B$</b>: 같은 자리 성분끼리 계산 → 합성·차이 검출.</p>
+    </div>
+  </div>
+
+  <div class="cards" style="margin-top:6px;">
+    <div class="card" style="background:#fff8e8; border-color:#e6d3a3;">
+      <h4>💡 대단원 한 줄 요약</h4>
+      <p><b>모든 자료(글·그림)를 결국 수·벡터·행렬로 바꿔야</b> 인공지능이 계산·분류·예측할 수 있다.</p>
+    </div>
+  </div>
+
+  <div class="page-number">- 2 -</div>
+</div>
+
+</body>
+</html>
