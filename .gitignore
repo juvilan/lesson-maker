@@ -22,3 +22,6 @@ node_modules/
 *.tmp
 *.bak
 .claude/worktrees/
+
+# 도구 캐시
+.serena/
