@@ -65,5 +65,5 @@ python3 -m http.server 8791
   git clone --filter=blob:none --no-checkout https://github.com/juvilan/lesson-maker.git
   cd lesson-maker && git sparse-checkout set --no-cone '/*' '!/*/book/' && git checkout main
   ```
-  (미검증 명령입니다. `du -sh .`로 확인하고, PDF가 필요해지면 `git sparse-checkout disable`.)
+  ⚠️ **이 명령은 쓰지 마세요 — 검증 결과 실패입니다.** 2026-08-19 윈도우에서 실제로 실행한 결과 `You are in a sparse checkout with 0% of tracked files present.` 로, 파일이 하나도 체크아웃되지 않은 빈 저장소가 만들어졌습니다. `--no-cone`의 포함 패턴 `'/*'`와 배제 패턴 `'!/*/book/'`이 충돌한 것으로 보입니다. 용량을 줄여야 한다면 cone 모드로 다시 작성해 **실제 clone으로 검증한 뒤** 이 자리에 적어주세요. (잘못 실행했다면 되돌리기: `git sparse-checkout disable` 또는 저장소를 지우고 README대로 전체 clone.)
 - **습관**: 작업 시작 `/sync`, 작업 끝 `/commit-push-pr`. 이번에 `3b40f30`이 push 없이 맥에만 20일 남아 있던 게 이 습관이 빠져서였습니다.
