@@ -130,12 +130,12 @@ const {{asset_id}}_net = new NeuralNetDiagram('{{asset_id}}-container', {{layers
 XOR 데이터 포인트 시각화 (선형 분리 불가 강조).
 
 ```html
-<canvas id="{{asset_id}}" width="280" height="280" style="border-radius:8px; max-height:280px;"></canvas>
+<canvas id="{{asset_id}}" width="420" height="420" style="border-radius:8px; max-height:420px;"></canvas>
 <script>
 (function() {
   const c = document.getElementById('{{asset_id}}');
   const ctx = c.getContext('2d');
-  const W=280, H=280, m=40, s=180;
+  const W=420, H=420, m=60, s=270;
   ctx.fillStyle='#1a1a2e'; ctx.fillRect(0,0,W,H);
   ctx.strokeStyle='#555'; ctx.lineWidth=1;
   ctx.strokeRect(m,m,s,s);
@@ -210,7 +210,7 @@ XOR를 집합(벤다이어그램)으로 시각화.
 결정 경계 2D 시각화 + 경계선 수식 연결.
 
 ```html
-<canvas id="{{asset_id}}" width="320" height="280" style="border-radius:8px; max-height:280px;"></canvas>
+<canvas id="{{asset_id}}" width="480" height="420" style="border-radius:8px; max-height:420px;"></canvas>
 <div class="param-slider-group">
   <label>임계값 θ</label>
   <input type="range" min="0.1" max="1.0" step="0.05" value="{{theta}}"
@@ -227,7 +227,7 @@ XOR를 집합(벤다이어그램)으로 시각화.
 Chart.js 사용. **반드시** `responsive:true, maintainAspectRatio:true, aspectRatio:1.6` 적용.
 
 ```html
-<div style="position:relative; max-height:280px;">
+<div style="position:relative; max-height:420px;">
   <canvas id="{{asset_id}}"></canvas>
 </div>
 <script>
