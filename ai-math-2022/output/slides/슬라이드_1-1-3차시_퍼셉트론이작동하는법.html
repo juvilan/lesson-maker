@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>퍼셉트론이 작동하는 법 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    /* ── SVG 공통 (색은 전부 토큰) ── */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .fill-page   { fill: var(--lm-page); }
+    .dg .fill-tint   { fill: var(--lm-paper-tint); }
+    .dg .fill-accent { fill: var(--lm-accent); }
+    .dg .fill-soft   { fill: var(--lm-paper-soft); }
+    .dg .stroke-rule   { stroke: var(--lm-rule-strong); fill: none; }
+    .dg .stroke-accent { stroke: var(--lm-accent); fill: none; }
+    .dg .stroke-ink    { stroke: var(--lm-ink-3); fill: none; }
+    .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink); }
+    .dg .t-cap  { font-size: 17px; fill: var(--lm-ink-3); }
+    .dg .t-lab  { font-size: 19px; fill: var(--lm-ink-2); }
+    .dg .t-val  { font-size: 20px; fill: var(--lm-accent); font-weight: 600; }
+    .dg .t-big  { font-size: 26px; fill: var(--lm-ink); }
+    .dg .t-white { fill: var(--lm-page); }
+
+    /* ── 신경세포 ↔ 퍼셉트론 대응표 ── */
+    .map-table td:first-child { text-align: right; color: var(--lm-ink-2); }
+    .map-table td:nth-child(2) { color: var(--lm-ink-4); width: 3em; }
+    .map-table td:last-child { text-align: left; font-weight: 600; }
+
+    /* ── 카드 (포함관계·가중치) ── */
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-3); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+
+    /* ── 활성화함수 4종 미니 카드 ── */
+    .act-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--lm-space-4);
+                margin-top: var(--lm-space-4); }
+    .act-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-3);
+                text-align: center; }
+    .act-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small); }
+    .act-card p { margin: var(--lm-space-2) 0 0; font-size: var(--lm-slide-caption);
+                  line-height: var(--lm-slide-line-tight); color: var(--lm-ink-3); }
+
+    /* ── O/X 확인하기 ── */
+    .ox-list { list-style: none; padding: 0; margin: var(--lm-space-4) 0 0; }
+    .ox-list li { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-5);
+                  margin-bottom: var(--lm-space-3); font-size: var(--lm-slide-small);
+                  cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+    .ox-list li:hover { border-color: var(--lm-accent); }
+    .ox-list li .ox-ans { display: block; margin-top: var(--lm-space-2);
+                          font-size: var(--lm-slide-caption); color: var(--lm-accent);
+                          font-weight: 600; opacity: 0; transition: opacity 0.3s ease; }
+    .ox-list li.revealed { background: var(--lm-accent-tint); border-color: var(--lm-accent); }
+    .ox-list li.revealed .ox-ans { opacity: 1; }
+  </style>
+</head>
+
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ═══════════ 1. 타이틀 ═══════════ -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅰ-1 인공지능의 의미 · 3차시</div>
+    <h1>퍼셉트론이 작동하는 법</h1>
+    <p class="slide-sub">신경 세포 하나를 수학으로 옮기면</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 17~20쪽</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 2. 복습 → 오늘의 질문 ═══════════ -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>셋 다 "조금씩 고쳐 나간다"고 했다</h2>
+
+    <table class="calc-table" style="margin-top: var(--lm-space-4);">
+      <thead><tr><th>학습 방식</th><th>기계에게 주는 것</th><th>기계가 하는 일</th></tr></thead>
+      <tbody>
+        <tr><td>지도학습</td><td>정답</td><td>오차를 줄인다</td></tr>
+        <tr><td>비지도학습</td><td>아무것도 주지 않음</td><td>구조를 스스로 찾는다</td></tr>
+        <tr><td>강화학습</td><td>보상(점수)</td><td>보상을 키운다</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      그런데 기계 안에서 대체 <span class="kw-success">'무엇이' 고쳐지는</span> 걸까?
+      오늘 그 정체를 만난다.
+    </div>
+  </section>
+
+  <!-- ═══════════ 3. 학습 목표 ═══════════ -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>신경 세포와 <span class="kw">퍼셉트론</span>의 각 부분이 어떻게 대응되는지 설명할 수 있다.</span></li>
+      <li><span class="num">2</span><span>입력값과 가중치로 <span class="kw">가중합</span>을 구할 수 있다.</span></li>
+      <li><span class="num">3</span><span><span class="kw">활성화함수</span>로 퍼셉트론의 출력값을 결정할 수 있다.</span></li>
+    </ul>
+  </section>
+
+  <!-- ═══════════ 4. 인공지능 ⊃ 기계학습 ⊃ 딥러닝 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 17쪽</div>
+    <h2>딥러닝은 기계학습의 한 갈래다</h2>
+
+    <div class="two-col ratio-1-2" style="margin-top: var(--lm-space-4); align-items: center;">
+      <svg class="dg" viewBox="0 0 380 300" width="380" height="300" preserveAspectRatio="xMidYMid meet">
+        <circle cx="190" cy="150" r="140" class="fill-soft"/>
+        <circle cx="190" cy="150" r="140" class="stroke-rule" stroke-width="1.5"/>
+        <circle cx="190" cy="168" r="97" class="fill-tint"/>
+        <circle cx="190" cy="168" r="97" class="stroke-rule" stroke-width="1.5"/>
+        <circle cx="190" cy="192" r="55" class="fill-accent" opacity="0.85"/>
+        <text x="190" y="42" text-anchor="middle" class="t-lab">인공지능</text>
+        <text x="190" y="103" text-anchor="middle" class="t-lab">기계학습</text>
+        <text x="190" y="200" text-anchor="middle" class="t-big t-white">딥러닝</text>
+      </svg>
+
+      <div>
+        <div class="definition-box">
+          <span class="kw">딥러닝(deep learning)</span>은 컴퓨터가 <b>인공신경망을 여러 층으로 연결</b>하여
+          학습하는 대표적인 기계학습 방식이다.
+        </div>
+        <div class="info-box" style="margin-top: var(--lm-space-4);">
+          <span class="kw-info">인공신경망</span> — 인간의 신경 세포가 자극을 전달하는 체계를
+          <b>수학적으로 모델링</b>한 것.
+        </div>
+        <div class="result-box" style="margin-top: var(--lm-space-4);">
+          그러니 먼저 볼 것은 컴퓨터가 아니라 <span class="kw-success">신경 세포 한 개</span>다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 5. 신경 세포 한 개 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 17쪽</div>
+    <h2>신경 세포 한 개는 이렇게 일한다</h2>
+
+    <svg class="dg" viewBox="0 0 1180 300" width="1180" height="300" preserveAspectRatio="xMidYMid meet"
+         style="margin-top: var(--lm-space-3);">
+      <!-- 가지 돌기 -->
+      <path d="M60,70 L180,140 M40,150 L180,150 M60,232 L180,162" class="stroke-ink" stroke-width="3" stroke-linecap="round"/>
+      <path d="M60,70 L34,52 M60,70 L36,84 M60,232 L34,248 M60,232 L36,216 M40,150 L16,136 M40,150 L16,166"
+            class="stroke-ink" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- 세포체 -->
+      <circle cx="235" cy="150" r="58" class="fill-tint"/>
+      <circle cx="235" cy="150" r="58" class="stroke-rule" stroke-width="2"/>
+      <circle cx="235" cy="150" r="20" class="fill-accent" opacity="0.75"/>
+      <!-- 축삭 돌기 -->
+      <line x1="293" y1="150" x2="880" y2="150" class="stroke-ink" stroke-width="6" stroke-linecap="round"/>
+      <!-- 말단 -->
+      <path d="M880,150 L960,96 M880,150 L975,150 M880,150 L960,204" class="stroke-ink" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="962" cy="94" r="9" class="fill-accent"/>
+      <circle cx="977" cy="150" r="9" class="fill-accent"/>
+      <circle cx="962" cy="206" r="9" class="fill-accent"/>
+      <!-- 전달 방향 -->
+      <path d="M330,236 L830,236" class="stroke-accent" stroke-width="2" stroke-dasharray="7 7"/>
+      <path d="M830,236 l-14,-6 l0,12 z" class="fill-accent"/>
+      <text x="580" y="226" text-anchor="middle" class="t-cap">자극의 전달 방향</text>
+      <!-- 라벨 -->
+      <text x="70" y="286" text-anchor="middle" class="t-lab">가지 돌기</text>
+      <text x="235" y="286" text-anchor="middle" class="t-lab">신경 세포체</text>
+      <text x="590" y="122" text-anchor="middle" class="t-lab">축삭 돌기</text>
+      <text x="1010" y="286" text-anchor="middle" class="t-lab">말단</text>
+      <text x="70" y="40" text-anchor="middle" class="t-cap">자극을 받아들인다</text>
+      <text x="235" y="60" text-anchor="middle" class="t-cap">자극을 통합한다</text>
+      <text x="1050" y="150" class="t-cap">다음 세포로</text>
+    </svg>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      핵심은 여기다 — 축삭 돌기는 전달된 <b>자극의 세기의 총합</b>이
+      <span class="kw-danger">임곗값보다 큰 경우에만</span> 활성화되어 자극을 넘긴다.
+      <span class="chip chip-muted">아주 작은 자극에도 반응하면 신경망에 피로가 쌓여 정작 중요한 자극을 놓친다</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 6. 신경 세포 ↔ 퍼셉트론 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 17~19쪽 <span class="badge">오늘의 중심</span></div>
+    <h2>퍼셉트론은 신경 세포를 베낀 것이다</h2>
+
+    <svg class="dg" viewBox="0 0 1060 250" width="1060" height="250" preserveAspectRatio="xMidYMid meet">
+      <!-- 입력 -->
+      <circle cx="70" cy="60"  r="34" class="fill-page"/><circle cx="70" cy="60"  r="34" class="stroke-rule" stroke-width="2"/>
+      <circle cx="70" cy="190" r="34" class="fill-page"/><circle cx="70" cy="190" r="34" class="stroke-rule" stroke-width="2"/>
+      <text x="70" y="68"  text-anchor="middle" class="t-big">x₁</text>
+      <text x="70" y="198" text-anchor="middle" class="t-big">x₂</text>
+      <!-- 엣지 -->
+      <line x1="104" y1="72"  x2="326" y2="112" class="stroke-ink" stroke-width="2"/>
+      <line x1="104" y1="178" x2="326" y2="138" class="stroke-ink" stroke-width="2"/>
+      <text x="205" y="80"  text-anchor="middle" class="t-val">w₁</text>
+      <text x="205" y="185" text-anchor="middle" class="t-val">w₂</text>
+      <!-- 가중합 -->
+      <circle cx="366" cy="125" r="42" class="fill-tint"/><circle cx="366" cy="125" r="42" class="stroke-rule" stroke-width="2"/>
+      <text x="366" y="136" text-anchor="middle" class="t-big">Σ</text>
+      <text x="366" y="205" text-anchor="middle" class="t-cap">가중합 x</text>
+      <!-- 활성화함수 -->
+      <line x1="408" y1="125" x2="500" y2="125" class="stroke-ink" stroke-width="2"/>
+      <rect x="500" y="83" width="118" height="84" rx="8" class="fill-page"/>
+      <rect x="500" y="83" width="118" height="84" rx="8" class="stroke-accent" stroke-width="2.5"/>
+      <text x="559" y="136" text-anchor="middle" class="t-big">σ(x)</text>
+      <text x="559" y="205" text-anchor="middle" class="t-cap">활성화함수</text>
+      <!-- 출력 -->
+      <line x1="618" y1="125" x2="710" y2="125" class="stroke-ink" stroke-width="2"/>
+      <path d="M710,125 l-14,-6 l0,12 z" class="fill-accent"/>
+      <circle cx="760" cy="125" r="40" class="fill-accent" opacity="0.85"/>
+      <text x="760" y="134" text-anchor="middle" class="t-big t-white">출력</text>
+      <text x="905" y="118" class="t-lab">임곗값 h를 넘으면 c,</text>
+      <text x="905" y="148" class="t-lab">넘지 못하면 0</text>
+    </svg>
+
+    <table class="calc-table map-table" style="margin-top: var(--lm-space-3); width: 78%;">
+      <thead><tr><th>신경 세포</th><th></th><th>퍼셉트론</th></tr></thead>
+      <tbody>
+        <tr><td>가지 돌기가 받는 자극</td><td>→</td><td>입력값 \(x_1, x_2, \ldots, x_n\)</td></tr>
+        <tr><td>세포 사이의 연결 강도</td><td>→</td><td class="result-cell">가중치 \(w_1, w_2, \ldots, w_n\)</td></tr>
+        <tr><td>세포체가 자극을 통합</td><td>→</td><td>가중합 \(x\)</td></tr>
+        <tr><td>임곗값을 넘어야 전달</td><td>→</td><td class="result-cell">활성화함수 \(\sigma\)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════ 7. 가중치란 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 18쪽</div>
+    <h2>가중치 — 무엇을 중요하게 볼 것인가</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>🐕 개와 고양이를 나눠라</h4>
+        <p>처음에 인공지능은 <b>어떤 정보가 중요한지 모른다.</b></p>
+        <p>사진에서 뽑은 여러 특징을 일단 다 받아들인다 —
+           코의 생김새, 귀의 각도, 털 색, 배경의 밝기…</p>
+        <p style="margin-top: var(--lm-space-3); color: var(--lm-ink-3);">
+          분류에 <b>유용한 특징</b>을 발견하면 그 특징의 가중치를 <b>높게</b> 조정한다.
+          쓸모없는 특징의 가중치는 낮아진다.</p>
+      </div>
+
+      <div>
+        <svg class="dg" viewBox="0 0 460 250" width="460" height="250" preserveAspectRatio="xMidYMid meet">
+          <text x="30" y="46" class="t-lab">코의 생김새</text>
+          <line x1="215" y1="38" x2="360" y2="112" class="stroke-accent" stroke-width="9" stroke-linecap="round"/>
+          <text x="30" y="130" class="t-lab">귀의 각도</text>
+          <line x1="215" y1="122" x2="360" y2="122" class="stroke-accent" stroke-width="5" stroke-linecap="round"/>
+          <text x="30" y="214" class="t-lab">배경의 밝기</text>
+          <line x1="215" y1="206" x2="360" y2="134" class="stroke-ink" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="392" cy="123" r="34" class="fill-tint"/>
+          <circle cx="392" cy="123" r="34" class="stroke-rule" stroke-width="2"/>
+          <text x="392" y="134" text-anchor="middle" class="t-big">Σ</text>
+          <text x="230" y="20" class="t-cap">굵을수록 큰 가중치</text>
+        </svg>
+
+        <div class="result-box" style="margin-top: var(--lm-space-3);">
+          지난 시간 물음의 답 —
+          인공신경망에서 <span class="kw-success">학습이란 적절한 가중치를 찾아가는 과정</span>이다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 8. 가중합 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 18쪽</div>
+    <h2>가중합 — 자극을 하나로 합치기</h2>
+
+    <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin-top: var(--lm-space-4);">
+      퍼셉트론으로 입력되는 \(n\)개의 값 \(x_1, x_2, \ldots, x_n\)에
+      가중치 \(w_1, w_2, \ldots, w_n\)을 각각 <b>곱하여 더한 값</b>을 가중합이라 한다.
+    </p>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-4);">
+      \[ x = x_1w_1 + x_2w_2 + \cdots + x_nw_n \]
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="info-box">
+        입력이 크다고 무조건 세게 전달되는 게 아니다.
+        <span class="kw-info">중요하다고 판단한 입력</span>에 큰 가중치가 붙어 총합을 키운다.
+      </div>
+      <div class="warning-box">
+        가중치는 <b>음수</b>일 수도 있다.
+        그러면 그 입력은 총합을 <span class="kw-danger">깎는</span> 방향으로 작용한다.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 9. 활성화함수 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 19쪽</div>
+    <h2>활성화함수 — 넘길지 말지 결정하는 문지기</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3); align-items: center;">
+      <div>
+        <div class="definition-box">
+          퍼셉트론에서 들어오는 자극의 강도에 따라 <b>자극의 전달 여부를 결정</b>할 때 쓰는 함수를
+          <span class="kw">활성화함수(activation function)</span>라고 한다.
+        </div>
+        <div class="formula-box" style="margin-top: var(--lm-space-4);">
+          \[ \sigma(x) = \begin{cases} c & (x \ge h) \\[2pt] 0 & (x < h) \end{cases} \]
+        </div>
+        <p style="font-size: var(--lm-slide-caption); color: var(--lm-ink-3); text-align:center; margin:0;">
+          \(c\)는 0이 아닌 상수, \(h\)는 임곗값
+        </p>
+      </div>
+
+      <div>
+        <svg class="dg" viewBox="0 0 420 300" width="420" height="300" preserveAspectRatio="xMidYMid meet">
+          <line x1="40" y1="240" x2="390" y2="240" class="stroke-ink" stroke-width="1.5"/>
+          <line x1="60" y1="270" x2="60" y2="30" class="stroke-ink" stroke-width="1.5"/>
+          <text x="396" y="248" class="t-cap">x</text>
+          <text x="46" y="28" class="t-cap">y</text>
+          <!-- 임곗값 보조선 -->
+          <line x1="215" y1="240" x2="215" y2="80" class="stroke-rule" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <line x1="60" y1="80" x2="215" y2="80" class="stroke-rule" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <!-- 계단 -->
+          <line x1="60" y1="240" x2="215" y2="240" class="stroke-accent" stroke-width="4"/>
+          <line x1="215" y1="80" x2="380" y2="80" class="stroke-accent" stroke-width="4"/>
+          <circle cx="215" cy="240" r="6" class="fill-page"/>
+          <circle cx="215" cy="240" r="6" class="stroke-accent" stroke-width="3"/>
+          <circle cx="215" cy="80" r="6" class="fill-accent"/>
+          <text x="215" y="266" text-anchor="middle" class="t-val">h</text>
+          <text x="44" y="88" text-anchor="end" class="t-val">c</text>
+          <text x="44" y="248" text-anchor="end" class="t-cap">0</text>
+          <text x="300" y="60" text-anchor="middle" class="t-cap">넘겼다 → c</text>
+          <text x="130" y="222" text-anchor="middle" class="t-cap">못 넘겼다 → 0</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      활성화함수는 <span class="kw-success">가중합을 임곗값과 비교하여</span> 퍼셉트론의 출력값을 결정한다.
+    </div>
+  </section>
+
+  <!-- ═══════════ 10. 예제 1 (순전파) ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 19쪽 · 예제 1</div>
+    <h2>직접 통과시켜 보자</h2>
+
+    <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin: 0;">
+      가중치가 \(w_1 = 0.8\), \(w_2 = 0.3\)이고 활성화함수가
+      \(\sigma(x) = 3\ (x \ge 1)\), \(0\ (x < 1)\)인 퍼셉트론이 있다.
+      입력값 \(x_1 = 1\), \(x_2 = 2\)에 대한 출력값을 구하시오.
+    </p>
+
+    <div class="two-col ratio-2-1" style="margin-top: var(--lm-space-3);">
+      <div class="nn-container" style="margin:0;">
+        <svg class="dg" id="fwd" viewBox="0 0 700 250" width="700" height="250" preserveAspectRatio="xMidYMid meet">
+          <circle cx="60" cy="60"  r="34" class="fill-page" id="fw-n1"/><circle cx="60" cy="60"  r="34" class="stroke-rule" stroke-width="2"/>
+          <circle cx="60" cy="190" r="34" class="fill-page" id="fw-n2"/><circle cx="60" cy="190" r="34" class="stroke-rule" stroke-width="2"/>
+          <text x="60" y="55"  text-anchor="middle" class="t-lab">x₁</text>
+          <text x="60" y="80"  text-anchor="middle" class="t-val" id="fw-x1">1</text>
+          <text x="60" y="185" text-anchor="middle" class="t-lab">x₂</text>
+          <text x="60" y="210" text-anchor="middle" class="t-val" id="fw-x2">2</text>
+
+          <line x1="94" y1="72"  x2="286" y2="112" class="stroke-ink" stroke-width="2" id="fw-e1"/>
+          <line x1="94" y1="178" x2="286" y2="138" class="stroke-ink" stroke-width="2" id="fw-e2"/>
+          <text x="185" y="78"  text-anchor="middle" class="t-val">w₁ = 0.8</text>
+          <text x="185" y="188" text-anchor="middle" class="t-val">w₂ = 0.3</text>
+
+          <circle cx="326" cy="125" r="42" class="fill-page" id="fw-sum"/><circle cx="326" cy="125" r="42" class="stroke-rule" stroke-width="2"/>
+          <text x="326" y="120" text-anchor="middle" class="t-big">Σ</text>
+          <text x="326" y="148" text-anchor="middle" class="t-val" id="fw-z">?</text>
+
+          <line x1="368" y1="125" x2="440" y2="125" class="stroke-ink" stroke-width="2"/>
+          <rect x="440" y="85" width="112" height="80" rx="8" class="fill-page" id="fw-act"/>
+          <rect x="440" y="85" width="112" height="80" rx="8" class="stroke-rule" stroke-width="2" id="fw-actb"/>
+          <text x="496" y="120" text-anchor="middle" class="t-lab">σ(x)</text>
+          <text x="496" y="146" text-anchor="middle" class="t-cap">h = 1</text>
+
+          <line x1="552" y1="125" x2="614" y2="125" class="stroke-ink" stroke-width="2"/>
+          <path d="M614,125 l-13,-6 l0,12 z" class="fill-accent"/>
+          <circle cx="655" cy="125" r="36" class="fill-page" id="fw-out"/><circle cx="655" cy="125" r="36" class="stroke-rule" stroke-width="2"/>
+          <text x="655" y="134" text-anchor="middle" class="t-big" id="fw-y">?</text>
+        </svg>
+      </div>
+
+      <div>
+        <div class="step-box" id="fs1">
+          <div class="step-label">STEP 1 · 가중합</div>
+          \( x = 1 \times 0.8 + 2 \times 0.3 \)
+        </div>
+        <div class="step-box" id="fs2">
+          <div class="step-label">STEP 2 · 계산</div>
+          \( x = 0.8 + 0.6 = 1.4 \)
+        </div>
+        <div class="step-box" id="fs3">
+          <div class="step-label">STEP 3 · 임곗값과 비교</div>
+          \( 1.4 \ge 1 \)이므로 \( \sigma(1.4) = 3 \)
+        </div>
+      </div>
+    </div>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="fwNext">다음 단계</button>
+      <span class="step-counter" id="fwCount">0 / 3</span>
+      <button class="anim-btn reset-btn" id="fwReset">처음으로</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ 11. 문제 3 ═══════════ -->
+  <section>
+    <div class="chapter-tag">활동 · 교과서 19쪽 문제 3</div>
+    <h2>가중치가 음수라면</h2>
+
+    <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin: 0;">
+      \(w_1 = 0.3\), \(w_2 = -0.4\)이고 활성화함수가 \(\sigma(x) = 2\ (x \ge 0)\), \(0\ (x < 0)\)인 퍼셉트론이다.
+      각 입력에 대한 가중합 \(x\)와 출력값 \(\sigma(x)\)를 구하시오.
+      <span class="chip chip-muted">행을 누르면 답이 나옵니다</span>
+    </p>
+
+    <table class="calc-table" id="p3" style="margin-top: var(--lm-space-4); width: 82%;">
+      <thead><tr><th>x₁</th><th>x₂</th><th>가중합 x</th><th>σ(x)</th></tr></thead>
+      <tbody>
+        <tr data-x="0.3 + (-0.4) = -0.1" data-y="0"><td>1</td><td>1</td><td class="fillable">?</td><td class="fillable">?</td></tr>
+        <tr data-x="0.3 + 0 = 0.3"       data-y="2"><td>1</td><td>0</td><td class="fillable">?</td><td class="fillable">?</td></tr>
+        <tr data-x="0 + (-0.4) = -0.4"   data-y="0"><td>0</td><td>1</td><td class="fillable">?</td><td class="fillable">?</td></tr>
+        <tr data-x="0 + 0 = 0"           data-y="2"><td>0</td><td>0</td><td class="fillable">?</td><td class="fillable">?</td></tr>
+      </tbody>
+    </table>
+
+    <div class="anim-controls" style="margin-top: var(--lm-space-3);">
+      <button class="anim-btn" id="p3All">전부 채우기</button>
+      <button class="anim-btn reset-btn" id="p3Reset">지우기</button>
+    </div>
+
+    <div class="warning-box" id="p3Note" style="margin-top: var(--lm-space-3); opacity: 0; transition: opacity 0.4s;">
+      마지막 줄을 조심하자. 입력이 둘 다 0이면 가중합도 0인데,
+      \(x \ge 0\)이므로 <span class="kw-danger">출력은 0이 아니라 2</span>다.
+      임곗값에 걸쳐 있을 때 어느 쪽인지는 <b>부등호가 정한다.</b>
+    </div>
+  </section>
+
+  <!-- ═══════════ 12. 여러 가지 활성화함수 (맛보기) ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 20쪽 · 인공지능 이야기</div>
+    <h2>문지기는 한 종류가 아니다</h2>
+
+    <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin: 0;">
+      활성화함수의 특성은 퍼셉트론의 성능에 큰 영향을 준다.
+      그래서 개발자들은 <b>목적과 상황에 맞는 활성화함수</b>를 골라 쓴다.
+    </p>
+
+    <div class="act-grid">
+      <div class="act-card">
+        <h4>계단함수</h4>
+        <svg class="dg" viewBox="0 0 200 120" width="200" height="120" preserveAspectRatio="xMidYMid meet">
+          <line x1="14" y1="96" x2="190" y2="96" class="stroke-ink" stroke-width="1.2"/>
+          <line x1="100" y1="112" x2="100" y2="14" class="stroke-ink" stroke-width="1.2"/>
+          <line x1="16" y1="96" x2="100" y2="96" class="stroke-accent" stroke-width="3.5"/>
+          <line x1="100" y1="30" x2="188" y2="30" class="stroke-accent" stroke-width="3.5"/>
+        </svg>
+        <p>0 또는 1. 초기 신경망에 쓰였다. <b>미분이 막혀</b> 학습에 제한이 있다.</p>
+      </div>
+      <div class="act-card">
+        <h4>시그모이드</h4>
+        <svg class="dg" viewBox="0 0 200 120" width="200" height="120" preserveAspectRatio="xMidYMid meet">
+          <line x1="14" y1="96" x2="190" y2="96" class="stroke-ink" stroke-width="1.2"/>
+          <line x1="100" y1="112" x2="100" y2="14" class="stroke-ink" stroke-width="1.2"/>
+          <path d="M16,94 C60,93 78,88 100,63 C122,38 140,33 188,32" class="stroke-accent" stroke-width="3.5"/>
+        </svg>
+        <p>부드러운 S자. 가운데는 진하게, 양 끝으로 갈수록 <b>기울기가 사라진다.</b></p>
+      </div>
+      <div class="act-card">
+        <h4>쌍곡탄젠트</h4>
+        <svg class="dg" viewBox="0 0 200 120" width="200" height="120" preserveAspectRatio="xMidYMid meet">
+          <line x1="14" y1="60" x2="190" y2="60" class="stroke-ink" stroke-width="1.2"/>
+          <line x1="100" y1="112" x2="100" y2="10" class="stroke-ink" stroke-width="1.2"/>
+          <path d="M16,104 C58,103 78,96 100,60 C122,24 142,17 188,16" class="stroke-accent" stroke-width="3.5"/>
+        </svg>
+        <p>시그모이드와 닮았지만 출력이 <b>음수까지</b> 내려간다.</p>
+      </div>
+      <div class="act-card">
+        <h4>ReLU</h4>
+        <svg class="dg" viewBox="0 0 200 120" width="200" height="120" preserveAspectRatio="xMidYMid meet">
+          <line x1="14" y1="96" x2="190" y2="96" class="stroke-ink" stroke-width="1.2"/>
+          <line x1="100" y1="112" x2="100" y2="14" class="stroke-ink" stroke-width="1.2"/>
+          <line x1="16" y1="96" x2="100" y2="96" class="stroke-accent" stroke-width="3.5"/>
+          <line x1="100" y1="96" x2="176" y2="20" class="stroke-accent" stroke-width="3.5"/>
+        </svg>
+        <p>음수는 싹 지우고, 양수는 <b>기울기를 그대로</b> 유지한다. 오늘날 가장 널리 쓰인다.</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      "미분이 막힌다"는 말이 왜 문제인지는 <span class="kw-info">4단원 손실함수·경사하강법</span>에서 갚는다.
+      지금은 <b>문지기의 성격이 여러 가지다</b>까지만 알아 두자.
+    </div>
+  </section>
+
+  <!-- ═══════════ 13. 정리 ═══════════ -->
+  <section>
+    <div class="chapter-tag">정리</div>
+    <h2>오늘 한 줄</h2>
+
+    <ul class="ox-list">
+      <li>⑴ 지도학습은 인공지능에게 정답을 알려 주지 않고 학습시키는 방법이다.
+        <span class="ox-ans">✗ — 정답을 <b>알려 주는</b> 것이 지도학습이다.</span></li>
+      <li>⑵ 활성화함수는 가중합을 임곗값과 비교하여 퍼셉트론의 출력값을 결정한다.
+        <span class="ox-ans">○ — 오늘 배운 그대로다.</span></li>
+    </ul>
+
+    <div class="three-col" style="margin-top: var(--lm-space-5);">
+      <div class="concept-card">
+        <div class="icon">🧠</div>
+        <h4>퍼셉트론</h4>
+        <p>신경 세포 하나를 <span class="kw">수학으로 옮긴 것</span></p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">⚖️</div>
+        <h4>가중합</h4>
+        <p><span class="kw">중요도를 곱해 더한</span> 자극의 총합</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🚪</div>
+        <h4>활성화함수</h4>
+        <p>임곗값과 견주어 <span class="kw">넘길지 말지</span> 결정</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      퍼셉트론 하나로 이미 <span class="kw-success">"조건에 따라 켜고 끄는 판단"</span>을 할 수 있게 됐다.
+      그렇다면 사람의 논리적 판단도 이걸로 흉내 낼 수 있을까?
+      <span class="chip chip-accent" style="margin-left: var(--lm-space-3);">다음 시간</span>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    minScale: 0.2, maxScale: 1.0,
+    center: false,
+    hash: true, slideNumber: 'c/t', progress: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: []
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* ══════════════════════════════════════════════════════════
+     예제 1 — 퍼셉트론 순전파 3단계
+     x = 1×0.8 + 2×0.3 = 1.4 ≥ 1  →  σ(1.4) = 3
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const svg = document.getElementById('fwd');
+    if (!svg) return;
+
+    const ACCENT = getComputedStyle(document.documentElement).getPropertyValue('--lm-accent').trim();
+    const TINT   = getComputedStyle(document.documentElement).getPropertyValue('--lm-paper-tint').trim();
+    const PAGE   = getComputedStyle(document.documentElement).getPropertyValue('--lm-page').trim();
+    const RULE   = getComputedStyle(document.documentElement).getPropertyValue('--lm-rule-strong').trim();
+
+    const steps  = ['fs1', 'fs2', 'fs3'].map(id => document.getElementById(id));
+    const e1 = document.getElementById('fw-e1'), e2 = document.getElementById('fw-e2');
+    const sum = document.getElementById('fw-sum'), z = document.getElementById('fw-z');
+    const act = document.getElementById('fw-act'), actb = document.getElementById('fw-actb');
+    const out = document.getElementById('fw-out'), y = document.getElementById('fw-y');
+    const counter = document.getElementById('fwCount');
+    const nextBtn = document.getElementById('fwNext'), resetBtn = document.getElementById('fwReset');
+
+    let cur = 0;
+
+    function render() {
+      steps.forEach((el, i) => el.classList.toggle('visible', i < cur));
+
+      [e1, e2].forEach(e => {
+        e.setAttribute('stroke', cur >= 1 ? ACCENT : RULE);
+        e.setAttribute('stroke-width', cur >= 1 ? '4' : '2');
+      });
+      sum.setAttribute('fill', cur >= 2 ? TINT : PAGE);
+      z.textContent = cur >= 2 ? 'x = 1.4' : '?';
+      z.setAttribute('opacity', cur >= 2 ? '1' : '0.35');
+
+      act.setAttribute('fill', cur >= 3 ? TINT : PAGE);
+      actb.setAttribute('stroke', cur >= 3 ? ACCENT : RULE);
+      out.setAttribute('fill', cur >= 3 ? ACCENT : PAGE);
+      y.textContent = cur >= 3 ? '3' : '?';
+      y.setAttribute('fill', cur >= 3 ? PAGE : '');
+
+      counter.textContent = cur + ' / 3';
+      nextBtn.disabled = cur >= 3;
+
+      window.safeTypeset(steps.filter((el, i) => i < cur));
+    }
+
+    nextBtn.addEventListener('click', () => { if (cur < 3) { cur++; render(); } });
+    resetBtn.addEventListener('click', () => { cur = 0; render(); });
+    render();
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     문제 3 — 행별 채우기
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const table = document.getElementById('p3');
+    if (!table) return;
+
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    const note = document.getElementById('p3Note');
+
+    function fill(tr) {
+      const cells = tr.querySelectorAll('td');
+      cells[2].textContent = tr.dataset.x;
+      cells[3].textContent = tr.dataset.y;
+      cells[2].classList.add('filled');
+      cells[3].classList.add('filled', 'result-cell');
+      if (rows.every(r => r.querySelectorAll('td')[3].classList.contains('filled'))) {
+        note.style.opacity = '1';
+      }
+    }
+
+    function clear(tr) {
+      const cells = tr.querySelectorAll('td');
+      cells[2].textContent = '?';
+      cells[3].textContent = '?';
+      cells[2].classList.remove('filled');
+      cells[3].classList.remove('filled', 'result-cell');
+    }
+
+    rows.forEach(tr => {
+      tr.style.cursor = 'pointer';
+      tr.addEventListener('click', () => fill(tr));
+    });
+    document.getElementById('p3All').addEventListener('click', () => rows.forEach(fill));
+    document.getElementById('p3Reset').addEventListener('click', () => {
+      rows.forEach(clear);
+      note.style.opacity = '0';
+    });
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     확인하기 O/X
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    document.querySelectorAll('.ox-list li').forEach(li => {
+      li.addEventListener('click', () => li.classList.toggle('revealed'));
+    });
+  })();
+</script>
+
+</body>
+</html>
