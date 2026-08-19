@@ -102,15 +102,16 @@
 
   /* ──────────────────────────────────────────────────────────────────────────
    * 6. 슬라이드 타입 스케일 (1920×1080 캔버스 기준)
+   *    본문 36px = 캔버스 높이의 3.3% — 교실 뒷자리 가독성 기준
    * ────────────────────────────────────────────────────────────────────────── */
-  --lm-slide-caption:  18px;
-  --lm-slide-small:    22px;
-  --lm-slide-body:     28px;
-  --lm-slide-body-lg:  32px;
-  --lm-slide-h3:       36px;
-  --lm-slide-h2:       48px;
-  --lm-slide-h1:       68px;
-  --lm-slide-display:  96px;
+  --lm-slide-caption:  24px;
+  --lm-slide-small:    28px;
+  --lm-slide-body:     36px;
+  --lm-slide-body-lg:  42px;
+  --lm-slide-h3:       46px;
+  --lm-slide-h2:       60px;
+  --lm-slide-h1:       88px;
+  --lm-slide-display:  120px;
 
   --lm-slide-line-tight:  1.2;
   --lm-slide-line-body:   1.5;

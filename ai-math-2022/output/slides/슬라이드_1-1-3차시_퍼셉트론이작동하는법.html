@@ -34,7 +34,7 @@
     html, body { background: var(--lm-paper); }
     .reveal-viewport { background: var(--lm-paper); }
 
-    /* ── SVG 공통 (색은 전부 토큰) ── */
+    /* ── 도식 SVG (색은 전부 토큰) ── */
     .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
     .dg .fill-page   { fill: var(--lm-page); }
     .dg .fill-tint   { fill: var(--lm-paper-tint); }
@@ -44,43 +44,50 @@
     .dg .stroke-accent { stroke: var(--lm-accent); fill: none; }
     .dg .stroke-ink    { stroke: var(--lm-ink-3); fill: none; }
     .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink); }
-    .dg .t-cap  { font-size: 17px; fill: var(--lm-ink-3); }
-    .dg .t-lab  { font-size: 19px; fill: var(--lm-ink-2); }
-    .dg .t-val  { font-size: 20px; fill: var(--lm-accent); font-weight: 600; }
-    .dg .t-big  { font-size: 26px; fill: var(--lm-ink); }
+    .dg .t-cap { font-size: 21px; fill: var(--lm-ink-3); }
+    .dg .t-lab { font-size: 24px; fill: var(--lm-ink-2); }
+    .dg .t-big { font-size: 30px; fill: var(--lm-ink); }
     .dg .t-white { fill: var(--lm-page); }
+
+    /* ── 도형 안 수식: SVG <text>는 MathJax가 처리하지 못하므로
+          foreignObject 안의 HTML로 넣는다 ── */
+    .dg foreignObject > div { font-family: var(--lm-font-sans); text-align: center;
+                              line-height: 1.05; color: var(--lm-ink); font-size: 30px; }
+    .dg .m-sm > div { font-size: 25px; }
+    .dg .m-val > div { color: var(--lm-accent); }
+    .dg .m-out > div { color: var(--lm-page); }
+    .dg .m-dim > div { opacity: 0.35; }
 
     /* ── 신경세포 ↔ 퍼셉트론 대응표 ── */
     .map-table td:first-child { text-align: right; color: var(--lm-ink-2); }
     .map-table td:nth-child(2) { color: var(--lm-ink-4); width: 3em; }
     .map-table td:last-child { text-align: left; font-weight: 600; }
 
-    /* ── 카드 (포함관계·가중치) ── */
+    /* ── 카드 ── */
     .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
                   border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5); }
     .plain-card h4 { margin: 0 0 var(--lm-space-3); font-size: var(--lm-slide-h3); }
     .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
                     line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
 
-    /* ── 활성화함수 4종 미니 카드 ── */
+    /* ── 활성화함수 4종 ── */
     .act-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--lm-space-4);
                 margin-top: var(--lm-space-4); }
     .act-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
-                border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-3);
-                text-align: center; }
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-3); text-align: center; }
     .act-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small); }
     .act-card p { margin: var(--lm-space-2) 0 0; font-size: var(--lm-slide-caption);
                   line-height: var(--lm-slide-line-tight); color: var(--lm-ink-3); }
 
     /* ── O/X 확인하기 ── */
-    .ox-list { list-style: none; padding: 0; margin: var(--lm-space-4) 0 0; }
+    .ox-list { list-style: none; padding: 0; margin: var(--lm-space-5) 0 0; }
     .ox-list li { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
-                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-5);
-                  margin-bottom: var(--lm-space-3); font-size: var(--lm-slide-small);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5);
+                  margin-bottom: var(--lm-space-4); font-size: var(--lm-slide-body);
                   cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
     .ox-list li:hover { border-color: var(--lm-accent); }
     .ox-list li .ox-ans { display: block; margin-top: var(--lm-space-2);
-                          font-size: var(--lm-slide-caption); color: var(--lm-accent);
+                          font-size: var(--lm-slide-small); color: var(--lm-accent);
                           font-weight: 600; opacity: 0; transition: opacity 0.3s ease; }
     .ox-list li.revealed { background: var(--lm-accent-tint); border-color: var(--lm-accent); }
     .ox-list li.revealed .ox-ans { opacity: 1; }
@@ -100,6 +107,7 @@
       <span>2학년 인공지능수학</span>
       <span>교과서 17~20쪽</span>
     </div>
+    <aside class="notes">지난 두 시간은 "무엇으로 배우는가(데이터)", "어떻게 배우는가(학습 방식)"였다. 오늘은 그 학습이 실제로 무엇을 바꾸는지 — 기계 속으로 들어간다.</aside>
   </section>
 
   <!-- ═══════════ 2. 복습 → 오늘의 질문 ═══════════ -->
@@ -107,7 +115,7 @@
     <div class="chapter-tag">지난 시간</div>
     <h2>셋 다 "조금씩 고쳐 나간다"고 했다</h2>
 
-    <table class="calc-table" style="margin-top: var(--lm-space-4);">
+    <table class="calc-table" style="margin-top: var(--lm-space-5);">
       <thead><tr><th>학습 방식</th><th>기계에게 주는 것</th><th>기계가 하는 일</th></tr></thead>
       <tbody>
         <tr><td>지도학습</td><td>정답</td><td>오차를 줄인다</td></tr>
@@ -116,10 +124,10 @@
       </tbody>
     </table>
 
-    <div class="result-box" style="margin-top: var(--lm-space-5);">
+    <div class="result-box" style="margin-top: var(--lm-space-6);">
       그런데 기계 안에서 대체 <span class="kw-success">'무엇이' 고쳐지는</span> 걸까?
-      오늘 그 정체를 만난다.
     </div>
+    <aside class="notes">지난 시간 마지막 발문을 그대로 받는다. 답을 말하지 말고 오늘 찾자고만.</aside>
   </section>
 
   <!-- ═══════════ 3. 학습 목표 ═══════════ -->
@@ -139,15 +147,15 @@
     <h2>딥러닝은 기계학습의 한 갈래다</h2>
 
     <div class="two-col ratio-1-2" style="margin-top: var(--lm-space-4); align-items: center;">
-      <svg class="dg" viewBox="0 0 380 300" width="380" height="300" preserveAspectRatio="xMidYMid meet">
-        <circle cx="190" cy="150" r="140" class="fill-soft"/>
-        <circle cx="190" cy="150" r="140" class="stroke-rule" stroke-width="1.5"/>
-        <circle cx="190" cy="168" r="97" class="fill-tint"/>
-        <circle cx="190" cy="168" r="97" class="stroke-rule" stroke-width="1.5"/>
-        <circle cx="190" cy="192" r="55" class="fill-accent" opacity="0.85"/>
-        <text x="190" y="42" text-anchor="middle" class="t-lab">인공지능</text>
-        <text x="190" y="103" text-anchor="middle" class="t-lab">기계학습</text>
-        <text x="190" y="200" text-anchor="middle" class="t-big t-white">딥러닝</text>
+      <svg class="dg" viewBox="0 0 380 320" width="380" height="320" preserveAspectRatio="xMidYMid meet">
+        <circle cx="190" cy="160" r="148" class="fill-soft"/>
+        <circle cx="190" cy="160" r="148" class="stroke-rule" stroke-width="1.5"/>
+        <circle cx="190" cy="180" r="103" class="fill-tint"/>
+        <circle cx="190" cy="180" r="103" class="stroke-rule" stroke-width="1.5"/>
+        <circle cx="190" cy="206" r="58" class="fill-accent" opacity="0.85"/>
+        <text x="190" y="44" text-anchor="middle" class="t-lab">인공지능</text>
+        <text x="190" y="110" text-anchor="middle" class="t-lab">기계학습</text>
+        <text x="190" y="216" text-anchor="middle" class="t-big t-white">딥러닝</text>
       </svg>
 
       <div>
@@ -171,42 +179,36 @@
     <div class="chapter-tag">교과서 17쪽</div>
     <h2>신경 세포 한 개는 이렇게 일한다</h2>
 
-    <svg class="dg" viewBox="0 0 1180 300" width="1180" height="300" preserveAspectRatio="xMidYMid meet"
-         style="margin-top: var(--lm-space-3);">
-      <!-- 가지 돌기 -->
-      <path d="M60,70 L180,140 M40,150 L180,150 M60,232 L180,162" class="stroke-ink" stroke-width="3" stroke-linecap="round"/>
-      <path d="M60,70 L34,52 M60,70 L36,84 M60,232 L34,248 M60,232 L36,216 M40,150 L16,136 M40,150 L16,166"
+    <svg class="dg" viewBox="0 0 1180 310" width="1180" height="310" preserveAspectRatio="xMidYMid meet"
+         style="margin-top: var(--lm-space-4);">
+      <path d="M60,72 L180,142 M40,152 L180,152 M60,234 L180,164" class="stroke-ink" stroke-width="3" stroke-linecap="round"/>
+      <path d="M60,72 L34,54 M60,72 L36,86 M60,234 L34,250 M60,234 L36,218 M40,152 L16,138 M40,152 L16,168"
             class="stroke-ink" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- 세포체 -->
-      <circle cx="235" cy="150" r="58" class="fill-tint"/>
-      <circle cx="235" cy="150" r="58" class="stroke-rule" stroke-width="2"/>
-      <circle cx="235" cy="150" r="20" class="fill-accent" opacity="0.75"/>
-      <!-- 축삭 돌기 -->
-      <line x1="293" y1="150" x2="880" y2="150" class="stroke-ink" stroke-width="6" stroke-linecap="round"/>
-      <!-- 말단 -->
-      <path d="M880,150 L960,96 M880,150 L975,150 M880,150 L960,204" class="stroke-ink" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="962" cy="94" r="9" class="fill-accent"/>
-      <circle cx="977" cy="150" r="9" class="fill-accent"/>
-      <circle cx="962" cy="206" r="9" class="fill-accent"/>
-      <!-- 전달 방향 -->
-      <path d="M330,236 L830,236" class="stroke-accent" stroke-width="2" stroke-dasharray="7 7"/>
-      <path d="M830,236 l-14,-6 l0,12 z" class="fill-accent"/>
-      <text x="580" y="226" text-anchor="middle" class="t-cap">자극의 전달 방향</text>
-      <!-- 라벨 -->
-      <text x="70" y="286" text-anchor="middle" class="t-lab">가지 돌기</text>
-      <text x="235" y="286" text-anchor="middle" class="t-lab">신경 세포체</text>
-      <text x="590" y="122" text-anchor="middle" class="t-lab">축삭 돌기</text>
-      <text x="1010" y="286" text-anchor="middle" class="t-lab">말단</text>
-      <text x="70" y="40" text-anchor="middle" class="t-cap">자극을 받아들인다</text>
-      <text x="235" y="60" text-anchor="middle" class="t-cap">자극을 통합한다</text>
-      <text x="1050" y="150" class="t-cap">다음 세포로</text>
+      <circle cx="235" cy="152" r="58" class="fill-tint"/>
+      <circle cx="235" cy="152" r="58" class="stroke-rule" stroke-width="2"/>
+      <circle cx="235" cy="152" r="20" class="fill-accent" opacity="0.75"/>
+      <line x1="293" y1="152" x2="880" y2="152" class="stroke-ink" stroke-width="6" stroke-linecap="round"/>
+      <path d="M880,152 L960,98 M880,152 L975,152 M880,152 L960,206" class="stroke-ink" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="962" cy="96" r="9" class="fill-accent"/>
+      <circle cx="977" cy="152" r="9" class="fill-accent"/>
+      <circle cx="962" cy="208" r="9" class="fill-accent"/>
+      <path d="M330,242 L830,242" class="stroke-accent" stroke-width="2" stroke-dasharray="7 7"/>
+      <path d="M830,242 l-14,-6 l0,12 z" class="fill-accent"/>
+      <text x="580" y="230" text-anchor="middle" class="t-cap">자극의 전달 방향</text>
+      <text x="70" y="296" text-anchor="middle" class="t-lab">가지 돌기</text>
+      <text x="235" y="296" text-anchor="middle" class="t-lab">신경 세포체</text>
+      <text x="590" y="126" text-anchor="middle" class="t-lab">축삭 돌기</text>
+      <text x="1010" y="296" text-anchor="middle" class="t-lab">말단</text>
+      <text x="70" y="38" text-anchor="middle" class="t-cap">자극을 받아들인다</text>
+      <text x="235" y="62" text-anchor="middle" class="t-cap">자극을 통합한다</text>
+      <text x="1046" y="152" class="t-cap">다음 세포로</text>
     </svg>
 
-    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
       핵심은 여기다 — 축삭 돌기는 전달된 <b>자극의 세기의 총합</b>이
       <span class="kw-danger">임곗값보다 큰 경우에만</span> 활성화되어 자극을 넘긴다.
-      <span class="chip chip-muted">아주 작은 자극에도 반응하면 신경망에 피로가 쌓여 정작 중요한 자극을 놓친다</span>
     </div>
+    <aside class="notes">아주 작은 자극에도 반응하면 신경망에 피로가 쌓여 정작 중요한 자극에 반응하지 못한다 — 문지기가 필요한 이유.</aside>
   </section>
 
   <!-- ═══════════ 6. 신경 세포 ↔ 퍼셉트론 ═══════════ -->
@@ -214,37 +216,38 @@
     <div class="chapter-tag">교과서 17~19쪽 <span class="badge">오늘의 중심</span></div>
     <h2>퍼셉트론은 신경 세포를 베낀 것이다</h2>
 
-    <svg class="dg" viewBox="0 0 1060 250" width="1060" height="250" preserveAspectRatio="xMidYMid meet">
-      <!-- 입력 -->
-      <circle cx="70" cy="60"  r="34" class="fill-page"/><circle cx="70" cy="60"  r="34" class="stroke-rule" stroke-width="2"/>
-      <circle cx="70" cy="190" r="34" class="fill-page"/><circle cx="70" cy="190" r="34" class="stroke-rule" stroke-width="2"/>
-      <text x="70" y="68"  text-anchor="middle" class="t-big">x₁</text>
-      <text x="70" y="198" text-anchor="middle" class="t-big">x₂</text>
-      <!-- 엣지 -->
-      <line x1="104" y1="72"  x2="326" y2="112" class="stroke-ink" stroke-width="2"/>
-      <line x1="104" y1="178" x2="326" y2="138" class="stroke-ink" stroke-width="2"/>
-      <text x="205" y="80"  text-anchor="middle" class="t-val">w₁</text>
-      <text x="205" y="185" text-anchor="middle" class="t-val">w₂</text>
-      <!-- 가중합 -->
-      <circle cx="366" cy="125" r="42" class="fill-tint"/><circle cx="366" cy="125" r="42" class="stroke-rule" stroke-width="2"/>
-      <text x="366" y="136" text-anchor="middle" class="t-big">Σ</text>
-      <text x="366" y="205" text-anchor="middle" class="t-cap">가중합 x</text>
-      <!-- 활성화함수 -->
-      <line x1="408" y1="125" x2="500" y2="125" class="stroke-ink" stroke-width="2"/>
-      <rect x="500" y="83" width="118" height="84" rx="8" class="fill-page"/>
-      <rect x="500" y="83" width="118" height="84" rx="8" class="stroke-accent" stroke-width="2.5"/>
-      <text x="559" y="136" text-anchor="middle" class="t-big">σ(x)</text>
-      <text x="559" y="205" text-anchor="middle" class="t-cap">활성화함수</text>
-      <!-- 출력 -->
-      <line x1="618" y1="125" x2="710" y2="125" class="stroke-ink" stroke-width="2"/>
-      <path d="M710,125 l-14,-6 l0,12 z" class="fill-accent"/>
-      <circle cx="760" cy="125" r="40" class="fill-accent" opacity="0.85"/>
-      <text x="760" y="134" text-anchor="middle" class="t-big t-white">출력</text>
-      <text x="905" y="118" class="t-lab">임곗값 h를 넘으면 c,</text>
-      <text x="905" y="148" class="t-lab">넘지 못하면 0</text>
+    <svg class="dg" viewBox="0 0 1080 270" width="1080" height="270" preserveAspectRatio="xMidYMid meet"
+         style="margin-top: var(--lm-space-3);">
+      <circle cx="72" cy="64"  r="38" class="fill-page"/><circle cx="72" cy="64"  r="38" class="stroke-rule" stroke-width="2"/>
+      <circle cx="72" cy="198" r="38" class="fill-page"/><circle cx="72" cy="198" r="38" class="stroke-rule" stroke-width="2"/>
+      <foreignObject x="32" y="42" width="80" height="46"><div xmlns="http://www.w3.org/1999/xhtml">\(x_1\)</div></foreignObject>
+      <foreignObject x="32" y="176" width="80" height="46"><div xmlns="http://www.w3.org/1999/xhtml">\(x_2\)</div></foreignObject>
+
+      <line x1="110" y1="78"  x2="336" y2="118" class="stroke-ink" stroke-width="2"/>
+      <line x1="110" y1="184" x2="336" y2="144" class="stroke-ink" stroke-width="2"/>
+      <foreignObject class="m-val m-sm" x="178" y="62" width="100" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(w_1\)</div></foreignObject>
+      <foreignObject class="m-val m-sm" x="178" y="172" width="100" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(w_2\)</div></foreignObject>
+
+      <circle cx="378" cy="131" r="46" class="fill-tint"/><circle cx="378" cy="131" r="46" class="stroke-rule" stroke-width="2"/>
+      <text x="378" y="144" text-anchor="middle" class="t-big">Σ</text>
+      <foreignObject class="m-sm" x="318" y="192" width="120" height="42"><div xmlns="http://www.w3.org/1999/xhtml">가중합 \(x\)</div></foreignObject>
+
+      <line x1="424" y1="131" x2="516" y2="131" class="stroke-ink" stroke-width="2"/>
+      <rect x="516" y="87" width="132" height="88" rx="8" class="fill-page"/>
+      <rect x="516" y="87" width="132" height="88" rx="8" class="stroke-accent" stroke-width="2.5"/>
+      <foreignObject x="516" y="112" width="132" height="46"><div xmlns="http://www.w3.org/1999/xhtml">\(\sigma(x)\)</div></foreignObject>
+      <text x="582" y="212" text-anchor="middle" class="t-cap">활성화함수</text>
+
+      <line x1="648" y1="131" x2="742" y2="131" class="stroke-ink" stroke-width="2"/>
+      <path d="M742,131 l-14,-6 l0,12 z" class="fill-accent"/>
+      <circle cx="796" cy="131" r="44" class="fill-accent" opacity="0.9"/>
+      <text x="796" y="142" text-anchor="middle" class="t-big t-white">출력</text>
+
+      <foreignObject class="m-sm" x="862" y="94" width="210" height="46"><div xmlns="http://www.w3.org/1999/xhtml">임곗값 \(h\)를 넘으면 \(c\)</div></foreignObject>
+      <foreignObject class="m-sm" x="862" y="142" width="210" height="46"><div xmlns="http://www.w3.org/1999/xhtml">넘지 못하면 \(0\)</div></foreignObject>
     </svg>
 
-    <table class="calc-table map-table" style="margin-top: var(--lm-space-3); width: 78%;">
+    <table class="calc-table map-table" style="margin-top: var(--lm-space-3); width: 80%;">
       <thead><tr><th>신경 세포</th><th></th><th>퍼셉트론</th></tr></thead>
       <tbody>
         <tr><td>가지 돌기가 받는 자극</td><td>→</td><td>입력값 \(x_1, x_2, \ldots, x_n\)</td></tr>
@@ -272,17 +275,17 @@
       </div>
 
       <div>
-        <svg class="dg" viewBox="0 0 460 250" width="460" height="250" preserveAspectRatio="xMidYMid meet">
-          <text x="30" y="46" class="t-lab">코의 생김새</text>
-          <line x1="215" y1="38" x2="360" y2="112" class="stroke-accent" stroke-width="9" stroke-linecap="round"/>
-          <text x="30" y="130" class="t-lab">귀의 각도</text>
-          <line x1="215" y1="122" x2="360" y2="122" class="stroke-accent" stroke-width="5" stroke-linecap="round"/>
-          <text x="30" y="214" class="t-lab">배경의 밝기</text>
-          <line x1="215" y1="206" x2="360" y2="134" class="stroke-ink" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="392" cy="123" r="34" class="fill-tint"/>
-          <circle cx="392" cy="123" r="34" class="stroke-rule" stroke-width="2"/>
-          <text x="392" y="134" text-anchor="middle" class="t-big">Σ</text>
-          <text x="230" y="20" class="t-cap">굵을수록 큰 가중치</text>
+        <svg class="dg" viewBox="0 0 470 260" width="470" height="260" preserveAspectRatio="xMidYMid meet">
+          <text x="24" y="52" class="t-lab">코의 생김새</text>
+          <line x1="228" y1="42" x2="368" y2="116" class="stroke-accent" stroke-width="10" stroke-linecap="round"/>
+          <text x="24" y="136" class="t-lab">귀의 각도</text>
+          <line x1="228" y1="128" x2="368" y2="128" class="stroke-accent" stroke-width="5" stroke-linecap="round"/>
+          <text x="24" y="220" class="t-lab">배경의 밝기</text>
+          <line x1="228" y1="212" x2="368" y2="140" class="stroke-ink" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="402" cy="128" r="38" class="fill-tint"/>
+          <circle cx="402" cy="128" r="38" class="stroke-rule" stroke-width="2"/>
+          <text x="402" y="140" text-anchor="middle" class="t-big">Σ</text>
+          <text x="238" y="22" class="t-cap">굵을수록 큰 가중치</text>
         </svg>
 
         <div class="result-box" style="margin-top: var(--lm-space-3);">
@@ -298,16 +301,16 @@
     <div class="chapter-tag">교과서 18쪽</div>
     <h2>가중합 — 자극을 하나로 합치기</h2>
 
-    <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin-top: var(--lm-space-4);">
+    <p style="font-size: var(--lm-slide-body); color: var(--lm-ink-2); margin-top: var(--lm-space-5);">
       퍼셉트론으로 입력되는 \(n\)개의 값 \(x_1, x_2, \ldots, x_n\)에
       가중치 \(w_1, w_2, \ldots, w_n\)을 각각 <b>곱하여 더한 값</b>을 가중합이라 한다.
     </p>
 
-    <div class="formula-box" style="margin-top: var(--lm-space-4);">
+    <div class="formula-box" style="margin-top: var(--lm-space-5);">
       \[ x = x_1w_1 + x_2w_2 + \cdots + x_nw_n \]
     </div>
 
-    <div class="two-col" style="margin-top: var(--lm-space-4);">
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
       <div class="info-box">
         입력이 크다고 무조건 세게 전달되는 게 아니다.
         <span class="kw-info">중요하다고 판단한 입력</span>에 큰 가중치가 붙어 총합을 키운다.
@@ -324,7 +327,7 @@
     <div class="chapter-tag">교과서 19쪽</div>
     <h2>활성화함수 — 넘길지 말지 결정하는 문지기</h2>
 
-    <div class="two-col" style="margin-top: var(--lm-space-3); align-items: center;">
+    <div class="two-col" style="margin-top: var(--lm-space-4); align-items: center;">
       <div>
         <div class="definition-box">
           퍼셉트론에서 들어오는 자극의 강도에 따라 <b>자극의 전달 여부를 결정</b>할 때 쓰는 함수를
@@ -333,36 +336,33 @@
         <div class="formula-box" style="margin-top: var(--lm-space-4);">
           \[ \sigma(x) = \begin{cases} c & (x \ge h) \\[2pt] 0 & (x < h) \end{cases} \]
         </div>
+      </div>
+
+      <div>
+        <svg class="dg" viewBox="0 0 440 320" width="440" height="320" preserveAspectRatio="xMidYMid meet">
+          <line x1="44" y1="252" x2="400" y2="252" class="stroke-ink" stroke-width="1.5"/>
+          <line x1="66" y1="286" x2="66" y2="32" class="stroke-ink" stroke-width="1.5"/>
+          <line x1="226" y1="252" x2="226" y2="84" class="stroke-rule" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <line x1="66" y1="84" x2="226" y2="84" class="stroke-rule" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <line x1="66" y1="252" x2="226" y2="252" class="stroke-accent" stroke-width="4"/>
+          <line x1="226" y1="84" x2="392" y2="84" class="stroke-accent" stroke-width="4"/>
+          <circle cx="226" cy="252" r="6" class="fill-page"/>
+          <circle cx="226" cy="252" r="6" class="stroke-accent" stroke-width="3"/>
+          <circle cx="226" cy="84" r="6" class="fill-accent"/>
+          <foreignObject class="m-val m-sm" x="186" y="258" width="80" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(h\)</div></foreignObject>
+          <foreignObject class="m-val m-sm" x="8" y="62" width="50" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(c\)</div></foreignObject>
+          <foreignObject class="m-sm" x="8" y="230" width="50" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(0\)</div></foreignObject>
+          <foreignObject class="m-sm" x="392" y="230" width="46" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(x\)</div></foreignObject>
+          <text x="310" y="62" text-anchor="middle" class="t-cap">넘겼다 → c</text>
+          <text x="146" y="232" text-anchor="middle" class="t-cap">못 넘겼다 → 0</text>
+        </svg>
         <p style="font-size: var(--lm-slide-caption); color: var(--lm-ink-3); text-align:center; margin:0;">
           \(c\)는 0이 아닌 상수, \(h\)는 임곗값
         </p>
       </div>
-
-      <div>
-        <svg class="dg" viewBox="0 0 420 300" width="420" height="300" preserveAspectRatio="xMidYMid meet">
-          <line x1="40" y1="240" x2="390" y2="240" class="stroke-ink" stroke-width="1.5"/>
-          <line x1="60" y1="270" x2="60" y2="30" class="stroke-ink" stroke-width="1.5"/>
-          <text x="396" y="248" class="t-cap">x</text>
-          <text x="46" y="28" class="t-cap">y</text>
-          <!-- 임곗값 보조선 -->
-          <line x1="215" y1="240" x2="215" y2="80" class="stroke-rule" stroke-width="1.5" stroke-dasharray="5 5"/>
-          <line x1="60" y1="80" x2="215" y2="80" class="stroke-rule" stroke-width="1.5" stroke-dasharray="5 5"/>
-          <!-- 계단 -->
-          <line x1="60" y1="240" x2="215" y2="240" class="stroke-accent" stroke-width="4"/>
-          <line x1="215" y1="80" x2="380" y2="80" class="stroke-accent" stroke-width="4"/>
-          <circle cx="215" cy="240" r="6" class="fill-page"/>
-          <circle cx="215" cy="240" r="6" class="stroke-accent" stroke-width="3"/>
-          <circle cx="215" cy="80" r="6" class="fill-accent"/>
-          <text x="215" y="266" text-anchor="middle" class="t-val">h</text>
-          <text x="44" y="88" text-anchor="end" class="t-val">c</text>
-          <text x="44" y="248" text-anchor="end" class="t-cap">0</text>
-          <text x="300" y="60" text-anchor="middle" class="t-cap">넘겼다 → c</text>
-          <text x="130" y="222" text-anchor="middle" class="t-cap">못 넘겼다 → 0</text>
-        </svg>
-      </div>
     </div>
 
-    <div class="result-box" style="margin-top: var(--lm-space-3);">
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
       활성화함수는 <span class="kw-success">가중합을 임곗값과 비교하여</span> 퍼셉트론의 출력값을 결정한다.
     </div>
   </section>
@@ -380,33 +380,31 @@
 
     <div class="two-col ratio-2-1" style="margin-top: var(--lm-space-3);">
       <div class="nn-container" style="margin:0;">
-        <svg class="dg" id="fwd" viewBox="0 0 700 250" width="700" height="250" preserveAspectRatio="xMidYMid meet">
-          <circle cx="60" cy="60"  r="34" class="fill-page" id="fw-n1"/><circle cx="60" cy="60"  r="34" class="stroke-rule" stroke-width="2"/>
-          <circle cx="60" cy="190" r="34" class="fill-page" id="fw-n2"/><circle cx="60" cy="190" r="34" class="stroke-rule" stroke-width="2"/>
-          <text x="60" y="55"  text-anchor="middle" class="t-lab">x₁</text>
-          <text x="60" y="80"  text-anchor="middle" class="t-val" id="fw-x1">1</text>
-          <text x="60" y="185" text-anchor="middle" class="t-lab">x₂</text>
-          <text x="60" y="210" text-anchor="middle" class="t-val" id="fw-x2">2</text>
+        <svg class="dg" id="fwd" viewBox="0 0 720 270" width="720" height="270" preserveAspectRatio="xMidYMid meet">
+          <circle cx="62" cy="62"  r="38" class="fill-page"/><circle cx="62" cy="62"  r="38" class="stroke-rule" stroke-width="2"/>
+          <circle cx="62" cy="200" r="38" class="fill-page"/><circle cx="62" cy="200" r="38" class="stroke-rule" stroke-width="2"/>
+          <foreignObject class="m-sm" x="22" y="42" width="80" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(x_1 = 1\)</div></foreignObject>
+          <foreignObject class="m-sm" x="22" y="180" width="80" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(x_2 = 2\)</div></foreignObject>
 
-          <line x1="94" y1="72"  x2="286" y2="112" class="stroke-ink" stroke-width="2" id="fw-e1"/>
-          <line x1="94" y1="178" x2="286" y2="138" class="stroke-ink" stroke-width="2" id="fw-e2"/>
-          <text x="185" y="78"  text-anchor="middle" class="t-val">w₁ = 0.8</text>
-          <text x="185" y="188" text-anchor="middle" class="t-val">w₂ = 0.3</text>
+          <line x1="100" y1="76"  x2="298" y2="116" class="stroke-ink" stroke-width="2" id="fw-e1"/>
+          <line x1="100" y1="186" x2="298" y2="146" class="stroke-ink" stroke-width="2" id="fw-e2"/>
+          <foreignObject class="m-val m-sm" x="128" y="56" width="150" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(w_1 = 0.8\)</div></foreignObject>
+          <foreignObject class="m-val m-sm" x="128" y="188" width="150" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(w_2 = 0.3\)</div></foreignObject>
 
-          <circle cx="326" cy="125" r="42" class="fill-page" id="fw-sum"/><circle cx="326" cy="125" r="42" class="stroke-rule" stroke-width="2"/>
-          <text x="326" y="120" text-anchor="middle" class="t-big">Σ</text>
-          <text x="326" y="148" text-anchor="middle" class="t-val" id="fw-z">?</text>
+          <circle cx="340" cy="131" r="46" class="fill-page" id="fw-sum"/><circle cx="340" cy="131" r="46" class="stroke-rule" stroke-width="2"/>
+          <text x="340" y="128" text-anchor="middle" class="t-big">Σ</text>
+          <foreignObject class="m-val m-sm m-dim" id="fw-zbox" x="270" y="182" width="140" height="42"><div xmlns="http://www.w3.org/1999/xhtml" id="fw-z">\(x = ?\)</div></foreignObject>
 
-          <line x1="368" y1="125" x2="440" y2="125" class="stroke-ink" stroke-width="2"/>
-          <rect x="440" y="85" width="112" height="80" rx="8" class="fill-page" id="fw-act"/>
-          <rect x="440" y="85" width="112" height="80" rx="8" class="stroke-rule" stroke-width="2" id="fw-actb"/>
-          <text x="496" y="120" text-anchor="middle" class="t-lab">σ(x)</text>
-          <text x="496" y="146" text-anchor="middle" class="t-cap">h = 1</text>
+          <line x1="386" y1="131" x2="452" y2="131" class="stroke-ink" stroke-width="2"/>
+          <rect x="452" y="89" width="126" height="86" rx="8" class="fill-page" id="fw-act"/>
+          <rect x="452" y="89" width="126" height="86" rx="8" class="stroke-rule" stroke-width="2" id="fw-actb"/>
+          <foreignObject class="m-sm" x="452" y="102" width="126" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(\sigma(x)\)</div></foreignObject>
+          <foreignObject class="m-sm" x="452" y="138" width="126" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="font-size:22px">\(h = 1\)</div></foreignObject>
 
-          <line x1="552" y1="125" x2="614" y2="125" class="stroke-ink" stroke-width="2"/>
-          <path d="M614,125 l-13,-6 l0,12 z" class="fill-accent"/>
-          <circle cx="655" cy="125" r="36" class="fill-page" id="fw-out"/><circle cx="655" cy="125" r="36" class="stroke-rule" stroke-width="2"/>
-          <text x="655" y="134" text-anchor="middle" class="t-big" id="fw-y">?</text>
+          <line x1="578" y1="131" x2="632" y2="131" class="stroke-ink" stroke-width="2"/>
+          <path d="M632,131 l-14,-6 l0,12 z" class="fill-accent"/>
+          <circle cx="678" cy="131" r="40" class="fill-page" id="fw-out"/><circle cx="678" cy="131" r="40" class="stroke-rule" stroke-width="2"/>
+          <foreignObject id="fw-ybox" x="638" y="108" width="80" height="48"><div xmlns="http://www.w3.org/1999/xhtml" id="fw-y">\(?\)</div></foreignObject>
         </svg>
       </div>
 
@@ -440,12 +438,11 @@
 
     <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin: 0;">
       \(w_1 = 0.3\), \(w_2 = -0.4\)이고 활성화함수가 \(\sigma(x) = 2\ (x \ge 0)\), \(0\ (x < 0)\)인 퍼셉트론이다.
-      각 입력에 대한 가중합 \(x\)와 출력값 \(\sigma(x)\)를 구하시오.
       <span class="chip chip-muted">행을 누르면 답이 나옵니다</span>
     </p>
 
-    <table class="calc-table" id="p3" style="margin-top: var(--lm-space-4); width: 82%;">
-      <thead><tr><th>x₁</th><th>x₂</th><th>가중합 x</th><th>σ(x)</th></tr></thead>
+    <table class="calc-table" id="p3" style="margin-top: var(--lm-space-4); width: 84%;">
+      <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th><th>가중합 \(x\)</th><th>\(\sigma(x)\)</th></tr></thead>
       <tbody>
         <tr data-x="0.3 + (-0.4) = -0.1" data-y="0"><td>1</td><td>1</td><td class="fillable">?</td><td class="fillable">?</td></tr>
         <tr data-x="0.3 + 0 = 0.3"       data-y="2"><td>1</td><td>0</td><td class="fillable">?</td><td class="fillable">?</td></tr>
@@ -460,9 +457,8 @@
     </div>
 
     <div class="warning-box" id="p3Note" style="margin-top: var(--lm-space-3); opacity: 0; transition: opacity 0.4s;">
-      마지막 줄을 조심하자. 입력이 둘 다 0이면 가중합도 0인데,
-      \(x \ge 0\)이므로 <span class="kw-danger">출력은 0이 아니라 2</span>다.
-      임곗값에 걸쳐 있을 때 어느 쪽인지는 <b>부등호가 정한다.</b>
+      마지막 줄을 조심하자. 가중합이 \(0\)인데 \(x \ge 0\)이므로
+      <span class="kw-danger">출력은 0이 아니라 2</span>다. 걸쳐 있을 때는 <b>부등호가 정한다.</b>
     </div>
   </section>
 
@@ -519,21 +515,27 @@
 
     <div class="info-box" style="margin-top: var(--lm-space-4);">
       "미분이 막힌다"는 말이 왜 문제인지는 <span class="kw-info">4단원 손실함수·경사하강법</span>에서 갚는다.
-      지금은 <b>문지기의 성격이 여러 가지다</b>까지만 알아 두자.
     </div>
   </section>
 
-  <!-- ═══════════ 13. 정리 ═══════════ -->
+  <!-- ═══════════ 13. 확인하기 ═══════════ -->
   <section>
-    <div class="chapter-tag">정리</div>
-    <h2>오늘 한 줄</h2>
+    <div class="chapter-tag">확인하기 · 교과서 19쪽</div>
+    <h2>맞으면 O, 틀리면 X</h2>
 
     <ul class="ox-list">
       <li>⑴ 지도학습은 인공지능에게 정답을 알려 주지 않고 학습시키는 방법이다.
-        <span class="ox-ans">✗ — 정답을 <b>알려 주는</b> 것이 지도학습이다.</span></li>
+        <span class="ox-ans">✗ — 정답을 <b>알려 주는</b> 것이 지도학습이다. 안 알려 주는 쪽은 비지도학습.</span></li>
       <li>⑵ 활성화함수는 가중합을 임곗값과 비교하여 퍼셉트론의 출력값을 결정한다.
         <span class="ox-ans">○ — 오늘 배운 그대로다.</span></li>
     </ul>
+    <aside class="notes">문항을 눌러 답을 연다. ⑴은 지난 시간, ⑵는 오늘 내용 — 두 시간을 잇는 확인.</aside>
+  </section>
+
+  <!-- ═══════════ 14. 정리 ═══════════ -->
+  <section>
+    <div class="chapter-tag">정리</div>
+    <h2>오늘 한 줄</h2>
 
     <div class="three-col" style="margin-top: var(--lm-space-5);">
       <div class="concept-card">
@@ -553,7 +555,7 @@
       </div>
     </div>
 
-    <div class="result-box" style="margin-top: var(--lm-space-5);">
+    <div class="result-box" style="margin-top: var(--lm-space-6);">
       퍼셉트론 하나로 이미 <span class="kw-success">"조건에 따라 켜고 끄는 판단"</span>을 할 수 있게 됐다.
       그렇다면 사람의 논리적 판단도 이걸로 흉내 낼 수 있을까?
       <span class="chip chip-accent" style="margin-left: var(--lm-space-3);">다음 시간</span>
@@ -591,21 +593,26 @@
   /* ══════════════════════════════════════════════════════════
      예제 1 — 퍼셉트론 순전파 3단계
      x = 1×0.8 + 2×0.3 = 1.4 ≥ 1  →  σ(1.4) = 3
+     도형 안 수식은 foreignObject 안의 HTML이므로
+     내용을 바꾼 뒤 반드시 safeTypeset()으로 다시 조판한다.
      ══════════════════════════════════════════════════════════ */
   (function () {
     const svg = document.getElementById('fwd');
     if (!svg) return;
 
-    const ACCENT = getComputedStyle(document.documentElement).getPropertyValue('--lm-accent').trim();
-    const TINT   = getComputedStyle(document.documentElement).getPropertyValue('--lm-paper-tint').trim();
-    const PAGE   = getComputedStyle(document.documentElement).getPropertyValue('--lm-page').trim();
-    const RULE   = getComputedStyle(document.documentElement).getPropertyValue('--lm-rule-strong').trim();
+    const css = getComputedStyle(document.documentElement);
+    const ACCENT = css.getPropertyValue('--lm-accent').trim();
+    const TINT   = css.getPropertyValue('--lm-paper-tint').trim();
+    const PAGE   = css.getPropertyValue('--lm-page').trim();
+    const RULE   = css.getPropertyValue('--lm-rule-strong').trim();
 
-    const steps  = ['fs1', 'fs2', 'fs3'].map(id => document.getElementById(id));
+    const steps = ['fs1', 'fs2', 'fs3'].map(id => document.getElementById(id));
     const e1 = document.getElementById('fw-e1'), e2 = document.getElementById('fw-e2');
-    const sum = document.getElementById('fw-sum'), z = document.getElementById('fw-z');
+    const sum = document.getElementById('fw-sum');
+    const zBox = document.getElementById('fw-zbox'), z = document.getElementById('fw-z');
     const act = document.getElementById('fw-act'), actb = document.getElementById('fw-actb');
-    const out = document.getElementById('fw-out'), y = document.getElementById('fw-y');
+    const out = document.getElementById('fw-out');
+    const yBox = document.getElementById('fw-ybox'), y = document.getElementById('fw-y');
     const counter = document.getElementById('fwCount');
     const nextBtn = document.getElementById('fwNext'), resetBtn = document.getElementById('fwReset');
 
@@ -618,20 +625,21 @@
         e.setAttribute('stroke', cur >= 1 ? ACCENT : RULE);
         e.setAttribute('stroke-width', cur >= 1 ? '4' : '2');
       });
+
       sum.setAttribute('fill', cur >= 2 ? TINT : PAGE);
-      z.textContent = cur >= 2 ? 'x = 1.4' : '?';
-      z.setAttribute('opacity', cur >= 2 ? '1' : '0.35');
+      z.innerHTML = cur >= 2 ? '\\(x = 1.4\\)' : '\\(x = ?\\)';
+      zBox.classList.toggle('m-dim', cur < 2);
 
       act.setAttribute('fill', cur >= 3 ? TINT : PAGE);
       actb.setAttribute('stroke', cur >= 3 ? ACCENT : RULE);
       out.setAttribute('fill', cur >= 3 ? ACCENT : PAGE);
-      y.textContent = cur >= 3 ? '3' : '?';
-      y.setAttribute('fill', cur >= 3 ? PAGE : '');
+      y.innerHTML = cur >= 3 ? '\\(3\\)' : '\\(?\\)';
+      yBox.classList.toggle('m-out', cur >= 3);
 
       counter.textContent = cur + ' / 3';
       nextBtn.disabled = cur >= 3;
 
-      window.safeTypeset(steps.filter((el, i) => i < cur));
+      window.safeTypeset([z, y].concat(steps));
     }
 
     nextBtn.addEventListener('click', () => { if (cur < 3) { cur++; render(); } });
