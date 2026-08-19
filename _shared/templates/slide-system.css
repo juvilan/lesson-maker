@@ -675,6 +675,16 @@
   overflow-y: hidden;
 }
 
+/* 한글 사이에 인라인 수식이 끼면 글자가 맞붙어 보인다.
+   좌우로 숨 쉴 틈을 준다. (도형 안 라벨은 아래에서 되돌림) */
+.reveal mjx-container[jax="CHTML"]:not([display="true"]) {
+  margin: 0 0.16em;
+}
+/* 도식(SVG foreignObject) 안 수식은 좌표로 이미 정렬돼 있으므로 여백 없음 */
+.reveal .dg foreignObject mjx-container[jax="CHTML"] {
+  margin: 0;
+}
+
 
 /* ──────────────────────────────────────────────────────────────────────────
  * 타이틀 슬라이드 전용 레이아웃

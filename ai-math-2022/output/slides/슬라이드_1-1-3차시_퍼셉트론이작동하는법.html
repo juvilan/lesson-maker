@@ -79,6 +79,15 @@
     .act-card p { margin: var(--lm-space-2) 0 0; font-size: var(--lm-slide-caption);
                   line-height: var(--lm-slide-line-tight); color: var(--lm-ink-3); }
 
+    /* ── 문제 서술문 (한글 + 수식 혼합) ── */
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.7; margin: var(--lm-space-4) 0 0; }
+
+    /* ── 3열로 놓이는 계산 단계 ── */
+    .three-col > .step-box { align-self: start; }
+    .three-col > .step-box.visible { padding: var(--lm-space-3) var(--lm-space-4);
+                                     margin: 0; }
+
     /* ── O/X 확인하기 ── */
     .ox-list { list-style: none; padding: 0; margin: var(--lm-space-5) 0 0; }
     .ox-list li { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
@@ -372,63 +381,73 @@
     <div class="chapter-tag">교과서 19쪽 · 예제 1</div>
     <h2>직접 통과시켜 보자</h2>
 
-    <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin: 0;">
+    <p class="prob-stmt">
       가중치가 \(w_1 = 0.8\), \(w_2 = 0.3\)이고 활성화함수가
-      \(\sigma(x) = 3\ (x \ge 1)\), \(0\ (x < 1)\)인 퍼셉트론이 있다.
+      \(\sigma(x) = 3\ (x \ge 1)\), \(0\ (x < 1)\)인 퍼셉트론이 있다.<br>
       입력값 \(x_1 = 1\), \(x_2 = 2\)에 대한 출력값을 구하시오.
     </p>
 
-    <div class="two-col ratio-2-1" style="margin-top: var(--lm-space-3);">
-      <div class="nn-container" style="margin:0;">
-        <svg class="dg" id="fwd" viewBox="0 0 720 270" width="720" height="270" preserveAspectRatio="xMidYMid meet">
-          <circle cx="62" cy="62"  r="38" class="fill-page"/><circle cx="62" cy="62"  r="38" class="stroke-rule" stroke-width="2"/>
-          <circle cx="62" cy="200" r="38" class="fill-page"/><circle cx="62" cy="200" r="38" class="stroke-rule" stroke-width="2"/>
-          <foreignObject class="m-sm" x="22" y="42" width="80" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(x_1 = 1\)</div></foreignObject>
-          <foreignObject class="m-sm" x="22" y="180" width="80" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(x_2 = 2\)</div></foreignObject>
+    <div class="nn-container" style="margin: var(--lm-space-4) 0 0;">
+      <svg class="dg" id="fwd" viewBox="0 0 1180 300" width="1120" height="285" preserveAspectRatio="xMidYMid meet">
+        <!-- 입력 (알약 모양 — 수식이 넉넉히 들어가도록) -->
+        <rect x="40" y="36"  width="170" height="88" rx="44" class="fill-page"/>
+        <rect x="40" y="36"  width="170" height="88" rx="44" class="stroke-rule" stroke-width="2"/>
+        <rect x="40" y="176" width="170" height="88" rx="44" class="fill-page"/>
+        <rect x="40" y="176" width="170" height="88" rx="44" class="stroke-rule" stroke-width="2"/>
+        <foreignObject x="40" y="58"  width="170" height="46"><div xmlns="http://www.w3.org/1999/xhtml">\(x_1 = 1\)</div></foreignObject>
+        <foreignObject x="40" y="198" width="170" height="46"><div xmlns="http://www.w3.org/1999/xhtml">\(x_2 = 2\)</div></foreignObject>
 
-          <line x1="100" y1="76"  x2="298" y2="116" class="stroke-ink" stroke-width="2" id="fw-e1"/>
-          <line x1="100" y1="186" x2="298" y2="146" class="stroke-ink" stroke-width="2" id="fw-e2"/>
-          <foreignObject class="m-val m-sm" x="128" y="56" width="150" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(w_1 = 0.8\)</div></foreignObject>
-          <foreignObject class="m-val m-sm" x="128" y="188" width="150" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(w_2 = 0.3\)</div></foreignObject>
+        <!-- 가중치 엣지 -->
+        <line x1="210" y1="80"  x2="450" y2="128" class="stroke-ink" stroke-width="2" id="fw-e1"/>
+        <line x1="210" y1="220" x2="450" y2="172" class="stroke-ink" stroke-width="2" id="fw-e2"/>
+        <foreignObject class="m-val" x="248" y="40"  width="180" height="46"><div xmlns="http://www.w3.org/1999/xhtml">\(w_1 = 0.8\)</div></foreignObject>
+        <foreignObject class="m-val" x="248" y="214" width="180" height="46"><div xmlns="http://www.w3.org/1999/xhtml">\(w_2 = 0.3\)</div></foreignObject>
 
-          <circle cx="340" cy="131" r="46" class="fill-page" id="fw-sum"/><circle cx="340" cy="131" r="46" class="stroke-rule" stroke-width="2"/>
-          <text x="340" y="128" text-anchor="middle" class="t-big">Σ</text>
-          <foreignObject class="m-val m-sm m-dim" id="fw-zbox" x="270" y="182" width="140" height="42"><div xmlns="http://www.w3.org/1999/xhtml" id="fw-z">\(x = ?\)</div></foreignObject>
+        <!-- 가중합 -->
+        <circle cx="512" cy="150" r="62" class="fill-page" id="fw-sum"/>
+        <circle cx="512" cy="150" r="62" class="stroke-rule" stroke-width="2"/>
+        <text x="512" y="164" text-anchor="middle" class="t-big" style="font-size:40px">Σ</text>
+        <foreignObject class="m-val m-dim" id="fw-zbox" x="412" y="232" width="200" height="48"><div xmlns="http://www.w3.org/1999/xhtml" id="fw-z">\(x = ?\)</div></foreignObject>
 
-          <line x1="386" y1="131" x2="452" y2="131" class="stroke-ink" stroke-width="2"/>
-          <rect x="452" y="89" width="126" height="86" rx="8" class="fill-page" id="fw-act"/>
-          <rect x="452" y="89" width="126" height="86" rx="8" class="stroke-rule" stroke-width="2" id="fw-actb"/>
-          <foreignObject class="m-sm" x="452" y="102" width="126" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(\sigma(x)\)</div></foreignObject>
-          <foreignObject class="m-sm" x="452" y="138" width="126" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="font-size:22px">\(h = 1\)</div></foreignObject>
+        <!-- 활성화함수 -->
+        <line x1="574" y1="150" x2="664" y2="150" class="stroke-ink" stroke-width="2"/>
+        <rect x="664" y="94" width="196" height="112" rx="10" class="fill-page" id="fw-act"/>
+        <rect x="664" y="94" width="196" height="112" rx="10" class="stroke-rule" stroke-width="2" id="fw-actb"/>
+        <foreignObject x="664" y="108" width="196" height="48"><div xmlns="http://www.w3.org/1999/xhtml">\(\sigma(x)\)</div></foreignObject>
+        <foreignObject class="m-sm" x="664" y="154" width="196" height="44"><div xmlns="http://www.w3.org/1999/xhtml">\(h = 1\)</div></foreignObject>
+        <text x="762" y="240" text-anchor="middle" class="t-cap">활성화함수</text>
 
-          <line x1="578" y1="131" x2="632" y2="131" class="stroke-ink" stroke-width="2"/>
-          <path d="M632,131 l-14,-6 l0,12 z" class="fill-accent"/>
-          <circle cx="678" cy="131" r="40" class="fill-page" id="fw-out"/><circle cx="678" cy="131" r="40" class="stroke-rule" stroke-width="2"/>
-          <foreignObject id="fw-ybox" x="638" y="108" width="80" height="48"><div xmlns="http://www.w3.org/1999/xhtml" id="fw-y">\(?\)</div></foreignObject>
-        </svg>
+        <!-- 출력 -->
+        <line x1="860" y1="150" x2="948" y2="150" class="stroke-ink" stroke-width="2"/>
+        <path d="M948,150 l-16,-7 l0,14 z" class="fill-accent"/>
+        <circle cx="1058" cy="150" r="60" class="fill-page" id="fw-out"/>
+        <circle cx="1058" cy="150" r="60" class="stroke-rule" stroke-width="2"/>
+        <foreignObject id="fw-ybox" x="988" y="124" width="140" height="52"><div xmlns="http://www.w3.org/1999/xhtml" id="fw-y">\(?\)</div></foreignObject>
+        <text x="1058" y="240" text-anchor="middle" class="t-cap">출력값</text>
+      </svg>
+    </div>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="step-box" id="fs1">
+        <div class="step-label">STEP 1 · 가중합</div>
+        \( x = 1 	imes 0.8 + 2 	imes 0.3 \)
       </div>
-
-      <div>
-        <div class="step-box" id="fs1">
-          <div class="step-label">STEP 1 · 가중합</div>
-          \( x = 1 \times 0.8 + 2 \times 0.3 \)
-        </div>
-        <div class="step-box" id="fs2">
-          <div class="step-label">STEP 2 · 계산</div>
-          \( x = 0.8 + 0.6 = 1.4 \)
-        </div>
-        <div class="step-box" id="fs3">
-          <div class="step-label">STEP 3 · 임곗값과 비교</div>
-          \( 1.4 \ge 1 \)이므로 \( \sigma(1.4) = 3 \)
-        </div>
+      <div class="step-box" id="fs2">
+        <div class="step-label">STEP 2 · 계산</div>
+        \( x = 0.8 + 0.6 = 1.4 \)
+      </div>
+      <div class="step-box" id="fs3">
+        <div class="step-label">STEP 3 · 임곗값과 비교</div>
+        \( 1.4 \ge 1 \)이므로 \( \sigma(1.4) = 3 \)
       </div>
     </div>
 
-    <div class="anim-controls">
+    <div class="anim-controls" style="margin-top: var(--lm-space-4);">
       <button class="anim-btn" id="fwNext">다음 단계</button>
       <span class="step-counter" id="fwCount">0 / 3</span>
       <button class="anim-btn reset-btn" id="fwReset">처음으로</button>
     </div>
+    <aside class="notes">버튼을 누르기 전에 학생이 가중합을 암산하게 한다. STEP 3에서 등호가 포함된 부등호(≥)를 짚어 줄 것 — 문제 3의 함정으로 이어진다.</aside>
   </section>
 
   <!-- ═══════════ 11. 문제 3 ═══════════ -->
