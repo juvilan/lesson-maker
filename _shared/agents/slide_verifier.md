@@ -18,25 +18,32 @@ Wave 2에서 생성된 `slide_structure.json`을 검토하여 높이 초과, 수
 
 ### 1. 높이 예산 초과 (CRITICAL)
 
-아래 기준을 초과하면 슬라이드를 분리하거나 내용을 축소한다.
+캔버스는 **1920×1080 고정**이다 (`design-tokens.css` `--lm-slide-height`).
+`margin: 0.04`이므로 **절대 상한은 994px** — 이를 넘으면 잘린다.
+
+아래는 타입별 권장 예산이며 `slide_creator.md`의 값과 일치해야 한다.
+초과하면 **슬라이드를 분리한다. 폰트를 줄이지 않는다.**
 
 | 타입 | 최대 예산 |
 |------|---------|
-| title | 120px |
-| objectives | 290px |
-| concept_intro | 360px |
-| numeric_example | 390px |
-| truth_table | 400px |
-| comparison | 480px |
-| quiz | 390px |
-| summary | 440px |
-| code_slide | 350px |
-| info_cards | 395px |
+| title | 600px |
+| objectives | 750px |
+| concept_intro · definition_formula | 800px |
+| numeric_example | 850px |
+| truth_table | 800px |
+| comparison | 850px |
+| quiz | 650px |
+| summary | 700px |
+| code_slide | 750px |
+| info_cards · concept_cards | 650px |
+
+> 이 표의 값은 720×1280 시절 기준(120~480px)에서 1920×1080 기준으로 갱신됨 (2026-08-20).
+> 옛 값을 쓰면 슬라이드가 절반만 채워진다.
 
 **감지 규칙:**
 - `two-col` + `visual placeholder` + `anim-controls` 3개 모두 있으면 → 분리 검토
 - `step-box`가 4개 이상이면 → 초과 확정, 분리 필요
-- `ul` 항목이 6개 이상이면 → 폰트 축소 또는 슬라이드 분리
+- `ul` 항목이 6개 이상이면 → 슬라이드 분리 (폰트 축소 금지)
 - `three-col` 안에 `p` 태그 내용이 2줄 이상이면 → 내용 축소
 
 ### 2. 수식 렌더링 오류 (CRITICAL)
@@ -45,13 +52,16 @@ Wave 2에서 생성된 `slide_structure.json`을 검토하여 높이 초과, 수
 - `MathJax.Hub.Queue(` 발견 → `window.safeTypeset()` 으로 교체
 - `\[` `\]` 블록이 `<p>` 안에 있으면 → `<div>` 로 교체 (인라인 렌더링 방지)
 - `$$` 구문 사용 → `\[ \]` 로 교체
+- **SVG `<text>` 안의 `\(...\)` → MathJax가 조판하지 않는다.**
+  `<foreignObject>` + `<div xmlns="http://www.w3.org/1999/xhtml">` 안으로 옮길 것.
+  JS로 내용을 바꾼 뒤에는 반드시 `window.safeTypeset([해당요소])` 재호출
 
 ### 3. 오버플로우 위험 (WARNING)
 
-- `style` 안에 `max-height` 없는 `<canvas>`, `<svg>` → `max-height: 280px; overflow: hidden` 추가
+- `style` 안에 `max-height` 없는 `<canvas>`, `<svg>` → `max-height: 460px; overflow: hidden` 추가
 - `<img>` 태그에 `max-width: 100%` 없으면 추가
 - `font-size` 가 `0.6em` 이하 → `0.7em` 으로 상향
-- `style="height:` 값이 350px 초과인 placeholder → 280px 로 축소
+- `style="height:` 값이 520px 초과인 placeholder → 460px 로 축소
 
 ### 4. ID 무결성 (ERROR)
 
