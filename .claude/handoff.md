@@ -58,6 +58,7 @@ python3 -m http.server 8791
 ## 4. 기기 전환 시 주의
 
 - **저장소 안에 없는 것은 넘어오지 않습니다.** 계획 파일은 맥의 `~/.claude/plans/`에 있어 윈도우에 없습니다. 대화 내용도 마찬가지입니다. 남길 게 있으면 이 파일에 적으세요.
+- **계획서는 `docs/plans/`에 남깁니다.** `~/.claude/plans/`는 기기를 넘지 못하므로, 계획이 확정되면 `docs/plans/YYYY-MM-DD-<주제>.md`로 저장소에 복사해 커밋합니다. 결과물(코드)만 넘어오고 판단 근거가 사라지는 걸 막기 위해서입니다. 실례: `docs/plans/2026-08-19-pretendard-bundling.md` — 커밋 `bcb12e4`의 근거 문서로, 폰트 조사 실측치(폴백 1070.91px vs Pretendard 1130.57px 등)가 들어 있습니다.
 - **새 기기 설정의 정본은 `README.md`의 "다른 기기에서 작업하기"입니다.** 전체 clone + `pip install -r requirements.txt` + `playwright install chromium`. 교과서 PDF는 수업 설계에 쓰이므로 저장소에 **일부러 포함**돼 있고, 지도서(52MB)만 제외돼 Google Drive에서 따로 복사합니다.
 - (선택) 학교 노트북 용량이 부담되면 교과서 PDF를 빼고 받을 수도 있습니다. clone 약 283MB 중 대부분이 `*/book/*.pdf`(316MB)입니다. 다만 PDF 없이는 교안 설계 시 교과서 참조가 안 되니, **기본은 README대로 전체 clone**을 권합니다.
   ```
