@@ -4,8 +4,8 @@
     {
       "name": "lesson-maker-static",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "/Users/jeongsanghwa/Projects/lesson-maker"],
-      "port": 8765
+      "runtimeArgs": ["-m", "http.server", "8791", "--directory", "."],
+      "port": 8791
     }
   ]
 }
