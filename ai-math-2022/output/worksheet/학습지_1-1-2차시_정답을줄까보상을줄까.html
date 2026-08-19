@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>정답을 줄까, 보상을 줄까 — 학습지</title>
+
+<link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+<link rel="stylesheet" href="../../../_shared/templates/worksheet-system.css">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      packages: { '[+]': ['boldsymbol', 'ams'] },
+      tags: 'ams'
+    },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] },
+    chtml: { scale: 0.95 }
+  };
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+<style>
+  /* ────────────────────────────────────────────────────────────────
+     worksheet-system.css 의 .ws-body 는 column-fill: auto 인데,
+     .ws-page 가 height 가 아닌 min-height 만 가져서 단이 채워질
+     확정 높이가 생기지 않는다 → 모든 문항이 1단으로 쌓인다.
+     (레퍼런스 worksheet-kitchen-sink.html 도 동일 증상)
+     공유 템플릿이 고쳐지기 전까지 이 파일에서만 balance 로 되돌린다.
+     ──────────────────────────────────────────────────────────────── */
+  .ws-body { column-fill: balance; }
+
+  .lvl {
+    display: inline-block;
+    font-size: 0.78em;
+    padding: 1px 7px;
+    margin-left: 6px;
+    border: var(--lm-border-hair) solid var(--lm-page-rule);
+    border-radius: var(--lm-radius-sm);
+    color: var(--lm-page-ink-3);
+    vertical-align: 0.15em;
+    white-space: nowrap;
+  }
+  .lvl-adv { border-color: var(--lm-accent); color: var(--lm-accent); }
+  .ans-key { font-size: var(--lm-page-small); line-height: var(--lm-page-line-body); }
+  .ans-key h3 {
+    font-size: var(--lm-page-h3);
+    margin: var(--lm-space-4) 0 var(--lm-space-2);
+    padding-bottom: var(--lm-space-1);
+    border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+  }
+  .ans-key h3 { break-after: avoid; page-break-after: avoid; }
+  .ans-key p { margin: 0 0 var(--lm-space-2); }
+  .ans-key .why { color: var(--lm-page-ink-2); }
+</style>
+</head>
+
+<body data-subject="ai_math">
+
+<!-- ══════════════════ PAGE 1 · 문항 ══════════════════ -->
+<div class="ws-page">
+
+  <header class="ws-head">
+    <div class="ws-title-group">
+      <div class="ws-chapter">Ⅰ-1 · 2차시</div>
+      <h1 class="ws-title">정답을 줄까, 보상을 줄까</h1>
+    </div>
+    <div class="ws-meta">인공지능수학 · 2학년 · 영일고등학교</div>
+  </header>
+
+  <div class="ws-student">
+    <span class="ws-student-field"><label>학년</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>반</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>번호</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>이름</label><span class="line"></span></span>
+  </div>
+
+  <div class="ws-body">
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">1.</span>기존의 프로그래밍과 기계학습은 <strong>규칙을 누가 만드는가</strong>에서 갈린다.
+        빈칸을 채우시오.
+        <span class="lvl">이해</span>
+      </div>
+      <aside class="ws-info">
+        기존의 프로그래밍 — (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)이(가) 규칙을 설계한다.<br>
+        기계학습 — (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)이(가) 데이터에서 규칙을 찾아낸다.
+      </aside>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">2.</span>세 가지 학습 방식의 특징을 표로 정리하시오.
+        <span class="lvl">기억</span>
+      </div>
+      <table class="ws-table">
+        <thead>
+          <tr><th class="left">학습 방식</th><th>무엇을 주는가</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">지도학습</td><td>&nbsp;</td></tr>
+          <tr><td class="left">비지도학습</td><td>&nbsp;</td></tr>
+          <tr><td class="left">강화학습</td><td>&nbsp;</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">3.</span>다음 중 <strong>지도학습</strong>에 해당하는 것만을 있는 대로 고른 것은?
+        <span class="lvl">적용</span>
+      </div>
+      <aside class="ws-info">
+        <strong>&lt;보기&gt;</strong><br>
+        ㄱ. '정상'과 '스팸'으로 표시된 메일로 새 메일을 분류하게 한다.<br>
+        ㄴ. 아무 기준도 주지 않고 도형을 나누게 한다.<br>
+        ㄷ. 사진마다 '개' 또는 '고양이'를 적어 두고 학습시킨다.<br>
+        ㄹ. 신호를 지킬 때마다 점수를 준다.
+      </aside>
+      <ol class="ws-choices">
+        <li>① ㄱ, ㄴ</li>
+        <li>② ㄱ, ㄷ</li>
+        <li>③ ㄴ, ㄷ</li>
+        <li>④ ㄴ, ㄹ</li>
+        <li>⑤ ㄷ, ㄹ</li>
+      </ol>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">4.</span>각 사례에 알맞은 학습 방식을 쓰시오.
+        <span class="lvl">적용</span>
+      </div>
+      <aside class="ws-info">
+        ⑴ 바둑에서 승률이 높은 전략을 탐색하게 한다.<br>
+        ⑵ 태블릿에 쓴 손 글씨 숫자를 맞히게 한다.<br>
+        ⑶ 취향이 비슷한 사람들이 들은 음악을 추천하게 한다.
+      </aside>
+      <div class="ws-answer-space sm"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">5.</span>같은 도형 9개를 비지도학습으로 분류시켰더니,
+        한 번은 <strong>색</strong>으로 세 무리, 다른 한 번은 <strong>모양</strong>으로 세 무리가 되었다.
+        둘 중 어느 쪽이 틀린 것인지 판단하고, 그 이유를 쓰시오.
+        <span class="lvl">분석</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">6.</span>지도학습이 <strong>바르게 이루어지기 위한 조건</strong>과,
+        강화학습이 <strong>바르게 이루어지기 위한 조건</strong>을 각각 쓰시오.
+        <span class="lvl">이해</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">1 / 2</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 2 · 심화 + 정답 ══════════════════ -->
+<div class="ws-page">
+
+  <h2 class="ws-section">심화 문항</h2>
+
+  <div class="ws-body">
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">7.</span>세 학습 방식은 모두 "조금씩 고쳐 나간다"는 점이 같고,
+        <strong>고칠 방향을 알려 주는 신호</strong>만 다르다. 표를 완성하시오.
+        <span class="lvl lvl-adv">심화 · 분석</span>
+      </div>
+      <table class="ws-table">
+        <thead>
+          <tr><th class="left">방식</th><th>신호</th><th>기계가 하는 일</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">지도학습</td><td>정답</td><td>&nbsp;</td></tr>
+          <tr><td class="left">비지도학습</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td class="left">강화학습</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">8.</span>의료 영상으로 질병을 진단하는 인공지능을 만들려고 한다.
+        지도학습을 쓰는 것이 좋지만 <strong>현실적으로 어려운 점</strong>이 있다.
+        그 어려움이 무엇일지 쓰시오.
+        <span class="lvl lvl-adv">심화 · 평가</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+  </div>
+
+  <h2 class="ws-section">정답 및 해설</h2>
+
+  <div class="ws-body ans-key">
+
+    <h3>1.</h3>
+    <p>기존의 프로그래밍 — <strong>사람</strong><br>
+       기계학습 — <strong>컴퓨터</strong></p>
+
+    <h3>2.</h3>
+    <p>지도학습 — <strong>정답</strong>을 준다<br>
+       비지도학습 — <strong>아무것도 주지 않는다</strong><br>
+       강화학습 — <strong>보상(점수)</strong>을 준다</p>
+
+    <h3>3. ②</h3>
+    <p class="why">ㄱ과 ㄷ은 사람이 미리 정답을 붙여 준 자료로 학습시키므로 지도학습이다.
+       ㄴ은 정답을 주지 않았으므로 비지도학습, ㄹ은 점수를 주므로 강화학습이다.</p>
+
+    <h3>4.</h3>
+    <p>⑴ 강화학습 &nbsp;·&nbsp; ⑵ 지도학습 &nbsp;·&nbsp; ⑶ 비지도학습</p>
+    <p class="why">⑴은 정해진 정답 없이 이기면 점수를 얻는다.
+       ⑵는 '이 글씨는 3이다'라는 정답을 붙여 학습시킨다.
+       ⑶은 '비슷한 취향의 무리'를 스스로 찾아낸다.</p>
+
+    <h3>5.</h3>
+    <p><strong>어느 쪽도 틀리지 않았다.</strong></p>
+    <p class="why">비지도학습은 정답을 알려 주지 않고 학습시키는 방법이므로,
+       비교할 정답 자체가 없다. 인공지능이 데이터에서
+       <strong>어떤 규칙을 발견하느냐</strong>에 따라 분류 결과가 달라질 뿐이다.</p>
+
+    <h3>6.</h3>
+    <p>지도학습 — 학습용 데이터에 <strong>사람이 정한 올바른 예측의 결과</strong>가 포함되어 있어야 한다.</p>
+    <p>강화학습 — 선택한 결과가 얼마나 좋은 성과를 냈는지 평가하고,
+       그에 따라 <strong>보상의 정도를 일관되게</strong> 조정하는 과정을 반복해야 한다.</p>
+
+    <h3>7.</h3>
+    <p>지도학습 — 정답 → 정답과의 <strong>오차</strong>를 줄인다<br>
+       비지도학습 — <strong>없음</strong> → 데이터 안의 <strong>구조</strong>를 스스로 찾는다<br>
+       강화학습 — <strong>보상</strong> → 보상을 <strong>크게</strong> 만든다</p>
+
+    <h3>8.</h3>
+    <p class="why">지도학습을 하려면 영상 하나하나에 사람이 정답(label)을 붙여야 하는데,
+       의료 영상은 <strong>전문가(의사)만 정답을 붙일 수 있다.</strong>
+       그래서 시간과 비용이 매우 많이 들고, 방대한 데이터에 적용하기 어렵다.</p>
+    <p class="why">참고 — 이런 어려움 때문에 데이터 자체에서 정답을 만들어 내는
+       <strong>자기지도학습</strong>이 연구되고 있다.</p>
+
+  </div>
+
+  <div class="ws-pagenum">2 / 2</div>
+</div>
+
+<script>
+  window.addEventListener('load', function () { window.safeTypeset(); });
+</script>
+
+</body>
+</html>

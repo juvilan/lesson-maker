@@ -1,0 +1,12 @@
+# lesson-maker 도구 의존성
+#
+# 설치:
+#   pip install -r requirements.txt
+#   playwright install chromium      ← 브라우저 바이너리는 별도 설치 필요
+#
+# 용도:
+#   playwright — _shared/tools/html_to_pdf.py (HTML → A4 PDF 변환 + 페이지 넘침 검증)
+#   pypdf      — 교과서·지도서 PDF 본문 추출, 산출물 PDF 페이지 확인
+
+playwright>=1.58
+pypdf>=6.0
