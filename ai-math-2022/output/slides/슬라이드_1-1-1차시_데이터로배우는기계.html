@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>데이터로 배우는 기계 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    /* ── 스타일 전이 후크 ── */
+    .st-wrap { display: flex; align-items: center; justify-content: center; gap: var(--lm-space-6); }
+    .st-panel { text-align: center; flex: 0 0 660px; }
+    .st-panel svg { display: block; width: 100%; height: auto;
+                    border-radius: var(--lm-radius-md); border: var(--lm-border-thin) solid var(--lm-rule); }
+    .st-cap { margin-top: var(--lm-space-3); font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .st-arrow { font-size: 64px; color: var(--lm-accent); line-height: 1; }
+
+    /* ── 데이터 분류 기준 카드 ── */
+    .crit-row { display: grid; grid-template-columns: 200px 1fr 1fr; gap: var(--lm-space-4);
+                align-items: stretch; margin: var(--lm-space-3) 0; }
+    .crit-key { display: flex; align-items: center; justify-content: center; text-align: center;
+                background: var(--lm-accent); color: var(--lm-page); border-radius: var(--lm-radius-md);
+                padding: var(--lm-space-3); font-weight: 600; font-size: var(--lm-slide-small); }
+    .crit-cell { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                 border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .crit-cell h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-body); color: var(--lm-accent); }
+    .crit-cell p  { margin: 0; font-size: var(--lm-slide-small); color: var(--lm-ink-2);
+                    line-height: var(--lm-slide-line-tight); }
+    .crit-eg { display: block; margin-top: var(--lm-space-2); font-size: var(--lm-slide-caption); color: var(--lm-ink-3); }
+    .crit-row.dim { opacity: 0.28; }
+    .crit-row { transition: opacity 0.35s ease; }
+
+    /* ── 문제1 활동 ── */
+    .q-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-4); margin-top: var(--lm-space-4); }
+    .q-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+              border-radius: var(--lm-radius-md); padding: var(--lm-space-4); cursor: pointer;
+              transition: border-color 0.2s ease, background 0.2s ease; }
+    .q-card:hover { border-color: var(--lm-accent); }
+    .q-card .q-no { font-size: var(--lm-slide-caption); color: var(--lm-accent); font-weight: 600;
+                    letter-spacing: 0.1em; margin-bottom: var(--lm-space-2); }
+    .q-card .q-items { font-size: var(--lm-slide-small); line-height: var(--lm-slide-line-tight); }
+    .q-card .q-items b { display: block; margin: var(--lm-space-1) 0; }
+    .q-card .q-ans { margin-top: var(--lm-space-3); padding-top: var(--lm-space-2);
+                     border-top: var(--lm-border-hair) solid var(--lm-rule);
+                     font-size: var(--lm-slide-small); color: var(--lm-accent); font-weight: 600;
+                     opacity: 0; transition: opacity 0.3s ease; }
+    .q-card.revealed { background: var(--lm-accent-tint); border-color: var(--lm-accent); }
+    .q-card.revealed .q-ans { opacity: 1; }
+
+    /* ── 학습 흐름 대비 ── */
+    .flow-box { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5); }
+    .flow-box h4 { margin: 0 0 var(--lm-space-3); font-size: var(--lm-slide-body); }
+    .flow-steps { display: flex; flex-wrap: wrap; align-items: center; gap: var(--lm-space-2);
+                  font-size: var(--lm-slide-small); }
+    .flow-steps span.n { background: var(--lm-paper-tint); border-radius: var(--lm-radius-sm);
+                         padding: 6px 12px; white-space: nowrap; }
+    .flow-steps span.n.hi { background: var(--lm-accent); color: var(--lm-page); font-weight: 600; }
+    .flow-steps span.ar { color: var(--lm-ink-4); }
+  </style>
+</head>
+
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ═══════════ 1. 타이틀 ═══════════ -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅰ-1 인공지능의 의미 · 1차시</div>
+    <h1>데이터로 배우는 기계</h1>
+    <p class="slide-sub">인공지능은 무엇이고, 무엇을 먹고 자라는가</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 10~14쪽</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 2. 후크 — 스타일 전이 ═══════════ -->
+  <section>
+    <div class="chapter-tag">생각해 볼 문제</div>
+    <h2>이 두 그림은 같은 풍경이다</h2>
+
+    <div class="st-wrap" style="margin-top: var(--lm-space-5);">
+      <div class="st-panel">
+        <svg viewBox="0 0 400 300" width="100%" preserveAspectRatio="xMidYMid meet"
+             role="img" aria-label="평범한 풍경 그림">
+          <rect width="400" height="300" fill="#BFD4E4"/>
+          <circle cx="316" cy="70" r="34" fill="#F2D06B"/>
+          <path d="M0 300 L0 214 Q110 168 210 210 Q310 250 400 200 L400 300 Z" fill="#7FA36B"/>
+          <path d="M0 300 L0 262 Q130 236 250 264 Q330 282 400 262 L400 300 Z" fill="#5E8452"/>
+          <path d="M258 232 Q246 178 258 132 Q272 178 258 232 Z" fill="#3C5A3C"/>
+          <rect x="86" y="212" width="66" height="50" fill="#E8DCC6"/>
+          <path d="M78 212 L119 184 L160 212 Z" fill="#B25A3E"/>
+          <rect x="110" y="234" width="20" height="28" fill="#6B5540"/>
+        </svg>
+        <p class="st-cap">원본 사진</p>
+      </div>
+
+      <div class="st-arrow">→</div>
+
+      <div class="st-panel">
+        <svg viewBox="0 0 400 300" width="100%" preserveAspectRatio="xMidYMid meet"
+             role="img" aria-label="같은 풍경을 화가의 화풍으로 바꾼 그림">
+          <defs>
+            <filter id="brush" x="-10%" y="-10%" width="120%" height="120%">
+              <feTurbulence type="turbulence" baseFrequency="0.035" numOctaves="3" seed="7" result="t"/>
+              <feDisplacementMap in="SourceGraphic" in2="t" scale="11" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+          </defs>
+
+          <g filter="url(#brush)">
+            <rect width="400" height="300" fill="#2C4A7C"/>
+            <!-- 소용돌이 하늘 -->
+            <g fill="none" stroke="#6FA3D8" stroke-width="8" stroke-linecap="round" opacity="0.85">
+              <path d="M28 66 Q86 24 138 62 Q182 96 128 116 Q84 130 78 96"/>
+              <path d="M170 40 Q232 14 276 52 Q310 84 262 102 Q222 116 214 84"/>
+              <path d="M12 132 Q84 106 152 136 Q214 162 288 132 Q346 108 392 134"/>
+              <path d="M6 34 Q70 8 126 30"/>
+              <path d="M300 22 Q346 6 396 26"/>
+              <path d="M18 176 Q104 152 186 178 Q262 202 340 174"/>
+            </g>
+            <g fill="none" stroke="#EFCF72" stroke-width="5" stroke-linecap="round" opacity="0.9">
+              <path d="M46 84 Q94 54 132 82"/>
+              <path d="M188 58 Q236 34 268 62"/>
+              <path d="M40 150 Q120 124 196 152"/>
+              <path d="M212 122 Q262 100 306 124"/>
+              <path d="M96 44 Q140 22 178 44"/>
+              <path d="M240 166 Q306 144 372 168"/>
+            </g>
+            <!-- 달/해 -->
+            <circle cx="316" cy="70" r="30" fill="#F6DE8A"/>
+            <circle cx="316" cy="70" r="42" fill="none" stroke="#F6DE8A" stroke-width="5" opacity="0.5"/>
+            <!-- 언덕 -->
+            <path d="M0 300 L0 214 Q110 168 210 210 Q310 250 400 200 L400 300 Z" fill="#3E6B4A"/>
+            <g fill="none" stroke="#6FA36B" stroke-width="6" stroke-linecap="round" opacity="0.75">
+              <path d="M10 238 Q100 206 190 234"/>
+              <path d="M204 244 Q292 268 392 232"/>
+              <path d="M24 276 Q130 252 244 280"/>
+            </g>
+            <!-- 사이프러스 -->
+            <path d="M258 236 Q240 178 258 126 Q278 178 258 236 Z" fill="#1E3524"/>
+            <g fill="none" stroke="#2E5233" stroke-width="4" stroke-linecap="round">
+              <path d="M252 220 Q262 190 254 158"/>
+              <path d="M264 214 Q256 186 264 152"/>
+            </g>
+            <!-- 집 -->
+            <rect x="86" y="212" width="66" height="50" fill="#E4D09A"/>
+            <path d="M78 212 L119 184 L160 212 Z" fill="#C25B36"/>
+            <rect x="110" y="234" width="20" height="28" fill="#4A3A28"/>
+          </g>
+        </svg>
+        <p class="st-cap">화가의 화풍으로 바꾼 결과</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5);">
+      컴퓨터는 <span class="kw-info">붓질을 배운 적이 없다.</span>
+      그런데 어떻게 화풍만 바꿔 그릴 수 있었을까?
+      <span class="chip chip-muted" style="margin-left: var(--lm-space-3);">답은 이 단원 끝에서</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 3. 학습 목표 ═══════════ -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>인공지능이 무엇인지 말하고, <span class="kw">기존 프로그램과 무엇이 다른지</span> 설명할 수 있다.</span></li>
+      <li><span class="num">2</span><span>데이터를 <span class="kw">세 가지 기준</span>으로 분류할 수 있다.</span></li>
+      <li><span class="num">3</span><span>같은 데이터가 <span class="kw">기준에 따라 여러 이름</span>을 갖는다는 것을 설명할 수 있다.</span></li>
+    </ul>
+    <div class="info-box">
+      성취기준 <span class="badge">인공지능의 개념을 이해하고 학습 방식을 수학적으로 해석할 수 있다</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 4. 생각 열기 ═══════════ -->
+  <section>
+    <div class="chapter-tag">생각 열기 · 교과서 12쪽</div>
+    <h2>정우의 주말 하루</h2>
+    <div class="two-col">
+      <div class="card">
+        <h4 style="margin-top:0;">아침 · 스마트 스피커</h4>
+        <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2);">
+          "좋은 아침이에요! 오늘 우산을 꼭 챙기세요."
+        </p>
+        <p class="chip chip-muted" style="margin-top: var(--lm-space-3);">일정 + 일기 예보를 합쳐서 판단</p>
+      </div>
+      <div class="card">
+        <h4 style="margin-top:0;">점심 · 챗봇</h4>
+        <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2);">
+          "비 오는 날 친구와 먹을 점심 메뉴를 추천해 줘."<br>
+          → "수제비, 칼국수, 우동을 추천할게요!"
+        </p>
+        <p class="chip chip-muted" style="margin-top: var(--lm-space-3);">자연스러운 문장으로 대화</p>
+      </div>
+    </div>
+    <div class="example-box" style="margin-top: var(--lm-space-4);">
+      우리 주변에서 인공지능이 적용된 사례를 <span class="kw">세 가지만</span> 더 말해 보자.
+    </div>
+  </section>
+
+  <!-- ═══════════ 5. 인공지능의 정의 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 12쪽</div>
+    <h2>인공지능이란</h2>
+    <div class="definition-box">
+      <span class="kw">인공지능(AI, Artificial Intelligence)</span>이란 인간의 인지, 학습, 추론, 행동 등의
+      지적 능력을 컴퓨터로 구현하는 과학 기술이다.
+    </div>
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="flow-box">
+        <h4>기존 프로그램</h4>
+        <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin: 0;">
+          정해진 <span class="kw-danger">명령만</span> 따라 작동한다.
+        </p>
+      </div>
+      <div class="flow-box" style="border-color: var(--lm-accent);">
+        <h4>인공지능</h4>
+        <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin: 0;">
+          <span class="kw-success">스스로 판단</span>하고 논리적 사고와 행동을 수행한다.
+        </p>
+      </div>
+    </div>
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      <span class="kw-info">매카시(McCarthy, J.)</span>가 1956년 <span class="kw-info">다트머스 학회</span>에서
+      '인공지능'이라는 용어를 처음 만들었다.
+    </div>
+  </section>
+
+  <!-- ═══════════ 6. 데이터의 뜻 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 13쪽</div>
+    <h2>인공지능은 무엇을 먹고 자라는가</h2>
+    <div class="definition-box">
+      어떤 연구나 분석에 활용하기 위해 수집·저장된 자료를 <span class="kw">데이터(data)</span>라고 한다.
+    </div>
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      인간이 <span class="kw-success">책</span>을 통해 새로운 지식을 얻는 것처럼,
+      인공지능은 <span class="kw-success">데이터</span>를 통해 학습하고 스스로를 개선한다.
+    </div>
+    <div class="example-box" style="margin-top: var(--lm-space-4);">
+      제주도 체험 학습 후보지 선호도를 조사하려고
+      <span class="kw">글로 작성한 의견</span>과 <span class="kw">사진</span>을 제출받았다.
+      → 둘 다 선호도를 파악하기 위한 <b>데이터</b>다.
+    </div>
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      데이터를 올바르게 분류하는 것은 인공지능을 활용한 의사 결정에서
+      <span class="kw-danger">매우 중요한 절차</span>다. 그래서 지금부터 분류 기준을 배운다.
+    </div>
+  </section>
+
+  <!-- ═══════════ 7. 데이터 분류 3기준 ═══════════ -->
+  <section data-anim="crit">
+    <div class="chapter-tag">교과서 13쪽 · 핵심</div>
+    <h2>데이터를 나누는 세 가지 기준</h2>
+
+    <div id="critRows" style="margin-top: var(--lm-space-4);">
+      <div class="crit-row" data-idx="0">
+        <div class="crit-key">저장 규칙의<br>유무</div>
+        <div class="crit-cell">
+          <h4>정형 데이터</h4>
+          <p>정의된 규칙에 따라 일정한 형식으로 저장된 데이터
+             <span class="crit-eg">예 &nbsp;학년, 반, 이름, 평점</span></p>
+        </div>
+        <div class="crit-cell">
+          <h4>비정형 데이터</h4>
+          <p>특별한 규칙 없이 데이터의 특징에 맞게 저장된 데이터
+             <span class="crit-eg">예 &nbsp;글로 작성된 의견, 여행 사진</span></p>
+        </div>
+      </div>
+
+      <div class="crit-row" data-idx="1">
+        <div class="crit-key">연산<br>가능성</div>
+        <div class="crit-cell">
+          <h4>수치형 데이터</h4>
+          <p>숫자의 형태로 저장되어 사칙연산과 같은 수학적 연산이 <b>가능한</b> 데이터
+             <span class="crit-eg">예 &nbsp;평점, 키, 몸무게</span></p>
+        </div>
+        <div class="crit-cell">
+          <h4>범주형 데이터</h4>
+          <p>속성이나 범주의 형태로 저장되어 수학적 연산이 <b>불가능한</b> 데이터
+             <span class="crit-eg">예 &nbsp;학년, 이름, 혈액형</span></p>
+        </div>
+      </div>
+
+      <div class="crit-row" data-idx="2">
+        <div class="crit-key">저장<br>형태</div>
+        <div class="crit-cell">
+          <h4>텍스트 데이터</h4>
+          <p>단어나 문장처럼 문자를 사용하여 저장된 데이터
+             <span class="crit-eg">예 &nbsp;글로 작성된 의견, 성별, 이름</span></p>
+        </div>
+        <div class="crit-cell">
+          <h4>이미지 데이터</h4>
+          <p>사진이나 그림의 형태로 저장된 데이터
+             <span class="crit-eg">예 &nbsp;여행 사진, 아이콘, 캐리커쳐</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="anim-controls" style="margin-top: var(--lm-space-3);">
+      <button class="anim-btn" id="critNext">기준 하나씩 보기 ▶</button>
+      <span class="step-counter" id="critCount">전체 보기</span>
+      <button class="anim-btn reset-btn" id="critReset">모두 표시</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ 8. 기준이 셋이라는 뜻 ═══════════ -->
+  <section>
+    <div class="chapter-tag">가장 중요한 한 가지</div>
+    <h2>기준이 셋이면, 이름도 셋이다</h2>
+
+    <div class="example-box">
+      '<span class="kw">글로 작성된 의견</span>'은 무슨 데이터인가?
+    </div>
+
+    <table class="calc-table" style="margin-top: var(--lm-space-4);">
+      <thead>
+        <tr><th>기준</th><th>이 데이터는</th><th>왜</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>저장 규칙의 유무</td><td class="result-cell">비정형</td><td>정해진 형식 없이 자유롭게 쓴 글이므로</td></tr>
+        <tr><td>연산 가능성</td><td class="result-cell">범주형</td><td>더하거나 곱할 수 없으므로</td></tr>
+        <tr><td>저장 형태</td><td class="result-cell">텍스트</td><td>문자로 저장되었으므로</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      하나의 데이터가 <span class="kw-success">동시에 세 개의 이름</span>을 갖는다.
+      "이건 무슨 데이터야?"라는 질문에는 <span class="kw-success">"어느 기준으로?"</span>를 먼저 되물어야 한다.
+    </div>
+  </section>
+
+  <!-- ═══════════ 9. 문제 1 활동 ═══════════ -->
+  <section>
+    <div class="chapter-tag">활동 · 교과서 14쪽 문제 1</div>
+    <h2>어떤 기준으로 나눈 것일까</h2>
+    <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2);">
+      어느 영화에 대한 데이터를 세 기준 중 하나로 나눈 예시다. 각각 <b>어떤 기준</b>을 쓴 것인지 찾아보자.
+      <span class="chip chip-muted">카드를 누르면 답이 나옵니다</span>
+    </p>
+
+    <div class="q-grid">
+      <div class="q-card" data-ans="연산 가능성">
+        <div class="q-no">⑴</div>
+        <div class="q-items">
+          <b>평론가 평점, 상영 시간</b>
+          <span style="color: var(--lm-ink-4);">— 나눔 —</span>
+          <b>관람 가능 연령, 장르</b>
+        </div>
+        <div class="q-ans">→ 연산 가능성 &nbsp;<span style="font-weight:400; color:var(--lm-ink-3);">수치형 / 범주형</span></div>
+      </div>
+
+      <div class="q-card" data-ans="저장 규칙의 유무">
+        <div class="q-no">⑵</div>
+        <div class="q-items">
+          <b>관람객 수, 장르</b>
+          <span style="color: var(--lm-ink-4);">— 나눔 —</span>
+          <b>포스터 이미지, 예고편 영상</b>
+        </div>
+        <div class="q-ans">→ 저장 규칙의 유무 &nbsp;<span style="font-weight:400; color:var(--lm-ink-3);">정형 / 비정형</span></div>
+      </div>
+
+      <div class="q-card" data-ans="저장 형태">
+        <div class="q-no">⑶</div>
+        <div class="q-items">
+          <b>관람 평, 명대사</b>
+          <span style="color: var(--lm-ink-4);">— 나눔 —</span>
+          <b>포스터 이미지, 출연 배우 사진</b>
+        </div>
+        <div class="q-ans">→ 저장 형태 &nbsp;<span style="font-weight:400; color:var(--lm-ink-3);">텍스트 / 이미지</span></div>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      ⑵와 ⑶에 <span class="kw-danger">'포스터 이미지'가 둘 다 나온다.</span>
+      같은 데이터인데 왼쪽에 놓이기도, 오른쪽에 놓이기도 한다 — 기준이 다르기 때문이다.
+    </div>
+  </section>
+
+  <!-- ═══════════ 10. 심화 ═══════════ -->
+  <section>
+    <div class="chapter-tag">심화 <span class="badge">더 알고 싶다면</span></div>
+    <h2>더 잘게 나눌 수도 있다</h2>
+
+    <div class="two-col">
+      <div class="card card-accent">
+        <h4 style="margin-top:0;">수치형 데이터</h4>
+        <p style="font-size: var(--lm-slide-small); margin: 0 0 var(--lm-space-2);">
+          <span class="kw">이산형</span> — 값이 뚝뚝 떨어진다<br>
+          <span class="crit-eg" style="margin:0;">학급별 학생 수, 가족 구성원 수</span>
+        </p>
+        <p style="font-size: var(--lm-slide-small); margin: 0;">
+          <span class="kw">연속형</span> — 값이 이어진다<br>
+          <span class="crit-eg" style="margin:0;">키, 몸무게</span>
+        </p>
+      </div>
+      <div class="card card-accent">
+        <h4 style="margin-top:0;">범주형 데이터</h4>
+        <p style="font-size: var(--lm-slide-small); margin: 0 0 var(--lm-space-2);">
+          <span class="kw">명목형</span> — 순서가 없다<br>
+          <span class="crit-eg" style="margin:0;">색상, 혈액형</span>
+        </p>
+        <p style="font-size: var(--lm-slide-small); margin: 0;">
+          <span class="kw">순서형</span> — 순서가 있다<br>
+          <span class="crit-eg" style="margin:0;">학점, 신발 크기</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      <span class="kw-info">데이터</span>는 아직 가공되지 않은 원시 자료이고,
+      거기서 추려낸 핵심 요소를 <span class="kw-info">특성(feature)</span>이라고 한다.
+      좋은 특성을 골라내면 학습이 빨라지고, 잘못 고르면 오히려 성능이 떨어진다.
+      <span class="chip chip-muted" style="margin-left: var(--lm-space-2);">3차시에서 다시 만난다</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 11. 정리 ═══════════ -->
+  <section>
+    <div class="chapter-tag">정리</div>
+    <h2>오늘 한 줄</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="concept-card">
+        <div class="icon">🤖</div>
+        <h4>인공지능</h4>
+        <p>정해진 명령만 따르는 게 아니라 <span class="kw">스스로 판단</span>한다.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">📦</div>
+        <h4>데이터</h4>
+        <p>인공지능이 <span class="kw">학습하는 재료</span>. 사람의 책에 해당한다.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔀</div>
+        <h4>세 가지 기준</h4>
+        <p>저장 규칙 · 연산 가능성 · 저장 형태.
+           <span class="kw">같은 데이터도 기준마다 이름이 다르다.</span></p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      데이터를 모았다. 그런데 기계는 이걸로 <span class="kw-success">'어떻게' 배우는</span> 걸까?
+      <span class="chip chip-accent" style="margin-left: var(--lm-space-3);">다음 시간</span>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    minScale: 0.2, maxScale: 1.0,
+    center: false,
+    hash: true, slideNumber: 'c/t', progress: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: []
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* ── 데이터 분류 기준: 하나씩 보기 ── */
+  (function () {
+    const rows  = Array.from(document.querySelectorAll('#critRows .crit-row'));
+    const btn   = document.getElementById('critNext');
+    const reset = document.getElementById('critReset');
+    const count = document.getElementById('critCount');
+    if (!rows.length || !btn) return;
+
+    let step = -1;  /* -1 = 전체 표시 */
+
+    function render() {
+      if (step < 0) {
+        rows.forEach(r => r.classList.remove('dim'));
+        count.textContent = '전체 보기';
+      } else {
+        rows.forEach((r, i) => r.classList.toggle('dim', i !== step));
+        count.textContent = (step + 1) + ' / ' + rows.length;
+      }
+    }
+    btn.addEventListener('click', () => {
+      step = (step + 1) % rows.length;
+      render();
+    });
+    reset.addEventListener('click', () => { step = -1; render(); });
+    render();
+  })();
+
+  /* ── 문제 1: 카드 클릭으로 정답 공개 ── */
+  document.querySelectorAll('.q-card').forEach(card => {
+    card.addEventListener('click', () => card.classList.toggle('revealed'));
+  });
+</script>
+
+</body>
+</html>

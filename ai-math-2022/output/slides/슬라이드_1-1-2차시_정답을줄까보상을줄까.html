@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>정답을 줄까, 보상을 줄까 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    /* ── 흐름 도식 ── */
+    .flow-col { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5); }
+    .flow-col.accent { border-color: var(--lm-accent); }
+    .flow-col h4 { margin: 0 0 var(--lm-space-3); font-size: var(--lm-slide-body); }
+    .flow-chain { display: flex; flex-direction: column; gap: var(--lm-space-2); font-size: var(--lm-slide-small); }
+    .flow-chain .n { background: var(--lm-paper-tint); border-radius: var(--lm-radius-sm);
+                     padding: 10px 14px; }
+    .flow-chain .n.hi { background: var(--lm-accent); color: var(--lm-page); font-weight: 600; }
+    .flow-chain .ar { color: var(--lm-ink-4); text-align: center; line-height: 1; font-size: 20px; }
+
+    /* ── 비지도학습 인터랙티브 ── */
+    .cluster-stage { position: relative; width: 100%; height: 400px;
+                     background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                     border-radius: var(--lm-radius-md); overflow: hidden; }
+    .cl-item { position: absolute; width: 78px; height: 78px;
+               transition: left 0.75s cubic-bezier(.4,0,.2,1), top 0.75s cubic-bezier(.4,0,.2,1); }
+    .cl-item svg { width: 100%; height: 100%; display: block; }
+    .cl-label { position: absolute; font-size: var(--lm-slide-small); font-weight: 600;
+                color: var(--lm-ink-3); opacity: 0; transition: opacity 0.4s ease 0.5s;
+                transform: translateX(-50%); }
+    .cl-label.on { opacity: 1; }
+    .cl-hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+               font-size: var(--lm-slide-small); color: var(--lm-ink-4); pointer-events: none;
+               transition: opacity 0.3s ease; }
+    .cl-hint.off { opacity: 0; }
+
+    /* ── 학습 방식 카드 ── */
+    .ml-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+               border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5); }
+    .ml-card .ml-tag { display: inline-block; font-size: var(--lm-slide-caption); font-weight: 600;
+                       letter-spacing: 0.1em; color: var(--lm-accent); margin-bottom: var(--lm-space-2); }
+    .ml-card h4 { margin: 0 0 var(--lm-space-3); font-size: var(--lm-slide-h3); }
+    .ml-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                 line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+
+    /* 말풍선 */
+    .bubble { position: relative; background: var(--lm-paper-tint); border-radius: var(--lm-radius-md);
+              padding: var(--lm-space-3) var(--lm-space-4); font-size: var(--lm-slide-small);
+              margin: var(--lm-space-2) 0; }
+
+    /* ── 문제2 활동 ── */
+    .q2-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-4);
+               margin-top: var(--lm-space-4); }
+    .q2-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+               border-radius: var(--lm-radius-md); padding: var(--lm-space-4); cursor: pointer;
+               transition: border-color 0.2s ease, background 0.2s ease; }
+    .q2-card:hover { border-color: var(--lm-accent); }
+    .q2-card .q2-no { font-size: var(--lm-slide-caption); color: var(--lm-accent); font-weight: 600;
+                      letter-spacing: 0.1em; margin-bottom: var(--lm-space-2); }
+    .q2-card .q2-body { font-size: var(--lm-slide-small); line-height: var(--lm-slide-line-tight); }
+    .q2-card .q2-ans { margin-top: var(--lm-space-3); padding-top: var(--lm-space-2);
+                       border-top: var(--lm-border-hair) solid var(--lm-rule);
+                       font-size: var(--lm-slide-small); color: var(--lm-accent); font-weight: 600;
+                       opacity: 0; transition: opacity 0.3s ease; }
+    .q2-card.revealed { background: var(--lm-accent-tint); border-color: var(--lm-accent); }
+    .q2-card.revealed .q2-ans { opacity: 1; }
+  </style>
+</head>
+
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ═══════════ 1. 타이틀 ═══════════ -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅰ-1 인공지능의 의미 · 2차시</div>
+    <h1>정답을 줄까, 보상을 줄까</h1>
+    <p class="slide-sub">기계가 배우는 세 가지 방식</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 14~16쪽</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 2. 복습 ═══════════ -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>데이터를 나누는 세 기준, 기억나나요</h2>
+    <table class="calc-table" style="margin-top: var(--lm-space-4);">
+      <thead><tr><th>기준</th><th>한쪽</th><th>다른 쪽</th></tr></thead>
+      <tbody>
+        <tr><td>저장 규칙의 유무</td><td>정형</td><td>비정형</td></tr>
+        <tr><td>연산 가능성</td><td>수치형</td><td>범주형</td></tr>
+        <tr><td>저장 형태</td><td>텍스트</td><td>이미지</td></tr>
+      </tbody>
+    </table>
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      데이터라는 <span class="kw-success">재료</span>는 준비됐다.
+      오늘은 기계가 이 재료로 <span class="kw-success">어떻게 배우는지</span>를 본다.
+    </div>
+  </section>
+
+  <!-- ═══════════ 3. 학습 목표 ═══════════ -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span><span class="kw">기존 프로그래밍</span>과 <span class="kw">기계학습</span>의 차이를 설명할 수 있다.</span></li>
+      <li><span class="num">2</span><span>지도학습·비지도학습·강화학습의 <span class="kw">특성</span>을 구분할 수 있다.</span></li>
+      <li><span class="num">3</span><span>주어진 사례에 <span class="kw">알맞은 학습 방식</span>을 고를 수 있다.</span></li>
+    </ul>
+  </section>
+
+  <!-- ═══════════ 4. 기계학습의 뜻 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 14쪽</div>
+    <h2>기계학습이란</h2>
+    <div class="definition-box">
+      <span class="kw">기계학습(machine learning)</span>은 컴퓨터가 주어진 데이터를 통해
+      스스로 학습할 수 있도록 프로그래밍하는, 인공지능 구현의 대표적인 기술이다.
+    </div>
+    <div class="example-box" style="margin-top: var(--lm-space-5);">
+      인간은 학습을 통해 성장하고 문명을 발전시켰다.
+      인간을 모방한 인공지능도 <span class="kw">학습을 통해 스스로를 개선</span>한다.
+    </div>
+  </section>
+
+  <!-- ═══════════ 5. 기존 프로그래밍 vs 기계학습 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 14쪽 · 핵심 대비</div>
+    <h2>규칙을 누가 만드는가</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="flow-col">
+        <h4>기존의 프로그래밍</h4>
+        <div class="flow-chain">
+          <span class="n">학습용 데이터를 <b>사람이</b> 분석한다</span>
+          <span class="ar">↓</span>
+          <span class="n hi"><b>사람이</b> 규칙(알고리즘)을 설계한다</span>
+          <span class="ar">↓</span>
+          <span class="n">그 규칙대로 프로그램을 만든다</span>
+          <span class="ar">↓</span>
+          <span class="n">새 데이터 → 결과 출력</span>
+        </div>
+      </div>
+
+      <div class="flow-col accent">
+        <h4>기계학습</h4>
+        <div class="flow-chain">
+          <span class="n">학습이 가능한 구조(모델)를 설계한다</span>
+          <span class="ar">↓</span>
+          <span class="n hi"><b>컴퓨터가</b> 데이터를 분석해 규칙을 학습한다</span>
+          <span class="ar">↓</span>
+          <span class="n">스스로 학습한 규칙을 적용한다</span>
+          <span class="ar">↓</span>
+          <span class="n">새 데이터 → 결과 출력</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      차이는 딱 한 곳이다 — <span class="kw-success">규칙을 사람이 주느냐, 기계가 찾느냐.</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 6. 지도학습 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 15쪽 · 첫 번째</div>
+    <h2>지도학습 — 정답을 알려 준다</h2>
+
+    <div class="two-col">
+      <div class="ml-card">
+        <span class="ml-tag">SUPERVISED LEARNING</span>
+        <h4>문제와 정답을 모두 준다</h4>
+        <p>새로운 상황에서 올바른 값을 <span class="kw">예측</span>하거나
+           대상을 정확하게 <span class="kw">분류</span>하는 능력을 갖추게 하는 것이 목적이다.</p>
+        <p style="margin-top: var(--lm-space-3); color: var(--lm-ink-3);">
+          조건 — 학습용 데이터에 <b>사람이 정한 올바른 결과</b>가 들어 있어야 한다.</p>
+      </div>
+      <div>
+        <div class="bubble">📧 <b>'정상'</b>으로 표시된 메일 &nbsp;+&nbsp; <b>'스팸'</b>으로 표시된 메일을 학습용으로 준다</div>
+        <div class="bubble">🤖 "정상 메일과 스팸 메일을 나누는 규칙을 학습해."</div>
+        <div class="bubble" style="background: var(--lm-accent-tint);">
+          ❓ 새 메일이 도착 → 🤖 <b>"'스팸'입니다."</b></div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 단어 — <span class="kw-info">정답(label)</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 7. 비지도학습 인터랙티브 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 15~16쪽 · 두 번째</div>
+    <h2>비지도학습 — 기준은 알아서 정해라</h2>
+
+    <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin-bottom: var(--lm-space-3);">
+      "이 도형들을 분류해 봐. <b>분류 기준은 알아서 판단해.</b>"
+      <span class="chip chip-muted">버튼을 눌러 결과를 비교해 보자</span>
+    </p>
+
+    <div class="cluster-stage" id="clStage">
+      <div class="cl-hint" id="clHint">아직 분류하지 않았다 — 아래 버튼을 눌러 보자</div>
+    </div>
+
+    <div class="anim-controls" style="margin-top: var(--lm-space-3);">
+      <button class="anim-btn" id="byColor">색으로 분류</button>
+      <button class="anim-btn" id="byShape">모양으로 분류</button>
+      <button class="anim-btn reset-btn" id="clReset">흩어 놓기</button>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      정답을 안 줬으니 <span class="kw-danger">둘 다 틀린 게 아니다.</span>
+      인공지능이 데이터에서 <b>어떤 규칙을 발견하느냐</b>에 따라 분류 결과가 달라진다.
+    </div>
+  </section>
+
+  <!-- ═══════════ 8. 비지도학습 정리 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 15~16쪽</div>
+    <h2>비지도학습 — 정리</h2>
+    <div class="definition-box">
+      <span class="kw">비지도학습(unsupervised learning)</span>은 인공지능에게
+      정답을 알려 주지 않고 학습시키는 방법이다.
+      데이터의 <span class="kw">패턴이나 구조</span>를 스스로 발견하도록 하는 것이 목적이다.
+    </div>
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="card">
+        <h4 style="margin-top:0;">🤖 "도형의 <b>형태</b>로 분류했구나."</h4>
+      </div>
+      <div class="card">
+        <h4 style="margin-top:0;">🤖 "이번에는 도형의 <b>색</b>으로 분류했네."</h4>
+      </div>
+    </div>
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 단어 — <span class="kw-info">스스로 찾은 구조</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 9. 강화학습 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 16쪽 · 세 번째</div>
+    <h2>강화학습 — 점수를 준다</h2>
+
+    <div class="two-col">
+      <div class="ml-card">
+        <span class="ml-tag">REINFORCEMENT LEARNING</span>
+        <h4>선택에 보상을 준다</h4>
+        <p><span class="kw">보상 체계</span>를 통해 인공지능의 기능을 개선시키는 것이 목적이다.</p>
+        <p style="margin-top: var(--lm-space-3); color: var(--lm-ink-3);">
+          조건 — 결과가 얼마나 좋았는지 평가하고,
+          보상의 정도를 <b>일관되게</b> 조정하는 과정을 반복해야 한다.</p>
+      </div>
+      <div>
+        <div class="bubble">🚗 적색 신호에 <b>멈췄다</b> → 🟢 가점<br>
+          <span style="color: var(--lm-ink-3);">"앞으로 적색 신호에는 멈추는 게 좋겠어!"</span></div>
+        <div class="bubble">🚗 적색 신호에 <b>지나갔다</b> → 🔴 감점<br>
+          <span style="color: var(--lm-ink-3);">"감점을 줄이려면 어떻게 해야 할까?"</span></div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 단어 — <span class="kw-info">보상(reward)</span> &nbsp;·&nbsp;
+      <span class="chip chip-muted">벨만(Bellman, R. E.)의 벨만 방정식이 강화학습의 핵심 아이디어가 되었다</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 10. 세 방식 비교 (심화) ═══════════ -->
+  <section>
+    <div class="chapter-tag">심화 <span class="badge">한 문장으로 꿰기</span></div>
+    <h2>셋은 '피드백의 종류'만 다르다</h2>
+
+    <table class="calc-table" style="margin-top: var(--lm-space-4);">
+      <thead>
+        <tr><th>학습 방식</th><th>기계에게 무엇을 주는가</th><th>기계가 하는 일</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>지도학습</td><td class="result-cell">정답</td><td>정답과의 <b>오차</b>를 줄인다</td></tr>
+        <tr><td>비지도학습</td><td class="result-cell">아무것도 주지 않음</td><td>데이터 안의 <b>구조</b>를 스스로 찾는다</td></tr>
+        <tr><td>강화학습</td><td class="result-cell">보상(점수)</td><td><b>보상</b>을 크게 만든다</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      셋 다 <span class="kw-success">"무언가를 조금씩 고쳐 나간다"</span>는 점은 같다.
+      다른 건 <span class="kw-success">고칠 방향을 알려 주는 신호</span>가 무엇이냐뿐이다.
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      이 한 문장이 다음 시간 <span class="kw-info">가중치 조정</span>,
+      그리고 4단원 <span class="kw-info">손실함수·경사하강법</span>까지 그대로 이어진다.
+    </div>
+  </section>
+
+  <!-- ═══════════ 11. 문제 2 활동 ═══════════ -->
+  <section>
+    <div class="chapter-tag">활동 · 교과서 16쪽 문제 2</div>
+    <h2>어떤 학습 방식일까</h2>
+    <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2);">
+      각 사례에 적합한 학습 방식을 지도학습·비지도학습·강화학습 중에서 고르시오.
+      <span class="chip chip-muted">카드를 누르면 답이 나옵니다</span>
+    </p>
+
+    <div class="q2-grid">
+      <div class="q2-card">
+        <div class="q2-no">⑴</div>
+        <div class="q2-body">바둑에서 <b>승률이 높은 전략</b>을 탐색하도록 하는 것</div>
+        <div class="q2-ans">→ 강화학습<br>
+          <span style="font-weight:400; color:var(--lm-ink-3);">정답이 없다. 이기면 점수를 얻는다</span></div>
+      </div>
+      <div class="q2-card">
+        <div class="q2-no">⑵</div>
+        <div class="q2-body">태블릿에 쓴 <b>손 글씨 숫자</b>가 어떤 숫자인지 맞히도록 하는 것</div>
+        <div class="q2-ans">→ 지도학습<br>
+          <span style="font-weight:400; color:var(--lm-ink-3);">'이건 3이다'라는 정답을 붙여 학습</span></div>
+      </div>
+      <div class="q2-card">
+        <div class="q2-no">⑶</div>
+        <div class="q2-body">나와 <b>취향이 비슷한 사람들</b>이 많이 들은 음악을 추천하도록 하는 것</div>
+        <div class="q2-ans">→ 비지도학습<br>
+          <span style="font-weight:400; color:var(--lm-ink-3);">'비슷한 무리'를 스스로 찾아낸다</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 12. 정리 ═══════════ -->
+  <section>
+    <div class="chapter-tag">정리</div>
+    <h2>오늘 한 줄</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="concept-card">
+        <div class="icon">🏷️</div>
+        <h4>지도학습</h4>
+        <p><span class="kw">정답</span>을 준다 → 오차를 줄인다</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔍</div>
+        <h4>비지도학습</h4>
+        <p><span class="kw">정답이 없다</span> → 구조를 스스로 찾는다</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🎯</div>
+        <h4>강화학습</h4>
+        <p><span class="kw">보상</span>을 준다 → 보상을 키운다</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      셋 다 "조금씩 고쳐 나간다"고 했다.
+      그런데 기계 안에서 대체 <span class="kw-success">'무엇이' 고쳐지는</span> 걸까?
+      <span class="chip chip-accent" style="margin-left: var(--lm-space-3);">다음 시간</span>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    minScale: 0.2, maxScale: 1.0,
+    center: false,
+    hash: true, slideNumber: 'c/t', progress: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: []
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* ══════════════════════════════════════════════════════════
+     비지도학습 — 같은 데이터, 다른 기준, 다른 결과
+     3가지 색 × 3가지 모양 = 9개 도형
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const stage = document.getElementById('clStage');
+    if (!stage) return;
+
+    const COLORS = [
+      { key: 'r', fill: '#C0563A', name: '빨강' },
+      { key: 'b', fill: '#3E6E9E', name: '파랑' },
+      { key: 'y', fill: '#D9A93C', name: '노랑' }
+    ];
+    const SHAPES = [
+      { key: 't', name: '삼각형' },
+      { key: 's', name: '사각형' },
+      { key: 'c', name: '원' }
+    ];
+
+    function shapeSVG(shape, fill) {
+      if (shape === 't') return '<svg viewBox="0 0 100 100"><polygon points="50,12 92,88 8,88" fill="' + fill + '"/></svg>';
+      if (shape === 's') return '<svg viewBox="0 0 100 100"><rect x="12" y="12" width="76" height="76" rx="6" fill="' + fill + '"/></svg>';
+      return '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="' + fill + '"/></svg>';
+    }
+
+    /* 흩어진 초기 위치 (백분율) */
+    const SCATTER = [
+      [12, 18], [38, 10], [64, 22], [84, 14],
+      [20, 58], [46, 46], [72, 60],
+      [10, 78], [58, 80]
+    ];
+
+    const items = [];
+    let n = 0;
+    COLORS.forEach(function (c) {
+      SHAPES.forEach(function (s) {
+        const el = document.createElement('div');
+        el.className = 'cl-item';
+        el.innerHTML = shapeSVG(s.key, c.fill);
+        el.dataset.color = c.key;
+        el.dataset.shape = s.key;
+        stage.appendChild(el);
+        items.push({ el: el, color: c.key, shape: s.key, idx: n });
+        n++;
+      });
+    });
+
+    /* 그룹 라벨 3개 */
+    const labels = [];
+    for (let i = 0; i < 3; i++) {
+      const l = document.createElement('div');
+      l.className = 'cl-label';
+      l.style.top = '84%';
+      stage.appendChild(l);
+      labels.push(l);
+    }
+
+    const COL_X = [18, 50, 82];          /* 세 그룹의 가로 중심(%) */
+    const ROW_Y = [16, 40, 64];          /* 그룹 안 세 줄(%) */
+
+    function place(x, y, it) {
+      it.el.style.left = 'calc(' + x + '% - 39px)';
+      it.el.style.top  = 'calc(' + y + '% - 39px)';
+    }
+
+    function scatter() {
+      items.forEach(function (it, i) {
+        place(SCATTER[i][0], SCATTER[i][1], it);
+      });
+      labels.forEach(function (l) { l.classList.remove('on'); });
+      document.getElementById('clHint').classList.remove('off');
+    }
+
+    function group(by) {
+      const keys = (by === 'color') ? COLORS : SHAPES;
+      keys.forEach(function (k, gi) {
+        const members = items.filter(function (it) {
+          return (by === 'color' ? it.color : it.shape) === k.key;
+        });
+        members.forEach(function (it, mi) {
+          place(COL_X[gi], ROW_Y[mi], it);
+        });
+        labels[gi].textContent = k.name;
+        labels[gi].style.left = COL_X[gi] + '%';
+        labels[gi].classList.add('on');
+      });
+      document.getElementById('clHint').classList.add('off');
+    }
+
+    document.getElementById('byColor').addEventListener('click', function () { group('color'); });
+    document.getElementById('byShape').addEventListener('click', function () { group('shape'); });
+    document.getElementById('clReset').addEventListener('click', scatter);
+
+    scatter();
+  })();
+
+  /* ── 문제 2: 카드 클릭으로 정답 공개 ── */
+  document.querySelectorAll('.q2-card').forEach(function (card) {
+    card.addEventListener('click', function () { card.classList.toggle('revealed'); });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>데이터로 배우는 기계 — 학습지</title>
+
+<link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+<link rel="stylesheet" href="../../../_shared/templates/worksheet-system.css">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      packages: { '[+]': ['boldsymbol', 'ams'] },
+      tags: 'ams'
+    },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] },
+    chtml: { scale: 0.95 }
+  };
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+<style>
+  /* ────────────────────────────────────────────────────────────────
+     worksheet-system.css 의 .ws-body 는 column-fill: auto 인데,
+     .ws-page 가 height 가 아닌 min-height 만 가져서 단이 채워질
+     확정 높이가 생기지 않는다 → 모든 문항이 1단으로 쌓인다.
+     (레퍼런스 worksheet-kitchen-sink.html 도 동일 증상)
+     공유 템플릿이 고쳐지기 전까지 이 파일에서만 balance 로 되돌린다.
+     ──────────────────────────────────────────────────────────────── */
+  .ws-body { column-fill: balance; }
+
+  .lvl {
+    display: inline-block;
+    font-size: 0.78em;
+    padding: 1px 7px;
+    margin-left: 6px;
+    border: var(--lm-border-hair) solid var(--lm-page-rule);
+    border-radius: var(--lm-radius-sm);
+    color: var(--lm-page-ink-3);
+    vertical-align: 0.15em;
+    white-space: nowrap;
+  }
+  .lvl-adv { border-color: var(--lm-accent); color: var(--lm-accent); }
+  .ans-key { font-size: var(--lm-page-small); line-height: var(--lm-page-line-body); }
+  .ans-key h3 {
+    font-size: var(--lm-page-h3);
+    margin: var(--lm-space-4) 0 var(--lm-space-2);
+    padding-bottom: var(--lm-space-1);
+    border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+  }
+  .ans-key h3 { break-after: avoid; page-break-after: avoid; }
+  .ans-key p { margin: 0 0 var(--lm-space-2); }
+  .ans-key .why { color: var(--lm-page-ink-2); }
+</style>
+</head>
+
+<body data-subject="ai_math">
+
+<!-- ══════════════════ PAGE 1 · 문항 ══════════════════ -->
+<div class="ws-page">
+
+  <header class="ws-head">
+    <div class="ws-title-group">
+      <div class="ws-chapter">Ⅰ-1 · 1차시</div>
+      <h1 class="ws-title">데이터로 배우는 기계</h1>
+    </div>
+    <div class="ws-meta">인공지능수학 · 2학년 · 영일고등학교</div>
+  </header>
+
+  <div class="ws-student">
+    <span class="ws-student-field"><label>학년</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>반</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>번호</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>이름</label><span class="line"></span></span>
+  </div>
+
+  <div class="ws-body">
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">1.</span>인공지능이 기존의 프로그램과 가장 크게 다른 점을 한 문장으로 쓰시오.
+        <span class="lvl">이해</span>
+      </div>
+      <div class="ws-answer-space sm"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">2.</span>데이터를 분류하는 세 가지 기준과, 각 기준으로 나뉘는 두 가지 종류를 표에 쓰시오.
+        <span class="lvl">기억</span>
+      </div>
+      <table class="ws-table">
+        <thead>
+          <tr><th class="left">기준</th><th>종류 ①</th><th>종류 ②</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">저장 규칙의 유무</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td class="left">&nbsp;</td><td>수치형</td><td>&nbsp;</td></tr>
+          <tr><td class="left">&nbsp;</td><td>&nbsp;</td><td>이미지</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">3.</span>다음 중 <strong>비정형 데이터</strong>인 것만을 있는 대로 고른 것은?
+        <span class="lvl">이해</span>
+      </div>
+      <aside class="ws-info">
+        <strong>&lt;보기&gt;</strong><br>
+        ㄱ. 우리 반 학생들의 키를 적은 표<br>
+        ㄴ. 체험 학습 후보지에 대해 자유롭게 쓴 의견<br>
+        ㄷ. 수학여행에서 찍은 사진<br>
+        ㄹ. 학년, 반, 번호가 적힌 명렬표
+      </aside>
+      <ol class="ws-choices">
+        <li>① ㄱ, ㄴ</li>
+        <li>② ㄴ, ㄷ</li>
+        <li>③ ㄷ, ㄹ</li>
+        <li>④ ㄱ, ㄴ, ㄷ</li>
+        <li>⑤ ㄴ, ㄷ, ㄹ</li>
+      </ol>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">4.</span>어느 학교 급식 만족도 조사에서 아래와 같은 자료를 모았다.
+        각 자료를 <strong>세 기준 모두</strong>에 대하여 분류하시오.
+        <span class="lvl">적용</span>
+      </div>
+      <table class="ws-table">
+        <thead>
+          <tr><th class="left">자료</th><th>저장 규칙</th><th>연산</th><th>저장 형태</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">만족도 점수 (1~5)</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td class="left">자유롭게 쓴 건의 사항</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td class="left">급식 사진</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">5.</span>어느 영화의 데이터를 아래와 같이 둘로 나누었다.
+        <strong>어떤 기준</strong>을 사용한 것인지 쓰고, 그렇게 판단한 이유를 쓰시오.
+        <span class="lvl">적용</span>
+      </div>
+      <aside class="ws-info">
+        <strong>왼쪽</strong> 관람객 수, 장르<br>
+        <strong>오른쪽</strong> 포스터 이미지, 예고편 영상
+      </aside>
+      <div class="ws-answer-space sm"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">6.</span>'포스터 이미지'는 어떤 문제에서는 왼쪽에, 어떤 문제에서는 오른쪽에 놓인다.
+        같은 데이터인데 왜 이런 일이 생기는지 설명하시오.
+        <span class="lvl">분석</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">1 / 2</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 2 · 심화 + 정답 ══════════════════ -->
+<div class="ws-page">
+
+  <h2 class="ws-section">심화 문항</h2>
+
+  <div class="ws-body">
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">7.</span>수치형 데이터는 <strong>이산형</strong>과 <strong>연속형</strong>으로,
+        범주형 데이터는 <strong>명목형</strong>과 <strong>순서형</strong>으로 더 나눌 수 있다.
+        다음을 알맞게 분류하시오.
+        <span class="lvl lvl-adv">심화 · 적용</span>
+      </div>
+      <aside class="ws-info">
+        ㄱ. 한 반의 학생 수 &nbsp;&nbsp; ㄴ. 학생의 키<br>
+        ㄷ. 혈액형 &nbsp;&nbsp; ㄹ. 학점(A, B, C)
+      </aside>
+      <div class="ws-answer-space sm"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">8.</span>인공지능에게 <strong>키</strong>를 '큰 키 / 보통 / 작은 키'로 바꾸어 입력하면,
+        데이터의 종류가 어떻게 바뀌는지 쓰고, 이때 <strong>잃게 되는 정보</strong>가 무엇인지 설명하시오.
+        <span class="lvl lvl-adv">심화 · 평가</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+  </div>
+
+  <h2 class="ws-section">정답 및 해설</h2>
+
+  <div class="ws-body ans-key">
+
+    <h3>1.</h3>
+    <p>기존 프로그램은 <strong>정해진 명령만</strong> 따라 작동하지만,
+       인공지능은 <strong>스스로 판단</strong>하고 논리적 사고와 행동을 수행한다.</p>
+
+    <h3>2.</h3>
+    <p>저장 규칙의 유무 → <strong>정형 / 비정형</strong><br>
+       <strong>연산 가능성</strong> → 수치형 / <strong>범주형</strong><br>
+       <strong>저장 형태</strong> → <strong>텍스트</strong> / 이미지</p>
+
+    <h3>3. ②</h3>
+    <p class="why">ㄴ은 정해진 형식 없이 자유롭게 쓴 글, ㄷ은 사진이므로 비정형이다.
+       ㄱ의 표와 ㄹ의 명렬표는 일정한 형식이 있으므로 정형이다.</p>
+
+    <h3>4.</h3>
+    <p>만족도 점수 → 정형 / 수치형 / 텍스트<br>
+       건의 사항 → 비정형 / 범주형 / 텍스트<br>
+       급식 사진 → 비정형 / 범주형 / 이미지</p>
+    <p class="why">점수는 숫자로 저장되어 평균을 낼 수 있으므로 수치형,
+       건의 사항은 더하거나 곱할 수 없으므로 범주형이다.</p>
+
+    <h3>5.</h3>
+    <p><strong>저장 규칙의 유무</strong></p>
+    <p class="why">관람객 수와 장르는 일정한 형식으로 저장된 정형 데이터이고,
+       포스터 이미지와 예고편 영상은 특별한 규칙 없이 저장된 비정형 데이터이기 때문이다.</p>
+
+    <h3>6.</h3>
+    <p class="why">데이터를 분류하는 기준이 <strong>세 가지</strong>이고,
+       하나의 데이터는 세 기준 각각에 대하여 이름을 갖기 때문이다.
+       포스터 이미지는 <strong>저장 규칙의 유무</strong>로는 비정형,
+       <strong>저장 형태</strong>로는 이미지로 분류된다.
+       따라서 "무슨 데이터인가"를 묻기 전에 <strong>"어느 기준으로"</strong>를 먼저 정해야 한다.</p>
+
+    <h3>7.</h3>
+    <p>이산형 ㄱ &nbsp;·&nbsp; 연속형 ㄴ &nbsp;·&nbsp; 명목형 ㄷ &nbsp;·&nbsp; 순서형 ㄹ</p>
+    <p class="why">학생 수는 값이 뚝뚝 떨어지고, 키는 값이 이어진다.
+       혈액형은 순서가 없지만 학점은 A&gt;B&gt;C의 순서가 있다.</p>
+
+    <h3>8.</h3>
+    <p><strong>수치형(연속형) → 범주형(순서형)</strong>으로 바뀐다.</p>
+    <p class="why">잃는 정보: 같은 '큰 키' 안에서의 <strong>차이</strong>가 사라진다.
+       175 cm와 190 cm가 똑같이 '큰 키'가 되어 두 사람을 구별할 수 없고,
+       평균·차이 같은 <strong>사칙연산</strong>도 더 이상 할 수 없다.</p>
+
+  </div>
+
+  <div class="ws-pagenum">2 / 2</div>
+</div>
+
+<script>
+  window.addEventListener('load', function () { window.safeTypeset(); });
+</script>
+
+</body>
+</html>
