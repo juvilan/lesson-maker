@@ -9,15 +9,17 @@
 윈도우에서 clone하면 **worktree 구조가 아니라 브랜치들**을 받습니다.
 맥의 `.claude/worktrees/` 레이아웃은 gitignore라 넘어오지 않습니다. 재현하지 마시고 `git checkout`으로 오가시면 됩니다.
 
+**2026-08-19 병합 완료.** `main`만 보시면 됩니다.
+
 | 브랜치 | 내용 | 상태 |
 |---|---|---|
-| `main` | 공통 베이스 (`d8a22b6`) | 원격과 동일 |
-| `lesson/ai-math-2022-1-1` | 인공지능수학(2022) 1-1 1~2차시 수업자료 (`3b40f30`) | main에 미병합 |
-| `claude/reverent-moser-21ec5b` | Pretendard 폰트 로컬 번들링 + 이 노트 | main에 미병합 |
-| ~~`claude/strange-villani-e75dbb`~~ | **내용 없음** — main과 동일한 빈 브랜치. 무시하거나 삭제 | — |
+| `main` | 아래 둘이 모두 들어 있음 | ✅ 여기서 작업 |
+| `lesson/ai-math-2022-1-1` | 인공지능수학(2022) 1-1 1~2차시 수업자료 (`3b40f30`) | main에 병합됨 |
+| `claude/reverent-moser-21ec5b` | Pretendard 폰트 로컬 번들링 + 이 노트 | main에 병합됨 |
+| `claude/strange-villani-e75dbb` | **내용 없음** — main과 동일한 빈 브랜치 | 원격에 없음. 무시 |
 
-**세 브랜치는 아직 합치지 않았습니다.** 기기 이동을 머지 결정에 묶지 않으려고 그대로 뒀습니다.
-윈도우에서 순서를 정해 정리하시면 됩니다.
+두 브랜치는 건드리는 파일이 겹치지 않아 충돌 없이 병합됐습니다.
+병합된 브랜치들은 삭제하셔도 됩니다.
 
 ## 2. 직전 작업 — Pretendard 폰트 번들링 (완료·검증됨)
 
@@ -56,12 +58,11 @@ python3 -m http.server 8791
 ## 4. 기기 전환 시 주의
 
 - **저장소 안에 없는 것은 넘어오지 않습니다.** 계획 파일은 맥의 `~/.claude/plans/`에 있어 윈도우에 없습니다. 대화 내용도 마찬가지입니다. 남길 게 있으면 이 파일에 적으세요.
-- **clone 용량**: 약 283MB이고 그 대부분이 `*/book/*.pdf`(316MB, 미래엔 교과서)입니다. 교안 작업에 매번 필요하진 않으니 학교 노트북에서는 제외하고 받는 것을 권합니다.
+- **새 기기 설정의 정본은 `README.md`의 "다른 기기에서 작업하기"입니다.** 전체 clone + `pip install -r requirements.txt` + `playwright install chromium`. 교과서 PDF는 수업 설계에 쓰이므로 저장소에 **일부러 포함**돼 있고, 지도서(52MB)만 제외돼 Google Drive에서 따로 복사합니다.
+- (선택) 학교 노트북 용량이 부담되면 교과서 PDF를 빼고 받을 수도 있습니다. clone 약 283MB 중 대부분이 `*/book/*.pdf`(316MB)입니다. 다만 PDF 없이는 교안 설계 시 교과서 참조가 안 되니, **기본은 README대로 전체 clone**을 권합니다.
   ```
   git clone --filter=blob:none --no-checkout https://github.com/juvilan/lesson-maker.git
-  ```
-  ```
   cd lesson-maker && git sparse-checkout set --no-cone '/*' '!/*/book/' && git checkout main
   ```
-  (이 두 명령은 아직 실제로 실행해 검증하지 않았습니다. `du -sh .`로 결과를 확인하세요. PDF가 필요해지면 `git sparse-checkout disable`.)
+  (미검증 명령입니다. `du -sh .`로 확인하고, PDF가 필요해지면 `git sparse-checkout disable`.)
 - **습관**: 작업 시작 `/sync`, 작업 끝 `/commit-push-pr`. 이번에 `3b40f30`이 push 없이 맥에만 20일 남아 있던 게 이 습관이 빠져서였습니다.
