@@ -16,10 +16,10 @@
 
 
 /* ────────────────────────────────────────────────────────────────────────────
- * Pretendard 폰트 (CDN 1순위 · 로컬 woff2 2순위 · 시스템 폰트 폴백)
+ * Pretendard 폰트 — 저장소 번들 woff2 (오프라인 동작, CDN 의존 없음)
+ * 파일: _shared/fonts/PretendardVariable.woff2 (SIL OFL 1.1, LICENSE 동봉)
+ * 로드 실패 시 --lm-font-sans 폴백 체인(맑은 고딕 등)으로 자동 대체됨.
  * ────────────────────────────────────────────────────────────────────────── */
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@2.3.0/dist/web/variable/pretendardvariable.min.css');
-
 @font-face {
   font-family: 'Pretendard Variable';
   font-weight: 45 920;
