@@ -67,3 +67,24 @@ python3 -m http.server 8791
   ```
   ⚠️ **이 명령은 쓰지 마세요 — 검증 결과 실패입니다.** 2026-08-19 윈도우에서 실제로 실행한 결과 `You are in a sparse checkout with 0% of tracked files present.` 로, 파일이 하나도 체크아웃되지 않은 빈 저장소가 만들어졌습니다. `--no-cone`의 포함 패턴 `'/*'`와 배제 패턴 `'!/*/book/'`이 충돌한 것으로 보입니다. 용량을 줄여야 한다면 cone 모드로 다시 작성해 **실제 clone으로 검증한 뒤** 이 자리에 적어주세요. (잘못 실행했다면 되돌리기: `git sparse-checkout disable` 또는 저장소를 지우고 README대로 전체 clone.)
 - **습관**: 작업 시작 `/sync`, 작업 끝 `/commit-push-pr`. 이번에 `3b40f30`이 push 없이 맥에만 20일 남아 있던 게 이 습관이 빠져서였습니다.
+
+## 5. 윈도우 노트북 환경 — 남은 작업 3건 (2026-08-19)
+
+저장소가 아니라 **기기 설정** 쪽 잔여 작업입니다. 저장소 작업(3절)과 별개입니다.
+
+1. **빈 껍데기 폴더 삭제** — `C:\Users\user\lesson-maker`. 4절의 sparse-checkout 명령이 만든 0% 체크아웃 저장소 자리로, 내용물(중복 clone 604MB + 깨진 `.git`)은 이미 지웠고 **빈 디렉터리만 남았습니다.** 그 폴더를 작업 디렉터리로 잡은 Claude Code 세션이 있으면 삭제가 막히니, `Projects\lesson-maker`에서 세션을 연 뒤 실행하세요.
+   ```
+   Remove-Item -Force C:\Users\user\lesson-maker
+   ```
+   ※ 이 저장소의 정본 위치는 `C:\Users\user\Projects\lesson-maker`입니다 (맥의 `~/Projects/lesson-maker`와 같은 배치).
+
+2. **Python Store 별칭 정리** (GUI라 직접 해야 함) — 설정 → 앱 → 고급 앱 설정 → 앱 실행 별칭에서 **`python3` (3.13) 항목 끄기**.
+   **Python은 설치돼 있습니다 — 3.14.7** (`AppData\Local\Python\pythoncore-3.14-64`, pip 26.2.1). PowerShell에서는 `python`·`python3`·`py` 모두 정상입니다.
+   그런데 **Git Bash에서만 `python3`이 항상 실패합니다**(`0x80070002`). 사라진 3.13 Store 패키지를 가리키는 확장자 없는 별칭 stub을 MSYS가 실행하지 못하는 것으로, **Bash에서 안 된다고 "Python 미설치"로 오진하기 쉽습니다**(실제로 2026-08-19에 그렇게 오진했습니다). 판단 전에 PowerShell로 교차 확인하세요.
+   별칭을 정리하면 Git Bash에서도 `python3`이 살아나고, `~/.claude/skills/continuous-learning-v2/hooks/observe.sh`의 간헐적 blocking 에러도 사라집니다. (그 훅은 현재 `~/.claude/homunculus/disabled` 파일로 꺼둔 상태 — 파일을 지우면 다시 켜집니다.)
+   PDF 파이프라인 의존성은 **설치·검증 완료**입니다: playwright 1.62.0 + pypdf 6.16.1 + Chrome Headless Shell 151. `html_to_pdf.py`로 kitchen-sink 8페이지 변환 확인.
+
+3. **`~/.claude/rules/agents-v2.md`의 `~/qjc-office/` 경로** — 이 기기에 그 경로가 없어 참조 6개가 전부 끊깁니다. 같은 내용이 `C:\Users\user\Projects\claude-forge\`에 있고, `reference/`에 3개(`agents-config-ref.md`, `agents-teams-ref.md`, `server-inventory.md`)가 존재합니다.
+   나머지 3개(`agent-catalog.md`, `agent-pipeline.md`, `parallel-agents-guide.md`)는 **claude-forge 저장소 어디에도 없습니다**(0/0 동기화 상태 확인). 맥에서 `ls ~/qjc-office/dotclaude/reference/`로 실재 여부를 먼저 확인하고, 있으면 claude-forge에 커밋·push, 없으면 rules에서 참조를 제거하세요.
+   경로 통일 방식은 미결정입니다 — (A) 맥에 `~/Projects/claude-forge` symlink 후 rules를 그 경로로 통일 / (B) rules를 `claude-forge/reference/` 상대 표기로 / (C) 윈도우 경로로 바꾸고 맥은 나중에.
+   ⚠️ **`~/.claude/rules/*.md`와 `~/.claude/settings.json`은 `claude-forge/`와 바이트 동일한 install 산출물입니다.** 직접 고치면 `/forge-update`·`install.ps1`이 되돌립니다. 수정은 반드시 claude-forge 저장소에서 하세요.
