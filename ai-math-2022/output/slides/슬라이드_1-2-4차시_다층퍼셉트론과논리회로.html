@@ -58,7 +58,7 @@
     /* ── 층 이름표 ── */
     .layer-tag { font-size: 22px; fill: var(--lm-ink-4); letter-spacing: 0.08em; }
     .dg.wide  { width: 100%; max-width: 1040px; height: auto; }
-    .dg.xwide { width: 100%; max-width: 1200px; height: auto; }
+    .dg.xwide { width: 100%; max-width: 1040px; height: auto; }
 
     /* ── 문제 서술문 (한글 + 수식 혼합) ── */
     .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
@@ -68,10 +68,10 @@
     .gate-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-5);
                  margin-top: var(--lm-space-3); }
     .gate-cell { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
-                 border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4);
+                 border-radius: var(--lm-radius-md); padding: var(--lm-space-2) var(--lm-space-4);
                  text-align: center; }
     .gate-cell h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
-    .gate-cell .dg { width: 100%; max-width: 420px; height: auto; }
+    .gate-cell .dg { width: 100%; max-width: 320px; height: auto; }
     .gate-cell p { margin: var(--lm-space-2) 0 0; font-size: var(--lm-slide-caption);
                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-3); }
     .gate-cell .truth-table { margin: var(--lm-space-2) auto 0; font-size: var(--lm-slide-small); }
@@ -517,7 +517,7 @@
 
     <p class="prob-stmt" style="margin-bottom: var(--lm-space-2);">
       디지털 회로에서 논리 연산을 수행하는 회로를 <b>논리 회로</b>라고 한다.
-      스위치가 연결되거나 전구가 켜진 상태를 \(1\), 그렇지 않은 상태를 \(0\)이라 하면 진리표의 결과를 확인할 수 있다.
+      스위치나 전구가 켜진 상태가 \(1\), 꺼진 상태가 \(0\)이다.
     </p>
 
     <div class="gate-grid">
