@@ -339,13 +339,15 @@
 
 
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
   <script>
     Reveal.initialize({
       width: 1920, height: 1080, margin: 0.04,
       minScale: 0.2, maxScale: 1.0,
       center: false,
       hash: true, slideNumber: 'c/t', progress: true, controls: true,
-      transition: 'fade'
+      transition: 'fade',
+      plugins: [RevealNotes]
     });
 
     window.safeTypeset = function(elements) {

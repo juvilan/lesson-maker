@@ -74,6 +74,7 @@
        Reveal.js 초기화 (고정 크기 · 상단 정렬 · 업스케일 금지)
        ─────────────────────────────────────────────────────────── -->
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
   <script>
     Reveal.initialize({
       /* ── 캔버스 고정 ── */
@@ -118,7 +119,7 @@
           }
         }
       },
-      plugins: []
+      plugins: [RevealNotes]
     });
 
     /* MathJax 안전 호출 유틸 (에이전트 생성 코드에서 공통 사용) */

@@ -500,6 +500,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
 <script>
   Reveal.initialize({
     width: 1920, height: 1080, margin: 0.04,
@@ -509,7 +510,7 @@
     controls: true, controlsLayout: 'bottom-right',
     transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
     touch: true,
-    plugins: []
+    plugins: [RevealNotes]
   });
 
   window.safeTypeset = function (elements) {
