@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>참과 거짓만으로 생각하기 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        macros: { xor: '\\mathbin{\\dot{\\vee}}' },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    /* ── 카드 ── */
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-3); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    /* ── 문제 서술문 (한글 + 수식 혼합) ── */
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.7; margin: var(--lm-space-4) 0 0; }
+
+    /* ── 논리 연산 5종 표 ── */
+    .op-table { width: 100%; border-collapse: collapse; margin-top: var(--lm-space-4);
+                font-size: var(--lm-slide-small); }
+    .op-table th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 500;
+                   padding: var(--lm-space-2) var(--lm-space-4); text-align: center;
+                   border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .op-table td { border-bottom: var(--lm-border-hair) solid var(--lm-rule);
+                   padding: var(--lm-space-3) var(--lm-space-4); color: var(--lm-ink-2); }
+    .op-table tr:last-child td { border-bottom: none; }
+    .op-table td.op-name { font-weight: 600; color: var(--lm-ink); white-space: nowrap; }
+    .op-table td.op-sym  { text-align: center; color: var(--lm-accent); white-space: nowrap; }
+    .op-table tr.on td { background: var(--lm-accent-tint); }
+    .op-table tr { transition: background 0.25s; }
+
+    /* ── 진리표: 열 강조 ── */
+    .truth-table td.dim, .truth-table th.dim { opacity: 0.25; transition: opacity 0.3s; }
+    .truth-table .col-btn { cursor: pointer; }
+    .truth-table .col-btn:hover { background: var(--lm-accent-tint-strong); }
+
+    /* ── 지식 베이스 규칙 ── */
+    .rule-row { display: grid; grid-template-columns: 4.5em 1fr 3em 1fr; align-items: center;
+                gap: var(--lm-space-3); background: var(--lm-page);
+                border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4);
+                margin-bottom: var(--lm-space-3); font-size: var(--lm-slide-small); }
+    .rule-row .rule-id { font-weight: 600; color: var(--lm-accent); }
+    .rule-row .rule-if   { color: var(--lm-ink-2); }
+    .rule-row .rule-then { color: var(--lm-ink); font-weight: 600; }
+    .rule-row .rule-arrow { text-align: center; color: var(--lm-ink-4); }
+    .rule-row.on { border-color: var(--lm-accent); background: var(--lm-accent-tint); }
+    .rule-row { transition: border-color 0.25s, background 0.25s; }
+
+    /* ── 진단 대화 ── */
+    .chat { margin-top: var(--lm-space-4); }
+    .bubble { max-width: 74%; padding: var(--lm-space-3) var(--lm-space-4);
+              border-radius: var(--lm-radius-md); font-size: var(--lm-slide-small);
+              margin-bottom: var(--lm-space-3); line-height: var(--lm-slide-line-tight);
+              opacity: 0; transform: translateY(8px); transition: opacity 0.3s, transform 0.3s; }
+    .bubble.show { opacity: 1; transform: translateY(0); }
+    .bubble.user { background: var(--lm-paper-tint); color: var(--lm-ink-2);
+                   border: var(--lm-border-thin) solid var(--lm-rule); margin-right: auto; }
+    .bubble.sys  { background: var(--lm-accent-tint); color: var(--lm-ink);
+                   border: var(--lm-border-thin) solid var(--lm-accent); margin-left: auto; }
+    .bubble.final { background: var(--lm-success-tint); color: var(--lm-success);
+                    border-color: var(--lm-success); font-weight: 600; margin-left: auto; }
+
+    /* ── O/X · 정답 공개 카드 ── */
+    .ox-list { list-style: none; padding: 0; margin: var(--lm-space-4) 0 0; }
+    .ox-list li { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5);
+                  margin-bottom: var(--lm-space-3); font-size: var(--lm-slide-small);
+                  cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+    .ox-list li:hover { border-color: var(--lm-accent); }
+    .ox-list li .ox-ans { display: block; margin-top: var(--lm-space-2);
+                          font-size: var(--lm-slide-small); color: var(--lm-accent);
+                          font-weight: 600; opacity: 0; transition: opacity 0.3s ease; }
+    .ox-list li.revealed { background: var(--lm-accent-tint); border-color: var(--lm-accent); }
+    .ox-list li.revealed .ox-ans { opacity: 1; }
+  </style>
+</head>
+
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ═══════════ 1. 타이틀 ═══════════ -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅰ-2 인공지능의 역사 · 2차시</div>
+    <h1>참과 거짓만으로 생각하기</h1>
+    <p class="slide-sub">진리표와 논리 연산, 그리고 규칙으로 만든 전문가</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 25~27쪽</span>
+    </div>
+    <aside class="notes">오늘은 수학 시간처럼 보이는 시간이다. 명제·논리는 공통수학에서 이미 다뤘으니 "복습 + 인공지능 연결"로 위치를 잡아 준다. 새 개념은 배타적논리합 하나뿐이라고 미리 말해 두면 부담이 줄어든다.</aside>
+  </section>
+
+  <!-- ═══════════ 2. 지난 시간 → 오늘의 질문 ═══════════ -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>지난 시간 마지막 질문</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="result-box">
+        70년의 역사를 훑었다. 그 안에 <span class="kw-success">전문가시스템</span>이 있었다 —
+        사람이 규칙을 전부 적어 주는 방식.
+      </div>
+      <div class="info-box">
+        그런데 컴퓨터는 <span class="kw-info">0과 1</span>로만 동작한다.
+        규칙을 "적어 준다"는 게 대체 무슨 뜻인가?
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      사람은 <b>"만약 오늘 비가 오면 우산을 챙긴다."</b>처럼 생각한다.
+      이 말을 <span class="kw-danger">0과 1로 옮기는 방법</span>이 오늘의 주제다.
+    </div>
+    <aside class="notes">칠판에 '비가 온다 → 우산을 챙긴다'를 그대로 적어 둔다. 12번 슬라이드의 IF-THEN 규칙에서 이 문장을 그대로 회수한다.</aside>
+  </section>
+
+  <!-- ═══════════ 3. 학습 목표 ═══════════ -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>다섯 가지 <span class="kw">논리 연산</span>의 기호와 의미를 말할 수 있다.</span></li>
+      <li><span class="num">2</span><span>두 명제의 <span class="kw">진리표</span>를 완성할 수 있다.</span></li>
+      <li><span class="num">3</span><span><span class="kw">전문가시스템</span>이 조건문으로 추론하는 과정을 설명할 수 있다.</span></li>
+    </ul>
+    <div class="info-box">
+      성취기준 <span class="badge">인공지능에서 수학을 활용한 역사적 사례를 탐구하고 설명할 수 있다</span>
+    </div>
+    <aside class="notes">2번이 오늘의 계산 목표, 3번이 오늘의 연결 목표다. 다음 시간(퍼셉트론으로 논리 연산)의 재료가 전부 2번에서 나온다.</aside>
+  </section>
+
+  <!-- ═══════════ 4. 왜 논리 연산인가 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 25쪽</div>
+    <h2>사람의 추론을 기계에 옮기려면</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>🧠 사람은 이렇게 판단한다</h4>
+        <p>"만약 오늘 비가 오면 우산을 챙긴다."</p>
+        <p>어떤 결정을 내리거나 문제를 해결할 때
+           사람은 <span class="kw">논리적인 추론</span>을 사용한다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>💻 컴퓨터는 이렇게 동작한다</h4>
+        <p>0과 1, 두 가지 상태뿐이다.</p>
+        <p>그렇다면 <span class="kw">참과 거짓에 기반한 논리 연산</span>이
+           사람의 추론을 재현하는 가장 효과적인 방법이 된다.</p>
+      </div>
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-5);">
+      수학적 추론이란 <b>주어진 명제로부터 새로운 명제를 도출하는 과정</b>이다.
+      그래서 초기 인공지능의 발전은 수학의 기본 요소인
+      <span class="kw">논리 연산과 알고리즘</span>에 크게 의존하게 되었다.
+    </div>
+    <aside class="notes">"왜 수학 시간에 논리를 배우나"에 대한 답이 이 한 장에 있다. 서두르지 말고 여기서 한 번 멈춘다.</aside>
+  </section>
+
+  <!-- ═══════════ 5. 논리 연산 5종 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 25쪽 <span class="badge">오늘의 중심</span></div>
+    <h2>두 명제에 적용하는 다섯 가지 연산</h2>
+
+    <table class="op-table" id="opTable">
+      <thead>
+        <tr><th style="width:20%;">논리 연산</th><th style="width:14%;">기호</th>
+            <th style="width:30%;">의미</th><th style="width:36%;">참이 될 조건</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="op-name">부정 (NOT)</td><td class="op-sym">\(\sim p\)</td>
+            <td>\(p\)가 아니다.</td><td>\(p\)가 거짓</td></tr>
+        <tr><td class="op-name">논리합 (OR)</td><td class="op-sym">\(p \vee q\)</td>
+            <td>\(p\) 또는 \(q\)이다.</td><td>\(p\)와 \(q\) 중에서 <b>적어도 하나</b>가 참</td></tr>
+        <tr><td class="op-name">논리곱 (AND)</td><td class="op-sym">\(p \wedge q\)</td>
+            <td>\(p\)이고 \(q\)이다.</td><td>\(p\)와 \(q\)가 <b>모두</b> 참</td></tr>
+        <tr class="on"><td class="op-name">배타적논리합 (XOR)</td><td class="op-sym">\(p \xor q\)</td>
+            <td>\(p \vee q\)이지만 \(p \wedge q\)는 아니다.</td>
+            <td>\(p\)와 \(q\) 중에서 <b>반드시 하나만</b> 참</td></tr>
+        <tr><td class="op-name">조건문 (IF-THEN)</td><td class="op-sym">\(p \rightarrow q\)</td>
+            <td>\(p\)이면 \(q\)이다.</td>
+            <td>\(p\)와 \(q\)가 모두 참이거나 \(p\)가 거짓</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      네 번째 <span class="kw-info">배타적논리합</span>만 처음 보는 기호다.
+      "둘 중 하나만" — 짜장면이냐 짬뽕이냐, 둘 다는 안 된다.
+    </div>
+    <aside class="notes">배타적논리합이 오늘의 유일한 새 기호다. 이름을 크게 적어 둘 것 — 다음 시간에 퍼셉트론이 이 연산에서 막히고, 그 다음 시간에 층을 쌓아 뚫는다. 세 차시를 관통하는 단어다.</aside>
+  </section>
+
+  <!-- ═══════════ 6. 예제 1 ═══════════ -->
+  <section>
+    <div class="chapter-tag">예제 1 · 교과서 25쪽</div>
+    <h2>말로 옮기고, 참·거짓을 가리자</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="example-box">
+        \(p\): 사람은 포유류이다. <span class="chip chip-success">참</span>
+      </div>
+      <div class="example-box">
+        \(q\): 고래는 어류이다. <span class="chip chip-danger">거짓</span>
+      </div>
+    </div>
+
+    <p class="prob-stmt">다음 명제를 말하고, 그 참·거짓을 판별하시오.
+      &nbsp;⑴ \(\sim p\) &nbsp;&nbsp; ⑵ \(p \vee q\) &nbsp;&nbsp; ⑶ \(p \xor q\)</p>
+
+    <div id="ex1Steps">
+      <div class="step-box" data-i="1">
+        <div class="step-label">⑴ 부정</div>
+        \(\sim p\): 사람은 포유류가 <b>아니다.</b> &nbsp;—&nbsp;
+        \(p\)가 참이므로 \(\sim p\)는 <span class="kw-danger">거짓</span>이다.
+      </div>
+      <div class="step-box" data-i="2">
+        <div class="step-label">⑵ 논리합</div>
+        \(p \vee q\): 사람은 포유류<b>이거나</b> 고래는 어류이다. &nbsp;—&nbsp;
+        \(p\)가 참이므로(적어도 하나가 참) \(p \vee q\)는 <span class="kw-success">참</span>이다.
+      </div>
+      <div class="step-box" data-i="3">
+        <div class="step-label">⑶ 배타적논리합</div>
+        \(p \xor q\): 사람은 포유류이거나 고래는 어류이다. <b>그러나</b> 사람이 포유류이고 고래가 어류인 것은 아니다.
+        &nbsp;—&nbsp; \(p\)는 참, \(q\)는 거짓이므로 <b>정확히 하나만</b> 참이다. 따라서 <span class="kw-success">참</span>이다.
+      </div>
+    </div>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="ex1Next">다음 단계 ▶</button>
+      <span class="step-counter" id="ex1Cnt">0 / 3</span>
+      <button class="anim-btn reset-btn" id="ex1Reset">처음으로</button>
+    </div>
+    <aside class="notes">⑵와 ⑶의 우리말 문장이 앞부분은 똑같고 뒷문장만 붙는다는 점을 짚는다. 배타적논리합은 "논리합 + 단서"라는 감각이 여기서 생긴다.</aside>
+  </section>
+
+  <!-- ═══════════ 7. 문제 2 ═══════════ -->
+  <section>
+    <div class="chapter-tag">문제 2 · 교과서 26쪽</div>
+    <h2>이번엔 여러분이</h2>
+
+    <p class="prob-stmt">예제 1의 두 명제 \(p\)(참), \(q\)(거짓)에 대하여 다음 명제를 말하고, 그 참·거짓을 판별하시오.</p>
+
+    <ul class="ox-list" id="p2List" style="margin-top: var(--lm-space-4);">
+      <li>⑴ \(\sim q\)
+        <span class="ox-ans">"고래는 어류가 아니다." — \(q\)가 거짓이므로 \(\sim q\)는 <b>참</b>이다.</span></li>
+      <li>⑵ \(p \wedge q\)
+        <span class="ox-ans">"사람은 포유류이고 고래는 어류이다." — 모두 참이어야 하는데 \(q\)가 거짓이므로 <b>거짓</b>이다.</span></li>
+      <li>⑶ \(p \rightarrow q\)
+        <span class="ox-ans">"사람이 포유류이면 고래는 어류이다." — \(p\)가 참인데 \(q\)가 거짓이므로 <b>거짓</b>이다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      ⑶에 주의. 조건문은 <span class="kw-danger">\(p\)가 참인데 \(q\)가 거짓일 때만</span> 거짓이다.
+      나머지는 전부 참이다.
+    </div>
+    <aside class="notes">조건문의 진릿값은 매년 걸린다. "약속을 어긴 경우만 거짓"으로 설명하면 잘 통한다 — 비가 왔는데(p 참) 우산을 안 챙긴 경우(q 거짓)만 약속을 어긴 것.</aside>
+  </section>
+
+  <!-- ═══════════ 8. 진릿값과 진리표 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 26쪽</div>
+    <h2>진릿값 — 참은 T, 거짓은 F</h2>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-5);">
+      명제의 참 또는 거짓을 그 명제의 <span class="kw">진릿값</span>이라 하고,
+      참인 경우에는 <b>T</b>, 거짓인 경우에는 <b>F</b>로 나타낸다.
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-4);">
+      두 명제 \(p\)와 \(q\)의 참과 거짓에 따라 논리 연산으로 생성된 새로운 명제의 진릿값을
+      표로 나타낸 것을 <span class="kw">진리표(truth table)</span>라고 한다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="info-box">
+        <b>T</b>는 참을 뜻하는 <b>T</b>ruth,
+        <b>F</b>는 거짓을 뜻하는 <b>F</b>alse의 첫 글자다.
+      </div>
+      <div class="result-box">
+        진리표는 인공지능의 논리적 추론을
+        <span class="kw-success">단순화하고 체계화</span>하는 데 효과적이다.
+      </div>
+    </div>
+    <aside class="notes">다음 슬라이드의 표가 오늘의 핵심 산출물이다. 학생들에게 책 26쪽을 펴 두고 같이 채우게 한다.</aside>
+  </section>
+
+  <!-- ═══════════ 9. 진리표 (핵심) ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 26쪽 <span class="badge">오늘의 중심</span></div>
+    <h2>두 명제의 진리표</h2>
+
+    <table class="truth-table" id="ttMain" style="width: 88%;">
+      <thead>
+        <tr>
+          <th>\(p\)</th><th>\(q\)</th>
+          <th class="col-btn dim" data-c="2">\(\sim p\)</th>
+          <th class="col-btn dim" data-c="3">\(\sim q\)</th>
+          <th class="col-btn dim" data-c="4">\(p \vee q\)</th>
+          <th class="col-btn dim" data-c="5">\(p \wedge q\)</th>
+          <th class="col-btn dim" data-c="6">\(p \xor q\)</th>
+          <th class="col-btn dim" data-c="7">\(p \rightarrow q\)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="val-1">T</td><td class="val-1">T</td>
+            <td class="dim val-0" data-c="2">F</td><td class="dim val-0" data-c="3">F</td>
+            <td class="dim val-1" data-c="4">T</td><td class="dim val-1" data-c="5">T</td>
+            <td class="dim val-0" data-c="6">F</td><td class="dim val-1" data-c="7">T</td></tr>
+        <tr><td class="val-1">T</td><td class="val-0">F</td>
+            <td class="dim val-0" data-c="2">F</td><td class="dim val-1" data-c="3">T</td>
+            <td class="dim val-1" data-c="4">T</td><td class="dim val-0" data-c="5">F</td>
+            <td class="dim val-1" data-c="6">T</td><td class="dim val-0" data-c="7">F</td></tr>
+        <tr><td class="val-0">F</td><td class="val-1">T</td>
+            <td class="dim val-1" data-c="2">T</td><td class="dim val-0" data-c="3">F</td>
+            <td class="dim val-1" data-c="4">T</td><td class="dim val-0" data-c="5">F</td>
+            <td class="dim val-1" data-c="6">T</td><td class="dim val-1" data-c="7">T</td></tr>
+        <tr><td class="val-0">F</td><td class="val-0">F</td>
+            <td class="dim val-1" data-c="2">T</td><td class="dim val-1" data-c="3">T</td>
+            <td class="dim val-0" data-c="4">F</td><td class="dim val-0" data-c="5">F</td>
+            <td class="dim val-0" data-c="6">F</td><td class="dim val-1" data-c="7">T</td></tr>
+      </tbody>
+    </table>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="ttNext">한 열씩 열기 ▶</button>
+      <span class="step-counter" id="ttCnt">0 / 6</span>
+      <button class="anim-btn" id="ttAll">전부 열기</button>
+      <button class="anim-btn reset-btn" id="ttReset">가리기</button>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      머리글을 눌러 열 하나만 따로 열 수도 있다.
+      \(p \vee q\)와 \(p \xor q\)를 <span class="kw-info">나란히 놓고 첫 행만 비교</span>해 보자 — 딱 한 칸이 다르다.
+    </div>
+    <aside class="notes">열을 다 연 뒤 반드시 OR과 XOR의 첫 행(T,T)만 비교시킨다. 이 한 칸의 차이가 다음 두 차시 전체의 원인이다. 시간이 부족하면 다른 건 줄여도 이건 남긴다.</aside>
+  </section>
+
+  <!-- ═══════════ 10. 보기 ═══════════ -->
+  <section>
+    <div class="chapter-tag">보기 · 교과서 26쪽</div>
+    <h2>진리표에서 읽어 내기</h2>
+
+    <div class="two-col ratio-1-2" style="margin-top: var(--lm-space-4); align-items: center;">
+      <table class="truth-table">
+        <thead><tr><th>\(p\)</th><th>\(q\)</th><th>\(\sim p\)</th><th>\(\sim p \vee q\)</th></tr></thead>
+        <tbody>
+          <tr><td class="val-1">T</td><td class="val-1">T</td><td class="val-0">F</td><td class="val-1">T</td></tr>
+          <tr><td class="val-1">T</td><td class="val-0">F</td><td class="val-0">F</td><td class="val-0">F</td></tr>
+          <tr><td class="val-0">F</td><td class="val-1">T</td><td class="val-1">T</td><td class="val-1">T</td></tr>
+          <tr><td class="val-0">F</td><td class="val-0">F</td><td class="val-1">T</td><td class="val-1">T</td></tr>
+        </tbody>
+      </table>
+
+      <div>
+        <div class="result-box">
+          \(p\)가 <b>거짓일 때만</b> \(\sim p\)의 진릿값이 참이다.
+        </div>
+        <div class="result-box" style="margin-top: var(--lm-space-4);">
+          \(p\)가 참이고 \(q\)가 거짓일 때만 \(\sim p \vee q\)의 진릿값이 <b>거짓</b>이다.
+        </div>
+        <div class="info-box" style="margin-top: var(--lm-space-4);">
+          그런데 이건 <span class="kw-info">\(p \rightarrow q\)의 진릿값과 똑같다.</span>
+          앞 표에서 확인해 보자 — 조건문은 이렇게 다른 연산으로 바꿔 쓸 수 있다.
+        </div>
+      </div>
+    </div>
+    <aside class="notes">\(\sim p \vee q\)가 \(p \rightarrow q\)와 같다는 사실은 교과서에 직접 적혀 있지 않지만, 앞 표를 열어 두고 비교하면 학생들이 스스로 발견한다. 여유가 있을 때만 다룬다.</aside>
+  </section>
+
+  <!-- ═══════════ 11. 문제 3 ═══════════ -->
+  <section>
+    <div class="chapter-tag">문제 3 · 교과서 26쪽</div>
+    <h2>대우를 진리표로 확인하자</h2>
+
+    <p class="prob-stmt">⑴ 오른쪽 진리표를 완성하시오. &nbsp; ⑵ \(p \rightarrow q\)와 \(\sim q \rightarrow \sim p\)의 진릿값을 비교하시오.</p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3); align-items: start;">
+      <table class="calc-table" id="p3Table" style="width: 100%;">
+        <thead><tr><th>\(p\)</th><th>\(q\)</th><th>\(\sim p\)</th><th>\(\sim q\)</th>
+                   <th>\(\sim q \rightarrow \sim p\)</th><th>\(p \rightarrow q\)</th></tr></thead>
+        <tbody>
+          <tr><td>T</td><td>T</td>
+              <td class="fillable" data-a="F">?</td><td class="fillable" data-a="F">?</td>
+              <td class="fillable" data-a="T">?</td><td class="result-cell">T</td></tr>
+          <tr><td>T</td><td>F</td>
+              <td class="fillable" data-a="F">?</td><td class="fillable" data-a="T">?</td>
+              <td class="fillable" data-a="F">?</td><td class="result-cell">F</td></tr>
+          <tr><td>F</td><td>T</td>
+              <td class="fillable" data-a="T">?</td><td class="fillable" data-a="F">?</td>
+              <td class="fillable" data-a="T">?</td><td class="result-cell">T</td></tr>
+          <tr><td>F</td><td>F</td>
+              <td class="fillable" data-a="T">?</td><td class="fillable" data-a="T">?</td>
+              <td class="fillable" data-a="T">?</td><td class="result-cell">T</td></tr>
+        </tbody>
+      </table>
+
+      <div>
+        <div class="info-box">
+          \(\sim q \rightarrow \sim p\)는 <b>\(\sim q\)가 참인데 \(\sim p\)가 거짓일 때만</b> 거짓이다.
+          두 번째 행이 바로 그 경우다.
+        </div>
+        <div class="step-box" id="p3Concl">
+          <div class="step-label">⑵ 비교</div>
+          두 열이 <b>T, F, T, T</b>로 완전히 같다.
+          즉 \(p \rightarrow q\)와 \(\sim q \rightarrow \sim p\)의 <span class="kw-success">진릿값은 같다.</span>
+          <span class="chip chip-accent" style="margin-left: var(--lm-space-2);">대우</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="p3All">전부 채우기</button>
+      <button class="anim-btn reset-btn" id="p3Reset">지우기</button>
+    </div>
+    <aside class="notes">칸을 직접 눌러 하나씩 채울 수 있다. 학생이 먼저 공책에 채우게 한 뒤 열어 확인하는 순서가 좋다. "대우"라는 이름은 공통수학에서 이미 배웠다.</aside>
+  </section>
+
+  <!-- ═══════════ 12. 전문가시스템과 조건문 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 27쪽</div>
+    <h2>전문가시스템 — 조건문을 쌓아 만든 전문가</h2>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-4);">
+      전문가시스템은 특정 분야의 전문적 지식으로 구축된 <span class="kw">지식 베이스</span>를 기반으로 작동하는
+      <b>규칙 기반 추론 시스템</b>이다. 사용자가 사실을 입력하면, 입력받은 사실과 지식 베이스의 규칙을 결합하여
+      논리적 추론을 수행한다.
+    </div>
+
+    <h3 style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-h3);">지식 베이스 — 의료 진단 예시</h3>
+    <div style="margin-top: var(--lm-space-3);">
+      <div class="rule-row" data-r="1">
+        <span class="rule-id">규칙 ①</span>
+        <span class="rule-if">IF &nbsp; 기침을 하고 콧물이 난다.</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-then">THEN &nbsp; 감기 또는 독감이다.</span>
+      </div>
+      <div class="rule-row" data-r="2">
+        <span class="rule-id">규칙 ②</span>
+        <span class="rule-if">IF &nbsp; 고열과 오한이 있다.</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-then">THEN &nbsp; 독감 또는 장염이다.</span>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      규칙의 정체가 보이는가? <span class="kw-info">IF-THEN, 곧 조건문 \(p \rightarrow q\)</span>다.
+      오늘 배운 다섯 연산 중 마지막 것이 전문가시스템의 뼈대다.
+      <span class="chip chip-muted" style="margin-left: var(--lm-space-2);">지식 베이스 = 지식과 규칙을 구조화하여 저장한 것</span>
+    </div>
+    <aside class="notes">2번 슬라이드의 '비가 오면 우산을 챙긴다'를 여기서 회수한다. 그 문장도 규칙 하나다. 규칙을 수천 개 모으면 전문가시스템이 된다.</aside>
+  </section>
+
+  <!-- ═══════════ 13. 진단 대화 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 27쪽</div>
+    <h2>추론이 일어나는 순간</h2>
+
+    <div class="two-col ratio-1-2" style="margin-top: var(--lm-space-3); align-items: start;">
+      <div id="chatRules">
+        <div class="rule-row" data-r="1" style="grid-template-columns: 4.5em 1fr;">
+          <span class="rule-id">규칙 ①</span>
+          <span class="rule-if">기침 + 콧물 → 감기 or 독감</span>
+        </div>
+        <div class="rule-row" data-r="2" style="grid-template-columns: 4.5em 1fr;">
+          <span class="rule-id">규칙 ②</span>
+          <span class="rule-if">고열 + 오한 → 독감 or 장염</span>
+        </div>
+        <div class="warning-box" style="margin-top: var(--lm-space-4);">
+          규칙에 <span class="kw-danger">없는 증상</span>을 말하면?
+          시스템은 아무 답도 하지 못한다. 지난 시간에 배운 <b>쇠락의 이유</b>가 이것이다.
+        </div>
+      </div>
+
+      <div class="chat" id="chat">
+        <div class="bubble user" data-i="1">🙍 기침을 하고 콧물이 나요.</div>
+        <div class="bubble sys"  data-i="2">🤖 규칙 ①에 의하여 <b>감기 또는 독감</b>입니다.</div>
+        <div class="bubble user" data-i="3">🙍 몸이 덜덜 떨리고 추워요.</div>
+        <div class="bubble sys"  data-i="4">🤖 오한이 있군요. 규칙 ②에 의하여 <b>독감 또는 장염</b>입니다.</div>
+        <div class="bubble final" data-i="5">🤖 증상을 종합해 볼 때, <b>독감</b>입니다.</div>
+      </div>
+    </div>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="chatNext">대화 진행 ▶</button>
+      <span class="step-counter" id="chatCnt">0 / 5</span>
+      <button class="anim-btn reset-btn" id="chatReset">처음으로</button>
+    </div>
+    <aside class="notes">마지막 말풍선 직전에 "그럼 답은 뭘까?"를 던진다. 두 규칙의 결론 {감기, 독감}과 {독감, 장염}의 교집합이 독감이라는 걸 학생이 먼저 말하게 한다. 집합으로 설명하면 바로 이해한다.</aside>
+  </section>
+
+  <!-- ═══════════ 14. 정리 ═══════════ -->
+  <section>
+    <div class="chapter-tag">정리</div>
+    <h2>오늘 한 줄</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-5);">
+      <div class="concept-card">
+        <div class="icon">🔣</div>
+        <h4>다섯 연산</h4>
+        <p>NOT · OR · AND · <span class="kw">XOR</span> · IF-THEN.
+           새 기호는 XOR 하나였다.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">📋</div>
+        <h4>진리표</h4>
+        <p>참·거짓의 모든 경우를 표로 적으면
+           <span class="kw">추론이 계산이 된다.</span></p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🏥</div>
+        <h4>전문가시스템</h4>
+        <p>조건문을 모아 만든 전문가.
+           <span class="kw">규칙 밖에서는 멈춘다.</span></p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-6);">
+      컴퓨터는 참을 <span class="kw-success">1</span>, 거짓을 <span class="kw-success">0</span>으로 쓴다.
+      그런데 우리는 이미 0과 1을 받아 0과 1을 내놓는 장치를 만들어 봤다 — <b>퍼셉트론</b>.
+      그렇다면 퍼셉트론으로 논리 연산을 할 수 있을까?
+      <span class="chip chip-accent" style="margin-left: var(--lm-space-3);">다음 시간 · 퍼셉트론과 논리 연산</span>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      <b>과제 (문제 4 · 탐구)</b> — 의료, 교육, 경영 분야에서 찾아볼 수 있는 전문가시스템의 사례를 조사해 오자.
+      <span class="chip chip-muted" style="margin-left: var(--lm-space-2);">힌트: 왓슨 · 지능형 교수 시스템 · XCON</span>
+    </div>
+    <aside class="notes">마지막 물음이 다음 차시의 첫 슬라이드로 그대로 이어진다. 과제는 한 분야만 조사해 와도 된다고 범위를 좁혀 주면 회수율이 오른다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    minScale: 0.2, maxScale: 1.0,
+    center: false,
+    hash: true, slideNumber: 'c/t', progress: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: []
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* ══════════════════════════════════════════════════════════
+     예제 1 — 단계별 풀이 공개
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const wrap = document.getElementById('ex1Steps');
+    if (!wrap) return;
+    const steps = Array.from(wrap.querySelectorAll('.step-box'));
+    const cnt = document.getElementById('ex1Cnt');
+    let i = 0;
+
+    function render() {
+      steps.forEach((s, k) => s.classList.toggle('visible', k < i));
+      cnt.textContent = i + ' / ' + steps.length;
+      window.safeTypeset(steps.slice(0, i));
+    }
+    document.getElementById('ex1Next').addEventListener('click', () => {
+      if (i < steps.length) { i++; render(); }
+    });
+    document.getElementById('ex1Reset').addEventListener('click', () => { i = 0; render(); });
+    render();
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     문제 2 — 카드를 눌러 답 공개
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const list = document.getElementById('p2List');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     진리표 — 열 단위로 공개 (~p → ~q → ∨ → ∧ → XOR → →)
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const table = document.getElementById('ttMain');
+    if (!table) return;
+    const cols = [2, 3, 4, 5, 6, 7];
+    const cnt = document.getElementById('ttCnt');
+    const open = new Set();
+
+    function cells(c) { return table.querySelectorAll('[data-c="' + c + '"]'); }
+    function render() {
+      cols.forEach(c => cells(c).forEach(el => el.classList.toggle('dim', !open.has(c))));
+      cnt.textContent = open.size + ' / ' + cols.length;
+    }
+    function toggle(c) { open.has(c) ? open.delete(c) : open.add(c); render(); }
+
+    table.querySelectorAll('th.col-btn').forEach(th => {
+      th.addEventListener('click', () => toggle(Number(th.dataset.c)));
+    });
+    document.getElementById('ttNext').addEventListener('click', () => {
+      const next = cols.find(c => !open.has(c));
+      if (next !== undefined) { open.add(next); render(); }
+    });
+    document.getElementById('ttAll').addEventListener('click', () => {
+      cols.forEach(c => open.add(c)); render();
+    });
+    document.getElementById('ttReset').addEventListener('click', () => { open.clear(); render(); });
+    render();
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     문제 3 — 진리표 칸 채우기 (대우)
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const table = document.getElementById('p3Table');
+    if (!table) return;
+    const cells = Array.from(table.querySelectorAll('td.fillable'));
+    const concl = document.getElementById('p3Concl');
+
+    function fill(td) {
+      td.textContent = td.dataset.a;
+      td.classList.add('filled');
+      if (cells.every(c => c.classList.contains('filled'))) {
+        concl.classList.add('visible');
+        window.safeTypeset([concl]);
+      }
+    }
+    function clear(td) {
+      td.textContent = '?';
+      td.classList.remove('filled');
+      concl.classList.remove('visible');
+    }
+
+    cells.forEach(td => td.addEventListener('click', () => fill(td)));
+    document.getElementById('p3All').addEventListener('click', () => cells.forEach(fill));
+    document.getElementById('p3Reset').addEventListener('click', () => cells.forEach(clear));
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     전문가시스템 진단 대화 — 규칙 강조와 함께 진행
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const chat = document.getElementById('chat');
+    if (!chat) return;
+    const bubbles = Array.from(chat.querySelectorAll('.bubble'));
+    const rules = Array.from(document.querySelectorAll('#chatRules .rule-row'));
+    const cnt = document.getElementById('chatCnt');
+    /* 말풍선 i에서 강조할 규칙 번호 (0 = 없음) */
+    const ruleAt = { 2: 1, 4: 2 };
+    let i = 0;
+
+    function render() {
+      bubbles.forEach((b, k) => b.classList.toggle('show', k < i));
+      const active = ruleAt[i] || 0;
+      rules.forEach(r => r.classList.toggle('on', Number(r.dataset.r) === active));
+      cnt.textContent = i + ' / ' + bubbles.length;
+    }
+    document.getElementById('chatNext').addEventListener('click', () => {
+      if (i < bubbles.length) { i++; render(); }
+    });
+    document.getElementById('chatReset').addEventListener('click', () => { i = 0; render(); });
+    render();
+  })();
+</script>
+
+</body>
+</html>

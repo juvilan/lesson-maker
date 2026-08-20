@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>층을 쌓으면 열린다 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        macros: { xor: '\\mathbin{\\dot{\\vee}}' },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    /* ── 도식 SVG (색은 전부 토큰) ── */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .fill-page   { fill: var(--lm-page); }
+    .dg .fill-tint   { fill: var(--lm-paper-tint); }
+    .dg .fill-accent { fill: var(--lm-accent); }
+    .dg .stroke-rule   { stroke: var(--lm-rule-strong); fill: none; }
+    .dg .stroke-accent { stroke: var(--lm-accent); fill: none; }
+    .dg .stroke-ink    { stroke: var(--lm-ink-3); fill: none; }
+    .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink); }
+    .dg .t-cap { font-size: 21px; fill: var(--lm-ink-3); }
+    .dg .t-lab { font-size: 25px; fill: var(--lm-ink-2); }
+
+    /* ── 도형 안 수식: SVG <text>는 MathJax가 처리하지 못하므로
+          foreignObject 안의 HTML로 넣는다 ── */
+    .dg foreignObject > div { font-family: var(--lm-font-sans); text-align: center;
+                              line-height: 1.05; color: var(--lm-ink); font-size: 28px; }
+    .dg .m-sm > div  { font-size: 23px; }
+    .dg .m-val > div { color: var(--lm-accent); }
+    .dg .m-out > div { color: var(--lm-page); }
+
+    /* ── 층 이름표 ── */
+    .layer-tag { font-size: 22px; fill: var(--lm-ink-4); letter-spacing: 0.08em; }
+    .dg.wide  { width: 100%; max-width: 1040px; height: auto; }
+    .dg.xwide { width: 100%; max-width: 1200px; height: auto; }
+
+    /* ── 문제 서술문 (한글 + 수식 혼합) ── */
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.7; margin: var(--lm-space-4) 0 0; }
+
+    /* ── 논리 회로 3종 ── */
+    .gate-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-5);
+                 margin-top: var(--lm-space-3); }
+    .gate-cell { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                 border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4);
+                 text-align: center; }
+    .gate-cell h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .gate-cell .dg { width: 100%; max-width: 420px; height: auto; }
+    .gate-cell p { margin: var(--lm-space-2) 0 0; font-size: var(--lm-slide-caption);
+                   line-height: var(--lm-slide-line-tight); color: var(--lm-ink-3); }
+    .gate-cell .truth-table { margin: var(--lm-space-2) auto 0; font-size: var(--lm-slide-small); }
+    .gate-cell .truth-table th, .gate-cell .truth-table td { padding: 2px var(--lm-space-4); }
+    .gate-cell.bad { border-color: var(--lm-danger); }
+
+    /* ── O/X 확인하기 ── */
+    .ox-list { list-style: none; padding: 0; margin: var(--lm-space-5) 0 0; }
+    .ox-list li { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5);
+                  margin-bottom: var(--lm-space-4); font-size: var(--lm-slide-body);
+                  cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+    .ox-list li:hover { border-color: var(--lm-accent); }
+    .ox-list li .ox-ans { display: block; margin-top: var(--lm-space-2);
+                          font-size: var(--lm-slide-small); color: var(--lm-accent);
+                          font-weight: 600; opacity: 0; transition: opacity 0.3s ease; }
+    .ox-list li.revealed { background: var(--lm-accent-tint); border-color: var(--lm-accent); }
+    .ox-list li.revealed .ox-ans { opacity: 1; }
+
+    /* ── 세로를 조여야 하는 장 ── */
+    section.tight .step-box.visible { padding: var(--lm-space-1) var(--lm-space-4);
+                                      margin: var(--lm-space-1) 0; }
+    section.tight .step-box .step-label { margin-bottom: 0; }
+    section.tight h2 { margin-bottom: var(--lm-space-2); }
+    section.tight .two-col { margin: var(--lm-space-2) 0; }
+    section.tight .prob-stmt { line-height: 1.5; margin-top: var(--lm-space-2); }
+    section.tight .anim-controls { margin-top: var(--lm-space-2); }
+    section.tight .calc-table { margin-top: var(--lm-space-2); margin-bottom: 0; }
+    section.tight .calc-table th,
+    section.tight .calc-table td { padding: var(--lm-space-1) var(--lm-space-4); }
+    /* MathJax 디스플레이 수식의 기본 상하 여백(1em)이 세로를 크게 먹는다 */
+    section.tight mjx-container[display="true"] { margin: 0.25em 0 !important; }
+  </style>
+</head>
+
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ═══════════ 1. 타이틀 ═══════════ -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅰ-2 인공지능의 역사 · 4차시</div>
+    <h1>층을 쌓으면 열린다</h1>
+    <p class="slide-sub">다층퍼셉트론과 배타적논리합, 그리고 논리 회로</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 30~32쪽</span>
+    </div>
+    <aside class="notes">지난 시간에 학생들은 직접 막혔다. 오늘은 그 벽이 뚫리는 시간이다. 첫 마디로 "지난 시간에 안 된다고 했던 그거, 오늘 됩니다"를 던지고 시작하면 집중도가 다르다.</aside>
+  </section>
+
+  <!-- ═══════════ 2. 지난 시간 → 오늘의 질문 ═══════════ -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>하나로는 안 됐다</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="warning-box">
+        네 부등식 \(h > a+b\), \(h \le a\), \(h \le b\), \(h > 0\)이
+        <span class="kw-danger">동시에 성립할 수 없었다.</span>
+        하나의 퍼셉트론으로는 배타적논리합이 불가능하다.
+      </div>
+      <div class="info-box">
+        그런데 3차시에서 본 그림을 떠올려 보자 —
+        <span class="kw-info">신경 세포는 하나가 아니었다.</span>
+        수없이 많은 세포가 서로 연결되어 있었다.
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      여러 개의 신경 세포가 복잡하게 연결된 신경망처럼,
+      <span class="kw-success">여러 개의 퍼셉트론을 연결한 인공신경망</span>으로 배타적논리합 문제를 해결할 수 있다.
+    </div>
+    <aside class="notes">3차시 5번 슬라이드(신경 세포 한 개)를 잠깐 다시 띄워도 좋다. "하나만 그렸을 뿐, 원래 뇌에는 860억 개가 있다"는 한마디가 오늘의 발상을 자연스럽게 만든다.</aside>
+  </section>
+
+  <!-- ═══════════ 3. 학습 목표 ═══════════ -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span><span class="kw">입력층·은닉층·출력층</span>의 뜻을 말할 수 있다.</span></li>
+      <li><span class="num">2</span><span>다층퍼셉트론의 <span class="kw">출력값을 계산</span>할 수 있다.</span></li>
+      <li><span class="num">3</span><span>다층퍼셉트론으로 <span class="kw">배타적논리합이 가능함</span>을 표로 확인할 수 있다.</span></li>
+    </ul>
+    <div class="info-box">
+      성취기준 <span class="badge">인공지능에서 수학을 활용한 역사적 사례를 탐구하고 설명할 수 있다</span>
+    </div>
+    <aside class="notes">2번은 계산이 세 번 반복되는 구조라 손이 익으면 금방이다. 3번에서 지난 시간의 좌절이 해소된다.</aside>
+  </section>
+
+  <!-- ═══════════ 4. 두 퍼셉트론 P1, P2 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 30쪽</div>
+    <h2>같은 입력, 다른 두 퍼셉트론</h2>
+
+    <p class="prob-stmt">
+      입력값은 \(x_1\)과 \(x_2\)로 <b>동일</b>하지만 출력값이 각각 \(z_1\)과 \(z_2\)로 <b>다른</b>
+      두 퍼셉트론 \(P_1\)과 \(P_2\)를 생각해 보자.
+    </p>
+
+    <svg class="dg xwide" viewBox="0 0 900 300" width="900" height="300" preserveAspectRatio="xMidYMid meet"
+         style="margin-top: var(--lm-space-4);">
+      <!-- P1 -->
+      <circle cx="90" cy="70"  r="30" class="fill-page"/><circle cx="90" cy="70"  r="30" class="stroke-rule" stroke-width="2"/>
+      <circle cx="90" cy="200" r="30" class="fill-page"/><circle cx="90" cy="200" r="30" class="stroke-rule" stroke-width="2"/>
+      <foreignObject x="58" y="52" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(x_1\)</div></foreignObject>
+      <foreignObject x="58" y="182" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(x_2\)</div></foreignObject>
+      <line x1="120" y1="80"  x2="272" y2="128" class="stroke-ink" stroke-width="2"/>
+      <line x1="120" y1="190" x2="272" y2="142" class="stroke-ink" stroke-width="2"/>
+      <circle cx="304" cy="135" r="32" class="fill-tint"/><circle cx="304" cy="135" r="32" class="stroke-rule" stroke-width="2"/>
+      <foreignObject x="272" y="117" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(z_1\)</div></foreignObject>
+      <text x="304" y="215" text-anchor="middle" class="t-lab">P₁</text>
+
+      <!-- P2 -->
+      <circle cx="530" cy="70"  r="30" class="fill-page"/><circle cx="530" cy="70"  r="30" class="stroke-rule" stroke-width="2"/>
+      <circle cx="530" cy="200" r="30" class="fill-page"/><circle cx="530" cy="200" r="30" class="stroke-rule" stroke-width="2"/>
+      <foreignObject x="498" y="52" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(x_1\)</div></foreignObject>
+      <foreignObject x="498" y="182" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(x_2\)</div></foreignObject>
+      <line x1="560" y1="80"  x2="712" y2="128" class="stroke-ink" stroke-width="2"/>
+      <line x1="560" y1="190" x2="712" y2="142" class="stroke-ink" stroke-width="2"/>
+      <circle cx="744" cy="135" r="32" class="fill-tint"/><circle cx="744" cy="135" r="32" class="stroke-rule" stroke-width="2"/>
+      <foreignObject x="712" y="117" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(z_2\)</div></foreignObject>
+      <text x="744" y="215" text-anchor="middle" class="t-lab">P₂</text>
+
+      <line x1="420" y1="40" x2="420" y2="240" class="stroke-ink" stroke-width="1.5" stroke-dasharray="6 8"/>
+      <text x="450" y="280" text-anchor="middle" class="t-cap">입력은 같고, 가중치가 다르므로 출력이 다르다</text>
+    </svg>
+    <aside class="notes">두 퍼셉트론이 같은 재료(x₁, x₂)를 보고 서로 다른 판단(z₁, z₂)을 내린다는 점만 잡으면 된다. 숫자는 다음다음 장에서 준다.</aside>
+  </section>
+
+  <!-- ═══════════ 5. P3를 얹는다 → 층 구조 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 30쪽 <span class="badge">오늘의 중심</span></div>
+    <h2>\(z_1, z_2\)를 다시 입력으로 넣으면</h2>
+
+    <p class="prob-stmt">
+      두 퍼셉트론의 출력값 \(z_1, z_2\)를 <b>입력값으로 하고</b> 출력값이 \(y\)인 새로운 퍼셉트론을 \(P_3\)이라 하자.
+      \(P_1, P_2, P_3\)을 층 구조로 연결하면 입력값이 \(x_1, x_2\)이고 출력값이 \(y\)인 새로운 인공신경망이 된다.
+    </p>
+
+    <svg class="dg xwide" viewBox="0 0 900 330" width="900" height="330" preserveAspectRatio="xMidYMid meet"
+         style="margin-top: var(--lm-space-3);">
+      <text x="130" y="30" text-anchor="middle" class="layer-tag">입력층</text>
+      <text x="450" y="30" text-anchor="middle" class="layer-tag">은닉층</text>
+      <text x="770" y="30" text-anchor="middle" class="layer-tag">출력층</text>
+
+      <line x1="160" y1="95"  x2="418" y2="105" class="stroke-ink" stroke-width="2"/>
+      <line x1="160" y1="95"  x2="418" y2="225" class="stroke-ink" stroke-width="2"/>
+      <line x1="160" y1="235" x2="418" y2="115" class="stroke-ink" stroke-width="2"/>
+      <line x1="160" y1="235" x2="418" y2="235" class="stroke-ink" stroke-width="2"/>
+      <line x1="482" y1="110" x2="738" y2="160" class="stroke-ink" stroke-width="2"/>
+      <line x1="482" y1="230" x2="738" y2="180" class="stroke-ink" stroke-width="2"/>
+
+      <circle cx="130" cy="95"  r="32" class="fill-page"/><circle cx="130" cy="95"  r="32" class="stroke-rule" stroke-width="2"/>
+      <circle cx="130" cy="235" r="32" class="fill-page"/><circle cx="130" cy="235" r="32" class="stroke-rule" stroke-width="2"/>
+      <foreignObject x="98" y="76" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(x_1\)</div></foreignObject>
+      <foreignObject x="98" y="216" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(x_2\)</div></foreignObject>
+
+      <circle cx="450" cy="110" r="34" class="fill-tint"/><circle cx="450" cy="110" r="34" class="stroke-rule" stroke-width="2"/>
+      <circle cx="450" cy="230" r="34" class="fill-tint"/><circle cx="450" cy="230" r="34" class="stroke-rule" stroke-width="2"/>
+      <foreignObject x="418" y="91" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(z_1\)</div></foreignObject>
+      <foreignObject x="418" y="211" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(z_2\)</div></foreignObject>
+      <text x="450" y="168" text-anchor="middle" class="t-cap">P₁</text>
+      <text x="450" y="288" text-anchor="middle" class="t-cap">P₂</text>
+
+      <circle cx="770" cy="170" r="36" class="fill-accent"/>
+      <foreignObject class="m-out" x="736" y="150" width="68" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(y\)</div></foreignObject>
+      <text x="770" y="232" text-anchor="middle" class="t-cap">P₃</text>
+    </svg>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-3);">
+      입력값이 있는 층을 <span class="kw">입력층</span>, 출력값이 있는 층을 <span class="kw">출력층</span>,
+      그 사이 내부의 층들을 <span class="kw">은닉층</span>이라고 한다.
+    </div>
+    <aside class="notes">"은닉(隱匿)"이라는 이름의 뜻을 짚어 준다 — 밖에서는 입력과 출력만 보이고 가운데는 보이지 않는다. z₁, z₂는 사람이 정해 준 값이 아니라 계산 도중에 생기는 값이다.</aside>
+  </section>
+
+  <!-- ═══════════ 6. 다층퍼셉트론 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 30쪽</div>
+    <h2>은닉층을 여러 개 두면 — 다층퍼셉트론</h2>
+
+    <div class="two-col ratio-1-2" style="margin-top: var(--lm-space-4); align-items: center;">
+      <div>
+        <div class="definition-box">
+          입력층과 출력층 사이에 <b>은닉층이 여러 개</b> 있도록 설계할 수 있는데,
+          이를 <span class="kw">다층퍼셉트론</span> 또는 <span class="kw">심층 신경망</span>이라고 한다.
+        </div>
+        <div class="info-box" style="margin-top: var(--lm-space-4);">
+          3차시에서 <span class="kw-info">딥러닝</span>이라는 이름이 나왔다.
+          그 "깊다(deep)"가 바로 <b>은닉층이 깊게 쌓였다</b>는 뜻이다.
+        </div>
+      </div>
+
+      <svg class="dg wide" viewBox="0 0 640 300" width="640" height="300" preserveAspectRatio="xMidYMid meet">
+        <text x="70"  y="28" text-anchor="middle" class="layer-tag">입력층</text>
+        <text x="320" y="28" text-anchor="middle" class="layer-tag">은닉층</text>
+        <text x="570" y="28" text-anchor="middle" class="layer-tag">출력층</text>
+        <g class="stroke-ink" stroke-width="1.2" opacity="0.55">
+          <path d="M70,110 L195,80 M70,110 L195,150 M70,110 L195,220 M70,200 L195,80 M70,200 L195,150 M70,200 L195,220"/>
+          <path d="M195,80 L320,80 M195,80 L320,150 M195,80 L320,220 M195,150 L320,80 M195,150 L320,150 M195,150 L320,220 M195,220 L320,80 M195,220 L320,150 M195,220 L320,220"/>
+          <path d="M320,80 L445,80 M320,80 L445,150 M320,80 L445,220 M320,150 L445,80 M320,150 L445,150 M320,150 L445,220 M320,220 L445,80 M320,220 L445,150 M320,220 L445,220"/>
+          <path d="M445,80 L570,155 M445,150 L570,155 M445,220 L570,155"/>
+        </g>
+        <g>
+          <circle cx="70" cy="110" r="20" class="fill-page"/><circle cx="70" cy="110" r="20" class="stroke-rule" stroke-width="2"/>
+          <circle cx="70" cy="200" r="20" class="fill-page"/><circle cx="70" cy="200" r="20" class="stroke-rule" stroke-width="2"/>
+          <circle cx="195" cy="80"  r="20" class="fill-tint"/><circle cx="195" cy="80"  r="20" class="stroke-rule" stroke-width="2"/>
+          <circle cx="195" cy="150" r="20" class="fill-tint"/><circle cx="195" cy="150" r="20" class="stroke-rule" stroke-width="2"/>
+          <circle cx="195" cy="220" r="20" class="fill-tint"/><circle cx="195" cy="220" r="20" class="stroke-rule" stroke-width="2"/>
+          <circle cx="320" cy="80"  r="20" class="fill-tint"/><circle cx="320" cy="80"  r="20" class="stroke-rule" stroke-width="2"/>
+          <circle cx="320" cy="150" r="20" class="fill-tint"/><circle cx="320" cy="150" r="20" class="stroke-rule" stroke-width="2"/>
+          <circle cx="320" cy="220" r="20" class="fill-tint"/><circle cx="320" cy="220" r="20" class="stroke-rule" stroke-width="2"/>
+          <circle cx="445" cy="80"  r="20" class="fill-tint"/><circle cx="445" cy="80"  r="20" class="stroke-rule" stroke-width="2"/>
+          <circle cx="445" cy="150" r="20" class="fill-tint"/><circle cx="445" cy="150" r="20" class="stroke-rule" stroke-width="2"/>
+          <circle cx="445" cy="220" r="20" class="fill-tint"/><circle cx="445" cy="220" r="20" class="stroke-rule" stroke-width="2"/>
+          <circle cx="570" cy="155" r="22" class="fill-accent"/>
+        </g>
+        <text x="320" y="285" text-anchor="middle" class="t-cap">은닉층이 깊을수록 "딥"러닝</text>
+      </svg>
+    </div>
+    <aside class="notes">이 그림은 이름을 붙이기 위한 것이지 계산 대상이 아니다. 다음 장부터 다시 P₁·P₂·P₃ 세 개로 돌아온다고 미리 말해 주면 학생이 겁먹지 않는다.</aside>
+  </section>
+
+  <!-- ═══════════ 7. 숫자를 넣자 ═══════════ -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 31쪽 <span class="badge">오늘의 중심</span></div>
+    <h2>숫자를 넣어 보자</h2>
+
+    <div class="two-col ratio-2-1" style="align-items: center;">
+      <svg class="dg wide" viewBox="0 0 840 300" width="840" height="300" preserveAspectRatio="xMidYMid meet">
+        <!-- 엣지 -->
+        <line x1="112" y1="80"  x2="368" y2="90"  class="stroke-ink" stroke-width="2"/>
+        <line x1="112" y1="80"  x2="368" y2="220" class="stroke-ink" stroke-width="2"/>
+        <line x1="112" y1="220" x2="368" y2="100" class="stroke-ink" stroke-width="2"/>
+        <line x1="112" y1="220" x2="368" y2="230" class="stroke-ink" stroke-width="2"/>
+        <line x1="432" y1="95"  x2="668" y2="145" class="stroke-ink" stroke-width="2"/>
+        <line x1="432" y1="225" x2="668" y2="165" class="stroke-ink" stroke-width="2"/>
+
+        <!-- 가중치 라벨 -->
+        <foreignObject class="m-val m-sm" x="260" y="56" width="80" height="38"><div xmlns="http://www.w3.org/1999/xhtml">6</div></foreignObject>
+        <foreignObject class="m-val m-sm" x="260" y="223" width="80" height="38"><div xmlns="http://www.w3.org/1999/xhtml">2</div></foreignObject>
+        <foreignObject class="m-val m-sm" x="295" y="93" width="80" height="38"><div xmlns="http://www.w3.org/1999/xhtml">4</div></foreignObject>
+        <foreignObject class="m-val m-sm" x="295" y="186" width="80" height="38"><div xmlns="http://www.w3.org/1999/xhtml">2</div></foreignObject>
+        <foreignObject class="m-val m-sm" x="506" y="86" width="80" height="38"><div xmlns="http://www.w3.org/1999/xhtml">5</div></foreignObject>
+        <foreignObject class="m-val m-sm" x="506" y="196" width="90" height="38"><div xmlns="http://www.w3.org/1999/xhtml">\(-5\)</div></foreignObject>
+
+        <!-- 노드 -->
+        <circle cx="80" cy="80"  r="32" class="fill-page"/><circle cx="80" cy="80"  r="32" class="stroke-rule" stroke-width="2"/>
+        <circle cx="80" cy="220" r="32" class="fill-page"/><circle cx="80" cy="220" r="32" class="stroke-rule" stroke-width="2"/>
+        <foreignObject x="48" y="61" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(x_1\)</div></foreignObject>
+        <foreignObject x="48" y="201" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(x_2\)</div></foreignObject>
+
+        <circle cx="400" cy="95"  r="34" class="fill-tint"/><circle cx="400" cy="95"  r="34" class="stroke-rule" stroke-width="2"/>
+        <circle cx="400" cy="225" r="34" class="fill-tint"/><circle cx="400" cy="225" r="34" class="stroke-rule" stroke-width="2"/>
+        <foreignObject x="368" y="76" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(z_1\)</div></foreignObject>
+        <foreignObject x="368" y="206" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(z_2\)</div></foreignObject>
+        <text x="400" y="152" text-anchor="middle" class="t-cap">P₁</text>
+        <text x="400" y="282" text-anchor="middle" class="t-cap">P₂</text>
+
+        <circle cx="700" cy="155" r="36" class="fill-accent"/>
+        <foreignObject class="m-out" x="666" y="135" width="68" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(y\)</div></foreignObject>
+        <text x="700" y="216" text-anchor="middle" class="t-cap">P₃</text>
+      </svg>
+
+      <div>
+        <div class="formula-box">
+          \[ \sigma(x)=\begin{cases} 1 & (x \ge 4) \\ 0 & (x &lt; 4) \end{cases} \]
+        </div>
+        <table class="calc-table" style="margin-top: var(--lm-space-3);">
+          <thead><tr><th>퍼셉트론</th><th>가중치</th></tr></thead>
+          <tbody>
+            <tr><td>\(P_1\)</td><td>\(w_1=6,\ w_2=4\)</td></tr>
+            <tr><td>\(P_2\)</td><td>\(w_1=2,\ w_2=2\)</td></tr>
+            <tr><td>\(P_3\)</td><td>\(w_1=5,\ w_2=-5\)</td></tr>
+          </tbody>
+        </table>
+        <div class="info-box" style="margin-top: var(--lm-space-3);">
+          세 퍼셉트론 모두 <b>같은 활성화함수</b>를 쓴다. 임곗값은 \(4\).
+        </div>
+      </div>
+    </div>
+    <aside class="notes">P₃의 가중치에 음수 −5가 있다는 점을 짚는다. 3차시에서 "가중치는 음수일 수도 있고, 그러면 총합을 깎는다"고 했던 그 이야기가 여기서 결정적으로 쓰인다.</aside>
+  </section>
+
+  <!-- ═══════════ 8. z1, z2, y 계산 ═══════════ -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 31쪽</div>
+    <h2>네 가지 입력을 모두 통과시켜 보자</h2>
+
+    <div class="two-col ratio-2-1" style="align-items: start;">
+      <table class="calc-table" id="mlpTable">
+        <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th>
+                   <th>\(6x_1+4x_2\)</th><th>\(z_1\)</th>
+                   <th>\(2x_1+2x_2\)</th><th>\(z_2\)</th>
+                   <th>\(5z_1-5z_2\)</th><th>\(y\)</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>1</td>
+              <td class="fillable" data-a="10">?</td><td class="fillable" data-a="1">?</td>
+              <td class="fillable" data-a="4">?</td><td class="fillable" data-a="1">?</td>
+              <td class="fillable" data-a="0">?</td><td class="fillable rc" data-a="0">?</td></tr>
+          <tr><td>1</td><td>0</td>
+              <td class="fillable" data-a="6">?</td><td class="fillable" data-a="1">?</td>
+              <td class="fillable" data-a="2">?</td><td class="fillable" data-a="0">?</td>
+              <td class="fillable" data-a="5">?</td><td class="fillable rc" data-a="1">?</td></tr>
+          <tr><td>0</td><td>1</td>
+              <td class="fillable" data-a="4">?</td><td class="fillable" data-a="1">?</td>
+              <td class="fillable" data-a="2">?</td><td class="fillable" data-a="0">?</td>
+              <td class="fillable" data-a="5">?</td><td class="fillable rc" data-a="1">?</td></tr>
+          <tr><td>0</td><td>0</td>
+              <td class="fillable" data-a="0">?</td><td class="fillable" data-a="0">?</td>
+              <td class="fillable" data-a="0">?</td><td class="fillable" data-a="0">?</td>
+              <td class="fillable" data-a="0">?</td><td class="fillable rc" data-a="0">?</td></tr>
+        </tbody>
+      </table>
+
+      <div>
+        <div class="info-box">
+          한 행마다 <b>세 번</b> 계산한다 — \(z_1\) 구하고, \(z_2\) 구하고, 그 둘로 \(y\)를 구한다.
+        </div>
+        <div class="warning-box" style="margin-top: var(--lm-space-3);">
+          첫 행 확인 — \(6+4=10 \ge 4\)이므로 \(z_1=1\), \(2+2=4 \ge 4\)이므로 \(z_2=1\).
+          그러면 \(5(1)-5(1)=0 &lt; 4\)이므로 \(y=0\).
+        </div>
+      </div>
+    </div>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="mlpRow">한 행씩 ▶</button>
+      <span class="step-counter" id="mlpCnt">0 / 4</span>
+      <button class="anim-btn" id="mlpAll">전부 채우기</button>
+      <button class="anim-btn reset-btn" id="mlpReset">지우기</button>
+    </div>
+    <aside class="notes">"한 행씩" 버튼으로 진행하며 학생이 먼저 계산하게 한다. 두 번째 행(1,0)에서 z₂=0이 되는 순간이 이 수업의 열쇠다 — P₂만 문턱을 못 넘어서 y가 살아난다.</aside>
+  </section>
+
+  <!-- ═══════════ 9. 결과 — XOR이다 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 31쪽 <span class="badge">오늘의 도착점</span></div>
+    <h2>두 입력이 같으면 0, 다르면 1</h2>
+
+    <div class="two-col ratio-1-2" style="margin-top: var(--lm-space-4); align-items: center;">
+      <table class="truth-table">
+        <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(y\)</th><th>\(p \xor q\)</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>1</td><td class="val-0">0</td><td class="val-0">F</td></tr>
+          <tr><td>1</td><td>0</td><td class="val-1">1</td><td class="val-1">T</td></tr>
+          <tr><td>0</td><td>1</td><td class="val-1">1</td><td class="val-1">T</td></tr>
+          <tr><td>0</td><td>0</td><td class="val-0">0</td><td class="val-0">F</td></tr>
+        </tbody>
+      </table>
+
+      <div>
+        <div class="result-box">
+          이 다층퍼셉트론은 두 입력값이 같으면 \(0\), 다르면 \(1\)을 출력한다.
+          <span class="kw-success">배타적논리합(XOR) 연산과 완전히 같은 결과</span>다.
+        </div>
+        <div class="result-box" style="margin-top: var(--lm-space-4);">
+          하나의 퍼셉트론으로는 가능하지 않았던 배타적논리합 연산이
+          <span class="kw-success">다층퍼셉트론으로는 가능하다.</span>
+        </div>
+        <div class="info-box" style="margin-top: var(--lm-space-4);">
+          2차시 연표를 기억하는가 — <span class="kw-info">1986년, 힌턴</span>.
+          "여러 개의 퍼셉트론을 다층 구조로 연결한 해결법"이 바로 이것이다.
+          인공신경망은 여기서 다시 살아났다.
+        </div>
+      </div>
+    </div>
+    <aside class="notes">지난 시간 부등식으로 "없다"를 증명한 학생들에게, 왜 이번에는 되는지 한 문장으로 정리해 준다 — 은닉층이 좌표평면을 한 번 접어 주기 때문에 출력층에서는 직선 하나로 나뉜다. 깊이 들어가지는 말 것.</aside>
+  </section>
+
+  <!-- ═══════════ 10. 문제 6 ═══════════ -->
+  <section class="tight">
+    <div class="chapter-tag">문제 6 · 교과서 31쪽</div>
+    <h2>0과 1이 아닌 입력이라면</h2>
+
+    <p class="prob-stmt">
+      위의 다층퍼셉트론에서 주어진 입력값 \(x_1, x_2\)에 대한 은닉층의 값 \(z_1, z_2\)와 출력값 \(y\)를 구하여 표를 완성하시오.
+    </p>
+
+    <div class="two-col" style="align-items: start;">
+      <table class="calc-table" id="p6Table">
+        <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(6x_1+4x_2\)</th><th>\(z_1\)</th>
+                   <th>\(2x_1+2x_2\)</th><th>\(z_2\)</th><th>\(5z_1-5z_2\)</th><th>\(y\)</th></tr></thead>
+        <tbody>
+          <tr><td>2</td><td>\(-1\)</td>
+              <td class="fillable" data-a="8">?</td><td class="fillable" data-a="1">?</td>
+              <td class="fillable" data-a="2">?</td><td class="fillable" data-a="0">?</td>
+              <td class="fillable" data-a="5">?</td><td class="fillable rc" data-a="1">?</td></tr>
+          <tr><td>\(-1\)</td><td>3</td>
+              <td class="fillable" data-a="6">?</td><td class="fillable" data-a="1">?</td>
+              <td class="fillable" data-a="4">?</td><td class="fillable" data-a="1">?</td>
+              <td class="fillable" data-a="0">?</td><td class="fillable rc" data-a="0">?</td></tr>
+        </tbody>
+      </table>
+
+      <div>
+        <div class="warning-box">
+          입력이 <span class="kw-danger">0이나 1이 아니어도</span> 계산 방법은 똑같다.
+          가중합을 구하고, 임곗값 \(4\)와 비교할 뿐이다.
+        </div>
+        <div class="step-box" id="p6Concl">
+          <div class="step-label">확인</div>
+          첫 행은 \(z_1=1, z_2=0\)이라 \(y=1\), 둘째 행은 \(z_1=z_2=1\)이라 서로 상쇄되어 \(y=0\).
+          <b>은닉층 두 값이 다르면 1, 같으면 0</b>이라는 구조가 그대로 보인다.
+        </div>
+      </div>
+    </div>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="p6All">전부 채우기</button>
+      <button class="anim-btn reset-btn" id="p6Reset">지우기</button>
+    </div>
+    <aside class="notes">둘째 행 x₂=3에서 z₂의 가중합이 정확히 4가 되어 "≥"라서 1이 된다. 등호가 포함된다는 걸 놓치는 학생이 반드시 나온다. 미리 확인할 것.</aside>
+  </section>
+
+  <!-- ═══════════ 11. 확인하기 ═══════════ -->
+  <section>
+    <div class="chapter-tag">확인하기 · 교과서 31쪽</div>
+    <h2>맞으면 O, 틀리면 X</h2>
+
+    <ul class="ox-list" id="oxList">
+      <li>⑴ 두 명제 \(p\)와 \(q\) 중에서 <b>적어도 하나가 참이면</b> 명제 \(p \wedge q\)가 참이다.
+        <span class="ox-ans">✗ — 적어도 하나가 참일 때 참인 것은 논리합 \(p \vee q\)다.
+          논리곱 \(p \wedge q\)는 <b>둘 다 참</b>이어야 참이다. (2차시 진리표 참조)</span></li>
+      <li>⑵ <b>하나의 퍼셉트론</b>으로 배타적논리합(XOR) 문제를 해결할 수 있다.
+        <span class="ox-ans">✗ — 지난 시간에 부등식으로 확인했다. 하나로는 불가능하고,
+          오늘처럼 <b>다층퍼셉트론</b>이어야 가능하다.</span></li>
+    </ul>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5);">
+      두 문항 모두 <span class="kw-info">×</span>다. ⑴은 2차시, ⑵는 3차시 내용이다 —
+      Ⅰ-2 네 시간이 이 두 문장에 압축되어 있다.
+    </div>
+    <aside class="notes">문항을 눌러 답을 열기 전에 손을 들게 한다. ⑴에서 논리합과 논리곱을 헷갈리는 학생이 매년 절반쯤 나온다.</aside>
+  </section>
+
+  <!-- ═══════════ 12. 탐구 & 융합 — 논리 회로 ═══════════ -->
+  <section>
+    <div class="chapter-tag">탐구 &amp; 융합 · 교과서 32쪽</div>
+    <h2>진리표 제작소 — 논리 회로</h2>
+
+    <p class="prob-stmt" style="margin-bottom: var(--lm-space-2);">
+      디지털 회로에서 논리 연산을 수행하는 회로를 <b>논리 회로</b>라고 한다.
+      스위치가 연결되거나 전구가 켜진 상태를 \(1\), 그렇지 않은 상태를 \(0\)이라 하면 진리표의 결과를 확인할 수 있다.
+    </p>
+
+    <div class="gate-grid">
+      <div class="gate-cell">
+        <h4>논리합 (OR)</h4>
+        <svg class="dg" viewBox="0 0 240 120" width="240" height="120" preserveAspectRatio="xMidYMid meet">
+          <path d="M70,20 Q100,60 70,100 Q140,100 175,60 Q140,20 70,20 Z" class="fill-page"/>
+          <path d="M70,20 Q100,60 70,100 Q140,100 175,60 Q140,20 70,20 Z" class="stroke-rule" stroke-width="2.5"/>
+          <line x1="20" y1="40" x2="82" y2="40" class="stroke-ink" stroke-width="2"/>
+          <line x1="20" y1="80" x2="82" y2="80" class="stroke-ink" stroke-width="2"/>
+          <line x1="175" y1="60" x2="222" y2="60" class="stroke-ink" stroke-width="2"/>
+          <text x="14" y="34" class="t-cap">x₁</text>
+          <text x="14" y="74" class="t-cap">x₂</text>
+          <text x="214" y="52" class="t-cap">X</text>
+        </svg>
+        <table class="truth-table">
+          <thead><tr><th>x₁</th><th>x₂</th><th>X</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td class="val-1">1</td></tr>
+            <tr><td>1</td><td>0</td><td class="val-1">1</td></tr>
+            <tr><td>0</td><td>1</td><td class="val-1">1</td></tr>
+            <tr><td>0</td><td>0</td><td class="val-0">0</td></tr>
+          </tbody>
+        </table>
+        <p>적어도 하나가 1이면 1</p>
+      </div>
+
+      <div class="gate-cell">
+        <h4>논리곱 (AND)</h4>
+        <svg class="dg" viewBox="0 0 240 120" width="240" height="120" preserveAspectRatio="xMidYMid meet">
+          <path d="M78,20 L120,20 A40,40 0 0 1 120,100 L78,100 Z" class="fill-page"/>
+          <path d="M78,20 L120,20 A40,40 0 0 1 120,100 L78,100 Z" class="stroke-rule" stroke-width="2.5"/>
+          <line x1="20" y1="40" x2="78" y2="40" class="stroke-ink" stroke-width="2"/>
+          <line x1="20" y1="80" x2="78" y2="80" class="stroke-ink" stroke-width="2"/>
+          <line x1="160" y1="60" x2="222" y2="60" class="stroke-ink" stroke-width="2"/>
+          <text x="14" y="34" class="t-cap">x₁</text>
+          <text x="14" y="74" class="t-cap">x₂</text>
+          <text x="214" y="52" class="t-cap">X</text>
+        </svg>
+        <table class="truth-table">
+          <thead><tr><th>x₁</th><th>x₂</th><th>X</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td class="val-1">1</td></tr>
+            <tr><td>1</td><td>0</td><td class="val-0">0</td></tr>
+            <tr><td>0</td><td>1</td><td class="val-0">0</td></tr>
+            <tr><td>0</td><td>0</td><td class="val-0">0</td></tr>
+          </tbody>
+        </table>
+        <p>둘 다 1이어야 1</p>
+      </div>
+
+      <div class="gate-cell bad">
+        <h4>배타적논리합 (XOR)</h4>
+        <svg class="dg" viewBox="0 0 240 120" width="240" height="120" preserveAspectRatio="xMidYMid meet">
+          <path d="M78,20 Q108,60 78,100 Q148,100 183,60 Q148,20 78,20 Z" class="fill-page"/>
+          <path d="M78,20 Q108,60 78,100 Q148,100 183,60 Q148,20 78,20 Z" class="stroke-rule" stroke-width="2.5"/>
+          <path d="M60,20 Q90,60 60,100" class="stroke-rule" stroke-width="2.5"/>
+          <line x1="20" y1="40" x2="72" y2="40" class="stroke-ink" stroke-width="2"/>
+          <line x1="20" y1="80" x2="72" y2="80" class="stroke-ink" stroke-width="2"/>
+          <line x1="183" y1="60" x2="222" y2="60" class="stroke-ink" stroke-width="2"/>
+          <text x="14" y="34" class="t-cap">x₁</text>
+          <text x="14" y="74" class="t-cap">x₂</text>
+          <text x="214" y="52" class="t-cap">X</text>
+        </svg>
+        <table class="truth-table">
+          <thead><tr><th>x₁</th><th>x₂</th><th>X</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td class="val-0">0</td></tr>
+            <tr><td>1</td><td>0</td><td class="val-1">1</td></tr>
+            <tr><td>0</td><td>1</td><td class="val-1">1</td></tr>
+            <tr><td>0</td><td>0</td><td class="val-0">0</td></tr>
+          </tbody>
+        </table>
+        <p>반드시 하나만 1이어야 1</p>
+      </div>
+    </div>
+    <aside class="notes">XOR 기호는 OR 기호 뒤에 선이 하나 더 그어져 있다는 것만 알려 주면 학생이 기억한다. 이 세 진리표는 2차시에 이미 채워 봤다는 점을 상기시킨다.</aside>
+  </section>
+
+  <!-- ═══════════ 13. 탐구 문제 ═══════════ -->
+  <section class="tight">
+    <div class="chapter-tag">탐구 · 교과서 32쪽</div>
+    <h2>회로 세 개를 이어 붙이면</h2>
+
+    <p class="prob-stmt">
+      다음 논리 회로에서 입력값과 출력값을 정리한 표이다. ㉠~㉢에 알맞은 수를 써넣으시오.
+    </p>
+
+    <div class="two-col" style="align-items: center;">
+      <svg class="dg wide" viewBox="0 0 560 300" width="560" height="300" preserveAspectRatio="xMidYMid meet">
+        <!-- OR 게이트 -->
+        <path d="M110,30 Q135,62 110,94 Q168,94 196,62 Q168,30 110,30 Z" class="fill-page"/>
+        <path d="M110,30 Q135,62 110,94 Q168,94 196,62 Q168,30 110,30 Z" class="stroke-rule" stroke-width="2.5"/>
+        <line x1="46" y1="46" x2="120" y2="46" class="stroke-ink" stroke-width="2"/>
+        <line x1="46" y1="78" x2="120" y2="78" class="stroke-ink" stroke-width="2"/>
+        <text x="20" y="52" class="t-cap">x₁</text>
+        <text x="20" y="84" class="t-cap">x₂</text>
+        <text x="152" y="118" text-anchor="middle" class="t-cap">OR</text>
+
+        <!-- XOR 게이트 -->
+        <path d="M118,182 Q143,214 118,246 Q176,246 204,214 Q176,182 118,182 Z" class="fill-page"/>
+        <path d="M118,182 Q143,214 118,246 Q176,246 204,214 Q176,182 118,182 Z" class="stroke-rule" stroke-width="2.5"/>
+        <path d="M104,182 Q129,214 104,246" class="stroke-rule" stroke-width="2.5"/>
+        <line x1="46" y1="198" x2="112" y2="198" class="stroke-ink" stroke-width="2"/>
+        <line x1="46" y1="230" x2="112" y2="230" class="stroke-ink" stroke-width="2"/>
+        <text x="20" y="204" class="t-cap">x₃</text>
+        <text x="20" y="236" class="t-cap">x₄</text>
+        <text x="160" y="270" text-anchor="middle" class="t-cap">XOR</text>
+
+        <!-- 연결선 -->
+        <path d="M196,62 L262,62 L262,120 L318,120" class="stroke-ink" stroke-width="2"/>
+        <path d="M204,214 L262,214 L262,156 L318,156" class="stroke-ink" stroke-width="2"/>
+
+        <!-- AND 게이트 -->
+        <path d="M318,98 L354,98 A40,40 0 0 1 354,178 L318,178 Z" class="fill-page"/>
+        <path d="M318,98 L354,98 A40,40 0 0 1 354,178 L318,178 Z" class="stroke-rule" stroke-width="2.5"/>
+        <line x1="394" y1="138" x2="470" y2="138" class="stroke-ink" stroke-width="2"/>
+        <text x="484" y="146" class="t-cap">X</text>
+        <text x="356" y="212" text-anchor="middle" class="t-cap">AND</text>
+      </svg>
+
+      <div>
+        <table class="calc-table" id="qTable">
+          <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(x_3\)</th><th>\(x_4\)</th><th>\(X\)</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>1</td><td>1</td><td>1</td><td class="fillable rc" data-a="0">㉠</td></tr>
+            <tr><td>0</td><td class="fillable" data-a="0">㉡</td><td>1</td><td>0</td><td class="result-cell">0</td></tr>
+            <tr><td>1</td><td>0</td><td class="fillable" data-a="1">㉢</td><td>0</td><td class="result-cell">1</td></tr>
+          </tbody>
+        </table>
+
+        <div class="step-box" id="qConcl">
+          <div class="step-label">풀이</div>
+          <b>㉠</b> OR\((0,1)=1\), XOR\((1,1)=0\) → AND\((1,0)=0\)<br>
+          <b>㉡</b> XOR\((1,0)=1\)인데 \(X=0\)이므로 OR\((0,\text{㉡})=0\) → ㉡\(=0\)<br>
+          <b>㉢</b> OR\((1,0)=1\), \(X=1\)이므로 XOR\((\text{㉢},0)=1\) → ㉢\(=1\)
+        </div>
+
+        <div class="anim-controls">
+          <button class="anim-btn" id="qAll">답 확인</button>
+          <button class="anim-btn reset-btn" id="qReset">지우기</button>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">㉡과 ㉢은 출력에서 거꾸로 거슬러 올라가는 역추론이다. 앞에서 뒤로 계산하는 ㉠과 방식이 다르다는 걸 분명히 구분해 준다. 회로도에 값을 직접 적어 가며 따라가면 훨씬 쉽다.</aside>
+  </section>
+
+  <!-- ═══════════ 14. 정리 ═══════════ -->
+  <section>
+    <div class="chapter-tag">정리 · Ⅰ-2 마무리</div>
+    <h2>오늘 한 줄</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-5);">
+      <div class="concept-card">
+        <div class="icon">🧱</div>
+        <h4>층을 쌓았다</h4>
+        <p>입력층 · <span class="kw">은닉층</span> · 출력층.
+           깊게 쌓으면 심층 신경망, 곧 딥러닝이다.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔓</div>
+        <h4>벽이 열렸다</h4>
+        <p>하나로는 불가능했던 XOR이
+           <span class="kw">세 개를 잇자 가능</span>해졌다.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔌</div>
+        <h4>회로로도 같다</h4>
+        <p>논리 회로 OR · AND · XOR.
+           <span class="kw">컴퓨터 속에서 실제로 도는</span> 그 연산이다.</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-6);">
+      Ⅰ-2를 네 시간에 걸쳐 지났다 — 70년의 역사, 논리와 진리표, 하나의 퍼셉트론이 막힌 자리,
+      그리고 층을 쌓아 뚫은 자리. <span class="kw-success">인공지능이 걸어온 길을 우리가 그대로 다시 걸었다.</span>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      다음은 Ⅰ-3. 이 모든 학습을 가능하게 한 재료 이야기다 —
+      <b>데이터가 없으면 학습도 없다.</b>
+      <span class="chip chip-accent" style="margin-left: var(--lm-space-2);">다음 시간 · 빅데이터의 의미</span>
+    </div>
+    <aside class="notes">Ⅰ-2 절 전체를 닫는 장이다. 2차시 연표를 다시 띄워 1958 → 1969 → 1986을 손으로 짚으며 "우리가 이 세 점을 차례로 지나왔다"고 말하면 마무리가 깔끔하다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    minScale: 0.2, maxScale: 1.0,
+    center: false,
+    hash: true, slideNumber: 'c/t', progress: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: []
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* ══════════════════════════════════════════════════════════
+     공용 — 표 칸 채우기. 다 채우면 결론 step-box 공개
+     ══════════════════════════════════════════════════════════ */
+  function wireFillTable(tableId, allBtnId, resetBtnId, conclId) {
+    const table = document.getElementById(tableId);
+    if (!table) return null;
+    const cells = Array.from(table.querySelectorAll('td.fillable'));
+    const concl = conclId ? document.getElementById(conclId) : null;
+    const original = new Map(cells.map(td => [td, td.innerHTML]));
+
+    function fill(td) {
+      td.innerHTML = '\\(' + td.dataset.a + '\\)';
+      td.classList.add('filled');
+      if (td.classList.contains('rc')) td.classList.add('result-cell');
+      window.safeTypeset([td]);
+      if (concl && cells.every(c => c.classList.contains('filled'))) {
+        concl.classList.add('visible');
+        window.safeTypeset([concl]);
+      }
+    }
+    function clear(td) {
+      td.innerHTML = original.get(td);
+      td.classList.remove('filled', 'result-cell');
+      if (concl) concl.classList.remove('visible');
+    }
+
+    cells.forEach(td => td.addEventListener('click', () => fill(td)));
+    document.getElementById(allBtnId).addEventListener('click', () => cells.forEach(fill));
+    document.getElementById(resetBtnId).addEventListener('click', () => cells.forEach(clear));
+    return { table, cells, fill, clear };
+  }
+
+  const mlp = wireFillTable('mlpTable', 'mlpAll', 'mlpReset', null);
+  wireFillTable('p6Table', 'p6All', 'p6Reset', 'p6Concl');
+  wireFillTable('qTable',  'qAll',  'qReset',  'qConcl');
+
+  /* ══════════════════════════════════════════════════════════
+     다층퍼셉트론 표 — 한 행씩 진행 (계산 순서를 보여 주기 위해)
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    if (!mlp) return;
+    const rows = Array.from(mlp.table.querySelectorAll('tbody tr'));
+    const cnt = document.getElementById('mlpCnt');
+    let i = 0;
+
+    function sync() { cnt.textContent = i + ' / ' + rows.length; }
+    document.getElementById('mlpRow').addEventListener('click', () => {
+      if (i >= rows.length) return;
+      rows[i].querySelectorAll('td.fillable').forEach(mlp.fill);
+      i++; sync();
+    });
+    document.getElementById('mlpAll').addEventListener('click', () => { i = rows.length; sync(); });
+    document.getElementById('mlpReset').addEventListener('click', () => { i = 0; sync(); });
+    sync();
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     확인하기 — 눌러서 정답 공개
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const list = document.getElementById('oxList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
