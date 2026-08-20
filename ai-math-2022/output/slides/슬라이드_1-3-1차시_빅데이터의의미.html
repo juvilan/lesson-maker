@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>감당할 수 없을 만큼 많아지면 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    /* ── 도식 SVG (색은 전부 토큰) ── */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .fill-page   { fill: var(--lm-page); }
+    .dg .fill-tint   { fill: var(--lm-paper-tint); }
+    .dg .fill-accent { fill: var(--lm-accent); }
+    .dg .stroke-rule   { stroke: var(--lm-rule-strong); fill: none; }
+    .dg .stroke-accent { stroke: var(--lm-accent); fill: none; }
+    .dg .stroke-ink    { stroke: var(--lm-ink-3); fill: none; }
+    .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink); }
+    .dg .t-cap { font-size: 21px; fill: var(--lm-ink-3); }
+    .dg .t-lab { font-size: 25px; fill: var(--lm-ink-2); }
+    .dg.wide { width: 100%; max-width: 1040px; height: auto; }
+
+    /* ── 카드 ── */
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-3); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    /* ── 3V / 5V 카드 ── */
+    .v-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-4);
+              margin-top: var(--lm-space-3); }
+    .v-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+              border-top: var(--lm-border-accent) solid var(--lm-accent);
+              border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .v-card .v-en { font-size: var(--lm-slide-h3); font-weight: 600; color: var(--lm-accent); }
+    .v-card .v-ko { font-size: var(--lm-slide-small); color: var(--lm-ink-3);
+                    margin-bottom: var(--lm-space-2); }
+    .v-card ul { margin: 0; padding-left: 1.1em; }
+    .v-card li { font-size: var(--lm-slide-small); line-height: var(--lm-slide-line-tight);
+                 color: var(--lm-ink-2); margin-bottom: var(--lm-space-2); }
+    .v-card li:last-child { margin-bottom: 0; }
+    .v-card.added { border-top-color: var(--lm-success); }
+    .v-card.added .v-en { color: var(--lm-success); }
+
+    /* ── 정답 공개 카드 ── */
+    .ox-list { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .ox-list li { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-5);
+                  margin-bottom: var(--lm-space-3); font-size: var(--lm-slide-small);
+                  cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+    .ox-list li:hover { border-color: var(--lm-accent); }
+    .ox-list li .ox-ans { display: block; margin-top: var(--lm-space-2);
+                          font-size: var(--lm-slide-small); color: var(--lm-accent);
+                          font-weight: 600; opacity: 0; transition: opacity 0.3s ease; }
+    .ox-list li.revealed { background: var(--lm-accent-tint); border-color: var(--lm-accent); }
+    .ox-list li.revealed .ox-ans { opacity: 1; }
+
+    /* ── 세로를 조여야 하는 장 ── */
+    section.tight .step-box.visible { padding: var(--lm-space-1) var(--lm-space-4);
+                                      margin: var(--lm-space-1) 0; }
+    section.tight .step-box .step-label { margin-bottom: 0; }
+    section.tight h2 { margin-bottom: var(--lm-space-2); }
+    section.tight .two-col { margin: var(--lm-space-2) 0; }
+    section.tight .prob-stmt { line-height: 1.5; margin-top: var(--lm-space-2); }
+    section.tight .anim-controls { margin-top: var(--lm-space-2); }
+    section.tight .calc-table { margin-top: var(--lm-space-2); margin-bottom: 0; }
+    section.tight .calc-table th,
+    section.tight .calc-table td { padding: var(--lm-space-1) var(--lm-space-4); }
+    section.tight mjx-container[display="true"] { margin: 0.25em 0 !important; }
+  </style>
+</head>
+
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ═══════════ 1. 타이틀 ═══════════ -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅰ-3 빅데이터와 인공지능 · 1차시</div>
+    <h1>감당할 수 없을 만큼 많아지면</h1>
+    <p class="slide-sub">빅데이터의 의미와 3V, 그리고 5V</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 33~34쪽</span>
+    </div>
+    <aside class="notes">Ⅰ단원 마지막 절이다. 앞 일곱 차시가 "기계가 어떻게 배우는가"였다면 이 절은 "무엇으로 배우는가"다. 계산이 적은 시간이므로 학생 발언을 많이 끌어내는 쪽으로 운영한다.</aside>
+  </section>
+
+  <!-- ═══════════ 2. 지난 시간 → 오늘의 질문 ═══════════ -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>도구는 다 만들었다. 그런데 재료는?</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="result-box">
+        Ⅰ-2를 닫으며 이렇게 말했다 —
+        <span class="kw-success">데이터가 없으면 학습도 없다.</span>
+        퍼셉트론도, 층을 쌓은 신경망도 결국 <b>데이터를 먹고</b> 가중치를 찾는다.
+      </div>
+      <div class="info-box">
+        1차시에서 배운 <span class="kw-info">기계학습</span>의 정의를 떠올려 보자.
+        규칙을 사람이 적어 주는 대신,
+        <b>데이터에서 규칙을 스스로 찾아내는</b> 방식이었다.
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      그렇다면 그 데이터는 <b>얼마나</b> 있어야 할까?
+      그리고 <span class="kw-danger">많기만 하면 되는 걸까?</span>
+    </div>
+    <aside class="notes">"데이터가 없으면 학습도 없다"는 1-2-4차시 마지막 장의 문장이다. 그대로 받아서 시작하면 절이 바뀌어도 이야기가 끊기지 않는다.</aside>
+  </section>
+
+  <!-- ═══════════ 3. 학습 목표 ═══════════ -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span><span class="kw">빅데이터</span>가 무엇인지 정의할 수 있다.</span></li>
+      <li><span class="num">2</span><span>빅데이터의 세 가지 특징 <span class="kw">3V</span>를 설명할 수 있다.</span></li>
+      <li><span class="num">3</span><span>데이터 크기 단위를 <span class="kw">거듭제곱</span>으로 비교할 수 있다.</span></li>
+    </ul>
+    <div class="info-box">
+      성취기준 <span class="badge">빅데이터의 개념과 특성을 알고 인공지능에서 빅데이터를 활용한 사례를 찾을 수 있다</span>
+    </div>
+    <aside class="notes">3번이 오늘 유일한 계산 목표다. 교과서 34쪽 여백의 단위표에서 나온다. 나머지는 개념이니 학생들이 부담 없이 듣도록 미리 말해 준다.</aside>
+  </section>
+
+  <!-- ═══════════ 4. 생각 열기 ═══════════ -->
+  <section>
+    <div class="chapter-tag">생각 열기 · 교과서 33쪽</div>
+    <h2>챗봇은 어떻게 로마의 역사를 알까</h2>
+
+    <div class="two-col ratio-1-2" style="margin-top: var(--lm-space-4); align-items: center;">
+      <div>
+        <div class="example-box">
+          🙍 "로마의 역사를 알려 줘."
+        </div>
+        <div class="example-box" style="margin-top: var(--lm-space-3);">
+          🤖 "로마는 매우 흥미로운 도시이자 역사와 문화유산이 풍부한 곳입니다. 로마는…"
+        </div>
+      </div>
+
+      <div>
+        <div class="definition-box">
+          챗봇은 사용자가 로마의 역사를 물으면,
+          데이터베이스에 저장된 <span class="kw">수백만 개의 자료</span>에서
+          로마의 역사에 대한 정보를 찾고 이를 <b>종합하여</b> 답변한다.
+        </div>
+        <div class="info-box" style="margin-top: var(--lm-space-4);">
+          대량의 정보에서 <span class="kw-info">유용한 것만 골라</span> 실시간으로 내놓을 수 있는 것은,
+          방대한 데이터를 학습하고 분석해 패턴과 관계를 파악하는
+          <b>대규모 데이터 처리 기술</b> 덕분이다.
+        </div>
+      </div>
+    </div>
+    <aside class="notes">"여러분이 오늘 하루 만들어 낸 데이터는 뭐가 있을까요?"를 던진다. 사진, 검색, 이동 경로, 결제 기록… 학생들이 스스로 데이터 생산자라는 걸 깨닫게 하는 것이 이 장의 목적이다.</aside>
+  </section>
+
+  <!-- ═══════════ 5. 데이터 수집의 역사 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 33쪽</div>
+    <h2>데이터를 모으는 일은 새롭지 않다</h2>
+
+    <p class="prob-stmt">
+      데이터를 수집하여 의미 있는 정보를 찾아내려는 시도는 <b>인류 역사와 함께</b> 시작되었다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>🏛️ 과거 — 거대 제국</h4>
+        <p>동서양을 막론하고 거대 제국을 이룩한 지도자들은
+           국가의 <b>군사력과 경제력</b>을 정확히 파악하기 위해
+           <span class="kw">통계 조사</span>를 시행하였다.</p>
+        <p style="color: var(--lm-ink-3);">데이터의 수집은 그때도 국력을 결정짓는 요소였다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>📱 현재 — 모두가 생산자</h4>
+        <p>모바일 기기의 확대, 사물 인터넷의 보급, 디지털 매체로의 전환으로
+           매일 <span class="kw">수십억 개</span>의 문서·사진·영상이 만들어진다.</p>
+        <p style="color: var(--lm-ink-3);">양과 질, 다양성 모두 과거와 큰 차이를 보인다.</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      달라진 건 <b>"모은다"</b>가 아니라 <span class="kw-danger">"감당할 수 있는가"</span>다.
+      방대한 데이터에서 필요한 정보를 찾고 목적에 맞게 가공하는 일은,
+      전문 분석 도구를 써도 쉽지 않다.
+    </div>
+    <aside class="notes">통계 조사가 국력이었다는 대목을 짚으면 이 과목이 왜 수학인지 다시 연결된다. 인구 조사(census)는 로마 시대부터 있었다 — 4번 슬라이드의 로마와 이어 붙이면 좋다.</aside>
+  </section>
+
+  <!-- ═══════════ 6. 빅데이터의 정의 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 34쪽 <span class="badge">정의</span></div>
+    <h2>빅데이터란 무엇인가</h2>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-5);">
+      <span class="kw">전통적인 데이터 처리 도구로는 감당하기 어려운 방대한 데이터</span>를
+      빅데이터(big data)라고 한다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="info-box">
+        정의의 핵심은 <b>크기의 숫자가 아니라 "감당 가능한가"</b>다.
+        기준이 되는 정확한 바이트 수는 정해져 있지 않다.
+      </div>
+      <div class="info-box">
+        확장된 관점에서는 방대한 데이터뿐 아니라
+        <span class="kw-info">이를 빠르게 분석하고 처리하는 기술</span>까지
+        빅데이터에 포함하기도 한다.
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      빅데이터 기술을 이용하면 <b>정형 데이터뿐만 아니라 비정형 데이터도</b>
+      수집·저장·분석할 수 있다.
+      <span class="chip chip-muted" style="margin-left: var(--lm-space-2);">정형·비정형은 1차시에서 배웠다</span>
+    </div>
+    <aside class="notes">"몇 기가부터 빅데이터인가요?"라는 질문이 반드시 나온다. 정답은 "정해진 숫자가 없다"이고, 그게 이 정의의 핵심이라고 답해 준다. 1차시의 정형/비정형 분류를 여기서 회수한다.</aside>
+  </section>
+
+  <!-- ═══════════ 7. 데이터 크기 단위 (수학 고리) ═══════════ -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 34쪽 <span class="badge">계산해 보자</span></div>
+    <h2>얼마나 커야 "방대한" 걸까</h2>
+
+    <div class="two-col" style="align-items: start;">
+      <table class="calc-table">
+        <thead><tr><th>단위</th><th>바이트</th></tr></thead>
+        <tbody>
+          <tr><td>킬로 (kilo)</td><td>\(10^{3}\)</td></tr>
+          <tr><td>메가 (Mega)</td><td>\(10^{6}\)</td></tr>
+          <tr><td>기가 (Giga)</td><td>\(10^{9}\)</td></tr>
+          <tr><td>테라 (Tera)</td><td class="result-cell">\(10^{12}\)</td></tr>
+          <tr><td>페타 (Peta)</td><td class="result-cell">\(10^{15}\)</td></tr>
+        </tbody>
+      </table>
+
+      <div>
+        <p class="prob-stmt" style="margin-top:0;">
+          교과서는 규모를 <b>"수십 테라바이트에서 수십 페타바이트"</b>라고 쓴다.
+          <span class="kw">1PB는 1TB의 몇 배</span>인가?
+        </p>
+
+        <div class="step-box" data-i="1">
+          <div class="step-label">지수끼리 나눈다</div>
+          \[ \frac{10^{15}}{10^{12}} = 10^{15-12} = 10^{3} = 1000 \]
+        </div>
+        <div class="step-box" data-i="2">
+          <div class="step-label">답</div>
+          1페타바이트는 1테라바이트의 <b>1000배</b>다.
+          한 칸 올라갈 때마다 <span class="kw-success">1000배씩</span> 커진다.
+        </div>
+        <div class="step-box" data-i="3">
+          <div class="step-label">얼마나 되는 양일까 <span class="chip chip-muted">가정: 사진 1장 = 3 MB</span></div>
+          \(10^{15} \div (3 \times 10^{6}) \approx 3.3 \times 10^{8}\) — 1PB는 사진 <b>약 3억 3천만 장</b>이다.
+        </div>
+      </div>
+    </div>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="uNext">다음 단계 ▶</button>
+      <span class="step-counter" id="uCnt">0 / 3</span>
+      <button class="anim-btn reset-btn" id="uReset">처음으로</button>
+    </div>
+    <aside class="notes">오늘의 유일한 계산이다. 지수법칙은 공통수학에서 배웠으니 확인 수준으로 빠르게 간다. 세 번째 단계의 사진 장수는 교과서에 없는 보조 예시이고 "사진 1장 3MB"라는 가정을 칠판에 적어 두고 계산할 것.</aside>
+  </section>
+
+  <!-- ═══════════ 8. 3V 모델 ═══════════ -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 34쪽 <span class="badge">오늘의 중심</span></div>
+    <h2>빅데이터의 세 가지 특징 — 3V 모델</h2>
+
+    <div class="v-grid">
+      <div class="v-card">
+        <div class="v-en">Volume</div>
+        <div class="v-ko">규모</div>
+        <ul>
+          <li>수십 테라바이트에서 수십 페타바이트에 이를 정도로 방대하며, <b>계속 증가</b>하고 있다.</li>
+          <li>방대한 규모로 인해 기존의 데이터 관리 시스템으로는 <b>저장·처리·분석이 어렵다.</b></li>
+        </ul>
+      </div>
+      <div class="v-card">
+        <div class="v-en">Velocity</div>
+        <div class="v-ko">속도</div>
+        <ul>
+          <li>빅데이터는 <b>실시간으로 생성</b>되며 이를 즉각적으로 분석·처리하는 것이 중요하다.</li>
+          <li>처리 속도가 생성 속도를 따라가지 못하면 데이터의 <b>유용성이 저하</b>된다.</li>
+        </ul>
+      </div>
+      <div class="v-card">
+        <div class="v-en">Variety</div>
+        <div class="v-ko">다양성</div>
+        <ul>
+          <li>숫자와 텍스트뿐 아니라 <b>이미지·음성·영상·센서</b> 등 다양한 형태를 포함한다.</li>
+          <li>형식에 따라 특별한 분석 기술이 필요해 <b>분석의 복잡성이 증가</b>한다.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      셋 다 <span class="kw-info">V로 시작</span>해서 3V다.
+      규모(얼마나 많은가) · 속도(얼마나 빨리 오는가) · 다양성(어떤 모양인가) — 세 질문으로 외우자.
+    </div>
+    <aside class="notes">판서로 V 세 개를 같이 적는다. 앞 장에서 계산한 테라~페타가 Volume 칸에 그대로 나오니 연결해 준다. 속도는 "지금 이 순간에도 쌓이고 있다"로, 다양성은 "여러분 휴대폰 안에 사진·음성·영상이 다 있다"로 예를 든다.</aside>
+  </section>
+
+  <!-- ═══════════ 9. 문제 1 — 5V ═══════════ -->
+  <section>
+    <div class="chapter-tag">문제 1 · 탐구 · 교과서 34쪽</div>
+    <h2>3V로는 부족했다 — 5V 모델</h2>
+
+    <p class="prob-stmt">
+      최근에는 빅데이터를 설명하는 새로운 방법으로 기존의 3V 모델에 다음 두 가지 특징을 포함한
+      <b>5V 모델</b>이 등장하였다. 각 특징의 내용을 조사하시오.
+    </p>
+
+    <ul class="ox-list" id="v5List">
+      <li>💎 <b>가치 (Value)</b>
+        <span class="ox-ans">데이터는 <b>유용한 가치를 품고 있어야</b> 한다.
+          아무리 많이 모아도 쓸모가 없으면 저장 비용만 든다.</span></li>
+      <li>✅ <b>정확성 (Veracity)</b>
+        <span class="ox-ans">데이터의 <b>신뢰성과 품질이 높아야</b> 한다.
+          틀린 데이터를 학습하면 인공지능도 틀린 답을 낸다.</span></li>
+    </ul>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      추가된 두 V의 공통점 — 둘 다 <b>양이 아니라 질</b>을 묻는다.
+      <span class="kw-success">규모만 크다고 빅데이터가 아니다.</span>
+    </div>
+    <aside class="notes">항목을 누르기 전에 학생들에게 먼저 뜻을 추측하게 한다. Value는 대부분 맞히고 Veracity는 어려워한다. "veracity = 진실성"이라는 영어 뜻을 알려 주면 기억에 남는다. 이 장이 다음 시간 공정성 이야기의 씨앗이다.</aside>
+  </section>
+
+  <!-- ═══════════ 10. 정리 ═══════════ -->
+  <section>
+    <div class="chapter-tag">정리</div>
+    <h2>오늘 한 줄</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-5);">
+      <div class="concept-card">
+        <div class="icon">📦</div>
+        <h4>정의는 크기가 아니다</h4>
+        <p>전통적 도구로 <span class="kw">감당하기 어려운</span> 데이터가 빅데이터다.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔢</div>
+        <h4>한 칸에 1000배</h4>
+        <p>\(10^{12}\)에서 \(10^{15}\)로,
+           <span class="kw">테라에서 페타</span>는 1000배.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">💎</div>
+        <h4>3V + 2V</h4>
+        <p>규모·속도·다양성에 <span class="kw">가치·정확성</span>이 더해졌다.</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-6);">
+      이제 재료가 무엇인지 알았다. 그렇다면 인공지능은 이 재료로
+      <span class="kw-success">실제로 무슨 일을 어떻게 하는가?</span>
+      그리고 재료가 한쪽으로 치우쳐 있다면 무슨 일이 벌어질까?
+      <span class="chip chip-accent" style="margin-left: var(--lm-space-3);">다음 시간 · 빅데이터 활용 5단계와 인공지능의 공정성</span>
+    </div>
+    <aside class="notes">마지막 물음 두 개가 다음 차시의 전반부(5단계)와 후반부(공정성)에 각각 대응한다. 특히 "치우쳐 있다면"은 오늘 배운 Veracity와 이어진다는 걸 짚고 끝낸다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    minScale: 0.2, maxScale: 1.0,
+    center: false,
+    hash: true, slideNumber: 'c/t', progress: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* ══════════════════════════════════════════════════════════
+     단위 계산 — 단계별 공개
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const steps = Array.from(document.querySelectorAll('[data-i]'))
+      .filter(el => el.classList.contains('step-box'));
+    if (!steps.length) return;
+    const cnt = document.getElementById('uCnt');
+    let i = 0;
+
+    function render() {
+      steps.forEach((s, k) => s.classList.toggle('visible', k < i));
+      cnt.textContent = i + ' / ' + steps.length;
+      window.safeTypeset(steps.slice(0, i));
+    }
+    document.getElementById('uNext').addEventListener('click', () => {
+      if (i < steps.length) { i++; render(); }
+    });
+    document.getElementById('uReset').addEventListener('click', () => { i = 0; render(); });
+    render();
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     5V — 눌러서 뜻 공개
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const list = document.getElementById('v5List');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
