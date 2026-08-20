@@ -55,6 +55,33 @@ python3 -m http.server 8791
 2. **템플릿 상대경로 깊이 불일치** — `reveal_base.html:48`·`worksheet_base.html:11`이 `../../_shared/`를 쓰는데 산출물 89/90개는 `<과목>/output/<하위폴더>/` 3단계라 `../../../_shared/`가 필요합니다. 템플릿을 그대로 복사하면 CSS가 404 납니다. 1번을 하려면 이것부터.
 3. `--lm-font-mono: 'JetBrains Mono'`에 대응하는 `@font-face`가 저장소 어디에도 없습니다.
 
+### 2026-04판 구판 슬라이드·대본 6건 삭제됨 (2026-08-20)
+
+`ai-math-2022/output/slides/`에서 절 단위 구판 6개를 지웠습니다(커밋 `8dc574c`).
+차시 단위 신판 7개가 1-1·1-2절을 완전히 대체했고, 구판은 **애초에 실행되지도 않았습니다** —
+`../../libs/`의 자산 8개(reveal·mathjax·gsap·p5·chart 등)를 참조하는데 그 경로는
+저장소에 존재한 적이 없어 `typeof Reveal === 'undefined'` 상태였습니다.
+테마도 `theme/black.css`(다크)라 현행 Pretendard 밝은 디자인 시스템과 다릅니다.
+
+**단, 1-3절(빅데이터)은 신판이 아직 없습니다.** 계획서의 8·9차시를 만들 때
+구판 내용을 참고하려면 git에서 꺼내 쓰세요 (파일은 이력에 그대로 남아 있습니다).
+
+```
+git show 8dc574c^:"ai-math-2022/output/slides/슬라이드_1-3_빅데이터와인공지능.html" > /tmp/ref-1-3.html
+git show 8dc574c^:"ai-math-2022/output/slides/대본_1-3_빅데이터와인공지능.html"   > /tmp/ref-daebon-1-3.html
+```
+
+`ai-math/output/slides/`의 IV-1·IV-2도 같은 libs 문제를 안고 있으나 2015 교육과정이라 방치 중입니다.
+
+### 슬라이드 세로 상한은 1080px입니다 (측정 근거)
+
+Reveal 스테이지가 1920×1080이고 `.slides`의 clientHeight가 1080, section은
+`position:absolute`라 내용만큼 늘어납니다. 브라우저 실측 결과 **1025px짜리 장에서
+`scrollHeight === clientHeight`이고 잘림이 없었습니다**(2026-08-20 맥).
+즉 1080이 실제 한계이고 그보다 낮은 수치는 안전 여백입니다.
+여백을 얼마나 둘지는 취향이지만, **상한을 몇으로 잡았는지 커밋 메시지에 적어 두세요** —
+두 기기에서 서로 다른 상한으로 같은 파일을 조정하면 도식 크기가 왔다 갔다 합니다.
+
 ### ⚠️ 슬라이드 작성 시 함정 — 수식 안의 `<`
 
 MathJax 수식 안에서 **`<` 바로 뒤에 알파벳이 오면 브라우저가 HTML 태그 시작으로 파싱해
