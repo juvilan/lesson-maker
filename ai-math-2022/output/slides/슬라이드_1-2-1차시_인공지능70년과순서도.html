@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인공지능 70년, 다섯 장면 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    /* ── 도식 SVG ── */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .fill-page   { fill: var(--lm-page); }
+    .dg .fill-tint   { fill: var(--lm-paper-tint); }
+    .dg .fill-accent { fill: var(--lm-accent); }
+    .dg .stroke-rule { stroke: var(--lm-rule-strong); fill: none; }
+    .dg .stroke-ink  { stroke: var(--lm-ink-3); fill: none; }
+    .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink-2); font-size: 20px; }
+
+    /* ── 시대 카드 ── */
+    .era-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5); }
+    .era-card .era-year { font-size: var(--lm-slide-caption); font-weight: 600;
+                          letter-spacing: 0.1em; color: var(--lm-accent);
+                          margin-bottom: var(--lm-space-2); }
+    .era-card h4 { margin: 0 0 var(--lm-space-3); font-size: var(--lm-slide-h3); }
+    .era-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                  line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .era-card p:last-child { margin-bottom: 0; }
+
+    /* ── 인물 메모 ── */
+    .who { display: inline-block; background: var(--lm-paper-tint); border-radius: var(--lm-radius-sm);
+           padding: 2px 12px; font-size: var(--lm-slide-caption); color: var(--lm-ink-3); }
+
+    /* ── 연표 ── */
+    .tl { position: relative; margin-top: var(--lm-space-6); padding-bottom: var(--lm-space-4); }
+    .tl-line { position: absolute; left: 0; right: 0; top: 34px; height: 3px; background: var(--lm-rule); }
+    .tl-items { position: relative; display: flex; justify-content: space-between; }
+    .tl-item { position: relative; text-align: center; cursor: pointer; flex: 1; }
+    .tl-item .tl-year { font-size: var(--lm-slide-small); font-weight: 600; color: var(--lm-ink-3);
+                        margin-bottom: var(--lm-space-2); transition: color 0.2s; }
+    .tl-item .tl-dot { width: 20px; height: 20px; border-radius: 50%; margin: 0 auto;
+                       background: var(--lm-page); border: 3px solid var(--lm-rule-strong);
+                       transition: background 0.2s, border-color 0.2s, transform 0.2s; }
+    .tl-item:hover .tl-dot { border-color: var(--lm-accent); }
+    .tl-item.on .tl-dot { background: var(--lm-accent); border-color: var(--lm-accent); transform: scale(1.25); }
+    .tl-item.on .tl-year { color: var(--lm-accent); }
+    .tl-item .tl-tag { margin-top: var(--lm-space-3); font-size: var(--lm-slide-caption);
+                       color: var(--lm-ink-3); line-height: 1.3; }
+
+    .tl-detail { margin-top: var(--lm-space-5); background: var(--lm-page);
+                 border: var(--lm-border-thin) solid var(--lm-rule);
+                 border-left: var(--lm-border-accent) solid var(--lm-accent);
+                 border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5);
+                 font-size: var(--lm-slide-small); color: var(--lm-ink-2); min-height: 116px; }
+    .tl-detail b { color: var(--lm-ink); }
+
+    /* ── 순서도 (HTML — 수식이 그대로 조판되도록) ── */
+    .fc { display: flex; flex-direction: column; align-items: center; gap: var(--lm-space-1); }
+    .fc-node { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule-strong);
+               padding: var(--lm-space-2) var(--lm-space-5); font-size: var(--lm-slide-small);
+               text-align: center; min-width: 250px; }
+    .fc-node.start { border-radius: 999px; background: var(--lm-paper-tint); min-width: 150px; }
+    .fc-node.proc  { border-radius: var(--lm-radius-sm); }
+    .fc-node.dec   { border-radius: var(--lm-radius-sm); border-color: var(--lm-accent);
+                     background: var(--lm-accent-tint); }
+    .fc-node.out   { border-radius: var(--lm-radius-sm); background: var(--lm-success-tint);
+                     border-color: var(--lm-success); color: var(--lm-success); font-weight: 600;
+                     min-width: 190px; }
+    .fc-arrow { color: var(--lm-ink-4); font-size: var(--lm-slide-small); line-height: 1; }
+    .fc-branch { display: flex; align-items: center; gap: var(--lm-space-3); }
+    .fc-edge { color: var(--lm-ink-3); font-size: var(--lm-slide-caption); white-space: nowrap; }
+
+    .blank { display: inline-block; min-width: 132px; border-bottom: 2px dashed var(--lm-accent);
+             color: var(--lm-accent); font-weight: 600; }
+    .fc-node.solved .blank { border-bottom-color: transparent; }
+    .fc-node.q { cursor: pointer; transition: box-shadow 0.2s; }
+    .fc-node.q:hover { box-shadow: 0 0 0 3px var(--lm-accent-tint-strong); }
+
+    /* ── 순서도 기호 범례 ── */
+    .sym-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--lm-space-3);
+                margin-top: var(--lm-space-4); }
+    .sym { text-align: center; }
+    .sym p { margin: var(--lm-space-2) 0 0; font-size: var(--lm-slide-caption); color: var(--lm-ink-3); }
+  </style>
+</head>
+
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ═══════════ 1. 타이틀 ═══════════ -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅰ-2 인공지능의 역사 · 1차시</div>
+    <h1>인공지능 70년, 다섯 장면</h1>
+    <p class="slide-sub">그리고 그 장면마다 수학이 있었다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 21~24쪽</span>
+    </div>
+    <aside class="notes">오늘은 계산이 거의 없는 시간이다. 대신 앞으로 배울 개념들의 이름이 전부 등장한다 — 학생에게 "오늘 나온 이름을 기억해 두라"고 미리 말해 둘 것.</aside>
+  </section>
+
+  <!-- ═══════════ 2. 복습 → 오늘의 질문 ═══════════ -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>퍼셉트론은 1958년에 나왔다</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="result-box">
+        지난 시간 우리가 만든 퍼셉트론 —
+        입력에 <span class="kw-success">가중치</span>를 곱해 더하고,
+        <span class="kw-success">활성화함수</span>로 넘길지 말지 정한다.
+      </div>
+      <div class="info-box">
+        이 구조가 세상에 나온 해가 <span class="kw-info">1958년</span>이다.
+        스마트폰도, 인터넷도 없던 때다.
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      그런데 왜 인공지능은 <span class="kw-danger">2016년 알파고</span>가 되어서야 세상을 놀라게 했을까?
+      60년 동안 무슨 일이 있었나.
+    </div>
+    <aside class="notes">학생들은 인공지능을 최근 기술로 안다. 1958이라는 숫자를 칠판에 크게 적어 두면 오늘 내내 효과가 있다.</aside>
+  </section>
+
+  <!-- ═══════════ 3. 학습 목표 ═══════════ -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>인공지능 발전의 <span class="kw">주요 전환점</span>을 시대 순으로 설명할 수 있다.</span></li>
+      <li><span class="num">2</span><span>각 전환점에서 <span class="kw">수학이 어떻게 쓰였는지</span> 말할 수 있다.</span></li>
+      <li><span class="num">3</span><span>문제 해결 절차를 <span class="kw">알고리즘과 순서도</span>로 나타낼 수 있다.</span></li>
+    </ul>
+    <div class="info-box">
+      성취기준 <span class="badge">인공지능에서 수학을 활용한 역사적 사례를 탐구하고 설명할 수 있다</span>
+    </div>
+    <aside class="notes">2번 목표가 오늘의 중심이다. 연표 슬라이드에서 회수한다.</aside>
+  </section>
+
+  <!-- ═══════════ 4. 생각 열기 ═══════════ -->
+  <section>
+    <div class="chapter-tag">생각 열기 · 교과서 21쪽</div>
+    <h2>인공지능은 언제 탄생했을까</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-6);">
+      <div class="card">
+        <h4 style="margin-top:0;">🙋 학생 A</h4>
+        <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin:0;">"알파고부터 아니야?"</p>
+      </div>
+      <div class="card">
+        <h4 style="margin-top:0;">🙋 학생 B</h4>
+        <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin:0;">"10년 전쯤 아닐까?"</p>
+      </div>
+      <div class="card card-accent">
+        <h4 style="margin-top:0;">📖 교과서</h4>
+        <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin:0;">"아니야." — 답은 훨씬 이전이다.</p>
+      </div>
+    </div>
+
+    <div class="example-box" style="margin-top: var(--lm-space-6);">
+      여러분은 언제라고 생각하는가? <span class="kw">연도를 하나씩 적어 보자.</span>
+    </div>
+    <aside class="notes">학생 각자 연도를 적게 한 뒤 손을 들어 보게 한다. 대부분 2000년대 이후를 고른다. 1950이 나오면 크게 칭찬.</aside>
+  </section>
+
+  <!-- ═══════════ 5. 1950년대 ═══════════ -->
+  <section>
+    <div class="chapter-tag">장면 1 · 1950년대</div>
+    <h2>인공지능의 태동 — 기계가 생각한다는 것</h2>
+
+    <div class="two-col ratio-1-2" style="margin-top: var(--lm-space-4); align-items: center;">
+      <svg class="dg" viewBox="0 0 420 260" width="420" height="260" preserveAspectRatio="xMidYMid meet">
+        <rect x="30" y="60" width="140" height="110" rx="8" class="fill-page"/>
+        <rect x="30" y="60" width="140" height="110" rx="8" class="stroke-rule" stroke-width="2"/>
+        <text x="100" y="122" text-anchor="middle">A</text>
+        <rect x="250" y="60" width="140" height="110" rx="8" class="fill-page"/>
+        <rect x="250" y="60" width="140" height="110" rx="8" class="stroke-rule" stroke-width="2"/>
+        <text x="320" y="122" text-anchor="middle">B</text>
+        <text x="100" y="200" text-anchor="middle">"나는 사람이야."</text>
+        <text x="320" y="200" text-anchor="middle">"나도 사람이야."</text>
+        <text x="210" y="40" text-anchor="middle" class="fill-accent">누가 사람이지?</text>
+        <path d="M175,115 L245,115" class="stroke-ink" stroke-width="2" stroke-dasharray="6 6"/>
+        <text x="210" y="240" text-anchor="middle">구별하지 못하면 → 지능이 있다</text>
+      </svg>
+
+      <div>
+        <div class="definition-box">
+          <span class="kw">튜링 테스트(1950)</span> — 평가자가 모니터로 컴퓨터·인간과 각각 대화한 뒤
+          어느 쪽이 컴퓨터인지 <b>구별하지 못한다면</b>, 그 컴퓨터는 최소한 인간 정도의 지능을 가졌다고 본다.
+        </div>
+        <div class="info-box" style="margin-top: var(--lm-space-4);">
+          <span class="who">튜링(Turing, A. M., 1912~1954) · 영국의 수학자</span><br>
+          수학자가 던진 이 질문이 이후 모든 인공지능 연구의 사상적 기초가 되었다.
+        </div>
+        <div class="result-box" style="margin-top: var(--lm-space-4);">
+          그리고 <span class="kw-success">1958년, 퍼셉트론</span>이 등장한다 — 지난 시간에 우리가 만든 그것.
+        </div>
+      </div>
+    </div>
+    <aside class="notes">튜링이 '수학자'라는 점을 짚는다. 이 과목이 왜 수학인지에 대한 첫 번째 답이다.</aside>
+  </section>
+
+  <!-- ═══════════ 6. 1969 XOR ═══════════ -->
+  <section>
+    <div class="chapter-tag">장면 2 · 1969년</div>
+    <h2>첫 번째 겨울 — 직선 하나로 안 되는 문제</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="era-card">
+        <div class="era-year">1969</div>
+        <h4>퍼셉트론의 한계가 증명되다</h4>
+        <p><span class="kw">배타적논리합(XOR)</span> 같은 문제는 퍼셉트론 하나로 구분할 수 없다는 사실이
+           수학적으로 증명되었다.</p>
+        <p><span class="who">민스키(Minsky, M. L., 1927~2016) · 미국의 컴퓨터 과학자</span></p>
+      </div>
+      <div>
+        <div class="warning-box">
+          신경망 연구는 <span class="kw-danger">침체기</span>로 접어든다.
+          연구자들의 관심은 전혀 다른 방향 — 전문가시스템으로 옮겨 간다.
+        </div>
+        <div class="info-box" style="margin-top: var(--lm-space-4);">
+          <span class="kw-info">여기서 멈추지 말자.</span>
+          "왜 안 되는가"는 오늘 외우는 게 아니라,
+          <b>세 번째 시간에 우리가 직접 부등식으로 증명한다.</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      한 사람의 증명이 <span class="kw-success">한 분야를 20년 멈춰 세웠다.</span>
+      수학이 인공지능에 미친 영향은 이렇게 크다 — 좋은 쪽으로도, 아픈 쪽으로도.
+    </div>
+    <aside class="notes">XOR을 여기서 설명하려 들지 말 것. 이름과 사건만 남기고, 6차시에 학생이 직접 부등식 모순을 유도하게 한다. 오늘 설명하면 그때의 발견이 죽는다.</aside>
+  </section>
+
+  <!-- ═══════════ 7. 전문가시스템 ═══════════ -->
+  <section>
+    <div class="chapter-tag">장면 3 · 1960~1980년대 초</div>
+    <h2>전문가시스템의 등장과 쇠락</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="era-card">
+        <div class="era-year">등장</div>
+        <h4>지식을 컴퓨터에 넣자</h4>
+        <p>특정 분야의 전문 지식을 컴퓨터에 저장해 두고 활용하는 기술.
+           일반인도 <span class="kw">전문적인 판단</span>을 경험할 수 있다는 점에서 큰 기대를 모았다.</p>
+      </div>
+      <div class="era-card" style="border-color: var(--lm-danger);">
+        <div class="era-year" style="color: var(--lm-danger);">쇠락</div>
+        <h4>규칙을 벗어나면 무너진다</h4>
+        <p>규칙에 없는 상황에서 <span class="kw-danger">예측 정확성이 떨어졌고</span>,
+           시스템 관리 비용도 높았다. 개발과 투자가 급격히 줄어든다.</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5);">
+      떠올려 보자 — 1차시에서 배운 <span class="kw-info">기존의 프로그래밍</span> 그 자체다.
+      <b>규칙을 사람이 전부 적어 준다.</b> 그래서 사람이 적지 않은 상황에는 대응하지 못했다.
+      <span class="chip chip-muted" style="margin-left: var(--lm-space-2);">다음 시간에 조건문으로 직접 만들어 본다</span>
+    </div>
+    <aside class="notes">1차시의 '규칙을 누가 만드는가' 대비표를 다시 꺼내면 이해가 빠르다. 전문가시스템 = 사람이 규칙을 준 쪽의 극단.</aside>
+  </section>
+
+  <!-- ═══════════ 8. 귀환 ═══════════ -->
+  <section>
+    <div class="chapter-tag">장면 4 · 1980년대 중반~2000년대</div>
+    <h2>인공신경망의 귀환</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="era-card">
+        <div class="era-year">1986</div>
+        <h4>역전파 알고리즘</h4>
+        <p>여러 퍼셉트론을 <span class="kw">다층 구조</span>로 연결하면 XOR도 풀린다.
+           힌턴이 심층 신경망의 가중치를 최적화하는 방법을 증명했다.</p>
+        <p><span class="who">힌턴(Hinton, G. E., 1947~)</span></p>
+      </div>
+      <div class="era-card">
+        <div class="era-year">1997</div>
+        <h4>딥블루</h4>
+        <p>체스 세계 챔피언 카스파로프를 이긴 <span class="kw">최초의 인공지능</span>.
+           다만 모든 경우의 수를 계산하는 방식이라 복잡한 문제에는 한계가 있었다.</p>
+      </div>
+      <div class="era-card">
+        <div class="era-year">2006</div>
+        <h4>딥러닝 학습법</h4>
+        <p>힌턴이 딥러닝을 <span class="kw">효과적으로 학습시키는 방법</span>을 발표.
+           인공지능 발전에 큰 진전을 이룬다.</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      딥블루의 한계가 방향을 바꿨다 — 모든 경우를 <span class="kw-success">계산</span>하는 대신,
+      <span class="kw-success">학습</span>으로 스스로 나아지는 인공지능으로.
+    </div>
+    <aside class="notes">역전파는 이름만. 합성함수 미분이 필요해서 4단원 이후에나 제대로 다룰 수 있다고 솔직히 말해 준다.</aside>
+  </section>
+
+  <!-- ═══════════ 9. 2010~2020년대 ═══════════ -->
+  <section>
+    <div class="chapter-tag">장면 5 · 2010년대~현재</div>
+    <h2>그리고 우리가 아는 인공지능</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="era-card">
+        <div class="era-year">2012 · 2016</div>
+        <h4>AlexNet과 알파고</h4>
+        <p>AlexNet이 이미지 분류 대회에서 압도적으로 우승.
+           알파고가 이세돌과의 대국에서 승리하며
+           <span class="kw">승률 예측</span>처럼 복잡한 문제에서도 인간을 넘어섰다.</p>
+      </div>
+      <div class="era-card">
+        <div class="era-year">2022</div>
+        <h4>생성형 인공지능</h4>
+        <p>인공지능 챗봇이 등장해 정보를 얻고 소통하는 방식을 바꾸었다.
+           자연스러운 대화로 <span class="kw">인간의 의사 결정을 보조</span>한다.</p>
+      </div>
+      <div class="era-card card-accent">
+        <div class="era-year">2024</div>
+        <h4>노벨 물리학상</h4>
+        <p>힌턴과 홉필드가 인공신경망으로 기계학습을 가능하게 한 공로로
+           <span class="kw">노벨 물리학상</span>을 공동 수상했다.</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5);">
+      1969년에 한계를 지적받고 20년을 기다린 그 신경망이, <span class="kw-info">2024년에 노벨상을 받았다.</span>
+    </div>
+    <aside class="notes">힌턴이 1986년과 2024년에 모두 등장한다는 점을 짚어 준다. 한 사람이 40년을 밀고 간 이야기.</aside>
+  </section>
+
+  <!-- ═══════════ 10. 연표 (인터랙티브) ═══════════ -->
+  <section>
+    <div class="chapter-tag">한눈에 보기 <span class="badge">교과서 22~23쪽 연표</span></div>
+    <h2>장면마다 수학이 있었다</h2>
+
+    <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin: 0;">
+      연도를 누르면 그때 쓰인 수학이 나온다.
+      <span class="chip chip-muted">우리가 이 책에서 배울 것들이다</span>
+    </p>
+
+    <div class="tl">
+      <div class="tl-line"></div>
+      <div class="tl-items" id="tlItems">
+        <div class="tl-item" data-d="프랑스의 코시가 <b>경사하강법</b>을 제안했다. 인공지능이 나오기 100년도 전이다. 손실을 가장 빠르게 줄이는 방향으로 조금씩 내려가는 이 방법이, 오늘날 모든 신경망의 학습 방식이다. <b>→ 4단원 경사하강법(144쪽)</b>">
+          <div class="tl-year">1847</div><div class="tl-dot"></div><div class="tl-tag">경사하강법</div>
+        </div>
+        <div class="tl-item" data-d="수학자 <b>튜링</b>이 튜링 테스트를 제안했다. '기계가 생각한다'를 어떻게 판정할 것인가 — 정의가 먼저였다. <b>→ 교과서 21쪽</b>">
+          <div class="tl-year">1950</div><div class="tl-dot"></div><div class="tl-tag">튜링 테스트</div>
+        </div>
+        <div class="tl-item" data-d="<b>퍼셉트론</b> 등장. 가중합과 활성화함수 — 지난 시간에 우리가 직접 계산한 그 구조다. <b>→ 교과서 17쪽</b>">
+          <div class="tl-year">1958</div><div class="tl-dot"></div><div class="tl-tag">퍼셉트론</div>
+        </div>
+        <div class="tl-item" data-d="<b>배타적논리합(XOR)</b> 문제 해결 실패. 좌표평면에서 직선 하나로는 네 점을 가를 수 없다는 것이 핵심이다. <b>→ 3차시 뒤에 직접 증명한다(25·29쪽)</b>">
+          <div class="tl-year">1969</div><div class="tl-dot"></div><div class="tl-tag">XOR의 벽</div>
+        </div>
+        <div class="tl-item" data-d="<b>역전파 알고리즘</b> 발표. 합성함수의 미분(연쇄법칙)으로 은닉층의 가중치까지 조정한다. <b>→ 4단원 미분(140쪽)</b>">
+          <div class="tl-year">1986</div><div class="tl-dot"></div><div class="tl-tag">역전파</div>
+        </div>
+        <div class="tl-item" data-d="<b>AlexNet</b>이 이미지 인식 대회 우승. 이미지를 숫자의 격자, 곧 <b>행렬</b>로 다룬다. <b>→ 3단원 행렬(88쪽)</b>">
+          <div class="tl-year">2012</div><div class="tl-dot"></div><div class="tl-tag">AlexNet</div>
+        </div>
+        <div class="tl-item" data-d="<b>알파고</b>가 이세돌에게 승리. 다음 수의 승률을 <b>확률</b>로 예측해 가장 좋은 수를 고른다. <b>→ 4단원 확률을 이용한 예측</b>">
+          <div class="tl-year">2016</div><div class="tl-dot"></div><div class="tl-tag">알파고</div>
+        </div>
+        <div class="tl-item" data-d="<b>인공지능 챗봇</b> 등장. 단어의 의미를 <b>벡터</b>로 바꿔 다룬다. <b>→ 2단원 벡터(51쪽)</b>">
+          <div class="tl-year">2022</div><div class="tl-dot"></div><div class="tl-tag">챗봇</div>
+        </div>
+      </div>
+      <div class="tl-detail" id="tlDetail">
+        연도를 눌러 보자. 이 책의 목차가 그대로 인공지능의 역사다.
+      </div>
+    </div>
+    <aside class="notes">이 슬라이드가 오늘의 핵심이다. "왜 인공지능 수업에서 수학을 배우나"에 대한 답 — 목차와 연표가 같다는 것을 보여 준다.</aside>
+  </section>
+
+  <!-- ═══════════ 11. 알고리즘과 순서도 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 24쪽 · 인공지능과 수학</div>
+    <h2>알고리즘과 순서도</h2>
+
+    <div class="definition-box">
+      어떤 문제를 논리적으로 해결하는 데 필요한 절차와 순서를 <span class="kw">알고리즘</span>,
+      이를 기호와 그림으로 알기 쉽게 나타낸 것을 <span class="kw">순서도</span>라고 한다.
+    </div>
+
+    <div class="sym-grid">
+      <div class="sym">
+        <svg class="dg" viewBox="0 0 160 70" width="160" height="70" preserveAspectRatio="xMidYMid meet">
+          <rect x="12" y="12" width="136" height="46" rx="23" class="fill-tint"/>
+          <rect x="12" y="12" width="136" height="46" rx="23" class="stroke-rule" stroke-width="2"/>
+        </svg>
+        <p>시작 · 끝</p>
+      </div>
+      <div class="sym">
+        <svg class="dg" viewBox="0 0 160 70" width="160" height="70" preserveAspectRatio="xMidYMid meet">
+          <rect x="12" y="12" width="136" height="46" rx="4" class="fill-page"/>
+          <rect x="12" y="12" width="136" height="46" rx="4" class="stroke-rule" stroke-width="2"/>
+        </svg>
+        <p>입력 · 처리</p>
+      </div>
+      <div class="sym">
+        <svg class="dg" viewBox="0 0 160 70" width="160" height="70" preserveAspectRatio="xMidYMid meet">
+          <path d="M80,10 L150,35 L80,60 L10,35 Z" class="fill-page"/>
+          <path d="M80,10 L150,35 L80,60 L10,35 Z" class="stroke-rule" stroke-width="2"/>
+        </svg>
+        <p>판단</p>
+      </div>
+      <div class="sym">
+        <svg class="dg" viewBox="0 0 160 70" width="160" height="70" preserveAspectRatio="xMidYMid meet">
+          <path d="M32,12 L152,12 L128,58 L8,58 Z" class="fill-page"/>
+          <path d="M32,12 L152,12 L128,58 L8,58 Z" class="stroke-rule" stroke-width="2"/>
+        </svg>
+        <p>출력</p>
+      </div>
+      <div class="sym">
+        <svg class="dg" viewBox="0 0 160 70" width="160" height="70" preserveAspectRatio="xMidYMid meet">
+          <line x1="80" y1="12" x2="80" y2="48" class="stroke-ink" stroke-width="2.5"/>
+          <path d="M80,58 l-8,-14 l16,0 z" class="fill-accent"/>
+        </svg>
+        <p>흐름</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      순서도를 쓰면 사람에게도, <span class="kw-success">인공지능에게도</span>
+      해결 절차를 오해 없이 전달할 수 있다.
+    </div>
+    <aside class="notes">중학교 정보에서 이미 배운 내용이다. 기호 다섯 개만 빠르게 확인하고 바로 활동으로 넘어간다.</aside>
+  </section>
+
+  <!-- ═══════════ 12. 예시 — 두 직선의 위치 관계 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 24쪽 · 예시</div>
+    <h2>두 직선의 위치 관계를 순서도로</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3); align-items: center;">
+      <div class="example-box" style="margin:0;">
+        두 직선 \(l: y = mx + n\), \(l': y = m'x + n'\)에 대하여<br><br>
+        Ⅰ. \(m = m'\)이고 \(n = n'\)이면 &nbsp;<b>일치</b><br>
+        Ⅱ. \(m = m'\)이고 \(n \ne n'\)이면 &nbsp;<b>평행</b><br>
+        Ⅲ. \(m \ne m'\)이면 &nbsp;<b>한 점에서 만난다</b>
+      </div>
+
+      <div class="fc">
+        <div class="fc-node start">시작</div>
+        <div class="fc-arrow">↓</div>
+        <div class="fc-branch">
+          <div class="fc-node dec">\(m = m'\)</div>
+          <div class="fc-edge">아니요 →</div>
+          <div class="fc-node out">한 점에서 만난다</div>
+        </div>
+        <div class="fc-arrow">↓ 예</div>
+        <div class="fc-branch">
+          <div class="fc-node dec">\(n = n'\)</div>
+          <div class="fc-edge">아니요 →</div>
+          <div class="fc-node out">서로 평행하다</div>
+        </div>
+        <div class="fc-arrow">↓ 예</div>
+        <div class="fc-node out">일치한다</div>
+      </div>
+    </div>
+    <aside class="notes">왼쪽 글과 오른쪽 그림이 같은 내용임을 짚어 준다. 판단 상자에서 '예'는 아래로, '아니요'는 옆으로 빠진다는 규칙만 알면 읽을 수 있다.</aside>
+  </section>
+
+  <!-- ═══════════ 13. 활동 — 문제 1 ═══════════ -->
+  <section>
+    <div class="chapter-tag">활동 · 교과서 24쪽 문제 1</div>
+    <h2>빈칸을 채워 보자</h2>
+
+    <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin: 0;">
+      이차방정식 \(ax^2 + bx + c = 0\)의 <b>서로 다른 실근의 개수</b>를 출력하는 순서도다.
+      <span class="chip chip-muted">빈칸 상자를 누르면 답이 나옵니다</span>
+    </p>
+
+    <div class="fc" style="margin-top: var(--lm-space-4);">
+      <div class="fc-node start">시작</div>
+      <div class="fc-arrow">↓</div>
+      <div class="fc-node proc">\(D = b^2 - 4ac\)</div>
+      <div class="fc-arrow">↓</div>
+      <div class="fc-branch">
+        <div class="fc-node dec q" id="qa" data-ans="\(D &gt; 0\)"><span class="blank">㈎</span></div>
+        <div class="fc-edge">예 →</div>
+        <div class="fc-node out">2</div>
+      </div>
+      <div class="fc-arrow">↓ 아니요</div>
+      <div class="fc-branch">
+        <div class="fc-node dec">\(D = 0\)</div>
+        <div class="fc-edge">예 →</div>
+        <div class="fc-node out q" id="qb" data-ans="1"><span class="blank">㈏</span></div>
+      </div>
+      <div class="fc-arrow">↓ 아니요</div>
+      <div class="fc-node out q" id="qc" data-ans="0"><span class="blank">㈐</span></div>
+    </div>
+
+    <div class="anim-controls" style="margin-top: var(--lm-space-4);">
+      <button class="anim-btn" id="fcAll">전부 채우기</button>
+      <button class="anim-btn reset-btn" id="fcReset">지우기</button>
+    </div>
+    <aside class="notes">판별식은 공통수학에서 배웠다. 순서도 읽는 법이 목적이지 판별식이 목적이 아니다. ㈎에서 부등호 방향을 틀리는 학생이 많다.</aside>
+  </section>
+
+  <!-- ═══════════ 14. 정리 ═══════════ -->
+  <section>
+    <div class="chapter-tag">정리</div>
+    <h2>오늘 한 줄</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-5);">
+      <div class="concept-card">
+        <div class="icon">❄️</div>
+        <h4>두 번의 겨울</h4>
+        <p>XOR의 벽과 전문가시스템의 쇠락. <span class="kw">한계가 방향을 바꿨다.</span></p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">📐</div>
+        <h4>늘 수학이 있었다</h4>
+        <p>경사하강법 · 미분 · 행렬 · 벡터 · 확률.
+           <span class="kw">이 책의 목차 그대로다.</span></p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔀</div>
+        <h4>순서도</h4>
+        <p>절차를 기호로 나타내면 <span class="kw">사람도 기계도</span> 같게 읽는다.</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-6);">
+      컴퓨터는 <span class="kw-success">참과 거짓, 0과 1</span>로만 판단한다.
+      그렇다면 사람의 "~이거나", "~이고", "~이면"은 어떻게 옮길까?
+      <span class="chip chip-accent" style="margin-left: var(--lm-space-3);">다음 시간 · 진리표와 논리 연산</span>
+    </div>
+    <aside class="notes">다음 차시 예고로 끝낸다. 이 질문이 5차시(진리표)와 6차시(퍼셉트론으로 논리 연산)를 관통한다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    minScale: 0.2, maxScale: 1.0,
+    center: false,
+    hash: true, slideNumber: 'c/t', progress: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: []
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* ══════════════════════════════════════════════════════════
+     연표 — 연도를 누르면 그때 쓰인 수학을 보여 준다
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const wrap = document.getElementById('tlItems');
+    if (!wrap) return;
+    const detail = document.getElementById('tlDetail');
+    const items = Array.from(wrap.querySelectorAll('.tl-item'));
+
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        items.forEach(i => i.classList.toggle('on', i === item));
+        detail.innerHTML = item.dataset.d;
+        window.safeTypeset([detail]);
+      });
+    });
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     문제 1 — 순서도 빈칸 채우기 (㈎ D>0, ㈏ 1, ㈐ 0)
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const nodes = ['qa', 'qb', 'qc'].map(id => document.getElementById(id)).filter(Boolean);
+    if (!nodes.length) return;
+
+    const original = new Map();
+    nodes.forEach(n => original.set(n, n.innerHTML));
+
+    function fill(n) {
+      n.innerHTML = n.dataset.ans;
+      n.classList.add('solved');
+      window.safeTypeset([n]);
+    }
+    function clear(n) {
+      n.innerHTML = original.get(n);
+      n.classList.remove('solved');
+    }
+
+    nodes.forEach(n => n.addEventListener('click', () => fill(n)));
+    document.getElementById('fcAll').addEventListener('click', () => nodes.forEach(fill));
+    document.getElementById('fcReset').addEventListener('click', () => nodes.forEach(clear));
+  })();
+</script>
+
+</body>
+</html>
