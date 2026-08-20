@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>치우친 재료로 배우면 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    /* ── 5단계 파이프라인 ── */
+    .pipe { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--lm-space-3);
+            margin-top: var(--lm-space-3); align-items: stretch; }
+    .pipe-step { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                 border-top: var(--lm-border-accent) solid var(--lm-accent);
+                 border-radius: var(--lm-radius-md); padding: var(--lm-space-3);
+                 transition: background 0.25s, border-color 0.25s; }
+    .pipe-step .pipe-n { font-size: var(--lm-slide-caption); color: var(--lm-accent);
+                         font-weight: 600; letter-spacing: 0.1em; }
+    .pipe-step h4 { margin: var(--lm-space-1) 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    color: var(--lm-ink); }
+    .pipe-step ul { margin: 0; padding-left: 1em; }
+    .pipe-step li { font-size: var(--lm-slide-caption); line-height: var(--lm-slide-line-tight);
+                    color: var(--lm-ink-2); margin-bottom: var(--lm-space-1); }
+    .pipe-step li:last-child { margin-bottom: 0; }
+
+    /* ── 사례 전환 ── */
+    .case-btns { display: flex; justify-content: center; gap: var(--lm-space-3);
+                 margin-top: var(--lm-space-3); }
+    /* 선택되지 않은 사례는 눌러 두고, 지금 보고 있는 사례만 강조한다 */
+    .case-btns .anim-btn { background: var(--lm-page); color: var(--lm-ink-3);
+                           border: var(--lm-border-thin) solid var(--lm-rule); }
+    .case-btns .anim-btn:hover { border-color: var(--lm-accent); color: var(--lm-ink); }
+    .case-btns .anim-btn.on { background: var(--lm-accent); color: var(--lm-page);
+                              border-color: var(--lm-accent); }
+    .case-table { width: 100%; border-collapse: collapse; margin-top: var(--lm-space-3);
+                  font-size: var(--lm-slide-caption); table-layout: fixed; }
+    .case-table th { background: var(--lm-paper-tint); color: var(--lm-accent); font-weight: 600;
+                     padding: var(--lm-space-2); text-align: center;
+                     border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong);
+                     font-size: var(--lm-slide-small); }
+    .case-table td { border-bottom: var(--lm-border-hair) solid var(--lm-rule);
+                     padding: var(--lm-space-3) var(--lm-space-2); color: var(--lm-ink-2);
+                     vertical-align: top; line-height: var(--lm-slide-line-tight); }
+
+    /* ── 기사 인용 ── */
+    .quote { background: var(--lm-page); border-left: var(--lm-border-accent) solid var(--lm-rule-strong);
+             border-radius: 0 var(--lm-radius-md) var(--lm-radius-md) 0;
+             padding: var(--lm-space-4) var(--lm-space-5); font-size: var(--lm-slide-small);
+             color: var(--lm-ink-2); line-height: var(--lm-slide-line-body); }
+    .quote .src { display: block; margin-top: var(--lm-space-2);
+                  font-size: var(--lm-slide-caption); color: var(--lm-ink-4); }
+
+    /* ── 사례 카드 (편향) ── */
+    .bias-card { background: var(--lm-danger-tint); border-left: var(--lm-border-accent) solid var(--lm-danger);
+                 border-radius: 0 var(--lm-radius-md) var(--lm-radius-md) 0;
+                 padding: var(--lm-space-3) var(--lm-space-4); font-size: var(--lm-slide-small);
+                 line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .bias-card b { color: var(--lm-danger); }
+
+    /* ── O/X 확인하기 ── */
+    .ox-list { list-style: none; padding: 0; margin: var(--lm-space-4) 0 0; }
+    .ox-list li { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-4) var(--lm-space-5);
+                  margin-bottom: var(--lm-space-3); font-size: var(--lm-slide-body);
+                  cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+    .ox-list li:hover { border-color: var(--lm-accent); }
+    .ox-list li .ox-ans { display: block; margin-top: var(--lm-space-2);
+                          font-size: var(--lm-slide-small); color: var(--lm-accent);
+                          font-weight: 600; opacity: 0; transition: opacity 0.3s ease; }
+    .ox-list li.revealed { background: var(--lm-accent-tint); border-color: var(--lm-accent); }
+    .ox-list li.revealed .ox-ans { opacity: 1; }
+
+    /* ── Ⅰ단원 회수 연표 ── */
+    .recap { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--lm-space-3);
+             margin-top: var(--lm-space-4); }
+    .recap-item { text-align: center; background: var(--lm-page);
+                  border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3); }
+    .recap-item .r-tag { font-size: var(--lm-slide-caption); color: var(--lm-accent);
+                         font-weight: 600; letter-spacing: 0.08em; }
+    .recap-item .r-body { font-size: var(--lm-slide-small); color: var(--lm-ink-2);
+                          margin-top: var(--lm-space-2); line-height: var(--lm-slide-line-tight); }
+
+    /* ── 세로를 조여야 하는 장 ── */
+    section.tight .step-box.visible { padding: var(--lm-space-1) var(--lm-space-4);
+                                      margin: var(--lm-space-1) 0; }
+    section.tight .step-box .step-label { margin-bottom: 0; }
+    section.tight h2 { margin-bottom: var(--lm-space-2); }
+    section.tight .two-col { margin: var(--lm-space-2) 0; }
+    section.tight .prob-stmt { line-height: 1.5; margin-top: var(--lm-space-2); }
+    section.tight .anim-controls { margin-top: var(--lm-space-2); }
+    section.tight .calc-table { margin-top: var(--lm-space-2); margin-bottom: 0; }
+    section.tight .calc-table th,
+    section.tight .calc-table td { padding: var(--lm-space-1) var(--lm-space-4); }
+    section.tight mjx-container[display="true"] { margin: 0.25em 0 !important; }
+  </style>
+</head>
+
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ═══════════ 1. 타이틀 ═══════════ -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅰ-3 빅데이터와 인공지능 · 2차시 <span class="badge">Ⅰ단원 마무리</span></div>
+    <h1>치우친 재료로 배우면</h1>
+    <p class="slide-sub">빅데이터 활용 5단계, 그리고 인공지능의 공정성</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 35~39쪽</span>
+    </div>
+    <aside class="notes">Ⅰ단원을 닫는 차시다. 전반부(5단계·사례)는 빠르게 지나가고 후반부(공정성)에 시간을 몰아 준다. 공정성은 계산이 없지만 이 단원에서 학생에게 가장 오래 남는 부분이다.</aside>
+  </section>
+
+  <!-- ═══════════ 2. 지난 시간 → 오늘의 질문 ═══════════ -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>양이 아니라 질을 묻는 두 개의 V</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="result-box">
+        3V에 더해진 <span class="kw-success">가치(Value)</span>와 <span class="kw-success">정확성(Veracity)</span>.
+        데이터는 쓸모가 있어야 하고, 믿을 만해야 한다.
+      </div>
+      <div class="info-box">
+        오늘은 두 가지를 본다 —
+        인공지능이 그 데이터로 <span class="kw-info">실제로 무슨 일을 하는지</span>,
+        그리고 데이터가 <span class="kw-info">믿을 만하지 않을 때</span> 무슨 일이 벌어지는지.
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      3차시에서 배웠다 — <b>학습이란 데이터를 보고 가중치를 찾는 일</b>이다.
+      그렇다면 <span class="kw-danger">데이터가 한쪽으로 치우쳐 있으면</span> 가중치도 치우친다.
+    </div>
+    <aside class="notes">마지막 문장이 오늘 후반부 전체의 논리다. 퍼셉트론 가중치 이야기를 편향성과 연결하는 다리이니 반드시 소리 내어 읽고 넘어간다.</aside>
+  </section>
+
+  <!-- ═══════════ 3. 학습 목표 ═══════════ -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>인공지능이 빅데이터로 문제를 해결하는 <span class="kw">5단계</span>를 설명할 수 있다.</span></li>
+      <li><span class="num">2</span><span>빅데이터 <span class="kw">활용 사례</span>를 분야별로 찾을 수 있다.</span></li>
+      <li><span class="num">3</span><span><span class="kw">데이터의 편향성</span>이 생기는 두 가지 이유를 말할 수 있다.</span></li>
+    </ul>
+    <div class="info-box">
+      성취기준 <span class="badge">빅데이터의 개념과 특성을 알고 인공지능에서 빅데이터를 활용한 사례를 찾을 수 있다</span>
+    </div>
+    <aside class="notes">3번이 오늘의 무게중심이다. 1·2번은 절차와 사례라 학생들이 어렵지 않게 따라온다.</aside>
+  </section>
+
+  <!-- ═══════════ 4. 왜 빅데이터가 필요한가 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 35쪽</div>
+    <h2>기계학습은 재료를 많이 먹는다</h2>
+
+    <p class="prob-stmt">
+      기계학습과 딥러닝은 패턴을 인식하고 예측과 의사 결정을 수행하기 위해 <b>방대한 데이터</b>를 필요로 한다.
+      빅데이터는 인공지능에 <span class="kw">필수적인 훈련 재료</span>를 제공한다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>🚗 자율주행 자동차</h4>
+        <p>인공지능은 <b>수많은 운전 시나리오 데이터</b>를 학습하여
+           실제 도로 상황에서 운전을 수행한다.</p>
+        <p style="color: var(--lm-ink-3);">데이터가 많을수록 더 정교하고 정확해지며,
+           스스로 성능을 지속적으로 향상시키는 것도 가능해진다.</p>
+      </div>
+      <div class="definition-box">
+        데이터로부터 학습된 패턴을 바탕으로 예측이나 결정을 내리기 위해 사용되는
+        <b>수학적 구조 또는 프로그램</b>을 <span class="kw">모델(model)</span>이라고 한다.
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      "모델"은 결국 <span class="kw-info">입력을 넣으면 출력이 나오는 함수</span>다.
+      우리가 3차시에 만든 퍼셉트론도, 4차시의 다층퍼셉트론도 전부 모델이었다.
+    </div>
+    <aside class="notes">"모델 = 함수"라는 연결이 이 장의 핵심이다. 앞 차시에서 만든 것들이 전부 모델이었다고 말해 주면 새 용어에 대한 부담이 사라진다.</aside>
+  </section>
+
+  <!-- ═══════════ 5. 활용 5단계 ═══════════ -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 35쪽 <span class="badge">오늘의 중심</span></div>
+    <h2>인공지능이 빅데이터로 문제를 푸는 5단계</h2>
+
+    <div class="pipe">
+      <div class="pipe-step">
+        <div class="pipe-n">STEP 1</div>
+        <h4>데이터 수집</h4>
+        <ul>
+          <li>웹사이트·센서·시스템 로그 등 다양한 출처로부터 필요한 데이터를 수집</li>
+          <li>전문적인 데이터 관리 기술과 수집 프로그램을 활용</li>
+        </ul>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-n">STEP 2</div>
+        <h4>데이터 가공</h4>
+        <ul>
+          <li>오류와 분석에 불필요한 정보를 제거</li>
+          <li>여러 경로로 수집된 데이터를 분석에 적합한 형태로 가공</li>
+        </ul>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-n">STEP 3</div>
+        <h4>데이터 분석과 모델 제작</h4>
+        <ul>
+          <li>목적과 데이터 형태에 맞는 분석 모델 선정</li>
+          <li>패턴 식별을 통해 예측 모델 구축</li>
+          <li>학습·검증·조정을 반복해 개선</li>
+        </ul>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-n">STEP 4</div>
+        <h4>예측 수행</h4>
+        <ul>
+          <li>예측 모델로 문제 상황을 예측</li>
+          <li>예측 결과의 설명·시각화 자료 생성</li>
+        </ul>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-n">STEP 5</div>
+        <h4>평가 및 의사 결정</h4>
+        <ul>
+          <li>결과를 해석하고 신뢰성을 평가</li>
+          <li>평가 결과로 모델 개선안 도출</li>
+          <li>예측 결과를 고려해 의사 결정</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      데이터를 정제하여 분석에 적합한 형태로 가공하는 것을
+      <span class="kw-info">데이터 전처리(preprocess)</span>라고 한다 — STEP 2가 그것이다.
+      <span class="chip chip-muted" style="margin-left: var(--lm-space-2);">시스템 로그 = 시스템의 운영 상황·오류를 기록한 내부 데이터</span>
+    </div>
+    <aside class="notes">실무에서는 STEP 2에 전체 시간의 대부분이 쏠린다는 이야기를 해 주면 학생들이 놀란다. "인공지능 개발자는 대부분 데이터를 치우고 있다"가 이 장의 숨은 메시지다.</aside>
+  </section>
+
+  <!-- ═══════════ 6. 사례 — 같은 5단계, 다른 분야 ═══════════ -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 36~37쪽</div>
+    <h2>같은 절차가 분야만 바꿔 반복된다</h2>
+
+    <div class="case-btns">
+      <button class="anim-btn on" data-case="drug">💊 신약 개발</button>
+      <button class="anim-btn" data-case="trans">🌐 인공지능 번역기</button>
+      <button class="anim-btn" data-case="stock">📦 재고 관리 최적화</button>
+    </div>
+
+    <p class="prob-stmt" id="caseDesc" style="text-align:center;"></p>
+
+    <table class="case-table">
+      <thead>
+        <tr><th>데이터 수집</th><th>데이터 가공</th><th>데이터 분석과 모델 제작</th><th>예측 수행</th><th>평가 및 의사 결정</th></tr>
+      </thead>
+      <tbody>
+        <tr><td id="c0"></td><td id="c1"></td><td id="c2"></td><td id="c3"></td><td id="c4"></td></tr>
+      </tbody>
+    </table>
+    <aside class="notes">버튼을 눌러 분야를 바꾸면 표의 다섯 칸만 내용이 바뀐다. 열 제목(5단계)이 고정돼 있다는 점을 강조할 것 — 분야가 달라도 절차는 같다는 것이 교과서가 세 사례를 나란히 실은 이유다. 번역기 사례는 다음 장 생각 열기로 바로 이어진다.</aside>
+  </section>
+
+  <!-- ═══════════ 7. 생각 열기 — Dia ═══════════ -->
+  <section>
+    <div class="chapter-tag">생각 열기 · 교과서 37쪽</div>
+    <h2>번역기가 성별을 정했다</h2>
+
+    <div class="quote" style="margin-top: var(--lm-space-4);">
+      최근 인공지능 번역기가 성차별을 한다는 글이 올라와 논란이 일고 있다.
+      인도네시아어로 <b>'Dia'</b>는 남성과 여성 모두에게 쓸 수 있는 단어이지만
+      <b>'Dia perawat(간호사이다)'</b>를 입력하면
+      <b>'She's a nurse(그녀는 간호사이다)'</b>로 번역했다.
+      <span class="src">출처: 『아시아경제』, 2017년 12월 4일</span>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      원문에는 <b>성별 정보가 없다.</b> 번역기는 '간호사'라는 정보만 가지고
+      <span class="kw-danger">성별을 여성으로 예측</span>했다. 왜 그랬을까?
+    </div>
+
+    <div class="step-box" id="diaAns">
+      <div class="step-label">추측</div>
+      번역기가 학습한 데이터에는 <b>여성 간호사가 남성 간호사보다 많이 포함</b>되었을 것이다.
+      모델은 데이터에서 본 비율을 그대로 따라간 것이다 — <span class="kw">잘못 계산한 게 아니라, 잘못 배운 것이다.</span>
+    </div>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="diaBtn">함께 추측해 보기 ▶</button>
+    </div>
+    <aside class="notes">버튼을 누르기 전에 학생들에게 먼저 이유를 말하게 한다. "번역기가 나쁜 마음을 먹었나?"로 물으면 아니라는 답이 나오고, 그러면 원인이 데이터라는 결론으로 자연스럽게 도착한다.</aside>
+  </section>
+
+  <!-- ═══════════ 8. 데이터의 편향성 ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 38쪽 <span class="badge">정의</span></div>
+    <h2>데이터의 편향성</h2>
+
+    <p class="prob-stmt">
+      인공지능은 학습 과정에서 학습용 데이터에 담겨 있는 <b>사회의 편견을 흡수</b>한다.
+      이 편견은 의사 결정 알고리즘에 반영되어 예측 결과로 재현될 수 있고, 성능에도 영향을 미친다.
+    </p>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-4);">
+      학습용 데이터가 대상을 균형 있게 반영하지 못하고,
+      특정한 요소나 의견이 <b>과장되거나 축소되어 왜곡된 상태</b>를
+      <span class="kw">데이터의 편향성</span>이라고 한다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="plain-card">
+        <h4>① 편향적으로 수집된 데이터</h4>
+        <p>현실은 균형 잡혀 있는데, <b>모으는 과정</b>에서 한쪽이 많아진 경우</p>
+      </div>
+      <div class="plain-card">
+        <h4>② 편향된 현실의 데이터</h4>
+        <p><b>현실 자체가</b> 이미 치우쳐 있어, 그대로 배우면 편견이 재생산되는 경우</p>
+      </div>
+    </div>
+    <aside class="notes">두 이유를 여기서 한 번 세워 두고 다음 두 장에서 하나씩 펼친다. ①은 표본의 문제, ②는 현실의 문제라고 구분해 주면 학생들이 헷갈리지 않는다.</aside>
+  </section>
+
+  <!-- ═══════════ 9. 이유 ① ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 38쪽</div>
+    <h2>① 편향적으로 수집된 데이터를 학습하는 경우</h2>
+
+    <p class="prob-stmt">
+      학습용 데이터는 사회와 현상을 <b>있는 그대로</b> 반영해야 하지만, 수집 과정에서
+      특정 집단의 비중이 실제보다 크거나 작아질 수 있다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>🏥 의료 진단 인공지능</h4>
+        <p>학습용 데이터가 다양한 <b>인종·성별·연령</b>을 균형 있게 담지 못하고 특정 집단에 편중되면,
+           데이터에 포함되지 못한 환자군을 진료할 때 <b>진단 정확도가 낮아질</b> 수 있다.</p>
+      </div>
+      <div class="bias-card">
+        <b>실제 사례 — SNS 미리 보기</b><br>
+        어느 사회 관계망 서비스 기업의 인공지능이 사진 미리 보기를 제공할 때
+        유색 인종보다 백인을, 남성보다 여성을 우선 선택해 논란이 되었다.
+        백인과 여성의 이미지를 주로 학습한 것이 원인이었다.
+        기업은 인공지능 사용을 즉시 중단하고 사과문과 성능 평가 결과를 공개했다.
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      예방하려면 데이터를 수집할 때 사회와 현상을 올바르게 반영하도록
+      <b>체계적인 계획</b>을 세워야 한다.
+      교과서는 여기서 이렇게 쓴다 — <span class="kw-success">"이때 수학 및 통계 지식이 유용하게 사용될 수 있다."</span>
+    </div>
+    <aside class="notes">마지막 문장이 이 절에서 수학이 등장하는 유일한 자리다. 표본을 어떻게 뽑아야 모집단을 대표하는가 — 통계의 표본 설계 문제라고 알려 주면 Ⅳ단원 예고도 된다.</aside>
+  </section>
+
+  <!-- ═══════════ 10. 이유 ② ═══════════ -->
+  <section>
+    <div class="chapter-tag">교과서 39쪽</div>
+    <h2>② 편향된 현실의 데이터를 학습하는 경우</h2>
+
+    <p class="prob-stmt">
+      학습용 데이터가 반영하는 <b>현실 자체가 이미 편향</b>되어 있다면,
+      이를 학습한 인공지능이 편견을 <b>재생산</b>하여 왜곡을 심화시킬 수 있다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>⚖️ 채용 · 교육 · 금융</h4>
+        <p>이들 분야에서 일어나는 편견과 사회적 불평등이 반영된 데이터를 학습한 인공지능은
+           특정 집단에 대하여 <b>사회적·경제적 차별을 강화하는</b> 의사 결정을 내릴 수 있다.</p>
+      </div>
+      <div class="bias-card">
+        <b>실제 사례 — 범죄 예측 인공지능</b><br>
+        어떤 지역은 한때 다른 지역보다 경찰이 많이 배치되었고, 그 결과 많은 범죄 데이터가 수집되었다.
+        이를 학습한 인공지능은 그 지역의 범죄 발생 가능성을
+        <b>실제 범죄 발생 수보다 높게</b> 예측하였다.
+        부정적 편견을 강화시킬 수 있다는 우려로 결국 사용이 중단되었다.
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      인공지능의 판단을 공정하고 객관적인 것으로 <span class="kw-danger">신뢰하는 것은 매우 위험하다.</span>
+      신뢰할 만한지, 특정 집단에 불이익을 주지는 않는지 항상 비판적으로 검토해야 한다.
+    </div>
+    <aside class="notes">범죄 예측 사례는 다음 장에서 숫자로 다시 본다. 여기서는 "많이 봤더니 많아 보였다"는 구조만 짚고 넘어간다.</aside>
+  </section>
+
+  <!-- ═══════════ 11. 표본 편향을 수로 보기 ═══════════ -->
+  <section class="tight">
+    <div class="chapter-tag">더 생각하기 <span class="badge">숫자로 확인</span></div>
+    <h2>"많이 본 곳"이 "많이 일어난 곳"은 아니다</h2>
+
+    <p class="prob-stmt">
+      앞의 범죄 예측 사례를 수로 따져 보자.
+      <span class="chip chip-muted">교과서에 없는 보조 예시 — 숫자는 이해를 돕기 위한 가정</span>
+    </p>
+
+    <div class="two-col ratio-1-2" style="align-items: start;">
+      <table class="calc-table">
+        <thead><tr><th></th><th>A 지역</th><th>B 지역</th></tr></thead>
+        <tbody>
+          <tr><td>실제 범죄</td><td>100건</td><td>100건</td></tr>
+          <tr><td>순찰 비율</td><td>\(80\%\)</td><td>\(20\%\)</td></tr>
+          <tr><td>적발·기록된 건수</td><td class="result-cell">80건</td><td class="result-cell">20건</td></tr>
+        </tbody>
+      </table>
+
+      <div>
+        <div class="step-box" data-i="1">
+          <div class="step-label">데이터에는 이렇게 남는다</div>
+          \(100 \times 0.8 = 80\), \(100 \times 0.2 = 20\) —
+          <b>실제 범죄는 같은데</b> 기록은 \(80 : 20 = 4 : 1\)이 된다.
+        </div>
+        <div class="step-box" data-i="2">
+          <div class="step-label">인공지능이 배우는 것</div>
+          모델은 기록만 본다. 그래서 <b>A가 B보다 4배 위험</b>하다고 학습한다.
+          실제 위험도는 \(1 : 1\)인데도 그렇다.
+        </div>
+        <div class="step-box" data-i="3">
+          <div class="step-label">그리고 되먹임</div>
+          "A가 위험하다" → A에 순찰을 더 배치 → A의 기록이 더 쌓임 →
+          <span class="kw-danger">편향이 스스로를 키운다.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="bNext">다음 단계 ▶</button>
+      <span class="step-counter" id="bCnt">0 / 3</span>
+      <button class="anim-btn reset-btn" id="bReset">처음으로</button>
+    </div>
+    <aside class="notes">이 장이 편향성을 감정이 아니라 계산으로 이해시키는 자리다. 핵심 문장은 "관측된 빈도 ≠ 실제 빈도". 37쪽 간호사 사례도 똑같은 구조(표본 비율)라는 걸 마지막에 연결해 준다.</aside>
+  </section>
+
+  <!-- ═══════════ 12. 확인하기 ═══════════ -->
+  <section>
+    <div class="chapter-tag">확인하기 · 교과서 39쪽</div>
+    <h2>맞으면 O, 틀리면 X</h2>
+
+    <ul class="ox-list" id="oxList">
+      <li>⑴ 인공지능의 예측 수행 결과는 <b>항상 공정하고 객관적</b>이다.
+        <span class="ox-ans">✗ — 학습 데이터의 편향이 결과에 그대로 재현된다.
+          교과서는 인공지능의 판단을 공정한 것으로 신뢰하는 것이 <b>매우 위험하다</b>고 못 박는다.</span></li>
+      <li>⑵ <b>전통적인 데이터 처리 도구</b>로 손쉽게 빅데이터를 처리할 수 있다.
+        <span class="ox-ans">✗ — 빅데이터의 정의 자체가 "전통적인 데이터 처리 도구로는 <b>감당하기 어려운</b>
+          방대한 데이터"다. (지난 시간 34쪽)</span></li>
+    </ul>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      인공지능의 편향성 문제는 <b>기술적 접근만으로는 해결할 수 없다.</b>
+      윤리적 관점에서 공정의 기준을 함께 마련하고, 이를 반영한 설계·학습·지속적인 공정성 평가가 이루어져야
+      인공지능이 <span class="kw-success">신뢰할 수 있는 도구</span>가 된다.
+    </div>
+    <aside class="notes">두 문항 모두 ×다. ⑵는 지난 시간 정의를 그대로 뒤집은 문장이니 못 맞히면 34쪽을 다시 펴게 한다. 마지막 상자는 교과서 39쪽 마무리 문단이고, 이 단원의 윤리적 결론이므로 읽고 넘어간다.</aside>
+  </section>
+
+  <!-- ═══════════ 13. Ⅰ단원 마무리 ═══════════ -->
+  <section>
+    <div class="chapter-tag">Ⅰ단원 마무리</div>
+    <h2>아홉 시간을 지나왔다</h2>
+
+    <div class="recap">
+      <div class="recap-item">
+        <div class="r-tag">Ⅰ-1 · 1~3차시</div>
+        <div class="r-body">데이터로 배우는 기계 · 지도/비지도/강화 ·
+          <b>퍼셉트론</b>의 가중합과 활성화함수</div>
+      </div>
+      <div class="recap-item">
+        <div class="r-tag">Ⅰ-2 · 4~5차시</div>
+        <div class="r-body">인공지능 70년의 역사 ·
+          논리 연산과 <b>진리표</b></div>
+      </div>
+      <div class="recap-item">
+        <div class="r-tag">Ⅰ-2 · 6~7차시</div>
+        <div class="r-body">퍼셉트론으로 OR·AND ·
+          <b>XOR의 벽</b>과 층을 쌓아 뚫기</div>
+      </div>
+      <div class="recap-item">
+        <div class="r-tag">Ⅰ-3 · 8~9차시</div>
+        <div class="r-body">빅데이터 3V·5V ·
+          활용 5단계와 <b>공정성</b></div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      1958년의 퍼셉트론에서 시작해 XOR의 벽을 만나고, 층을 쌓아 넘고,
+      그 모든 것을 움직이는 재료가 데이터라는 데까지 왔다.
+      <span class="kw-success">그리고 그 재료가 치우치면 결과도 치우친다는 것까지.</span>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      <b>활동 예고 (40~41쪽)</b> — 빅카인즈(bigkinds.or.kr)로 신문 기사 빅데이터를 직접 분석해 본다.
+      컴퓨터실에서 진행하며, 검색 연산자 <b>AND · OR · −</b> 를 미리 익혀 두자.
+      <span class="chip chip-accent" style="margin-left: var(--lm-space-2);">다음 단원 · Ⅱ 텍스트 데이터 처리</span>
+    </div>
+    <aside class="notes">40~41쪽 활동은 로그인과 인터넷이 필요해 이 덱에 넣지 않았다. 컴퓨터실 배정이 되면 별도 차시로 운영하거나 과제로 낸다. 마지막으로 2차시 연표를 다시 띄워 1958 → 1969 → 1986을 짚으면 단원이 깔끔하게 닫힌다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    minScale: 0.2, maxScale: 1.0,
+    center: false,
+    hash: true, slideNumber: 'c/t', progress: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* ══════════════════════════════════════════════════════════
+     사례 전환 — 열(5단계)은 고정, 칸 내용만 바뀐다 (교과서 36~37쪽)
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const CASES = {
+      drug: {
+        desc: '인공지능은 축적된 임상 결과와 약물 특허 정보를 분석하여, 특정 질병에 효과를 보일 새로운 화합물 조합을 신속하게 찾아낸다.',
+        cells: [
+          '생물학·화학·임상 데이터, 환자 진료 기록, 약물 데이터 수집',
+          '수집된 데이터 정리<br>누락 또는 중복된 데이터 검출 및 수정<br>데이터 형식 통일',
+          '통계 분석과 기계학습으로 데이터 패턴 추출<br>신약 후보 물질과 임상 결과를 예측하는 모델 생성',
+          '가능성 높은 신약 후보 물질 선정<br>약물 반응도와 안정성 예측',
+          '예측 결과의 의학적 의미 해석<br>성공 가능성이 높은 후보에 집중하여 신약 개발 전략 수정'
+        ]
+      },
+      trans: {
+        desc: '신경망 학습에 기반한 번역기는 방대한 텍스트에 대한 딥러닝으로 표현의 의미와 사용 패턴을 인식해, 전후 맥락에 맞는 표현을 고른다.',
+        cells: [
+          '다양한 언어·형식·문체·맥락으로 구성된 방대한 텍스트 데이터 수집',
+          '수집된 데이터 정리<br>구두점, 문장 부호 제거<br>데이터 형식 통일',
+          '기계학습과 딥러닝으로 데이터 패턴 추출<br>학습 및 언어 모델 생성',
+          '새로운 텍스트 번역<br>전후 맥락을 고려하여 적합한 표현 예측',
+          '번역 품질과 오류 분석<br>재학습과 알고리즘 조정을 통해 모델 성능 개선'
+        ]
+      },
+      stock: {
+        desc: '각 지점이 연결된 재고 관리 시스템으로 재고 현황과 고객 수요를 실시간 모니터링하여, 수요 변화에 적시에 대응한다.',
+        cells: [
+          '지점별 판매 데이터, 재고량, 고객 구매 패턴 데이터 수집<br>실시간 상품별 판매량과 재고량 수집',
+          '수집된 데이터 정리<br>재고 데이터와 판매 데이터 통합<br>누락 또는 중복된 데이터 검출 및 수정',
+          '시기별 분석과 기계학습으로 데이터 패턴 추출<br>수요 예측과 재고 최적화 모델 생성',
+          '수요와 재고 예측<br>재고 최적화 모델로 지점별 물류 관리 방안 예측',
+          '모델의 성능 평가, 데이터와 알고리즘 조정<br>생산량 및 지점별 재고 조정'
+        ]
+      }
+    };
+
+    const btns = Array.from(document.querySelectorAll('.case-btns .anim-btn'));
+    if (!btns.length) return;
+    const desc = document.getElementById('caseDesc');
+    const cells = [0, 1, 2, 3, 4].map(i => document.getElementById('c' + i));
+
+    function show(key) {
+      const c = CASES[key];
+      desc.textContent = c.desc;
+      cells.forEach((td, i) => { td.innerHTML = c.cells[i]; });
+      btns.forEach(b => b.classList.toggle('on', b.dataset.case === key));
+    }
+    btns.forEach(b => b.addEventListener('click', () => show(b.dataset.case)));
+    show('drug');
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     생각 열기 — 추측 공개
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const box = document.getElementById('diaAns');
+    const btn = document.getElementById('diaBtn');
+    if (!box || !btn) return;
+    btn.addEventListener('click', () => {
+      box.classList.toggle('visible');
+      window.safeTypeset([box]);
+    });
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     표본 편향 — 단계별 공개
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const steps = Array.from(document.querySelectorAll('[data-i]'))
+      .filter(el => el.classList.contains('step-box'));
+    if (!steps.length) return;
+    const cnt = document.getElementById('bCnt');
+    let i = 0;
+    function render() {
+      steps.forEach((s, k) => s.classList.toggle('visible', k < i));
+      cnt.textContent = i + ' / ' + steps.length;
+      window.safeTypeset(steps.slice(0, i));
+    }
+    document.getElementById('bNext').addEventListener('click', () => {
+      if (i < steps.length) { i++; render(); }
+    });
+    document.getElementById('bReset').addEventListener('click', () => { i = 0; render(); });
+    render();
+  })();
+
+  /* ══════════════════════════════════════════════════════════
+     확인하기 — 눌러서 정답 공개
+     ══════════════════════════════════════════════════════════ */
+  (function () {
+    const list = document.getElementById('oxList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
