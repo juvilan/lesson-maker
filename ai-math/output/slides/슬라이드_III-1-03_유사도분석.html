@@ -81,8 +81,6 @@
     .freq-table td.doc { font-weight: 600; color: var(--lm-accent); text-align: left;
                          padding-left: var(--lm-space-3); }
     .freq-table td.zero { color: var(--lm-ink-4); }
-    .freq-table .air  { background: var(--lm-info-tint); }
-    .freq-table .water { background: var(--lm-accent-tint); }
 
     /* ── 반례 결과표 ── */
     .verdict-table { width: 100%; border-collapse: collapse; table-layout: fixed;
@@ -121,8 +119,17 @@
                                    padding: var(--lm-space-2) var(--lm-space-4); text-align: center; }
     .mat-table th { background: var(--lm-paper-tint); color: var(--lm-accent); font-weight: 600; }
     .mat-table td.diag { background: var(--lm-paper-soft); color: var(--lm-ink-4); }
-    .mat-table td.pairA { background: var(--lm-accent-tint-strong); color: var(--lm-accent); font-weight: 600; }
-    .mat-table td.pairB { background: var(--lm-info-tint); color: var(--lm-info); font-weight: 600; }
+    .mat-table td.pairA { background: var(--lm-accent); color: var(--lm-page); font-weight: 700; }
+    .mat-table td.pairB { background: var(--lm-info);   color: var(--lm-page); font-weight: 700; }
+    .mat-table td.pairC { background: var(--lm-success); color: var(--lm-page); font-weight: 700; }
+    .mat-legend { display: flex; flex-direction: column; gap: var(--lm-space-2);
+                  font-size: var(--lm-slide-small); color: var(--lm-ink-2);
+                  margin-bottom: var(--lm-space-3); }
+    .mat-legend i { display: inline-block; width: 26px; height: 26px; border-radius: var(--lm-radius-sm);
+                    vertical-align: -4px; margin-right: var(--lm-space-2); }
+    .mat-legend .sw-a { background: var(--lm-accent); }
+    .mat-legend .sw-b { background: var(--lm-info); }
+    .mat-legend .sw-c { background: var(--lm-success); }
 
     /* ── O/X 확인 활동 ── */
     .ox-list { list-style: none; padding: 0; margin: var(--lm-space-4) 0 0; }
@@ -150,7 +157,16 @@
                           margin-top: var(--lm-space-2); line-height: var(--lm-slide-line-tight); }
 
     /* ── 세로를 조여야 하는 장 ── */
-    section.tight .step-box.visible { padding: var(--lm-space-1) var(--lm-space-4);
+    /* step-box 는 max-height 전이 대신 표시/숨김으로 다룬다.
+       공유 CSS의 max-height 0→600px 전이가 Reveal 의 슬라이드 display 토글과 겹치면
+       .visible 을 붙여도 펼쳐지지 않는 경우를 실측했다(DOM 재삽입 때만 복구됨).
+       수업 중에 터지면 곤란하므로 전이를 쓰지 않는다. 표시 조건은 규약대로 .visible 뿐이다. */
+    section.tight .step-box { display: none; max-height: none; opacity: 1;
+                              transform: none; transition: none; }
+    /* 여백은 .visible 쪽에 둔다 — 공유 CSS의 .reveal .step-box.visible(클래스 3개)이
+       section.tight .step-box(클래스 2개+요소 1개)보다 명시도가 높아 여기서만 이긴다 */
+    section.tight .step-box.visible { display: block;
+                                      padding: var(--lm-space-1) var(--lm-space-4);
                                       margin: var(--lm-space-1) 0; }
     section.tight .step-box .step-label { display: inline-block; margin-bottom: 0;
                                           margin-right: var(--lm-space-3); }
@@ -187,8 +203,9 @@
 
     <p class="prob-stmt">
       감성 분석에서 우리가 한 일은 결국 하나였다 —
-      <b>문장에 어떤 단어가 몇 번 나왔는지 세어서 벡터로 만드는 것.</b>
-      "사과를 좋아하고, 바나나도 좋아한다"는 \(\vec{T}=(1,\,1,\,2,\,0)\)이 되었다.
+      <b>단어를 세어서 벡터로 만드는 것.</b>
+      공연 감상평을 \((\text{긍정 단어의 수},\ \text{부정 단어의 수},\ \text{중립 단어의 수})\)로 세어
+      \((2,\,1,\,6)\)이라는 벡터를 얻었다.
     </p>
 
     <div class="two-col" style="margin-top: var(--lm-space-5);">
@@ -322,8 +339,7 @@
     <h2>세 텍스트 중 가장 닮은 짝은?</h2>
 
     <p class="prob-stmt">
-      세 텍스트를 나타내는 벡터가
-      \(\vec{P}=(1,\,0,\,1)\), \(\vec{Q}=(0,\,1,\,2)\), \(\vec{R}=(1,\,1,\,0)\)일 때,
+      \(\vec{P}=(1,\,0,\,1)\), \(\vec{Q}=(0,\,1,\,2)\), \(\vec{R}=(1,\,1,\,0)\)일 때
       <b>유클리드 유사도가 가장 큰 두 텍스트</b>를 찾아보자.
     </p>
 
@@ -403,8 +419,7 @@
     <h2>이번엔 각도로 재 보자</h2>
 
     <p class="prob-stmt">
-      세 텍스트를 나타내는 벡터가
-      \(\vec{P}=(1,\,1,\,0)\), \(\vec{Q}=(2,\,0,\,0)\), \(\vec{R}=(1,\,0,\,2)\)일 때,
+      \(\vec{P}=(1,\,1,\,0)\), \(\vec{Q}=(2,\,0,\,0)\), \(\vec{R}=(1,\,0,\,2)\)일 때
       <b>코사인 유사도가 가장 큰 두 텍스트</b>를 찾아보자.
     </p>
 
@@ -529,10 +544,10 @@
       <thead>
         <tr>
           <th style="width: 9%;"></th>
-          <th class="air">대기</th><th class="air">오존</th><th class="air">환경</th>
-          <th class="air">오염</th><th class="air">미세먼지</th>
-          <th class="water">폐수</th><th class="water">하천</th><th class="water">수질</th>
-          <th class="water">하수</th><th class="water">댐</th>
+          <th>대기</th><th>오존</th><th>환경</th>
+          <th>오염</th><th>미세먼지</th>
+          <th>폐수</th><th>하천</th><th>수질</th>
+          <th>하수</th><th>댐</th>
         </tr>
       </thead>
       <tbody>
@@ -695,13 +710,18 @@
         <tbody>
           <tr><th>\(T_1\)</th><td class="diag">1</td><td class="pairA">0.95</td><td>0.82</td><td>0.47</td><td>0.33</td></tr>
           <tr><th>\(T_2\)</th><td class="pairA">0.95</td><td class="diag">1</td><td>0.83</td><td>0.58</td><td>0.41</td></tr>
-          <tr><th>\(T_3\)</th><td>0.82</td><td>0.83</td><td class="diag">1</td><td class="pairB">0.87</td><td>0.82</td></tr>
-          <tr><th>\(T_4\)</th><td>0.47</td><td>0.58</td><td class="pairB">0.87</td><td class="diag">1</td><td class="pairB">0.94</td></tr>
+          <tr><th>\(T_3\)</th><td>0.82</td><td>0.83</td><td class="diag">1</td><td class="pairC">0.87</td><td>0.82</td></tr>
+          <tr><th>\(T_4\)</th><td>0.47</td><td>0.58</td><td class="pairC">0.87</td><td class="diag">1</td><td class="pairB">0.94</td></tr>
           <tr><th>\(T_5\)</th><td>0.33</td><td>0.41</td><td>0.82</td><td class="pairB">0.94</td><td class="diag">1</td></tr>
         </tbody>
       </table>
 
       <div>
+        <div class="mat-legend">
+          <span><i class="sw-a"></i> ① \(0.95\) — 가장 먼저 묶인다</span>
+          <span><i class="sw-b"></i> ② \(0.94\) — 그다음</span>
+          <span><i class="sw-c"></i> ③ \(0.87\) — 여기에 \(T_3\)이 붙는다</span>
+        </div>
         <div class="example-box">
           가장 큰 값 \(0.95\)로 \(T_1,\,T_2\)를 묶고,
           다음 \(0.94\)로 \(T_4,\,T_5\)를 묶고,
@@ -731,7 +751,8 @@
         \(R=\{\text{쥐},\ \text{소},\ \text{호랑이},\ \text{뱀}\}\)일 때 <b>자카드 유사도가 가장 큰</b> 두 집합은?
         <span class="ox-ans">\(J(P,Q)=\dfrac{2}{4}=\dfrac{1}{2}\), \(J(Q,R)=\dfrac{2}{5}\), \(J(R,P)=\dfrac{2}{5}\)
           → <b>P와 Q</b></span></li>
-      <li>⑶ 짧은 기사와 아주 긴 기사가 <b>같은 주제</b>인지 알아보려 한다. 세 유사도 중 무엇이 적절한가?
+      <li>⑶ <span class="chip chip-muted">교과서 밖</span>
+        짧은 기사와 아주 긴 기사가 <b>같은 주제</b>인지 알아보려 한다. 세 유사도 중 무엇이 적절한가?
         <span class="ox-ans"><b>코사인 유사도</b> — 길이가 크게 다르면 유클리드는 분량 차이에 반응해 버린다.
           빈도를 살리고 싶으니 자카드보다 코사인이 낫다.</span></li>
     </ul>
