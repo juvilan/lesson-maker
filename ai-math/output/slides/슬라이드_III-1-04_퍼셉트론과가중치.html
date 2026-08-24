@@ -80,7 +80,8 @@
     .val-table th, .val-table td { border: var(--lm-border-hair) solid var(--lm-rule);
                                    padding: var(--lm-space-2) var(--lm-space-5); text-align: center; }
     .val-table th { background: var(--lm-paper-tint); color: var(--lm-accent); font-weight: 600; }
-    .val-table tbody tr { opacity: 0.12; transition: opacity 0.35s ease; }
+    /* 공개는 전이 없이 즉시 — 전이는 창이 숨겨진 상태에서 시작되지 않아 검증이 불가능하다 */
+    .val-table tbody tr { opacity: 0.12; }
     .val-table tbody tr.on { opacity: 1; }
     .val-table td.ans { color: var(--lm-accent); font-weight: 700; background: var(--lm-accent-tint); }
 
@@ -89,13 +90,13 @@
     .ox-list li { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
                   border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-5);
                   margin-bottom: var(--lm-space-3); font-size: var(--lm-slide-small);
-                  cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+                  cursor: pointer; }
     .ox-list li:hover { border-color: var(--lm-accent); }
     .ox-list li .ox-ans { display: block; margin-top: var(--lm-space-2);
                           font-size: var(--lm-slide-small); color: var(--lm-accent);
-                          font-weight: 600; opacity: 0; transition: opacity 0.3s ease; }
+                          font-weight: 600; display: none; }
     .ox-list li.revealed { background: var(--lm-accent-tint); border-color: var(--lm-accent); }
-    .ox-list li.revealed .ox-ans { opacity: 1; }
+    .ox-list li.revealed .ox-ans { display: block; }
 
     /* ── 마무리 회수 ── */
     .recap { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-3);

@@ -108,7 +108,7 @@
                      vertical-align: middle; line-height: var(--lm-slide-line-tight);
                      border-bottom: var(--lm-border-hair) solid var(--lm-rule); }
     .pick-table td.rowhead { font-weight: 600; color: var(--lm-ink); text-align: right; }
-    .pick-table tbody tr { opacity: 0.1; transition: opacity 0.35s ease; }
+    .pick-table tbody tr { opacity: 0.1; }
     .pick-table tbody tr.on { opacity: 1; }
     .pick-table tbody tr.care td { background: var(--lm-warning-tint); }
 
@@ -136,13 +136,13 @@
     .ox-list li { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
                   border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-5);
                   margin-bottom: var(--lm-space-3); font-size: var(--lm-slide-small);
-                  cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+                  cursor: pointer; }
     .ox-list li:hover { border-color: var(--lm-accent); }
     .ox-list li .ox-ans { display: block; margin-top: var(--lm-space-2);
                           font-size: var(--lm-slide-small); color: var(--lm-accent);
-                          font-weight: 600; opacity: 0; transition: opacity 0.3s ease; }
+                          font-weight: 600; display: none; }
     .ox-list li.revealed { background: var(--lm-accent-tint); border-color: var(--lm-accent); }
-    .ox-list li.revealed .ox-ans { opacity: 1; }
+    .ox-list li.revealed .ox-ans { display: block; }
 
     /* ── 마무리 회수 ── */
     .recap { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-3);
