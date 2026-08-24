@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이미지 분류 — 해밍과 퍼셉트론 · 학습지</title>
+
+<link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+<link rel="stylesheet" href="../../../_shared/templates/worksheet-system.css">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      packages: { '[+]': ['boldsymbol', 'ams'] },
+      tags: 'ams'
+    },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] },
+    chtml: { scale: 0.95 }
+  };
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+<style>
+  /* ────────────────────────────────────────────────────────────────
+     worksheet-system.css 의 .ws-body 는 column-fill: auto 인데,
+     .ws-page 가 height 가 아닌 min-height 만 가져서 단이 채워질
+     확정 높이가 생기지 않는다 → 모든 문항이 1단으로 쌓인다.
+     (레퍼런스 worksheet-kitchen-sink.html 도 동일 증상)
+     공유 템플릿이 고쳐지기 전까지 이 파일에서만 balance 로 되돌린다.
+     ──────────────────────────────────────────────────────────────── */
+  .ws-body { column-fill: balance; }
+
+  .lvl {
+    display: inline-block;
+    font-size: 0.78em;
+    padding: 1px 7px;
+    margin-left: 6px;
+    border: var(--lm-border-hair) solid var(--lm-page-rule);
+    border-radius: var(--lm-radius-sm);
+    color: var(--lm-page-ink-3);
+    vertical-align: 0.15em;
+    white-space: nowrap;
+  }
+  .lvl-adv { border-color: var(--lm-accent); color: var(--lm-accent); }
+  .ans-key { font-size: var(--lm-page-small); line-height: var(--lm-page-line-body); }
+  .ans-key h3 {
+    font-size: var(--lm-page-h3);
+    margin: var(--lm-space-4) 0 var(--lm-space-2);
+    padding-bottom: var(--lm-space-1);
+    border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+  }
+  .ans-key h3 { break-after: avoid; page-break-after: avoid; }
+  .ans-key p { margin: 0 0 var(--lm-space-2); }
+  .ans-key .why { color: var(--lm-page-ink-2); }
+
+  /* ── 픽셀 격자 (전광판 이미지) ── */
+  .wpix { display: grid; grid-template-columns: repeat(5, 5.2mm); gap: 0.5mm;
+          justify-content: center; margin: 2mm auto 1mm; }
+  .wpix i { display: block; width: 5.2mm; height: 5.2mm;
+            background: var(--lm-page-ink); border: 0.2mm solid var(--lm-page-rule); }
+  .wpix i.on { background: var(--lm-page); }
+  .pix-row { display: flex; justify-content: center; gap: 8mm; }
+  .pix-cell { text-align: center; }
+  .pix-cell .pname { font-size: var(--lm-page-small); font-weight: 700;
+                     color: var(--lm-accent); }
+</style>
+</head>
+
+<body data-subject="ai_math">
+
+<!-- ══════════════════ PAGE 1 · 문항 ══════════════════ -->
+<div class="ws-page">
+
+  <header class="ws-head">
+    <div class="ws-title-group">
+      <div class="ws-chapter">Ⅲ-1 자료의 분류 · 교과서 78~82쪽</div>
+      <h1 class="ws-title">이미지 분류 — 해밍 거리와 퍼셉트론</h1>
+    </div>
+    <div class="ws-meta">인공지능수학 · 3학년</div>
+  </header>
+
+  <div class="ws-student">
+    <span class="ws-student-field"><label>학년</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>반</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>번호</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>이름</label><span class="line"></span></span>
+  </div>
+
+  <div class="ws-body">
+
+    <article class="ws-problem ws-span-all">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">※</span>다음 세 이미지를 보고 1~5번에 답하시오.
+        불이 켜진 픽셀(흰색)을 1, 꺼진 픽셀(검은색)을 0으로 하여 \(7 \times 5\) 행렬로 나타낸 것이다.
+      </div>
+      <div class="pix-row">
+        <div class="pix-cell">
+          <div class="pname">이미지 A (숫자 0)</div>
+          <div class="wpix">
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i class="on"></i><i class="on"></i>
+            <i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i>
+            <i class="on"></i><i class="on"></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+          </div>
+        </div>
+        <div class="pix-cell">
+          <div class="pname">이미지 B (숫자 8)</div>
+          <div class="wpix">
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+          </div>
+        </div>
+        <div class="pix-cell">
+          <div class="pname">입력 이미지 C</div>
+          <div class="wpix">
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i></i><i></i><i></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">1.</span>이미지 A, B, C에서 <strong>켜진 칸의 개수</strong>를 각각 세어 쓰시오.
+        <span class="lvl">기억</span>
+      </div>
+      <div class="ws-answer-space sm"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">2.</span>해밍 거리 \(H(\mathrm{C},\ \mathrm{A})\)와 \(H(\mathrm{C},\ \mathrm{B})\)를 구하고,
+        해밍 거리로 판단할 때 이미지 C가 어느 숫자로 분류되는지 쓰시오.
+        <span class="lvl">적용</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">3.</span>이미지 A가 0일 가능성을 계산하는 퍼셉트론 \(\mathrm{P}\)의 가중치 행렬은
+        \(W = \dfrac{1}{19}A\)이고, 이미지 B에 대한 퍼셉트론 \(\mathrm{P}'\)의 가중치 행렬은
+        \(W' = \dfrac{1}{17}B\)이다. <strong>분모의 19와 17</strong>은 각각 무엇인지 쓰시오.
+        <span class="lvl">이해</span>
+      </div>
+      <div class="ws-answer-space sm"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">4.</span>입력값과 가중치가 모두 0 또는 1이므로,
+        \(x_1w_1 + \cdots + x_{35}w_{35}\)는 결국 <strong>어떤 칸의 개수</strong>를 세는 것과 같은지 쓰시오.
+        <span class="lvl">분석</span>
+      </div>
+      <div class="ws-answer-space sm"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">5.</span>퍼셉트론 \(\mathrm{P}\)와 \(\mathrm{P}'\)에 이미지 C를 입력했을 때의 출력값을
+        각각 분수로 나타내고, 어느 숫자로 분류되는지 쓰시오.
+        <span class="lvl">적용</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">1 / 2</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 2 · 심화 + 정답 ══════════════════ -->
+<div class="ws-page">
+
+  <h2 class="ws-section">심화 문항</h2>
+
+  <div class="ws-body">
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">6.</span>오른쪽은 8에 획이 몇 개 더 붙은 이미지 D이다.
+        퍼셉트론 \(\mathrm{P}'\)의 출력값과 해밍 거리 \(H(\mathrm{D},\ \mathrm{B})\)를 각각 구하고,
+        <strong>두 값이 서로 어긋나는 까닭</strong>을 설명하시오.
+        <span class="lvl lvl-adv">심화 · 분석</span>
+      </div>
+      <div class="pix-row">
+        <div class="pix-cell">
+          <div class="pname">이미지 D</div>
+          <div class="wpix">
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i class="on"></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i class="on"></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+          </div>
+        </div>
+        <div class="pix-cell">
+          <div class="pname">이미지 B (숫자 8)</div>
+          <div class="wpix">
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+          </div>
+        </div>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">7.</span>전광판의 <strong>전구를 전부 켜서</strong> 입력하면
+        \(\mathrm{P}\)와 \(\mathrm{P}'\)의 출력값은 각각 얼마인가?
+        이 결과로부터 퍼셉트론이 <strong>무엇을 놓치는지</strong> 한 문장으로 쓰시오.
+        <span class="lvl lvl-adv">심화 · 평가</span>
+      </div>
+      <div class="ws-answer-space sm"></div>
+    </article>
+
+  </div>
+
+  <h2 class="ws-section">정답 및 해설</h2>
+
+  <div class="ws-body ans-key">
+
+    <h3>1.</h3>
+    <p>A <strong>19</strong>개 · B <strong>17</strong>개 · C <strong>14</strong>개
+       <span class="why">(A는 사선이 그어진 0이라 8보다 많다)</span></p>
+
+    <h3>2.</h3>
+    <p>\(H(\mathrm{C},\mathrm{A})=5\), \(H(\mathrm{C},\mathrm{B})=3\) → <strong>숫자 8</strong></p>
+    <p class="why">A와는 사선·넷째 줄에서 5개, B와는 넷째 줄에서 3개가 다르다.
+       해밍은 <strong>작을수록</strong> 유사하다.</p>
+
+    <h3>3.</h3>
+    <p>각각 <strong>행렬 \(A\), \(B\)의 모든 성분의 합</strong>(= 켜진 칸의 개수)</p>
+
+    <h3>4.</h3>
+    <p><strong>양쪽 다 켜진 칸</strong>의 개수
+       <span class="why">(\(1 \times 1\)일 때만 값이 생긴다)</span></p>
+
+    <h3>5.</h3>
+    <p>\(\mathrm{P} = \dfrac{14}{19} \approx 0.74\),
+       \(\mathrm{P}' = \dfrac{14}{17} \approx 0.82\) → <strong>숫자 8</strong></p>
+    <p class="why"><strong>분자가 둘 다 14</strong>다 — C의 14칸이 A에도 B에도 통째로 들어 있어서다.
+       답을 가른 것은 분모뿐, 곧 <strong>어느 쪽이 덜 켜져 있는가</strong>였다.</p>
+
+    <h3>6.</h3>
+    <p>B의 17칸이 모두 D 안에 들어 있으므로
+       \(\mathrm{P}' = \dfrac{17}{17} = \mathbf{1.00}\), 그러나 \(H(\mathrm{D},\ \mathrm{B}) = \mathbf{4}\)</p>
+    <p class="why">퍼셉트론은 <strong>정답의 칸이 입력에도 켜져 있는지</strong>만 세고,
+       입력에만 켜진 칸(D의 나머지 4칸)은 세지 않는다.
+       해밍은 어느 쪽으로 어긋났든 모두 세므로 4가 나온다.</p>
+
+    <h3>7.</h3>
+    <p>\(\mathrm{P} = \dfrac{19}{19} = 1.00\), \(\mathrm{P}' = \dfrac{17}{17} = 1.00\)
+       — <strong>0일 가능성도 100%, 8일 가능성도 100%</strong>가 된다.</p>
+    <p class="why">퍼셉트론은 <strong>없어야 할 칸이 켜진 것을 벌하지 않으므로</strong>
+       정답을 통째로 덮기만 하면 1.00이 나온다(해밍은 16, 18로 제대로 판정).
+       그렇다고 나쁜 방법은 아니다 — <strong>일부가 빠진</strong> 이미지에는 퍼셉트론이,
+       <strong>낙서가 더해진</strong> 이미지에는 해밍이 어울린다.
+       <strong>잣대를 고르는 일</strong>이 먼저다.</p>
+
+  </div>
+
+  <div class="ws-pagenum">2 / 2</div>
+</div>
+
+<script>
+  window.addEventListener('load', function () { window.safeTypeset(); });
+</script>
+
+</body>
+</html>
+

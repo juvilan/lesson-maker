@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>퍼셉트론과 논리 연산 — 학습지</title>
+
+<link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+<link rel="stylesheet" href="../../../_shared/templates/worksheet-system.css">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      packages: { '[+]': ['boldsymbol', 'ams'] },
+      tags: 'ams'
+    },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] },
+    chtml: { scale: 0.95 }
+  };
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+<style>
+  /* ────────────────────────────────────────────────────────────────
+     worksheet-system.css 의 .ws-body 는 column-fill: auto 인데,
+     .ws-page 가 height 가 아닌 min-height 만 가져서 단이 채워질
+     확정 높이가 생기지 않는다 → 모든 문항이 1단으로 쌓인다.
+     (레퍼런스 worksheet-kitchen-sink.html 도 동일 증상)
+     공유 템플릿이 고쳐지기 전까지 이 파일에서만 balance 로 되돌린다.
+     ──────────────────────────────────────────────────────────────── */
+  .ws-body { column-fill: balance; }
+
+  .lvl {
+    display: inline-block;
+    font-size: 0.78em;
+    padding: 1px 7px;
+    margin-left: 6px;
+    border: var(--lm-border-hair) solid var(--lm-page-rule);
+    border-radius: var(--lm-radius-sm);
+    color: var(--lm-page-ink-3);
+    vertical-align: 0.15em;
+    white-space: nowrap;
+  }
+  .lvl-adv { border-color: var(--lm-accent); color: var(--lm-accent); }
+  .ans-key { font-size: var(--lm-page-small); line-height: var(--lm-page-line-body); }
+  .ans-key h3 {
+    font-size: var(--lm-page-h3);
+    margin: var(--lm-space-4) 0 var(--lm-space-2);
+    padding-bottom: var(--lm-space-1);
+    border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+  }
+  .ans-key h3 { break-after: avoid; page-break-after: avoid; }
+  .ans-key p { margin: 0 0 var(--lm-space-2); }
+  .ans-key .why { color: var(--lm-page-ink-2); }
+</style>
+</head>
+
+<body data-subject="ai_math">
+
+<!-- ══════════════════ PAGE 1 · 문항 ══════════════════ -->
+<div class="ws-page">
+
+  <header class="ws-head">
+    <div class="ws-title-group">
+      <div class="ws-chapter">Ⅲ-1 자료의 분류 · 교과서 75~77쪽</div>
+      <h1 class="ws-title">퍼셉트론과 논리 연산</h1>
+    </div>
+    <div class="ws-meta">인공지능수학 · 3학년</div>
+  </header>
+
+  <div class="ws-student">
+    <span class="ws-student-field"><label>학년</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>반</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>번호</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>이름</label><span class="line"></span></span>
+  </div>
+
+  <div class="ws-body">
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">1.</span>가중치가 \(w_1=3\), \(w_2=2\)이고
+        \(\sigma(x)=\begin{cases} 0 & (x \lt \theta) \\ 1 & (x \ge \theta)\end{cases}\)인 퍼셉트론이 있다.
+        <strong>논리합(OR)</strong> 연산이 되도록 하는 표를 완성하시오.
+        <span class="lvl">적용</span>
+      </div>
+      <table class="ws-table">
+        <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(x\)</th><th>\(\sigma(x)\)</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>&nbsp;</td><td>0</td></tr>
+          <tr><td>0</td><td>1</td><td>&nbsp;</td><td>1</td></tr>
+          <tr><td>1</td><td>0</td><td>&nbsp;</td><td>1</td></tr>
+          <tr><td>1</td><td>1</td><td>&nbsp;</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">2.</span>1번에서 각 줄이 요구하는 \(\theta\)의 조건을 쓰고,
+        네 조건을 <strong>모두 만족시키는</strong> \(\theta\)의 범위를 구하시오.
+        <span class="lvl">적용</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">3.</span>같은 퍼셉트론으로 <strong>논리곱(AND)</strong> 연산이 가능하려면
+        \(\theta\)의 범위가 얼마여야 하는지 구하시오.
+        <span class="lvl">적용</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">4.</span>같은 퍼셉트론으로 <strong>배타적 논리합(XOR)</strong>이 가능한지
+        \(\theta\)의 조건을 네 줄 모두 써서 판단하시오.
+        <span class="lvl">분석</span>
+      </div>
+      <aside class="ws-info">
+        <strong>배타적 논리합</strong> 두 입력값이 <strong>다를 때만</strong> 1을 출력한다.
+      </aside>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">5.</span>다음 다층 퍼셉트론에서 활성화함수는 세 개 모두
+        \(\sigma(x)=\begin{cases} 0 & (x \lt 4) \\ 1 & (x \ge 4)\end{cases}\)이고,
+        \(z_1=\sigma(6x_1+5x_2)\), \(z_2=\sigma(3x_1+2x_2)\), \(y=\sigma(5z_1-5z_2)\)이다. 표를 완성하시오.
+        <span class="lvl">적용</span>
+      </div>
+      <table class="ws-table">
+        <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(z_1\)</th><th>\(z_2\)</th><th>\(y\)</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td>0</td><td>1</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td>1</td><td>0</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td>1</td><td>1</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">6.</span>5번의 다층 퍼셉트론에 \(x_1=2\), \(x_2=-1\)을 입력할 때
+        \(z_1\), \(z_2\), \(y\)의 값을 각각 구하시오.
+        <span class="lvl">적용</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">1 / 2</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 2 · 심화 + 정답 ══════════════════ -->
+<div class="ws-page">
+
+  <h2 class="ws-section">심화 문항</h2>
+
+  <div class="ws-body">
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">7.</span>가중치를 \(w_1=3\), \(w_2=2\)가 아닌 <strong>임의의 두 양수</strong>
+        \(a\), \(b\)로 두어도 퍼셉트론 하나로는 배타적 논리합이 불가능함을 보이시오.
+        <span class="lvl lvl-adv">심화 · 분석</span>
+      </div>
+      <aside class="ws-info">
+        <strong>힌트</strong> 두 입력이 다를 때 1을 내려면 \(\theta \le a\)이고 \(\theta \le b\)이다.
+        두 부등식을 더하면 \(\theta\)와 \(\dfrac{a+b}{2}\)의 대소를 알 수 있다.
+      </aside>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">8.</span>5번 표에서 \(z_1\)과 \(z_2\)의 값만 따로 보면
+        각각 <strong>어떤 논리 연산</strong>과 같은지 쓰고, 이로부터
+        배타적 논리합이 <strong>어떤 연산들의 조합</strong>으로 만들어졌는지 설명하시오.
+        <span class="lvl lvl-adv">심화 · 평가</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+  </div>
+
+  <h2 class="ws-section">정답 및 해설</h2>
+
+  <div class="ws-body ans-key">
+
+    <h3>1.</h3>
+    <p>\(x\)의 값은 위에서부터 <strong>0, 2, 3, 5</strong></p>
+
+    <h3>2.</h3>
+    <p>\(\theta \gt 0\), \(\theta \le 2\), \(\theta \le 3\), \(\theta \le 5\)
+       → <strong>\(0 \lt \theta \le 2\)</strong> (예: \(\theta=1\))</p>
+    <p class="why">출력 0이면 \(\theta\)가 그 값보다 <strong>커야</strong> 하고,
+       출력 1이면 그 값 <strong>이하</strong>여야 한다.</p>
+
+    <h3>3.</h3>
+    <p>\(\theta \gt 0\), \(\theta \gt 2\), \(\theta \gt 3\), \(\theta \le 5\)이므로
+       <strong>\(3 \lt \theta \le 5\)</strong></p>
+    <p class="why">가중치는 그대로인데 <strong>임곗값만 옮겨서</strong> 전혀 다른 연산이 되었다.</p>
+
+    <h3>4.</h3>
+    <p>\(\theta \gt 0\), \(\theta \le 2\), \(\theta \le 3\), \(\theta \gt 5\)</p>
+    <p><strong>불가능하다.</strong> \(\theta \le 2\)이면서 동시에 \(\theta \gt 5\)일 수는 없다.</p>
+
+    <h3>5.</h3>
+    <p>\((0,0)\to 0,0,0\) · \((0,1)\to 1,0,1\) · \((1,0)\to 1,0,1\) · \((1,1)\to 1,1,0\)
+       &nbsp;(\(z_1, z_2, y\) 순)</p>
+    <p class="why">넷째 줄은 \(5-5=0 \lt 4\)라 \(y=0\). 음수 가중치가 <strong>상쇄</strong> 역할을 한다.</p>
+
+    <h3>6.</h3>
+    <p>\(z_1=\sigma(6 \cdot 2 + 5 \cdot (-1))=\sigma(7)=1\),
+       \(z_2=\sigma(3 \cdot 2 + 2 \cdot (-1))=\sigma(4)=1\),
+       \(y=\sigma(5-5)=\sigma(0)=\mathbf{0}\)</p>
+    <p class="why">\(\sigma(4)\)는 \(4 \ge 4\)라 1, \(\sigma(0)\)은 \(0 \lt 4\)라 0이다.</p>
+
+    <h3>7.</h3>
+    <p>\((1,0)\)에서 \(x=a\), \((0,1)\)에서 \(x=b\)이고 둘 다 1을 내야 하므로
+       \(\theta \le a\), \(\theta \le b\).<br>
+       두 식을 더하여 2로 나누면 \(\theta \le \dfrac{a+b}{2}\).<br>
+       \((1,1)\)에서 \(x=a+b\)이고 0을 내야 하므로 \(a+b \lt \theta\).<br>
+       두 결과를 합치면 \(a+b \lt \theta \le \dfrac{a+b}{2}\).</p>
+    <p class="why">\(a,b\)가 양수면 \(a+b \gt \dfrac{a+b}{2}\)이라 모순.
+       <strong>어떤 양수 가중치로도</strong> 그런 \(\theta\)는 없다.</p>
+
+    <h3>8.</h3>
+    <p>\(z_1\)은 <strong>논리합(OR)</strong>, \(z_2\)는 <strong>논리곱(AND)</strong>과 같다.</p>
+    <p class="why">\(z_1\)은 \((0,0)\)에서만 0이라 논리합, \(z_2\)는 \((1,1)\)에서만 1이라 논리곱이다.
+       \(y=\sigma(5z_1-5z_2)\)는 <strong>"논리합이면서 논리곱은 아닌 경우"</strong>에만 1을 낸다.
+       즉 XOR = (OR) 그리고 (AND가 아님). 한 층으로 안 되던 일이
+       <strong>이미 되는 연산 두 개를 조합</strong>해 해결된 것이다.</p>
+
+  </div>
+
+  <div class="ws-pagenum">2 / 2</div>
+</div>
+
+<script>
+  window.addEventListener('load', function () { window.safeTypeset(); });
+</script>
+
+</body>
+</html>
