@@ -522,18 +522,17 @@
     </table>
 
     <div class="warning-box" style="margin-top: var(--lm-space-3);">
-      답이 같으니 안심해도 될까? 유사도 시간을 떠올려 보자 —
-      <b>답이 같다고 해서 같은 것을 잰 것은 아니다.</b>
-      <span class="kw-danger">퍼셉트론이 무엇을 보고 그렇게 답했는지 뜯어보자.</span>
+      그런데 이상하다. <b>해밍 거리 하나로 이미 답이 나왔는데</b>,
+      교과서는 왜 같은 문제를 <span class="kw-danger">한 번 더 푸는 걸까?</span>
     </div>
-    <aside class="notes">여기까지가 교과서 내용이다. 교과서는 두 방법이 일치하는 것으로 단원을 닫는데, 그래서 두 방법의 차이가 드러나지 않는다. 다음 두 장이 오늘 덱에서 교과서 밖으로 나가는 부분이다. 시간이 없으면 12장만 하고 13장은 넘겨도 되지만, 12장은 반드시 한다.</aside>
+    <aside class="notes">여기까지가 교과서 내용이다. 두 방법이 같은 답을 내므로 학생 입장에서는 "그럼 하나만 하면 되지 않나"라는 의문이 자연스럽다. 그 의문을 덮지 말고 정면으로 꺼내는 것이 다음 두 장이다. 실제로 이 문제만 놓고 보면 해밍 거리로 충분하다 — 그 점을 인정하고 시작해야 13장의 답이 설득력을 갖는다.</aside>
   </section>
 
 
-  <!-- ═══════════ 12. ★ 퍼셉트론은 무엇을 봤나 ═══════════ -->
+  <!-- ═══════════ 12. ★ 퍼셉트론은 여기서 무슨 일을 했나 ═══════════ -->
   <section class="tight">
     <div class="chapter-tag">교과서 밖 보조 자료 <span class="badge">오늘의 중심</span></div>
-    <h2>분자가 둘 다 14였다</h2>
+    <h2>퍼셉트론은 사실 별로 한 일이 없다</h2>
 
     <div class="formula-box">
       \[\mathrm{P}: \frac{\mathbf{14}}{19} \approx 0.74
@@ -542,82 +541,60 @@
     </div>
 
     <p class="prob-stmt">
-      C에서 켜진 14칸이 <b>A에도 통째로 들어 있고 B에도 통째로 들어 있다.</b>
-      그래서 "들어맞는 칸"은 양쪽 다 14로 <span class="kw">똑같다</span>.
+      <b>분자가 둘 다 14다.</b> C에서 켜진 14칸이 A에도 통째로, B에도 통째로 들어 있어서
+      "들어맞는 칸"이 양쪽 다 같게 나온 것이다.
     </p>
 
     <div class="two-col" style="margin-top: var(--lm-space-3);">
       <div class="warning-box">
-        그렇다면 답을 가른 것은 <b>분모뿐</b>이다 —
+        그러면 답을 가른 것은 <b>분모뿐</b>이다 —
         <span class="kw-danger">어느 정답 이미지가 더 적게 켜져 있는가.</span>
         8은 17칸, 사선 있는 0은 19칸. 그래서 8이 이겼다.
       </div>
-      <div class="plain-card">
-        <h4>해밍 거리는 달랐다</h4>
-        <p>해밍은 <b>꺼졌어야 하는데 켜진 칸</b>도, <b>켜졌어야 하는데 꺼진 칸</b>도
-          똑같이 센다. 그래서 5와 3으로 <b>다른 값</b>이 나왔다.</p>
+      <div class="result-box">
+        해밍 거리는 <b>5와 3</b>으로 갈렸다.
+        <span class="kw-success">이쪽은 실제로 모양을 견줬다.</span>
       </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      정리하면 — <b>이 문제에서는 해밍 거리 하나로 충분했다.</b>
+      퍼셉트론이 더 해 준 일이 없다. <span class="kw-info">그렇다면 왜 배우는가?</span>
+    </div>
+    <aside class="notes">10장에서 주황색 칸이 둘 다 14개였던 것을 여기서 회수한다. 이 장의 목적은 퍼셉트론을 깎아내리는 것이 아니라 "이 문제에서는 해밍이면 됐다"는 사실을 학생과 함께 인정하는 것이다. 그래야 다음 장의 답이 변명처럼 들리지 않는다. 마지막 물음을 던지고 잠깐 기다렸다가 넘어간다.</aside>
+  </section>
+
+  <!-- ═══════════ 13. ★ 왜 한 번 더 배우나 ═══════════ -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 밖 보조 자료 <span class="badge">오늘의 중심</span></div>
+    <h2>이 문제 때문이 아니라, 다음을 위해서다</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>① 해밍 — 견본과 대 보기</h4>
+        <p><b>정답 이미지를 통째로 갖고 있어야</b> 한다. 그리고 한 칸씩 대 보며 다른 개수를 센다.</p>
+        <p style="color: var(--lm-ink-3);">0과 8처럼 <b>견본이 딱 하나로 정해질 때</b> 잘 통한다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>② 퍼셉트론 — 점수 매겨 고르기</h4>
+        <p>후보마다 퍼셉트론을 하나씩 두고 <b>점수를 매긴 뒤 가장 큰 것</b>을 고른다.</p>
+        <p style="color: var(--lm-ink-3);">이것이 <b>실제 인공지능이 이미지를 분류하는 구조</b>다.</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      숫자가 0과 8 둘뿐이라 차이가 안 드러났을 뿐이다.
+      손글씨처럼 <b>사람마다 모양이 다른</b> 자료에서는 견본을 하나로 정할 수 없어
+      <span class="kw-danger">①이 무너진다.</span>
     </div>
 
     <div class="result-box" style="margin-top: var(--lm-space-3);">
-      퍼셉트론은 <span class="kw-success">정답의 칸이 입력에도 켜져 있는지</span>만 보고,
-      <b>정답에는 없는데 C에 켜진 칸</b>은 아예 세지 않는다. 잣대가 애초에 다른 것이다.
+      그때 필요한 것이 <b>가중치를 데이터에서 찾는 일</b> —
+      우리가 73쪽에서 배운 <span class="kw-success">"학습"</span>이다.
+      82쪽의 퍼셉트론은 가중치를 손으로 정한 <b>가장 단순한 형태</b>이고,
+      여기에 학습을 붙이면 그대로 진짜 분류기가 된다.
     </div>
-    <aside class="notes">10장에서 주황색 칸이 둘 다 14개였던 것을 여기서 회수한다. 이 장의 목적은 "퍼셉트론이 틀렸다"가 아니라 "무엇을 재는지가 다르다"를 드러내는 것이다. 78쪽의 '유사한 정도 / 가능성의 정도'라는 교과서 구분이 실제로 이런 차이였다고 정리해 주면 앞뒤가 맞는다. 다음 장에서 그 차이가 문제가 되는 경우를 본다.</aside>
-  </section>
-
-  <!-- ═══════════ 13. ★ 반례 ═══════════ -->
-  <section class="tight">
-    <div class="chapter-tag">교과서 82쪽 문제 3 <span class="badge">오늘의 중심</span></div>
-    <h2>교과서 문제가 스스로 구멍을 밟는다</h2>
-
-    <p class="prob-stmt">
-      교과서 문제 3의 이미지다. 8에 획이 몇 개 더 붙었다.
-      퍼셉트론 \(\mathrm{P}'\)에 넣으면 <b>8일 가능성이 얼마</b>가 나올까?
-    </p>
-
-    <div class="grid-wrap">
-        <div class="grid-item">
-          <div class="g-name">문제 3의 이미지</div>
-          <div class="pix">
-            <i></i><i class="both"></i><i class="both"></i><i class="both"></i><i></i>
-            <i class="both"></i><i></i><i></i><i></i><i class="both"></i>
-            <i class="both"></i><i class="on"></i><i></i><i></i><i class="both"></i>
-            <i class="on"></i><i class="both"></i><i class="both"></i><i class="both"></i><i class="on"></i>
-            <i class="both"></i><i></i><i></i><i class="on"></i><i class="both"></i>
-            <i class="both"></i><i></i><i></i><i></i><i class="both"></i>
-            <i></i><i class="both"></i><i class="both"></i><i class="both"></i><i></i>
-          </div>
-          <div class="g-sub">켜진 칸 21개 · 주황 17칸이 B와 겹친다</div>
-        </div>
-        <div class="grid-item">
-          <div class="g-name">이미지 B (숫자 8)</div>
-          <div class="pix">
-            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
-            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
-            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
-            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
-            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
-            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
-            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
-          </div>
-          <div class="g-sub">켜진 칸 17개</div>
-        </div>
-    </div>
-
-    <div class="two-col" style="margin-top: var(--lm-space-3);">
-      <div class="warning-box">
-        B의 17칸이 <b>모두</b> 이 이미지 안에 들어 있다.
-        그래서 \(\mathrm{P}' = \dfrac{17}{17} = 1.00\) —
-        <span class="kw-danger">"완벽한 8"이라는 뜻이다.</span>
-      </div>
-      <div class="result-box">
-        그런데 해밍 거리로 재면 \(H = 4\), <b>네 칸이나 다르다.</b>
-        한쪽은 완벽하다 하고 다른 쪽은 네 칸 틀렸다고 한다.
-      </div>
-    </div>
-
-    <aside class="notes">더 밀어붙이면 이렇다 — 전광판을 전부 켜서 넣으면 P=19/19=1.00, P'=17/17=1.00으로 0일 가능성도 8일 가능성도 100%가 된다. 해밍 거리는 각각 16과 18로 둘 다 전혀 안 닮았다고 제대로 판정한다. 이 예는 화면에 넣지 않았으니 칠판에 써서 보여 주면 된다(15장 확인 ⑵의 답에도 들어 있다). 문제 3을 풀면 교과서 답이 실제로 1이 나온다 — 학생이 직접 계산해서 1.00을 보게 하는 것이 이 장의 핵심이다. 전부 켜는 예시는 극단적이지만 왜 그런지 즉시 이해된다. 여기서 "그럼 퍼셉트론은 쓰면 안 되나요?"가 나오면 다음 장이 답이다. 절대 "교과서가 틀렸다"로 말하지 않는다 — 교과서 78쪽도 단계를 간단히 했다고 밝히고 있고, 실제 분류기는 이 구멍을 메우는 장치를 더 붙인다.</aside>
+    <aside class="notes">이 장이 82쪽이 존재하는 이유다. 교과서 78쪽 주안점도 "실제로 이미지를 분류하는 알고리즘을 정확하게 이해하는 것은 쉽지 않으므로 여기서는 단계를 간단히 하여 제시하였다"고 밝히고 있으니, 82쪽은 완성된 방법이 아니라 구조를 보여 주는 축소판이라고 말해 주면 정직하다. 손글씨 숫자(MNIST) 이야기를 곁들이면 학생들이 바로 이해한다 — 같은 3이라도 사람마다 달라서 "정답 3"을 하나로 못 정한다. 시간이 밀리면 이 장은 result-box 한 문장만 읽고 넘어가도 된다.</aside>
   </section>
 
   <!-- ═══════════ 14. ★ 선택 기준 ═══════════ -->
@@ -639,13 +616,14 @@
         <tr data-pick="3"><td class="label">언제 닮았나</td>
             <td><span class="miss">작을수록</span> 유사</td><td><span class="pick">클수록</span> 가능성 높음</td></tr>
         <tr data-pick="4"><td class="label">강점</td>
-            <td>어긋난 곳을 <b>빠짐없이</b> 센다</td><td>일부가 지워져도 <b>남은 모양</b>을 알아본다</td></tr>
-        <tr data-pick="5"><td class="label">주의할 점</td>
-            <td>어느 쪽으로 어긋났는지는 구별하지 않는다</td>
-            <td><b>없어야 할 칸이 켜진 것</b>을 벌하지 않는다</td></tr>
-        <tr data-pick="6"><td class="label">언제 쓰나</td>
-            <td>정답과 <b>정확히</b> 맞는지 볼 때</td>
-            <td>전구가 나가는 등 <b>일부가 빠진</b> 이미지를 볼 때</td></tr>
+            <td>계산이 단순하고 어긋난 곳을 <b>빠짐없이</b> 센다</td>
+            <td>후보가 늘어나도 <b>점수만 더 매기면</b> 된다</td></tr>
+        <tr data-pick="5"><td class="label">한계</td>
+            <td>정답 견본을 <b>통째로 갖고 있어야</b> 한다</td>
+            <td><b>없어야 할 칸이 켜진 것</b>을 세지 않는다</td></tr>
+        <tr data-pick="6"><td class="label">그래서</td>
+            <td>견본이 <b>하나로 정해질 때</b> — 오늘 문제엔 이걸로 충분</td>
+            <td>견본을 정할 수 없을 때 — <b>가중치를 학습</b>하면 된다</td></tr>
       </tbody>
     </table>
 
@@ -654,7 +632,7 @@
       <span class="step-counter" id="pickCnt">0 / 6</span>
       <button class="anim-btn reset-btn" id="pickReset">처음으로</button>
     </div>
-    <aside class="notes">'주의할 점' 행은 단점 목록이 아니라 성질 목록이다. 퍼셉트론이 나쁜 자가 아니라는 것을 분명히 한다 — 오늘 문제 상황(전구가 나가서 일부만 켜진 이미지)에서는 퍼셉트론 쪽이 오히려 어울린다. 없는 칸이 꺼진 것은 원래 그런 상황이니까. 반대로 낙서가 더해진 이미지라면 해밍이 낫다. 마지막 행을 오늘의 결론으로 삼는다.</aside>
+    <aside class="notes">'한계' 행은 단점 목록이 아니라 성질 목록이다. 마지막 '그래서' 행이 오늘의 결론이다 — 오늘 문제에는 해밍으로 충분했고, 퍼셉트론은 견본을 정할 수 없는 자료로 넘어갈 때 값을 한다. 어느 쪽이 우월하다고 말하지 않는다. 퍼셉트론의 한계(없어야 할 칸이 켜진 것을 세지 않음)는 확인 활동 ⑵에서 숫자로 확인하니 여기서는 한 줄만 짚고 넘어간다.</aside>
   </section>
 
 
@@ -703,6 +681,8 @@
     <div class="result-box" style="margin-top: var(--lm-space-5);">
       Ⅲ-1에서 우리는 다섯 가지 잣대를 배웠다. 전부 "닮음"을 재지만 재는 대상이 달랐다.
       그래서 <span class="kw-success">공식을 고르기 전에 무엇을 닮음으로 볼 것인지 정해야 한다.</span>
+      그리고 오늘 배운 퍼셉트론 분류는 <b>지금 문제를 위해서가 아니라
+      앞으로 만날 자료를 위해</b> 익혀 둔 것이다.
     </div>
 
     <div class="info-box" style="margin-top: var(--lm-space-4);">

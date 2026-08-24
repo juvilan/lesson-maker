@@ -242,9 +242,9 @@
 
     <article class="ws-problem">
       <div class="ws-problem-body">
-        <span class="ws-problem-number">7.</span>전광판의 <strong>전구를 전부 켜서</strong> 입력하면
-        \(\mathrm{P}\)와 \(\mathrm{P}'\)의 출력값은 각각 얼마인가?
-        이 결과로부터 퍼셉트론이 <strong>무엇을 놓치는지</strong> 한 문장으로 쓰시오.
+        <span class="ws-problem-number">7.</span>이 문제는 <strong>해밍 거리만으로도</strong> 답이 나왔다.
+        그런데도 교과서가 퍼셉트론으로 한 번 더 분류한 <strong>까닭</strong>을,
+        두 방법이 각각 무엇을 필요로 하는지에 비추어 설명하시오.
         <span class="lvl lvl-adv">심화 · 평가</span>
       </div>
       <div class="ws-answer-space md"></div>
@@ -293,13 +293,14 @@
        해밍은 어느 쪽으로 어긋났든 모두 세므로 4가 나온다.</p>
 
     <h3>7.</h3>
-    <p>\(\mathrm{P} = \dfrac{19}{19} = 1.00\), \(\mathrm{P}' = \dfrac{17}{17} = 1.00\)
-       — <strong>0일 가능성도 100%, 8일 가능성도 100%</strong>가 된다.</p>
-    <p class="why">퍼셉트론은 <strong>없어야 할 칸이 켜진 것을 벌하지 않으므로</strong>
-       정답을 통째로 덮기만 하면 1.00이 나온다(해밍은 16, 18로 제대로 판정).
-       그렇다고 나쁜 방법은 아니다 — <strong>일부가 빠진</strong> 이미지에는 퍼셉트론이,
-       <strong>낙서가 더해진</strong> 이미지에는 해밍이 어울린다.
-       <strong>잣대를 고르는 일</strong>이 먼저다.</p>
+    <p>해밍 거리는 <strong>정답 견본을 통째로 갖고 있어야</strong> 한 칸씩 대 볼 수 있다.
+       퍼셉트론은 <strong>후보마다 점수를 매겨 가장 큰 것을 고르는</strong> 방식이라
+       견본이 없어도 되고, 후보가 늘어도 점수만 더 매기면 된다.</p>
+    <p class="why">이 문제는 숫자가 0과 8 둘뿐이고 견본이 하나로 정해져서 해밍으로 충분했다.
+       그러나 손글씨처럼 <strong>사람마다 모양이 다른</strong> 자료에서는 견본을 하나로 정할 수 없다.
+       그때는 가중치를 <strong>데이터에서 찾아야</strong> 하는데(=학습),
+       82쪽의 퍼셉트론은 그 가중치를 손으로 정한 <strong>가장 단순한 형태</strong>다.
+       즉 이 절은 <strong>지금 문제를 더 잘 풀려고가 아니라 다음을 위해</strong> 있는 것이다.</p>
 
   </div>
 
