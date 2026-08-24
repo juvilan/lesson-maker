@@ -95,6 +95,9 @@
                                    color: var(--lm-accent); }
     .cmp-table .pick { color: var(--lm-accent); font-weight: 700; }
     .cmp-table .miss { color: var(--lm-danger); font-weight: 700; }
+    /* 14장만 행 단위로 공개한다 — 11장 표는 data-pick 이 없어 항상 보인다 */
+    .cmp-table tbody tr[data-pick] { opacity: 0.12; }
+    .cmp-table tbody tr[data-pick].on { opacity: 1; }
 
     /* ── 방법 선택 버튼 ── */
     .way-btns { display: flex; justify-content: center; gap: var(--lm-space-3);
@@ -110,13 +113,13 @@
     .ox-list li { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
                   border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-5);
                   margin-bottom: var(--lm-space-3); font-size: var(--lm-slide-small);
-                  cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+                  cursor: pointer; }
     .ox-list li:hover { border-color: var(--lm-accent); }
     .ox-list li .ox-ans { display: block; margin-top: var(--lm-space-2);
                           font-size: var(--lm-slide-small); color: var(--lm-accent);
-                          font-weight: 600; opacity: 0; transition: opacity 0.3s ease; }
+                          font-weight: 600; display: none; }
     .ox-list li.revealed { background: var(--lm-accent-tint); border-color: var(--lm-accent); }
-    .ox-list li.revealed .ox-ans { opacity: 1; }
+    .ox-list li.revealed .ox-ans { display: block; }
 
     /* ── 마무리 회수 ── */
     .recap { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-3);
@@ -557,8 +560,8 @@
     </div>
 
     <div class="result-box" style="margin-top: var(--lm-space-3);">
-      퍼셉트론은 <span class="kw-success">모양이 얼마나 겹치는지</span>만 보고,
-      <b>C에는 없는데 정답에는 있는 칸</b>을 벌하지 않는다. 잣대가 애초에 다른 것이다.
+      퍼셉트론은 <span class="kw-success">정답의 칸이 입력에도 켜져 있는지</span>만 보고,
+      <b>정답에는 없는데 C에 켜진 칸</b>은 아예 세지 않는다. 잣대가 애초에 다른 것이다.
     </div>
     <aside class="notes">10장에서 주황색 칸이 둘 다 14개였던 것을 여기서 회수한다. 이 장의 목적은 "퍼셉트론이 틀렸다"가 아니라 "무엇을 재는지가 다르다"를 드러내는 것이다. 78쪽의 '유사한 정도 / 가능성의 정도'라는 교과서 구분이 실제로 이런 차이였다고 정리해 주면 앞뒤가 맞는다. 다음 장에서 그 차이가 문제가 되는 경우를 본다.</aside>
   </section>
