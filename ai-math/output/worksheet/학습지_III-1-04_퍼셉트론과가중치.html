@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>퍼셉트론과 가중치 — 학습지</title>
+
+<link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+<link rel="stylesheet" href="../../../_shared/templates/worksheet-system.css">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      packages: { '[+]': ['boldsymbol', 'ams'] },
+      tags: 'ams'
+    },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] },
+    chtml: { scale: 0.95 }
+  };
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+<style>
+  /* ────────────────────────────────────────────────────────────────
+     worksheet-system.css 의 .ws-body 는 column-fill: auto 인데,
+     .ws-page 가 height 가 아닌 min-height 만 가져서 단이 채워질
+     확정 높이가 생기지 않는다 → 모든 문항이 1단으로 쌓인다.
+     (레퍼런스 worksheet-kitchen-sink.html 도 동일 증상)
+     공유 템플릿이 고쳐지기 전까지 이 파일에서만 balance 로 되돌린다.
+     ──────────────────────────────────────────────────────────────── */
+  .ws-body { column-fill: balance; }
+
+  .lvl {
+    display: inline-block;
+    font-size: 0.78em;
+    padding: 1px 7px;
+    margin-left: 6px;
+    border: var(--lm-border-hair) solid var(--lm-page-rule);
+    border-radius: var(--lm-radius-sm);
+    color: var(--lm-page-ink-3);
+    vertical-align: 0.15em;
+    white-space: nowrap;
+  }
+  .lvl-adv { border-color: var(--lm-accent); color: var(--lm-accent); }
+  .ans-key { font-size: var(--lm-page-small); line-height: var(--lm-page-line-body); }
+  .ans-key h3 {
+    font-size: var(--lm-page-h3);
+    margin: var(--lm-space-4) 0 var(--lm-space-2);
+    padding-bottom: var(--lm-space-1);
+    border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+  }
+  .ans-key h3 { break-after: avoid; page-break-after: avoid; }
+  .ans-key p { margin: 0 0 var(--lm-space-2); }
+  .ans-key .why { color: var(--lm-page-ink-2); }
+</style>
+</head>
+
+<body data-subject="ai_math">
+
+<!-- ══════════════════ PAGE 1 · 문항 ══════════════════ -->
+<div class="ws-page">
+
+  <header class="ws-head">
+    <div class="ws-title-group">
+      <div class="ws-chapter">Ⅲ-1 자료의 분류 · 교과서 73~75쪽</div>
+      <h1 class="ws-title">퍼셉트론과 가중치</h1>
+    </div>
+    <div class="ws-meta">인공지능수학 · 3학년</div>
+  </header>
+
+  <div class="ws-student">
+    <span class="ws-student-field"><label>학년</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>반</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>번호</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>이름</label><span class="line"></span></span>
+  </div>
+
+  <div class="ws-body">
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">1.</span>신경 세포의 각 부분이 퍼셉트론의 무엇에 대응하는지 빈칸을 채우시오.
+        <span class="lvl">기억</span>
+      </div>
+      <table class="ws-table">
+        <thead><tr><th class="left">신경 세포</th><th class="left">퍼셉트론</th></tr></thead>
+        <tbody>
+          <tr><td class="left">가지 돌기로 들어온 자극</td><td class="left">&nbsp;</td></tr>
+          <tr><td class="left">세포 사이의 연결 강도</td><td class="left">&nbsp;</td></tr>
+          <tr><td class="left">&nbsp;</td><td class="left">\(x = x_1w_1 + \cdots + x_nw_n\)</td></tr>
+          <tr><td class="left">임곗값을 넘으면 전달</td><td class="left">&nbsp;</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">2.</span>다음 문장의 빈칸을 채우시오.
+        <span class="lvl">기억</span>
+      </div>
+      <aside class="ws-info">
+        인공지능에서 <strong>학습</strong>이란 적절한 <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>를
+        찾아 가는 과정이다.
+      </aside>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">3.</span>가중치가 \(w_1=0.8\), \(w_2=0.4\)인 퍼셉트론에 \(x_1=1\), \(x_2=2\)가 입력되었다.
+        활성화함수가 \(\sigma(x)=\begin{cases} 0 & (x \lt 0) \\ 1 & (x \ge 0)\end{cases}\)일 때,
+        \(x\)의 값과 출력값을 구하시오.
+        <span class="lvl">적용</span>
+      </div>
+      <div class="ws-answer-space sm"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">4.</span>가중치가 \(w_1=0.7\), \(w_2=-0.4\)이고 활성화함수가
+        \(\sigma(x)=\begin{cases} 0 & (x \lt 0) \\ 3 & (x \ge 0)\end{cases}\)인 퍼셉트론이 있다.
+        표를 완성하시오.
+        <span class="lvl">적용</span>
+      </div>
+      <table class="ws-table">
+        <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(x\)</th><th>\(\sigma(x)\)</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td>0</td><td>1</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td>1</td><td>0</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td>1</td><td>1</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">5.</span>4번에서 <strong>둘째 줄만</strong> 출력값이 0이다. 그 이유를 설명하시오.
+        <span class="lvl">이해</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">6.</span>가중치가 \(w_1=2\), \(w_2=-1\)이고
+        \(\sigma(x)=\begin{cases} 0 & (x \lt 1) \\ 1 & (x \ge 1)\end{cases}\)인 퍼셉트론에
+        \(x_1=1\), \(x_2=1\)을 입력하면 출력값은 얼마인가?
+        <span class="lvl">적용</span>
+      </div>
+      <div class="ws-answer-space sm"></div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">1 / 2</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 2 · 심화 + 정답 ══════════════════ -->
+<div class="ws-page">
+
+  <h2 class="ws-section">심화 문항</h2>
+
+  <div class="ws-body">
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">7.</span>4번 퍼셉트론에서 \(w_2 = -0.4\)로 <strong>음수</strong>였다.
+        가중치가 음수라는 것은 그 입력이 출력에 어떤 영향을 준다는 뜻인지 설명하시오.
+        <span class="lvl lvl-adv">심화 · 분석</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+    <article class="ws-problem">
+      <div class="ws-problem-body">
+        <span class="ws-problem-number">8.</span>가중치와 입력값은 그대로 두고 <strong>임곗값 \(\theta\)만</strong> 바꾸면
+        퍼셉트론의 출력이 달라질 수 있다. 3번 퍼셉트론(\(x=1.6\))에서
+        출력값이 0이 되도록 하는 \(\theta\)의 범위를 구하고,
+        이로부터 <strong>임곗값이 하는 일</strong>을 한 문장으로 쓰시오.
+        <span class="lvl lvl-adv">심화 · 평가</span>
+      </div>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+  </div>
+
+  <h2 class="ws-section">정답 및 해설</h2>
+
+  <div class="ws-body ans-key">
+
+    <h3>1.</h3>
+    <p>가지 돌기로 들어온 자극 → <strong>입력값 \(x_1, x_2, \cdots, x_n\)</strong><br>
+       세포 사이의 연결 강도 → <strong>가중치 \(w_1, w_2, \cdots, w_n\)</strong><br>
+       <strong>세포체가 자극을 통합</strong> → \(x = x_1w_1 + \cdots + x_nw_n\)<br>
+       임곗값을 넘으면 전달 → <strong>활성화함수 \(\sigma(x)\)가 출력을 정한다</strong></p>
+
+    <h3>2.</h3>
+    <p><strong>가중치</strong></p>
+
+    <h3>3.</h3>
+    <p>\(x = 1 \times 0.8 + 2 \times 0.4 = 1.6\), \(1.6 \ge 0\)이므로 출력값은 <strong>1</strong></p>
+
+    <h3>4.</h3>
+    <p>\((0,0)\): \(x=0\), \(\sigma=3\) &nbsp;·&nbsp;
+       \((0,1)\): \(x=-0.4\), \(\sigma=0\) &nbsp;·&nbsp;
+       \((1,0)\): \(x=0.7\), \(\sigma=3\) &nbsp;·&nbsp;
+       \((1,1)\): \(x=0.3\), \(\sigma=3\)</p>
+
+    <h3>5.</h3>
+    <p class="why">\((0,1)\)일 때만 \(x = -0.4\)로 <strong>음수</strong>가 되어
+       임곗값 \(0\)보다 작기 때문이다. 나머지 세 경우는 \(x\)가 0 이상이라
+       모두 \(3\)을 출력한다.</p>
+
+    <h3>6.</h3>
+    <p>\(x = 1 \times 2 + 1 \times (-1) = 1\)이고 \(1 \ge 1\)이므로 출력값은 <strong>1</strong></p>
+    <p class="why">임곗값이 \(1\)이고 조건이 "\(x \ge 1\)"이므로 경계값 \(1\)도 포함된다.
+       부등호가 \(\ge\)인지 \(\gt\)인지 반드시 확인해야 한다.</p>
+
+    <h3>7.</h3>
+    <p>그 입력이 커질수록 \(x\)가 <strong>작아지므로</strong>, 출력이 1이 되는 것을
+       <strong>방해(억제)</strong>한다.</p>
+    <p class="why">양수 가중치는 "이 입력이 있으면 그렇다고 판단하라"는 뜻이고,
+       음수 가중치는 "이 입력이 있으면 오히려 아니라고 판단하라"는 뜻이다.
+       개와 고양이를 구별할 때 '고양이 수염' 같은 특징이 개 쪽 퍼셉트론에서는
+       음수 가중치를 갖는 것과 같다.</p>
+
+    <h3>8.</h3>
+    <p>\(\sigma(1.6) = 0\)이 되려면 \(1.6 \lt \theta\), 즉 <strong>\(\theta \gt 1.6\)</strong></p>
+    <p class="why">임곗값은 <strong>"얼마나 확신해야 그렇다고 답할 것인가"의 기준선</strong>이다.
+       높이면 웬만해서는 1을 내지 않는 신중한 퍼셉트론이 되고,
+       낮추면 쉽게 1을 내는 성급한 퍼셉트론이 된다.
+       가중치가 무엇을 볼지 정한다면, 임곗값은 얼마나 엄격하게 볼지를 정한다.</p>
+
+  </div>
+
+  <div class="ws-pagenum">2 / 2</div>
+</div>
+
+<script>
+  window.addEventListener('load', function () { window.safeTypeset(); });
+</script>
+
+</body>
+</html>
