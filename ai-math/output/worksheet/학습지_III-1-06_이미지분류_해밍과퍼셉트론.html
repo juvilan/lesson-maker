@@ -60,11 +60,16 @@
   .ans-key h3 { break-after: avoid; page-break-after: avoid; }
   .ans-key p { margin: 0 0 var(--lm-space-2); }
   .ans-key .why { color: var(--lm-page-ink-2); }
+  /* 정답은 3쪽에 따로 둔다 — 학생에게는 1~2쪽만 나눠 준다 */
+  .teacher-only { font-size: 0.72em; font-weight: 600; letter-spacing: 0.06em;
+                  color: var(--lm-page); background: var(--lm-accent);
+                  border-radius: var(--lm-radius-sm); padding: 1px 7px;
+                  margin-left: 6px; vertical-align: 0.15em; }
 
   /* ── 픽셀 격자 (전광판 이미지) ── */
-  .wpix { display: grid; grid-template-columns: repeat(5, 5.2mm); gap: 0.5mm;
-          justify-content: center; margin: 2mm auto 1mm; }
-  .wpix i { display: block; width: 5.2mm; height: 5.2mm;
+  .wpix { display: grid; grid-template-columns: repeat(5, 4.6mm); gap: 0.5mm;
+          justify-content: center; margin: 1.5mm auto 1mm; }
+  .wpix i { display: block; width: 4.6mm; height: 4.6mm;
             background: var(--lm-page-ink); border: 0.2mm solid var(--lm-page-rule); }
   .wpix i.on { background: var(--lm-page); }
   .pix-row { display: flex; justify-content: center; gap: 8mm; }
@@ -99,7 +104,7 @@
     <article class="ws-problem ws-span-all">
       <div class="ws-problem-body">
         <span class="ws-problem-number">※</span>다음 세 이미지를 보고 1~5번에 답하시오.
-        불이 켜진 픽셀(흰색)을 1, 꺼진 픽셀(검은색)을 0으로 하여 \(7 \times 5\) 행렬로 나타낸 것이다.
+        켜진 픽셀(흰색)이 1, 꺼진 픽셀(검은색)이 0인 \(7 \times 5\) 행렬이다.
       </div>
       <div class="pix-row">
         <div class="pix-cell">
@@ -188,7 +193,7 @@
 
   </div>
 
-  <div class="ws-pagenum">1 / 2</div>
+  <div class="ws-pagenum">1 / 3</div>
 </div>
 
 
@@ -242,12 +247,19 @@
         이 결과로부터 퍼셉트론이 <strong>무엇을 놓치는지</strong> 한 문장으로 쓰시오.
         <span class="lvl lvl-adv">심화 · 평가</span>
       </div>
-      <div class="ws-answer-space sm"></div>
+      <div class="ws-answer-space md"></div>
     </article>
 
   </div>
 
-  <h2 class="ws-section">정답 및 해설</h2>
+  <div class="ws-pagenum">2 / 3</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 3 · 정답 (교사용) ══════════════════ -->
+<div class="ws-page">
+
+  <h2 class="ws-section">정답 및 해설 <span class="teacher-only">교사용</span></h2>
 
   <div class="ws-body ans-key">
 
@@ -291,7 +303,7 @@
 
   </div>
 
-  <div class="ws-pagenum">2 / 2</div>
+  <div class="ws-pagenum">3 / 3</div>
 </div>
 
 <script>
