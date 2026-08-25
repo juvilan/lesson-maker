@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>전체를 보려면 더한다 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-body); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt td.pos { color: var(--lm-success); font-weight: 700; }
+    .dt td.neg { color: var(--lm-danger); font-weight: 700; }
+    .dt td.neu { color: var(--lm-ink-3); font-weight: 700; }
+    .dt tr.total td { background: var(--lm-accent-tint); color: var(--lm-accent);
+                      font-weight: 700; border-top: var(--lm-border-thin) solid var(--lm-accent); }
+
+    /* 문장 카드 (T1·T2·T3) */
+    .tcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-4);
+              margin-top: var(--lm-space-4); }
+    .tcard { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+             border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4);
+             text-align: center; }
+    .tcard .tn { font-size: var(--lm-slide-caption); color: var(--lm-accent); font-weight: 700; }
+    .tcard p { margin: var(--lm-space-2) 0 0; font-size: var(--lm-slide-small);
+               line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { display: none; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid var(--lm-rule); color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { display: block; }
+  </style>
+</head>
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅱ-3 텍스트 데이터 분석 · 2차시</div>
+    <h1>전체를 보려면 더한다</h1>
+    <p class="slide-sub">벡터의 덧셈으로 말뭉치 전체의 감성을 재는 법</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 66~68쪽</span>
+    </div>
+    <aside class="notes">짧고 가벼운 차시다. 새로 배우는 것은 벡터의 덧셈 하나이고 규칙도 단순하다(같은 자리끼리 더한다). 6~7장의 "개별과 전체가 다르다"에 시간을 쓰고, 마지막 두 장으로 다음 주제(유사도)의 문을 연다.</aside>
+  </section>
+
+  <!-- 2. 문제 제기 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 65쪽</div>
+    <h2>후기 하나씩만 봤다</h2>
+
+    <table class="dt" style="max-width: 1200px; margin-left:auto; margin-right:auto;">
+      <thead>
+        <tr><th style="width:16%"></th><th>감성 벡터</th><th>감성 점수</th><th>감성 분석</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">소비자 A</td><td>\((3,\ 0,\ 2)\)</td><td>3</td><td class="pos">긍정</td></tr>
+        <tr><td class="rowhead">소비자 B</td><td>\((2,\ 2,\ 2)\)</td><td>0</td><td class="neu">중립</td></tr>
+        <tr><td class="rowhead">소비자 C</td><td>\((1,\ 4,\ 1)\)</td><td>-3</td><td class="neg">부정</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      쇼핑몰 입장에서 궁금한 것은 한 사람이 아니다 —
+      <span class="kw-danger">“이 상품의 후기 <b>전체</b>는 어떤가?”</span>
+    </div>
+
+    <p class="prob-stmt">
+      긍정 하나, 중립 하나, 부정 하나. 전체는 어느 쪽일까?
+    </p>
+    <aside class="notes">학생들에게 먼저 짐작하게 한다. "반반이니까 중립 아닐까요"라는 답이 나오면 좋다. 그 짐작이 맞는지 6장에서 확인한다. 세 후기의 감성 벡터는 지난 시간 것을 그대로 가져왔다.</aside>
+  </section>
+
+  <!-- 3. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span><span class="kw">벡터의 덧셈</span>을 할 수 있다.</span></li>
+      <li><span class="num">2</span><span>여러 텍스트의 감성 벡터를 더해 <span class="kw">전체의 감성</span>을 분석할 수 있다.</span></li>
+    </ul>
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      벡터의 덧셈 규칙은 한 줄이다 —
+      <span class="kw-success">같은 자리끼리 더한다.</span>
+    </div>
+    <aside class="notes">목표가 둘뿐이고 규칙도 하나다. 시간이 남으면 마지막 두 장의 유사도 도입에 더 쓰거나, 문제 2를 여러 개 풀린다.</aside>
+  </section>
+
+  <!-- 4. 벡터의 덧셈 -->
+  <section>
+    <div class="chapter-tag">교과서 66쪽 · 정의</div>
+    <h2>같은 자리끼리 더한다</h2>
+
+    <div class="definition-box">
+      두 벡터 \(\vec{P}=(p_1,\ p_2,\ \dots,\ p_n)\), \(\vec{Q}=(q_1,\ q_2,\ \dots,\ q_n)\)의 덧셈은
+      \[ \vec{P}+\vec{Q}=(p_1+q_1,\ p_2+q_2,\ \dots,\ p_n+q_n) \]
+      과 같이 정한다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="warning-box">
+        <b>차원이 같을 때만</b> 더할 수 있다.
+        3차원과 4차원은 더하지 못한다.
+      </div>
+      <div class="info-box">
+        <b>세 개 이상</b>도 더할 수 있고,
+        실수의 덧셈처럼 <b>결합법칙</b>이 성립한다.
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      자리마다 뜻이 정해져 있으니, <b>첫째는 첫째끼리 · 둘째는 둘째끼리</b> 더하는 것이 자연스럽다.
+    </p>
+    <aside class="notes">'차원이 같을 때만'을 강조한다. 감성 벡터는 늘 3차원이라 문제가 없지만, 단어 사전이 다른 두 빈도수 벡터는 더할 수 없다는 점을 예로 들면 이해가 깊어진다. 결합법칙은 "어느 둘을 먼저 더해도 같다"는 뜻이라고만 풀어 준다.</aside>
+  </section>
+
+  <!-- 5. 보기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 66쪽 · 보기</div>
+    <h2>음수가 섞여도 마찬가지다</h2>
+
+    <p class="prob-stmt">
+      \(\vec{P}=(1,\ 4,\ -3)\), \(\vec{Q}=(-3,\ 1,\ 0)\), \(\vec{R}=(5,\ -3,\ 2)\)일 때
+    </p>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-3);">
+      \[ \vec{P}+\vec{Q}=\bigl(1+(-3),\ 4+1,\ -3+0\bigr)=(-2,\ 5,\ -3) \]
+    </div>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-3);">
+      \[ \vec{P}+\vec{Q}+\vec{R}=\bigl(1+(-3)+5,\ 4+1+(-3),\ -3+0+2\bigr)=(3,\ 2,\ -1) \]
+    </div>
+
+    <p class="prob-stmt">
+      셋을 더할 때도 <b>자리별로 한 번에</b> 더하면 된다.
+      \((\vec{P}+\vec{Q})+\vec{R}\)로 두 번 나눠 해도 결과는 같다.
+    </p>
+    <aside class="notes">음수 덧셈에서 실수가 나오기 쉬우니 괄호를 살려 적게 한다. 세 개를 한 번에 더하는 것과 둘씩 나눠 더하는 것이 같다는 걸 직접 해 보게 하면 결합법칙이 몸으로 이해된다. 감성 벡터에는 음수가 없지만 벡터 일반의 성질이라 여기서 다룬다.</aside>
+  </section>
+
+  <!-- 6. 전체 감성 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 67쪽 · 전체 감성</div>
+    <h2>세 후기를 더하면</h2>
+
+    <p class="prob-stmt">
+      세 감성 벡터를 <b>같은 자리끼리</b> 더한다 — 표를 세로로 더하는 것과 같다.
+    </p>
+
+    <table class="dt" style="max-width: 1200px; margin-left:auto; margin-right:auto;">
+      <thead>
+        <tr><th style="width:20%"></th><th>긍정</th><th>부정</th><th>중립</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">A</td><td>3</td><td>0</td><td>2</td></tr>
+        <tr><td class="rowhead">B</td><td>2</td><td>2</td><td>2</td></tr>
+        <tr><td class="rowhead">C</td><td>1</td><td>4</td><td>1</td></tr>
+        <tr class="total"><td class="rowhead">전체</td><td>6</td><td>6</td><td>5</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      \(\vec{A}+\vec{B}+\vec{C}=(6,\ 6,\ 5)\)이므로 감성 점수는 \(6-6=0\) —
+      세 소비자의 전체 후기는 <span class="kw-success">‘중립’</span>으로 분석한다.
+    </div>
+    <aside class="notes">2장에서 학생들이 짐작한 것과 맞는지 확인한다. 표를 세로로 더하면 되니 계산 부담은 없다. 긍정 6과 부정 6이 정확히 맞물린 것은 우연이지만, 그래서 중립이라는 답이 선명하게 나온다.</aside>
+  </section>
+
+  <!-- 7. 개별과 전체 -->
+  <section>
+    <div class="chapter-tag">교과서 67쪽 · 해석</div>
+    <h2>개별과 전체는 다른 질문이다</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>A 하나만 보면</h4>
+        <p>점수 3 → <span class="kw-success">긍정</span></p>
+      </div>
+      <div class="plain-card">
+        <h4>C 하나만 보면</h4>
+        <p>점수 −3 → <span class="kw-danger">부정</span></p>
+      </div>
+      <div class="plain-card">
+        <h4>셋을 합치면</h4>
+        <p>점수 0 → <span class="kw">중립</span></p>
+      </div>
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-5);">
+      개별 후기의 감성과 전체 후기의 감성은 <b>다를 수 있다.</b>
+      무엇을 묻는지에 따라 봐야 할 벡터가 달라진다.
+    </div>
+
+    <p class="prob-stmt">
+      이것은 지난 절에서 겪은 것과 같은 구조다 —
+      <b>개별 문서의 주제어</b>와 <b>말뭉치의 주제어</b>가 달랐던 것처럼.
+    </p>
+    <aside class="notes">2-2-1차시 예제 1(A의 주제어는 '안전'인데 말뭉치는 '책임')과 연결해 준다. 단원 내내 반복되는 구조라 여기서 한 번 명시해 두면 학생들이 패턴을 알아본다. "전체가 중립이라고 해서 모두가 중립인 것은 아니다"라는 점도 짚는다.</aside>
+  </section>
+
+  <!-- 8. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 66~67쪽 문제 2·3</div>
+    <h2>직접 해 보자</h2>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>문제 2.</b> \(\vec{P}=(2,1,4,0)\), \(\vec{Q}=(0,1,-2,3)\), \(\vec{R}=(3,-5,1,2)\)일 때
+        ⑴ \(\vec{P}+\vec{Q}\) ⑵ \(\vec{P}+\vec{Q}+\vec{R}\)를 구하시오.
+        <div class="ans">
+          ⑴ \(\vec{P}+\vec{Q}=(2+0,\ 1+1,\ 4+(-2),\ 0+3)=(2,\ 2,\ 2,\ 3)\)<br>
+          ⑵ \(\vec{P}+\vec{Q}+\vec{R}=(5,\ -3,\ 3,\ 5)\)
+        </div>
+      </li>
+      <li>
+        <b>문제 3.</b> 소비자 A~E 다섯 명의 전체 후기에 대한 감성 분석을 하시오.
+        (\(\vec{D}=(2,1,5)\), \(\vec{E}=(2,2,4)\)는 지난 시간에 구했다)
+        <div class="ans">
+          \(\vec{A}+\vec{B}+\vec{C}+\vec{D}+\vec{E}=(3,0,2)+(2,2,2)+(1,4,1)+(2,1,5)+(2,2,4)=(10,\ 9,\ 14)\)<br>
+          감성 점수 \(10-9=1>0\) → 다섯 명의 전체 후기는 <b>긍정</b>
+        </div>
+      </li>
+    </ul>
+
+    <div class="info-box" style="margin-top: var(--lm-space-2);">
+      세 명일 때는 <b>중립</b>이었는데 다섯 명으로 늘리니 <b>긍정</b>이 됐다.
+      <span class="kw-info">표본이 바뀌면 결과도 바뀐다.</span>
+    </div>
+    <aside class="notes">문제 3의 결과가 6장과 달라지는 것이 재미있는 지점이다. D가 긍정(1점)이고 E가 중립(0점)이라 전체가 긍정 쪽으로 기울었다. 실제 쇼핑몰에서 후기 수가 적을 때 평점이 요동치는 이유와 같다고 덧붙이면 좋다. 문제 2는 음수 계산 확인용이니 빠르게 넘어간다.</aside>
+  </section>
+
+  <!-- 9. 쓸모 -->
+  <section>
+    <div class="chapter-tag">교과서 67쪽 · 활용</div>
+    <h2>이 계산은 어디에 쓰이나</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>기업은</h4>
+        <p>제품 후기에서 사람들이 긍정적인지 부정적인지 분석해
+        <b>품질 개선이나 홍보</b>에 활용한다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>개인은</h4>
+        <p>공연 감상 평에서 선호도를 파악하거나,
+        제품을 <b>구매할 때 참고</b>한다.</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      감성 분석은 텍스트 데이터에서
+      <span class="kw-success">가치 있는 정보를 찾아내는 데 유용한 방법</span>이다.
+    </div>
+    <aside class="notes">짧게 넘어간다. 학생들이 아는 사례(배달 앱의 후기 요약, 영화 평점 사이트)를 말하게 하면 1분이면 충분하다. 여기까지가 감성 분석이고, 다음 장부터 질문이 바뀐다.</aside>
+  </section>
+
+  <!-- 10. 다음 질문 -->
+  <section>
+    <div class="chapter-tag">생각 열기 · 교과서 67쪽</div>
+    <h2>이번엔 다른 질문이다</h2>
+
+    <p class="prob-stmt">
+      세 문장을 <b>유사한 정도에 따라 두 그룹</b>으로 나눈다면?
+    </p>
+
+    <div class="tcards">
+      <div class="tcard">
+        <div class="tn">T₁</div>
+        <p>딸기를 좋아하고,<br>바나나도 좋아한다.</p>
+      </div>
+      <div class="tcard">
+        <div class="tn">T₂</div>
+        <p>딸기는 좋아하지만,<br>바나나는 싫어한다.</p>
+      </div>
+      <div class="tcard">
+        <div class="tn">T₃</div>
+        <p>딸기와 바나나를<br>모두 싫어한다.</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      <b>딸기</b>를 기준으로 하면 {T₁, T₂}와 {T₃}로,
+      <b>바나나</b>를 기준으로 하면 {T₁}과 {T₂, T₃}로 나뉜다.
+      <span class="kw-danger">사람마다 기준이 달라 답이 하나가 아니다.</span>
+    </div>
+    <aside class="notes">학생들에게 실제로 나눠 보게 하면 답이 갈린다. 그 갈림이 다음 차시의 출발점이다 — 사람의 주관적 기준으로는 답이 여럿이니, 인공지능이 분류하려면 "닮은 정도"를 수로 만들어야 한다. 그것이 유사도다. 이름만 흘려 두고 계산은 다음 시간으로 넘긴다.</aside>
+  </section>
+
+  <!-- 11. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>더하면 전체가 보인다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      감성 벡터를 <span class="kw-success">같은 자리끼리 더하면</span><br>
+      말뭉치 전체의 감성을 한 번에 잴 수 있다.
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-6);">
+      여기까지가 <b>감성 분석</b> — 한 글이 어떤 감정인지를 물었다.<br>
+      다음 시간부터는 <b>유사도 분석</b> —
+      <span class="kw-danger">두 글이 얼마나 닮았는지</span>를 묻는다.
+    </div>
+
+    <p class="prob-stmt">
+      닮은 정도를 수로 만드는 방법이 <b>세 가지</b> 있다.
+    </p>
+    <aside class="notes">절의 절반이 여기서 끝난다. 감성 분석(한 글)과 유사도 분석(두 글)의 대비를 분명히 해 두면 남은 두 차시의 자리가 잡힌다. '세 가지'라고 예고해 두면 다음 시간에 유클리드·코사인·자카드가 나올 때 학생들이 지도를 갖고 듣는다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (8장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
