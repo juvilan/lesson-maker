@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>잣대가 다르면 답도 갈린다 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-body); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt td.win { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+    .dt.compact { font-size: var(--lm-slide-small); }
+    .dt.compact th, .dt.compact td { padding: var(--lm-space-1) var(--lm-space-2); }
+
+    /* 집합 카드 */
+    .sets { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-4);
+            margin-top: var(--lm-space-3); }
+    .setcard { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+               border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .setcard .nm { font-size: var(--lm-slide-caption); color: var(--lm-accent); font-weight: 700; }
+    .setcard p { margin: var(--lm-space-2) 0 0; font-size: var(--lm-slide-small);
+                 line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+
+    /* 세 유사도 판정 카드 */
+    .verdicts { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-4);
+                margin-top: var(--lm-space-4); }
+    .vd { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+          background: var(--lm-page); padding: var(--lm-space-3); text-align: center; }
+    .vd .kind { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); }
+    .vd .val { font-size: var(--lm-slide-small); color: var(--lm-ink-2);
+               margin: var(--lm-space-2) 0; line-height: 1.7; }
+    .vd .ans { font-size: var(--lm-slide-h3); font-weight: 700; }
+    .vd.a { border-color: var(--lm-info); background: var(--lm-info-tint); }
+    .vd.a .ans { color: var(--lm-info); }
+    .vd.b { border-color: var(--lm-accent); background: var(--lm-accent-tint); }
+    .vd.b .ans { color: var(--lm-accent); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { display: none; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid var(--lm-rule); color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { display: block; }
+  </style>
+</head>
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅱ-3 텍스트 데이터 분석 · 4차시 <span class="badge">Ⅱ단원 마무리</span></div>
+    <h1>잣대가 다르면 답도 갈린다</h1>
+    <p class="slide-sub">자카드 유사도, 그리고 세 유사도의 비교</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 71~75쪽</span>
+    </div>
+    <aside class="notes">Ⅱ단원을 닫는 차시다. 자카드 유사도는 앞의 둘보다 계산이 쉬워 부담이 적고, 오늘의 무게중심은 9장 — 같은 자료에 세 잣대를 대면 답이 갈리는 대목이다. 거기까지 가는 것이 이 차시의 목적이고 앞부분은 리듬 있게 넘긴다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 68~70쪽</div>
+    <h2>벡터로 둘, 이제 집합으로 하나</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>유클리드 \(D\)</h4>
+        <p>두 점 사이의 <b>거리</b></p>
+        <p><span class="kw-success">0에 가까울수록 유사</span></p>
+      </div>
+      <div class="plain-card">
+        <h4>코사인 \(C\)</h4>
+        <p>두 벡터가 이루는 <b>각</b></p>
+        <p><span class="kw-success">1에 가까울수록 유사</span></p>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      둘 다 텍스트를 <b>벡터</b>로 바꿔 놓고 쟀다.
+      그런데 Ⅱ-1에서 우리는 텍스트를 <span class="kw">집합</span>으로도 나타냈었다 —
+      단어집합이다.
+    </p>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      오늘 배울 <b>자카드 유사도</b>는 벡터가 아니라 <span class="kw-info">집합으로</span> 잰다.
+    </div>
+    <aside class="notes">2-1-2차시에서 만든 단어집합을 떠올리게 한다. 그때는 벡터로 바꾸기 위한 중간 단계였는데, 오늘은 집합 그대로 쓴다. 벡터로 바꾸지 않아도 유사도를 잴 수 있다는 점이 새롭다.</aside>
+  </section>
+
+  <!-- 3. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span><span class="kw">자카드 유사도</span> \(J(P,Q)\)를 구할 수 있다.</span></li>
+      <li><span class="num">2</span><span>세 유사도로 <span class="kw">유사도 분석</span>을 하고 결과를 비교할 수 있다.</span></li>
+      <li><span class="num">3</span><span>목적과 특성에 따라 <span class="kw">적절한 유사도를 선택</span>해야 함을 설명할 수 있다.</span></li>
+    </ul>
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      오늘의 결론을 미리 말하면 —
+      <span class="kw-success">셋 중에 정답인 하나는 없다.</span>
+    </div>
+    <aside class="notes">목표 3번이 오늘의 도착점이자 이 절 전체의 결론이다. 결론을 미리 알려 줘도 9장의 충격은 줄지 않는다. 오히려 "정말 갈리나?" 하고 기다리게 된다.</aside>
+  </section>
+
+  <!-- 4. 자카드 정의 -->
+  <section>
+    <div class="chapter-tag">교과서 71쪽 · 자카드 유사도</div>
+    <h2>3. 자카드 유사도 — 겹치는 비율</h2>
+
+    <div class="definition-box">
+      두 텍스트 P와 Q의 단어집합이 \(P\)와 \(Q\)일 때
+      \[ J(P,\ Q)=\frac{n(P\cap Q)}{n(P\cup Q)} \]
+      <b>교집합의 원소 개수</b>를 <b>합집합의 원소 개수</b>로 나눈 값이다.
+    </div>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>겹치는 것이 없으면</h4>
+        <p>\(P\cap Q=\varnothing\) → \(J=0\)</p>
+      </div>
+      <div class="plain-card">
+        <h4>완전히 같으면</h4>
+        <p>\(P=Q\) → \(J=1\)</p>
+      </div>
+      <div class="plain-card">
+        <h4>그 사이</h4>
+        <p>\(0\le J(P,Q)\le 1\)</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      공통 원소가 많을수록 값이 커진다 →
+      <span class="kw-success">1에 가까울수록 유사하다.</span> 코사인과 같은 방향이다.
+    </div>
+    <aside class="notes">계산이 가장 쉽다. 근호도 분모의 곱도 없이 개수를 세어 나누면 끝이다. n(P∪Q)=n(P)+n(Q)−n(P∩Q)라는 공식을 쓰면 합집합을 일일이 나열하지 않아도 된다는 요령을 알려 주면 좋다. 코사인과 방향이 같다는 점(1에 가까울수록)도 확실히 해 둔다 — 유클리드만 반대다.</aside>
+  </section>
+
+  <!-- 5. 함께하기 자료 -->
+  <section class="tight">
+    <div class="chapter-tag">함께하기 · 교과서 71쪽</div>
+    <h2>세 학생이 좋아하는 영화 장르</h2>
+
+    <div class="sets">
+      <div class="setcard">
+        <span class="nm">학생 A</span>
+        <p>\(A=\{\)액션, 코미디, 스릴러, 전쟁, 판타지\(\}\)</p>
+      </div>
+      <div class="setcard">
+        <span class="nm">학생 B</span>
+        <p>\(B=\{\)액션, 스릴러, 뮤지컬, 드라마, SF\(\}\)</p>
+      </div>
+      <div class="setcard">
+        <span class="nm">학생 C</span>
+        <p>\(C=\{\)액션, 코미디, 스릴러, 드라마, SF\(\}\)</p>
+      </div>
+    </div>
+
+    <table class="dt compact" style="margin-top: var(--lm-space-4);">
+      <thead><tr><th style="width:14%">쌍</th><th>교집합</th><th>\(n(\cap)\)</th><th>\(n(\cup)\)</th><th>\(J\)</th></tr></thead>
+      <tbody>
+        <tr><td class="rowhead">A와 B</td><td>{액션, 스릴러}</td><td>2</td><td>8</td><td>\(\dfrac{2}{8}=\dfrac{1}{4}\)</td></tr>
+        <tr><td class="rowhead">B와 C</td><td>{액션, 스릴러, 드라마, SF}</td><td>4</td><td>6</td><td class="win">\(\dfrac{4}{6}=\dfrac{2}{3}\)</td></tr>
+        <tr><td class="rowhead">C와 A</td><td>{액션, 코미디, 스릴러}</td><td>3</td><td>7</td><td>\(\dfrac{3}{7}\)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-2);">
+      값이 <b>가장 큰</b> \(\dfrac{2}{3}\) —
+      <span class="kw-success">B와 C의 취향이 가장 유사하다.</span>
+    </div>
+    <aside class="notes">교집합을 먼저 구하고 합집합의 개수는 n(P)+n(Q)−n(P∩Q)로 계산하면 빠르다. A와 B는 5+5−2=8, B와 C는 5+5−4=6, C와 A는 5+5−3=7이다. 세 학생 모두 다섯 장르씩 골랐다는 점도 확인시킨다. 실제 추천 서비스가 이런 계산으로 취향이 비슷한 사람을 묶는다고 덧붙이면 흥미를 끈다.</aside>
+  </section>
+
+  <!-- 6. 문제 8 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 72쪽 문제 8</div>
+    <h2>일기 예보 기사로 연습</h2>
+
+    <div class="sets">
+      <div class="setcard">
+        <span class="nm">제목 A</span>
+        <p>“한파에 눈 예보, 일부는 비 예보”</p>
+        <p>\(A=\{\)한파, 눈, 예보, 일부, 비\(\}\)</p>
+      </div>
+      <div class="setcard">
+        <span class="nm">제목 B</span>
+        <p>“눈 예보, 퇴근길에 눈 조심!”</p>
+        <p>\(B=\{\)눈, 예보, 퇴근길, 조심\(\}\)</p>
+      </div>
+      <div class="setcard">
+        <span class="nm">제목 C</span>
+        <p>“비 예보, 일부는 눈 또는 비, 비 그치면 한파”</p>
+        <p>\(C=\{\)비, 예보, 일부, 눈, 그치다, 한파\(\}\)</p>
+      </div>
+    </div>
+
+    <ul class="qlist" id="qList8" style="margin-top: var(--lm-space-3);">
+      <li>
+        자카드 유사도를 이용하여 <b>가장 유사한 기사 제목 두 개</b>를 고르시오.
+        <div class="ans">
+          \(J(A,B)=\dfrac{2}{7}\) · \(J(B,C)=\dfrac{2}{8}=\dfrac{1}{4}\) ·
+          \(J(C,A)=\dfrac{5}{6}\)<br>
+          가장 큰 \(\dfrac{5}{6}\) → <b>C와 A</b>
+        </div>
+      </li>
+    </ul>
+    <aside class="notes">C와 A는 다섯 원소가 겹친다 — A의 원소 다섯 개가 모두 C에 들어 있다. 그래서 5/6으로 매우 높다. B는 '퇴근길·조심'이라는 자기만의 단어가 있어 둘 다와 멀다. 집합만 보고도 답을 짐작할 수 있다는 점을 짚어 주면 계산 전에 예측하는 습관이 생긴다.</aside>
+  </section>
+
+  <!-- 7. 유사도 분석 자료 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 72쪽 · 유사도 분석</div>
+    <h2>환경 문서 셋, C는 누구와 닮았나</h2>
+
+    <p class="prob-stmt">
+      문서 C가 A와 B 중 어느 쪽과 더 유사한지 <b>세 유사도로 각각</b> 알아본다.
+    </p>
+
+    <table class="dt compact">
+      <thead>
+        <tr><th style="width:8%"></th><th>대기</th><th>오존</th><th>환경</th><th>오염</th><th>미세먼지</th><th>폐수</th><th>하천</th><th>수질</th><th>하수</th><th>댐</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">A</td><td>3</td><td>2</td><td>3</td><td>3</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+        <tr><td class="rowhead">B</td><td>0</td><td>0</td><td>0</td><td>0</td><td>2</td><td>3</td><td>3</td><td>7</td><td>5</td><td>5</td></tr>
+        <tr><td class="rowhead">C</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      <b>A는 대기</b> 이야기(대기·오존·환경·미세먼지), <b>B는 물</b> 이야기(폐수·하천·수질·하수).
+      <b>C는 그 사이</b>에 걸쳐 있다 — 그래서 판단이 갈린다.
+    </div>
+    <aside class="notes">표를 가로로 읽으며 각 문서가 무슨 이야기인지 먼저 파악하게 한다. A는 대기 오염, B는 수질 오염, C는 둘 다 조금씩 언급하되 물 쪽 단어가 많다. 이 관찰이 뒤의 결과를 이해하는 열쇠다. 빈도수 벡터는 지난 절에서 배운 그대로다.</aside>
+  </section>
+
+  <!-- 8. 세 유사도 계산 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 73쪽 · 결과</div>
+    <h2>세 잣대를 각각 대 보면</h2>
+
+    <table class="dt compact" style="max-width: 1300px; margin-left:auto; margin-right:auto;">
+      <thead>
+        <tr><th style="width:16%"></th><th>유클리드 \(D\)</th><th>코사인 \(C\)</th><th>자카드 \(J\)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">C와 A</td><td class="win">\(\sqrt{38}\)</td><td>\(\dfrac{7}{24}\)</td><td>\(\dfrac{3}{10}\)</td></tr>
+        <tr><td class="rowhead">C와 B</td><td>\(\sqrt{53}\)</td><td class="win">\(\dfrac{21}{22}\)</td><td class="win">\(\dfrac{6}{7}\)</td></tr>
+        <tr><td class="rowhead">고르는 법</td><td>작은 쪽</td><td>큰 쪽</td><td>큰 쪽</td></tr>
+      </tbody>
+    </table>
+
+    <p class="prob-stmt">
+      자카드를 쓰려면 단어집합이 필요하다 —
+      \(C\cap A\)는 {오염, 미세먼지, 댐}으로 3개, \(C\cup A\)는 10개.
+      \(C\cap B\)는 6개, \(C\cup B\)는 7개다.
+    </p>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-2);">
+      강조된 칸이 각 잣대에서 <b>더 유사하다고 판정된 쪽</b>이다.
+      <span class="kw-danger">한 줄이 아니다.</span>
+    </div>
+    <aside class="notes">유클리드만 C와 A에 표시가 있고 나머지 둘은 C와 B에 있다. 학생들이 표에서 그것을 먼저 발견하게 두고 다음 장에서 정리한다. 값 자체를 계산하는 것은 부담이 크니 결과를 주고 읽는 데 집중한다. 자카드용 단어집합은 빈도수가 0이 아닌 단어를 모은 것이라고만 설명한다.</aside>
+  </section>
+
+  <!-- 9. 갈린다 -->
+  <section>
+    <div class="chapter-tag">교과서 73쪽 · 핵심</div>
+    <h2>같은 자료, 다른 답</h2>
+
+    <div class="verdicts">
+      <div class="vd a">
+        <div class="kind">유클리드 유사도</div>
+        <div class="val">\(D(C,A) < D(C,B)\)</div>
+        <div class="ans">C는 A와</div>
+      </div>
+      <div class="vd b">
+        <div class="kind">코사인 유사도</div>
+        <div class="val">\(C(C,A) < C(C,B)\)</div>
+        <div class="ans">C는 B와</div>
+      </div>
+      <div class="vd b">
+        <div class="kind">자카드 유사도</div>
+        <div class="val">\(J(C,A) < J(C,B)\)</div>
+        <div class="ans">C는 B와</div>
+      </div>
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-5);">
+      어떤 유사도를 사용하는지에 따라
+      <span class="kw">유사도 분석의 결과는 달라질 수 있다.</span>
+    </div>
+
+    <p class="prob-stmt">
+      셋 다 계산은 맞다. <b>재는 것이 다를 뿐</b>이다 —
+      유클리드는 <b>빈도수의 차이</b>를, 코사인은 <b>방향</b>을, 자카드는 <b>겹치는 단어</b>를 본다.
+    </p>
+    <aside class="notes">오늘의 정점이다. 왜 유클리드만 다른 답을 냈는지 물어보면 좋다. B는 수질 7, 하수 5처럼 빈도수가 크고 C는 2, 2로 작아서 거리가 멀어진다. 반면 코사인은 크기를 나눠 없애고 방향만 보므로 같은 물 이야기인 B와 가깝다고 판정한다. 자카드는 아예 개수를 무시하고 어떤 단어가 있는지만 본다. "틀린 것이 없다"는 점을 꼭 말해 준다.</aside>
+  </section>
+
+  <!-- 10. 결론 -->
+  <section>
+    <div class="chapter-tag">교과서 73쪽 · 결론</div>
+    <h2>그래서 골라야 한다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      텍스트의 <span class="kw-success">분석 목적과 특성에 따라 적절한 유사도를 선택</span>해야
+      의미 있는 분석 결과를 얻을 수 있다.
+    </div>
+
+    <div class="three-col" style="margin-top: var(--lm-space-5);">
+      <div class="plain-card">
+        <h4>유클리드가 맞는 때</h4>
+        <p>단어가 <b>몇 번</b> 나왔는지가 중요할 때</p>
+      </div>
+      <div class="plain-card">
+        <h4>코사인이 맞는 때</h4>
+        <p>글의 <b>길이가 달라도</b> 주제가 같은지 볼 때</p>
+      </div>
+      <div class="plain-card">
+        <h4>자카드가 맞는 때</h4>
+        <p>어떤 단어가 <b>있고 없는지</b>만 중요할 때</p>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      Ⅲ-2에서 배운 것과 같은 이야기다 — <b>도구를 고르는 것도 판단</b>이다.
+    </p>
+    <aside class="notes">세 가지가 각각 어울리는 상황을 예로 들어 주면 좋다. 긴 논문과 짧은 초록을 비교할 때는 길이 영향을 받지 않는 코사인이 낫고, 재료 목록처럼 있고 없고만 중요할 때는 자카드가 낫다. 마지막 문장은 학생들이 "그럼 뭘 써야 해요?"라고 물을 때의 답이다 — 정답은 목적에 달렸다.</aside>
+  </section>
+
+  <!-- 11. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 73쪽 문제 9 · 확인하기</div>
+    <h2>직접 해 보자</h2>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>문제 9.</b> 음악 문서 세 개의 빈도수가
+        \(\vec{A}=(2,0,1,2)\), \(\vec{B}=(0,4,0,3)\), \(\vec{C}=(2,3,2,0)\) (발라드·힙합·록·팝).
+        세 유사도로 문서 C와 가장 유사한 문서를 각각 찾으시오.
+        <div class="ans">
+          유클리드 \(D(C,A)=\sqrt{14}\), \(D(C,B)=\sqrt{18}=3\sqrt{2}\) → <b>A</b> (작은 쪽)<br>
+          코사인 \(C(C,A)=\dfrac{2\sqrt{17}}{17}\approx0.49\),
+          \(C(C,B)=\dfrac{12\sqrt{17}}{85}\approx0.58\) → <b>B</b> (큰 쪽)<br>
+          자카드 \(J(C,A)=\dfrac{2}{4}=\dfrac{1}{2}\), \(J(C,B)=\dfrac{1}{4}\) → <b>A</b> (큰 쪽)<br>
+          <span class="kw-danger">여기서도 답이 갈린다.</span>
+        </div>
+      </li>
+      <li>
+        <b>확인하기.</b> ⑴ 감성 분석을 할 때 단어들을 긍정 단어 또는 부정 단어로만 구분한다.
+        ⑵ 유클리드·코사인·자카드 유사도의 값이 1에 가까울수록 두 텍스트가 유사하다.
+        <div class="ans">
+          ⑴ ✗ — 감성 사전에 없는 단어는 <b>중립</b>이다<br>
+          ⑵ ✗ — <b>유클리드는 0에 가까울수록</b> 유사하다
+        </div>
+      </li>
+    </ul>
+    <aside class="notes">문제 9가 본문 사례를 그대로 반복한다 — 이번에는 유클리드와 자카드가 A, 코사인이 B다. 본문과 갈리는 조합이 다르다는 점이 오히려 좋다. "어느 하나가 늘 튀는 게 아니다"를 보여 준다. 확인하기 두 문항 모두 오늘·지난 시간의 함정을 정확히 겨냥하고 있으니 틀린 학생은 해당 장으로 돌아가 확인시킨다.</aside>
+  </section>
+
+  <!-- 12. 공학 도구 -->
+  <section>
+    <div class="chapter-tag">공학 도구 · 교과서 74~75쪽</div>
+    <h2>도구로 한꺼번에 재기</h2>
+
+    <p class="prob-stmt">
+      긴 글의 문장들을 서로 비교하려면 손으로는 어렵다.
+      <b>AskMath</b>의 AI 웹 실험실이 이 계산을 대신해 준다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>하는 일</h4>
+        <p>글을 넣으면 <b>문장 분리 → 텍스트 전처리 → TF·TF-IDF →
+        세 유사도 표</b>까지 한 번에 보여 준다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>읽는 법</h4>
+        <p>문장 1과 가장 유사한 문장을 찾을 때, <b>코사인·자카드는 가장 큰 값</b>,
+        <b>유클리드는 가장 작은 값</b>을 본다.</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      도구가 계산해 줘도 <b>어느 값을 골라야 하는지</b>는 사람이 안다.
+      오늘 배운 것이 바로 그것이다.
+    </div>
+    <aside class="notes">시간이 되면 실제로 띄워서 한 문단을 넣어 본다. 결과 표가 크지만 읽는 법은 오늘 배운 그대로다. 도구를 쓸 줄 아는 것과 결과를 읽을 줄 아는 것은 다르다는 점을 짚어 주면 이 단원의 마무리로 좋다.</aside>
+  </section>
+
+  <!-- 13. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄 · Ⅱ단원 마무리</div>
+    <h2>Ⅱ단원에서 배운 것</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>Ⅱ-1 표현</h4>
+        <p>정형은 <b>원-핫 벡터</b>로,<br>비정형은 <b>단어집합과 단어 사전</b>을 거쳐 벡터로</p>
+      </div>
+      <div class="plain-card">
+        <h4>Ⅱ-2 처리</h4>
+        <p><b>빈도수 벡터</b>로 주제어를,<br><b>TF-IDF</b>로 유용한 단어를</p>
+      </div>
+      <div class="plain-card">
+        <h4>Ⅱ-3 분석</h4>
+        <p><b>감성 점수</b>로 감정을,<br><b>세 유사도</b>로 닮은 정도를</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-body-lg);">
+      기계는 글자를 못 읽는다. 그래서 우리는 <span class="kw-success">말을 수로 바꿨다.</span><br>
+      바꾸는 방법이 여럿이었고, <b>무엇을 재고 싶은가에 따라</b> 골라 썼다.
+    </div>
+    <aside class="notes">Ⅱ-1-1차시의 제목("기계는 글자를 못 읽는다")으로 단원을 닫는다. 여덟 차시가 하나의 이야기였다는 것을 확인시키면 마무리가 깔끔하다. 대단원 정리(78쪽)와 평가 문제(79~81쪽)는 별도 시간에 다룬다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (6장·11장) */
+  (function () {
+    ['qList8', 'qList'].forEach(id => {
+      const list = document.getElementById(id);
+      if (!list) return;
+      list.querySelectorAll('li').forEach(li => {
+        li.addEventListener('click', () => {
+          li.classList.toggle('revealed');
+          window.safeTypeset([li]);
+        });
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
