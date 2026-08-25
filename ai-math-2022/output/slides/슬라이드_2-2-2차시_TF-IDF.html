@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>흔한 말은 깎는다 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-small); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt td.top { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+    .dt td.low { background: var(--lm-paper-soft); color: var(--lm-ink-4); }
+    .dt caption { caption-side: top; text-align: left; font-size: var(--lm-slide-caption);
+                  color: var(--lm-ink-3); padding-bottom: var(--lm-space-1); }
+
+    /* 4단계 배지 */
+    .stagehead { display: flex; align-items: center; gap: var(--lm-space-3);
+                 margin-top: var(--lm-space-2); }
+    .stagehead .sn { display: inline-block; min-width: 44px; height: 44px; line-height: 44px;
+                     border-radius: 50%; background: var(--lm-accent); color: var(--lm-page);
+                     text-align: center; font-weight: 700; font-size: var(--lm-slide-body); }
+    .stagehead .sd { font-size: var(--lm-slide-body); color: var(--lm-ink); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { display: none; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid var(--lm-rule); color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { display: block; }
+
+    .reasons { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--lm-space-3);
+               margin-top: var(--lm-space-4); }
+    .reason { background: var(--lm-accent-tint); border: var(--lm-border-thin) solid var(--lm-accent);
+              border-radius: var(--lm-radius-md); padding: var(--lm-space-3); text-align: center; }
+    .reason .who { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); }
+    .reason .word { font-size: var(--lm-slide-h3); color: var(--lm-accent); font-weight: 700;
+                    margin: var(--lm-space-1) 0; }
+    .reason .why { font-size: var(--lm-slide-caption); color: var(--lm-ink-2); }
+  </style>
+</head>
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅱ-2 텍스트 데이터 처리 · 2차시 <span class="badge">Ⅱ-2 마무리</span></div>
+    <h1>흔한 말은 깎는다</h1>
+    <p class="slide-sub">TF-IDF로 빈도수는 낮아도 유용한 단어를 찾는 법</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 58~62쪽</span>
+    </div>
+    <aside class="notes">Ⅱ-2를 닫는 차시이자 이 단원에서 계산이 가장 많은 시간이다. 4단계를 한 장씩 끊어 놓았으니 순서를 잃지 않게 진행한다. 8장의 뒤집힘(추천 vs 위생적)이 오늘의 정점이고, 그 앞의 세 단계는 거기에 도달하기 위한 준비다. 12장 로그는 『대수』 이수 여부에 따라 건너뛴다.</aside>
+  </section>
+
+  <!-- 2. 문제 제기 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 58쪽</div>
+    <h2>추천인 건 알겠는데, 왜?</h2>
+
+    <p class="prob-stmt">
+      지난 시간 음식점 후기 네 개의 말뭉치에서 주제어가 <b>‘추천’</b>임을 찾았다.
+      네 사람 모두 추천한다는 뜻이다.
+    </p>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      그런데 교과서는 이렇게 적는다 —
+      빈도수 벡터만으로는 ‘추천’처럼 <b>빈도수가 높은 주제어</b>는 쉽게 찾지만,
+      <span class="kw-danger">‘이 음식점을 추천하는 이유’처럼 유용한 정보는 파악하기 어렵다.</span>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      네 후기에 <b>모두</b> 나오는 ‘추천’은, 바로 그 이유로
+      네 후기를 <span class="kw-info">서로 구별해 주지 못한다.</span>
+    </div>
+    <aside class="notes">2-1-2차시 10장에서 "세 댓글이 다 교복 이야기라면 '교복'도 불용어로 넣을 수 있다"고 했던 것을 여기서 다시 꺼낸다. 그때는 넣거나 빼거나 둘 중 하나였는데, 오늘 배우는 것은 아예 빼지 않고 '중요도를 낮추는' 방법이다.</aside>
+  </section>
+
+  <!-- 3. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span><span class="kw">TF</span>·<span class="kw">DF</span>·<span class="kw">IDF</span>가 각각 무엇을 세는지 말할 수 있다.</span></li>
+      <li><span class="num">2</span><span><span class="kw">TF-IDF</span>를 구하고, 문서에서 중요도가 높은 단어를 찾을 수 있다.</span></li>
+      <li><span class="num">3</span><span>빈도수가 높은 단어와 중요도가 높은 단어가 <span class="kw">다를 수 있음</span>을 설명할 수 있다.</span></li>
+    </ul>
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      오늘의 아이디어 한 줄 —
+      <span class="kw-success">모든 문서에 나오는 말은 깎고, 여기서만 잦은 말은 올린다.</span>
+    </div>
+    <aside class="notes">목표 3번이 오늘의 개념적 핵심이다. TF가 큰 단어와 TF-IDF가 큰 단어가 어긋나는 것을 8장에서 숫자로 확인한다. 계산 자체는 곱셈 한 번이라 어렵지 않으니, 각 값이 무엇을 세는지에 시간을 쓴다.</aside>
+  </section>
+
+  <!-- 4. 아이디어 -->
+  <section>
+    <div class="chapter-tag">교과서 58쪽 · 아이디어</div>
+    <h2>흔할수록 깎는다</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>모든 문서에 나오는 단어</h4>
+        <p>어느 문서를 봐도 있으니 <b>구별에 쓸모가 없다.</b><br>
+        → 중요도를 <b>낮춘다</b></p>
+      </div>
+      <div class="plain-card">
+        <h4>특정한 문서에만 나오는 단어</h4>
+        <p>그 문서만의 이야기를 담고 있다.<br>
+        → 중요도를 <b>높인다</b></p>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      이 생각을 수로 만든 것이 <b>TF-IDF</b>다.
+      네 단계로 나누어 차례대로 구한다.
+    </p>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      계속 쓰는 자료는 지난 시간의 <b>음식점 후기 네 개</b>다.
+      단어 사전은 그대로 9개, 전체 문서의 개수는 <b>4개</b>다.
+    </div>
+    <aside class="notes">"반에서 모두가 가진 물건은 그 사람을 설명해 주지 못한다"는 비유가 잘 통한다. 교복은 누구나 입으니 그 사람의 특징이 아니지만, 특이한 배지를 단 사람은 그것으로 구별된다. 전체 문서 개수 4를 칠판에 크게 적어 둔다 — 3단계에서 분자로 쓰인다.</aside>
+  </section>
+
+  <!-- 5. 단계 1 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 59쪽 · 단계 1</div>
+    <h2>단어빈도 TF</h2>
+
+    <div class="stagehead">
+      <span class="sn">1</span>
+      <span class="sd">\(TF=\) (각 문서에서 그 단어가 나오는 <b>횟수</b>)</span>
+    </div>
+
+    <table class="dt">
+      <caption>TF — 지난 시간의 빈도수 표와 같다</caption>
+      <thead>
+        <tr><th style="width:10%"></th><th>추천</th><th>위생적</th><th>인테리어</th><th>예쁘다</th><th>음식점</th><th>가격</th><th>저렴</th><th>맛</th><th>좋다</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">A</td><td>2</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td class="rowhead">B</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td>2</td><td>1</td></tr>
+        <tr><td class="rowhead">C</td><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td><td>2</td><td>0</td><td>0</td></tr>
+        <tr><td class="rowhead">D</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>2</td><td>0</td></tr>
+      </tbody>
+    </table>
+
+    <p class="prob-stmt">
+      새로 계산할 것이 없다. <b>TF는 지난 시간에 이미 구한 빈도수</b>다.
+      Term Frequency의 줄임말이다.
+    </p>
+    <aside class="notes">첫 단계가 이미 아는 것이라 학생들이 안심한다. 표를 다시 그리게 하지 말고 지난 시간 학습지를 펴게 한다. 가로로 읽으면 한 후기의 단어 빈도, 세로로 읽으면 한 단어가 각 후기에 몇 번 나오는지다 — 다음 단계는 세로로 읽는다.</aside>
+  </section>
+
+  <!-- 6. 단계 2·3 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 59쪽 · 단계 2·3</div>
+    <h2>문서빈도 DF, 그리고 뒤집기</h2>
+
+    <div class="stagehead">
+      <span class="sn">2</span>
+      <span class="sd">\(DF=\) (각 단어가 나오는 <b>문서의 개수</b>) — 횟수가 아니라 문서 수다</span>
+    </div>
+
+    <table class="dt">
+      <thead>
+        <tr><th style="width:10%"></th><th>추천</th><th>위생적</th><th>인테리어</th><th>예쁘다</th><th>음식점</th><th>가격</th><th>저렴</th><th>맛</th><th>좋다</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">DF</td><td class="low">4</td><td class="top">1</td><td>2</td><td>2</td><td class="low">4</td><td>2</td><td>2</td><td>2</td><td class="top">1</td></tr>
+      </tbody>
+    </table>
+
+    <div class="stagehead" style="margin-top: var(--lm-space-4);">
+      <span class="sn">3</span>
+      <span class="sd">\(IDF=\dfrac{(\text{전체 문서의 개수})}{DF}=\dfrac{4}{DF}\)</span>
+    </div>
+
+    <table class="dt">
+      <thead>
+        <tr><th style="width:10%"></th><th>추천</th><th>위생적</th><th>인테리어</th><th>예쁘다</th><th>음식점</th><th>가격</th><th>저렴</th><th>맛</th><th>좋다</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">IDF</td><td class="low">1</td><td class="top">4</td><td>2</td><td>2</td><td class="low">1</td><td>2</td><td>2</td><td>2</td><td class="top">4</td></tr>
+      </tbody>
+    </table>
+
+    <p class="prob-stmt">
+      <b>DF가 크면 IDF는 작아진다.</b> 나누기 때문이다 — 이 뒤집기가 “흔할수록 깎는다”를 만든다.
+    </p>
+    <aside class="notes">DF를 셀 때 '맛'이 후기 B에 두 번 나와도 문서 수로는 1로 센다는 점이 함정이다. B와 D 두 문서에 나오므로 DF는 2다. 여기서 틀리는 학생이 많으니 한 단어를 함께 세어 본다. IDF의 I가 Inverse(역)라는 것도 짚어 준다 — 뒤집는다는 뜻이 이름에 있다.</aside>
+  </section>
+
+  <!-- 7. 단계 4 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 59쪽 · 단계 4</div>
+    <h2>TF-IDF = TF × IDF</h2>
+
+    <div class="stagehead">
+      <span class="sn">4</span>
+      <span class="sd">\(TF\text{-}IDF = TF \times IDF\) — 각 칸의 TF에 그 열의 IDF를 곱한다</span>
+    </div>
+
+    <table class="dt">
+      <thead>
+        <tr><th style="width:10%"></th><th>추천</th><th>위생적</th><th>인테리어</th><th>예쁘다</th><th>음식점</th><th>가격</th><th>저렴</th><th>맛</th><th>좋다</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">IDF</td><td>1</td><td>4</td><td>2</td><td>2</td><td>1</td><td>2</td><td>2</td><td>2</td><td>4</td></tr>
+        <tr><td class="rowhead">A</td><td>2</td><td class="top">4</td><td>2</td><td>2</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td class="rowhead">B</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>2</td><td>2</td><td class="top">4</td><td class="top">4</td></tr>
+        <tr><td class="rowhead">C</td><td>1</td><td>0</td><td>2</td><td>2</td><td>1</td><td>2</td><td class="top">4</td><td>0</td><td>0</td></tr>
+        <tr><td class="rowhead">D</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td class="top">4</td><td>0</td></tr>
+      </tbody>
+    </table>
+
+    <p class="prob-stmt">
+      예를 들어 후기 A의 ‘추천’은 \(TF=2\), \(IDF=1\)이므로 \(2\times 1=2\).
+      ‘위생적’은 \(TF=1\), \(IDF=4\)이므로 \(1\times 4=4\).
+    </p>
+    <aside class="notes">IDF 행을 맨 위에 두었으니 세로로 곱하면 된다. 한두 칸을 학생에게 직접 시켜 본다. 0인 칸은 곱해도 0이라 그대로다. 이 표가 오늘의 결과물이고 다음 두 장에서 이 표를 읽는다.</aside>
+  </section>
+
+  <!-- 8. 뒤집힘 -->
+  <section>
+    <div class="chapter-tag">교과서 59~60쪽 · 핵심</div>
+    <h2>후기 A에서 순위가 뒤집힌다</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>TF로 보면</h4>
+        <p>‘추천’ <b>2</b> &gt; ‘위생적’ <b>1</b></p>
+        <p>추천이 더 중요해 <b>보인다</b>.</p>
+      </div>
+      <div class="plain-card">
+        <h4>TF-IDF로 보면</h4>
+        <p>‘위생적’ <b>4</b> &gt; ‘추천’ <b>2</b></p>
+        <p><span class="kw-danger">위생적이 더 유용하다.</span></p>
+      </div>
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-5);">
+      TF-IDF는 <span class="kw">모든 문서에서 자주 나오는 단어는 중요도가 낮다</span>고 보고,
+      <span class="kw">특정한 문서에서만 자주 나오는 단어는 중요도가 높다</span>고 본다.
+    </div>
+
+    <p class="prob-stmt">
+      그래서 후기 A에서는 <b>TF는 낮지만</b> TF-IDF가 큰 ‘위생적’이
+      더 유용한 단어라고 판단한다.
+    </p>
+    <aside class="notes">오늘의 정점이다. 같은 후기, 같은 표인데 어떤 잣대로 보느냐에 따라 1등이 바뀐다. 교과서 문장을 그대로 읽어 주면 좋다 — "TF는 낮지만 더 유용한 단어라 판단한다". 학생들이 "그럼 뭐가 맞아요?"라고 물으면 "무엇을 묻느냐에 따라 다르다"고 답한다. 주제어를 묻는지, 특징을 묻는지.</aside>
+  </section>
+
+  <!-- 9. 결과 읽기 -->
+  <section>
+    <div class="chapter-tag">교과서 60쪽 · 결과</div>
+    <h2>그래서 왜 추천했나</h2>
+
+    <p class="prob-stmt">
+      TF-IDF 표에서 각 후기의 가장 큰 값을 찾으면 이렇게 된다.
+    </p>
+
+    <div class="reasons">
+      <div class="reason">
+        <div class="who">후기 A</div>
+        <div class="word">위생적</div>
+        <div class="why">위생적이기 때문에</div>
+      </div>
+      <div class="reason">
+        <div class="who">후기 B</div>
+        <div class="word">맛 · 좋다</div>
+        <div class="why">맛이 좋기 때문에</div>
+      </div>
+      <div class="reason">
+        <div class="who">후기 C</div>
+        <div class="word">저렴</div>
+        <div class="why">저렴하기 때문에</div>
+      </div>
+      <div class="reason">
+        <div class="who">후기 D</div>
+        <div class="word">맛</div>
+        <div class="why">맛있기 때문에</div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      지난 시간에 못 얻었던 답이 나왔다 —
+      <span class="kw-success">네 사람이 추천한 이유는 각각 위생, 맛, 가격, 맛이었다.</span>
+    </div>
+    <aside class="notes">2장에서 던진 질문에 답하는 자리다. 빈도수 벡터로는 '추천'까지가 한계였는데 TF-IDF가 이유까지 꺼내 줬다. 실제 쇼핑몰이나 배달 앱이 후기를 요약해 보여 주는 것이 이런 계산이라고 덧붙이면 실감이 난다.</aside>
+  </section>
+
+  <!-- 10. 예제 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 60쪽 · 예제 2</div>
+    <h2>자율주행 기사로 한 번 더</h2>
+
+    <p class="prob-stmt">
+      전체 문서는 <b>3개</b>다. 앞의 TF에서 DF와 IDF를 구하면 —
+    </p>
+
+    <table class="dt">
+      <thead>
+        <tr><th style="width:14%"></th><th>운전자</th><th>책임</th><th>제조사</th><th>안전</th><th>주체</th><th>논란</th><th>자동차</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">DF</td><td>3</td><td>3</td><td>3</td><td>3</td><td class="top">1</td><td class="top">1</td><td class="top">1</td></tr>
+        <tr><td class="rowhead">IDF</td><td>1</td><td>1</td><td>1</td><td>1</td><td class="top">3</td><td class="top">3</td><td class="top">3</td></tr>
+        <tr><td class="rowhead">A</td><td>1</td><td>2</td><td>1</td><td class="top">3</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td class="rowhead">B</td><td>1</td><td>2</td><td>1</td><td>1</td><td class="top">3</td><td class="top">3</td><td>0</td></tr>
+        <tr><td class="rowhead">C</td><td>1</td><td>2</td><td>1</td><td>1</td><td>0</td><td>0</td><td class="top">3</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      중요도가 가장 높은 단어 — A <b>안전</b>, B <b>주체·논란</b>, C <b>자동차</b>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 주제어는 A 안전, B <b>책임</b>, C <b>책임</b>이었다.
+      B와 C의 답이 <span class="kw-danger">바뀌었다.</span>
+    </p>
+    <aside class="notes">'책임'은 세 기사에 모두 나와 IDF가 1이라 깎였고, 한 기사에만 나온 '주체·논란·자동차'가 3배로 올랐다. 지난 시간 예제와 나란히 놓고 비교하면 TF-IDF가 하는 일이 분명해진다. 주제어(무엇에 대한 글인가)와 중요도 높은 단어(이 글만의 특징은 무엇인가)는 다른 질문이라는 것을 다시 짚는다.</aside>
+  </section>
+
+  <!-- 11. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 61쪽 문제 3 · 확인하기</div>
+    <h2>직접 해 보자</h2>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>문제 3.</b> 미세 먼지 문서 3개, \(U=\{\)농도, 외출, 환기, 자제, 낮다, 높다\(\}\).
+        TF는 A \((1,2,1,2,0,1)\), B \((1,0,2,0,2,0)\), C \((1,0,1,0,0,4)\).
+        TF-IDF로 각 문서에서 중요도가 가장 높은 단어를 구하시오.
+        <div class="ans">
+          \(DF=(3,1,3,1,1,2)\), \(IDF=\left(1,\ 3,\ 1,\ 3,\ 3,\ \dfrac{3}{2}\right)\)<br>
+          TF-IDF: A \(\left(1,6,1,6,0,\dfrac{3}{2}\right)\), B \((1,0,2,0,6,0)\), C \((1,0,1,0,0,6)\)<br>
+          → A <b>외출·자제</b>, B <b>낮다</b>, C <b>높다</b>
+        </div>
+      </li>
+      <li>
+        <b>확인하기.</b> ⑴ 빈도수 벡터로 주제어와 유용한 정보를 쉽게 찾을 수 있다.
+        ⑵ \(TF=3\), \(IDF=2\)이면 \(TF\text{-}IDF=6\)이다.
+        ⑶ 중요도가 가장 높은 단어를 찾을 때 TF-IDF가 가장 <b>작은</b> 단어를 찾는다.
+        <div class="ans">⑴ ✗ — 유용한 정보는 어렵다 &nbsp; ⑵ ○ &nbsp; ⑶ ✗ — 가장 큰 단어를 찾는다</div>
+      </li>
+    </ul>
+    <aside class="notes">문제 3은 IDF에 분수가 처음 나온다. '높다'는 A와 C 두 문서에 나오므로 DF는 2이고 IDF는 3/2이다. 분수가 나와도 곱셈은 같다는 것만 확인시킨다. A의 답이 두 개(외출·자제)인 것도 지금까지 여러 번 겪었으니 놀라지 않을 것이다.</aside>
+  </section>
+
+  <!-- 12. 심화 -->
+  <section>
+    <div class="chapter-tag">심화 · 교과서 61쪽 <span class="badge">『대수』 이수자</span></div>
+    <h2>실제로는 로그를 쓴다</h2>
+
+    <p class="prob-stmt">
+      인공지능이 다루는 문서에서 전체 문장의 개수 \(n\)은 매우 큰 수다.
+      그러면 \(IDF=\dfrac{n}{DF}\)의 값도 너무 커져 계산이 불편하다.
+    </p>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-3);">
+      \[ IDF = \log \frac{n}{DF} \]
+    </div>
+
+    <div class="example-box" style="margin-top: var(--lm-space-4);">
+      \(n=10^{6}\), \(DF=10^{2}\)이면 \(\dfrac{n}{DF}=10^{4}\)으로 큰 값이지만,
+      상용로그를 쓰면 \(\log 10^{4}=4\)로 작아진다.
+    </div>
+
+    <p class="prob-stmt">
+      값이 작아져도 <b>크고 작은 순서는 그대로</b>다 —
+      그래서 중요도 비교에는 아무 지장이 없다.
+    </p>
+    <aside class="notes">『대수』를 이수한 학생만 다룬다. 이수하지 않았으면 이 장을 건너뛰어도 오늘 목표에는 지장이 없다. 핵심은 "왜 로그인가"이고 답은 "숫자를 다루기 좋은 크기로 줄이려고"다. 순서가 보존된다는 마지막 문장을 꼭 짚는다 — 그래야 바꿔도 되는 이유가 설명된다.</aside>
+  </section>
+
+  <!-- 13. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>많이 나온 말과 중요한 말은 다르다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      모두가 쓰는 말은 깎고, 여기서만 잦은 말은 올린다.<br>
+      <span class="kw-success">\(TF\text{-}IDF = TF \times IDF\)</span>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5);">
+      <b>탐구 &amp; 융합</b> — 워드 클라우드 생성기(wordcloud.kr)에 글을 넣으면
+      빈도수가 높은 단어가 크게 그려진다. 글의 핵심을 한눈에 보는 시각화 방법이다.
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      다음 시간부터는 <b>Ⅱ-3 텍스트 데이터 분석</b>이다.
+      글이 무엇에 대한 것인지가 아니라
+      <span class="kw-danger">글이 어떤 감정인지</span>를 묻는다.
+    </div>
+    <aside class="notes">워드 클라우드는 시간이 남으면 실제로 해 보면 좋다. 다만 워드 클라우드는 빈도수 기반이라 오늘 배운 TF-IDF와는 다르다는 점을 한마디 덧붙이면 정확하다. 다음 절 예고로 마무리한다 — 주제에서 감정으로 질문이 바뀐다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (11장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
