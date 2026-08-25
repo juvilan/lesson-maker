@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>몇 번 나왔는지를 센다 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-small); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt td.top { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+    .dt tr.corpus td { background: var(--lm-paper-tint); font-weight: 700; color: var(--lm-ink); }
+    .dt tr.corpus td.top { background: var(--lm-accent); color: var(--lm-page); }
+
+    /* 표어·후기 카드 */
+    .cards2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+              margin-top: var(--lm-space-4); }
+    .cards4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--lm-space-3);
+              margin-top: var(--lm-space-3); }
+    .qcard { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+             border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .qcard .tag { display: inline-block; font-size: var(--lm-slide-caption);
+                  color: var(--lm-accent); font-weight: 700; margin-bottom: var(--lm-space-2); }
+    .qcard p { margin: 0; font-size: var(--lm-slide-small);
+               line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+
+    .vecline { text-align: center; font-size: var(--lm-slide-body);
+               color: var(--lm-ink); margin-top: var(--lm-space-3); line-height: 1.9; }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { display: none; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid var(--lm-rule); color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { display: block; }
+  </style>
+</head>
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅱ-2 텍스트 데이터 처리 · 1차시</div>
+    <h1>몇 번 나왔는지를 센다</h1>
+    <p class="slide-sub">빈도수 벡터로 글의 주제어를 찾는 법</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 55~58쪽</span>
+    </div>
+    <aside class="notes">지난 절에서 만든 0/1 벡터를 한 칸 확장하는 차시다. 계산은 세기뿐이라 부담이 없고, 4~5장의 대비(있다/없다 vs 몇 번)가 오늘의 전부다. 뒤로 갈수록 표가 커지니 앞에서 시간을 아껴 둔다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 52~54쪽</div>
+    <h2>있다와 없다만 말하는 벡터</h2>
+
+    <p class="prob-stmt">
+      지난 시간에 교복 댓글을 단어 사전 9개 기준으로 벡터로 만들었다.
+      \(\vec{A}=(1,1,1,1,1,0,0,0,0)\) — <span class="kw">속하면 1, 아니면 0</span>이었다.
+    </p>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      그런데 댓글 A에서 <b>‘학교’와 ‘교복’은 두 번씩</b> 나왔다.
+      <span class="kw-danger">벡터에는 둘 다 그냥 1로 적혔다.</span>
+    </div>
+
+    <p class="prob-stmt">
+      집합은 중복을 쓰지 않으니 당연한 결과다.
+      하지만 <b>몇 번 나왔는지</b>가 중요할 때는 이 벡터로는 부족하다.
+    </p>
+    <aside class="notes">지난 차시 마지막 장에서 남긴 질문을 그대로 이어받는다. 학생들에게 "댓글 A에서 교복이 몇 번 나왔지?"라고 물어 두 번임을 확인시키고, 벡터에는 1로만 적혔다는 것을 짚으면 오늘의 필요가 분명해진다.</aside>
+  </section>
+
+  <!-- 3. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>단어의 <span class="kw">빈도수</span>를 성분으로 하는 <span class="kw">빈도수 벡터</span>를 구할 수 있다.</span></li>
+      <li><span class="num">2</span><span>빈도수 벡터로 문서와 말뭉치의 <span class="kw">주제어</span>를 찾을 수 있다.</span></li>
+    </ul>
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      오늘 바뀌는 것은 딱 하나다 —
+      <span class="kw-success">0과 1 대신, 나온 횟수를 그대로 적는다.</span>
+    </div>
+    <aside class="notes">목표가 둘뿐인 가벼운 차시다. 새 개념은 '빈도수 벡터'와 '주제어' 두 낱말이고 방법은 세기뿐이다. 그래서 예제와 문제에 시간을 넉넉히 쓸 수 있다.</aside>
+  </section>
+
+  <!-- 4. 생각 열기 -->
+  <section class="tight">
+    <div class="chapter-tag">생각 열기 · 교과서 55쪽</div>
+    <h2>두 표어, 같아 보이는 벡터</h2>
+
+    <div class="cards2">
+      <div class="qcard">
+        <span class="tag">표어 A</span>
+        <p>수학으로 혁신하고<br>수학으로 발전하는 인공지능!</p>
+      </div>
+      <div class="qcard">
+        <span class="tag">표어 B</span>
+        <p>수학은 인공지능의 꽃,<br>인공지능은 수학의 산물!</p>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      단어 사전이 \(U=\{\)수학, 혁신, 발전, 인공지능, 꽃, 산물\(\}\)일 때
+      지난 시간 방식(속하면 1)으로 벡터를 만들면 —
+    </p>
+
+    <div class="vecline">
+      \(\vec{A}=(1,\ 1,\ 1,\ 1,\ 0,\ 0)\) &nbsp;&nbsp;&nbsp;
+      \(\vec{B}=(1,\ 0,\ 0,\ 1,\ 1,\ 1)\)
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      이 벡터로는 <b>어떤 단어가 자주 나오는지</b> 알 수 없다.
+      표어 A에서 ‘수학’이 두 번 나온 것이 <span class="kw-danger">보이지 않는다.</span>
+    </div>
+    <aside class="notes">표어를 소리 내어 읽게 하면 '수학'과 '인공지능'이 반복된다는 것이 귀로 들린다. 그런데 벡터에는 그 반복이 안 보인다 — 이 어긋남이 오늘의 출발점이다.</aside>
+  </section>
+
+  <!-- 5. 빈도수를 센다 -->
+  <section class="tight">
+    <div class="chapter-tag">생각 열기 · 교과서 55쪽</div>
+    <h2>그럼 횟수를 그대로 적어 보자</h2>
+
+    <table class="dt" style="max-width: 1300px; margin-left:auto; margin-right:auto;">
+      <thead>
+        <tr><th style="width:12%"></th><th>수학</th><th>혁신</th><th>발전</th><th>인공지능</th><th>꽃</th><th>산물</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">표어 A</td><td class="top">2</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+        <tr><td class="rowhead">표어 B</td><td class="top">2</td><td>0</td><td>0</td><td class="top">2</td><td>1</td><td>1</td></tr>
+      </tbody>
+    </table>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="result-box">
+        표어 A에서 빈도수가 가장 높은 단어 —
+        <span class="kw-success">‘수학’</span>
+      </div>
+      <div class="result-box">
+        표어 B에서 빈도수가 가장 높은 단어 —
+        <span class="kw-success">‘수학’과 ‘인공지능’</span>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      숫자 하나만 바꿨을 뿐인데 <b>보이지 않던 것이 보인다.</b>
+    </p>
+    <aside class="notes">B에서 최다 단어가 둘이라는 점을 짚는다. 주제어가 하나로 안 정해질 수도 있다는 것을 여기서 미리 겪게 하면 뒤의 문제 2⑶(공·심판 두 개)에서 당황하지 않는다.</aside>
+  </section>
+
+  <!-- 6. 정의 -->
+  <section>
+    <div class="chapter-tag">교과서 56쪽 · 정의</div>
+    <h2>빈도수 벡터와 단어가방</h2>
+
+    <div class="definition-box">
+      단어 사전을 기준으로 각 단어의 <span class="kw">빈도수를 성분으로 하는 벡터</span>를
+      빈도수 벡터라고 한다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="plain-card">
+        <h4>달라진 점은 성분뿐이다</h4>
+        <p>자리(차원)는 그대로 단어 사전의 크기다.
+        각 자리에 <b>0/1 대신 횟수</b>가 들어간다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>단어가방 (Bag of Words)</h4>
+        <p>불용어를 뺀 단어들을 <b>가방 하나에 몰아넣은</b> 것.
+        순서는 잃고 개수만 남는다. 빈도수 벡터를 만들 때 쓰는 모형이다.</p>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      가방에 단어를 쏟아 넣고 <b>같은 것끼리 세는 그림</b>을 떠올리면 된다.
+      문장의 순서는 사라지고 <span class="kw">무엇이 몇 개인가</span>만 남는다.
+    </p>
+    <aside class="notes">'단어가방'이라는 이름이 직관적이라 학생들이 잘 기억한다. 교과서 56쪽 옆의 가방 그림을 함께 보면 좋다. 순서를 잃는다는 점은 한계이기도 한데, 여기서는 언급만 하고 넘어간다.</aside>
+  </section>
+
+  <!-- 7. 함께하기 자료 -->
+  <section class="tight">
+    <div class="chapter-tag">함께하기 · 교과서 56쪽</div>
+    <h2>음식점 후기 네 개</h2>
+
+    <div class="cards4">
+      <div class="qcard">
+        <span class="tag">후기 A</span>
+        <p>추천! 위생적이고 인테리어가 예뻐서 이 음식점을 추천해요.</p>
+      </div>
+      <div class="qcard">
+        <span class="tag">후기 B</span>
+        <p>이 음식점은 가격도 저렴하고, 맛도 좋아요! 정말 맛있어요. 추천!</p>
+      </div>
+      <div class="qcard">
+        <span class="tag">후기 C</span>
+        <p>역시 저렴, 저렴한 가격! 예쁜 인테리어! 추천하는 음식점!</p>
+      </div>
+      <div class="qcard">
+        <span class="tag">후기 D</span>
+        <p>뭐라 해도 맛이죠. 맛있어요! 이 음식점을 추천합니다.</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      단어 사전 \(U=\{\)추천, 위생적, 인테리어, 예쁘다, 음식점, 가격, 저렴, 맛, 좋다\(\}\) — <b>9개</b>
+    </div>
+    <aside class="notes">후기를 소리 내어 읽으면서 반복되는 단어를 손으로 세게 한다. C의 '저렴'이 두 번, D의 '맛'이 두 번인 것을 놓치기 쉽다. '맛있어요'가 '맛'으로 세어진다는 점도 확인시킨다 — 지난 차시의 기본 사전형 단어 표현이다.</aside>
+  </section>
+
+  <!-- 8. 빈도수 표와 벡터 -->
+  <section class="tight">
+    <div class="chapter-tag">함께하기 · 교과서 56쪽</div>
+    <h2>세어서 표로, 표에서 벡터로</h2>
+
+    <table class="dt">
+      <thead>
+        <tr><th style="width:10%"></th><th>추천</th><th>위생적</th><th>인테리어</th><th>예쁘다</th><th>음식점</th><th>가격</th><th>저렴</th><th>맛</th><th>좋다</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">A</td><td>2</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td class="rowhead">B</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td>2</td><td>1</td></tr>
+        <tr><td class="rowhead">C</td><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td><td>2</td><td>0</td><td>0</td></tr>
+        <tr><td class="rowhead">D</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>2</td><td>0</td></tr>
+        <tr class="corpus"><td class="rowhead">말뭉치</td><td class="top">5</td><td>1</td><td>2</td><td>2</td><td>4</td><td>2</td><td>3</td><td>4</td><td>1</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      말뭉치의 빈도수 벡터 \(\vec{U}=(5,1,2,2,4,2,3,4,1)\)에서 가장 큰 성분은 <b>5</b> —
+      이 말뭉치의 주제어는 <span class="kw-success">‘추천’</span>이다.
+    </div>
+    <aside class="notes">말뭉치 행은 네 후기의 세로 합이라는 것을 확인시킨다. 한 열만 함께 더해 보면 바로 이해한다. 빈도수 벡터로 "이 말뭉치가 무엇에 대한 글인가"를 한 단어로 답할 수 있다는 것이 오늘의 성과다.</aside>
+  </section>
+
+  <!-- 9. 예제 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 57쪽 · 예제 1</div>
+    <h2>자율주행 사고 책임 기사</h2>
+
+    <p class="prob-stmt">
+      단어 사전 \(U=\{\)운전자, 책임, 제조사, 안전, 주체, 논란, 자동차\(\}\)
+    </p>
+
+    <table class="dt" style="max-width: 1300px; margin-left:auto; margin-right:auto;">
+      <thead>
+        <tr><th style="width:12%"></th><th>운전자</th><th>책임</th><th>제조사</th><th>안전</th><th>주체</th><th>논란</th><th>자동차</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">제목 A</td><td>1</td><td>2</td><td>1</td><td class="top">3</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td class="rowhead">제목 B</td><td>1</td><td class="top">2</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+        <tr><td class="rowhead">제목 C</td><td>1</td><td class="top">2</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+        <tr class="corpus"><td class="rowhead">말뭉치</td><td>3</td><td class="top">6</td><td>3</td><td>5</td><td>1</td><td>1</td><td>1</td></tr>
+      </tbody>
+    </table>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="result-box">
+        각 제목의 주제어 —
+        A <b>안전</b>, B <b>책임</b>, C <b>책임</b>
+      </div>
+      <div class="result-box">
+        말뭉치의 주제어 —
+        <span class="kw-success">‘책임’</span> (빈도수 6)
+      </div>
+    </div>
+    <aside class="notes">개별 문서의 주제어와 말뭉치 전체의 주제어가 다를 수 있다는 점이 이 예제의 요지다. A는 '안전'이 주제어인데 말뭉치 전체로는 '책임'이다. 어느 쪽을 묻는지 문제에서 잘 읽어야 한다고 일러 준다.</aside>
+  </section>
+
+  <!-- 10. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 57~58쪽 문제 1·2</div>
+    <h2>직접 해 보자</h2>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>문제 1.</b> 윤동주 「산울림」 —
+        “까치가 울어서 / 산울림, / 아무도 못 들은 / 산울림, / 까치가 들었다, / 산울림, / 저 혼자 들었다, / 산울림,”
+        의 단어집합과 빈도수 벡터를 구하고 주제어를 말하시오.
+        <div class="ans">
+          단어집합 \(\{\)까치, 울다, 산울림, 듣다, 혼자\(\}\) ·
+          빈도수 벡터 \((2,\ 1,\ 4,\ 3,\ 1)\) → 주제어 <b>산울림</b>
+        </div>
+      </li>
+      <li>
+        <b>문제 2.</b> \(U=\{\)경기장, 승부차기, 공, 심판, 도루, 번트, 자유투, 리바운드\(\}\),
+        \(\vec{A}=(3,4,2,1,0,0,0,0)\), \(\vec{B}=(1,0,2,2,4,3,0,0)\), \(\vec{C}=(1,0,2,3,0,0,4,3)\)
+        일 때 ⑴ 각 기사의 주제어 ⑵ 각 기사의 스포츠 ⑶ 말뭉치의 주제어를 구하시오.
+        <div class="ans">
+          ⑴ A <b>승부차기</b>, B <b>도루</b>, C <b>자유투</b><br>
+          ⑵ A <b>축구</b>, B <b>야구</b>, C <b>농구</b><br>
+          ⑶ \(\vec{U}=(5,4,6,6,4,3,4,3)\) → 주제어는 <b>‘공’과 ‘심판’</b> (둘 다 6)
+        </div>
+      </li>
+    </ul>
+    <aside class="notes">문제 1은 시라서 '산울림'이 후렴처럼 네 번 반복된다 — 빈도수가 주제를 그대로 짚어 주는 깨끗한 예다. 문제 2⑶은 최다 단어가 둘이다. 5장에서 표어 B가 그랬던 것을 떠올리게 하면 자연스럽다. ⑵는 종목별 전문 용어가 곧 주제어라는 점이 재미있는 지점이다.</aside>
+  </section>
+
+  <!-- 11. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>자주 나오는 말이 곧 주제다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      0과 1을 횟수로 바꾸었을 뿐인데<br>
+      <span class="kw-success">글이 무엇에 대한 것인지</span>가 한 단어로 나온다.
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-6);">
+      그런데 음식점 말뭉치의 주제어는 <b>‘추천’</b>이었다.
+      네 사람이 다 추천한 건 알겠는데 —
+      <span class="kw-danger">왜 추천하는지는 여전히 모른다.</span>
+    </div>
+
+    <p class="prob-stmt">
+      모두가 쓰는 말은 오히려 아무것도 알려 주지 않는다.
+      다음 시간에 그 문제를 푼다.
+    </p>
+    <aside class="notes">교과서 58쪽이 스스로 던지는 문제 제기를 그대로 가져왔다. '추천'은 네 후기에 모두 나오니 주제어가 되지만, 바로 그 이유로 후기끼리 구별해 주지 못한다. 지난 차시 10장에서 "모두에게 있는 단어는 서로를 구별해 주지 못한다"고 했던 것과 같은 이야기다 — 연결해 주면 다음 시간 TF-IDF가 자연스럽게 열린다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (10장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
