@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>다섯 명으로 정해도 되는가 | 인공지능수학 3학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-body); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt tr.sum td { font-weight: 700; color: var(--lm-ink); background: var(--lm-paper-tint); }
+    .dt td.hit { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+    .dt caption { caption-side: top; text-align: right; font-size: var(--lm-slide-caption);
+                  color: var(--lm-ink-3); padding-bottom: var(--lm-space-1); }
+
+    .prow { display: flex; justify-content: center; gap: var(--lm-space-6);
+            margin-top: var(--lm-space-3); flex-wrap: wrap; }
+    .pcell { text-align: center; padding: var(--lm-space-3) var(--lm-space-5);
+             border: var(--lm-border-thin) solid var(--lm-rule);
+             border-radius: var(--lm-radius-md); background: var(--lm-page); min-width: 190px; }
+    .pcell .pname { font-size: var(--lm-slide-small); color: var(--lm-ink-3);
+                    margin-bottom: var(--lm-space-1); }
+    .pcell.win { border-color: var(--lm-accent); background: var(--lm-accent-tint); }
+    .pcell.win .pname { color: var(--lm-accent); font-weight: 700; }
+    .pcell.tie { border-color: var(--lm-warning); background: var(--lm-warning-tint); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-3);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { display: none; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid var(--lm-rule); color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { display: block; }
+
+    /* 두 표 나란히 */
+    .tbl-pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-6);
+                margin-top: var(--lm-space-3); }
+    .tbl-pair .dt { margin-top: 0; font-size: var(--lm-slide-small); }
+  </style>
+</head>
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅲ-2 경향성과 예측 · 01 자료의 분석과 예측 <span class="badge">2차시</span></div>
+    <h1>다섯 명으로 정해도 되는가</h1>
+    <p class="slide-sub">조건이 겹쳐 자료가 모자랄 때, 인공지능이 쓰는 우회로</p>
+    <div class="title-meta">
+      <span>3학년 인공지능수학</span>
+      <span>교과서 87~89쪽</span>
+    </div>
+    <aside class="notes">지난 시간 마지막에 남긴 "1학년 여학생은 5명뿐"이 오늘의 출발점이다. 오늘은 계산 단계가 셋으로 늘어나므로 8장에서 속도를 늦춘다. 나머지는 가볍게 넘겨도 된다. 12장 MNIST 읽기 자료는 지도서가 "가볍게 알아두도록 한다"고 한 부분이라 1~2분이면 충분하다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 84~86쪽</div>
+    <h2>분모가 곧 질문이었다</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>아무 조건 없이</h4>
+        <p>분모 <b>200</b> → <span class="kw-success">상품 A</span></p>
+      </div>
+      <div class="plain-card">
+        <h4>1학년이라면</h4>
+        <p>분모 <b>41</b> → <span class="kw-success">상품 A</span></p>
+      </div>
+      <div class="plain-card">
+        <h4>여학생이라면</h4>
+        <p>분모 <b>89</b> → <span class="kw-danger">상품 B</span></p>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      조건이 주어지면 <span class="kw">전체로 삼는 범위</span>를 바꾸고, 그 안에서 세면 됐다.
+      계산은 분수 하나로 끝났다.
+    </p>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      그런데 조건이 <b>두 개 겹치면</b> 어떻게 될까?
+    </div>
+    <aside class="notes">지난 시간 요약은 30초면 된다. 세 칸을 빠르게 짚고 마지막 질문으로 넘어간다. 학생들이 "그냥 둘 다 만족하는 사람만 세면 되죠"라고 답하면 정확히 그게 다음 장이다 — 그 말을 받아서 넘어간다.</aside>
+  </section>
+
+  <!-- 3. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>자료의 수가 적을 때 <span class="kw">확률을 그대로 믿기 어려운 이유</span>를 말할 수 있다.</span></li>
+      <li><span class="num">2</span><span>조건을 <span class="kw">분리해서 곱하는</span> 방법으로 예상 인원을 구할 수 있다.</span></li>
+      <li><span class="num">3</span><span>그렇게 구한 확률로 예측하고, 직접 센 결과와 <span class="kw">비교</span>할 수 있다.</span></li>
+    </ul>
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      오늘은 곱셈이 세 번 나온다.
+      순서만 잃지 않으면 되는데, <span class="kw-success">각 곱셈이 무엇을 세는지</span>가 관건이다.
+    </div>
+    <aside class="notes">목표 2번의 "분리해서 곱한다"가 오늘의 기술이고, 3번의 "비교"가 오늘의 통찰이다. 직접 센 답과 나눠 곱한 답이 다르게 나오는데, 그게 실수가 아니라는 것을 10장에서 다룬다.</aside>
+  </section>
+
+  <!-- 4. 문제 제기 -->
+  <section>
+    <div class="chapter-tag">교과서 87쪽 · 문제 제기</div>
+    <h2>1학년이면서 여학생이라면</h2>
+
+    <p class="prob-stmt">
+      조건 두 개를 모두 만족하는 학생만 자료에서 골라내면 이렇게 된다.
+    </p>
+
+    <table class="dt" style="max-width: 1100px; margin-left:auto; margin-right:auto;">
+      <caption>(단위: 명)</caption>
+      <thead><tr><th style="width:30%"></th><th>상품 A</th><th>상품 B</th><th>상품 C</th><th>합계</th></tr></thead>
+      <tbody>
+        <tr><td class="rowhead">1학년 여학생</td><td>1</td><td>2</td><td>2</td><td class="hit">5</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      200명 중 <span class="kw-danger">단 5명</span>이다.
+    </div>
+    <aside class="notes">84쪽 원자료 표에서 1학년 여학생 행(1, 2, 2)을 짚어 주면 어디서 나온 숫자인지 바로 보인다. "겹치는 조건일수록 사람이 줄어든다"는 감각을 여기서 심는다. 조건이 셋이면 더 줄어든다는 것도 한마디 덧붙일 수 있다.</aside>
+  </section>
+
+  <!-- 5. 그대로 세어보면 -->
+  <section>
+    <div class="chapter-tag">교과서 87쪽 · 전개</div>
+    <h2>그래도 일단 세어 본다</h2>
+
+    <div class="prow">
+      <div class="pcell"><div class="pname">상품 A</div>\(p_\mathrm{A}=\dfrac{1}{5}\)</div>
+      <div class="pcell tie"><div class="pname">상품 B</div>\(p_\mathrm{B}=\dfrac{2}{5}\)</div>
+      <div class="pcell tie"><div class="pname">상품 C</div>\(p_\mathrm{C}=\dfrac{2}{5}\)</div>
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="info-box">
+        가장 큰 값이 <span class="kw-info">둘</span>이다.
+        예측은 "상품 B 또는 C" — 답이 하나로 좁혀지지 않는다.
+      </div>
+      <div class="warning-box">
+        더 큰 문제는 따로 있다.
+        <b>한 명만 달랐어도</b> 답이 통째로 바뀐다.
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      교과서는 이렇게 적는다 — 자료의 수가 충분하지 않으므로
+      <span class="kw">여기서 구한 확률은 신뢰하기 어렵다.</span>
+    </p>
+    <aside class="notes">"한 명만 달랐어도"를 실제로 해 보면 효과적이다. C를 산 학생 한 명이 A를 샀다면 1:2:2가 2:2:1이 되어 답이 A 또는 B로 바뀐다. 5명짜리 자료가 얼마나 흔들리는지 학생들이 체감한다.</aside>
+  </section>
+
+  <!-- 6. 전제 -->
+  <section>
+    <div class="chapter-tag">교과서 87쪽 · 약속</div>
+    <h2>계산에 앞서 하나를 약속한다</h2>
+
+    <div class="definition-box">
+      상품을 구매하는 학생의 <span class="kw">학년과 성별은 서로 영향을 주지 않는다</span>고 생각한다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="plain-card">
+        <h4>무슨 뜻인가</h4>
+        <p>"1학년이라서 여학생일 가능성이 달라지지는 않는다"는 뜻이다.
+        그래서 두 조건을 <b>따로 따져도 된다</b>고 보는 것이다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>왜 필요한가</h4>
+        <p>이 약속이 있어야 <b>곱셈</b>이 허용된다.
+        약속 없이 곱하면 근거가 없다.</p>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      실제로 늘 맞는 약속은 아니다. 그래도 자료가 모자랄 때는
+      <span class="kw">이렇게 가정하고 계산하는 편</span>이 5명으로 정하는 것보다 낫다.
+    </p>
+    <aside class="notes">이 장을 건너뛰면 8장의 곱셈이 근거 없는 조작으로 보인다. 짧아도 반드시 짚는다. "실제로 늘 맞지는 않는다"는 마지막 문장이 중요하다 — 인공지능이 쓰는 가정이 완벽해서가 아니라 쓸 만해서 쓴다는 감각을 준다.</aside>
+  </section>
+
+  <!-- 7. 1000명 환산 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 87쪽 · 상품 A의 경우</div>
+    <h2>1000명이 산다고 치고 따라가 본다</h2>
+
+    <p class="prob-stmt">고등학생 <b>1000명</b>이 세 상품 중 하나를 산다고 하자.</p>
+
+    <div class="step-box" data-s="1">
+      <div class="step-label">1단계 · 상품 A를 살 학생 수</div>
+      \(1000 \times \dfrac{72}{200} = 360\)(명)
+    </div>
+    <div class="step-box" data-s="2">
+      <div class="step-label">2단계 · 그중 1학년은 몇 명인가</div>
+      \(360 \times \dfrac{16}{72} = 80\)(명) — A를 산 72명 중 1학년이 16명이었다
+    </div>
+    <div class="step-box" data-s="3">
+      <div class="step-label">3단계 · 그중 여학생은 몇 명인가</div>
+      \(80 \times \dfrac{26}{72} = 28.8\cdots\) → <b>29명</b> — A를 산 72명 중 여학생이 26명이었다
+    </div>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="sNext">다음 단계 ▶</button>
+      <span class="step-counter" id="sCnt">0 / 3</span>
+      <button class="anim-btn reset-btn" id="sReset">처음으로</button>
+    </div>
+    <aside class="notes">오늘의 중심이다. 한 단계씩 열면서 "지금 세고 있는 게 누구인지"를 매번 말로 확인한다. 2단계와 3단계의 분모가 둘 다 72인 것을 짚어 준다 — 상품 A를 산 사람 전체가 기준이기 때문이다. 학생들이 가장 많이 헷갈리는 지점이다. 소수는 올림해서 사람 수로 만든다.</aside>
+  </section>
+
+  <!-- 8. 세 상품 결과 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 88쪽 · 결과</div>
+    <h2>세 상품을 모두 해 보면</h2>
+
+    <p class="prob-stmt">같은 방법으로 B와 C도 구해 표로 정리한다.</p>
+
+    <table class="dt" style="max-width: 1100px; margin-left:auto; margin-right:auto;">
+      <caption>1000명 중 예상되는 1학년 여학생 수 · (단위: 명)</caption>
+      <thead><tr><th style="width:30%"></th><th>상품 A</th><th>상품 B</th><th>상품 C</th><th>합계</th></tr></thead>
+      <tbody>
+        <tr><td class="rowhead">1학년 여학생</td><td>29</td><td>29</td><td class="hit">33</td><td>91</td></tr>
+      </tbody>
+    </table>
+
+    <div class="prow">
+      <div class="pcell"><div class="pname">상품 A</div>\(p_\mathrm{A}=\dfrac{29}{91}\)</div>
+      <div class="pcell"><div class="pname">상품 B</div>\(p_\mathrm{B}=\dfrac{29}{91}\)</div>
+      <div class="pcell win"><div class="pname">상품 C</div>\(p_\mathrm{C}=\dfrac{33}{91}\)</div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      인공지능은 이 1학년 여학생이 <span class="kw-success">상품 C</span>를 살 것으로 예측한다.
+    </div>
+    <aside class="notes">B와 C의 계산은 학습지에서 직접 하게 하고 여기서는 결과만 확인해도 좋다. 5명이 91명으로 늘어난 것이 핵심이다 — 같은 비율을 더 큰 무대에서 다시 본 셈이다. 답이 하나로 좁혀진 것도 짚는다.</aside>
+  </section>
+
+  <!-- 9. 대비 -->
+  <section>
+    <div class="chapter-tag">교과서 88쪽 · 핵심</div>
+    <h2>답이 달라졌다</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>직접 센 5명으로</h4>
+        <p>\(\dfrac{1}{5},\ \dfrac{2}{5},\ \dfrac{2}{5}\)</p>
+        <p><span class="kw-danger">상품 B 또는 C</span> — 하나로 못 좁힘</p>
+      </div>
+      <div class="plain-card">
+        <h4>조건을 나눠 곱해서</h4>
+        <p>\(\dfrac{29}{91},\ \dfrac{29}{91},\ \dfrac{33}{91}\)</p>
+        <p><span class="kw-success">상품 C</span> — 하나로 좁혀짐</p>
+      </div>
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-5);">
+      여러 개의 조건에 해당하는 자료의 수가 충분하지 않으면,
+      <span class="kw">각각의 조건을 분리하여 계산한 확률</span>을 이용해 예측한다.
+    </div>
+
+    <p class="prob-stmt">
+      5명이라는 <b>우연</b> 대신, 200명 전체가 보여 준 <b>비율</b>을 믿기로 한 것이다.
+    </p>
+    <aside class="notes">"어느 쪽이 맞느냐"고 묻는 학생이 나온다. 정답은 "5명짜리 자료로는 알 수 없다"이다. 나눠 곱한 쪽이 더 믿을 만한 이유는 200명 전체의 비율을 썼기 때문이지, 계산이 더 정교해서가 아니다. 마지막 문장을 그대로 말해 주면 좋다.</aside>
+  </section>
+
+  <!-- 10. 스스로활동 자료 -->
+  <section class="tight">
+    <div class="chapter-tag">스스로 활동 · 교과서 88쪽</div>
+    <h2>윤희는 내일 운동할까</h2>
+
+    <p class="prob-stmt">
+      윤희가 <b>14일</b> 동안 운동한 날(Y)과 하지 않은 날(N)을 날씨·온도와 함께 기록했다.
+      정리하면 이렇다. 운동한 날은 9일, 하지 않은 날은 5일이다.
+    </p>
+
+    <div class="tbl-pair">
+      <table class="dt">
+        <caption>날씨별 · (단위: 일)</caption>
+        <thead><tr><th>날씨</th><th>Y</th><th>N</th><th>합계</th></tr></thead>
+        <tbody>
+          <tr><td class="rowhead">맑음</td><td class="hit">2</td><td class="hit">3</td><td>5</td></tr>
+          <tr><td class="rowhead">흐림</td><td>4</td><td>0</td><td>4</td></tr>
+          <tr><td class="rowhead">비</td><td>3</td><td>2</td><td>5</td></tr>
+          <tr class="sum"><td class="rowhead">합계</td><td>9</td><td>5</td><td>14</td></tr>
+        </tbody>
+      </table>
+      <table class="dt">
+        <caption>온도별 · (단위: 일)</caption>
+        <thead><tr><th>온도</th><th>Y</th><th>N</th><th>합계</th></tr></thead>
+        <tbody>
+          <tr><td class="rowhead">더움</td><td>2</td><td>3</td><td>5</td></tr>
+          <tr><td class="rowhead">보통</td><td class="hit">4</td><td class="hit">1</td><td>5</td></tr>
+          <tr><td class="rowhead">시원</td><td>3</td><td>1</td><td>4</td></tr>
+          <tr class="sum"><td class="rowhead">합계</td><td>9</td><td>5</td><td>14</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      내일은 <b>맑고 온도가 보통</b>이라고 한다. 윤희는 운동을 할까?
+      강조된 칸이 우리가 쓸 숫자다.
+    </div>
+    <aside class="notes">표를 채우는 일은 학습지에서 하고, 슬라이드에서는 완성된 표로 시작한다. 두 조건(맑음·보통)이 겹쳤으니 앞의 쇼핑몰과 똑같은 상황이다. 학생들이 그 구조를 알아채도록 "이거 아까 뭐랑 같지?"라고 물어본다.</aside>
+  </section>
+
+  <!-- 11. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 88쪽 3·4</div>
+    <h2>100일 동안이라면</h2>
+    <p class="prob-stmt">문항을 누르면 답이 열린다. 사람 수처럼 <b>날수</b>도 올림해 정수로 만든다.</p>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>⑴</b> 100일 중 <b>운동을 한 날</b> 가운데, 날씨가 맑고 온도가 보통일 것으로
+        예상되는 날은 며칠인가?
+        <div class="ans">운동한 날 \(100 \times \dfrac{9}{14} = 64.2\cdots\) → 65일.
+        그중 \(65 \times \dfrac{2}{9} \times \dfrac{4}{9} = \dfrac{520}{81} = 6.4\cdots\) → <b>7일</b></div>
+      </li>
+      <li>
+        <b>⑵</b> 100일 중 <b>운동을 하지 않은 날</b> 가운데 같은 조건인 날은 며칠인가?
+        <div class="ans">운동 안 한 날 \(100 \times \dfrac{5}{14} = 35.7\cdots\) → 36일.
+        그중 \(36 \times \dfrac{3}{5} \times \dfrac{1}{5} = \dfrac{108}{25} = 4.32\) → <b>5일</b></div>
+      </li>
+      <li>
+        <b>⑶</b> 내일 실제로 맑고 온도가 보통이라면, 윤희의 운동 여부를 판단하시오.
+        <div class="ans">운동할 것으로 예상되는 날 <b>7일</b> vs 안 할 것으로 예상되는 날 <b>5일</b>
+        → 더 큰 쪽을 고르므로 <b>운동한다</b>고 예측</div>
+      </li>
+    </ul>
+    <aside class="notes">⑴과 ⑵의 분모가 다르다는 점이 함정이다. 운동한 9일 안에서의 비율(2/9, 4/9)과 안 한 5일 안에서의 비율(3/5, 1/5)을 각각 써야 한다. 여기서 틀리는 학생이 많으니 표의 어느 칸을 보는지 손으로 짚게 한다. ⑶은 결국 7과 5를 비교하는 일이라 1차시의 "큰 쪽을 고른다"와 같다.</aside>
+  </section>
+
+  <!-- 12. 읽기 자료 -->
+  <section>
+    <div class="chapter-tag">읽기 자료 · 교과서 89쪽</div>
+    <h2>손 글씨 숫자를 읽는 기계</h2>
+
+    <p class="prob-stmt">
+      우편번호를 사람이 읽어 분류하던 일을 기계에 맡기려고 만든 것이 <b>MNIST</b> 데이터 셋이다.
+    </p>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>이미지 한 장</h4>
+        <p>가로·세로 28개씩 <b>784개 픽셀</b>. 각 칸은 0(검정)부터 255(흰색)까지의 수다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>학습과 검증</h4>
+        <p>트레이닝 셋 <b>60000</b>개로 학습하고, 테스트 셋 <b>10000</b>개로 확인한다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>판단하는 법</h4>
+        <p>0부터 9까지 <b>10개의 확률</b>을 계산해, 확률이 가장 높은 숫자로 분류한다.</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      정확도는 2002년 99.58 %에서 2020년 <b>99.84 %</b>까지 올랐다 —
+      10000개 중 <span class="kw-success">16개만 틀린 것</span>이다.
+      그 16개는 사람이 봐도 헷갈린다.
+    </div>
+    <aside class="notes">지도서가 "가볍게 알아두도록 한다"고 한 부분이라 길게 끌지 않는다. 다만 마지막 문장 — "확률이 가장 높은 숫자로 분류한다" — 이 1차시에서 배운 규칙과 똑같다는 점은 반드시 짚는다. 교과서 89쪽의 잘못 분류된 숫자 그림을 띄워 주면 반응이 좋다.</aside>
+  </section>
+
+  <!-- 13. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>모자라면 쪼개서 곱한다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      조건이 겹쳐 해당하는 자료가 적으면, 그 적은 자료를 믿는 대신<br>
+      <span class="kw-success">조건을 하나씩 떼어 곱한다.</span>
+    </div>
+
+    <p class="prob-stmt">
+      여기까지가 <b>확률로 예측하기</b>다. 표를 세고, 범위를 정하고, 모자라면 쪼갰다.
+    </p>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      다음 시간부터는 표가 아니라 <b>좌표평면</b>이다.
+      수학 점수와 과학 점수처럼 <span class="kw-danger">두 값이 함께 움직이는 자료</span>를 다룬다.
+    </div>
+    <aside class="notes">Ⅲ-2의 01절이 여기서 끝난다. 다음 시간은 02절로, 도구가 통째로 바뀐다는 것을 예고해 둔다. "표를 세는 일은 끝났고, 이제 점을 찍는다"고 말하면 전환이 분명해진다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 단계 공개 — 1000명 환산 3단계 (7장) */
+  function wireReveal(attr, cls, nextId, resetId, cntId) {
+    const items = Array.from(document.querySelectorAll('[data-' + attr + ']'));
+    if (!items.length) return;
+    const cnt = document.getElementById(cntId);
+    let i = 0;
+    function render() {
+      items.forEach((el, k) => el.classList.toggle(cls, k < i));
+      cnt.textContent = i + ' / ' + items.length;
+      window.safeTypeset(items.slice(0, i));
+    }
+    document.getElementById(nextId).addEventListener('click', () => {
+      if (i < items.length) { i++; render(); }
+    });
+    document.getElementById(resetId).addEventListener('click', () => { i = 0; render(); });
+    render();
+  }
+
+  wireReveal('s', 'visible', 'sNext', 'sReset', 'sCnt');
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (11장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
