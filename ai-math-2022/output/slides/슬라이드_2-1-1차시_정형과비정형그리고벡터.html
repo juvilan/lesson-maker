@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>기계는 글자를 못 읽는다 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-body); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt td.hit { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+
+    /* 급식 조사 카드 */
+    .survey { display: grid; grid-template-columns: 1fr 1.4fr; gap: var(--lm-space-5);
+              margin-top: var(--lm-space-4); align-items: start; }
+    .menu-chips { display: flex; flex-wrap: wrap; gap: var(--lm-space-2); }
+    .menu-chips span { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                       border-radius: var(--lm-radius-sm); padding: var(--lm-space-1) var(--lm-space-3);
+                       font-size: var(--lm-slide-small); color: var(--lm-ink-2); }
+    .opinions { display: flex; flex-direction: column; gap: var(--lm-space-2); }
+    .opinions q { display: block; background: var(--lm-page);
+                  border-left: 4px solid var(--lm-rule-strong);
+                  border-radius: var(--lm-radius-sm); padding: var(--lm-space-2) var(--lm-space-3);
+                  font-size: var(--lm-slide-small); line-height: var(--lm-slide-line-tight);
+                  color: var(--lm-ink-2); quotes: none; }
+
+    /* 원-핫 벡터 시각화 */
+    .onehot { display: flex; justify-content: center; gap: var(--lm-space-6);
+              margin-top: var(--lm-space-4); flex-wrap: wrap; }
+    .oh { text-align: center; }
+    .oh .ohname { font-size: var(--lm-slide-small); color: var(--lm-ink-3);
+                  margin-bottom: var(--lm-space-2); }
+    .oh .cells { display: flex; gap: 6px; justify-content: center; }
+    .oh .cells i { display: block; width: 54px; height: 54px; line-height: 54px;
+                   border: var(--lm-border-thin) solid var(--lm-rule-strong);
+                   border-radius: var(--lm-radius-sm); background: var(--lm-page);
+                   font-style: normal; font-size: var(--lm-slide-body); color: var(--lm-ink-3); }
+    .oh .cells i.on { background: var(--lm-accent); color: var(--lm-page); font-weight: 700;
+                      border-color: var(--lm-accent); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-3);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { display: none; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid var(--lm-rule); color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { display: block; }
+  </style>
+</head>
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅱ-1 텍스트 데이터 표현 · 1차시 <span class="badge">Ⅱ단원 시작</span></div>
+    <h1>기계는 글자를 못 읽는다</h1>
+    <p class="slide-sub">정형과 비정형, 그리고 말을 수로 바꾸는 첫 걸음</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 50~52쪽</span>
+    </div>
+    <aside class="notes">Ⅱ단원의 첫 차시다. 앞 단원이 "인공지능이 무엇으로 배우는가"였다면 이 단원은 "그 재료가 글자일 때 어떻게 다루는가"다. 오늘은 개념이 대부분이고 계산이 거의 없어 가볍게 나갈 수 있다. 8~9장의 벡터와 원-핫이 오늘 유일하게 새로 배우는 수학이다.</aside>
+  </section>
+
+  <!-- 2. 단원 열기 -->
+  <section>
+    <div class="chapter-tag">단원 열기 · 교과서 48~49쪽</div>
+    <h2>데이터! 데이터! 데이터!</h2>
+
+    <div class="example-box" style="margin-top: var(--lm-space-4);">
+      <p style="font-size: var(--lm-slide-body-lg); line-height: 1.5;">
+        “데이터! 데이터! 데이터!<br>
+        <b>진흙이 없으면 벽돌을 만들 수 없지 않소.</b>”
+      </p>
+      <p style="font-size: var(--lm-slide-small); color: var(--lm-ink-3); margin-top: var(--lm-space-2);">
+        — 셜록 홈즈, 아서 코난 도일 『셜록 홈즈의 모험』
+      </p>
+    </div>
+
+    <p class="prob-stmt">
+      홈즈가 사건을 풀려면 단서가 있어야 한다고 답답해하며 한 말이다.
+      인공지능도 마찬가지다. <span class="kw">재료가 없으면 아무것도 만들지 못한다.</span>
+    </p>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      이 단원에서 다루는 재료는 <b>텍스트</b>다.
+      집합과 벡터로 텍스트를 표현하고, 특성에 따라 분석한다.
+    </div>
+    <aside class="notes">단원 도입은 1~2분이면 충분하다. 홈즈 인용은 학생들이 좋아하니 짧게 읽어 주고 넘어간다. "진흙 = 데이터, 벽돌 = 판단"이라는 대응을 한 번 짚어 주면 단원 전체의 틀이 잡힌다.</aside>
+  </section>
+
+  <!-- 3. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>텍스트 데이터를 <span class="kw">정형</span>과 <span class="kw">비정형</span>으로 구분할 수 있다.</span></li>
+      <li><span class="num">2</span><span>정형 텍스트 데이터를 <span class="kw">수</span>로 바꾸어 표현할 수 있다.</span></li>
+      <li><span class="num">3</span><span><span class="kw">벡터</span>의 성분과 차원을 말하고, 원-핫 벡터로 나타낼 수 있다.</span></li>
+    </ul>
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      오늘의 질문은 하나다 —
+      <span class="kw-success">기계가 못 읽는 말을, 어떻게 기계가 읽게 만들 것인가?</span>
+    </div>
+    <aside class="notes">목표 3번의 '벡터'가 오늘 새로 나오는 유일한 수학 용어다. 나머지는 구분과 약속이라 어렵지 않다. 마지막 질문을 칠판에 적어 두고 수업 내내 돌아오면 흐름이 잡힌다.</aside>
+  </section>
+
+  <!-- 4. 생각 열기 -->
+  <section class="tight">
+    <div class="chapter-tag">생각 열기 · 교과서 50쪽</div>
+    <h2>같은 조사, 다른 모양의 답</h2>
+
+    <p class="prob-stmt">
+      어느 고등학교에서 지난 학기 급식에 대해 <b>선호하는 메뉴</b>와 <b>의견</b>을 조사했다.
+    </p>
+
+    <div class="survey">
+      <div>
+        <div class="plain-card">
+          <h4>선호하는 메뉴</h4>
+          <div class="menu-chips">
+            <span>피자</span><span>찜닭</span><span>돈가스</span><span>볶음밥</span>
+            <span>떡볶이</span><span>김치찌개</span><span>스파게티</span><span>제육볶음</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="plain-card">
+          <h4>의견</h4>
+          <div class="opinions">
+            <q>식재료가 신선하고 모든 메뉴의 품질이 좋아요.</q>
+            <q>영양사 선생님께서 친절하고 맛있게 음식을 해 주세요.</q>
+            <q>고기가 자주 나와서 좋지만 가끔 짠 맛이 느껴져요.</q>
+            <q>집에서 먹는 음식과 비교하면 성의가 없어 보여요.</q>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      둘 다 글자인데, <b>생김새가 다르다.</b> 어디가 다른가?
+    </div>
+    <aside class="notes">학생들에게 먼저 물어본다. 대개 "왼쪽은 단어, 오른쪽은 문장"이라고 답하는데 그걸 받아서 "정해진 형식이 있느냐 없느냐"로 다듬어 준다. 왼쪽은 메뉴 이름 중에서 고르면 되지만 오른쪽은 무슨 말이든 쓸 수 있다는 점이 핵심이다.</aside>
+  </section>
+
+  <!-- 5. 정형과 비정형 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 50쪽 · 정의</div>
+    <h2>정형 데이터와 비정형 데이터</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>정형 데이터 — ‘선호하는 메뉴’</h4>
+        <p><b>정해진 형식</b>으로 저장된다.</p>
+        <p>✓ 컴퓨터가 쉽게 처리하고 효율적으로 검색·분석한다 → 인공지능에 활용하기 편하다</p>
+        <p>✗ 형식 밖의 세부 정보를 담거나 새 유형을 추가하기 어렵다</p>
+      </div>
+      <div class="plain-card">
+        <h4>비정형 데이터 — ‘의견’</h4>
+        <p><b>정해진 형식이 없다.</b></p>
+        <p>✓ 다양한 형식을 저장할 수 있고 세부적이고 풍부한 정보를 담는다</p>
+        <p>✗ 인공지능에 쓰려면 <b>컴퓨터가 인식할 수 있는 형태로 바꿔야</b> 한다</p>
+      </div>
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-4);">
+      어느 쪽이 더 좋은 것이 아니다.
+      <span class="kw">사용 목적과 특성에 따라</span> 골라 써야 한다.
+    </div>
+    <aside class="notes">"비정형이 나쁜 것"이라고 오해하기 쉬운데, 오히려 정보는 비정형 쪽이 훨씬 풍부하다. 다만 손이 더 간다. 급식 예로 돌아가면 분명하다 — 메뉴 목록으로는 "왜 좋아하는지"를 알 수 없다.</aside>
+  </section>
+
+  <!-- 6. 왜 수로 바꾸나 -->
+  <section>
+    <div class="chapter-tag">교과서 51쪽 · 문제 제기</div>
+    <h2>기계에게 ‘피자’는 무엇인가</h2>
+
+    <p class="prob-stmt">
+      인공지능은 단어나 문장을 <b>사람처럼 글자 형태로 인식하지 못한다.</b>
+      그래서 인공지능이 인식할 수 있도록 텍스트를
+      <span class="kw">수 또는 수학 기호</span>로 바꾸어 표현해야 한다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="info-box">
+        오늘 할 일 — <span class="kw-info">정형</span> 텍스트를 수와 벡터로 바꾼다.
+        범주가 정해져 있어 어렵지 않다.
+      </div>
+      <div class="warning-box">
+        다음 시간에 할 일 — <span class="kw-danger">비정형</span> 텍스트를 다룬다.
+        문장을 부수는 절차가 따로 필요하다.
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      쉬운 것부터 한다. <b>칸이 정해진 말</b>을 먼저 수로 바꿔 보자.
+    </p>
+    <aside class="notes">이 단원 전체의 지도를 여기서 그려 준다. 정형은 한 시간, 비정형은 다음 시간. 학생들이 "그럼 문장은 어떻게 해요?"라고 물으면 "그게 다음 시간"이라고만 답하고 궁금증을 남긴다.</aside>
+  </section>
+
+  <!-- 7. 수로 표현하기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 51쪽 · 수로 표현하기</div>
+    <h2>범주에 번호를 붙인다</h2>
+
+    <p class="prob-stmt">
+      성별이나 혈액형처럼 <b>범주가 정해진</b> 정형 텍스트 데이터는
+      각 범주를 수로 바꾸어 표현할 수 있다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <table class="dt">
+        <thead><tr><th colspan="4">혈액형 구분</th></tr></thead>
+        <tbody>
+          <tr><td class="rowhead">A형</td><td class="rowhead">B형</td><td class="rowhead">O형</td><td class="rowhead">AB형</td></tr>
+          <tr><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+        </tbody>
+      </table>
+      <table class="dt">
+        <thead><tr><th colspan="2">성별 구분</th></tr></thead>
+        <tbody>
+          <tr><td class="rowhead">남성</td><td class="rowhead">여성</td></tr>
+          <tr><td>3</td><td>4</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      이 수는 <b>이름표일 뿐</b>이다.
+      O형(2)이 A형(0)의 두 배라는 뜻이 아니고, 여성(4)이 남성(3)보다 크다는 뜻도 아니다.
+    </div>
+    <aside class="notes">교과서에 없는 주의지만 반드시 짚어야 한다. 번호를 크기로 읽는 오해가 실제 인공지능에서도 문제를 일으킨다. 바로 그 문제를 피하려고 다음에 배우는 것이 원-핫 벡터다 — 여기서 복선을 깔아 두면 9장이 살아난다.</aside>
+  </section>
+
+  <!-- 8. 벡터 -->
+  <section>
+    <div class="chapter-tag">교과서 51쪽 · 정의</div>
+    <h2>벡터 — 수를 순서대로 늘어놓은 것</h2>
+
+    <div class="definition-box">
+      \(n\)개의 수 \(x_1,\ x_2,\ \dots,\ x_n\)을 괄호 속에 순서대로 나열하여 나타낸
+      \[ \vec{X}=(x_1,\ x_2,\ \dots,\ x_n) \]
+      을 <span class="kw">벡터</span>라고 한다. 이때 \(x_1,\ x_2,\ \dots,\ x_n\)을 벡터 \(\vec{X}\)의
+      <span class="kw">성분</span>이라 하고, 성분의 개수를 그 벡터의 <span class="kw">차원</span>이라고 한다.
+    </div>
+
+    <div class="example-box" style="margin-top: var(--lm-space-4);">
+      \(\vec{X}=(2,\ 0,\ 1,\ 3,\ 5)\)에서
+      첫째 성분은 <b>2</b>, 셋째 성분은 <b>1</b>이고, 이 벡터의 차원은 <b>5</b>다.
+    </div>
+
+    <p class="prob-stmt">
+      벡터는 알파벳 위에 화살표를 붙여 \(\vec{A},\ \vec{P},\ \vec{X}\)와 같이 쓴다.
+      <b>순서가 중요하다</b> — 자리마다 뜻이 정해져 있기 때문이다.
+    </p>
+    <aside class="notes">"순서대로 늘어놓은 수의 묶음"이라는 감각이면 충분하다. 물리에서 배우는 화살표 벡터(크기와 방향)와는 쓰임이 다르다는 것을 묻는 학생이 있으면, 여기서는 자리마다 뜻이 있는 목록으로 쓴다고 답한다. 출석부의 한 줄 같은 것이라는 비유가 잘 통한다.</aside>
+  </section>
+
+  <!-- 9. 원-핫 벡터 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 52쪽 · 원-핫 벡터</div>
+    <h2>하나만 켜고 나머지는 끈다</h2>
+
+    <p class="prob-stmt">
+      정형 텍스트를 벡터로 표현할 때는 <b>범주의 개수를 차원</b>으로 하고,
+      해당하는 범주의 성분만 <span class="kw">1</span>, 나머지는 모두 <span class="kw">0</span>으로 둔다.
+    </p>
+
+    <div class="onehot">
+      <div class="oh">
+        <div class="ohname">남성</div>
+        <div class="cells"><i class="on">1</i><i>0</i></div>
+      </div>
+      <div class="oh">
+        <div class="ohname">여성</div>
+        <div class="cells"><i>0</i><i class="on">1</i></div>
+      </div>
+      <div class="oh">
+        <div class="ohname">O형 (A·B·O·AB 순)</div>
+        <div class="cells"><i>0</i><i>0</i><i class="on">1</i><i>0</i></div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      이렇게 나타낸 벡터를 <span class="kw-success">원-핫(one-hot) 벡터</span>라고 한다.
+      번호를 크기로 오해할 일이 없어진다 — <b>모든 범주가 대등해진다.</b>
+    </div>
+    <aside class="notes">7장에서 깔아 둔 복선을 여기서 회수한다. 0·1·2·3으로 쓰면 O형이 A형보다 크다는 오해가 생기지만 (0,0,1,0)과 (1,0,0,0)은 크기를 비교할 여지가 없다. 'one-hot'이라는 이름도 "하나만 뜨겁다(켜져 있다)"는 뜻이라고 풀어 주면 기억에 남는다.</aside>
+  </section>
+
+  <!-- 10. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 51~52쪽 문제 1·2·3</div>
+    <h2>직접 해 보자</h2>
+    <p class="prob-stmt">문항을 누르면 답이 열린다.</p>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>문제 1.</b> 다음을 정형 데이터와 비정형 데이터로 구분하시오.<br>
+        이름, 댓글, 설명서, 신문 기사, 거주 지역, 문자 메시지
+        <div class="ans"><b>정형</b> — 이름, 거주 지역 &nbsp;/&nbsp;
+        <b>비정형</b> — 댓글, 설명서, 신문 기사, 문자 메시지</div>
+      </li>
+      <li>
+        <b>문제 2.</b> 벡터 \(\vec{X}=(1,\ 0,\ 2,\ 3)\)에 대하여
+        ⑴ 둘째 성분 ⑵ 넷째 성분을 구하시오.
+        <div class="ans">⑴ <b>0</b> &nbsp;&nbsp; ⑵ <b>3</b></div>
+      </li>
+      <li>
+        <b>문제 3.</b> A형을 \((1,\ 0,\ 0,\ 0)\)으로 나타낼 때
+        O형·AB형·B형을 벡터로 표현하시오. (A·B·O·AB 순)
+        <div class="ans">O형 \((0,\ 0,\ 1,\ 0)\), AB형 \((0,\ 0,\ 0,\ 1)\), B형 \((0,\ 1,\ 0,\ 0)\)</div>
+      </li>
+    </ul>
+    <aside class="notes">문제 1에서 '이름'을 비정형으로 답하는 학생이 종종 있다. 이름은 정해진 칸에 들어가는 값이라 정형이다. 문제 3은 성분의 순서가 A·B·O·AB로 고정돼 있다는 점을 놓치면 틀린다 — 순서가 정해져 있다는 8장의 이야기를 여기서 확인한다.</aside>
+  </section>
+
+  <!-- 11. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>칸이 정해진 말은 수로 바꾸면 끝난다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      범주의 개수만큼 자리를 만들고,<br>
+      해당하는 자리에만 <span class="kw-success">1</span>을 둔다. 그것이 원-핫 벡터다.
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-6);">
+      그런데 급식 조사의 <b>‘의견’</b>은 어떻게 할까?
+      <span class="kw-danger">“식재료가 신선하고 모든 메뉴의 품질이 좋아요.”</span>
+      — 여기엔 고를 범주가 없다.
+    </div>
+
+    <p class="prob-stmt">
+      다음 시간에는 이런 <b>문장</b>을 부수어 집합으로 만든다.
+    </p>
+    <aside class="notes">4장에서 봤던 의견 문장을 그대로 다시 띄워 마무리한다. 오늘 배운 방법으로는 손을 댈 수 없다는 것을 확인시키면 다음 차시의 필요성이 분명해진다. "부순다"는 말을 써 두면 다음 시간 낱말 분리가 자연스럽게 이어진다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (10장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
