@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>흩어진 점에 직선을 얹으면 | 인공지능수학 3학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-small); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt caption { caption-side: top; text-align: right; font-size: var(--lm-slide-caption);
+                  color: var(--lm-ink-3); padding-bottom: var(--lm-space-1); }
+
+    /* 도식 SVG — viewBox 단위 = 렌더 px (배율 1.00) */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .axis   { stroke: var(--lm-rule-strong); fill: none; stroke-width: 2; }
+    .dg .gridln { stroke: var(--lm-rule); fill: none; stroke-width: 1; }
+    .dg .pt     { fill: var(--lm-ink-3); }
+    .dg .trend  { stroke: var(--lm-accent); fill: none; stroke-width: 4;
+                  opacity: 0; transition: opacity .45s ease; }
+    .dg.showline .trend { opacity: 1; }
+    .dg.showline .pt { fill: var(--lm-ink-4); }
+    .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink-3); }
+    .dg .t-ax { font-size: 22px; }
+    .dg .t-lab { font-size: 26px; fill: var(--lm-ink-2); }
+
+    /* 통그라미 순서 카드 */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--lm-space-4);
+             margin-top: var(--lm-space-4); }
+    .stepcard { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-3);
+                font-size: var(--lm-slide-small); line-height: var(--lm-slide-line-tight);
+                color: var(--lm-ink-2); }
+    .stepcard .sn { display: inline-block; width: 32px; height: 32px; line-height: 32px;
+                    border-radius: 50%; background: var(--lm-accent); color: var(--lm-page);
+                    text-align: center; font-weight: 700; margin-bottom: var(--lm-space-2); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-3);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { display: none; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid var(--lm-rule); color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { display: block; }
+  </style>
+</head>
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅲ-2 경향성과 예측 · 02 자료의 경향성과 예측 <span class="badge">3차시</span></div>
+    <h1>흩어진 점에 직선을 얹으면</h1>
+    <p class="slide-sub">산점도에서 경향을 읽고, 그 경향을 직선 하나로 나타내는 법</p>
+    <div class="title-meta">
+      <span>3학년 인공지능수학</span>
+      <span>교과서 90~92쪽</span>
+    </div>
+    <aside class="notes">02절의 첫 차시다. 앞 두 차시가 표를 세는 일이었다면 오늘은 좌표평면으로 옮겨 간다. 5장의 "직선 얹기" 버튼이 오늘의 핵심 장면이니 거기서 충분히 시간을 쓴다. 계산은 거의 없고, 추세선의 식은 공학적 도구가 준 값을 받아 쓴다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 84~89쪽</div>
+    <h2>표를 세는 일은 끝났다</h2>
+
+    <p class="prob-stmt">
+      앞의 두 시간 동안 우리는 <b>표</b>를 다뤘다.
+      상품별로 세고, 조건에 맞게 범위를 좁히고, 자료가 모자라면 쪼개서 곱했다.
+      자료는 늘 <span class="kw">칸으로 나뉜 것</span>이었다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="info-box">
+        지금까지의 자료 —<br>
+        <span class="kw-info">1학년/2학년/3학년, 남/여</span><br>
+        칸에 넣어 셀 수 있었다.
+      </div>
+      <div class="result-box">
+        오늘부터의 자료 —<br>
+        <span class="kw-success">수학 90점, 과학 86점</span><br>
+        칸이 아니라 <b>수</b> 두 개가 짝을 이룬다.
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      이런 자료는 세는 대신 <b>찍어 본다</b> — 좌표평면 위에 점으로.
+    </div>
+    <aside class="notes">전환을 분명히 해 준다. 학생들은 앞 차시의 분수 계산을 계속 쓸 거라 예상하는데 오늘은 거의 안 쓴다. "칸에 넣어 셀 수 있는 자료"와 "수 두 개가 짝을 이루는 자료"의 차이를 예를 하나씩 들어 확인시키면 좋다.</aside>
+  </section>
+
+  <!-- 3. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>두 변량의 자료를 <span class="kw">산점도</span>로 나타낼 수 있다.</span></li>
+      <li><span class="num">2</span><span>산점도에서 <span class="kw">상관관계</span>를 읽을 수 있다.</span></li>
+      <li><span class="num">3</span><span>자료의 경향을 나타내는 직선을 <span class="kw">추세선</span>이라 하고, 일차함수로 나타낼 수 있다.</span></li>
+      <li><span class="num">4</span><span>공학적 도구로 추세선의 식을 구할 수 있다.</span></li>
+    </ul>
+    <aside class="notes">목표 4번이 "손으로 구한다"가 아니라 "도구로 구한다"인 점이 중요하다. 교육과정이 추세선을 구할 때 공학적 도구를 이용할 수 있다고 명시하고 있다. 최소제곱법은 다루지 않는다.</aside>
+  </section>
+
+  <!-- 4. 자료 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 90쪽 · 자료</div>
+    <h2>어느 반 20명의 수학과 과학 점수</h2>
+
+    <table class="dt">
+      <caption>(단위: 점)</caption>
+      <thead>
+        <tr><th>번호</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">수학</td><td>90</td><td>64</td><td>94</td><td>57</td><td>82</td><td>92</td><td>84</td><td>72</td><td>52</td><td>86</td></tr>
+        <tr><td class="rowhead">과학</td><td>86</td><td>65</td><td>89</td><td>62</td><td>74</td><td>64</td><td>98</td><td>85</td><td>62</td><td>84</td></tr>
+      </tbody>
+      <thead>
+        <tr><th>번호</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th><th>19</th><th>20</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">수학</td><td>73</td><td>82</td><td>78</td><td>68</td><td>54</td><td>92</td><td>65</td><td>76</td><td>83</td><td>95</td></tr>
+        <tr><td class="rowhead">과학</td><td>84</td><td>83</td><td>59</td><td>64</td><td>55</td><td>95</td><td>70</td><td>72</td><td>88</td><td>93</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      각 학생의 수학 점수를 \(x\)점, 과학 점수를 \(y\)점이라 하고
+      순서쌍 \((x,\ y)\)를 좌표평면에 찍는다. 이것을 <b>산점도</b>라고 한다.
+    </div>
+    <aside class="notes">표를 눈으로 훑어서는 아무 규칙도 안 보인다는 점을 확인시킨다. "여기서 뭐가 보이나요?"라고 물으면 대부분 모르겠다고 한다. 그게 정상이고, 그래서 그림으로 옮기는 것이다.</aside>
+  </section>
+
+  <!-- 5. 산점도 + 직선 얹기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 90쪽 · [그림 1] → [그림 2]</div>
+    <h2>같은 자료, 직선 하나 차이</h2>
+
+    <svg id="sc1" class="dg" viewBox="0 0 680 470" width="680" height="470"
+         preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="수학 점수와 과학 점수의 산점도">
+      <line class="gridln" x1="90" y1="40" x2="640" y2="40"></line>
+      <line class="gridln" x1="90" y1="220" x2="640" y2="220"></line>
+      <line class="axis" x1="90" y1="400" x2="640" y2="400"></line>
+      <line class="axis" x1="90" y1="400" x2="90" y2="40"></line>
+      <text class="t-ax" x="82" y="406" text-anchor="end">50</text>
+      <text class="t-ax" x="82" y="226" text-anchor="end">75</text>
+      <text class="t-ax" x="82" y="46" text-anchor="end">100</text>
+      <text class="t-ax" x="90" y="428" text-anchor="middle">50</text>
+      <text class="t-ax" x="640" y="428" text-anchor="middle">100</text>
+      <text class="t-lab" x="365" y="456" text-anchor="middle">수학 점수 (점)</text>
+      <text class="t-lab" x="30" y="220" text-anchor="middle" transform="rotate(-90 30 220)">과학 점수 (점)</text>
+
+      <line class="trend" x1="112" y1="334" x2="585" y2="118"></line>
+
+      <circle class="pt" cx="530" cy="141" r="7"></circle>
+      <circle class="pt" cx="244" cy="292" r="7"></circle>
+      <circle class="pt" cx="574" cy="119" r="7"></circle>
+      <circle class="pt" cx="167" cy="314" r="7"></circle>
+      <circle class="pt" cx="442" cy="227" r="7"></circle>
+      <circle class="pt" cx="552" cy="299" r="7"></circle>
+      <circle class="pt" cx="464" cy="54"  r="7"></circle>
+      <circle class="pt" cx="332" cy="148" r="7"></circle>
+      <circle class="pt" cx="112" cy="314" r="7"></circle>
+      <circle class="pt" cx="486" cy="155" r="7"></circle>
+      <circle class="pt" cx="343" cy="155" r="7"></circle>
+      <circle class="pt" cx="442" cy="162" r="7"></circle>
+      <circle class="pt" cx="398" cy="335" r="7"></circle>
+      <circle class="pt" cx="288" cy="299" r="7"></circle>
+      <circle class="pt" cx="134" cy="364" r="7"></circle>
+      <circle class="pt" cx="552" cy="76"  r="7"></circle>
+      <circle class="pt" cx="255" cy="256" r="7"></circle>
+      <circle class="pt" cx="376" cy="242" r="7"></circle>
+      <circle class="pt" cx="453" cy="126" r="7"></circle>
+      <circle class="pt" cx="585" cy="90"  r="7"></circle>
+    </svg>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="lineBtn">직선 얹기 ▶</button>
+    </div>
+    <aside class="notes">먼저 점만 보여 주고 "규칙이 보이나요?"라고 묻는다. 교과서 표현대로 "불규칙하게 흩어져 있는 것처럼" 보인다. 그 상태로 잠깐 두었다가 버튼을 누른다. 직선이 나타나는 순간 학생들 반응이 달라진다 — 같은 점인데 갑자기 경향이 보인다. 이 대비가 오늘의 전부다. 버튼을 여러 번 눌러 껐다 켜 보여도 좋다.</aside>
+  </section>
+
+  <!-- 6. 상관관계와 추세선 -->
+  <section>
+    <div class="chapter-tag">교과서 90~91쪽 · 정의</div>
+    <h2>직선이 알려 주는 것</h2>
+
+    <p class="prob-stmt">
+      점들이 <b>한 직선을 중심으로</b> 가까이 모여 있다.
+      수학 점수가 높을수록 대체로 과학 점수도 높다 —
+      두 점수 사이에 <span class="kw">양의 상관관계</span>가 있다.
+    </p>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-4);">
+      자료의 경향을 나타내는 직선을 <span class="kw">추세선</span>이라 하고,
+      \(f(x)=ax+b\) (\(a,\ b\)는 상수)와 같이 \(x\)에 대한 <b>일차함수</b>로 나타낼 수 있다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="plain-card">
+        <h4>기울기 \(a\)가 양수면</h4>
+        <p><b>양의 상관관계</b> — \(x\)가 커질 때 \(y\)도 대체로 커진다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>기울기 \(a\)가 음수면</h4>
+        <p><b>음의 상관관계</b> — \(x\)가 커질 때 \(y\)는 대체로 작아진다.</p>
+      </div>
+    </div>
+    <aside class="notes">"대체로"라는 말을 강조한다. 추세선은 모든 점을 지나지 않고, 지날 필요도 없다. 6번 학생(수학 92, 과학 64)처럼 직선에서 멀리 떨어진 점을 짚어 주면 좋다 — 그 거리가 다음 차시의 오차다. 여기서는 이름만 흘려 두고 넘어간다.</aside>
+  </section>
+
+  <!-- 7. 공학적 도구 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 91~92쪽 · 공학적 도구</div>
+    <h2>추세선은 도구로 구한다</h2>
+
+    <p class="prob-stmt">
+      어느 날 우리나라 여러 지점의 <b>풍속</b>과 <b>최대 파고</b>를 조사한 자료다.
+      통그라미(통계청 통계교육 도구)로 추세선을 그려 본다.
+    </p>
+
+    <table class="dt">
+      <caption>기상자료개방포털, 2021</caption>
+      <thead>
+        <tr><th>지점</th><th>울릉도</th><th>덕적도</th><th>포항</th><th>외연도</th><th>거제도</th><th>서귀포</th><th>통영</th><th>인천</th><th>울산</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">풍속 (m/s)</td><td>12.7</td><td>1.6</td><td>13.1</td><td>2.0</td><td>7.3</td><td>8.4</td><td>9.0</td><td>4.2</td><td>9.7</td></tr>
+        <tr><td class="rowhead">최대 파고 (m)</td><td>5.8</td><td>1.9</td><td>3.8</td><td>2.7</td><td>1.7</td><td>2.6</td><td>2.0</td><td>2.9</td><td>3.6</td></tr>
+      </tbody>
+    </table>
+
+    <div class="steps">
+      <div class="stepcard"><span class="sn">1</span><br>통그라미를 실행하고 <b>풍속</b>과 <b>최대 파고</b>를 차례로 입력한다.</div>
+      <div class="stepcard"><span class="sn">2</span><br>메뉴에서 <b>그래프 &gt; 산점도</b>를 고른다.</div>
+      <div class="stepcard"><span class="sn">3</span><br>가로축에 풍속, 세로축에 최대 파고를 넣고 확인.</div>
+      <div class="stepcard"><span class="sn">4</span><br>옵션에서 <b>추세선(선형) 표시</b>를 켠다.</div>
+    </div>
+    <aside class="notes">가능하면 실제로 통그라미를 띄워 함께 해 본다(tong.kostat.go.kr). 시간이 없으면 순서만 확인하고 다음 장의 결과로 넘어간다. 도구가 무엇을 해 주는지가 핵심이고, 어떤 버튼인지는 부차적이다. 학생들이 나중에 혼자 할 수 있도록 학습지에 주소를 적어 둔다.</aside>
+  </section>
+
+  <!-- 8. 결과 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 92쪽 · 결과</div>
+    <h2>도구가 내놓은 직선</h2>
+
+    <svg id="sc2" class="dg showline" viewBox="0 0 680 450" width="680" height="450"
+         preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="풍속과 최대 파고의 산점도와 추세선">
+      <line class="gridln" x1="90" y1="40" x2="640" y2="40"></line>
+      <line class="gridln" x1="90" y1="220" x2="640" y2="220"></line>
+      <line class="axis" x1="90" y1="400" x2="640" y2="400"></line>
+      <line class="axis" x1="90" y1="400" x2="90" y2="40"></line>
+      <text class="t-ax" x="82" y="406" text-anchor="end">0</text>
+      <text class="t-ax" x="82" y="226" text-anchor="end">3</text>
+      <text class="t-ax" x="82" y="46" text-anchor="end">6</text>
+      <text class="t-ax" x="90" y="428" text-anchor="middle">0</text>
+      <text class="t-ax" x="640" y="428" text-anchor="middle">14</text>
+      <text class="t-lab" x="365" y="446" text-anchor="middle">풍속 (m/s)</text>
+      <text class="t-lab" x="30" y="220" text-anchor="middle" transform="rotate(-90 30 220)">최대 파고 (m)</text>
+
+      <line class="trend" x1="90" y1="307" x2="640" y2="147"></line>
+
+      <circle class="pt" cx="589" cy="52"  r="7"></circle>
+      <circle class="pt" cx="153" cy="286" r="7"></circle>
+      <circle class="pt" cx="605" cy="172" r="7"></circle>
+      <circle class="pt" cx="169" cy="238" r="7"></circle>
+      <circle class="pt" cx="377" cy="298" r="7"></circle>
+      <circle class="pt" cx="420" cy="244" r="7"></circle>
+      <circle class="pt" cx="444" cy="280" r="7"></circle>
+      <circle class="pt" cx="255" cy="226" r="7"></circle>
+      <circle class="pt" cx="471" cy="184" r="7"></circle>
+    </svg>
+
+    <div class="result-box" style="margin-top: var(--lm-space-2);">
+      추세선의 관계식은 \(f(x)=0.19x+1.55\)로 나타난다.
+      기울기가 <b>양수</b>이므로 풍속과 최대 파고 사이에는
+      <span class="kw-success">양의 상관관계</span>가 있다 — 풍속이 빠르면 파고가 높다.
+    </div>
+    <aside class="notes">식은 도구가 준 것을 받아 적었다. 어떻게 이 식이 나왔는지는 묻지 않는다(교육과정 범위 밖이다). 학생이 물으면 "점들과의 어긋남이 가장 작아지도록 컴퓨터가 고른 직선"이라고만 답한다. 그 '어긋남'이 다음 시간의 오차다. 울릉도 점(오른쪽 위)이 직선에서 꽤 떨어져 있는 것을 미리 짚어 두면 다음 차시가 매끄럽다.</aside>
+  </section>
+
+  <!-- 9. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 92쪽 문제 1</div>
+    <h2>이번엔 부호가 반대다</h2>
+
+    <p class="prob-stmt">
+      우리나라 기상 관측 지점의 <b>해발 고도</b>와 <b>7월 평년 최고 기온</b>이다.
+    </p>
+
+    <table class="dt">
+      <caption>기상자료개방포털, 2020</caption>
+      <thead>
+        <tr><th>지점</th><th>광주</th><th>대관령</th><th>대구</th><th>대전</th><th>부산</th><th>서울</th><th>울릉도</th><th>원주</th><th>장수</th><th>제주</th><th>추풍령</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">고도 (m)</td><td>70.3</td><td>772.4</td><td>54.3</td><td>70.2</td><td>69.6</td><td>85.7</td><td>221.1</td><td>150.1</td><td>406.9</td><td>20.8</td><td>245.0</td></tr>
+        <tr><td class="rowhead">기온 (°C)</td><td>29.6</td><td>22.8</td><td>30.3</td><td>29.0</td><td>27.3</td><td>28.6</td><td>25.2</td><td>29.3</td><td>27.6</td><td>29.0</td><td>28.4</td></tr>
+      </tbody>
+    </table>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>⑴</b> 통그라미로 산점도를 그리고 추세선의 식을 구하시오.
+        <div class="ans">\(y = -0.01x + 29.52\)</div>
+      </li>
+      <li>
+        <b>⑵</b> 해발 고도와 7월 평년 최고 기온 사이에 어떤 상관관계가 있는가?
+        <div class="ans">기울기가 음수이므로 <b>음의 상관관계</b> — 높은 곳일수록 대체로 기온이 낮다</div>
+      </li>
+    </ul>
+    <aside class="notes">대관령(772 m, 22.8 °C)이 다른 지점과 크게 떨어져 있어 경향이 눈으로도 보인다. 기울기 -0.01은 "100 m 높아질 때 약 1도 낮아진다"는 뜻이라고 풀어 주면 실감이 난다. 실제 대기의 기온감률과 비슷하다는 점을 덧붙이면 좋다. 통그라미를 쓸 수 없으면 식을 주고 ⑵만 물어도 된다.</aside>
+  </section>
+
+  <!-- 10. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>직선 하나가 경향이다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      흩어진 점만으로는 안 보이던 것이,<br>
+      <span class="kw-success">추세선 \(f(x)=ax+b\)</span> 하나를 얹으면 보인다.
+      기울기의 부호가 곧 상관관계다.
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-6);">
+      다음 시간에는 이 직선을 <b>쓴다</b> —
+      자료에 없는 풍속에서도 파고를 <span class="kw-danger">예측</span>하고,
+      그 예측이 실제와 얼마나 어긋나는지 잰다.
+    </div>
+
+    <p class="prob-stmt">
+      오늘은 직선을 <b>얻었고</b>, 다음 시간에는 그 직선을 <b>쓴다</b>.
+    </p>
+    <aside class="notes">"얻는 법"과 "쓰는 법"으로 두 차시를 가르는 구조를 명확히 해 둔다. 8장에서 울릉도 점이 직선에서 떨어져 있던 것을 다시 떠올리게 하면 다음 시간 도입이 자연스럽다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 직선 얹기 토글 (5장) */
+  (function () {
+    const svg = document.getElementById('sc1');
+    const btn = document.getElementById('lineBtn');
+    if (!svg || !btn) return;
+    btn.addEventListener('click', () => {
+      const on = svg.classList.toggle('showline');
+      btn.textContent = on ? '직선 지우기 ◀' : '직선 얹기 ▶';
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (9장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
