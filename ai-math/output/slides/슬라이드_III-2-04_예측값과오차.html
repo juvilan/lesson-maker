@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>예측은 얼마나 빗나가는가 | 인공지능수학 3학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-small); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt td.hit { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+    .dt td.warn { background: var(--lm-warning-tint); color: var(--lm-ink); font-weight: 700; }
+    .dt caption { caption-side: top; text-align: right; font-size: var(--lm-slide-caption);
+                  color: var(--lm-ink-3); padding-bottom: var(--lm-space-1); }
+
+    /* 도식 SVG — viewBox 단위 = 렌더 px (배율 1.00) */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .axis   { stroke: var(--lm-rule-strong); fill: none; stroke-width: 2; }
+    .dg .gridln { stroke: var(--lm-rule); fill: none; stroke-width: 1; }
+    .dg .pt     { fill: var(--lm-ink-3); }
+    .dg .trend  { stroke: var(--lm-accent); fill: none; stroke-width: 4; }
+    .dg .err    { stroke: var(--lm-danger); fill: none; stroke-width: 3; stroke-dasharray: 6 5; }
+    .dg .guide  { stroke: var(--lm-info); fill: none; stroke-width: 3; stroke-dasharray: 8 6; }
+    .dg .ptnew  { fill: var(--lm-info); }
+    .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink-3); }
+    .dg .t-ax { font-size: 22px; }
+    .dg .t-lab { font-size: 26px; fill: var(--lm-ink-2); }
+    .dg .t-mark { font-size: 26px; fill: var(--lm-danger); font-weight: 600; }
+    .dg .t-info { font-size: 26px; fill: var(--lm-info); font-weight: 600; }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-3);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { display: none; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid var(--lm-rule); color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { display: block; }
+
+    /* 정리하기 낱말 */
+    .words { display: flex; flex-wrap: wrap; gap: var(--lm-space-3);
+             justify-content: center; margin-top: var(--lm-space-4); }
+    .words .chip { font-size: var(--lm-slide-body); }
+  </style>
+</head>
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅲ-2 경향성과 예측 · 02 자료의 경향성과 예측 <span class="badge">4차시 · 단원 마무리</span></div>
+    <h1>예측은 얼마나 빗나가는가</h1>
+    <p class="slide-sub">추세선으로 예측값을 구하고, 측정값과의 어긋남을 재는 법</p>
+    <div class="title-meta">
+      <span>3학년 인공지능수학</span>
+      <span>교과서 93~95쪽</span>
+    </div>
+    <aside class="notes">Ⅲ-2를 닫는 차시다. 계산은 대입 한 번과 뺄셈 한 번뿐이라 부담이 없다. 오늘의 무게중심은 7장 — 오차를 산점도 위 세로 선분으로 보여 주는 대목이다. 거기서 "추세선이 무엇을 작게 만들려는 직선인지"가 눈으로 들어온다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 90~92쪽</div>
+    <h2>직선은 이미 얻었다</h2>
+
+    <p class="prob-stmt">
+      풍속과 최대 파고의 산점도에 통그라미가 직선 하나를 얹어 줬다.
+      그 직선의 식이 추세선 \(f(x)=0.19x+1.55\)였고,
+      기울기가 양수라 <span class="kw">양의 상관관계</span>임을 읽었다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="info-box">
+        지난 시간에 한 일 —<br>
+        <span class="kw-info">직선을 얻었다</span>
+      </div>
+      <div class="result-box">
+        오늘 할 일 —<br>
+        <span class="kw-success">그 직선을 쓴다</span>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      직선을 쓰면 두 가지가 따라온다.
+      <b>자료에 없는 값도 답할 수 있게 되고</b>, 동시에 <b>틀리기 시작한다.</b>
+    </div>
+    <aside class="notes">"틀리기 시작한다"에 무게를 둔다. 지금까지는 자료를 세기만 해서 틀릴 일이 없었는데, 예측을 하는 순간 맞고 틀림이 생긴다. 그 어긋남에 이름을 붙이는 것이 오늘 배우는 오차다.</aside>
+  </section>
+
+  <!-- 3. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>추세선을 이용해 자료에 없는 \(x\)에 대한 <span class="kw">예측값</span>을 구할 수 있다.</span></li>
+      <li><span class="num">2</span><span>측정값과 예측값의 차인 <span class="kw">오차</span>를 구할 수 있다.</span></li>
+      <li><span class="num">3</span><span>오차의 <span class="kw">부호와 크기</span>가 각각 무엇을 뜻하는지 말할 수 있다.</span></li>
+    </ul>
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      오늘의 계산은 <b>대입 한 번, 뺄셈 한 번</b>이다.
+    </div>
+    <aside class="notes">계산이 쉬운 만큼 의미에 시간을 쓴다. 특히 목표 3번 — 부호가 방향(위인가 아래인가)이고 절댓값이 크기(얼마나 빗나갔나)라는 구분이 오늘의 핵심 개념이다.</aside>
+  </section>
+
+  <!-- 4. 예측값 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 93쪽 · 예측값</div>
+    <h2>자료에 없는 값도 답할 수 있다</h2>
+
+    <p class="prob-stmt">
+      최대 파고를 잴 수 없는 어떤 지점의 풍속이 <b>4 m/s</b>라고 하자.
+      자료의 9개 지점 어디에도 없는 값이다. 그래도 추세선에 넣으면 답이 나온다.
+    </p>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-3);">
+      \[ f(4) = 0.19 \times 4 + 1.55 = 2.31 \ (\mathrm{m}) \]
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-4);">
+      추세선 \(f(x)=ax+b\)에서 변량 \(x\)에 대한 추세선의 값 \(f(x)\)를
+      변량 \(y\)의 <span class="kw">예측값</span>이라고 한다.
+    </div>
+
+    <p class="prob-stmt">
+      재지 않고도 <b>2.31 m쯤 되겠다</b>고 말할 수 있게 된 것이다.
+      이것이 추세선을 구한 이유다.
+    </p>
+    <aside class="notes">"재지 않고 안다"가 예측의 값어치다. 실제로 파고 관측 장비가 없는 지점이 많다는 점을 덧붙이면 실감이 난다. 다만 이 값은 어디까지나 추정이라는 것도 함께 말해 둔다 — 다음 장이 바로 그 이야기다.</aside>
+  </section>
+
+  <!-- 5. 오차 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 93쪽 · 오차</div>
+    <h2>그런데 실제로 잰 곳은 어떤가</h2>
+
+    <p class="prob-stmt">
+      통영은 풍속이 <b>9.0 m/s</b>이고, 최대 파고를 실제로 재 보니 <b>2.0 m</b>였다.
+      추세선은 뭐라고 했을까?
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="info-box">
+        <b>예측값</b><br>
+        \(f(9) = 0.19 \times 9 + 1.55 = 3.26\ (\mathrm{m})\)
+      </div>
+      <div class="result-box">
+        <b>측정값</b><br>
+        \(y = 2.0\ (\mathrm{m})\)
+      </div>
+    </div>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-3);">
+      \[ (\text{오차}) = y - f(9) = 2.0 - 3.26 = -1.26\ (\mathrm{m}) \]
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      추세선이 <b>1.26 m만큼 높게</b> 말한 것이다.
+    </div>
+    <aside class="notes">"추세선이 틀렸다"가 아니라 "추세선이 높게 말했다"로 표현한다. 오차는 잘못이 아니라 어긋남의 기록이다. 부호가 음수인 것은 실제가 예측보다 아래에 있다는 뜻이고, 다음 장에서 그 규칙을 정리한다.</aside>
+  </section>
+
+  <!-- 6. 정의 -->
+  <section>
+    <div class="chapter-tag">교과서 93쪽 · 정의</div>
+    <h2>오차와 오차의 크기</h2>
+
+    <div class="definition-box">
+      측정값 \(y\)에서 예측값 \(f(x)\)를 뺀 값을 변량 \(x\)에서의 <span class="kw">오차</span>라고 한다.
+      \[ (\text{오차}) = y - f(x) = y - ax - b \]
+      또, 오차의 <b>절댓값</b>을 오차의 <span class="kw">크기</span>라고 한다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="plain-card">
+        <h4>부호가 말하는 것 — 방향</h4>
+        <p><b>양수</b>면 실제가 예측보다 <b>위</b>에 있다.<br>
+        <b>음수</b>면 실제가 예측보다 <b>아래</b>에 있다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>절댓값이 말하는 것 — 크기</h4>
+        <p>얼마나 빗나갔는지다. 방향과 상관없이
+        <b>0에 가까울수록</b> 잘 맞은 것이다.</p>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      (오차) = (측정값) − (예측값). <b>순서를 뒤집으면 부호가 반대가 된다.</b>
+    </p>
+    <aside class="notes">순서를 뒤집는 실수가 가장 흔하다. "측정값이 먼저"를 구호처럼 반복시킨다. 통영의 -1.26을 다시 짚으며 "실제가 아래에 있어서 음수"라고 확인한다.</aside>
+  </section>
+
+  <!-- 7. 오차를 그림으로 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 94쪽 · 아홉 지점 전부</div>
+    <h2>오차는 점과 직선 사이의 거리다</h2>
+
+    <svg class="dg" viewBox="0 0 680 450" width="680" height="450"
+         preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="아홉 지점의 오차를 세로 선분으로 나타낸 산점도">
+      <line class="gridln" x1="90" y1="40" x2="640" y2="40"></line>
+      <line class="gridln" x1="90" y1="220" x2="640" y2="220"></line>
+      <line class="axis" x1="90" y1="400" x2="640" y2="400"></line>
+      <line class="axis" x1="90" y1="400" x2="90" y2="40"></line>
+      <text class="t-ax" x="82" y="406" text-anchor="end">0</text>
+      <text class="t-ax" x="82" y="226" text-anchor="end">3</text>
+      <text class="t-ax" x="82" y="46" text-anchor="end">6</text>
+      <text class="t-lab" x="365" y="446" text-anchor="middle">풍속 (m/s)</text>
+      <text class="t-lab" x="30" y="220" text-anchor="middle" transform="rotate(-90 30 220)">최대 파고 (m)</text>
+
+      <line class="trend" x1="90" y1="307" x2="640" y2="147"></line>
+
+      <line class="err" x1="589" y1="52"  x2="589" y2="162"></line>
+      <line class="err" x1="153" y1="286" x2="153" y2="289"></line>
+      <line class="err" x1="605" y1="172" x2="605" y2="157"></line>
+      <line class="err" x1="169" y1="238" x2="169" y2="284"></line>
+      <line class="err" x1="377" y1="298" x2="377" y2="224"></line>
+      <line class="err" x1="420" y1="244" x2="420" y2="211"></line>
+      <line class="err" x1="444" y1="280" x2="444" y2="204"></line>
+      <line class="err" x1="255" y1="226" x2="255" y2="259"></line>
+      <line class="err" x1="471" y1="184" x2="471" y2="196"></line>
+
+      <circle class="pt" cx="589" cy="52"  r="7"></circle>
+      <circle class="pt" cx="153" cy="286" r="7"></circle>
+      <circle class="pt" cx="605" cy="172" r="7"></circle>
+      <circle class="pt" cx="169" cy="238" r="7"></circle>
+      <circle class="pt" cx="377" cy="298" r="7"></circle>
+      <circle class="pt" cx="420" cy="244" r="7"></circle>
+      <circle class="pt" cx="444" cy="280" r="7"></circle>
+      <circle class="pt" cx="255" cy="226" r="7"></circle>
+      <circle class="pt" cx="471" cy="184" r="7"></circle>
+
+      <text class="t-mark" x="581" y="42"  text-anchor="end">울릉도</text>
+      <text class="t-mark" x="163" y="300" text-anchor="start">덕적도</text>
+      <text class="t-mark" x="452" y="298" text-anchor="start">통영</text>
+    </svg>
+
+    <div class="two-col" style="margin-top: var(--lm-space-2);">
+      <div class="warning-box">
+        가장 긴 선분 — <b>울릉도</b>, 오차의 크기 <b>1.837</b>
+      </div>
+      <div class="result-box">
+        가장 짧은 선분 — <b>덕적도</b>, 오차의 크기 <b>0.046</b>
+      </div>
+    </div>
+    <aside class="notes">오늘의 핵심 장면이다. 점선 하나하나가 오차이고, 추세선은 이 선분들이 전체적으로 짧아지도록 고른 직선이라고 말해 준다. "어떻게 가장 짧게 만드는가"는 다음 단원(최적화)의 일이라고만 예고한다. 울릉도가 유난히 긴 것을 보고 "이런 점은 빼야 하나요"라고 묻는 학생이 있으면 좋은 질문이라고 받아 준다 — 실제로 그런 판단을 하기도 한다고만 답한다.</aside>
+  </section>
+
+  <!-- 8. 아홉 지점 표 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 94쪽 · 오차표</div>
+    <h2>숫자로 확인하면</h2>
+
+    <table class="dt">
+      <caption>추세선 \(f(x)=0.19x+1.55\) 기준 · 예측값과 오차는 소수 셋째 자리까지</caption>
+      <thead>
+        <tr><th style="width:18%">지점</th><th>풍속 (m/s)</th><th>최대 파고 (m)</th><th>예측값 (m)</th><th>오차 (m)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">울릉도</td><td>12.7</td><td>5.8</td><td>3.963</td><td class="warn">1.837</td></tr>
+        <tr><td class="rowhead">덕적도</td><td>1.6</td><td>1.9</td><td>1.854</td><td class="hit">0.046</td></tr>
+        <tr><td class="rowhead">포항</td><td>13.1</td><td>3.8</td><td>4.039</td><td>-0.239</td></tr>
+        <tr><td class="rowhead">외연도</td><td>2.0</td><td>2.7</td><td>1.930</td><td>0.770</td></tr>
+        <tr><td class="rowhead">거제도</td><td>7.3</td><td>1.7</td><td>2.937</td><td>-1.237</td></tr>
+        <tr><td class="rowhead">서귀포</td><td>8.4</td><td>2.6</td><td>3.146</td><td>-0.546</td></tr>
+        <tr><td class="rowhead">통영</td><td>9.0</td><td>2.0</td><td>3.260</td><td>-1.260</td></tr>
+        <tr><td class="rowhead">인천</td><td>4.2</td><td>2.9</td><td>2.348</td><td>0.552</td></tr>
+        <tr><td class="rowhead">울산</td><td>9.7</td><td>3.6</td><td>3.393</td><td>0.207</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box" style="margin-top: var(--lm-space-2);">
+      오차가 <b>양수인 지점과 음수인 지점이 섞여</b> 있다 —
+      추세선이 점들 <span class="kw-info">한가운데</span>를 지난다는 뜻이다.
+    </div>
+    <aside class="notes">부호가 섞여 있다는 관찰이 중요하다. 한쪽으로 몰려 있다면 그 직선은 경향을 잘 나타내지 못한 것이다. 표의 예측값은 학생들이 직접 대입해 한두 개만 확인해 보면 충분하다. 계산기를 써도 된다.</aside>
+  </section>
+
+  <!-- 9. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 93~94쪽 예제 1 · 문제 2 · 3</div>
+    <h2>직접 해 보자</h2>
+    <p class="prob-stmt">문항을 누르면 답이 열린다.</p>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>예제 1.</b> 창립 이후 기간 \(x\)년, 매출액 \(y\)억 원, 추세선 \(f(x)=x+2\).
+        1년 2억, 2년 6억, 3년 4억일 때 오차를 각각 구하시오.
+        <div class="ans">예측값 3, 4, 5 → 오차 \(2-3=-1\), \(6-4=2\), \(4-5=-1\) (억 원)</div>
+      </li>
+      <li>
+        <b>문제 2.</b> 해발 고도의 추세선 \(y=-0.01x+29.52\)로
+        고도 250 m와 600 m인 지점의 7월 평년 최고 기온을 예측하시오.
+        <div class="ans">\(f(250)=-0.01\times 250+29.52=27.02\) °C,
+        \(f(600)=-0.01\times 600+29.52=23.52\) °C</div>
+      </li>
+      <li>
+        <b>문제 3.</b> 사용 기간 \(x\)년, 중고 가격 \(y\)만 원, 추세선 \(f(x)=-2.5x+11\).
+        1년 9만 원, 2년 5만 원, 3년 4만 원일 때 오차를 구하시오.
+        <div class="ans">예측값 8.5, 6.0, 3.5 → 오차 \(9-8.5=0.5\), \(5-6=-1.0\), \(4-3.5=0.5\) (만 원)</div>
+      </li>
+    </ul>
+    <aside class="notes">문제 2는 예측만 하고 오차는 묻지 않는다 — 그 고도의 실제 기온을 모르기 때문이다. 그 점을 짚어 주면 "오차는 잰 값이 있어야 구할 수 있다"는 것이 분명해진다. 예제 1과 문제 3은 부호가 섞여 나오므로 순서(측정값 − 예측값)를 지켰는지 확인시킨다.</aside>
+  </section>
+
+  <!-- 10. 정리하기 + 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">교과서 95쪽 · 정리하기 · 오늘 한 줄</div>
+    <h2>Ⅲ-2에서 배운 것</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>01 자료의 분석과 예측</h4>
+        <p>인공지능은 <b>확률</b>이 가장 큰 사건이 일어날 것으로 예측한다.
+        <b>조건</b>이 주어지면 그 조건에 맞는 확률로 예측하고,
+        자료가 모자라면 조건을 분리해 계산한다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>02 자료의 경향성과 예측</h4>
+        <p>자료의 <b>경향</b>을 나타내는 직선이 <b>추세선</b> \(f(x)=ax+b\)이다.
+        \(f(x)\)가 <b>예측값</b>, 측정값에서 예측값을 뺀 것이 <b>오차</b>,
+        그 절댓값이 오차의 <b>크기</b>다.</p>
+      </div>
+    </div>
+
+    <div class="words">
+      <span class="chip chip-accent">확률</span>
+      <span class="chip chip-accent">조건</span>
+      <span class="chip chip-accent">예측</span>
+      <span class="chip chip-info">경향</span>
+      <span class="chip chip-info">추세선</span>
+      <span class="chip chip-info">예측값</span>
+      <span class="chip chip-success">오차</span>
+      <span class="chip chip-success">크기</span>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      예측에는 늘 <span class="kw-success">오차가 따라온다.</span>
+      좋은 예측이란 틀리지 않는 예측이 아니라, <b>틀린 만큼이 작은</b> 예측이다.
+    </div>
+    <aside class="notes">낱말 여덟 개가 95쪽 정리하기의 낱말상자 그대로다. 학생들에게 각 낱말을 한 문장으로 설명하게 하면 단원 정리가 된다. 마지막 문장이 Ⅲ단원 전체의 결론이자 다음 단원(최적화 — 오차를 가장 작게 만드는 일)으로 넘어가는 다리다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (9장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
