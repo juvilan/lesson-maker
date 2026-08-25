@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>무엇을 살지 어떻게 맞히는가 | 인공지능수학 3학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    /* 자료표 */
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-body); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt tr.sum td { font-weight: 700; color: var(--lm-ink); background: var(--lm-paper-tint); }
+    .dt td.hit { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+    .dt caption { caption-side: top; text-align: right; font-size: var(--lm-slide-caption);
+                  color: var(--lm-ink-3); padding-bottom: var(--lm-space-1); }
+
+    /* 확률 세 칸 */
+    .prow { display: flex; justify-content: center; gap: var(--lm-space-6);
+            margin-top: var(--lm-space-4); flex-wrap: wrap; }
+    .pcell { text-align: center; padding: var(--lm-space-3) var(--lm-space-5);
+             border: var(--lm-border-thin) solid var(--lm-rule);
+             border-radius: var(--lm-radius-md); background: var(--lm-page); min-width: 190px; }
+    .pcell .pname { font-size: var(--lm-slide-small); color: var(--lm-ink-3);
+                    margin-bottom: var(--lm-space-1); }
+    .pcell.win { border-color: var(--lm-accent); background: var(--lm-accent-tint); }
+    .pcell.win .pname { color: var(--lm-accent); font-weight: 700; }
+
+    /* 확인 활동 */
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-3);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { display: none; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid var(--lm-rule); color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { display: block; }
+  </style>
+</head>
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅲ-2 경향성과 예측 · 01 자료의 분석과 예측 <span class="badge">1차시</span></div>
+    <h1>무엇을 살지 어떻게 맞히는가</h1>
+    <p class="slide-sub">자료에서 확률을 세어 예측하는 법, 그리고 조건이 붙었을 때</p>
+    <div class="title-meta">
+      <span>3학년 인공지능수학</span>
+      <span>교과서 84~86쪽</span>
+    </div>
+    <aside class="notes">Ⅲ-2의 첫 차시다. 지난 단원(Ⅲ-1)이 "무엇에 가까운가"를 재는 일이었다면 이번 단원은 "무엇이 일어날 것 같은가"를 재는 일이다. 계산은 분수 하나뿐이라 부담이 없고, 오늘의 무게중심은 8~9장 — 같은 사람인데 조건에 따라 답이 갈리는 대목이다. 앞부분은 리듬 있게 넘긴다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 73~82쪽</div>
+    <h2>닮음을 재고 나서</h2>
+
+    <p class="prob-stmt">
+      지난 단원에서 우리는 <b>분류</b>를 했다.
+      해밍 거리로 <span class="kw">몇 칸이 다른가</span>를 세고,
+      퍼셉트론으로 <span class="kw">점수를 매겨 큰 쪽</span>을 골랐다.
+      둘 다 "이것은 무엇인가"에 답하는 일이었다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="info-box">
+        분류가 묻는 것 —<br>
+        <span class="kw-info">이 이미지는 0인가 8인가?</span><br>
+        답은 이미 정해져 있고, 우리는 그걸 알아맞혔다.
+      </div>
+      <div class="result-box">
+        오늘부터 묻는 것 —<br>
+        <span class="kw-success">이 사람은 무엇을 살까?</span><br>
+        답은 아직 일어나지 않았다.
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      아직 일어나지 않은 일을 어떻게 맞히는가?
+      인공지능은 <b>이미 쌓인 자료</b>를 센다.
+    </div>
+    <aside class="notes">분류와 예측의 차이를 여기서 한 번 못 박아 둔다. 학생들은 둘을 잘 섞는다. "분류는 답이 있는 걸 맞히는 것, 예측은 아직 없는 걸 맞히는 것"이라고 말해 두면 뒤에서 편하다. 84쪽 다가서기(스마트폰 색 선호도) 그림을 띄우고 시작해도 좋다.</aside>
+  </section>
+
+  <!-- 3. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>자료에서 사건이 일어날 <span class="kw">확률</span>을 구할 수 있다.</span></li>
+      <li><span class="num">2</span><span>여러 사건 중 <span class="kw">확률이 가장 큰 것</span>을 골라 예측할 수 있다.</span></li>
+      <li><span class="num">3</span><span><span class="kw">조건이 주어지면</span> 그 조건에 맞는 확률을 구해 예측할 수 있다.</span></li>
+    </ul>
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      오늘의 계산은 <b>분수 하나</b>뿐이다.
+      어려운 것은 계산이 아니라 <span class="kw-success">무엇을 분모에 놓는가</span>이다.
+    </div>
+    <aside class="notes">목표 3번이 오늘의 핵심이다. 계산이 쉬우니 학생들이 방심하는데, 정작 틀리는 곳은 분모를 잘못 잡는 자리다. 그 점을 미리 예고해 두면 8장에서 반응이 온다.</aside>
+  </section>
+
+  <!-- 4. 자료 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 84쪽 · 자료</div>
+    <h2>고등학생 200명이 무엇을 샀나</h2>
+
+    <p class="prob-stmt">
+      어느 온라인 쇼핑몰에서 세 상품 A, B, C를 구매한 고등학생 <b>200명</b>의 자료다.
+      쇼핑몰을 방문한 학생이 <span class="kw">어느 상품을 살지</span> 예측하려 하는데,
+      인공지능이 가진 것은 이 표뿐이다.
+    </p>
+
+    <table class="dt">
+      <caption>(단위: 명)</caption>
+      <thead>
+        <tr><th style="width:14%">학년</th><th style="width:10%">성별</th><th>상품 A</th><th>상품 B</th><th>상품 C</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead" rowspan="2">1학년</td><td class="rowhead">남</td><td>15</td><td>9</td><td>12</td></tr>
+        <tr><td class="rowhead">여</td><td>1</td><td>2</td><td>2</td></tr>
+        <tr><td class="rowhead" rowspan="2">2학년</td><td class="rowhead">남</td><td>16</td><td>10</td><td>9</td></tr>
+        <tr><td class="rowhead">여</td><td>13</td><td>17</td><td>10</td></tr>
+        <tr><td class="rowhead" rowspan="2">3학년</td><td class="rowhead">남</td><td>15</td><td>11</td><td>14</td></tr>
+        <tr><td class="rowhead">여</td><td>12</td><td>14</td><td>18</td></tr>
+      </tbody>
+    </table>
+
+    <aside class="notes">표를 다 읽힐 필요는 없다. "학년과 성별로 나뉘어 있다"는 것만 확인하고 넘어간다. 이 표는 오늘 내내 다시 나오니 학습지에 붙여 두게 하면 좋다. 합계가 200이 되는지 한 명에게 확인시켜도 좋다.</aside>
+  </section>
+
+  <!-- 5. 합계로 확률 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 84쪽 · 전개</div>
+    <h2>일단 다 더해 본다</h2>
+
+    <p class="prob-stmt">학년과 성별을 지우고 <b>상품별로만</b> 세면 이렇게 된다.</p>
+
+    <table class="dt" style="max-width: 900px; margin-left:auto; margin-right:auto;">
+      <caption>(단위: 명)</caption>
+      <thead><tr><th>상품 A</th><th>상품 B</th><th>상품 C</th><th>합계</th></tr></thead>
+      <tbody><tr class="sum"><td>72</td><td>63</td><td>65</td><td>200</td></tr></tbody>
+    </table>
+
+    <div class="prow">
+      <div class="pcell win">
+        <div class="pname">상품 A</div>
+        \(p_\mathrm{A}=\dfrac{72}{200}\)
+      </div>
+      <div class="pcell">
+        <div class="pname">상품 B</div>
+        \(p_\mathrm{B}=\dfrac{63}{200}\)
+      </div>
+      <div class="pcell">
+        <div class="pname">상품 C</div>
+        \(p_\mathrm{C}=\dfrac{65}{200}\)
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      \(p_\mathrm{A}\)가 가장 크다. 그래서 인공지능은 이 학생이
+      <span class="kw-success">상품 A를 살 것</span>으로 예측한다.
+    </div>
+    <aside class="notes">분모가 200으로 모두 같으니 사실 분자만 비교하면 된다. 학생들이 그걸 스스로 말하게 유도한다. 여기서 "확률이 가장 큰 것을 고른다"는 규칙이 자연스럽게 나온다 — 다음 장에서 그걸 문장으로 굳힌다.</aside>
+  </section>
+
+  <!-- 6. 규칙 -->
+  <section>
+    <div class="chapter-tag">정리</div>
+    <h2>인공지능이 예측하는 방식</h2>
+
+    <div class="definition-box">
+      인공지능은 여러 개의 사건 중에서
+      <span class="kw">확률이 가장 큰 사건</span>이 일어날 것으로 예측한다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="plain-card">
+        <p><b>확실하다는 뜻이 아니다.</b>
+        200명 중 72명이 A를 샀을 뿐, 128명은 다른 것을 샀다.</p>
+      </div>
+      <div class="plain-card">
+        <p><b>가장 그럴듯한 것을 고를 뿐이다.</b>
+        예측은 맞을 수도, 틀릴 수도 있다.</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      그런데 이 예측에는 조건이 하나도 붙어 있지 않다.
+      <b>1학년인지, 여학생인지</b> 아무것도 모르는 채로 답한 것이다.
+    </div>
+    <aside class="notes">"가장 큰 것을 고른다"는 규칙은 Ⅲ-1의 퍼셉트론(점수를 매겨 큰 쪽을 고른다)과 같은 구조다. 그 연결을 짚어 주면 단원이 이어진다. 마지막 경고 상자가 다음 장으로 넘어가는 다리다.</aside>
+  </section>
+
+  <!-- 7. 조건: 1학년 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 85쪽 · 조건이 주어진 경우</div>
+    <h2>1학년이라는 것을 알았다면</h2>
+
+    <table class="dt">
+      <caption>학년별로 다시 정리한 표 · (단위: 명)</caption>
+      <thead><tr><th style="width:16%"></th><th>상품 A</th><th>상품 B</th><th>상품 C</th><th>합계</th></tr></thead>
+      <tbody>
+        <tr><td class="rowhead">1학년</td><td class="hit">16</td><td class="hit">11</td><td class="hit">14</td><td class="hit">41</td></tr>
+        <tr><td class="rowhead">2학년</td><td>29</td><td>27</td><td>19</td><td>75</td></tr>
+        <tr><td class="rowhead">3학년</td><td>27</td><td>25</td><td>32</td><td>84</td></tr>
+        <tr class="sum"><td class="rowhead">합계</td><td>72</td><td>63</td><td>65</td><td>200</td></tr>
+      </tbody>
+    </table>
+
+    <div class="prow" style="margin-top: var(--lm-space-3);">
+      <div class="pcell win"><div class="pname">상품 A</div>\(p_\mathrm{A}=\dfrac{16}{41}\)</div>
+      <div class="pcell"><div class="pname">상품 B</div>\(p_\mathrm{B}=\dfrac{11}{41}\)</div>
+      <div class="pcell"><div class="pname">상품 C</div>\(p_\mathrm{C}=\dfrac{14}{41}\)</div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-2);">
+      역시 <span class="kw-success">상품 A</span>. 분모가 200에서 <b>41</b>로 바뀌었다.
+    </div>
+    <aside class="notes">표를 띄우고 "1학년이라는 걸 알았으니 2·3학년 자료는 이제 쓸 이유가 없다"고 말로 짚어 준다. 그래서 전체가 200명이 아니라 1학년 41명이 된다. 여기서 학생들은 "답이 똑같네"라고 생각하는데, 그대로 두고 다음 장으로 넘어가면 반전이 산다. 분모가 41로 바뀐 것만 확실히 짚는다 — 오늘 목표 3번이 바로 이것이다.</aside>
+  </section>
+
+  <!-- 8. 조건: 여학생 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 85~86쪽 · 조건이 주어진 경우</div>
+    <h2>이번엔 여학생이라는 것을 알았다면</h2>
+
+    <p class="prob-stmt">
+      같은 쇼핑몰, 같은 자료다. 이번에는 <b>성별</b>로 다시 정리한다.
+    </p>
+
+    <table class="dt">
+      <caption>(단위: 명)</caption>
+      <thead><tr><th style="width:16%"></th><th>상품 A</th><th>상품 B</th><th>상품 C</th><th>합계</th></tr></thead>
+      <tbody>
+        <tr><td class="rowhead">남</td><td>46</td><td>30</td><td>35</td><td>111</td></tr>
+        <tr><td class="rowhead">여</td><td class="hit">26</td><td class="hit">33</td><td class="hit">30</td><td class="hit">89</td></tr>
+        <tr class="sum"><td class="rowhead">합계</td><td>72</td><td>63</td><td>65</td><td>200</td></tr>
+      </tbody>
+    </table>
+
+    <div class="prow">
+      <div class="pcell"><div class="pname">상품 A</div>\(p_\mathrm{A}=\dfrac{26}{89}\)</div>
+      <div class="pcell win"><div class="pname">상품 B</div>\(p_\mathrm{B}=\dfrac{33}{89}\)</div>
+      <div class="pcell"><div class="pname">상품 C</div>\(p_\mathrm{C}=\dfrac{30}{89}\)</div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      <span class="kw-danger">상품 B다.</span> 답이 바뀌었다.
+    </div>
+    <aside class="notes">여기가 오늘의 정점이다. 표를 띄우고 학생들에게 먼저 계산시켜도 좋다. 26/89와 33/89는 분모가 같으니 분자만 봐도 된다. "왜 바뀌었을까?"를 던지고 다음 장으로 넘어간다.</aside>
+  </section>
+
+  <!-- 9. 대비 -->
+  <section>
+    <div class="chapter-tag">교과서 86쪽 · 핵심</div>
+    <h2>같은 사람인데 답이 다르다</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>아무것도 모를 때</h4>
+        <p>분모 <b>200</b></p>
+        <p><span class="kw-success">상품 A</span></p>
+      </div>
+      <div class="plain-card">
+        <h4>1학년이라면</h4>
+        <p>분모 <b>41</b></p>
+        <p><span class="kw-success">상품 A</span></p>
+      </div>
+      <div class="plain-card">
+        <h4>여학생이라면</h4>
+        <p>분모 <b>89</b></p>
+        <p><span class="kw-danger">상품 B</span></p>
+      </div>
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-5);">
+      조건이 주어지면 <span class="kw">전체로 삼는 범위</span>가 달라진다.
+      범위가 달라지면 확률이 달라지고, 확률이 달라지면 <b>예측도 달라진다.</b>
+    </div>
+
+    <p class="prob-stmt">
+      틀린 계산은 하나도 없다. 세 답이 모두 맞다 —
+      <b>서로 다른 것을 물었기 때문</b>이다.
+    </p>
+    <aside class="notes">"조건부확률"이라는 용어는 쓰지 않는다. 교육과정이 그 용어와 기호를 도입하지 말라고 명시하고 있다. "전체로 삼는 범위가 바뀐다"는 말로 충분하고, 오히려 그 편이 학생에게 더 정확하게 전달된다. 세 답이 다 맞다는 마지막 문장을 꼭 말해 준다 — 학생들은 하나가 틀렸다고 생각한다.</aside>
+  </section>
+
+  <!-- 10. 예제 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 86쪽 · 예제 1</div>
+    <h2>독감 검사 키트</h2>
+
+    <p class="prob-stmt">
+      20명을 검사한 자료다. 준수가 검사했더니 <b>양성 반응</b>이 나왔다.
+      준수는 감염되었을까?
+    </p>
+
+    <table class="dt" style="max-width: 1100px; margin-left:auto; margin-right:auto;">
+      <caption>(단위: 명)</caption>
+      <thead><tr><th style="width:22%"></th><th>양성 반응</th><th>음성 반응</th><th>합계</th></tr></thead>
+      <tbody>
+        <tr><td class="rowhead">감염자</td><td class="hit">9</td><td>1</td><td>10</td></tr>
+        <tr><td class="rowhead">비감염자</td><td class="hit">3</td><td>7</td><td>10</td></tr>
+        <tr class="sum"><td class="rowhead">합계</td><td>12</td><td>8</td><td>20</td></tr>
+      </tbody>
+    </table>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="info-box">
+        전체로 삼을 범위는 20명이 아니라
+        <span class="kw-info">양성이 나온 12명</span>이다.
+      </div>
+      <div class="result-box">
+        \(p_1=\dfrac{9}{12}=\dfrac{3}{4}\), \(p_2=\dfrac{3}{12}=\dfrac{1}{4}\)<br>
+        \(p_1\)이 더 크므로 <span class="kw-success">감염되었다고 예측</span>
+      </div>
+    </div>
+    <aside class="notes">분모를 20으로 잡는 학생이 반드시 나온다. 그게 오늘 배운 것을 확인하는 자리다. "준수는 이미 양성이 나왔다. 음성인 8명은 준수가 될 수 없다"고 말해 주면 대부분 납득한다. 실제 진단 키트에서도 같은 계산을 한다는 점을 덧붙이면 흥미를 끈다.</aside>
+  </section>
+
+  <!-- 11. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 86쪽 문제 1·2</div>
+    <h2>직접 해 보자</h2>
+    <p class="prob-stmt">문항을 누르면 답이 열린다.</p>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>문제 1.</b> 앞의 쇼핑몰 자료에서 방문한 고등학생이 <b>3학년</b>이라면
+        A, B, C 중 무엇을 살 것으로 예측하는가?
+        <div class="ans">3학년 84명이 전체다. \(p_\mathrm{A}=\dfrac{27}{84}\), \(p_\mathrm{B}=\dfrac{25}{84}\), \(p_\mathrm{C}=\dfrac{32}{84}\) → <b>상품 C</b></div>
+      </li>
+      <li>
+        <b>문제 2 ⑴.</b> 여행사 회원 40명(남 경주 16·담양 6, 여 경주 8·담양 10) 중
+        회원 전체는 경주와 담양 중 어디를 더 선호하는가?
+        <div class="ans">경주 \(\dfrac{24}{40}=\dfrac{3}{5}\), 담양 \(\dfrac{16}{40}=\dfrac{2}{5}\) → <b>경주</b></div>
+      </li>
+      <li>
+        <b>문제 2 ⑵.</b> 그 회원이 <b>여자</b>라면 어디를 더 선호하는가?
+        <div class="ans">여자 18명이 전체다. 경주 \(\dfrac{8}{18}=\dfrac{4}{9}\), 담양 \(\dfrac{10}{18}=\dfrac{5}{9}\) → <b>담양</b>. 조건이 붙자 답이 뒤집혔다.</div>
+      </li>
+    </ul>
+    <aside class="notes">문제 2가 오늘의 대비를 그대로 반복한다 — 전체로 보면 경주, 여자만 보면 담양. 9장에서 본 구조와 같다는 것을 학생이 스스로 알아채면 성공이다. 시간이 모자라면 문제 2만 해도 된다.</aside>
+  </section>
+
+  <!-- 12. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>분모가 곧 질문이다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      인공지능은 확률이 가장 큰 것을 고른다.<br>
+      그런데 <span class="kw-success">무엇을 전체로 삼느냐</span>에 따라 그 확률이 달라진다.
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-6);">
+      다음 시간에 이렇게 물어본다 —
+      <b>1학년이면서 여학생</b>이라면 무엇을 살까?
+      <span class="kw-danger">그 조건에 맞는 학생은 자료에 5명뿐이다.</span>
+    </div>
+
+    <p class="prob-stmt">
+      5명으로 답을 정해도 될까? 그 이야기가 다음 차시다.
+    </p>
+    <aside class="notes">다음 차시 예고가 곧 문제 제기다. "5명"이라는 숫자를 칠판에 남겨 두고 끝낸다. 학생들이 "너무 적은데요"라고 말하면 그대로 다음 시간의 출발점이 된다. 84쪽 표에서 1학년 여학생 행(1, 2, 2)을 다시 짚어 주면 실감한다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (11장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
