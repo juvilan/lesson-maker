@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>거리로 재는 법, 각도로 재는 법 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-body); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-2) var(--lm-space-3); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt td.win { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+    .dt.compact th, .dt.compact td { padding: var(--lm-space-1) var(--lm-space-2); }
+
+    /* 도식 SVG — viewBox 단위 = 렌더 px (배율 1.00) */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .axis  { stroke: var(--lm-rule-strong); fill: none; stroke-width: 2; }
+    .dg .leg   { stroke: var(--lm-ink-3); fill: none; stroke-width: 2; stroke-dasharray: 6 5; }
+    .dg .dist  { stroke: var(--lm-accent); fill: none; stroke-width: 4; }
+    .dg .vec   { stroke: var(--lm-info); fill: none; stroke-width: 4; }
+    .dg .arc   { stroke: var(--lm-accent); fill: none; stroke-width: 3; }
+    .dg .pt    { fill: var(--lm-ink); }
+    .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink-2); }
+    .dg .t-ax { font-size: 22px; fill: var(--lm-ink-3); }
+    .dg .t-pt { font-size: 28px; fill: var(--lm-ink); font-weight: 600; }
+    .dg .t-len { font-size: 26px; fill: var(--lm-ink-3); }
+    .dg .t-ang { font-size: 26px; fill: var(--lm-accent); font-weight: 600; }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { display: none; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid var(--lm-rule); color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { display: block; }
+  </style>
+</head>
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅱ-3 텍스트 데이터 분석 · 3차시</div>
+    <h1>거리로 재는 법, 각도로 재는 법</h1>
+    <p class="slide-sub">유클리드 유사도와 코사인 유사도</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 68~70쪽</span>
+    </div>
+    <aside class="notes">계산이 많은 차시다. 근호와 분수가 계속 나오니 계산기를 허용해도 좋다. 다만 오늘의 핵심은 계산이 아니라 11장 — 두 유사도의 부등호 방향이 반대라는 것이다. 학생들이 가장 많이 틀리는 자리이므로 거기에 시간을 몰아 준다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 67쪽</div>
+    <h2>사람의 기준으로는 답이 여럿이었다</h2>
+
+    <p class="prob-stmt">
+      T₁ “딸기를 좋아하고, 바나나도 좋아한다” / T₂ “딸기는 좋아하지만, 바나나는 싫어한다”
+      / T₃ “딸기와 바나나를 모두 싫어한다”
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>딸기를 기준으로</h4>
+        <p>{T₁, T₂} 와 {T₃}</p>
+      </div>
+      <div class="plain-card">
+        <h4>바나나를 기준으로</h4>
+        <p>{T₁} 과 {T₂, T₃}</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      둘 다 말이 된다. <b>사람마다 기준이 주관적</b>이기 때문이다.
+      인공지능이 분류하려면 <span class="kw-danger">닮은 정도를 수로 만들어야</span> 한다.
+    </div>
+    <aside class="notes">지난 시간 마지막 장을 그대로 이어받는다. 학생들이 나눠 본 결과가 갈렸던 것을 상기시키고, 그래서 정량화가 필요하다는 것으로 넘어간다. "닮았다"를 숫자로 바꾸는 것이 오늘의 일이다.</aside>
+  </section>
+
+  <!-- 3. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span><span class="kw">유클리드 유사도</span> \(D(P,Q)\)를 구할 수 있다.</span></li>
+      <li><span class="num">2</span><span><span class="kw">코사인 유사도</span> \(C(P,Q)\)를 구할 수 있다.</span></li>
+      <li><span class="num">3</span><span>두 유사도에서 <span class="kw">값이 어느 쪽일 때 유사한지</span>를 구별할 수 있다.</span></li>
+    </ul>
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      목표 3번이 오늘 가장 중요하다 —
+      <span class="kw-danger">유클리드는 작을수록, 코사인은 클수록 유사하다.</span>
+      방향이 반대다.
+    </div>
+    <aside class="notes">목표 3번을 미리 경고해 둔다. 계산을 다 맞히고도 마지막에 "가장 유사한 둘"을 고를 때 뒤집어 답하는 학생이 반드시 나온다. 미리 말해 두면 11장에서 "아까 그 말이구나" 하고 걸린다.</aside>
+  </section>
+
+  <!-- 4. 유사도란 -->
+  <section>
+    <div class="chapter-tag">교과서 68쪽 · 정의</div>
+    <h2>유사도 — 닮은 정도를 수로</h2>
+
+    <div class="definition-box">
+      두 텍스트 사이의 유사한 정도를 수치화한 것을
+      <span class="kw">유사도(similarity)</span>라고 한다.
+    </div>
+
+    <div class="three-col" style="margin-top: var(--lm-space-5);">
+      <div class="plain-card">
+        <h4>유클리드 유사도</h4>
+        <p>벡터로 잰다.<br><b>두 점 사이의 거리</b></p>
+      </div>
+      <div class="plain-card">
+        <h4>코사인 유사도</h4>
+        <p>벡터로 잰다.<br><b>두 벡터가 이루는 각</b></p>
+      </div>
+      <div class="plain-card">
+        <h4>자카드 유사도</h4>
+        <p>집합으로 잰다.<br><b>겹치는 원소의 비율</b></p>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      오늘은 앞의 <b>둘</b>을 배운다. 자카드는 다음 시간이다.
+    </p>
+    <aside class="notes">세 가지의 지도를 먼저 보여 준다. 앞의 둘은 벡터를 쓰고 마지막 하나는 집합을 쓴다는 구분이 중요하다. 왜 세 개나 필요하냐고 물으면 "재는 것이 다르기 때문"이라고 답하고, 그 차이가 다음 시간의 주제라고 예고한다.</aside>
+  </section>
+
+  <!-- 5. 유클리드 정의 -->
+  <section>
+    <div class="chapter-tag">교과서 68쪽 · 유클리드 유사도</div>
+    <h2>1. 유클리드 유사도 — 거리</h2>
+
+    <div class="definition-box">
+      \(\vec{P}=(p_1,\ \dots,\ p_n)\), \(\vec{Q}=(q_1,\ \dots,\ q_n)\)일 때
+      \[ D(P,\ Q)=\sqrt{(q_1-p_1)^2+(q_2-p_2)^2+\cdots+(q_n-p_n)^2} \]
+    </div>
+
+    <p class="prob-stmt">
+      성분에 의해 결정되는 <b>두 점 사이의 거리</b>와 같다.
+      중학교에서 배운 두 점 사이의 거리 공식을 \(n\)개 성분으로 늘린 것이다.
+    </p>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      거리가 가까울수록 값이 작아진다 →
+      <span class="kw-success">0에 가까울수록 두 텍스트가 유사하다.</span>
+    </div>
+    <aside class="notes">공식이 길어 보이지만 두 점 사이의 거리 그대로다. 2차원일 때를 먼저 써 보게 하면 익숙한 식이 나온다. "차를 제곱해서 다 더하고 근호" 순서를 구호처럼 외우게 하면 실수가 준다. 이름은 유사도인데 값이 작을수록 유사하다는 점이 어색하다는 것을 미리 인정해 준다.</aside>
+  </section>
+
+  <!-- 6. 유클리드 보기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 68쪽 · 보기</div>
+    <h2>좌표평면 위의 두 점처럼</h2>
+
+    <svg class="dg" viewBox="0 0 620 400" width="620" height="400"
+         preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="두 점 P(5,1)과 Q(2,3) 사이의 거리를 나타낸 좌표평면">
+      <line class="axis" x1="80" y1="340" x2="580" y2="340"></line>
+      <line class="axis" x1="80" y1="340" x2="80" y2="60"></line>
+      <text class="t-ax" x="70" y="348" text-anchor="end">O</text>
+      <text class="t-ax" x="575" y="368" text-anchor="middle">x</text>
+      <text class="t-ax" x="60" y="70" text-anchor="middle">y</text>
+
+      <line class="leg" x1="430" y1="280" x2="220" y2="280"></line>
+      <line class="leg" x1="220" y1="280" x2="220" y2="160"></line>
+      <line class="dist" x1="430" y1="280" x2="220" y2="160"></line>
+
+      <circle class="pt" cx="430" cy="280" r="8"></circle>
+      <circle class="pt" cx="220" cy="160" r="8"></circle>
+      <text class="t-pt" x="446" y="292">P(5, 1)</text>
+      <text class="t-pt" x="204" y="150" text-anchor="end">Q(2, 3)</text>
+      <text class="t-len" x="325" y="308" text-anchor="middle">3</text>
+      <text class="t-len" x="206" y="226" text-anchor="end">2</text>
+    </svg>
+
+    <div class="two-col" style="margin-top: var(--lm-space-2);">
+      <div class="info-box">
+        \(\vec{P}=(5,\ 1)\), \(\vec{Q}=(2,\ 3)\)
+      </div>
+      <div class="result-box">
+        \(D(P,Q)=\sqrt{(2-5)^2+(3-1)^2}=\sqrt{13}\)
+      </div>
+    </div>
+    <aside class="notes">가로 3, 세로 2인 직각삼각형의 빗변이다. 피타고라스 정리로 √13이 나온다는 것을 확인시키면 공식이 낯설지 않다. 좌표평면 그림은 2차원이라 그릴 수 있지만 3차원 이상은 그릴 수 없다는 점, 그래도 계산은 똑같이 된다는 점을 짚어 준다.</aside>
+  </section>
+
+  <!-- 7. 유클리드 예제 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 69쪽 · 예제 1</div>
+    <h2>셋 중 가장 닮은 둘 고르기</h2>
+
+    <p class="prob-stmt">
+      \(\vec{P}=(0,1,2)\), \(\vec{Q}=(1,2,1)\), \(\vec{R}=(1,1,0)\)일 때
+      유클리드 유사도로 가장 유사한 둘을 고르시오.
+    </p>
+
+    <table class="dt compact" style="max-width: 1200px; margin-left:auto; margin-right:auto;">
+      <thead><tr><th style="width:20%">쌍</th><th>계산</th><th>값</th></tr></thead>
+      <tbody>
+        <tr><td class="rowhead">P와 Q</td><td>\(\sqrt{(1-0)^2+(2-1)^2+(1-2)^2}\)</td><td>\(\sqrt{3}\)</td></tr>
+        <tr><td class="rowhead">Q와 R</td><td>\(\sqrt{(1-1)^2+(1-2)^2+(0-1)^2}\)</td><td class="win">\(\sqrt{2}\)</td></tr>
+        <tr><td class="rowhead">R과 P</td><td>\(\sqrt{(0-1)^2+(1-1)^2+(2-0)^2}\)</td><td>\(\sqrt{5}\)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      값이 <b>가장 작은</b> \(\sqrt{2}\) —
+      <span class="kw-success">Q와 R이 가장 유사하다.</span>
+    </div>
+    <aside class="notes">세 쌍을 모두 구해야 한다는 것이 요령이다. 근호 안의 수만 비교하면 되므로 근호를 벗기지 않아도 된다는 점을 알려 주면 계산이 빨라진다. 2 < 3 < 5이니 √2가 가장 작다. 여기서 "가장 작은 것"을 고른다는 점을 다시 짚는다.</aside>
+  </section>
+
+  <!-- 8. 코사인 정의 -->
+  <section>
+    <div class="chapter-tag">교과서 69쪽 · 코사인 유사도</div>
+    <h2>2. 코사인 유사도 — 각도</h2>
+
+    <div class="definition-box">
+      \[ C(P,\ Q)=\frac{p_1q_1+p_2q_2+\cdots+p_nq_n}
+                       {\sqrt{p_1^{\,2}+\cdots+p_n^{\,2}}\ \sqrt{q_1^{\,2}+\cdots+q_n^{\,2}}} \]
+    </div>
+
+    <p class="prob-stmt">
+      분자는 <b>같은 자리끼리 곱해서 더한 것</b>,
+      분모는 <b>각 벡터의 길이를 곱한 것</b>이다.
+    </p>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      두 벡터가 이루는 각이 작아질수록 값이 커진다 →
+      <span class="kw-success">1에 가까울수록 두 텍스트가 유사하다.</span>
+    </div>
+    <aside class="notes">식이 복잡해 보이지만 하는 일은 단순하다. 분자 계산과 분모 계산을 따로 연습시키면 부담이 준다. 분모의 √ 안이 각 성분의 제곱합이라는 것, 즉 원점에서 그 점까지의 거리라는 것을 짚어 주면 의미가 잡힌다.</aside>
+  </section>
+
+  <!-- 9. 코사인 보기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 69~70쪽 · 보기</div>
+    <h2>각이 곧 코사인 값이다</h2>
+
+    <svg class="dg" viewBox="0 0 560 340" width="560" height="340"
+         preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="두 벡터 P(1,2)와 Q(3,1)이 이루는 각">
+      <line class="axis" x1="80" y1="290" x2="500" y2="290"></line>
+      <line class="axis" x1="80" y1="290" x2="80" y2="50"></line>
+      <text class="t-ax" x="70" y="298" text-anchor="end">O</text>
+      <text class="t-ax" x="496" y="318" text-anchor="middle">x</text>
+      <text class="t-ax" x="60" y="60" text-anchor="middle">y</text>
+
+      <line class="vec" x1="80" y1="290" x2="160" y2="130"></line>
+      <line class="vec" x1="80" y1="290" x2="320" y2="210"></line>
+      <path class="arc" d="M 152 254 A 80 80 0 0 0 122 214" ></path>
+
+      <circle class="pt" cx="160" cy="130" r="7"></circle>
+      <circle class="pt" cx="320" cy="210" r="7"></circle>
+      <text class="t-pt" x="170" y="120">P(1, 2)</text>
+      <text class="t-pt" x="332" y="202">Q(3, 1)</text>
+      <text class="t-ang" x="150" y="244">45°</text>
+    </svg>
+
+    <div class="two-col" style="margin-top: var(--lm-space-2);">
+      <div class="info-box">
+        \(C(P,Q)=\dfrac{1\cdot 3+2\cdot 1}{\sqrt{1^2+2^2}\ \sqrt{3^2+1^2}}
+        =\dfrac{5}{\sqrt{5}\sqrt{10}}=\dfrac{\sqrt{2}}{2}\)
+      </div>
+      <div class="result-box">
+        \(\cos 45^\circ=\dfrac{\sqrt{2}}{2}\)이므로
+        두 벡터가 이루는 각은 <b>45°</b>다.
+      </div>
+    </div>
+    <aside class="notes">코사인 유사도가 왜 '코사인'인지 여기서 드러난다. 두 벡터가 이루는 각을 θ라 하면 C(P,Q)=cos θ임이 알려져 있고, 0°≤θ≤90°일 때 0≤C≤1이다. 중학교에서 배운 삼각비 표(준비 학습)를 떠올리게 하면 45°가 바로 나온다. 각이 0°에 가까울수록, 즉 두 벡터가 같은 방향일수록 유사하다.</aside>
+  </section>
+
+  <!-- 10. 코사인 예제 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 70쪽 · 예제 2</div>
+    <h2>이번엔 가장 큰 값을 고른다</h2>
+
+    <p class="prob-stmt">
+      \(\vec{P}=(0,1,1)\), \(\vec{Q}=(1,0,2)\), \(\vec{R}=(2,0,0)\)일 때
+      코사인 유사도로 가장 유사한 둘을 고르시오.
+    </p>
+
+    <table class="dt compact" style="max-width: 1200px; margin-left:auto; margin-right:auto;">
+      <thead><tr><th style="width:20%">쌍</th><th>계산</th><th>값</th></tr></thead>
+      <tbody>
+        <tr><td class="rowhead">P와 Q</td><td>\(\dfrac{0\cdot1+1\cdot0+1\cdot2}{\sqrt{2}\,\sqrt{5}}\)</td><td class="win">\(\dfrac{\sqrt{10}}{5}\)</td></tr>
+        <tr><td class="rowhead">Q와 R</td><td>\(\dfrac{1\cdot2+0\cdot0+2\cdot0}{\sqrt{5}\,\sqrt{4}}\)</td><td>\(\dfrac{\sqrt{5}}{5}\)</td></tr>
+        <tr><td class="rowhead">R과 P</td><td>\(\dfrac{2\cdot0+0\cdot1+0\cdot1}{\sqrt{4}\,\sqrt{2}}\)</td><td>\(0\)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      값이 <b>가장 큰</b> \(\dfrac{\sqrt{10}}{5}\) —
+      <span class="kw-success">P와 Q가 가장 유사하다.</span>
+    </div>
+    <aside class="notes">R과 P의 값이 0인 것에 주목시킨다. 분자가 0이라는 것은 같은 자리에 둘 다 0이 아닌 성분이 하나도 없다는 뜻이고, 각이 90°라는 뜻이다. 즉 전혀 닮지 않았다. √10/5 ≈ 0.632, √5/5 ≈ 0.447이니 크기 비교는 계산기를 써도 된다.</aside>
+  </section>
+
+  <!-- 11. 방향이 반대 -->
+  <section>
+    <div class="chapter-tag">핵심 · 가장 많이 틀리는 자리</div>
+    <h2>두 유사도는 방향이 반대다</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>유클리드 유사도 \(D\)</h4>
+        <p>재는 것 — <b>거리</b></p>
+        <p>가까울수록 거리가 <b>작다</b></p>
+        <p><span class="kw-success">0에 가까울수록 유사</span></p>
+        <p>→ 셋 중 <b>가장 작은</b> 값을 고른다</p>
+      </div>
+      <div class="plain-card">
+        <h4>코사인 유사도 \(C\)</h4>
+        <p>재는 것 — <b>각</b></p>
+        <p>같은 방향일수록 각이 <b>작고</b> \(\cos\)은 <b>크다</b></p>
+        <p><span class="kw-danger">1에 가까울수록 유사</span></p>
+        <p>→ 셋 중 <b>가장 큰</b> 값을 고른다</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      계산을 다 맞히고도 <b>마지막에 뒤집어 답하는</b> 일이 흔하다.
+      문제를 풀기 전에 <span class="kw-danger">“이건 큰 걸 고르나, 작은 걸 고르나”</span>를 먼저 정하자.
+    </div>
+    <aside class="notes">오늘의 정점이다. 표로 나란히 놓고 소리 내어 읽게 한다. 이름이 둘 다 '유사도'인데 방향이 반대라 헷갈릴 수밖에 없다는 것을 인정해 주고, 그래서 미리 정하고 시작하라는 요령을 준다. 유클리드는 '거리'라서 작을수록 가깝다고 기억하면 덜 헷갈린다.</aside>
+  </section>
+
+  <!-- 12. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 68~70쪽 문제 5·6·7</div>
+    <h2>직접 해 보자</h2>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>문제 5.</b> \(\vec{P}=(0,2,1,1)\), \(\vec{Q}=(1,2,1,0)\), \(\vec{R}=(1,0,1,2)\).
+        유클리드 유사도로 가장 유사한 둘을 고르시오.
+        <div class="ans">
+          \(D(P,Q)=\sqrt{2}\), \(D(Q,R)=\sqrt{8}=2\sqrt{2}\), \(D(R,P)=\sqrt{6}\)<br>
+          가장 <b>작은</b> \(\sqrt{2}\) → <b>P와 Q</b>
+        </div>
+      </li>
+      <li>
+        <b>문제 6.</b> \(\vec{P}=(1,2,3)\), \(\vec{Q}=(2,3,1)\)의 코사인 유사도를 구하시오.
+        <div class="ans">
+          \(C(P,Q)=\dfrac{1\cdot2+2\cdot3+3\cdot1}{\sqrt{14}\,\sqrt{14}}=\dfrac{11}{14}\)
+        </div>
+      </li>
+      <li>
+        <b>문제 7.</b> \(\vec{P}=(1,2,0,1)\), \(\vec{Q}=(0,1,0,1)\), \(\vec{R}=(1,0,1,1)\).
+        코사인 유사도로 가장 유사한 둘을 고르시오.
+        <div class="ans">
+          \(C(P,Q)=\dfrac{3}{\sqrt{6}\sqrt{2}}=\dfrac{\sqrt{3}}{2}\),
+          \(C(Q,R)=\dfrac{1}{\sqrt{2}\sqrt{3}}=\dfrac{\sqrt{6}}{6}\),
+          \(C(R,P)=\dfrac{2}{\sqrt{3}\sqrt{6}}=\dfrac{\sqrt{2}}{3}\)<br>
+          가장 <b>큰</b> \(\dfrac{\sqrt{3}}{2}\) → <b>P와 Q</b>
+        </div>
+      </li>
+    </ul>
+    <aside class="notes">문제 5는 근호 안 수(2, 8, 6)만 비교하면 되고, 문제 7은 소수로 바꿔 비교하는 편이 빠르다(약 0.866, 0.408, 0.471). 문제 6은 분모가 √14·√14=14로 깔끔하게 정리된다 — 두 벡터의 성분이 같은 수들의 순열이기 때문이다. 시간이 모자라면 문제 6까지만 하고 7은 과제로 돌린다.</aside>
+  </section>
+
+  <!-- 13. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>닮음을 재는 잣대가 둘</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      <span class="kw-success">유클리드는 거리</span> — 0에 가까울수록 유사<br>
+      <span class="kw-success">코사인은 각</span> — 1에 가까울수록 유사
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-6);">
+      둘 다 <b>벡터</b>로 쟀다. 그런데 지난 절에서 우리는
+      텍스트를 <span class="kw-danger">집합</span>으로도 나타냈었다.
+    </div>
+
+    <p class="prob-stmt">
+      집합으로 재는 유사도가 하나 더 있다. 그리고 <b>세 잣대가 서로 다른 답</b>을
+      내놓는 경우도 있다. 다음 시간의 이야기다.
+    </p>
+    <aside class="notes">다음 차시 예고에 두 가지를 담는다 — 자카드 유사도(집합), 그리고 세 유사도가 갈리는 사례. 2-1-2차시에서 단어집합을 만들었던 것을 떠올리게 하면 자카드가 낯설지 않다. "세 잣대가 다른 답"이라는 예고가 다음 시간의 클라이맥스를 미리 세워 준다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (12장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
