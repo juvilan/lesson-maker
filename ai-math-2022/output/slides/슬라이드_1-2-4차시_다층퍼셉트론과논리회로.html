@@ -46,6 +46,7 @@
     .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink); }
     .dg .t-cap { font-size: 21px; fill: var(--lm-ink-3); }
     .dg .t-lab { font-size: 25px; fill: var(--lm-ink-2); }
+    .dg .t-sum { font-size: 42px; fill: var(--lm-ink); }
 
     /* ── 도형 안 수식: SVG <text>는 MathJax가 처리하지 못하므로
           foreignObject 안의 HTML로 넣는다 ── */
@@ -69,7 +70,7 @@
     .nn-cap  { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
                line-height: 1.5; text-align: center;
                max-width: 1500px; margin: var(--lm-space-3) auto 0;
-               min-height: 4.6em; }
+               min-height: 3.2em; }   /* 실측: 가장 긴 3단계 캡션 108px */
     #nnDef   { opacity: 0; transition: opacity 0.4s ease; }
     #nnDef.on { opacity: 1; }
 
@@ -165,7 +166,89 @@
     <aside class="notes">3차시 5번 슬라이드(신경 세포 한 개)를 잠깐 다시 띄워도 좋다. "하나만 그렸을 뿐, 원래 뇌에는 860억 개가 있다"는 한마디가 오늘의 발상을 자연스럽게 만든다.</aside>
   </section>
 
-  <!-- ═══════════ 3. 학습 목표 ═══════════ -->
+  <!-- ═══════════ 3. 단층으로 되는 것과 안 되는 것 ═══════════ -->
+  <section class="tight">
+    <div class="chapter-tag">지난 시간 결산 · 교과서 28~29쪽</div>
+    <h2>하나로 되는 연산, 하나로 안 되는 연산</h2>
+
+    <svg class="dg xwide" viewBox="0 0 900 164" width="900" height="164" preserveAspectRatio="xMidYMid meet">
+      <line x1="100" y1="50"  x2="289" y2="83" class="stroke-ink" stroke-width="2"/>
+      <line x1="100" y1="130" x2="289" y2="97" class="stroke-ink" stroke-width="2"/>
+      <foreignObject class="m-val m-sm" x="112" y="12"  width="130" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(w_1=2\)</div></foreignObject>
+      <foreignObject class="m-val m-sm" x="112" y="120" width="130" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(w_2=3\)</div></foreignObject>
+
+      <circle cx="70" cy="45"  r="30" class="fill-page"/><circle cx="70" cy="45"  r="30" class="stroke-rule" stroke-width="2"/>
+      <circle cx="70" cy="135" r="30" class="fill-page"/><circle cx="70" cy="135" r="30" class="stroke-rule" stroke-width="2"/>
+      <foreignObject x="38" y="26"  width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(x_1\)</div></foreignObject>
+      <foreignObject x="38" y="116" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(x_2\)</div></foreignObject>
+
+      <circle cx="330" cy="90" r="42" class="fill-tint"/><circle cx="330" cy="90" r="42" class="stroke-rule" stroke-width="2"/>
+      <text x="330" y="105" text-anchor="middle" class="t-sum">Σ</text>
+      <foreignObject class="m-sm" x="240" y="120" width="180" height="40"><div xmlns="http://www.w3.org/1999/xhtml">\(x=2x_1+3x_2\)</div></foreignObject>
+
+      <line x1="372" y1="90" x2="500" y2="90" class="stroke-ink" stroke-width="2"/>
+      <rect x="500" y="52" width="150" height="76" rx="8" class="fill-page"/>
+      <rect x="500" y="52" width="150" height="76" rx="8" class="stroke-accent" stroke-width="2.5"/>
+      <foreignObject x="500" y="69" width="150" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(\sigma(x)\)</div></foreignObject>
+      <foreignObject class="m-sm" x="500" y="120" width="150" height="40"><div xmlns="http://www.w3.org/1999/xhtml">임곗값 \(h\)</div></foreignObject>
+
+      <line x1="650" y1="90" x2="728" y2="90" class="stroke-ink" stroke-width="2"/>
+      <circle cx="760" cy="90" r="32" class="fill-accent"/>
+      <foreignObject class="m-out" x="728" y="70" width="64" height="42"><div xmlns="http://www.w3.org/1999/xhtml">\(X\)</div></foreignObject>
+    </svg>
+
+    <div class="gate-grid" style="margin-top: var(--lm-space-2);">
+      <div class="gate-cell">
+        <h4>논리합 (OR)</h4>
+        <table class="truth-table">
+          <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(x\)</th><th>원하는 \(X\)</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td>5</td><td class="val-1">1</td></tr>
+            <tr><td>1</td><td>0</td><td>2</td><td class="val-1">1</td></tr>
+            <tr><td>0</td><td>1</td><td>3</td><td class="val-1">1</td></tr>
+            <tr><td>0</td><td>0</td><td>0</td><td class="val-0">0</td></tr>
+          </tbody>
+        </table>
+        <p><b>가능</b> — \(0 &lt; h \le 2\)</p>
+      </div>
+
+      <div class="gate-cell">
+        <h4>논리곱 (AND)</h4>
+        <table class="truth-table">
+          <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(x\)</th><th>원하는 \(X\)</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td>5</td><td class="val-1">1</td></tr>
+            <tr><td>1</td><td>0</td><td>2</td><td class="val-0">0</td></tr>
+            <tr><td>0</td><td>1</td><td>3</td><td class="val-0">0</td></tr>
+            <tr><td>0</td><td>0</td><td>0</td><td class="val-0">0</td></tr>
+          </tbody>
+        </table>
+        <p><b>가능</b> — \(3 &lt; h \le 5\)</p>
+      </div>
+
+      <div class="gate-cell bad">
+        <h4>배타적논리합 (XOR)</h4>
+        <table class="truth-table">
+          <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(x\)</th><th>원하는 \(X\)</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td>5</td><td class="val-0">0</td></tr>
+            <tr><td>1</td><td>0</td><td>2</td><td class="val-1">1</td></tr>
+            <tr><td>0</td><td>1</td><td>3</td><td class="val-1">1</td></tr>
+            <tr><td>0</td><td>0</td><td>0</td><td class="val-0">0</td></tr>
+          </tbody>
+        </table>
+        <p><b>불가능</b> — \(h &gt; 5\)이면서 \(h \le 2\)</p>
+      </div>
+    </div>
+
+    <div class="result-box">
+      <span class="kw-success">임곗값만 옮기면 논리합도 논리곱도 된다.</span>
+      배타적논리합만 안 된다 — 퍼셉트론 <b>하나</b>로는 여기가 끝이다.
+    </div>
+    <aside class="notes">세 표의 \(x\) 열은 완전히 같다는 점을 먼저 짚는다. 다른 건 "원하는 출력" 열뿐이다. OR은 5·2·3에서 1이어야 하니 문턱을 2 아래로, AND는 5에서만 1이어야 하니 문턱을 3 위로 올리면 된다. XOR은 가장 큰 5에서 0을, 중간인 2와 3에서 1을 요구한다 — 문턱 하나로는 위아래를 동시에 자를 수 없다. 이 한마디가 오늘 수업 전체의 출발점이다.</aside>
+  </section>
+
+  <!-- ═══════════ 4. 학습 목표 ═══════════ -->
   <section>
     <div class="chapter-tag">학습 목표</div>
     <h2>오늘 도착할 곳</h2>
@@ -180,7 +263,7 @@
     <aside class="notes">2번은 계산이 세 번 반복되는 구조라 손이 익으면 금방이다. 3번에서 지난 시간의 좌절이 해소된다.</aside>
   </section>
 
-  <!-- ═══════════ 4. 두 퍼셉트론 P1, P2 ═══════════ -->
+  <!-- ═══════════ 5. 두 퍼셉트론 P1, P2 ═══════════ -->
   <section>
     <div class="chapter-tag">교과서 30쪽</div>
     <h2>같은 입력, 다른 두 퍼셉트론</h2>
@@ -220,12 +303,12 @@
     <aside class="notes">두 퍼셉트론이 같은 재료(x₁, x₂)를 보고 서로 다른 판단(z₁, z₂)을 내린다는 점만 잡으면 된다. 숫자는 다음다음 장에서 준다.</aside>
   </section>
 
-  <!-- ═══════════ 5. P3를 얹는다 → 층 구조 (4단계 전개) ═══════════ -->
+  <!-- ═══════════ 6. P3를 얹는다 → 층 구조 (4단계 전개) ═══════════ -->
   <section>
     <div class="chapter-tag">교과서 30쪽 <span class="badge">오늘의 중심</span></div>
-    <h2>하나에서 셋으로 — 층이 생긴다</h2>
+    <h2>\(z_1, z_2\)를 다시 입력으로 넣으면</h2>
 
-    <svg class="dg xwide" id="nnBuild" viewBox="0 0 1000 380" width="1000" height="380"
+    <svg class="dg xwide" id="nnBuild" viewBox="0 0 1000 356" width="1000" height="356"
          preserveAspectRatio="xMidYMid meet" style="margin-top: var(--lm-space-3);">
 
       <!-- 층 구분 밴드 — 반드시 맨 앞(노드 뒤에 깔려야 한다) -->
@@ -290,7 +373,7 @@
     <aside class="notes">한 단계씩 눌러 가며 "왜 하나를 더 두는가"를 학생에게 먼저 묻는다. 3단계에서 교과서 문장을 그대로 읽어 준다. 4단계 "은닉(隱匿)"이라는 이름의 뜻을 짚어 준다 — 밖에서는 입력과 출력만 보이고 가운데는 보이지 않는다. z₁, z₂는 사람이 정해 준 값이 아니라 계산 도중에 생기는 값이다.</aside>
   </section>
 
-  <!-- ═══════════ 6. 다층퍼셉트론 ═══════════ -->
+  <!-- ═══════════ 7. 다층퍼셉트론 ═══════════ -->
   <section>
     <div class="chapter-tag">교과서 30쪽</div>
     <h2>은닉층을 여러 개 두면 — 다층퍼셉트론</h2>
@@ -337,7 +420,7 @@
     <aside class="notes">이 그림은 이름을 붙이기 위한 것이지 계산 대상이 아니다. 다음 장부터 다시 P₁·P₂·P₃ 세 개로 돌아온다고 미리 말해 주면 학생이 겁먹지 않는다.</aside>
   </section>
 
-  <!-- ═══════════ 7. 숫자를 넣자 ═══════════ -->
+  <!-- ═══════════ 8. 숫자를 넣자 ═══════════ -->
   <section class="tight">
     <div class="chapter-tag">교과서 31쪽 <span class="badge">오늘의 중심</span></div>
     <h2>숫자를 넣어 보자</h2>
@@ -354,11 +437,11 @@
 
         <!-- 가중치 라벨 — 교차 지점이 아니라 출발 노드 바로 바깥에 둔다 -->
         <foreignObject class="m-val m-sm" x="103" y="43"  width="80" height="38"><div xmlns="http://www.w3.org/1999/xhtml">6</div></foreignObject>
-        <foreignObject class="m-val m-sm" x="89"  y="105" width="80" height="38"><div xmlns="http://www.w3.org/1999/xhtml">2</div></foreignObject>
+        <foreignObject class="m-val m-sm" x="99"  y="112" width="80" height="38"><div xmlns="http://www.w3.org/1999/xhtml">2</div></foreignObject>
         <foreignObject class="m-val m-sm" x="92"  y="159" width="80" height="38"><div xmlns="http://www.w3.org/1999/xhtml">4</div></foreignObject>
         <foreignObject class="m-val m-sm" x="103" y="222" width="80" height="38"><div xmlns="http://www.w3.org/1999/xhtml">2</div></foreignObject>
         <foreignObject class="m-val m-sm" x="433" y="70"  width="80" height="38"><div xmlns="http://www.w3.org/1999/xhtml">5</div></foreignObject>
-        <foreignObject class="m-val m-sm" x="418" y="210" width="90" height="38"><div xmlns="http://www.w3.org/1999/xhtml">\(-5\)</div></foreignObject>
+        <foreignObject class="m-val m-sm" x="430" y="212" width="90" height="38"><div xmlns="http://www.w3.org/1999/xhtml">\(-5\)</div></foreignObject>
 
         <!-- 노드 -->
         <circle cx="80" cy="80"  r="32" class="fill-page"/><circle cx="80" cy="80"  r="32" class="stroke-rule" stroke-width="2"/>
@@ -398,12 +481,12 @@
     <aside class="notes">P₃의 가중치에 음수 −5가 있다는 점을 짚는다. 3차시에서 "가중치는 음수일 수도 있고, 그러면 총합을 깎는다"고 했던 그 이야기가 여기서 결정적으로 쓰인다.</aside>
   </section>
 
-  <!-- ═══════════ 8. z1, z2, y 계산 ═══════════ -->
+  <!-- ═══════════ 9. z1, z2, y 계산 ═══════════ -->
   <section class="tight">
     <div class="chapter-tag">교과서 31쪽</div>
     <h2>네 가지 입력을 모두 통과시켜 보자</h2>
 
-    <div class="two-col ratio-2-1" style="align-items: start;">
+    <div class="two-col" style="align-items: start;">
       <table class="calc-table" id="mlpTable">
         <thead><tr><th>\(x_1\)</th><th>\(x_2\)</th>
                    <th>\(6x_1+4x_2\)</th><th>\(z_1\)</th>
@@ -431,11 +514,11 @@
 
       <div>
         <div class="info-box">
-          한 행마다 <b>세 번</b> 계산한다 — \(z_1\) 구하고, \(z_2\) 구하고, 그 둘로 \(y\)를 구한다.
+          한 행에 계산 <b>세 번</b> — \(z_1\), \(z_2\), 그리고 \(y\).
         </div>
-        <p class="mlp-now" id="mlpNow">아직 계산 전 — 버튼을 눌러 한 행씩 통과시켜 보자</p>
+        <p class="mlp-now" id="mlpNow">아직 계산 전 — 버튼을 눌러 보자</p>
 
-        <svg class="dg wide" id="mlpViz" viewBox="0 0 560 300" width="560" height="300"
+        <svg class="dg wide" id="mlpViz" viewBox="0 0 560 276" width="560" height="276"
              preserveAspectRatio="xMidYMid meet">
           <!-- 엣지 -->
           <line x1="88"  y1="71"  x2="250" y2="79"  class="stroke-ink" stroke-width="2"/>
@@ -484,7 +567,7 @@
     <aside class="notes">"한 행씩" 버튼으로 진행하며 학생이 먼저 계산하게 한다. 두 번째 행(1,0)에서 z₂=0이 되는 순간이 이 수업의 열쇠다 — P₂만 문턱을 못 넘어서 y가 살아난다.</aside>
   </section>
 
-  <!-- ═══════════ 9. 결과 — XOR이다 ═══════════ -->
+  <!-- ═══════════ 10. 결과 — XOR이다 ═══════════ -->
   <section>
     <div class="chapter-tag">교과서 31쪽 <span class="badge">오늘의 도착점</span></div>
     <h2>두 입력이 같으면 0, 다르면 1</h2>
@@ -519,7 +602,7 @@
     <aside class="notes">지난 시간 부등식으로 "없다"를 증명한 학생들에게, 왜 이번에는 되는지 한 문장으로 정리해 준다 — 은닉층이 좌표평면을 한 번 접어 주기 때문에 출력층에서는 직선 하나로 나뉜다. 깊이 들어가지는 말 것.</aside>
   </section>
 
-  <!-- ═══════════ 10. 문제 6 ═══════════ -->
+  <!-- ═══════════ 11. 문제 6 ═══════════ -->
   <section class="tight">
     <div class="chapter-tag">문제 6 · 교과서 31쪽</div>
     <h2>0과 1이 아닌 입력이라면</h2>
@@ -564,7 +647,7 @@
     <aside class="notes">둘째 행 x₂=3에서 z₂의 가중합이 정확히 4가 되어 "≥"라서 1이 된다. 등호가 포함된다는 걸 놓치는 학생이 반드시 나온다. 미리 확인할 것.</aside>
   </section>
 
-  <!-- ═══════════ 11. 확인하기 ═══════════ -->
+  <!-- ═══════════ 12. 확인하기 ═══════════ -->
   <section>
     <div class="chapter-tag">확인하기 · 교과서 31쪽</div>
     <h2>맞으면 O, 틀리면 X</h2>
@@ -585,7 +668,7 @@
     <aside class="notes">문항을 눌러 답을 열기 전에 손을 들게 한다. ⑴에서 논리합과 논리곱을 헷갈리는 학생이 매년 절반쯤 나온다.</aside>
   </section>
 
-  <!-- ═══════════ 12. 탐구 & 융합 — 논리 회로 ═══════════ -->
+  <!-- ═══════════ 13. 탐구 & 융합 — 논리 회로 ═══════════ -->
   <section>
     <div class="chapter-tag">탐구 &amp; 융합 · 교과서 32쪽</div>
     <h2>진리표 제작소 — 논리 회로</h2>
@@ -672,7 +755,7 @@
     <aside class="notes">XOR 기호는 OR 기호 뒤에 선이 하나 더 그어져 있다는 것만 알려 주면 학생이 기억한다. 이 세 진리표는 2차시에 이미 채워 봤다는 점을 상기시킨다.</aside>
   </section>
 
-  <!-- ═══════════ 13. 탐구 문제 ═══════════ -->
+  <!-- ═══════════ 14. 탐구 문제 ═══════════ -->
   <section class="tight">
     <div class="chapter-tag">탐구 · 교과서 32쪽</div>
     <h2>회로 세 개를 이어 붙이면</h2>
@@ -740,7 +823,7 @@
     <aside class="notes">㉡과 ㉢은 출력에서 거꾸로 거슬러 올라가는 역추론이다. 앞에서 뒤로 계산하는 ㉠과 방식이 다르다는 걸 분명히 구분해 준다. 회로도에 값을 직접 적어 가며 따라가면 훨씬 쉽다.</aside>
   </section>
 
-  <!-- ═══════════ 14. 정리 ═══════════ -->
+  <!-- ═══════════ 15. 정리 ═══════════ -->
   <section>
     <div class="chapter-tag">정리 · Ⅰ-2 마무리</div>
     <h2>오늘 한 줄</h2>
@@ -880,11 +963,11 @@
         const v = row ? String(row[n.key]) : null;
         n.val.innerHTML = v === null ? '?' : '\\(' + v + '\\)';
         n.val.style.color = v === null ? DIM : (v === '1' ? PAGE : INK);
-        n.circle.setAttribute('fill', v === null ? PAGE : (v === '1' ? ACCENT : TINT));
+        n.circle.style.fill = v === null ? PAGE : (v === '1' ? ACCENT : TINT);
       });
       now.innerHTML = row
         ? '지금 계산 중 — \\((x_1, x_2) = (' + row.x1 + ',\\ ' + row.x2 + ')\\)'
-        : '아직 계산 전 — 버튼을 눌러 한 행씩 통과시켜 보자';
+        : '아직 계산 전 — 버튼을 눌러 보자';
       window.safeTypeset(viz.map(n => n.val).concat([now]));
     }
 
