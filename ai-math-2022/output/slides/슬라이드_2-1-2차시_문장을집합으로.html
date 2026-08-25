@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>문장을 부수어 집합으로 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-small); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt td.one { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+
+    /* 댓글 카드 */
+    .cmts { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-4);
+            margin-top: var(--lm-space-4); }
+    .cmt-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .cmt-card .tag { display: inline-block; font-size: var(--lm-slide-caption);
+                     color: var(--lm-accent); font-weight: 700; margin-bottom: var(--lm-space-2); }
+    .cmt-card p { margin: 0; font-size: var(--lm-slide-small);
+                  line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+
+    /* 5단계 파이프라인 */
+    .pipe { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--lm-space-3);
+            margin-top: var(--lm-space-4); }
+    .pipe .pstep { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                   border-radius: var(--lm-radius-md); padding: var(--lm-space-3);
+                   text-align: center; font-size: var(--lm-slide-small);
+                   line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .pipe .pstep b { display: block; color: var(--lm-ink); margin-bottom: var(--lm-space-1); }
+    .pipe .pstep.last { border-color: var(--lm-accent); background: var(--lm-accent-tint); }
+    .pipe .pstep.last b { color: var(--lm-accent); }
+
+    /* 낱말 줄 */
+    .words { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+             margin-top: var(--lm-space-2); }
+    .words span { border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-sm); background: var(--lm-page);
+                  padding: 4px var(--lm-space-3); font-size: var(--lm-slide-small);
+                  color: var(--lm-ink-2); }
+    .words span.stop { background: var(--lm-paper-soft); color: var(--lm-ink-4);
+                       text-decoration: line-through; }
+    .words span.keep { border-color: var(--lm-accent); background: var(--lm-accent-tint);
+                       color: var(--lm-accent); font-weight: 700; }
+
+    .setline { text-align: center; font-size: var(--lm-slide-body-lg);
+               color: var(--lm-ink); margin-top: var(--lm-space-3); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { display: none; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid var(--lm-rule); color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { display: block; }
+  </style>
+</head>
+<body data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅱ-1 텍스트 데이터 표현 · 2차시</div>
+    <h1>문장을 부수어 집합으로</h1>
+    <p class="slide-sub">말뭉치에서 단어집합으로, 단어 사전에서 벡터로</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 52~54쪽</span>
+    </div>
+    <aside class="notes">오늘은 절차가 전부다. 5단계를 순서대로 밟는 것이 목표이고, 새로운 수학 개념은 집합의 합집합 하나뿐이다. 6장에서 댓글 A 하나를 끝까지 따라가면 나머지는 학생들이 스스로 할 수 있다. 시간이 빠듯하면 7·8장을 학습지로 넘겨도 된다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 50~52쪽</div>
+    <h2>정형은 끝났고, 비정형이 남았다</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="result-box">
+        <b>정형</b> — 범주가 정해져 있었다.<br>
+        남성 \((1,\ 0)\), 여성 \((0,\ 1)\).
+        <span class="kw-success">칸을 세어 자리를 만들면 끝났다.</span>
+      </div>
+      <div class="warning-box">
+        <b>비정형</b> — 고를 범주가 없다.<br>
+        “식재료가 신선하고 모든 메뉴의 품질이 좋아요.”
+        <span class="kw-danger">이 문장의 자리는 몇 개인가?</span>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      문장은 통째로는 다룰 수 없다. 그래서 <b>부순다</b> —
+      낱말로 쪼개고, 쓸모없는 것을 걷어내고, 남은 것을 <span class="kw">집합</span>으로 만든다.
+    </p>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      집합은 <b>같은 원소를 중복해서 쓰지 않는다.</b> 오늘 그 성질이 중요해진다.
+    </div>
+    <aside class="notes">집합의 정의(기준이 분명한 대상들의 모임, 중복 없음)를 여기서 한 번 복습한다. 중복을 쓰지 않는다는 점이 오늘 만드는 단어집합의 성질이고, 다음 차시의 빈도수 벡터가 나오는 이유이기도 하다 — 여기서는 언급만 하고 넘어간다.</aside>
+  </section>
+
+  <!-- 3. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>문장에서 <span class="kw">불용어</span>를 제거하고 <span class="kw">단어집합</span>을 만들 수 있다.</span></li>
+      <li><span class="num">2</span><span>여러 단어집합의 합집합으로 <span class="kw">단어 사전</span>을 구성할 수 있다.</span></li>
+      <li><span class="num">3</span><span>단어 사전을 기준으로 문장을 <span class="kw">0과 1의 벡터</span>로 표현할 수 있다.</span></li>
+    </ul>
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      오늘 하는 일을 한 문장으로 —
+      <span class="kw-success">문장 → 단어집합 → 단어 사전 → 벡터.</span>
+    </div>
+    <aside class="notes">이 네 단계 흐름을 칠판 구석에 적어 두고 수업 내내 어디쯤인지 짚어 준다. 학생들이 길을 잃는 것은 절차가 어려워서가 아니라 지금 어느 단계인지 몰라서다.</aside>
+  </section>
+
+  <!-- 4. 말뭉치 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 52쪽 · 말뭉치</div>
+    <h2>교복에 대한 댓글 세 개</h2>
+
+    <div class="cmts">
+      <div class="cmt-card">
+        <span class="tag">댓글 A</span>
+        <p>우리 학교 교복은 주변 학교 교복보다 디자인이 예뻐요.</p>
+      </div>
+      <div class="cmt-card">
+        <span class="tag">댓글 B</span>
+        <p>디자인과 신축성이 좋은 교복이에요.</p>
+      </div>
+      <div class="cmt-card">
+        <span class="tag">댓글 C</span>
+        <p>소재가 좋은 교복이라고 생각해요.</p>
+      </div>
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-4);">
+      어떤 목적을 가지고 수집한 텍스트 데이터 전체를
+      <span class="kw">말뭉치</span> 또는 <span class="kw">코퍼스(corpus)</span>라고 한다.
+    </div>
+
+    <p class="prob-stmt">
+      이 세 댓글이 오늘의 말뭉치다. 이걸로 끝까지 간다.
+    </p>
+    <aside class="notes">'말뭉치'라는 말이 낯설게 들리지만 뜻은 단순하다 — 목적을 가지고 모은 글 뭉치. 영화 선호도를 보려고 모은 댓글, 급식 만족도를 보려고 모은 의견이 다 말뭉치다. 이 세 댓글은 오늘 수업 내내 다시 나오니 학습지에 적어 두게 한다.</aside>
+  </section>
+
+  <!-- 5. 5단계 -->
+  <section>
+    <div class="chapter-tag">교과서 53쪽 · 절차</div>
+    <h2>문장에서 집합까지, 다섯 단계</h2>
+
+    <div class="pipe">
+      <div class="pstep"><b>1</b>문장</div>
+      <div class="pstep"><b>2</b>문장 부호 제외<br>낱말 분리</div>
+      <div class="pstep"><b>3</b>기본 사전형<br>단어 표현</div>
+      <div class="pstep"><b>4</b>불용어 제거</div>
+      <div class="pstep last"><b>5</b>단어집합</div>
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-5);">
+      텍스트 데이터에는 등장하지만 분석에 사용되지 않는 단어를
+      <span class="kw">불용어(不用語)</span>라 한다.
+      대명사·관사·전치사·조사·접속사·특수 문자 등이 해당된다.
+    </div>
+
+    <p class="prob-stmt">
+      마침표·느낌표·따옴표 같은 문장 부호는 <b>보통 제외한다.</b>
+      다음 장에서 댓글 A를 이 다섯 단계로 직접 통과시켜 본다.
+    </p>
+    <aside class="notes">불용어의 예를 학생들 입으로 말하게 한다 — '은/는/이/가', '그리고', '우리'. 뜻을 나르지 않고 문법을 위해 있는 말들이라는 감각을 주면 된다. 한자 不用語를 칠판에 써 주면 '쓰지 않는 말'로 바로 이해한다.</aside>
+  </section>
+
+  <!-- 6. 댓글 A 따라가기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 53쪽 · 댓글 A</div>
+    <h2>댓글 하나를 끝까지 따라가면</h2>
+
+    <div class="step-box" data-s="1">
+      <div class="step-label">1 · 문장</div>
+      우리 학교 교복은 주변 학교 교복보다 디자인이 예뻐요<b>.</b>
+    </div>
+    <div class="step-box" data-s="2">
+      <div class="step-label">2 · 문장 부호 제외 · 낱말 분리</div>
+      <div class="words">
+        <span>우리</span><span>학교</span><span>교복은</span><span>주변</span>
+        <span>학교</span><span>교복보다</span><span>디자인이</span><span>예뻐요</span>
+      </div>
+    </div>
+    <div class="step-box" data-s="3">
+      <div class="step-label">3 · 기본 사전형 단어</div>
+      <div class="words">
+        <span>우리</span><span>학교</span><span>교복</span><span>은</span><span>주변</span>
+        <span>학교</span><span>교복</span><span>보다</span><span>디자인</span><span>이</span><span>예쁘다</span>
+      </div>
+    </div>
+    <div class="anim-controls">
+      <button class="anim-btn" id="sNext">다음 단계 ▶</button>
+      <span class="step-counter" id="sCnt">0 / 3</span>
+      <button class="anim-btn reset-btn" id="sReset">처음으로</button>
+    </div>
+    <aside class="notes">한 단계씩 열면서 무엇이 바뀌었는지 학생들에게 먼저 말하게 한다. 2단계에서 마침표가 사라진 것, 3단계에서 '교복은'이 '교복'과 '은'으로 갈라지고 '예뻐요'가 '예쁘다'로 바뀐 것 — 이 두 지점을 짚는다. '학교'와 '교복'이 각각 두 번씩 나온다는 것도 세어 두게 하면 다음 장의 마지막 단계가 살아난다.</aside>
+  </section>
+
+  <!-- 7. 걷어내고 모으기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 53쪽 · 댓글 A (이어서)</div>
+    <h2>그다음 걷어내고 모은다</h2>
+
+    <div class="step-box" data-t="1">
+      <div class="step-label">4 · 불용어 제거</div>
+      <div class="words">
+        <span class="stop">우리</span><span class="keep">학교</span><span class="keep">교복</span>
+        <span class="stop">은</span><span class="keep">주변</span><span class="keep">학교</span>
+        <span class="keep">교복</span><span class="stop">보다</span><span class="keep">디자인</span>
+        <span class="stop">이</span><span class="keep">예쁘다</span>
+      </div>
+    </div>
+    <div class="step-box" data-t="2">
+      <div class="step-label">5 · 단어집합 — 중복은 한 번만</div>
+      <div class="setline">\(A=\{\)학교, 교복, 주변, 디자인, 예쁘다\(\}\)</div>
+    </div>
+
+    <div class="anim-controls">
+      <button class="anim-btn" id="tNext">다음 단계 ▶</button>
+      <span class="step-counter" id="tCnt">0 / 2</span>
+      <button class="anim-btn reset-btn" id="tReset">처음으로</button>
+    </div>
+    <aside class="notes">오늘의 중심 장면이다. 4단계에서 '우리·은·보다·이'가 빠지고 '학교'와 '교복'이 두 번씩 살아남는 것, 5단계에서 그 중복이 하나로 줄어드는 것 — 이 두 지점을 놓치지 않는다. 집합이라 중복을 안 쓴다는 2장의 이야기가 여기서 실제로 쓰인다. 왜 '주변'은 남고 '우리'는 빠지는지 물어보면 좋다(뜻을 나르는가).</aside>
+  </section>
+
+  <!-- 7. 세 단어집합 -->
+  <section>
+    <div class="chapter-tag">교과서 53쪽 · 나머지 둘</div>
+    <h2>같은 방법으로 B와 C도</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>댓글 A</h4>
+        <p>우리 학교 교복은 주변 학교 교복보다 디자인이 예뻐요.</p>
+        <p>\(A=\{\)학교, 교복, 주변, 디자인, 예쁘다\(\}\)</p>
+      </div>
+      <div class="plain-card">
+        <h4>댓글 B</h4>
+        <p>디자인과 신축성이 좋은 교복이에요.</p>
+        <p>\(B=\{\)디자인, 신축성, 좋다, 교복\(\}\)</p>
+      </div>
+      <div class="plain-card">
+        <h4>댓글 C</h4>
+        <p>소재가 좋은 교복이라고 생각해요.</p>
+        <p>\(C=\{\)소재, 좋다, 교복, 생각\(\}\)</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5);">
+      세 집합에 <b>‘교복’</b>이 공통으로 들어 있고,
+      B와 C에는 <b>‘좋다’</b>가 함께 있다. 겹치는 단어가 보이기 시작한다.
+    </div>
+    <aside class="notes">B와 C는 학생들이 직접 만들게 하는 것이 좋다. 짧아서 1~2분이면 된다. 겹치는 단어를 짚어 주면 다음 장의 합집합이 자연스럽다. '좋은'이 '좋다'로 바뀌는 것(기본 사전형)을 다시 확인시킨다.</aside>
+  </section>
+
+  <!-- 8. 단어 사전 -->
+  <section>
+    <div class="chapter-tag">교과서 53쪽 · 단어 사전</div>
+    <h2>세 집합을 하나로 합치면</h2>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-3);">
+      \[ U = A \cup B \cup C \]
+    </div>
+
+    <div class="setline" style="margin-top: var(--lm-space-4);">
+      \(U=\{\)학교, 교복, 주변, 디자인, 예쁘다, 신축성, 좋다, 소재, 생각\(\}\)
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-4);">
+      말뭉치의 단어집합, 즉 세 댓글로부터 구성한 이 집합 \(U\)를
+      <span class="kw">단어 사전</span>이라고 한다.
+    </div>
+
+    <p class="prob-stmt">
+      원소가 <b>9개</b>다. 이 9개가 곧 <span class="kw">벡터의 자리 9개</span>가 된다 —
+      지난 시간 혈액형 4개가 4차원이 됐던 것과 같다.
+    </p>
+    <aside class="notes">합집합이라 중복이 한 번씩만 들어간다는 점, 순서는 정하기 나름이지만 한번 정하면 끝까지 지켜야 한다는 점을 짚는다. 마지막 문장이 지난 차시와 오늘을 잇는 다리다 — 범주의 개수가 차원이었듯 단어 사전의 크기가 차원이 된다.</aside>
+  </section>
+
+  <!-- 9. 벡터로 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 54쪽 · 벡터 표현</div>
+    <h2>속하면 1, 아니면 0</h2>
+
+    <table class="dt">
+      <thead>
+        <tr><th style="width:8%"></th><th>학교</th><th>교복</th><th>주변</th><th>디자인</th><th>예쁘다</th><th>신축성</th><th>좋다</th><th>소재</th><th>생각</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">A</td><td class="one">1</td><td class="one">1</td><td class="one">1</td><td class="one">1</td><td class="one">1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td class="rowhead">B</td><td>0</td><td class="one">1</td><td>0</td><td class="one">1</td><td>0</td><td class="one">1</td><td class="one">1</td><td>0</td><td>0</td></tr>
+        <tr><td class="rowhead">C</td><td>0</td><td class="one">1</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="one">1</td><td class="one">1</td><td class="one">1</td></tr>
+      </tbody>
+    </table>
+
+    <div class="setline" style="margin-top: var(--lm-space-3); font-size: var(--lm-slide-body);">
+      \(\vec{A}=(1,1,1,1,1,0,0,0,0)\) &nbsp;
+      \(\vec{B}=(0,1,0,1,0,1,1,0,0)\) &nbsp;
+      \(\vec{C}=(0,1,0,0,0,0,1,1,1)\)
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-3);">
+      텍스트 형태의 자연어를 기계가 인식할 수 있도록 수로 나열하여 벡터로 표현하는 것을
+      <span class="kw">임베딩(embedding)</span>이라고 한다.
+    </div>
+    <aside class="notes">표를 세로로 읽으면 "이 단어가 어느 댓글에 있나", 가로로 읽으면 "이 댓글에 어떤 단어가 있나"가 된다. 둘 다 읽어 보게 한다. 벡터의 성분 순서가 단어 사전의 순서를 따른다는 '주의'를 반드시 짚는다 — 순서가 어긋나면 전혀 다른 뜻이 된다.</aside>
+  </section>
+
+  <!-- 10. 불용어는 목적에 따라 -->
+  <section>
+    <div class="chapter-tag">교과서 53쪽 · 참고</div>
+    <h2>불용어는 정해져 있지 않다</h2>
+
+    <p class="prob-stmt">
+      불용어는 <b>경우에 따라 사용자가 목적에 맞게 설정</b>할 수 있다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>오늘 우리가 한 것</h4>
+        <p>‘우리’, ‘은’, ‘보다’, ‘이’를 뺐다.<br>
+        \(A=\{\)학교, 교복, 주변, 디자인, 예쁘다\(\}\)</p>
+      </div>
+      <div class="plain-card">
+        <h4>다르게 할 수도 있다</h4>
+        <p>세 댓글이 모두 <b>‘학교의 교복’</b>에 대한 것이므로,
+        분석 목적에 따라 ‘학교’와 ‘교복’도 불용어로 넣을 수 있다.</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      모든 댓글에 다 나오는 단어는 <b>서로를 구별해 주지 못한다.</b>
+      빼는 편이 나을 때가 있다.
+    </div>
+    <aside class="notes">이 장이 다음 절(TF-IDF)의 씨앗이다. "모두에게 있는 단어는 구별에 쓸모가 없다"는 생각이 나중에 IDF로 정식화된다. 여기서는 직관만 심어 두고 이름은 붙이지 않는다. 학생들에게 "그럼 이 세 댓글에서 뭘 빼면 좋겠냐"고 물으면 대개 '교복'이라고 답한다.</aside>
+  </section>
+
+  <!-- 11. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 53~54쪽 문제 4·5 · 확인하기</div>
+    <h2>직접 해 보자</h2>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>문제 4.</b> 영화 후기 세 개 —
+        A “이 영화는 스토리가 탄탄합니다. 추천!” /
+        B “영화 내내 긴장하며 봤네요. 역시 영화는 액션과 CG!” /
+        C “배우의 연기가 훌륭해요. 탄탄한 스토리와 액션! 최고!”
+        의 단어집합과 단어 사전 \(U\)를 구하시오.
+        <div class="ans">
+          \(A=\{\)영화, 스토리, 탄탄하다, 추천\(\}\) ·
+          \(B=\{\)영화, 긴장하다, 보다, 액션, CG\(\}\) ·
+          \(C=\{\)배우, 연기, 훌륭하다, 탄탄하다, 스토리, 액션, 최고\(\}\)<br>
+          \(U=\{\)영화, 스토리, 탄탄하다, 추천, 긴장하다, 보다, 액션, CG, 배우, 연기, 훌륭하다, 최고\(\}\) — 12개
+        </div>
+      </li>
+      <li>
+        <b>문제 5.</b> 위 단어 사전 \(U\)로 세 후기를 벡터 \(\vec{A},\ \vec{B},\ \vec{C}\)로 나타내시오.
+        <div class="ans">
+          \(\vec{A}=(1,1,1,1,0,0,0,0,0,0,0,0)\)<br>
+          \(\vec{B}=(1,0,0,0,1,1,1,1,0,0,0,0)\)<br>
+          \(\vec{C}=(0,1,1,0,0,0,1,0,1,1,1,1)\)
+        </div>
+      </li>
+      <li>
+        <b>확인하기.</b> ⑴ \(\vec{X}=(1,0,3,4,5,2)\)의 셋째 성분은 3이다.
+        ⑵ ‘이 소설은 감동적인 소설이에요.’에서 ‘소설’은 불용어에 포함시킬 수 없다.
+        ⑶ 문장을 벡터로 표현할 때 단어집합을 이용할 수 있다.
+        <div class="ans">⑴ ○ &nbsp; ⑵ ✗ — 불용어는 목적에 맞게 설정할 수 있다 &nbsp; ⑶ ○</div>
+      </li>
+    </ul>
+    <aside class="notes">문제 4에서 B의 '내내'와 '역시'가 불용어로 빠진다는 점이 걸린다. 학생들이 남겨 두기 쉬우니 "뜻을 나르는 말인가"를 기준으로 판단하게 한다. 확인하기 ⑵는 방금 10장에서 다룬 내용이 그대로 나온 것이다 — 연결해서 짚어 준다.</aside>
+  </section>
+
+  <!-- 12. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>부수고, 걷어내고, 모은다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      문장 → 단어집합 → 단어 사전 → 벡터.<br>
+      <span class="kw-success">단어 사전의 크기가 곧 벡터의 차원이다.</span>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-6);">
+      그런데 오늘 만든 벡터는 <b>있다(1)와 없다(0)</b>만 말한다.
+      <span class="kw-danger">같은 단어가 세 번 나와도 1이다.</span>
+    </div>
+
+    <p class="prob-stmt">
+      몇 번 나왔는지가 중요할 때는 어떻게 할까? 다음 시간의 이야기다.
+    </p>
+    <aside class="notes">0/1 벡터의 한계를 예고로 남긴다. 6장에서 '학교'와 '교복'이 두 번씩 나왔는데 벡터에서는 1이 된 것을 다시 짚으면 실감이 난다. 다음 차시의 빈도수 벡터가 정확히 이 문제를 푼다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 단계 공개 — 댓글 A 1~3단계(6장) · 4~5단계(7장) */
+  function wireReveal(attr, cls, nextId, resetId, cntId) {
+    const items = Array.from(document.querySelectorAll('[data-' + attr + ']'));
+    if (!items.length) return;
+    const cnt = document.getElementById(cntId);
+    let i = 0;
+    function render() {
+      items.forEach((el, k) => el.classList.toggle(cls, k < i));
+      cnt.textContent = i + ' / ' + items.length;
+      window.safeTypeset(items.slice(0, i));
+    }
+    document.getElementById(nextId).addEventListener('click', () => {
+      if (i < items.length) { i++; render(); }
+    });
+    document.getElementById(resetId).addEventListener('click', () => { i = 0; render(); });
+    render();
+  }
+
+  wireReveal('s', 'visible', 'sNext', 'sReset', 'sCnt');
+  wireReveal('t', 'visible', 'tNext', 'tReset', 'tCnt');
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (12장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
