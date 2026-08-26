@@ -55,6 +55,23 @@
   text-wrap: balance;
 }
 
+/* ── 본문 폭 제한 (옵트인) ──
+   슬라이드 1920px에서 좌우 여백 96px을 빼면 본문 폭이 1728px이다.
+   --lm-slide-small(28px)에서 한 줄에 한글 61자, 캡션(24px)에서는 72자가
+   들어간다. 읽기 편한 길이(30~40자)의 두 배라 글이 좌우로 늘어져 보인다.
+   1440px으로 조이면 28px에서 51자가 된다.
+
+   전역이 아니라 <body class="lm-narrow">로 켜는 옵트인이다. 폭을 조이면
+   줄이 늘어 세로가 커지는데, 이미 994px에 여유가 없는 덱은 넘치기 때문이다.
+   (1단원 1-2-2·1-2-3·1-2-4가 그런 경우라 켜지 않았다.)
+   되돌리려면 이 규칙 하나만 지우면 된다. 값은 --lm-measure로 조절한다. */
+.lm-narrow .reveal .slides section { --lm-measure: 1440px; }
+.lm-narrow .reveal .slides section > *:not(aside) {
+  max-width: var(--lm-measure, none);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 
 /* ──────────────────────────────────────────────────────────────────────────
  * 타이포그래피
