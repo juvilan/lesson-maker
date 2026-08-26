@@ -66,9 +66,30 @@
    (1단원 1-2-2·1-2-3·1-2-4가 그런 경우라 켜지 않았다.)
    되돌리려면 이 규칙 하나만 지우면 된다. 값은 --lm-measure로 조절한다. */
 .lm-narrow .reveal .slides section { --lm-measure: 1280px; }
-.lm-narrow .reveal .slides section > *:not(aside) {
+
+/* 폭을 조이는 대상은 '줄글'뿐이다.
+   여러 칸 배치(.two-col 등)·표·도식을 같이 조이면 글이 줄을 내리는 게 아니라
+   배치가 눌려 오히려 세로가 폭발한다(1-2-4 11장에서 two-col이 374→698px).
+   그래서 제외 목록이 아니라 **적용 목록**으로 둔다 — 새로 생기는 배치 요소가
+   자동으로 안전한 쪽(폭 제한 없음)에 놓인다.
+   \[...\] 디스플레이 수식이 들어가는 .formula-box도 뺀다(수식은 줄바꿈이 안 된다).
+
+   가운데가 아니라 **왼쪽 정렬**이다(margin-right만 auto). 표·도식은 폭 제한에서
+   빠지므로, 가운데로 모으면 글만 안쪽으로 들어가 왼쪽 끝이 어긋난다. */
+.lm-narrow .reveal .slides section > h1,
+.lm-narrow .reveal .slides section > h2,
+.lm-narrow .reveal .slides section > h3,
+.lm-narrow .reveal .slides section > h4,
+.lm-narrow .reveal .slides section > p,
+.lm-narrow .reveal .slides section > ul,
+.lm-narrow .reveal .slides section > ol,
+.lm-narrow .reveal .slides section > .info-box,
+.lm-narrow .reveal .slides section > .warning-box,
+.lm-narrow .reveal .slides section > .result-box,
+.lm-narrow .reveal .slides section > .definition-box,
+.lm-narrow .reveal .slides section > .example-box,
+.lm-narrow .reveal .slides section > .step-box {
   max-width: var(--lm-measure, none);
-  margin-left: auto;
   margin-right: auto;
 }
 
