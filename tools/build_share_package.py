@@ -62,7 +62,7 @@ REWRITES = [
 MJ_FONT_DIR = "_assets/mathjax/output/chtml/fonts/woff-v2"
 
 DECK_GLOBS = [
-    ("ai-math/output/slides", re.compile(r"^슬라이드_III-1-0[3-6].*\.html$")),
+    ("ai-math/output/slides", re.compile(r"^슬라이드_III-1-.*\.html$")),
     ("ai-math/output/slides", re.compile(r"^슬라이드_III-2-.*\.html$")),
     ("ai-math-2022/output/slides", re.compile(r"^슬라이드_[12]-.*\.html$")),
 ]
