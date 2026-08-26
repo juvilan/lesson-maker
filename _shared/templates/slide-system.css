@@ -93,6 +93,12 @@
   margin-right: auto;
 }
 
+/* section.wide-measure — 이 장만 본문 폭을 덜 조인다.
+   큰 그림이 들어가 세로가 빡빡한데 1280px에서는 글이 한 줄 더 늘어
+   넘치는 장에 쓴다(1-1-1 2장이 그런 경우로, 995px에서 1px 초과였다).
+   내용을 고치는 대신 그 장의 --lm-measure만 올린다. */
+.lm-narrow .reveal .slides section.wide-measure { --lm-measure: 1440px; }
+
 /* section.tight — 저자가 "이 장은 세로가 빡빡하다"고 표시해 둔 장이다.
    그런데 지금까지 공유 CSS에도 덱에도 규칙이 없어 아무 효과가 없는
    죽은 클래스였다(패딩이 기본 72px 그대로였다). 상하 여백을 줄여
