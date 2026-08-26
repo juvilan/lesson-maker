@@ -32,6 +32,27 @@
   line-height: var(--lm-slide-line-body);
   /* 슬라이드는 고정 1920×1080, 내용이 넘치지 않도록 저작 책임 */
   overflow: hidden;
+
+  /* ── 한글 줄바꿈: 어절 단위로만 끊는다 ──
+     word-break 기본값(normal)은 한글을 '글자' 단위로 끊는다. 그래서
+     "고를 범주가 없다"가 "…없 / 다"처럼 갈린다. keep-all이 이것을 막고
+     어절(띄어쓰기) 경계에서만 줄을 넘긴다.
+     overflow-wrap은 keep-all 탓에 끊을 수 없게 된 긴 라틴 문자열(URL 등)이
+     가로로 넘치는 것을 막는 안전장치다.
+     text-wrap: pretty는 마지막 줄에 한 어절만 남는 고아 줄을 줄인다.
+     상속되므로 하위 요소에 따로 줄 필요가 없다. Chrome 117+에서 동작하고
+     미지원 브라우저는 무시하므로, 실질적인 교정은 keep-all이 담당한다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+/* 제목은 줄 길이를 고르게 나누는 balance가 더 낫다 */
+.reveal .slides section h1,
+.reveal .slides section h2,
+.reveal .slides section h3,
+.reveal .slides section h4 {
+  text-wrap: balance;
 }
 
 
