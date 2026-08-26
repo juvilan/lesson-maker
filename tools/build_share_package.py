@@ -29,6 +29,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "dist", "공유용")
@@ -69,13 +70,25 @@ DECK_GLOBS = [
 
 
 def fetch(url):
-    """PowerShell 로 내려받는다.
+    """urllib 을 먼저 쓰고, 실패하면 PowerShell 로 넘긴다.
 
-    파이썬 urllib 은 이 PC 에서 SSL 검증에 실패한다
-    (CERTIFICATE_VERIFY_FAILED: Missing Authority Key Identifier).
-    검증을 끄면 남에게 배포할 파일을 검증 없이 받는 셈이라 그럴 수 없다.
-    PowerShell 은 Windows 인증서 저장소를 쓰므로 정상 검증된다.
+    맥에서는 urllib 이 그대로 된다.
+    윈도우 업무용 노트북에서는 urllib 이 SSL 검증에 실패하므로
+    (CERTIFICATE_VERIFY_FAILED: Missing Authority Key Identifier)
+    Windows 인증서 저장소를 쓰는 PowerShell 로 넘긴다.
+    **검증을 끄지는 않는다** — 남에게 배포할 파일이다.
     """
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "lesson-maker-bundler"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return r.read()
+    except Exception as e:
+        if os.name != "nt":
+            raise RuntimeError("다운로드 실패: %s\n%s" % (url, e))
+    return fetch_via_powershell(url)
+
+
+def fetch_via_powershell(url):
     fd, tmp = tempfile.mkstemp(suffix=".bin")
     os.close(fd)
     try:
