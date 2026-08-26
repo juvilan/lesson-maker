@@ -65,11 +65,20 @@
    줄이 늘어 세로가 커지는데, 이미 994px에 여유가 없는 덱은 넘치기 때문이다.
    (1단원 1-2-2·1-2-3·1-2-4가 그런 경우라 켜지 않았다.)
    되돌리려면 이 규칙 하나만 지우면 된다. 값은 --lm-measure로 조절한다. */
-.lm-narrow .reveal .slides section { --lm-measure: 1440px; }
+.lm-narrow .reveal .slides section { --lm-measure: 1280px; }
 .lm-narrow .reveal .slides section > *:not(aside) {
   max-width: var(--lm-measure, none);
   margin-left: auto;
   margin-right: auto;
+}
+
+/* section.tight — 저자가 "이 장은 세로가 빡빡하다"고 표시해 둔 장이다.
+   그런데 지금까지 공유 CSS에도 덱에도 규칙이 없어 아무 효과가 없는
+   죽은 클래스였다(패딩이 기본 72px 그대로였다). 상하 여백을 줄여
+   본문 폭을 좁힐 여지를 만든다. 높이를 줄이기만 하므로 넘칠 위험은 없다. */
+.lm-narrow .reveal .slides section.tight {
+  padding-top: 48px;
+  padding-bottom: 48px;
 }
 
 
