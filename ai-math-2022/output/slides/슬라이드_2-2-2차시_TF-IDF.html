@@ -180,7 +180,7 @@
 
     <div class="stagehead">
       <span class="sn">1</span>
-      <span class="sd">\(TF=\) (각 문서에서 그 단어가 나오는 <b>횟수</b>)</span>
+      <span class="sd">\(\mathrm{TF}=\) (각 문서에서 그 단어가 나오는 <b>횟수</b>)</span>
     </div>
 
     <table class="dt">
@@ -210,7 +210,7 @@
 
     <div class="stagehead">
       <span class="sn">2</span>
-      <span class="sd">\(DF=\) (각 단어가 나오는 <b>문서의 개수</b>) — 횟수가 아니라 문서 수다</span>
+      <span class="sd">\(\mathrm{DF}=\) (각 단어가 나오는 <b>문서의 개수</b>) — 횟수가 아니라 문서 수다</span>
     </div>
 
     <table class="dt">
@@ -224,7 +224,7 @@
 
     <div class="stagehead" style="margin-top: var(--lm-space-4);">
       <span class="sn">3</span>
-      <span class="sd">\(IDF=\dfrac{(\text{전체 문서의 개수})}{DF}=\dfrac{4}{DF}\)</span>
+      <span class="sd">\(\mathrm{IDF}=\dfrac{(\text{전체 문서의 개수})}{\mathrm{DF}}=\dfrac{4}{\mathrm{DF}}\)</span>
     </div>
 
     <table class="dt">
@@ -249,7 +249,7 @@
 
     <div class="stagehead">
       <span class="sn">4</span>
-      <span class="sd">\(TF\text{-}IDF = TF \times IDF\) — 각 칸의 TF에 그 열의 IDF를 곱한다</span>
+      <span class="sd">\(\mathrm{TF}\text{-}\mathrm{IDF} = \mathrm{TF} \times \mathrm{IDF}\) — 각 칸의 TF에 그 열의 IDF를 곱한다</span>
     </div>
 
     <table class="dt">
@@ -266,8 +266,8 @@
     </table>
 
     <p class="prob-stmt">
-      예를 들어 후기 A의 ‘추천’은 \(TF=2\), \(IDF=1\)이므로 \(2\times 1=2\).
-      ‘위생적’은 \(TF=1\), \(IDF=4\)이므로 \(1\times 4=4\).
+      예를 들어 후기 A의 ‘추천’은 \(\mathrm{TF}=2\), \(\mathrm{IDF}=1\)이므로 \(2\times 1=2\).
+      ‘위생적’은 \(\mathrm{TF}=1\), \(\mathrm{IDF}=4\)이므로 \(1\times 4=4\).
     </p>
     <aside class="notes">IDF 행을 맨 위에 두었으니 세로로 곱하면 된다. 한두 칸을 학생에게 직접 시켜 본다. 0인 칸은 곱해도 0이라 그대로다. 이 표가 오늘의 결과물이고 다음 두 장에서 이 표를 읽는다.</aside>
   </section>
@@ -385,14 +385,14 @@
         TF는 A \((1,2,1,2,0,1)\), B \((1,0,2,0,2,0)\), C \((1,0,1,0,0,4)\).
         TF-IDF로 각 문서에서 중요도가 가장 높은 단어를 구하시오.
         <div class="ans">
-          \(DF=(3,1,3,1,1,2)\), \(IDF=\left(1,\ 3,\ 1,\ 3,\ 3,\ \dfrac{3}{2}\right)\)<br>
+          \(\mathrm{DF}=(3,1,3,1,1,2)\), \(\mathrm{IDF}=\left(1,\ 3,\ 1,\ 3,\ 3,\ \dfrac{3}{2}\right)\)<br>
           TF-IDF: A \(\left(1,6,1,6,0,\dfrac{3}{2}\right)\), B \((1,0,2,0,6,0)\), C \((1,0,1,0,0,6)\)<br>
           → A <b>외출·자제</b>, B <b>낮다</b>, C <b>높다</b>
         </div>
       </li>
       <li>
         <b>확인하기.</b> ⑴ 빈도수 벡터로 주제어와 유용한 정보를 쉽게 찾을 수 있다.
-        ⑵ \(TF=3\), \(IDF=2\)이면 \(TF\text{-}IDF=6\)이다.
+        ⑵ \(\mathrm{TF}=3\), \(\mathrm{IDF}=2\)이면 \(\mathrm{TF}\text{-}\mathrm{IDF}=6\)이다.
         ⑶ 중요도가 가장 높은 단어를 찾을 때 TF-IDF가 가장 <b>작은</b> 단어를 찾는다.
         <div class="ans">⑴ ✗ — 유용한 정보는 어렵다 &nbsp; ⑵ ○ &nbsp; ⑶ ✗ — 가장 큰 단어를 찾는다</div>
       </li>
@@ -407,15 +407,15 @@
 
     <p class="prob-stmt">
       인공지능이 다루는 문서에서 전체 문장의 개수 \(n\)은 매우 큰 수다.
-      그러면 \(IDF=\dfrac{n}{DF}\)의 값도 너무 커져 계산이 불편하다.
+      그러면 \(\mathrm{IDF}=\dfrac{n}{\mathrm{DF}}\)의 값도 너무 커져 계산이 불편하다.
     </p>
 
     <div class="formula-box" style="margin-top: var(--lm-space-3);">
-      \[ IDF = \log \frac{n}{DF} \]
+      \[ \mathrm{IDF} = \log \frac{n}{\mathrm{DF}} \]
     </div>
 
     <div class="example-box" style="margin-top: var(--lm-space-4);">
-      \(n=10^{6}\), \(DF=10^{2}\)이면 \(\dfrac{n}{DF}=10^{4}\)으로 큰 값이지만,
+      \(n=10^{6}\), \(\mathrm{DF}=10^{2}\)이면 \(\dfrac{n}{\mathrm{DF}}=10^{4}\)으로 큰 값이지만,
       상용로그를 쓰면 \(\log 10^{4}=4\)로 작아진다.
     </div>
 
@@ -433,7 +433,7 @@
 
     <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
       모두가 쓰는 말은 깎고, 여기서만 잦은 말은 올린다.<br>
-      <span class="kw-success">\(TF\text{-}IDF = TF \times IDF\)</span>
+      <span class="kw-success">\(\mathrm{TF}\text{-}\mathrm{IDF} = \mathrm{TF} \times \mathrm{IDF}\)</span>
     </div>
 
     <div class="info-box" style="margin-top: var(--lm-space-5);">
