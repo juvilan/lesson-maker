@@ -629,6 +629,50 @@ SVG 단위 잘림 검사로는 잡히지 않고, MathJax 오류 0·원시 TeX 0�
 4단원을 만들 때 `슬라이드_III-2-0{1,2,3,4}_*.html`을 상당 부분 재활용할 수 있으나,
 교과서가 다르므로 숫자·예제는 2022판으로 다시 확인해야 합니다.
 
+## 2-G. 공유용 오프라인 꾸러미 (2026-08-26)
+
+동료 교사에게 HTML만 보냈더니 **"스타일 적용이 안 되네"** 라는 회신이 왔습니다.
+당연합니다 — 덱은 `../../../_shared/templates/*.css` 를 상대경로로 참조하고,
+그 CSS 가 다시 `../fonts/PretendardVariable.woff2` 를 찾습니다. HTML 한 개만
+빼내면 디자인이 통째로 죽습니다.
+
+`tools/build_share_package.py` 가 그 의존을 전부 폴더 안으로 끌어옵니다.
+
+```
+powershell.exe -NoProfile -Command "python tools/build_share_package.py"
+```
+
+산출물 `dist/공유용/` (4.5MB, 압축 2.85MB) — `dist/` 는 gitignore 입니다.
+스크립트만 저장소에 두고 산출물은 매번 다시 만드세요.
+
+**반드시 지킬 것 세 가지** (전부 조용히 실패하는 함정입니다)
+
+1. **CSS 를 평평하게 펴지 마세요.** `_assets/templates/` 에 두어야
+   `design-tokens.css` 의 `url('../fonts/...')` 가 `_assets/fonts/` 로 맞습니다.
+   펴면 폰트가 404 나고 **정확히 동료가 겪은 그 증상**이 재현됩니다.
+2. **MathJax `fontURL` 을 주입해야 합니다.** 안 주면 폰트만 조용히 CDN 으로
+   갑니다 — 온라인에서는 멀쩡해 보이고 **막힌 망에서만** 깨집니다.
+   확인은 "수식이 보인다"가 아니라 `performance.getEntriesByType('resource')`
+   에 localhost 밖 항목이 **0개**인지로 하세요.
+3. **MathJax 스크립트에서 `async` 를 떼야 합니다.** 덱의 `safeTypeset()` 은
+   MathJax 가 아직 없으면 조용히 아무 일도 안 하고 끝납니다. 원본은 CDN 이
+   느려 우연히 순서가 맞았지만, 자원을 로컬로 옮기면 뒤바뀌어 **수식이 하나도
+   조판되지 않습니다**(2-3-3 에서 mjx-container 0개로 실제 확인). 오류도 경고도
+   없습니다.
+
+**파이썬 urllib 은 이 PC 에서 SSL 검증에 실패합니다**
+(`CERTIFICATE_VERIFY_FAILED: Missing Authority Key Identifier`).
+검증을 끄지 말고 — 남에게 배포할 파일입니다 — 다운로드는 PowerShell
+`Invoke-WebRequest` 에 맡기세요. 스크립트가 그렇게 돼 있습니다.
+
+**검증 완료 (25개 전수, 실제 Chrome)** — 꾸러미 폴더만 따로 띄워 `_shared` 가
+404 인 상태에서: 외부 자원 **0건**, MathJax 오류 0, 발표자 노트 = 장수,
+세로 높이가 원본과 일치(Ⅲ-2-01 934, Ⅲ-2-02 884 등).
+`사용설명서.html` 도 함께 생성되며 25개 링크 전부 정상입니다.
+
+⚠️ **1-1-3 은 14장인데 발표자 노트가 5개뿐입니다.** 꾸러미 문제가 아니라
+원본이 그렇습니다. 다른 24개는 노트 수 = 장수입니다.
+
 ## 3. 다음에 할 일
 
 ### 0. 2022 3월판 학습지 3개 재제작 (2026-08-25 합의, 착수 전)
