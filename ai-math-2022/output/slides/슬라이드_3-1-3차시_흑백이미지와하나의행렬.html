@@ -72,9 +72,14 @@
                  border-radius: var(--lm-radius-sm); width: max-content; }
     .gray-grid i { display: block; height: 62px; }
 
-    /* 흑백 7x4 */
+    /* 흑백 7x4 — 켜진 칸이 흰색이라 밝은 슬라이드 바탕에서는 묻힌다.
+       격자 뒤에 어두운 판을 깔고, 격자선은 중간 톤으로 두어
+       흰 칸과 검은 칸이 판과 서로에게서 모두 드러나게 한다. */
+    .bw-board { background: var(--lm-ink-2); padding: 10px;
+                border-radius: var(--lm-radius-md); width: max-content;
+                margin: var(--lm-space-4) auto 0; }
     .bw-grid { display: grid; grid-template-columns: repeat(7, 62px); gap: 3px;
-               background: var(--lm-rule); padding: 3px;
+               background: var(--lm-ink-4); padding: 3px;
                border-radius: var(--lm-radius-sm); width: max-content; }
     .bw-grid i { display: block; height: 62px; cursor: pointer;
                  font-size: var(--lm-slide-small); font-weight: 700;
@@ -287,7 +292,9 @@
       검은색은 \(0\), 흰색은 \(255\). 칸을 눌러 값을 확인해 보자.
     </p>
 
-    <div class="bw-grid" id="bwBoard" style="margin: var(--lm-space-4) auto 0;"></div>
+    <div class="bw-board">
+      <div class="bw-grid" id="bwBoard"></div>
+    </div>
 
     <div class="anim-controls" style="margin-top: var(--lm-space-4);">
       <button class="anim-btn" id="btnBw">값 모두 보이기</button>

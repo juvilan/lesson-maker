@@ -64,10 +64,16 @@
     .mtx b.cut { background: var(--lm-danger-tint); color: var(--lm-danger); }
     .mtx b.rnd { background: var(--lm-accent-tint); color: var(--lm-accent); }
 
+    /* k를 키우면 칸이 255(흰색)가 되어 밝은 슬라이드 바탕에 묻힌다(대비 1.04).
+       어두운 판 위에 얹고 격자선은 중간 톤으로 둔다. */
     .kgrid { display: grid; grid-template-columns: repeat(3, 62px); gap: 3px;
-             background: var(--lm-rule); padding: 3px;
-             border-radius: var(--lm-radius-sm); width: max-content; }
+             background: var(--lm-ink-4); padding: 3px;
+             border-radius: var(--lm-radius-sm); width: max-content;
+             outline: 8px solid var(--lm-ink-2); outline-offset: 0;
+             margin: 8px; }
     .kgrid i { display: block; height: 62px; }
+    /* 계산 전에는 판이 빈 막대로 보이므로 감춘다 */
+    .kgrid:empty { display: none; }
 
     .trio { display: flex; gap: var(--lm-space-6); justify-content: center;
             align-items: flex-start; margin-top: var(--lm-space-4); }
