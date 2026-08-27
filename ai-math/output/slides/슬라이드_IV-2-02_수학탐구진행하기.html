@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>탐구를 진행한다 | 인공지능수학 3학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-small); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-2); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft);
+                     text-align: left; }
+    .dt td.hit { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+    .dt td.blank { color: var(--lm-rule-strong); }
+
+    /* 4단계 흐름 */
+    .flow4 { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+             align-items: center; gap: var(--lm-space-2); margin-top: var(--lm-space-4); }
+    .flow-box { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-3);
+                text-align: center; }
+    .flow-box.on { border-color: var(--lm-accent); background: var(--lm-accent-tint); }
+    .flow-box .fn { display: inline-block; min-width: 32px; height: 32px; line-height: 32px;
+                    border-radius: 50%; background: var(--lm-accent); color: var(--lm-page);
+                    font-weight: 700; margin-bottom: var(--lm-space-1); }
+    .flow-box .ft { font-size: var(--lm-slide-h3); color: var(--lm-ink); font-weight: 600; }
+    .flow-arrow { font-size: 34px; color: var(--lm-accent); text-align: center; }
+
+    .checklist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .checklist li { position: relative; padding-left: 42px; margin-bottom: var(--lm-space-3);
+                    font-size: var(--lm-slide-small); color: var(--lm-ink-2);
+                    line-height: var(--lm-slide-line-tight); }
+    .checklist li::before { content: ""; position: absolute; left: 0; top: 2px;
+                            width: 26px; height: 26px; border-radius: var(--lm-radius-sm);
+                            border: var(--lm-border-thin) solid var(--lm-rule-strong);
+                            background: var(--lm-page); }
+    .checklist li b { color: var(--lm-ink); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-3);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-2 인공지능과 수학 탐구 · 01 <span class="badge">2차시 · Ⅳ 마무리</span></div>
+    <h1>탐구를 진행한다</h1>
+    <p class="slide-sub">주제 정하기부터 발표 자료까지, 모둠별 네 단계</p>
+    <div class="title-meta">
+      <span>3학년 인공지능수학</span>
+      <span>교과서 126~128쪽</span>
+    </div>
+    <aside class="notes">이 덱은 설명용이 아니라 모둠 활동의 진행표다. 화면에 띄워 두고 학생들이 보면서 작업하게 만든 것이므로, 교사가 처음부터 끝까지 읽어 줄 필요가 없다. 3장에서 네 단계를 통으로 보여 준 뒤 각 단계로 넘어갈 때마다 해당 장을 띄운다. 한 시간에 다 끝나지 않으면 여러 차시로 늘려 잡아도 좋다 — 지도서도 프로젝트 학습으로 진행하라고 되어 있다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 123~126쪽</div>
+    <h2>도구는 써 봤다</h2>
+
+    <p class="prob-stmt">
+      티처블 머신으로 연령대를 구별하는 모델을 만들어 봤다.
+      모으고, 학습시키고, 새 자료로 확인했다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="result-box">
+        도구를 쓰는 일은
+        <span class="kw-success">생각보다 쉬웠다.</span>
+      </div>
+      <div class="warning-box">
+        어려운 것은 따로 있었다 —
+        <span class="kw-danger">무슨 문제를 풀 것인가.</span>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      오늘은 그 <b>문제를 고르는 일</b>부터 시작한다.
+      지난 시간에 적어 둔 아이디어를 꺼내 놓자.
+    </div>
+    <aside class="notes">지난 시간 6장·10장에서 나온 아이디어를 칠판이나 학습지에서 다시 꺼내게 한다. 그것들이 오늘 주제 후보가 된다. 아무것도 안 나온 모둠이 있으면 교과서 123쪽의 횡단보도 예시를 출발점으로 주면 된다.</aside>
+  </section>
+
+  <!-- 3. 네 단계 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 126쪽 · 전체 흐름</div>
+    <h2>탐구는 네 단계로</h2>
+
+    <div class="flow4">
+      <div class="flow-box"><span class="fn">1</span><div class="ft">주제 정하기</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box"><span class="fn">2</span><div class="ft">인공지능 조사하기</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box"><span class="fn">3</span><div class="ft">문제 해결하기</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box"><span class="fn">4</span><div class="ft">발표 자료 만들기</div></div>
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="plain-card">
+        <h4>모둠으로 한다</h4>
+        <p>각자 주제를 하나씩 찾아 오고, 모둠에서 <b>점수를 매겨</b> 하나를 고른다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>수학이 들어가야 한다</h4>
+        <p>3단원까지 배운 <b>벡터·행렬·확률·극한·미분</b> 중 무엇이 쓰이는지 반드시 밝힌다.</p>
+      </div>
+    </div>
+    <aside class="notes">네 단계를 통으로 보여 주고 오늘 어디까지 갈지 정해 준다. 보통 한 시간이면 1~2단계까지다. 오른쪽 카드가 이 탐구를 "인공지능 소개"가 아니라 "인공지능 수학 탐구"로 만드는 조건이다 — 여기를 놓치면 조사 발표로 끝나 버린다. 미리 못 박아 둔다.</aside>
+  </section>
+
+  <!-- 4. 1단계 주제 찾기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 127쪽 · 1단계</div>
+    <h2>주제를 점수로 고른다</h2>
+
+    <p class="prob-stmt">
+      모둠원이 각자 주제를 하나씩 찾아 온 뒤, 아래 표로 평가해
+      <b>가장 높은 점수를 받은 주제</b>를 모둠의 탐구 주제로 정한다.
+    </p>
+
+    <table class="dt">
+      <thead>
+        <tr><th style="width: 34%;">내용</th><th>흥미로운 주제인가?<br>[5점]</th><th>창의적인 주제인가?<br>[5점]</th><th>관련된 인공지능이 있는가?<br>[5점]</th><th>합계<br>[15점]</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">(예시) 횡단보도의 보행 신호 시간을 조절할 수 있는가?</td>
+            <td>4</td><td>3</td><td class="hit">5</td><td class="hit">12</td></tr>
+        <tr><td class="rowhead blank">&nbsp;</td><td class="blank">·</td><td class="blank">·</td><td class="blank">·</td><td class="blank">·</td></tr>
+        <tr><td class="rowhead blank">&nbsp;</td><td class="blank">·</td><td class="blank">·</td><td class="blank">·</td><td class="blank">·</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      세 번째 항목이 가장 중요하다 —
+      <b>관련된 인공지능이 실제로 있는가.</b>
+      없으면 조사할 것도, 수학적 원리를 밝힐 것도 없다.
+    </div>
+    <aside class="notes">표를 화면에 띄워 두고 학생들이 각자 채우게 한다. 점수 매기기가 형식적으로 흐르기 쉬우니, 세 번째 항목만은 근거를 대게 한다 — "그런 인공지능이 실제로 있나? 어디서 봤나?" 여기서 걸러지면 뒤가 편하다. 흥미와 창의는 다소 후하게 줘도 무방하다.</aside>
+  </section>
+
+  <!-- 5. 계획 세우기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 127쪽 · 1단계 계획</div>
+    <h2>계획에 넣을 것</h2>
+
+    <p class="prob-stmt">
+      주제가 정해지면 모둠 회의로 계획을 세운다. 다음이 <b>구체적으로</b> 들어가야 한다.
+    </p>
+
+    <ul class="checklist">
+      <li><b>주제</b> — 한 문장으로</li>
+      <li><b>주제를 정한 이유와 목적</b> — 무엇이 불편했고, 무엇을 나아지게 하려는가</li>
+      <li><b>모둠원의 역할 분담</b> — 누가 무엇을 맡는가</li>
+      <li><b>관련된 인공지능 조사 방법</b> — 어디서, 어떻게 찾을 것인가</li>
+      <li><b>발표 방법</b> — 신문 기사 · 보고서 · 포스터 중 무엇으로</li>
+    </ul>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      역할 분담을 빼먹지 말자. <b>한 사람이 다 하는 모둠</b>이 가장 흔한 실패다.
+    </div>
+    <aside class="notes">다섯 항목을 학습지나 공책에 그대로 옮겨 적게 하면 계획서가 된다. 역할 분담은 이름을 적게 해야 실효가 있다. 발표 방법을 처음에 정해 두는 것이 중요한데, 포스터인지 보고서인지에 따라 모으는 자료가 달라지기 때문이다. 이 장까지가 보통 1차시 분량이다.</aside>
+  </section>
+
+  <!-- 6. 2단계 조사 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 127~128쪽 · 2단계 <span class="badge">중심</span></div>
+    <h2>인공지능을 조사한다</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>① 찾기</h4>
+        <p>주제와 관련된 인공지능을 조사한다.</p>
+        <p>우리 <b>주변에서 실제로 쓰인 사례</b>를 찾아 문제에 적용해 본다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>② 설명하기</h4>
+        <p>그 인공지능의 <b>기능</b>은 무엇인가.</p>
+        <p><b>다른 분야</b>에서는 어떻게 쓰였나.</p>
+        <p>우리 주제에 <b>적용할 수 있는가</b>.</p>
+      </div>
+      <div class="plain-card">
+        <h4>③ 수학 찾기</h4>
+        <p>그 안에 담긴 <b>수학적 개념이나 원리</b>를 밝힌다.</p>
+        <p style="color: var(--lm-accent);">이 단계가 이 탐구의 이름값이다.</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      찾을 수학 — <b>벡터 · 행렬 · 확률 · 함수의 극한 · 미분</b>.
+      전부 <span class="kw-success">이 교과서에서 배운 것</span>이다.
+    </div>
+    <aside class="notes">③이 이 단원의 성취기준이 걸린 자리다. 이미지 인식이면 Ⅱ·Ⅲ단원의 행렬과 이미지 분류, 추천이면 Ⅲ-1의 유사도, 예측이면 Ⅲ-2의 추세선, 학습 과정이면 Ⅳ-1의 손실함수와 미분이 나온다. 학생이 "수학이 안 보인다"고 하면 이 대응표를 함께 훑어 준다. 인터넷 검색만으로는 ③이 안 나오는 경우가 많으니 교과서 목차를 옆에 두고 짚어 가게 하는 것이 실용적이다.</aside>
+  </section>
+
+  <!-- 7. 우리 교과서 대응표 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 밖 보조 자료</div>
+    <h2>어디서 배웠는지 찾아보자</h2>
+
+    <table class="dt">
+      <thead>
+        <tr><th style="width: 30%;">인공지능이 하는 일</th><th style="width: 34%;">쓰이는 수학</th><th>배운 곳</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">글을 분류한다</td><td>벡터, 유사도</td><td>Ⅲ-1 텍스트 분류 · 유사도 분석</td></tr>
+        <tr><td class="rowhead">이미지를 알아본다</td><td>행렬, 해밍 거리, 퍼셉트론</td><td>Ⅱ-2 · Ⅲ-1 이미지 분류</td></tr>
+        <tr><td class="rowhead">무엇을 고를지 예측한다</td><td>확률</td><td>Ⅲ-2 자료의 분석과 예측</td></tr>
+        <tr><td class="rowhead">값을 예측한다</td><td>추세선, 오차</td><td>Ⅲ-2 경향성과 예측</td></tr>
+        <tr><td class="rowhead">스스로 좋아진다</td><td>손실함수, 미분, 경사하강법</td><td>Ⅳ-1 최적화</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box" style="margin-top: var(--lm-space-2);">
+      조사한 인공지능이 어느 줄에 걸리는지 찾으면, <b>밝힐 수학</b>이 따라온다.
+    </div>
+    <aside class="notes">교과서에 없는 표다. 2단계 ③에서 학생들이 가장 많이 막히기 때문에 만들었다. 한 학년 동안 배운 것을 한 화면에 모아 둔 것이기도 해서, 학년 마무리 복습으로도 쓸 수 있다. 조사한 인공지능이 여러 줄에 걸치는 경우가 오히려 흔한데(예: 자율 주행은 이미지·예측·최적화가 다 들어간다) 그럴 때는 가장 중심이 되는 하나를 고르게 한다.</aside>
+  </section>
+
+  <!-- 8. 3·4단계 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 128쪽 · 3·4단계</div>
+    <h2>풀고, 정리해서 내놓는다</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>3단계 · 문제 해결하기</h4>
+        <p>조사한 인공지능으로 <b>문제를 어떻게 해결할지</b> 토론한다.</p>
+        <p>그 결과를 <b>글이나 그림</b>으로 나타낸다.</p>
+        <p style="color: var(--lm-ink-3);">말로만 끝내지 말고 반드시 남긴다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>4단계 · 발표 자료 만들기</h4>
+        <p><b>신문 기사 · 보고서 · 포스터</b> 중 하나를 골라 만든다.</p>
+        <p>탐구 과정을 정리해 담는다.</p>
+      </div>
+    </div>
+
+    <ul class="checklist" style="margin-top: var(--lm-space-3);">
+      <li><b>발표 자료의 제목</b></li>
+      <li><b>주제를 정한 이유</b></li>
+      <li><b>조사한 인공지능에 대한 설명과 수학적 원리</b></li>
+      <li><b>문제 해결 방법</b></li>
+      <li><b>결론 및 제언</b></li>
+    </ul>
+    <aside class="notes">체크리스트 다섯 항목이 곧 평가 기준이 된다. 학생들에게 미리 알려 주면 자료의 질이 올라간다. 세 번째 항목에 "수학적 원리"가 들어 있다는 점을 다시 강조한다. 지도서는 포트폴리오를 활용한 과정 중심 평가를 권하고 있으니, 1단계의 계획서부터 모아 두게 하면 그대로 포트폴리오가 된다.</aside>
+  </section>
+
+  <!-- 9. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">점검하기</div>
+    <h2>우리 모둠은 준비되었나</h2>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>⑴</b> 우리 주제와 관련된 인공지능이 <b>실제로 존재</b>하는가?
+        어디서 쓰이고 있는지 한 가지 대 보시오.
+        <div class="ans">대답하지 못하면 주제를 바꾸는 편이 낫다.
+          존재하지 않는 인공지능은 <b>조사할 수도, 수학을 밝힐 수도</b> 없다.</div>
+      </li>
+      <li>
+        <b>⑵</b> 그 인공지능에 우리 교과서의 어떤 수학이 들어 있는가?
+        <div class="ans">7장의 표에서 해당하는 줄을 찾는다.
+          벡터·행렬·확률·추세선·미분 중 <b>적어도 하나</b>는 반드시 걸린다.</div>
+      </li>
+      <li>
+        <b>⑶</b> 그 인공지능이 <b>틀린 판단</b>을 하면 어떤 일이 생기는가?
+        <div class="ans">보행 신호라면 못 건넌 사람이 생기고,
+          의료라면 병을 놓친다. <b>결론 및 제언</b>에 이 이야기를 넣으면 발표가 깊어진다.
+          <span style="color: var(--lm-ink-3);">— 교과서 밖</span></div>
+      </li>
+    </ul>
+    <aside class="notes">모둠별로 세 물음에 답하게 하고, 다 답하면 다음 단계로 보낸다. ⑴에서 막히는 모둠은 주제를 다시 잡는 편이 결국 빠르다. ⑶은 교과서에 없지만 지난 차시 10장에서 이어지는 물음이고, 발표에서 다른 모둠과 차이를 만드는 대목이다. 인공지능이 완벽하다는 전제로 발표하는 모둠이 대부분이라 여기서 한 번 흔들어 준다.</aside>
+  </section>
+
+  <!-- 10. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄 <span class="badge">Ⅳ 마무리</span></div>
+    <h2>도구는 배웠고, 이제 쓸 차례다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      <span class="kw-success">주제 → 조사 → 해결 → 발표.</span><br>
+      가장 중요한 것은 <b>어디에 어떤 수학이 들어 있는지</b> 밝히는 일이다.
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5);">
+      한 해 동안 배운 것 — 글과 이미지를 <b>수로 바꾸고</b>, 닮음을 <b>재고</b>,
+      경향을 <b>직선으로 그리고</b>, 오차를 <b>줄였다.</b>
+      인공지능이 하는 일이 그것이다.
+    </div>
+
+    <p class="prob-stmt">
+      이제 그 눈으로 <b>우리 주변</b>을 다시 보자.
+    </p>
+    <aside class="notes">Ⅳ단원과 한 해 과정을 함께 닫는 장이다. 가운데 상자가 Ⅱ·Ⅲ·Ⅳ를 한 문장으로 요약한 것이니 천천히 읽어 준다. 발표는 다음 시간부터 진행하며, 필요하면 차시를 더 잡는다. 지도서가 프로젝트 학습과 과정 중심 평가를 권하고 있으므로 결과물만 보지 말고 계획서·조사 기록도 함께 본다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 점검 활동 — 문항을 누르면 답이 펼쳐진다 (9장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
