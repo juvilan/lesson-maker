@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인공지능을 직접 만들어 본다 | 인공지능수학 3학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    /* 3단계 흐름 — SVG 대신 CSS 로 그린다 */
+    .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr;
+            align-items: center; gap: var(--lm-space-2); margin-top: var(--lm-space-4); }
+    .flow-box { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4);
+                text-align: center; }
+    .flow-box .fn { display: inline-block; min-width: 34px; height: 34px; line-height: 34px;
+                    border-radius: 50%; background: var(--lm-accent); color: var(--lm-page);
+                    font-weight: 700; margin-bottom: var(--lm-space-2); }
+    .flow-box .ft { font-size: var(--lm-slide-h3); color: var(--lm-ink); font-weight: 600; }
+    .flow-box .fs { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-top: var(--lm-space-1); line-height: var(--lm-slide-line-tight); }
+    .flow-arrow { font-size: 40px; color: var(--lm-accent); text-align: center; }
+
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--lm-space-3);
+             margin-top: var(--lm-space-3); }
+    .stepcard { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-3);
+                font-size: var(--lm-slide-caption); line-height: var(--lm-slide-line-tight);
+                color: var(--lm-ink-2); }
+    .stepcard .sn { display: inline-block; min-width: 30px; height: 30px; line-height: 30px;
+                    text-align: center; border-radius: 50%; background: var(--lm-accent);
+                    color: var(--lm-page); font-weight: 700; margin-bottom: var(--lm-space-2); }
+    .stepcard b { color: var(--lm-ink); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-3);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+
+    .url-line { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                margin-top: var(--lm-space-3); }
+    .url-line b { color: var(--lm-accent); letter-spacing: 0.01em; }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-2 인공지능과 수학 탐구 · 01 <span class="badge">1차시</span></div>
+    <h1>인공지능을 직접 만들어 본다</h1>
+    <p class="slide-sub">티처블 머신으로 연령대를 구별하는 모델 만들기</p>
+    <div class="title-meta">
+      <span>3학년 인공지능수학</span>
+      <span>교과서 123~126쪽</span>
+    </div>
+    <aside class="notes">계산이 없는 차시다. 여태 수식으로 배운 것을 실제로 굴려 보는 자리이므로, 설명보다 학생이 손을 움직이는 시간을 많이 준다. 컴퓨터실이면 6장부터 각자 실습하고, 교실이면 교사 화면으로 함께 따라간다. 8장의 도구 안내는 교과서와 화면이 달라졌으니 수업 전에 한 번 열어 보고 들어갈 것(노트 참조).</aside>
+  </section>
+
+  <!-- 2. 지난 단원 -->
+  <section>
+    <div class="chapter-tag">지난 단원 · 교과서 103~122쪽</div>
+    <h2>우리는 이미 학습을 시켜 봤다</h2>
+
+    <p class="prob-stmt">
+      Ⅳ-1에서 오차를 손실함수로 요약하고, 미분으로 그 값을 가장 작게 만드는
+      기울기를 찾았다. <b>그 과정이 곧 "학습"</b>이었다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="info-box">
+        다만 우리가 다룬 것은
+        <span class="kw-info">직선 하나</span>, 미지수 <span class="kw-info">하나</span>였다.
+      </div>
+      <div class="result-box">
+        오늘은 그 일을 <b>수천 개의 미지수</b>로 하는 도구를
+        <span class="kw-success">직접 써 본다.</span>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      원리는 같다 — <b>자료를 주고, 오차를 줄이는 쪽으로 조금씩 고친다.</b>
+    </p>
+    <aside class="notes">오늘 쓸 도구가 마법이 아니라 지난 단원의 확장이라는 점을 먼저 세운다. 티처블 머신 안에서 벌어지는 일이 결국 손실함수를 줄이는 반복이라는 것을 말해 주면, 실습이 단순 놀이로 끝나지 않는다. 4차시 읽기자료의 지도학습(문제와 정답을 함께 준다)도 여기서 회수된다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>인공지능으로 개선할 수 있는 <span class="kw">실생활 문제</span>를 찾아 말할 수 있다.</span></li>
+      <li><span class="num">2</span><span>기계학습의 <span class="kw">세 단계</span>를 설명할 수 있다.</span></li>
+      <li><span class="num">3</span><span>티처블 머신으로 <span class="kw">이미지 분류 모델</span>을 만들 수 있다.</span></li>
+      <li><span class="num">4</span><span>모델의 성능을 <span class="kw">새로운 자료</span>로 평가해야 하는 까닭을 말할 수 있다.</span></li>
+    </ul>
+    <div class="info-box">
+      성취기준 <span class="badge">12인수04-03</span>
+      합리적 의사 결정과 관련된 인공지능 수학 탐구 주제를 선정하여 탐구를 수행한다.
+    </div>
+    <aside class="notes">4번이 오늘의 숨은 핵심이다. 학습에 쓴 자료로 성능을 재면 잘 나오는 것이 당연하다 — 시험 문제를 미리 보고 푸는 것과 같다. 이 비유를 쓰면 학생들이 바로 이해한다. 9장에서 다시 다룬다.</aside>
+  </section>
+
+  <!-- 4. 횡단보도 문제 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 123쪽 · 문제 상황</div>
+    <h2>넓은 횡단보도의 곤란</h2>
+
+    <p class="prob-stmt">
+      교통량이 많은 아주 넓은 도로에 횡단보도가 있다.
+      노약자나 장애인은 <b>보행 신호 시간 안에 다 건너지 못해</b> 불편을 겪는다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>손쉬운 해결책</h4>
+        <p>보행 신호 시간을 <b>길게</b> 늘린다.</p>
+        <p style="color: var(--lm-danger);">그런데 교통량을 생각하면
+          <b>효율적이지 않다</b> — 늘 길면 차가 막힌다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>진짜 문제</h4>
+        <p>필요한 시간이 <b>사람마다, 때마다 다르다.</b></p>
+        <p>고정된 값 하나로는 맞출 수 없다.</p>
+        <p style="color: var(--lm-accent);">상황에 <b>맞춰 바뀌어야</b> 한다.</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      "누구에게 맞출 것인가"를 <b>미리 정할 수 없는</b> 문제다.
+      <span class="kw-danger">그때마다 판단해야 한다.</span>
+    </div>
+    <aside class="notes">학생들에게 먼저 해결책을 물어보면 대개 "시간을 늘린다"가 나온다. 그 답을 인정한 뒤 교통량 문제를 제기하면 자연스럽게 막힌다. 막히는 지점이 중요하다 — 규칙 하나로 정할 수 없는 문제라는 것. 학교 앞 횡단보도나 통학로를 예로 들면 더 가깝게 느낀다.</aside>
+  </section>
+
+  <!-- 5. 인공지능의 해법 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 123쪽 · 해결</div>
+    <h2>인공지능은 그때그때 정한다</h2>
+
+    <p class="prob-stmt">
+      횡단보도를 건너는 사람의 <b>보행 속도</b>와 도로의 <b>교통량</b> 등을 살펴,
+      인공지능이 상황에 맞게 신호 시간을 조절한다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>사람을 본다</h4>
+        <p>안면 인식으로 <b>연령대</b>를 구별한다.</p>
+        <p>걷는 동작과 위치, 휠체어·목발 같은 <b>도구 소지 여부</b>를 살핀다.</p>
+        <p style="color: var(--lm-ink-3);">→ 보행 속도를 가늠한다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>상황을 본다</h4>
+        <p>주간·야간에 따른 <b>교통량</b>.</p>
+        <p><b>날씨</b>와 시야 확보 정도.</p>
+        <p style="color: var(--lm-ink-3);">→ 얼마나 여유를 둘지 정한다.</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      Ⅲ단원에서 배운 <b>이미지 분류</b>가 여기서 쓰인다 —
+      <span class="kw-success">사람을 보고 어느 범주인지 가려내는 일</span> 말이다.
+    </div>
+    <aside class="notes">마지막 상자가 단원을 잇는 자리다. Ⅲ-1에서 전광판 숫자를 0과 8로 가른 것, 89쪽 MNIST에서 손 글씨를 0~9로 가른 것과 같은 일이 여기서는 "어린이·청년층·고령층"이 된다. 범주만 바뀌었을 뿐 구조가 같다는 점을 짚으면 오늘 실습이 낯설지 않다.</aside>
+  </section>
+
+  <!-- 6. 문제 1 -->
+  <section class="tight">
+    <div class="chapter-tag">활동 · 교과서 123쪽 문제 1</div>
+    <h2>우리 주변에서 찾아보자</h2>
+
+    <div class="prob-stmt" style="font-size: var(--lm-slide-body-lg);">
+      우리 주변에서 겪고 있던 <b>불편함</b>을 인공지능을 이용하여
+      개선한 사례를 찾아 말해 보자.
+    </div>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>이런 자리에서</h4>
+        <p>학교 · 집 · 길 · 가게 · 병원 · 대중교통</p>
+      </div>
+      <div class="plain-card">
+        <h4>이런 걸 물어보자</h4>
+        <p>무엇이 불편했나?<br>인공지능이 <b>무엇을 보고</b> 판단하나?</p>
+      </div>
+      <div class="plain-card">
+        <h4>예시</h4>
+        <p>자율 주행 자동차가 주변을 인식하는 카메라·적외선·초음파 센서·레이저 스캐너</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      떠오른 것을 적어 두자 — <b>다음 시간 탐구 주제</b>가 여기서 나온다.
+    </div>
+    <aside class="notes">자유 발표로 진행한다. 지도서도 "창의적 아이디어를 자유롭게 발표하도록 유도한다"고 되어 있다. 맞고 틀림을 따지지 말고 많이 나오게 하는 것이 목적이다. 나온 것을 칠판에 그대로 적어 두면 다음 차시 주제 정하기에서 그대로 쓸 수 있다 — 마지막 상자에 그 예고를 넣었다. 예시 칸은 학생 발표가 막힐 때만 연다.</aside>
+  </section>
+
+  <!-- 7. 기계학습 3단계 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 124쪽 · 개념</div>
+    <h2>기계는 세 단계로 배운다</h2>
+
+    <div class="flow">
+      <div class="flow-box">
+        <span class="fn">1</span>
+        <div class="ft">학습 자료 수집</div>
+        <div class="fs">이미지 · 소리 · 자세 자료를 훈련용으로 모은다</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <span class="fn">2</span>
+        <div class="ft">학습하기</div>
+        <div class="fs">모은 자료로 인공지능 모델을 만든다</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <span class="fn">3</span>
+        <div class="ft">결과 평가</div>
+        <div class="fs">평가 자료로 성능을 확인한다</div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      Ⅳ-1과 대응시키면 —
+      1은 <b>자료의 표</b>, 2는 <b>손실함수를 줄이는 반복</b>, 3은
+      <span class="kw-success">자료에 없던 \(x\)에 대한 예측</span>이다.
+    </div>
+    <aside class="notes">세 단계를 Ⅳ-1의 언어로 옮겨 보이는 것이 이 장의 값어치다. 티처블 머신이 2단계에서 실제로 하는 일이 우리가 손으로 한 경사하강법과 같은 종류라는 점을 말해 준다. 다만 미지수가 하나가 아니라 수천 개라서 사람이 못 하고 컴퓨터가 한다고 덧붙이면 규모의 차이가 실감 난다.</aside>
+  </section>
+
+  <!-- 8. 실습 순서 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 124~126쪽 · 실습</div>
+    <h2>연령대를 구별하는 모델 만들기</h2>
+
+    <div class="steps">
+      <div class="stepcard"><span class="sn">1</span><br><b>시작하기</b>를 누르고 <b>이미지 프로젝트</b>를 고른다.</div>
+      <div class="stepcard"><span class="sn">2</span><br>클래스를 <b>3개</b>로 만들고 이름을 <b>어린이 · 청년층 · 고령층</b>으로 바꾼다.</div>
+      <div class="stepcard"><span class="sn">3</span><br>각 클래스에 사진을 올린다. <b>한 클래스에 200장 이상</b>을 권한다.</div>
+      <div class="stepcard"><span class="sn">4</span><br><b>모델 학습시키기</b>를 누르고 학습이 끝날 때까지 기다린다.</div>
+    </div>
+
+    <p class="url-line">
+      티처블 머신 주소 — <b>teachablemachine.withgoogle.com</b>
+      (설치도 가입도 필요 없다)
+    </p>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      자료가 적으면 <b>엉뚱하게 배운다.</b>
+      한 클래스에만 사진이 많으면 인공지능은 <span class="kw-danger">그쪽으로 기울어 판단</span>한다.
+    </div>
+    <aside class="notes">⚠️ 화면이 교과서와 다르다 — 교과서는 2021년 기준이라 'Get Started', 'Image Project', 'Add a class', 'Train Model' 같은 영문 버튼으로 적혀 있는데, 지금 접속하면 한국어로 나온다('시작하기', 프로젝트 유형도 이미지·사운드 등). 2026-08-26에 접속해 사이트가 살아 있고 주소도 그대로임을 확인했다(버전 release-2-4-14). 다만 편집 화면 안쪽 버튼의 정확한 한국어 이름까지는 확인하지 못했으니 수업 전에 한 번 열어 보고 들어갈 것. 사진은 미리 준비해 두면 시간이 절약된다. 학생 얼굴을 쓰는 경우 동의를 먼저 받는다.</aside>
+  </section>
+
+  <!-- 9. 평가 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 126쪽 · 주의 <span class="badge">오늘의 중심</span></div>
+    <h2>평가는 새 자료로 한다</h2>
+
+    <div class="prob-stmt" style="font-size: var(--lm-slide-body-lg);">
+      학습이 끝나면 잘 작동하는지 확인한다. 이때
+      <b>학습에 쓰지 않은 새로운 자료</b>를 써야 한다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="warning-box">
+        학습에 쓴 사진으로 재면 —
+        <span class="kw-danger">당연히 잘 맞힌다.</span>
+        이미 본 것이기 때문이다.
+      </div>
+      <div class="result-box">
+        <b>시험 문제를 미리 보고 푸는 것</b>과 같다.
+        점수는 높지만 <span class="kw-success">실력은 알 수 없다.</span>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      89쪽의 MNIST도 그래서 <b>트레이닝 셋 60000장</b>과
+      <b>테스트 셋 10000장</b>을 나눠 두었다.
+    </div>
+    <aside class="notes">시험 비유가 가장 잘 통한다. 학생들이 웃으면서 이해한다. 마지막 상자가 Ⅲ-1-06에서 다룬 MNIST를 회수하는 자리다 — 그때는 숫자 두 개(60000/10000)로만 지나갔는데, 왜 나눠 두는지가 오늘 이해된다. 시간이 있으면 실제로 학습에 안 쓴 사진을 넣어 보여 주고 틀리는 경우도 함께 본다. 틀리는 것을 보는 편이 교육적이다.</aside>
+  </section>
+
+  <!-- 10. 문제 2 -->
+  <section class="tight">
+    <div class="chapter-tag">활동 · 교과서 126쪽 문제 2</div>
+    <h2>이 인공지능으로 무엇을 할까</h2>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>⑴</b> 방금 만든 <b>연령대를 구별하는 인공지능</b>으로 실생활의 어떤 문제를
+        해결할 수 있을지 아이디어를 내 보시오.
+        <div class="ans">예시 — 전시관 출입구에 설치해 <b>이용 빈도가 높은 관람객의 연령대</b>를
+          파악하고, 그들을 위한 편의 시설을 개선한다.
+          (교과서 예시: 횡단보도 보행 신호 시간 조절)</div>
+      </li>
+      <li>
+        <b>⑵</b> 각자의 아이디어를 견주어 <b>장단점</b>을 토론하시오.
+        <div class="ans">따져 볼 것 — 정말 필요한 문제인가 · 연령대만 알면 되는가 ·
+          <b>틀렸을 때 누가 손해를 보는가</b> · 얼굴을 찍어도 되는가</div>
+      </li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-2);">
+      쓸모만 따지지 말자. <b>틀렸을 때 무슨 일이 생기는지</b>도 함께 생각해야 한다.
+    </div>
+    <aside class="notes">⑵의 답에 넣은 네 가지 물음이 토론의 뼈대다. 특히 "틀렸을 때 누가 손해를 보는가"와 "얼굴을 찍어도 되는가"는 학생들이 잘 떠올리지 못하는데, 인공지능을 다루는 사람이 반드시 물어야 하는 것이다. Ⅲ-1-06에서 퍼셉트론이 잘못 판단할 수 있음을 본 것, Ⅲ-2에서 예측에 오차가 따른다는 것을 배운 것과 이어진다. 모둠별로 하나씩 정해 다음 시간 주제 후보로 남긴다.</aside>
+  </section>
+
+  <!-- 11. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>자료를 주면 기계가 배운다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      모으고 · 학습시키고 · <span class="kw-success">새 자료로 확인한다.</span><br>
+      Ⅳ-1에서 손으로 한 일을 도구가 대신 해 준 것뿐이다.
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      도구는 쉬웠지만 어려운 것은 따로 있다 —
+      <b>무슨 문제를 풀 것인가</b>, 그리고 <b>어떤 자료를 줄 것인가.</b>
+      <span class="kw-danger">그건 사람이 정해야 한다.</span>
+    </div>
+
+    <p class="prob-stmt">
+      다음 시간에는 모둠별로 <b>탐구 주제</b>를 정하고 계획을 세운다.
+    </p>
+    <aside class="notes">도구의 쉬움과 판단의 어려움을 대비시키며 닫는다. 6장과 10장에서 나온 아이디어를 다음 시간에 그대로 쓸 것이니 잘 적어 두라고 일러 둔다. 모둠 편성을 미리 해 두면 다음 차시가 매끄럽다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (10장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
