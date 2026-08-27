@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>가장 낮은 곳을 찾는다 | 인공지능수학 3학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-small); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt td.hit { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+
+    /* 도식 SVG — viewBox 단위 = 렌더 px (배율 1.00) */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .axis   { stroke: var(--lm-rule-strong); fill: none; stroke-width: 2; }
+    .dg .curve  { stroke: var(--lm-accent); fill: none; stroke-width: 4; }
+    .dg .best   { stroke: var(--lm-danger); fill: none; stroke-width: 4; }
+    .dg .drop   { stroke: var(--lm-danger); fill: none; stroke-width: 3; stroke-dasharray: 6 5; }
+    .dg .pt     { fill: var(--lm-ink-3); }
+    .dg .ptmin  { fill: var(--lm-danger); }
+    .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink-3); }
+    .dg .t-ax { font-size: 22px; }
+    .dg .t-lab { font-size: 26px; fill: var(--lm-ink-2); }
+    .dg .m-d div { font-size: 26px; line-height: 1; color: var(--lm-danger); }
+    .dg .m-a div { font-size: 26px; line-height: 1; color: var(--lm-accent); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-3);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-1 최적화와 의사 결정 · 03 최적화 <span class="badge">5차시</span></div>
+    <h1>가장 낮은 곳을 찾는다</h1>
+    <p class="slide-sub">완전제곱으로 최적 추세선 구하기</p>
+    <div class="title-meta">
+      <span>3학년 인공지능수학</span>
+      <span>교과서 114~115쪽</span>
+    </div>
+    <aside class="notes">03절의 첫 차시다. 계산은 완전제곱 하나뿐이라 부담이 없고, 학생들이 이차함수의 최솟값을 이미 배웠으므로 새로 익힐 기법도 없다. 오늘의 값어치는 계산이 아니라 이름 붙이기에 있다 — 이 단원 내내 쫓아온 "포물선의 가장 낮은 점"이 오늘 최적화·최적 추세선이라는 이름을 얻는다. 11장에서 다음 차시로 넘어가는 물음을 반드시 남긴다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 110~113쪽</div>
+    <h2>0이 나왔다</h2>
+
+    <p class="prob-stmt">
+      도함수를 만들고 손실함수에 써 봤더니,
+      \(L(a)=2a^2-4a+3\) 에서 \(L'(1)=0\) 이 나왔다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="info-box">
+        미분계수는 <span class="kw-info">접선의 기울기</span>였다.
+      </div>
+      <div class="warning-box">
+        기울기가 0 = 접선이 <span class="kw-danger">수평</span><br>
+        포물선에서 그런 자리는 <b>바닥</b>뿐이다.
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      오늘은 그 <b>바닥</b>을 제대로 찾는다. 다만 미분이 아니라
+      <span class="kw-success">이미 알고 있는 방법</span>으로 먼저 해 본다.
+    </div>
+    <aside class="notes">지난 시간의 매듭을 그대로 받는다. "이미 알고 있는 방법"이 무엇인지 학생에게 물으면 대개 완전제곱이라는 답이 나온다. 나오지 않으면 이차함수의 최솟값을 어떻게 구했는지 되묻는다. 미분을 배우고도 완전제곱으로 돌아가는 이유가 궁금할 텐데, 11장에서 답한다고 예고해 두면 참는다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>자료에서 손실함수 \(L(a)\)를 세우고 <span class="kw">완전제곱 꼴</span>로 바꿀 수 있다.</span></li>
+      <li><span class="num">2</span><span>\(L(a)\)가 최솟값을 갖는 \(a\)를 구할 수 있다.</span></li>
+      <li><span class="num">3</span><span><span class="kw">최적화</span>와 <span class="kw">최적 추세선</span>의 뜻을 말할 수 있다.</span></li>
+      <li><span class="num">4</span><span>최적 추세선으로 <span class="kw">예측값</span>을 구할 수 있다.</span></li>
+    </ul>
+    <div class="info-box">
+      성취기준 <span class="badge">12인수04-02</span>
+      함수의 최솟값 또는 최댓값을 찾아 최적화된 의사 결정 방법을 이해한다.
+    </div>
+    <aside class="notes">네 목표가 한 문제 안에서 순서대로 이어진다 — 자료를 받아 손실함수를 세우고, 완전제곱으로 바닥을 찾고, 그 기울기로 추세선을 정하고, 그것으로 예측한다. 오늘 수업은 이 네 단계를 두 번(4~7장에서 한 번, 9장 예제에서 한 번) 반복하는 구조라고 미리 알려 주면 학생이 따라오기 쉽다.</aside>
+  </section>
+
+  <!-- 4. 자료 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 114쪽 · 자료</div>
+    <h2>좌표평면 위를 움직이는 입자</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-2); align-items: center;">
+      <div>
+        <table class="dt">
+          <thead>
+            <tr><th>\(x\)</th><th>\(-2\)</th><th>\(-1\)</th><th>\(0\)</th><th>\(1\)</th><th>\(2\)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="rowhead">\(y\)</td><td>\(-1\)</td><td>\(-3\)</td><td>\(0\)</td><td>\(3\)</td><td>\(1\)</td></tr>
+          </tbody>
+        </table>
+        <p class="prob-stmt">
+          입자의 위치를 순서쌍 \((x,\ y)\)로 적은 것이다.
+          이번에도 추세선은 <b>원점을 지나는</b> \(f(x)=ax\) 꼴로 잡는다.
+        </p>
+      </div>
+
+      <svg class="dg" viewBox="0 0 660 350" width="660" height="350"
+           preserveAspectRatio="xMidYMid meet" role="img"
+           aria-label="입자의 위치를 나타낸 산점도">
+        <line class="axis" x1="60" y1="180" x2="610" y2="180"></line>
+        <line class="axis" x1="330" y1="30" x2="330" y2="330"></line>
+        <text class="t-ax" x="322" y="202" text-anchor="end">O</text>
+        <circle class="pt" cx="150" cy="215" r="7"></circle>
+        <circle class="pt" cx="240" cy="285" r="7"></circle>
+        <circle class="pt" cx="330" cy="180" r="7"></circle>
+        <circle class="pt" cx="420" cy="75"  r="7"></circle>
+        <circle class="pt" cx="510" cy="145" r="7"></circle>
+      </svg>
+    </div>
+    <aside class="notes">점이 다섯 개뿐이고 좌우로 흩어져 있어 어떤 직선이 좋을지 눈으로는 정하기 어렵다. 그것이 오늘의 출발점이다. 원점을 지나는 자료가 실제로 하나(0,0) 있다는 점을 짚으면 f(x)=ax로 두는 것이 더 그럴듯해진다. 점의 위치를 학생에게 하나씩 읽게 하면 좌표 감각도 확인된다.</aside>
+  </section>
+
+  <!-- 5. 손실함수 세우기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 114쪽 · 풀이</div>
+    <h2>손실함수를 세운다</h2>
+
+    <table class="dt">
+      <thead>
+        <tr><th>입력값 \(x\)</th><th>\(-2\)</th><th>\(-1\)</th><th>\(0\)</th><th>\(1\)</th><th>\(2\)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">측정값 \(y\)</td><td>\(-1\)</td><td>\(-3\)</td><td>\(0\)</td><td>\(3\)</td><td>\(1\)</td></tr>
+        <tr><td class="rowhead">예측값 \(ax\)</td><td>\(-2a\)</td><td>\(-a\)</td><td>\(0\)</td><td>\(a\)</td><td>\(2a\)</td></tr>
+        <tr><td class="rowhead">오차 \(y-ax\)</td><td>\(-1+2a\)</td><td>\(-3+a\)</td><td>\(0\)</td><td>\(3-a\)</td><td>\(1-2a\)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="formula-box">
+      \[L(a)=\frac{(-1+2a)^2+(-3+a)^2+0^2+(3-a)^2+(1-2a)^2}{5}=2a^2-4a+4\]
+    </div>
+
+    <p class="prob-stmt">
+      \(x\)가 음수인 곳에서는 예측값도 음수라 <b>부호에 주의</b>해야 한다.
+    </p>
+    <aside class="notes">오차 열의 첫 두 칸이 함정이다 — \(y-ax\)에서 \(x\)가 음수이므로 \(-(-2a)=+2a\)가 된다. 여기서 부호를 놓치는 학생이 많으니 두 칸을 직접 채우게 하고 확인한다. 세 번째 칸이 0인 이유(원점을 지나는 직선은 (0,0)을 정확히 맞힌다)도 짚어 주면 좋다. 전개는 교사가 보여 준다.</aside>
+  </section>
+
+  <!-- 6. 완전제곱 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 114쪽 <span class="badge">오늘의 중심</span></div>
+    <h2>완전제곱으로 바꾼다</h2>
+
+    <div class="formula-box">
+      \[L(a)=2a^2-4a+4=2(a^2-2a)+4=2(a-1)^2-2+4=2(a-1)^2+2\]
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="result-box">
+        \((a-1)^2 \ge 0\) 이므로 \(L(a) \ge 2\).
+        <span class="kw-success">\(a=1\)일 때 최솟값 2</span>를 갖는다.
+      </div>
+      <div class="info-box">
+        그러므로 이 자료에 가장 적합한 추세선은
+        <span class="kw-info">\(f(x)=x\)</span> 다.
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      기울기를 미지수로 남겨 둔 덕분에, <b>이차함수의 최솟값 문제</b>가 되었다.
+    </p>
+    <aside class="notes">완전제곱 과정을 학생과 함께 한 단계씩 간다. \(a^2\)의 계수 2로 묶는 것, 괄호 안에서 \((a-1)^2\)을 만들 때 \(-1\)이 생기는데 밖에 2가 곱해져 \(-2\)가 되는 것 — 이 두 곳에서 실수가 나온다. 마지막 문장이 2차시부터 이어 온 설계를 회수하는 자리다. 미지수로 남겨 두지 않았다면 최솟값을 물을 대상 자체가 없었다.</aside>
+  </section>
+
+  <!-- 7. 최적화 정의 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 115쪽 · 정의 <span class="badge">오늘의 중심</span></div>
+    <h2>얹어 보고 이름을 붙인다</h2>
+
+    <svg class="dg" viewBox="0 0 660 350" width="660" height="350"
+         preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="산점도에 최적 추세선 y=x 를 얹은 그림">
+      <line class="axis" x1="60" y1="180" x2="610" y2="180"></line>
+      <line class="axis" x1="330" y1="30" x2="330" y2="330"></line>
+      <text class="t-ax" x="322" y="202" text-anchor="end">O</text>
+      <line class="best" x1="60" y1="285" x2="600" y2="75"></line>
+      <circle class="pt" cx="150" cy="215" r="7"></circle>
+      <circle class="pt" cx="240" cy="285" r="7"></circle>
+      <circle class="pt" cx="330" cy="180" r="7"></circle>
+      <circle class="pt" cx="420" cy="75"  r="7"></circle>
+      <circle class="pt" cx="510" cy="145" r="7"></circle>
+      <foreignObject class="m-d" x="470" y="220" width="150" height="34">
+        <div xmlns="http://www.w3.org/1999/xhtml">\(f(x)=x\)</div>
+      </foreignObject>
+    </svg>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-2);">
+      손실함수의 값을 최소화하는 추세선의 기울기를 찾는 과정을
+      <span class="kw">최적화</span>(optimization)라 하고,
+      그때의 추세선을 <span class="kw">최적 추세선</span>이라고 한다.
+    </div>
+    <aside class="notes">직선을 얹은 그림을 먼저 보여 주고 "이 직선이 왜 최선인가"를 묻는다. 답은 눈이 아니라 계산에 있다 — 손실함수의 값이 가장 작기 때문이다. 점 하나(1,3)가 직선에서 꽤 떨어져 있는데, 그래도 이 직선이 최선이라는 점을 짚어 주면 "모든 점을 맞히는 것이 목표가 아니다"라는 감각이 생긴다. 최적화라는 말은 김치냉장고·건조기 광고에서도 쓰인다는 교과서 도입 만화를 언급해도 좋다.</aside>
+  </section>
+
+  <!-- 8. 포물선으로 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 115쪽 · 그래프</div>
+    <h2>손실함수 쪽에서 보면</h2>
+
+    <svg class="dg" viewBox="0 0 470 340" width="470" height="340"
+         preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="손실함수 L(a)의 그래프와 최솟값">
+      <line class="axis" x1="60" y1="300" x2="450" y2="300"></line>
+      <line class="axis" x1="60" y1="300" x2="60" y2="30"></line>
+      <text class="t-ax" x="52" y="306" text-anchor="end">0</text>
+      <text class="t-ax" x="240" y="326" text-anchor="middle">1</text>
+      <polyline class="curve" points="60.0,83.3 69.0,100.2 78.0,116.3 87.0,131.4 96.0,145.7 105.0,159.2 114.0,171.7 123.0,183.4 132.0,194.3 141.0,204.2 150.0,213.3 159.0,221.6 168.0,228.9 177.0,235.4 186.0,241.1 195.0,245.8 204.0,249.7 213.0,252.8 222.0,254.9 231.0,256.2 240.0,256.7 249.0,256.2 258.0,254.9 267.0,252.8 276.0,249.7 285.0,245.8 294.0,241.1 303.0,235.4 312.0,228.9 321.0,221.6 330.0,213.3 339.0,204.2 348.0,194.3 357.0,183.4 366.0,171.7 375.0,159.2 384.0,145.7 393.0,131.4 402.0,116.3 411.0,100.2 420.0,83.3"></polyline>
+      <line class="drop" x1="240" y1="256.7" x2="240" y2="300"></line>
+      <circle class="ptmin" cx="240" cy="256.7" r="8"></circle>
+      <foreignObject class="m-a" x="150" y="60" width="200" height="34">
+        <div xmlns="http://www.w3.org/1999/xhtml">\(L(a)=2(a-1)^2+2\)</div>
+      </foreignObject>
+      <foreignObject class="m-d" x="150" y="112" width="200" height="34">
+        <div xmlns="http://www.w3.org/1999/xhtml">\(a=1,\ L=2\)</div>
+      </foreignObject>
+    </svg>
+
+    <div class="result-box" style="margin-top: var(--lm-space-1);">
+      <b>같은 이야기를 두 곳에서 본 것이다</b> —
+      왼쪽 그림(7장)의 직선 하나가, 여기서는 <span class="kw-success">포물선의 바닥 한 점</span>이다.
+    </div>
+    <aside class="notes">두 그림의 대응이 이 차시에서 가장 헷갈리는 대목이다. 7장의 가로축은 자료의 x이고 여기 가로축은 기울기 a라는 점을 분명히 구별시킨다. 7장에서 직선을 이리저리 기울이는 것이 여기서는 포물선 위를 좌우로 움직이는 것에 해당한다. 손으로 기울이는 시늉을 하면서 이 그림의 점이 함께 움직인다고 말해 주면 이해가 빠르다.</aside>
+  </section>
+
+  <!-- 9. 예제 1 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 115쪽 · 예제 1</div>
+    <h2>손실함수만 주어져도 된다</h2>
+
+    <p class="prob-stmt">
+      추세선 \(f(x)=ax\)에 대한 손실함수가 \(L(a)=2a^2-12a+20\)일 때,
+      최적 추세선과 \(x=4\)에서의 예측값을 구하시오.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>⑴ 최적 추세선</h4>
+        <p>\(L(a)=2(a^2-6a)+20\)</p>
+        <p>\(=2(a-3)^2-18+20=2(a-3)^2+2\)</p>
+        <p>\(a=3\)에서 최솟값 → <b>\(f(x)=3x\)</b></p>
+      </div>
+      <div class="plain-card">
+        <h4>⑵ 예측값</h4>
+        <p>\(f(4)=3 \times 4=\mathbf{12}\)</p>
+        <p style="color: var(--lm-ink-3);">자료에 \(x=4\)가 없어도 답할 수 있다 —
+          추세선이 있기 때문이다.</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      자료를 주지 않고 <b>손실함수만</b> 줘도 된다.
+      이미 자료의 정보가 그 안에 다 들어 있기 때문이다.
+    </div>
+    <aside class="notes">학생이 직접 완전제곱을 해 보게 한다. 6장에서 한 것과 같은 절차다. ⑵는 Ⅲ-2에서 배운 예측과 이어진다 — 추세선이 있으면 자료에 없는 값도 답할 수 있다는 것. 마지막 상자가 오늘 새로 얻는 관점이다. 손실함수는 자료를 요약한 것이므로, 손실함수만 있으면 자료 없이도 최적 추세선을 구할 수 있다.</aside>
+  </section>
+
+  <!-- 10. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인하기 · 교과서 115쪽 문제 1·2</div>
+    <h2>직접 해 보자</h2>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>⑴</b> 손실함수가 \(L(a)=3a^2+6a+8\)일 때 최적 추세선 \(f(x)\)를 구하고,
+        \(x=-2\)에서의 예측값을 구하시오.
+        <div class="ans">\(L(a)=3(a+1)^2+5\) 이므로 \(a=-1\) → \(f(x)=-x\),
+          \(f(-2)=\mathbf{2}\)</div>
+      </li>
+      <li>
+        <b>⑵</b> 손실함수가 \(L(a)=pa^2+(5-p)a+15\)이고 최적 추세선에 따른 예측값이
+        \(f(1)=-2\)일 때, 상수 \(p\)의 값을 구하시오. (단, \(p>0\))
+        <div class="ans">\(f(1)=a=-2\) 이므로 최적 기울기가 \(-2\).
+          꼭짓점 \(a=-\dfrac{5-p}{2p}=-2\) 에서 \(5-p=4p\), 즉 <b>\(p=1\)</b>
+          <span style="color: var(--lm-ink-3);">— 확인: \(L(a)=(a+2)^2+11\)</span></div>
+      </li>
+    </ul>
+    <aside class="notes">⑴은 6장·9장과 같은 절차라 대부분 해낸다. 부호 하나만 조심하면 된다. ⑵는 꼭짓점 공식을 거꾸로 쓰는 문항이라 난도가 한 단계 높다. 막히는 학생에게는 "최적 추세선이 \(f(x)=ax\)이고 \(f(1)=-2\)라면 \(a\)는?"부터 묻는다. 완전제곱으로 풀어도 되지만 꼭짓점 위치 \(-\frac{q}{2p}\)를 쓰는 편이 훨씬 빠르다. 시간이 모자라면 ⑵는 과제로 돌린다.</aside>
+  </section>
+
+  <!-- 11. 한계 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 116쪽 예고 <span class="badge">오늘의 중심</span></div>
+    <h2>그런데 왜 미분을 배웠나</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>오늘 쓴 방법</h4>
+        <p>완전제곱으로 꼭짓점을 찾는다.</p>
+        <p>정확하고 빠르다.</p>
+        <p style="color: var(--lm-accent);">단, <b>이차함수일 때만</b> 통한다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>실제 인공지능은</h4>
+        <p>손실함수가 이차함수보다 <b>훨씬 복잡하다</b>.</p>
+        <p>완전제곱 꼴로 바꿀 수 없는 경우가 대부분이다.</p>
+        <p style="color: var(--lm-danger);">꼭짓점 공식이 <b>없다</b>.</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      그때는 <b>어디가 바닥인지 모른 채</b> 출발해야 한다.
+      한 지점에 서서 <span class="kw-danger">어느 쪽으로 내려가야 하는지</span>만 알아내며 나아가는 것 —
+      그 방향을 알려 주는 것이 <b>미분계수의 부호</b>다.
+    </div>
+    <aside class="notes">추세선 f(x)=ax에 대한 손실함수는 늘 a에 대한 이차함수라, 이 교과서 안에서는 완전제곱이면 충분하다. 그래서 학생이 "왜 미분을 배웠지?"라고 느끼는 것이 자연스럽고 정당하다. 교과서 116쪽도 "이차함수보다 복잡한 손실함수를 최적화하려면 좀 더 일반적인 최적화 기법이 필요하다"고 밝히고 있으니, 미분은 이 문제를 위해서가 아니라 다음을 위해 배운 것이라고 정직하게 말한다. Ⅲ-1-06에서 퍼셉트론을 두고 했던 이야기와 같은 구조다.</aside>
+  </section>
+
+  <!-- 12. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>바닥의 기울기가 최적 추세선이다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      손실함수를 <span class="kw-success">완전제곱</span> 꼴로 바꾸면 바닥이 보이고,<br>
+      그 자리의 \(a\)가 <span class="kw-success">최적 추세선</span>의 기울기다.
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      다음 시간에는 바닥이 <b>어딘지 모르는 채</b> 찾아 내려간다.
+      한 걸음씩, 미분계수의 부호를 나침반 삼아 —
+      <span class="kw-danger">경사하강법</span>이다.
+    </div>
+    <aside class="notes">오늘의 결론과 다음 차시를 한 화면에 둔다. "산에서 안개가 껴 정상이 안 보일 때, 발밑의 경사만 보고 내려가는 것"이라는 비유를 여기서 미리 던져 두면 다음 시간 도입이 필요 없다. 2차시부터 칠판에 적어 둔 "포물선의 가장 낮은 점"은 오늘 지운다 — 찾는 법을 배웠으니.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (10장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
