@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>손실함수로 직선을 고른다 | 인공지능수학 3학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-small); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt td.hit { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+    .dt td.warn { background: var(--lm-warning-tint); color: var(--lm-ink); font-weight: 700; }
+    .dt caption { caption-side: top; text-align: right; font-size: var(--lm-slide-caption);
+                  color: var(--lm-ink-3); padding-bottom: var(--lm-space-1); }
+
+    /* 도식 SVG — viewBox 단위 = 렌더 px (배율 1.00) */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .axis   { stroke: var(--lm-rule-strong); fill: none; stroke-width: 2; }
+    .dg .gridln { stroke: var(--lm-rule); fill: none; stroke-width: 1; }
+    .dg .curve  { stroke: var(--lm-accent); fill: none; stroke-width: 4; }
+    .dg .drop   { stroke: var(--lm-danger); fill: none; stroke-width: 3; stroke-dasharray: 6 5; }
+    .dg .pt     { fill: var(--lm-accent); }
+    .dg .ptmin  { fill: var(--lm-danger); }
+    .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink-3); }
+    .dg .t-ax { font-size: 22px; }
+    .dg .t-lab { font-size: 26px; fill: var(--lm-ink-2); }
+    .dg .m-lab div  { font-size: 26px; line-height: 1; color: var(--lm-accent); }
+    .dg .m-min div  { font-size: 26px; line-height: 1; color: var(--lm-danger); }
+
+    /* 도구 조작 순서 카드 */
+    .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--lm-space-3);
+             margin-top: var(--lm-space-4); }
+    .stepcard { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); padding: var(--lm-space-3);
+                font-size: var(--lm-slide-caption); line-height: var(--lm-slide-line-tight);
+                color: var(--lm-ink-2); }
+    .stepcard .sn { display: inline-block; min-width: 30px; height: 30px; line-height: 30px;
+                    text-align: center; border-radius: 50%; background: var(--lm-accent);
+                    color: var(--lm-page); font-weight: 700; margin-bottom: var(--lm-space-2); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-3);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-1 최적화와 의사 결정 · 01 손실함수 <span class="badge">2차시</span></div>
+    <h1>손실함수로 직선을 고른다</h1>
+    <p class="slide-sub">후보가 여럿일 때, 한 번 세워 두고 대입만 하는 법</p>
+    <div class="title-meta">
+      <span>3학년 인공지능수학</span>
+      <span>교과서 105~107쪽</span>
+    </div>
+    <aside class="notes">지난 시간에 손실함수를 정의했으니 오늘은 그것을 쓰는 시간이다. 계산량이 오늘이 제일 많지만 전개는 한 번뿐이고 나머지는 대입이다. 후반부(9~12장)는 공학적 도구 활동이라 컴퓨터실이면 함께 해 보고, 교실이면 화면으로 보여 준 뒤 12장의 그래프에서 시간을 쓴다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 103~104쪽</div>
+    <h2>이름은 붙였다</h2>
+
+    <p class="prob-stmt">
+      오차를 하나씩 견주면 승부가 안 나서, <b>제곱해서 평균</b>을 냈다. 그것이 손실함수다.
+    </p>
+
+    <div class="formula-box">
+      \[L(a)=\frac{(y_1-ax_1)^2+(y_2-ax_2)^2+\cdots+(y_n-ax_n)^2}{n}\]
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="result-box">
+        값이 <span class="kw-success">작을수록</span> 자료를 잘 설명하는 직선이다.
+      </div>
+      <div class="info-box">
+        그리고 \(L(a)\)는 기울기 \(a\)에 대한 <span class="kw-info">이차함수</span>였다.
+      </div>
+    </div>
+    <aside class="notes">공식을 외우게 하지 말고 말로 풀게 한다 — "오차를 제곱해서 다 더하고 개수로 나눈다". 오늘 5장에서 이 문장을 그대로 따라 쓰면 전개가 된다. 분모가 자료의 개수라는 점을 한 번 더 확인한다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>자료가 주어지면 손실함수 \(L(a)\)를 <span class="kw">직접 세울</span> 수 있다.</span></li>
+      <li><span class="num">2</span><span>여러 추세선의 \(L(a)\) 값을 비교해 <span class="kw">가장 적합한 것</span>을 고를 수 있다.</span></li>
+      <li><span class="num">3</span><span>공학적 도구로 기울기에 따른 <span class="kw">손실함수의 값의 변화</span>를 관찰할 수 있다.</span></li>
+    </ul>
+    <div class="info-box">
+      성취기준 <span class="badge">12인수04-01</span>
+      주어진 자료로부터 분류와 예측을 할 때, 오차를 표현할 수 있는 함수를 구성하는 원리와 방법을 이해한다.
+    </div>
+    <aside class="notes">3번이 오늘의 새 목표다. 1·2번은 지난 시간의 연장이고, 3번은 다음 절(미분)로 가는 다리다 — 슬라이더를 움직이며 "가장 낮은 곳"을 눈으로 찾아 본 경험이 있어야 미분으로 그 지점을 구하는 일이 자연스러워진다.</aside>
+  </section>
+
+  <!-- 4. 예제 자료 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 105쪽 · 예제 1</div>
+    <h2>버스는 얼마나 기다리면 몇 명인가</h2>
+
+    <p class="prob-stmt">
+      어느 정류장에 정차하는 서로 다른 노선 버스 6대의 <b>배차 간격 \(x\)분</b>과
+      각 버스를 기다리는 <b>승객 수 \(y\)명</b>이다.
+    </p>
+
+    <table class="dt">
+      <thead>
+        <tr><th>배차 간격 \(x\) (분)</th><th>3</th><th>6</th><th>9</th><th>3</th><th>6</th><th>9</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">승객 수 \(y\) (명)</td><td>5</td><td>8</td><td>11</td><td>3</td><td>4</td><td>5</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      \(x\)가 같은데 \(y\)가 다른 자료가 있다 — <b>3분인데 5명과 3명</b>, <b>6분인데 8명과 4명</b>.
+      <span class="kw-danger">모든 점을 지나는 직선은 아예 없다.</span>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      후보는 셋이다 —
+      <b>A</b>: \(f(x)=\frac{4}{3}x\) &nbsp;·&nbsp;
+      <b>B</b>: \(f(x)=\frac{2}{3}x\) &nbsp;·&nbsp;
+      <b>C</b>: \(f(x)=x\)
+    </div>
+    <aside class="notes">같은 x에 다른 y가 있다는 점을 학생이 먼저 발견하게 하면 좋다. 이것이 "왜 오차가 0이 될 수 없는가"에 대한 가장 직관적인 답이다. 노선이 다르면 승객 수가 다른 것이 당연하다는 실제 맥락도 짚어 준다. 세 후보를 눈으로 고르라고 하면 의견이 갈리는데, 오늘은 그 갈림을 계산으로 끝낸다.</aside>
+  </section>
+
+  <!-- 5. 손실함수 세우기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 105쪽 · 풀이 ⑴</div>
+    <h2>한 번만 세워 두면 된다</h2>
+
+    <table class="dt">
+      <thead>
+        <tr><th>\(x\) (분)</th><th>3</th><th>6</th><th>9</th><th>3</th><th>6</th><th>9</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">측정 \(y\) (명)</td><td>5</td><td>8</td><td>11</td><td>3</td><td>4</td><td>5</td></tr>
+        <tr><td class="rowhead">예측 \(ax\)</td><td>\(3a\)</td><td>\(6a\)</td><td>\(9a\)</td><td>\(3a\)</td><td>\(6a\)</td><td>\(9a\)</td></tr>
+        <tr><td class="rowhead">오차 \(y-ax\)</td><td>\(5-3a\)</td><td>\(8-6a\)</td><td>\(11-9a\)</td><td>\(3-3a\)</td><td>\(4-6a\)</td><td>\(5-9a\)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="formula-box">
+      \[L(a)=\frac{(5-3a)^2+(8-6a)^2+(11-9a)^2+(3-3a)^2+(4-6a)^2+(5-9a)^2}{6}
+        = \frac{252a^2-480a+260}{6}\]
+    </div>
+
+    <p class="prob-stmt">
+      기울기 \(a\)를 <b>모르는 채로</b> 그대로 두고 세운 것이 핵심이다.
+    </p>
+    <aside class="notes">예측값 칸을 학생에게 채우게 한다 — x에 a를 곱하기만 하면 되므로 부담이 없다. 오차 칸은 (측정)-(예측)이라는 것만 확인하면 자동이다. 전개는 시간이 걸리므로 교사가 보여 주되, 항이 여섯 개라는 것과 분모가 6이라는 것만 확실히 짚는다. 전개 결과를 못 따라온 학생도 다음 장은 할 수 있다.</aside>
+  </section>
+
+  <!-- 6. 대입 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 105쪽 · 풀이 ⑵ <span class="badge">오늘의 중심</span></div>
+    <h2>이제 대입만 하면 된다</h2>
+
+    <div class="formula-box">
+      \[L(a)=\frac{252a^2-480a+260}{6}\]
+    </div>
+
+    <table class="dt">
+      <thead>
+        <tr><th>후보</th><th>추세선</th><th>기울기 \(a\)</th><th>\(L(a)\)</th><th>소수로</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">A</td><td>\(f(x)=\frac{4}{3}x\)</td><td>\(\frac{4}{3}\)</td><td>\(\frac{34}{3}\)</td><td>약 11.33</td></tr>
+        <tr><td class="rowhead">B</td><td>\(f(x)=\frac{2}{3}x\)</td><td>\(\frac{2}{3}\)</td><td>\(\frac{26}{3}\)</td><td>약 8.67</td></tr>
+        <tr><td class="rowhead">C</td><td>\(f(x)=x\)</td><td>\(1\)</td><td class="hit">\(\frac{16}{3}\)</td><td class="hit">약 5.33</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      \(L\)의 값이 가장 작은 <span class="kw-success">추세선 C가 예측에 가장 적합하다.</span>
+    </div>
+    <aside class="notes">한 후보만 학생에게 대입시키고 나머지는 읽어 준다. B를 시키는 것이 좋다 — 분수 제곱이 들어가 계산 연습이 된다. 답을 분수로 두는 것이 교과서 표기다. 소수 열을 덧붙인 것은 크기 비교를 눈으로 하기 위해서이니, 비교가 끝나면 분수로 답하게 한다.</aside>
+  </section>
+
+  <!-- 7. 왜 먼저 세우나 -->
+  <section class="tight">
+    <div class="chapter-tag">지도서 유의점</div>
+    <h2>왜 함수를 먼저 세웠을까</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>후보마다 따로 계산하면</h4>
+        <p>A에 대해 예측값 6개·오차 6개·제곱 6개 → 평균.</p>
+        <p>B에 대해 또 6개. C에 대해 또 6개.</p>
+        <p style="color: var(--lm-danger);"><b>같은 일을 세 번</b> 한다.</p>
+      </div>
+      <div class="plain-card">
+        <h4>손실함수를 먼저 세우면</h4>
+        <p>전개는 <b>한 번</b>. 그 뒤로는 \(a\)에 수를 넣기만 한다.</p>
+        <p>후보가 열 개여도 대입이 열 번일 뿐이다.</p>
+        <p style="color: var(--lm-accent);"><b>후보가 늘수록 이득이 커진다.</b></p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      그런데 후보가 <b>무한히 많다면?</b>
+      <span class="kw-info">대입으로는 끝나지 않는다.</span> 그때 필요한 것이 다음 절의 미분이다.
+    </div>
+    <aside class="notes">지도서가 "손실함수를 먼저 구하고 이를 사용하여 비교하는 것이 더 편리하다는 것을 이해하게 한다"고 명시한 대목이다. 계산 요령처럼 보이지만 실은 이 단원의 설계다 — a를 미지수로 남겨 두었기 때문에 나중에 미분할 대상이 생긴다. 마지막 물음은 대답하지 말고 남겨 둔다. 3절에서 회수한다.</aside>
+  </section>
+
+  <!-- 8. 직접 해 보기 -->
+  <section class="tight">
+    <div class="chapter-tag">확인하기 · 교과서 105쪽 문제 1</div>
+    <h2>같은 자료, 다른 후보</h2>
+
+    <p class="prob-stmt">
+      같은 버스 자료다. 손실함수는 이미 세웠으니 \(a\)만 넣으면 된다 —
+      \(L(a)=\frac{252a^2-480a+260}{6}\)
+    </p>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>A</b>: \(f(x)=\frac{5}{3}x\) 일 때 \(L(a)\)의 값은?
+        <div class="ans">\(L\!\left(\frac{5}{3}\right)=\frac{700-800+260}{6}=\frac{160}{6}=\frac{80}{3}\) (약 26.67)</div>
+      </li>
+      <li>
+        <b>B</b>: \(f(x)=\frac{5}{6}x\) 일 때 \(L(a)\)의 값은?
+        <div class="ans">\(L\!\left(\frac{5}{6}\right)=\frac{175-400+260}{6}=\frac{35}{6}\) (약 5.83)</div>
+      </li>
+      <li>
+        <b>C</b>: \(f(x)=\frac{1}{3}x\) 일 때 \(L(a)\)의 값은? 그리고 가장 적합한 것은?
+        <div class="ans">\(L\!\left(\frac{1}{3}\right)=\frac{28-160+260}{6}=\frac{128}{6}=\frac{64}{3}\) (약 21.33)
+          → 가장 작은 <b>추세선 B</b></div>
+      </li>
+    </ul>
+    <aside class="notes">세 문항을 모둠별로 하나씩 맡기면 빠르다. 분수 제곱에서 실수가 나오기 쉬우니 \(a^2\) 항을 먼저 계산하게 한다. 답이 B라는 것보다, 앞 장에서 이겼던 C(기울기 1)가 여기서는 후보에 없다는 점을 짚어 주면 좋다 — 후보 목록이 달라지면 답도 달라진다. 그래서 "후보 중 최선"이 아니라 "모든 직선 중 최선"을 찾고 싶어지는 것이다.</aside>
+  </section>
+
+  <!-- 9. 도구 자료 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 106쪽 · 공학적 도구</div>
+    <h2>이번엔 자료가 열 개다</h2>
+
+    <p class="prob-stmt">
+      어느 기계에 넣은 연료 \(x\) L에 대한 작동 시간 \(y\)시간이다.
+      손으로 전개하기에는 항이 열 개라 벅차니 <b>도구에 맡긴다.</b>
+    </p>
+
+    <table class="dt">
+      <thead>
+        <tr><th>\(x\) (L)</th><th>3</th><th>6</th><th>9</th><th>3</th><th>6</th><th>9</th><th>5</th><th>6</th><th>8</th><th>11</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">\(y\) (시간)</td><td>4.0</td><td>6.5</td><td>10.5</td><td>3.0</td><td>3.5</td><td>4.5</td><td>4.5</td><td>8.5</td><td>7.5</td><td>13.5</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      쓸 도구는 <b>desmos 그래핑 계산기</b>다. 주소는 <b>www.desmos.com</b> —
+      설치 없이 웹에서 바로 열리고, 회원 가입 없이 쓸 수 있다.
+    </div>
+    <aside class="notes">1차시의 연료 자료와 비슷해 보이지만 다른 자료다(개수도 값도 다르다). 같은 기계를 여러 번 측정한 것이라고 보면 자연스럽다. 여기서도 x가 겹치는데 y가 다르다는 점(3L에서 4.0과 3.0)을 확인시키면 4장과 이어진다. 컴퓨터실이 아니면 교사 화면으로 시연하고 학생은 12장의 그래프에 집중하게 한다.</aside>
+  </section>
+
+  <!-- 10. desmos 순서 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 106~107쪽 · 조작 순서</div>
+    <h2>도구에 시키는 순서</h2>
+
+    <div class="steps">
+      <div class="stepcard"><span class="sn">1</span><br>desmos에서 <b>그래핑 계산기</b>를 연다.</div>
+      <div class="stepcard"><span class="sn">2</span><br><b>표</b>로 \(x_1,\ y_1\) 두 열을 입력한다.</div>
+      <div class="stepcard"><span class="sn">3</span><br>\(y=ax\)를 입력하면 <b>\(a\) 슬라이더</b>가 생긴다.</div>
+      <div class="stepcard"><span class="sn">4</span><br>표에 \(ax_1\) 열을 더해 <b>예측값</b>을, \(e_1\)으로 <b>오차</b>를 얻는다.</div>
+      <div class="stepcard"><span class="sn">5</span><br><b>mean((e₁)^2)</b>를 입력하면 그것이 \(L(a)\)다.</div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      마지막 한 줄이 오늘의 전부다 —
+      <span class="kw-success">오차를 제곱해서 평균 내라</span>는 말을 도구의 언어로 쓴 것뿐이다.
+    </div>
+    <aside class="notes">5단계의 mean은 평균을 뜻하는 명령어다. 학생들이 화면의 버튼을 따라가느라 무엇을 하고 있는지 놓치기 쉬우니, 각 단계가 2장의 공식 어느 부분에 해당하는지 한 번씩 대응시켜 준다. 4단계에서 오차가 (측정값)-(예측값) 순서라는 것도 확인한다. 도구 화면 캡처는 교과서 106~107쪽을 띄워 함께 본다.</aside>
+  </section>
+
+  <!-- 11. 슬라이더 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 107쪽 · 관찰 <span class="badge">오늘의 중심</span></div>
+    <h2>슬라이더를 움직여 본다</h2>
+
+    <p class="prob-stmt">
+      \(a\)를 이리저리 옮기면 직선이 기울고, 오차가 바뀌고, \(L(a)\)의 값이 따라 바뀐다.
+    </p>
+
+    <table class="dt">
+      <thead>
+        <tr><th>기울기 \(a\)</th><th>0.5</th><th>0.8</th><th>1.0</th><th>1.2</th><th>1.5</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">\(L(a)\)</td><td>16.75</td><td>6.29</td><td class="hit">4.30</td><td>6.29</td><td>16.75</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      \(a=1\)에서 <span class="kw-success">\(L=4.3\)</span>으로 가장 작다.
+      \(a\)를 <b>어느 쪽으로 옮겨도 값이 커진다.</b>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      슬라이더로 <b>가장 낮은 곳을 눈으로 찾은</b> 것이다.
+      <span class="kw-danger">이것을 계산으로 찾는 방법</span>이 이 단원의 나머지다.
+    </div>
+    <aside class="notes">표의 값은 교과서가 보여 주는 4.3(a=1)을 포함해 대칭이 드러나도록 고른 것이다. 0.8과 1.2가 같고 0.5와 1.5가 같다는 점을 학생이 발견하면 다음 장의 포물선이 자연스럽게 나온다. 실제로 슬라이더를 좌우로 천천히 끌면서 숫자가 내려갔다 올라가는 것을 보여 주는 것이 이 장의 핵심이다. 값을 외우게 하지 않는다.</aside>
+  </section>
+
+  <!-- 12. 손실함수의 모양 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 밖 보조 자료 <span class="badge">오늘의 중심</span></div>
+    <h2>그려 보면 포물선이다</h2>
+
+    <svg class="dg" viewBox="0 0 680 380" width="680" height="380"
+         preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="기울기 a에 대한 손실함수 L(a)의 그래프">
+      <line class="gridln" x1="110" y1="50" x2="600" y2="50"></line>
+      <line class="gridln" x1="110" y1="190" x2="600" y2="190"></line>
+      <line class="axis" x1="110" y1="330" x2="620" y2="330"></line>
+      <line class="axis" x1="110" y1="330" x2="110" y2="50"></line>
+      <text class="t-ax" x="102" y="336" text-anchor="end">0</text>
+      <text class="t-ax" x="102" y="196" text-anchor="end">30</text>
+      <text class="t-ax" x="102" y="56" text-anchor="end">60</text>
+      <text class="t-ax" x="110" y="356" text-anchor="middle">0</text>
+      <text class="t-ax" x="355" y="356" text-anchor="middle">1</text>
+      <text class="t-ax" x="600" y="356" text-anchor="middle">2</text>
+      <text class="t-lab" x="365" y="376" text-anchor="middle">기울기</text>
+
+      <polyline class="curve" points="110.0,77.5 122.2,100.2 134.5,121.7 146.8,142.0 159.0,161.2 171.2,179.2 183.5,196.1 195.8,211.7 208.0,226.3 220.2,239.6 232.5,251.8 244.8,262.9 257.0,272.7 269.2,281.5 281.5,289.0 293.8,295.4 306.0,300.6 318.2,304.7 330.5,307.6 342.8,309.4 355.0,309.9 367.2,309.4 379.5,307.6 391.8,304.7 404.0,300.6 416.2,295.4 428.5,289.0 440.8,281.5 453.0,272.7 465.2,262.9 477.5,251.8 489.8,239.6 502.0,226.3 514.2,211.7 526.5,196.1 538.8,179.2 551.0,161.2 563.2,142.0 575.5,121.7 587.8,100.2 600.0,77.5"></polyline>
+
+      <!-- 꼭짓점 표시: 축까지 내리는 선(a=1 눈금)과 라벨로 올리는 선 -->
+      <line class="drop" x1="355" y1="309.9" x2="355" y2="330"></line>
+      <line class="drop" x1="355" y1="309.9" x2="355" y2="178"></line>
+      <circle class="ptmin" cx="355" cy="309.9" r="8"></circle>
+
+      <!-- 라벨은 포물선 안쪽 빈 곳에 둔다 — 곡선은 이 높이에서 훨씬 아래에 있다 -->
+      <foreignObject class="m-lab" x="250" y="88" width="190" height="36">
+        <div xmlns="http://www.w3.org/1999/xhtml">\(L(a)\)</div>
+      </foreignObject>
+      <foreignObject class="m-min" x="250" y="140" width="190" height="36">
+        <div xmlns="http://www.w3.org/1999/xhtml">\(a=1,\ L=4.3\)</div>
+      </foreignObject>
+    </svg>
+
+    <div class="info-box" style="margin-top: var(--lm-space-2);">
+      아래로 볼록한 포물선이고, <b>가장 낮은 점이 하나</b>다. 그 점의 \(a\)가 답이다.
+    </div>
+    <aside class="notes">교과서에는 이 그래프가 없다. 슬라이더로 본 숫자의 변화를 한 장의 그림으로 묶어 주려고 넣었다. 지난 시간에 "L(a)는 이차함수"라고 했던 것이 여기서 눈에 보인다. 포물선의 가장 낮은 점을 손가락으로 짚게 하고 "이 점을 어떻게 찾을까?"로 마무리하면 다음 절이 필요해진다. 완전제곱으로 찾을 수 있다는 학생이 나오면 맞다고 인정하고, 3절에서 실제로 그렇게 한다고 예고한다.</aside>
+  </section>
+
+  <!-- 13. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>한 번 세우고, 넣기만 한다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      후보마다 처음부터 계산하지 않는다.<br>
+      <span class="kw-success">손실함수를 한 번 세워 두고</span> 기울기를 넣어 보면 된다.
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      그런데 후보를 <b>주지 않고</b> "가장 좋은 직선을 찾아라"라고 하면?
+      슬라이더를 눈으로 더듬는 대신
+      <span class="kw-danger">포물선의 가장 낮은 점을 계산으로 찾아야 한다.</span>
+    </div>
+
+    <p class="prob-stmt">
+      다음 시간부터 그 도구를 만든다 — <b>다항함수의 미분</b>이다.
+    </p>
+    <aside class="notes">오늘 두 번(7장, 12장) 던져 둔 물음을 여기서 하나로 모은다. 다음 두 차시는 손실함수가 잠깐 사라지고 극한·미분계수·도함수가 나오는데, 그것이 곁길이 아니라 이 물음에 답하려고 가는 길이라는 것을 분명히 해 두면 학생이 방향을 잃지 않는다. 칠판 구석에 "포물선의 가장 낮은 점"이라고 적어 두고 3절에서 지우는 것도 좋다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (8장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
