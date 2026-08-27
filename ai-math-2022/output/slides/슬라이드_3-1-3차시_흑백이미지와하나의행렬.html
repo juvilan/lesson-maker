@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>세 개가 같다면 하나로 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    /* 행렬 공통 */
+    .mtx { display: grid; gap: 3px; background: var(--lm-rule); padding: 3px;
+           border-radius: var(--lm-radius-sm); width: max-content; }
+    .mtx b { display: block; background: var(--lm-page); font-weight: 600;
+             color: var(--lm-ink); font-variant-numeric: tabular-nums;
+             font-size: var(--lm-slide-body); }
+    .mtx.c2 { grid-template-columns: repeat(2, 92px); }
+    .mtx.c2 b { height: 62px; line-height: 62px; }
+    .mtx.c4 { grid-template-columns: repeat(4, 86px); }
+    .mtx.c4 b { height: 60px; line-height: 60px; }
+    .mtx b.hit { background: var(--lm-accent); color: #fff; }
+
+    .chan-row { display: flex; gap: var(--lm-space-5); justify-content: center;
+                margin-top: var(--lm-space-3); flex-wrap: wrap; }
+    .chan { text-align: center; }
+    .chan .lab { font-size: var(--lm-slide-body); font-weight: 700;
+                 margin-bottom: var(--lm-space-2); }
+    .chan.r .lab { color: #b03a2e; }
+    .chan.g .lab { color: #1e7a46; }
+    .chan.b .lab { color: #1f4e9c; }
+    .chan.k .lab { color: var(--lm-ink); }
+
+    /* 무채색 사진 격자 */
+    .gray-grid { display: grid; grid-template-columns: repeat(4, 74px); gap: 3px;
+                 background: var(--lm-rule); padding: 3px;
+                 border-radius: var(--lm-radius-sm); width: max-content; }
+    .gray-grid i { display: block; height: 62px; }
+
+    /* 흑백 7x4 */
+    .bw-grid { display: grid; grid-template-columns: repeat(7, 62px); gap: 3px;
+               background: var(--lm-rule); padding: 3px;
+               border-radius: var(--lm-radius-sm); width: max-content; }
+    .bw-grid i { display: block; height: 62px; cursor: pointer;
+                 font-size: var(--lm-slide-small); font-weight: 700;
+                 display: flex; align-items: center; justify-content: center;
+                 font-variant-numeric: tabular-nums; }
+
+    .pair { display: grid; grid-template-columns: auto auto; gap: var(--lm-space-7);
+            align-items: center; justify-content: center; margin-top: var(--lm-space-4); }
+
+    /* 확인하기 OX */
+    .ox { list-style: none; padding: 0; margin: var(--lm-space-4) 0 0; }
+    .ox li { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+             border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4);
+             margin-bottom: var(--lm-space-3); cursor: pointer;
+             font-size: var(--lm-slide-body); display: flex; align-items: center;
+             gap: var(--lm-space-4); }
+    .ox li .mark { margin-left: auto; font-weight: 700; font-size: var(--lm-slide-h3);
+                   opacity: 0; transition: opacity .2s ease; }
+    .ox li.revealed .mark { opacity: 1; }
+    .ox li.revealed.o .mark { color: var(--lm-success); }
+    .ox li.revealed.x .mark { color: var(--lm-danger); }
+    .ox li .why { display: block; font-size: var(--lm-slide-small);
+                  color: var(--lm-ink-3); margin-top: var(--lm-space-1);
+                  opacity: 0; transition: opacity .2s ease; }
+    .ox li.revealed .why { opacity: 1; }
+
+    /* 픽셀 아트 */
+    .art-grid { display: grid; grid-template-columns: repeat(12, 26px); gap: 1px;
+                background: var(--lm-rule); padding: 2px;
+                border-radius: var(--lm-radius-sm); width: max-content; }
+    .art-grid i { display: block; height: 26px; }
+  </style>
+</head>
+
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅲ-1 이미지 데이터 표현 · 3차시 <span class="badge">Ⅲ-1 마무리</span></div>
+    <h1>세 개가 같다면 하나로</h1>
+    <p class="slide-sub">흑백 이미지와 행렬 \(K\), 그리고 픽셀 아트</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 90~91쪽</span>
+    </div>
+    <aside class="notes">Ⅲ-1을 닫는 차시다. 오늘 배우는 흑백 행렬 K가 Ⅲ-2와 Ⅲ-3 전체를 지탱한다 — 뒤로 가면 컬러는 거의 나오지 않고 K 하나로만 계산한다. 왜 흑백으로 줄이는지를 여기서 납득시켜 두어야 뒤가 편하다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 88~89쪽</div>
+    <h2>컬러 이미지 한 장 = 행렬 세 개</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>해상도</h4>
+        <p>가로 \(n\), 세로 \(m\) → \(n\times m\)</p>
+      </div>
+      <div class="plain-card">
+        <h4>행렬</h4>
+        <p>세 개의 \(m\times n\) 행렬 \(R,\ G,\ B\)</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      다시 한번 —
+      <span class="kw-danger">해상도와 행렬은 가로세로 순서가 반대다.</span>
+      해상도 \(3\times2\) → 행렬 \(2\times3\)
+    </div>
+    <aside class="notes">지난 시간 6장을 그대로 되짚는다. 다음 장 문제 2가 정확히 이걸 묻기 때문에 여기서 한 번 더 확인하고 넘어간다. 학생에게 "행렬이 3×2면 해상도는?" 하고 소리 내어 답하게 하면 좋다.</aside>
+  </section>
+
+  <!-- 3. 문제 2 -->
+  <section>
+    <div class="chapter-tag">교과서 90쪽 · 문제 2</div>
+    <h2>먼저 지난 시간 것부터</h2>
+
+    <p class="prob-stmt">
+      어떤 컬러 이미지를 세 행렬로 변환한 것이 아래와 같다.
+    </p>
+
+    <div class="chan-row">
+      <div class="chan r"><div class="lab">\(R\)</div><div class="mtx c2" id="q2R"></div></div>
+      <div class="chan g"><div class="lab">\(G\)</div><div class="mtx c2" id="q2G"></div></div>
+      <div class="chan b"><div class="lab">\(B\)</div><div class="mtx c2" id="q2B"></div></div>
+    </div>
+
+    <div class="anim-controls" style="margin-top: var(--lm-space-4);">
+      <button class="anim-btn" id="q2a">⑴ 해상도는?</button>
+      <button class="anim-btn" id="q2b">⑵ (2,1) 성분</button>
+      <button class="anim-btn" id="q2c">⑵ (3,2) 성분</button>
+      <button class="anim-btn" id="q2r">지우기</button>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);" id="q2out">
+      먼저 스스로 풀어 보자.
+    </div>
+    <aside class="notes">⑴이 함정이다. 행렬이 3×2이니 해상도도 3×2라고 쓰는 학생이 반드시 나온다. 답은 2×3이다. ⑵는 세 행렬의 같은 자리를 짚는 연습으로, 지난 시간 10장에서 해 본 그대로다. ⑶의 색 이름(남색·보라)은 90쪽 오른쪽 색상표를 보고 찾게 한다.</aside>
+  </section>
+
+  <!-- 4. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span><span class="kw">흑백 이미지</span>가 무엇인지 설명할 수 있다.</span></li>
+      <li><span class="num">2</span><span>흑백 이미지를 하나의 행렬 <span class="kw">\(K\)</span>로 변환할 수 있다.</span></li>
+      <li><span class="num">3</span><span>검은색과 흰색만 있는 이미지를 <span class="kw">0과 255</span>로 나타낼 수 있다.</span></li>
+    </ul>
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      오늘의 한 줄 —
+      <span class="kw-success">세 채널값이 같으면 행렬도 하나면 된다.</span>
+    </div>
+    <aside class="notes">목표 3번이 Ⅲ-3으로 이어지는 다리다. 전광판 숫자를 0과 1로 적는 것이 그 단원의 출발점인데, 오늘은 0과 255로 적는다. 값만 다르고 발상은 같다.</aside>
+  </section>
+
+  <!-- 5. 흑백 이미지 -->
+  <section>
+    <div class="chapter-tag">교과서 90쪽 · 흑백 이미지</div>
+    <h2>모든 픽셀이 무채색이라면</h2>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-3);">
+      모든 픽셀의 색이 무채색인 이미지를 <span class="kw">흑백 이미지</span>라고 한다.
+    </div>
+
+    <p class="prob-stmt">
+      1차시에서 배웠다 — 무채색은 <b>세 채널값이 모두 같은</b> 색이다.
+      그렇다면 흑백 이미지에서는 세 행렬 \(R,\ G,\ B\)가 어떻게 될까?
+    </p>
+
+    <div class="chan-row" style="margin-top: var(--lm-space-4);">
+      <div class="chan r"><div class="lab">\(R\)</div><div class="mtx c2" id="bwR"></div></div>
+      <div class="chan g"><div class="lab">\(G\)</div><div class="mtx c2" id="bwG"></div></div>
+      <div class="chan b"><div class="lab">\(B\)</div><div class="mtx c2" id="bwB"></div></div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      세 행렬이 <span class="kw-info">완전히 똑같다.</span>
+      같은 것을 세 번 적을 이유가 있을까?
+    </div>
+    <aside class="notes">질문을 던지고 학생이 답하게 한다. 세 행렬을 나란히 보여 주면 "굳이 왜 셋?"이라는 반응이 자연스럽게 나온다. 그 반응을 받아 다음 장으로 넘어간다. 여기서 쓴 네 값은 다음 장 토끼 사진의 일부다.</aside>
+  </section>
+
+  <!-- 6. K -->
+  <section>
+    <div class="chapter-tag">교과서 90쪽</div>
+    <h2>행렬 하나로 충분하다</h2>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-4);">
+      \[ K = R = G = B \]
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-4);">
+      해상도가 \(n\times m\)인 흑백 이미지는 하나의 \(m\times n\) 행렬
+      <span class="kw">\(K\)</span>로 변환하여 나타낼 수 있다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="plain-card">
+        <h4>컬러</h4>
+        <p>행렬 <b>세 개</b> — \(R,\ G,\ B\)</p>
+      </div>
+      <div class="plain-card">
+        <h4>흑백</h4>
+        <p>행렬 <b>한 개</b> — \(K\)</p>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      계산할 것이 <span class="kw">3분의 1</span>로 줄었다.
+      Ⅲ-2와 Ⅲ-3에서 대부분 흑백으로 다루는 이유다.
+    </p>
+    <aside class="notes">"왜 흑백만 하나요?"라는 질문이 나오는 자리다. 답은 계산량이다 — 원리는 컬러도 같지만 세 번 반복해야 한다. 실제 인공지능도 색이 판단에 중요하지 않으면 흑백으로 바꿔 쓴다는 점을 덧붙이면 좋다. Ⅲ-2-2차시에서 컬러를 흑백으로 바꾸는 방법을 직접 배운다.</aside>
+  </section>
+
+  <!-- 7. 토끼 사진 -->
+  <section>
+    <div class="chapter-tag">교과서 90쪽 · 예시</div>
+    <h2>사진 한 조각을 행렬로</h2>
+
+    <p class="prob-stmt">
+      흑백 사진에서 <b>해상도 \(4\times4\)</b>인 한 조각을 떼어 확대한 것이다.
+      각 칸의 밝기가 곧 성분이 된다.
+    </p>
+
+    <div class="pair">
+      <div class="gray-grid" id="rabbitImg"></div>
+      <div class="chan k">
+        <div class="lab">\(K\)</div>
+        <div class="mtx c4" id="rabbitK"></div>
+      </div>
+    </div>
+
+    <div class="anim-controls" style="margin-top: var(--lm-space-4);">
+      <button class="anim-btn" id="btnRabbit">한 칸씩 읽기</button>
+      <button class="anim-btn" id="btnRabbitAll">한꺼번에</button>
+    </div>
+    <aside class="notes">"한 칸씩 읽기"로 왼쪽 칸과 오른쪽 성분이 짝지어 켜진다. 값이 클수록 밝다는 1차시 내용을 여기서 눈으로 확인시킨다. 90은 어둡고 162는 밝다. 왼쪽 격자만 보고 "이 칸이 몇쯤 될까" 먼저 어림해 보게 하면 감이 잡힌다.</aside>
+  </section>
+
+  <!-- 8. 문제 3 -->
+  <section>
+    <div class="chapter-tag">교과서 90쪽 · 문제 3</div>
+    <h2>검은색과 흰색만 있다면</h2>
+
+    <p class="prob-stmt">
+      해상도가 \(7\times4\)인 흑백 이미지다.
+      검은색은 \(0\), 흰색은 \(255\). 칸을 눌러 값을 확인해 보자.
+    </p>
+
+    <div class="bw-grid" id="bwBoard" style="margin: var(--lm-space-4) auto 0;"></div>
+
+    <div class="anim-controls" style="margin-top: var(--lm-space-4);">
+      <button class="anim-btn" id="btnBw">값 모두 보이기</button>
+      <button class="anim-btn" id="btnBwHide">감추기</button>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      가로 7 · 세로 4이므로 행렬은 <span class="kw-info">\(4\times7\)</span>이다.
+    </div>
+    <aside class="notes">해상도 7×4에서 행렬이 4×7이 된다는 것을 다시 확인시킨다. 이 문제는 값이 0과 255뿐이라 계산이 없고 자리만 맞추면 된다. 학생이 공책에 옮겨 적게 한 뒤 "값 모두 보이기"로 맞춰 본다. Ⅲ-3에서는 이 0과 255가 0과 1로 바뀐다는 것을 미리 말해 두어도 좋다.</aside>
+  </section>
+
+  <!-- 9. 확인하기 -->
+  <section>
+    <div class="chapter-tag">교과서 90쪽 · 확인하기</div>
+    <h2>맞으면 O, 틀리면 X</h2>
+
+    <ul class="ox" id="oxList">
+      <li class="x">
+        <span>⑴ 색상 정보의 세 채널값이 모두 255에 가까워질수록 어두워진다.
+          <span class="why">255에 가까울수록 <b>밝아진다</b>. 어두워지는 것은 0에 가까울 때다.</span>
+        </span>
+        <span class="mark">✕</span>
+      </li>
+      <li class="o">
+        <span>⑵ 가로로 \(n\)개, 세로로 \(m\)개의 픽셀로 이루어진 이미지의 해상도는 \(n\times m\)이다.
+          <span class="why">맞다. 해상도는 <b>가로를 먼저</b> 쓴다. 행렬은 반대로 \(m\times n\).</span>
+        </span>
+        <span class="mark">○</span>
+      </li>
+    </ul>
+    <aside class="notes">⑴은 1차시, ⑵는 2차시 내용이라 Ⅲ-1 전체를 훑는 문항이다. 항목을 누르면 답과 이유가 함께 나온다. ⑵에서 해상도와 행렬의 순서를 한 번 더 못 박는다 — 이 단원에서 가장 자주 틀리는 지점이므로 세 번째 반복이다.</aside>
+  </section>
+
+  <!-- 10. 인공지능 이야기 -->
+  <section>
+    <div class="chapter-tag">교과서 91쪽 · 인공지능 이야기</div>
+    <h2>픽셀 아트 — 칸이 적어서 생긴 예술</h2>
+
+    <div class="pair" style="align-items: flex-start;">
+      <div class="art-grid" id="artGrid"></div>
+      <div>
+        <p class="prob-stmt" style="margin-top:0">
+          픽셀을 기반으로 이미지를 표현하는 그래픽 방식을 <b>픽셀 아트</b>라고 한다.
+          점을 하나하나 찍는 회화의 <b>점묘법</b>과 닮았다.
+        </p>
+        <div class="info-box" style="margin-top: var(--lm-space-4);">
+          1970~80년대 <b>8비트·16비트</b> 게임 시대에 등장했다.
+          그때 컴퓨터는 해상도가 낮아 색을 표현하는 데 한계가 있었다.
+        </div>
+        <div class="result-box" style="margin-top: var(--lm-space-4);">
+          <b>크립토펑크</b> — 해상도 \(24\times24\)인 아바타 1만 개.<br>
+          그중 외계인은 <span class="kw-success">9개뿐</span>이다.
+        </div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      한계에서 나온 방식이 지금은 하나의 양식이 되었다.
+      2021년에는 이 중 한 점이 <b>1,180만 달러</b>에 팔렸다.
+    </p>
+    <aside class="notes">가볍게 읽는 장이다. 해상도가 낮다는 것이 무엇을 뜻하는지 2차시 5장과 이어 주면 좋다 — 칸이 크면 각져 보이는데, 그것을 오히려 양식으로 삼은 것이 픽셀 아트다. NFT나 가격 이야기는 흥미 유발까지만 하고 깊이 들어가지 않는다. 발행 수량이 적을수록 비싸다는 것 정도.</aside>
+  </section>
+
+  <!-- 11. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄 · Ⅲ-1 마무리</div>
+    <h2>Ⅲ-1에서 배운 것</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>1차시</h4>
+        <p>픽셀 · 채널값 · <b>색상 정보</b></p>
+      </div>
+      <div class="plain-card">
+        <h4>2차시</h4>
+        <p>해상도 · <b>컬러 = 행렬 셋</b></p>
+      </div>
+      <div class="plain-card">
+        <h4>3차시</h4>
+        <p><b>흑백 = 행렬 하나</b> \(K\)</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-body-lg);">
+      사진을 <span class="kw-success">행렬로 적는 법</span>을 배웠다.<br>
+      그런데 지금까지는 <b>적기만</b> 했다.
+    </div>
+
+    <p class="prob-stmt" style="margin-top: var(--lm-space-4);">
+      다음 시간부터 Ⅲ-2 — <span class="kw">이 행렬을 계산하면 이미지가 바뀐다.</span>
+      밝기 조절부터 시작한다.
+    </p>
+    <aside class="notes">Ⅲ-1은 표현, Ⅲ-2는 처리, Ⅲ-3은 분석이라는 단원 구조를 여기서 한 번 보여 주면 학생이 지도를 갖게 된다. "적기만 했다 → 이제 계산한다"는 전환이 Ⅲ-2의 전부다. 준비 학습 2번(행렬의 연산)이 그래서 있었다는 것도 짚어 준다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 공통 — 행렬 채우기 */
+  function fillMtx(id, rows) {
+    var box = document.getElementById(id);
+    if (!box) return [];
+    var refs = [];
+    rows.forEach(function (row, r) {
+      row.forEach(function (v, c) {
+        var b = document.createElement('b');
+        b.textContent = v;
+        b.dataset.r = r; b.dataset.c = c;
+        box.appendChild(b);
+        refs.push(b);
+      });
+    });
+    return refs;
+  }
+</script>
+
+<script>
+  /* 3장 — 교과서 90쪽 문제 2 */
+  (function () {
+    var R = [[255, 32], [0, 255], [255, 128]];
+    var G = [[0, 128], [32, 128], [255, 0]];
+    var B = [[0, 32], [128, 0], [0, 192]];
+    var rR = fillMtx('q2R', R), rG = fillMtx('q2G', G), rB = fillMtx('q2B', B);
+    if (!rR.length) return;
+
+    var out = document.getElementById('q2out');
+    function clearHit() {
+      [rR, rG, rB].forEach(function (a) {
+        a.forEach(function (b) { b.classList.remove('hit'); });
+      });
+    }
+    function hit(r, c) {
+      clearHit();
+      [rR, rG, rB].forEach(function (a) {
+        a.forEach(function (b) {
+          if (+b.dataset.r === r && +b.dataset.c === c) b.classList.add('hit');
+        });
+      });
+    }
+    function say(html) { out.innerHTML = html; window.safeTypeset([out]); }
+
+    var a = document.getElementById('q2a');
+    if (a) a.addEventListener('click', function () {
+      clearHit();
+      say('세 행렬이 \\(3\\times2\\) 행렬이므로 해상도는 <b>\\(2\\times3\\)</b>이다. ' +
+          '<span style="color:var(--lm-ink-3)">— 순서가 뒤집힌다</span>');
+    });
+    var b = document.getElementById('q2b');
+    if (b) b.addEventListener('click', function () {
+      hit(1, 0);
+      say('\\((2,1)\\) 성분은 차례대로 \\(0,\\ 32,\\ 128\\) — 색상 정보는 <b>(0, 32, 128)</b> ' +
+          '<span style="display:inline-block;width:40px;height:22px;vertical-align:middle;' +
+          'border:1px solid var(--lm-rule);border-radius:4px;background:rgb(0,32,128)"></span> <b>남색</b>');
+    });
+    var c = document.getElementById('q2c');
+    if (c) c.addEventListener('click', function () {
+      hit(2, 1);
+      say('\\((3,2)\\) 성분은 차례대로 \\(128,\\ 0,\\ 192\\) — 색상 정보는 <b>(128, 0, 192)</b> ' +
+          '<span style="display:inline-block;width:40px;height:22px;vertical-align:middle;' +
+          'border:1px solid var(--lm-rule);border-radius:4px;background:rgb(128,0,192)"></span> <b>보라</b>');
+    });
+    var rst = document.getElementById('q2r');
+    if (rst) rst.addEventListener('click', function () {
+      clearHit(); say('먼저 스스로 풀어 보자.');
+    });
+  })();
+</script>
+
+<script>
+  /* 5장 — 흑백이면 세 행렬이 같다 */
+  (function () {
+    var K4 = [[123, 144], [153, 151]];
+    fillMtx('bwR', K4); fillMtx('bwG', K4); fillMtx('bwB', K4);
+  })();
+</script>
+
+<script>
+  /* 7장 — 교과서 90쪽 흑백 4x4 */
+  (function () {
+    var K = [
+      [123, 144, 158, 162],
+      [153, 151, 142, 130],
+      [128, 107,  93,  80],
+      [ 90,  76,  79,  78]
+    ];
+    var img = document.getElementById('rabbitImg');
+    if (!img) return;
+    var cells = [];
+    K.forEach(function (row) {
+      row.forEach(function (v) {
+        var el = document.createElement('i');
+        el.style.background = 'rgb(' + v + ',' + v + ',' + v + ')';
+        img.appendChild(el);
+        cells.push(el);
+      });
+    });
+
+    var refs = fillMtx('rabbitK', K);
+    refs.forEach(function (b) { b.dataset.v = b.textContent; b.textContent = ''; });
+
+    var i = 0;
+    function stepOne() {
+      if (i >= refs.length) { reset(); return; }
+      cells.forEach(function (c) { c.style.outline = ''; });
+      refs.forEach(function (b) { b.classList.remove('hit'); });
+      refs[i].textContent = refs[i].dataset.v;
+      refs[i].classList.add('hit');
+      cells[i].style.outline = '3px solid var(--lm-accent)';
+      cells[i].style.outlineOffset = '-3px';
+      i++;
+    }
+    function reset() {
+      i = 0;
+      refs.forEach(function (b) { b.textContent = ''; b.classList.remove('hit'); });
+      cells.forEach(function (c) { c.style.outline = ''; });
+    }
+
+    var b1 = document.getElementById('btnRabbit');
+    if (b1) b1.addEventListener('click', stepOne);
+    var b2 = document.getElementById('btnRabbitAll');
+    if (b2) b2.addEventListener('click', function () {
+      cells.forEach(function (c) { c.style.outline = ''; });
+      refs.forEach(function (b) { b.textContent = b.dataset.v; b.classList.remove('hit'); });
+      i = refs.length;
+    });
+  })();
+</script>
+
+<script>
+  /* 8장 — 교과서 90쪽 문제 3 (해상도 7x4) */
+  (function () {
+    var K = [
+      [  0,   0, 255, 255, 255,   0,   0],
+      [  0, 255,   0, 255,   0, 255,   0],
+      [  0, 255, 255,   0, 255, 255,   0],
+      [  0, 255, 255, 255, 255, 255,   0]
+    ];
+    var board = document.getElementById('bwBoard');
+    if (!board) return;
+    var cells = [];
+    K.forEach(function (row) {
+      row.forEach(function (v) {
+        var el = document.createElement('i');
+        el.style.background = 'rgb(' + v + ',' + v + ',' + v + ')';
+        el.style.color = v ? '#333' : '#fff';
+        el.dataset.v = v;
+        el.addEventListener('click', function () {
+          el.textContent = el.textContent ? '' : el.dataset.v;
+        });
+        board.appendChild(el);
+        cells.push(el);
+      });
+    });
+    var b1 = document.getElementById('btnBw');
+    if (b1) b1.addEventListener('click', function () {
+      cells.forEach(function (c) { c.textContent = c.dataset.v; });
+    });
+    var b2 = document.getElementById('btnBwHide');
+    if (b2) b2.addEventListener('click', function () {
+      cells.forEach(function (c) { c.textContent = ''; });
+    });
+  })();
+</script>
+
+<script>
+  /* 9장 — 확인하기 */
+  (function () {
+    var list = document.getElementById('oxList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(function (li) {
+      li.addEventListener('click', function () {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+<script>
+  /* 10장 — 픽셀 아트 아바타 (12 x 12) */
+  (function () {
+    var P = '#3aa7a0', S = '#2c7f7a', E = '#101820', M = '#e8e4d9', N = null;
+    var ART = [
+      [N,N,N,P,P,P,P,P,P,N,N,N],
+      [N,N,P,P,P,P,P,P,P,P,N,N],
+      [N,P,P,P,P,P,P,P,P,P,P,N],
+      [N,P,P,S,S,P,P,S,S,P,P,N],
+      [N,P,P,E,E,P,P,E,E,P,P,N],
+      [N,P,P,P,P,P,P,P,P,P,P,N],
+      [N,P,P,P,P,P,P,P,P,P,P,N],
+      [N,P,M,M,M,M,M,M,M,M,P,N],
+      [N,P,M,M,M,M,M,M,M,M,P,N],
+      [N,P,P,M,M,M,M,M,M,P,P,N],
+      [N,N,P,P,P,P,P,P,P,P,N,N],
+      [N,N,N,P,P,P,P,P,P,N,N,N]
+    ];
+    var g = document.getElementById('artGrid');
+    if (!g) return;
+    ART.forEach(function (row) {
+      row.forEach(function (v) {
+        var el = document.createElement('i');
+        el.style.background = v || 'var(--lm-paper)';
+        g.appendChild(el);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
