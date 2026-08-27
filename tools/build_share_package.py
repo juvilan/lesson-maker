@@ -62,10 +62,18 @@ REWRITES = [
 
 MJ_FONT_DIR = "_assets/mathjax/output/chtml/fonts/woff-v2"
 
+# 공유 CSS 를 쓰는 신판 덱만 집는다. 구판(다크 테마 theme/black.css)은
+# 여기 걸리지 않아 자동으로 빠진다 — 신판으로 바꾸면 그때 자동으로 들어온다.
+#
+# 2022 쪽 패턴은 원래 `[12]` 였다. 1·2단원밖에 없던 시절에 쓴 것이라
+# 3단원 덱(슬라이드_3-1-1차시_… 등)이 **오류도 경고도 없이 조용히 빠졌다.**
+# 단원이 늘 때마다 같은 일이 반복되므로 숫자 한 자리 전체로 넓혔다.
+# ⚠️ 그래서 이제 **작업 중인 단원도 같이 들어온다.** 남에게 보낼 꾸러미라면
+#    빌드 뒤 덱 목록을 한 번 보고, 미완성 단원이 있으면 빼고 보낼 것.
 DECK_GLOBS = [
     ("ai-math/output/slides", re.compile(r"^슬라이드_III-1-.*\.html$")),
     ("ai-math/output/slides", re.compile(r"^슬라이드_III-2-.*\.html$")),
-    ("ai-math-2022/output/slides", re.compile(r"^슬라이드_[12]-.*\.html$")),
+    ("ai-math-2022/output/slides", re.compile(r"^슬라이드_[0-9]-.*\.html$")),
 ]
 
 
@@ -171,6 +179,14 @@ def rewrite_html(raw):
 
 
 def main():
+    # 윈도우 콘솔은 기본이 cp949 라 이 스크립트의 em dash(—)를 못 찍는다.
+    # PYTHONIOENCODING 없이 실행하면 **맨 마지막 print 에서 UnicodeEncodeError 로
+    # 죽는다** — 그것도 "확인 필요" 분기라, 문제가 실제로 있을 때 그 진단을
+    # 출력하다가 죽어 버린다. 호출자가 환경변수를 챙기게 두지 말고 여기서 막는다.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
     if os.path.isdir(OUT):
         shutil.rmtree(OUT)
     os.makedirs(OUT, exist_ok=True)
