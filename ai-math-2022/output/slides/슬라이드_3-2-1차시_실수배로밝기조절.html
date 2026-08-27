@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>전체에 같은 수를 곱하면 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    /* 페이드 카드 */
+    .fade-row { display: flex; gap: var(--lm-space-4); justify-content: center;
+                margin-top: var(--lm-space-4); }
+    .fade-card { text-align: center; }
+    .fade-card b { display: block; width: 158px; height: 110px;
+                   border: var(--lm-border-thin) solid var(--lm-rule);
+                   border-radius: var(--lm-radius-sm); margin-bottom: var(--lm-space-2); }
+    .fade-card span { font-size: var(--lm-slide-small); color: var(--lm-ink-2);
+                      font-variant-numeric: tabular-nums; }
+
+    /* 행렬 */
+    .mtx { display: grid; grid-template-columns: repeat(3, 96px); gap: 3px;
+           background: var(--lm-rule); padding: 3px;
+           border-radius: var(--lm-radius-sm); width: max-content; }
+    .mtx b { display: block; height: 66px; line-height: 66px; background: var(--lm-page);
+             font-weight: 600; color: var(--lm-ink); font-variant-numeric: tabular-nums;
+             font-size: var(--lm-slide-body-lg); }
+    .mtx b.cut { background: var(--lm-danger-tint); color: var(--lm-danger); }
+    .mtx b.rnd { background: var(--lm-accent-tint); color: var(--lm-accent); }
+
+    .kgrid { display: grid; grid-template-columns: repeat(3, 62px); gap: 3px;
+             background: var(--lm-rule); padding: 3px;
+             border-radius: var(--lm-radius-sm); width: max-content; }
+    .kgrid i { display: block; height: 62px; }
+
+    .trio { display: flex; gap: var(--lm-space-6); justify-content: center;
+            align-items: flex-start; margin-top: var(--lm-space-4); }
+    .trio .col { text-align: center; }
+    .trio .col .cap { font-size: var(--lm-slide-body); font-weight: 700;
+                      margin-bottom: var(--lm-space-2); }
+
+    /* k 슬라이더 */
+    .kctl { display: grid; grid-template-columns: 5.5em 1fr 4em; gap: var(--lm-space-4);
+            align-items: center; margin: var(--lm-space-5) auto 0; max-width: 760px;
+            font-size: var(--lm-slide-body); }
+    .kctl input { width: 100%; accent-color: var(--lm-accent); height: 26px; }
+    .kctl .v { text-align: right; font-weight: 700; color: var(--lm-accent);
+               font-variant-numeric: tabular-nums; }
+
+    /* 문제 1 */
+    .q1 { display: flex; gap: var(--lm-space-6); justify-content: center;
+          margin-top: var(--lm-space-4); }
+    .q1 .item { text-align: center; cursor: pointer; }
+    .q1 .item .kv { font-size: var(--lm-slide-body); font-weight: 700;
+                    margin-bottom: var(--lm-space-2); }
+    .q1 .item .why { font-size: var(--lm-slide-small); color: var(--lm-ink-3);
+                     margin-top: var(--lm-space-2); opacity: 0; transition: opacity .2s; }
+    .q1 .item.on .why { opacity: 1; }
+  </style>
+</head>
+
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅲ-2 이미지 데이터 처리 · 1차시 <span class="badge">Ⅲ-2 시작</span></div>
+    <h1>전체에 같은 수를 곱하면</h1>
+    <p class="slide-sub">행렬의 실수배로 밝기를 조절한다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 92~93쪽</span>
+    </div>
+    <aside class="notes">Ⅲ-2의 첫 차시다. Ⅲ-1이 "적는 법"이었다면 Ⅲ-2는 "계산하는 법"이다. 오늘 쓰는 연산은 실수배 하나뿐이라 부담이 적다. 대신 반올림과 255 자르기라는 실무 규칙이 나오는데, 이게 뒤에서 계속 쓰이므로 여기서 확실히 해 둔다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · Ⅲ-1</div>
+    <h2>적는 법은 끝났다. 이제 계산한다</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>픽셀</h4>
+        <p>색상 정보 = 채널값 <b>세 개</b></p>
+      </div>
+      <div class="plain-card">
+        <h4>컬러 이미지</h4>
+        <p>\(m\times n\) 행렬 <b>세 개</b> \(R,\ G,\ B\)</p>
+      </div>
+      <div class="plain-card">
+        <h4>흑백 이미지</h4>
+        <p>\(m\times n\) 행렬 <b>하나</b> \(K\)</p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      준비 학습 2번이 <b>행렬의 연산</b>이었다.
+      <span class="kw-success">그 연장을 오늘부터 쓴다.</span>
+    </div>
+    <aside class="notes">85쪽 준비 학습 2번(A+B, 2A, AB)을 다시 꺼낸다. 그때 "Ⅲ-2 전체에서 쓴다"고 표시해 두었던 것을 회수하는 자리다. 오늘은 그중 실수배 하나만 쓰고, 덧셈은 다음 차시, 곱셈은 3차시다.</aside>
+  </section>
+
+  <!-- 3. 생각 열기 -->
+  <section>
+    <div class="chapter-tag">교과서 92쪽 · 생각 열기</div>
+    <h2>페이드 인, 페이드 아웃</h2>
+
+    <p class="prob-stmt">
+      경복궁을 찍은 영상의 일부다. 표시된 부분의 한 픽셀의 색상 정보가 이렇게 바뀌었다.
+    </p>
+
+    <div class="fade-row" id="fadeRow"></div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-5);">
+      <div class="plain-card">
+        <h4>페이드 인 <span style="color:var(--lm-ink-3)">(어두움 → 밝음)</span></h4>
+        <p>세 채널값이 모두 <b>255에 가까워진다</b></p>
+      </div>
+      <div class="plain-card">
+        <h4>페이드 아웃 <span style="color:var(--lm-ink-3)">(밝음 → 어두움)</span></h4>
+        <p>세 채널값이 모두 <b>0에 가까워진다</b></p>
+      </div>
+    </div>
+    <aside class="notes">네 색상 정보를 소리 내어 읽게 한다. 248 → 156 → 90 → 47로 줄어드는 것이 보이면 답은 저절로 나온다. 교과서는 오른쪽에서 왼쪽이 페이드 인, 왼쪽에서 오른쪽이 페이드 아웃이다. 화면에서는 왼쪽이 밝은 것부터 놓았으니 방향을 헷갈리지 않게 짚어 준다.</aside>
+  </section>
+
+  <!-- 4. 오늘 도착할 곳 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>행렬의 <span class="kw">실수배</span>로 이미지의 밝기를 조절할 수 있다.</span></li>
+      <li><span class="num">2</span><span>\(k\)의 크기와 <span class="kw">밝기 변화</span>의 관계를 설명할 수 있다.</span></li>
+      <li><span class="num">3</span><span>채널값의 <span class="kw">반올림과 255 자르기</span>를 적용할 수 있다.</span></li>
+    </ul>
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      오늘의 한 줄 —
+      <span class="kw-success">곱하는 수가 1보다 크면 밝아지고, 작으면 어두워진다.</span>
+    </div>
+    <aside class="notes">목표 3번이 오늘의 숨은 핵심이다. 원리는 1번으로 끝나지만 실제로 계산해 보면 소수가 나오거나 255를 넘는 일이 생긴다. 교과서가 방주로 규칙을 정해 두었으므로 그대로 따른다.</aside>
+  </section>
+
+  <!-- 5. 실수배 -->
+  <section>
+    <div class="chapter-tag">교과서 92쪽 · 배웠어요</div>
+    <h2>행렬의 실수배</h2>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-4);">
+      \[ A=\begin{pmatrix} a_{11} & a_{12} \\ a_{21} & a_{22} \end{pmatrix}
+         \quad\Longrightarrow\quad
+         kA=\begin{pmatrix} ka_{11} & ka_{12} \\ ka_{21} & ka_{22} \end{pmatrix} \]
+    </div>
+
+    <p class="prob-stmt">
+      <b>모든 성분에 같은 수를 곱한다.</b> 공통수학1에서 배운 그대로다.
+    </p>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      이미지에서 성분은 <span class="kw-info">채널값</span>이다.
+      즉 모든 픽셀의 밝기를 <b>같은 비율로</b> 올리거나 내리는 것이다.
+    </div>
+    <aside class="notes">정의 자체는 이미 아는 것이니 빠르게 지나간다. 중요한 것은 해석이다 — "모든 성분에 같은 수"가 이미지에서는 "모든 픽셀에 똑같이"라는 뜻이 된다. 사진 편집 앱의 밝기 슬라이더가 정확히 이 일을 한다고 말해 주면 실감한다.</aside>
+  </section>
+
+  <!-- 6. 반올림과 자르기 -->
+  <section>
+    <div class="chapter-tag">교과서 92쪽 · 방주 <span class="badge">놓치기 쉬움</span></div>
+    <h2>계산하다 보면 생기는 두 가지 일</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>① 소수가 나오면</h4>
+        <p>소수점 아래 <b>첫째 자리에서 반올림</b>한다</p>
+        <p style="color:var(--lm-accent)">\(83\times0.5=41.5 \to 42\)</p>
+      </div>
+      <div class="plain-card">
+        <h4>② 255를 넘으면</h4>
+        <p>채널값을 <b>255로 정한다</b></p>
+        <p style="color:var(--lm-danger)">\(200\times2=400 \to 255\)</p>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      채널값은 <span class="kw-danger">0부터 255까지의 정수</span>였다.
+      그 범위를 벗어나면 안 되므로 정한 규칙이다.
+    </div>
+
+    <p class="prob-stmt">
+      ②가 뜻하는 것 — <b>아무리 크게 곱해도 흰색보다 밝아질 수는 없다.</b>
+    </p>
+    <aside class="notes">이 규칙을 모르고 다음 장으로 가면 2K의 첫 성분에서 반드시 막힌다. 400이라고 답하는 학생이 나오면 오히려 좋다 — 그 자리에서 방주를 읽어 주면 기억에 남는다. ②의 해석("흰색보다 밝을 수는 없다")은 교과서에 없지만 직관을 잡아 준다.</aside>
+  </section>
+
+  <!-- 7. 0.5K와 2K -->
+  <section>
+    <div class="chapter-tag">교과서 92~93쪽</div>
+    <h2>직접 계산해 보자</h2>
+
+    <p class="prob-stmt">
+      해상도 \(3\times2\)인 흑백 이미지를 변환한 \(2\times3\) 행렬 \(K\)다.
+    </p>
+
+    <div class="trio">
+      <div class="col">
+        <div class="cap" style="color:var(--lm-ink-3)">\(0.5K\)</div>
+        <div class="kgrid" id="gHalf"></div>
+        <div class="mtx" id="mHalf" style="margin-top: var(--lm-space-2);"></div>
+      </div>
+      <div class="col">
+        <div class="cap">\(K\)</div>
+        <div class="kgrid" id="gK"></div>
+        <div class="mtx" id="mK" style="margin-top: var(--lm-space-2);"></div>
+      </div>
+      <div class="col">
+        <div class="cap" style="color:var(--lm-accent)">\(2K\)</div>
+        <div class="kgrid" id="gTwo"></div>
+        <div class="mtx" id="mTwo" style="margin-top: var(--lm-space-2);"></div>
+      </div>
+    </div>
+
+    <div class="anim-controls" style="margin-top: var(--lm-space-4);">
+      <button class="anim-btn" id="btnCalc">계산 결과 보기</button>
+    </div>
+    <aside class="notes">가운데 K를 먼저 보이고 양옆은 비워 둔 채 학생에게 계산시킨다. 0.5K의 41.5 → 42(반올림)와 2K의 400 → 255(자르기)가 각각 색으로 표시되니, 버튼을 누른 뒤 그 두 칸을 짚어 주면 앞 장의 규칙이 그대로 확인된다. 격자 색도 함께 바뀌어 어두워지고 밝아지는 것이 눈에 보인다.</aside>
+  </section>
+
+  <!-- 8. 일반화 -->
+  <section>
+    <div class="chapter-tag">교과서 93쪽 · 일반화</div>
+    <h2>정리하면</h2>
+
+    <p class="prob-stmt">
+      양수 \(k\)와 이미지 \(\mathrm{P}\)를 변환한 세 행렬 \(R,\ G,\ B\)에 대하여
+      세 행렬 \(kR,\ kG,\ kB\)가 나타내는 이미지를 \(\mathrm{P}_k\)라 할 때,
+    </p>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-4); text-align: left;">
+      <b>(ⅰ)</b> \(0&lt;k&lt;1\)인 경우 : 이미지 \(\mathrm{P}_k\)는 이미지 \(\mathrm{P}\)보다
+      <span class="kw">어두워진다.</span><br><br>
+      <b>(ⅱ)</b> \(k&gt;1\)인 경우 : 이미지 \(\mathrm{P}_k\)는 이미지 \(\mathrm{P}\)보다
+      <span class="kw">밝아진다.</span>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      컬러도 마찬가지다. <b>세 행렬에 똑같이 \(k\)를 곱하면</b> 된다 —
+      세 채널이 같은 비율로 변하므로 색은 유지되고 밝기만 바뀐다.
+    </div>
+    <aside class="notes">흑백으로 익힌 것을 컬러로 넓히는 장이다. "색이 유지된다"는 점을 짚어 주면 좋다 — 세 값의 비율이 그대로이기 때문이다. 교과서 93쪽 아래 새 사진 세 장이 그 예시다. k=1이면 아무 변화가 없다는 것도 물어보면 재미있다.</aside>
+  </section>
+
+  <!-- 9. k 조절 -->
+  <section>
+    <div class="chapter-tag">직접 해 보기</div>
+    <h2>\(k\)를 움직여 보자</h2>
+
+    <div class="trio" style="margin-top: var(--lm-space-3);">
+      <div class="col">
+        <div class="cap">\(K\) <span style="color:var(--lm-ink-3);font-weight:400">원본</span></div>
+        <div class="kgrid" id="gOrig"></div>
+      </div>
+      <div class="col">
+        <div class="cap" id="capLive">\(kK\)</div>
+        <div class="kgrid" id="gLive"></div>
+        <div class="mtx" id="mLive" style="margin-top: var(--lm-space-2);"></div>
+      </div>
+    </div>
+
+    <div class="kctl">
+      <label for="sK">\(k =\)</label>
+      <input type="range" id="sK" min="0" max="30" step="1" value="10">
+      <span class="v" id="vK">1.0</span>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);" id="kSay">
+      \(k=1\) — 원본 그대로다.
+    </div>
+    <aside class="notes">슬라이더를 0.1부터 3.0까지 움직인다. k를 키우면 성분이 하나씩 255에 도달해 붉게 표시되는데, 계속 키워도 더는 밝아지지 않는 순간이 온다 — 앞 장에서 말한 "흰색보다 밝아질 수 없다"가 눈앞에서 확인된다. k를 0에 가깝게 하면 검은색으로 수렴한다.</aside>
+  </section>
+
+  <!-- 10. 문제 1 -->
+  <section>
+    <div class="chapter-tag">교과서 93쪽 · 문제 1</div>
+    <h2>어느 것이 어느 것일까</h2>
+
+    <p class="prob-stmt">
+      왼쪽이 원본 \(K\)다. \(k=0.5,\ 2,\ 3\)일 때의 이미지를 골라 보자. 눌러서 확인.
+    </p>
+
+    <div class="q1" id="q1">
+      <div class="item" data-k="1">
+        <div class="kv" style="color:var(--lm-ink-3)">원본 \(K\)</div>
+        <div class="kgrid q1g"></div>
+        <div class="why">기준</div>
+      </div>
+      <div class="item" data-k="0.5">
+        <div class="kv">\(k=0.5\)</div>
+        <div class="kgrid q1g"></div>
+        <div class="why">\(0&lt;k&lt;1\) — 어두워진다</div>
+      </div>
+      <div class="item" data-k="2">
+        <div class="kv">\(k=2\)</div>
+        <div class="kgrid q1g"></div>
+        <div class="why">\(k&gt;1\) — 밝아진다</div>
+      </div>
+      <div class="item" data-k="3">
+        <div class="kv">\(k=3\)</div>
+        <div class="kgrid q1g"></div>
+        <div class="why">\(2&lt;3\) — \(2K\)보다 더 밝다</div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      \(2&lt;3\)이므로 \(3K\)가 나타내는 이미지가 \(2K\)보다 <span class="kw-info">더 밝다.</span>
+    </div>
+    <aside class="notes">교과서는 선으로 잇는 문제인데, 화면에서는 순서를 섞지 않고 왼쪽부터 어두운 순으로 놓았다. 학생이 스스로 순서를 말하게 한 뒤 눌러 확인시킨다. k=2와 k=3의 차이가 잘 안 보이면 이미 255에 닿은 칸이 있기 때문이다 — 그 점을 물어보면 좋은 토론이 된다.</aside>
+  </section>
+
+  <!-- 11. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>곱하는 수 하나로 밝기가 정해진다</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>\(0&lt;k&lt;1\)</h4>
+        <p>어두워진다</p>
+      </div>
+      <div class="plain-card">
+        <h4>\(k&gt;1\)</h4>
+        <p>밝아진다</p>
+      </div>
+      <div class="plain-card">
+        <h4>규칙</h4>
+        <p>소수는 <b>반올림</b>, 255 초과는 <b>255</b></p>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-body-lg);">
+      오늘은 <span class="kw-success">실수배 하나</span>로 밝기를 바꿨다.<br>
+      그런데 밝기 말고 <b>색을 아예 빼려면</b> 어떻게 해야 할까?
+    </div>
+
+    <p class="prob-stmt" style="margin-top: var(--lm-space-4);">
+      다음 시간 — <span class="kw">컬러를 흑백으로</span>. 이번엔 덧셈이 필요하다.
+    </p>
+    <aside class="notes">다음 차시 질문을 던지며 닫는다. 힌트를 원하면 "흑백은 세 채널값이 같아야 한다"는 것만 상기시킨다. 세 값을 같게 만드는 가장 자연스러운 방법이 평균이고, 평균에는 덧셈이 필요하다 — 그것이 3-2-2차시다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 교과서 92쪽 K, 그리고 채널값 규칙 */
+  var K92 = [[200, 83, 83], [83, 83, 120]];
+
+  /* 교과서 방주 — 반올림 후 255로 자른다 */
+  function chan(v) {
+    var x = Math.round(v);
+    return x > 255 ? 255 : (x < 0 ? 0 : x);
+  }
+  function scale(M, k) {
+    return M.map(function (row) {
+      return row.map(function (v) { return chan(v * k); });
+    });
+  }
+  function paintGrid(id, M) {
+    var g = document.getElementById(id);
+    if (!g) return;
+    g.innerHTML = '';
+    M.forEach(function (row) {
+      row.forEach(function (v) {
+        var el = document.createElement('i');
+        el.style.background = 'rgb(' + v + ',' + v + ',' + v + ')';
+        g.appendChild(el);
+      });
+    });
+  }
+  function paintMtx(id, M, marks) {
+    var box = document.getElementById(id);
+    if (!box) return;
+    box.innerHTML = '';
+    M.forEach(function (row, r) {
+      row.forEach(function (v, c) {
+        var b = document.createElement('b');
+        b.textContent = v;
+        if (marks) {
+          var m = marks(r, c, v);
+          if (m) b.classList.add(m);
+        }
+        box.appendChild(b);
+      });
+    });
+  }
+</script>
+
+<script>
+  /* 3장 — 페이드 네 픽셀 */
+  (function () {
+    var PX = [[248, 215, 210], [156, 136, 133], [90, 79, 77], [47, 41, 40]];
+    var row = document.getElementById('fadeRow');
+    if (!row) return;
+    PX.forEach(function (p) {
+      var d = document.createElement('div');
+      d.className = 'fade-card';
+      d.innerHTML = '<b style="background: rgb(' + p.join(',') + ')"></b>' +
+                    '<span>(' + p.join(', ') + ')</span>';
+      row.appendChild(d);
+    });
+  })();
+</script>
+
+<script>
+  /* 7장 — 0.5K, K, 2K */
+  (function () {
+    var half = scale(K92, 0.5), two = scale(K92, 2);
+    paintGrid('gK', K92);
+    paintMtx('mK', K92);
+
+    var btn = document.getElementById('btnCalc');
+    if (!btn) return;
+    var shown = false;
+    btn.addEventListener('click', function () {
+      if (shown) {
+        ['gHalf', 'gTwo'].forEach(function (id) {
+          var g = document.getElementById(id); if (g) g.innerHTML = '';
+        });
+        ['mHalf', 'mTwo'].forEach(function (id) {
+          var m = document.getElementById(id); if (m) m.innerHTML = '';
+        });
+        shown = false; btn.textContent = '계산 결과 보기';
+        return;
+      }
+      paintGrid('gHalf', half);
+      paintMtx('mHalf', half, function (r, c) {
+        return (K92[r][c] * 0.5) % 1 !== 0 ? 'rnd' : '';
+      });
+      paintGrid('gTwo', two);
+      paintMtx('mTwo', two, function (r, c) {
+        return K92[r][c] * 2 > 255 ? 'cut' : '';
+      });
+      shown = true; btn.textContent = '지우기';
+    });
+  })();
+</script>
+
+<script>
+  /* 9장 — k 슬라이더 */
+  (function () {
+    var s = document.getElementById('sK');
+    if (!s) return;
+    paintGrid('gOrig', K92);
+
+    var vK = document.getElementById('vK');
+    var cap = document.getElementById('capLive');
+    var say = document.getElementById('kSay');
+
+    function draw() {
+      var k = (+s.value) / 10;
+      vK.textContent = k.toFixed(1);
+      var M = scale(K92, k);
+      paintGrid('gLive', M);
+      paintMtx('mLive', M, function (r, c) {
+        return K92[r][c] * k > 255 ? 'cut' : '';
+      });
+      cap.innerHTML = '\\(' + k.toFixed(1) + 'K\\)';
+      var msg;
+      if (k === 0) msg = '\\(k=0\\) — 모두 0이 되어 <b>완전한 검은색</b>이다.';
+      else if (k < 1) msg = '\\(0&lt;k&lt;1\\) — 원본보다 <b>어두워졌다.</b>';
+      else if (k === 1) msg = '\\(k=1\\) — 원본 그대로다.';
+      else msg = '\\(k&gt;1\\) — 원본보다 <b>밝아졌다.</b>';
+      var cut = 0;
+      M.forEach(function (row, r) {
+        row.forEach(function (v, c) { if (K92[r][c] * k > 255) cut++; });
+      });
+      if (cut) msg += ' <span style="color:var(--lm-danger)">255에 닿은 칸 ' + cut + '개</span>';
+      say.innerHTML = msg;
+      window.safeTypeset([cap, say]);
+    }
+    s.addEventListener('input', draw);
+    draw();
+  })();
+</script>
+
+<script>
+  /* 10장 — 문제 1 */
+  (function () {
+    var box = document.getElementById('q1');
+    if (!box) return;
+    box.querySelectorAll('.item').forEach(function (it) {
+      var k = parseFloat(it.dataset.k);
+      var g = it.querySelector('.q1g');
+      scale(K92, k).forEach(function (row) {
+        row.forEach(function (v) {
+          var el = document.createElement('i');
+          el.style.background = 'rgb(' + v + ',' + v + ',' + v + ')';
+          g.appendChild(el);
+        });
+      });
+      it.addEventListener('click', function () { it.classList.toggle('on'); });
+    });
+  })();
+</script>
+
+</body>
+</html>
