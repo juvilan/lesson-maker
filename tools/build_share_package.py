@@ -70,9 +70,12 @@ MJ_FONT_DIR = "_assets/mathjax/output/chtml/fonts/woff-v2"
 # 단원이 늘 때마다 같은 일이 반복되므로 숫자 한 자리 전체로 넓혔다.
 # ⚠️ 그래서 이제 **작업 중인 단원도 같이 들어온다.** 남에게 보낼 꾸러미라면
 #    빌드 뒤 덱 목록을 한 번 보고, 미완성 단원이 있으면 빼고 보낼 것.
+# ai-math(2015) 신판은 `슬라이드_<단원>-<절>-<두자리>_제목` 꼴이다.
+# 구판은 절 번호가 없어(`슬라이드_IV-1_최적화와의사결정`) 아래 패턴에 걸리지 않는다
+# — 신판으로 바꾸는 대로 자동으로 꾸러미에 들어온다.
 DECK_GLOBS = [
-    ("ai-math/output/slides", re.compile(r"^슬라이드_III-1-.*\.html$")),
-    ("ai-math/output/slides", re.compile(r"^슬라이드_III-2-.*\.html$")),
+    ("ai-math/output/slides", re.compile(r"^슬라이드_III-[12]-\d\d_.*\.html$")),
+    ("ai-math/output/slides", re.compile(r"^슬라이드_IV-[12]-\d\d_.*\.html$")),
     ("ai-math-2022/output/slides", re.compile(r"^슬라이드_[0-9]-.*\.html$")),
 ]
 
