@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>어느 직선이 더 나은가 | 인공지능수학 3학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    .dt { width: 100%; border-collapse: collapse; table-layout: fixed;
+          font-size: var(--lm-slide-small); margin-top: var(--lm-space-3); }
+    .dt th { background: var(--lm-paper-tint); color: var(--lm-ink); font-weight: 600;
+             padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             border-bottom: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .dt td { padding: var(--lm-space-1) var(--lm-space-2); text-align: center;
+             color: var(--lm-ink-2); border-bottom: 1px solid var(--lm-rule); }
+    .dt td.rowhead { color: var(--lm-ink); font-weight: 600; background: var(--lm-paper-soft); }
+    .dt td.hit { background: var(--lm-accent-tint); color: var(--lm-accent); font-weight: 700; }
+    .dt td.warn { background: var(--lm-warning-tint); color: var(--lm-ink); font-weight: 700; }
+    .dt caption { caption-side: top; text-align: right; font-size: var(--lm-slide-caption);
+                  color: var(--lm-ink-3); padding-bottom: var(--lm-space-1); }
+
+    /* 도식 SVG — viewBox 단위 = 렌더 px (배율 1.00) */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .axis   { stroke: var(--lm-rule-strong); fill: none; stroke-width: 2; }
+    .dg .gridln { stroke: var(--lm-rule); fill: none; stroke-width: 1; }
+    .dg .pt     { fill: var(--lm-ink-3); }
+    .dg .trend  { stroke: var(--lm-accent); fill: none; stroke-width: 4; }
+    .dg .trend2 { stroke: var(--lm-info); fill: none; stroke-width: 4; stroke-dasharray: 10 7; }
+    .dg .err    { stroke: var(--lm-danger); fill: none; stroke-width: 3; stroke-dasharray: 6 5; }
+    .dg text { font-family: var(--lm-font-sans); fill: var(--lm-ink-3); }
+    .dg .t-ax { font-size: 22px; }
+    .dg .t-lab { font-size: 26px; fill: var(--lm-ink-2); }
+
+    /* foreignObject 안의 수식 라벨 — SVG <text> 에서는 조판되지 않는다 */
+    .dg .m-lab div { font-size: 26px; line-height: 1; color: var(--lm-accent); }
+    .dg .m-lab2 div { font-size: 26px; line-height: 1; color: var(--lm-info); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-3) var(--lm-space-4); margin-bottom: var(--lm-space-3);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-1 최적화와 의사 결정 · 01 손실함수 <span class="badge">1차시</span></div>
+    <h1>어느 직선이 더 나은가</h1>
+    <p class="slide-sub">여러 개의 오차를 숫자 하나로 요약하는 법</p>
+    <div class="title-meta">
+      <span>3학년 인공지능수학</span>
+      <span>교과서 103~104쪽</span>
+    </div>
+    <aside class="notes">Ⅳ단원의 첫 차시다. 새 단원이지만 내용은 지난 시간의 오차에서 곧장 이어지므로 "단원이 바뀌었다"는 말보다 "지난 시간 물음의 답을 오늘 한다"로 여는 편이 낫다. 계산은 제곱과 평균뿐이라 부담이 없고, 오늘의 무게중심은 8장이다 — 오차를 하나씩 견주면 승부가 안 난다는 것을 학생이 직접 확인하는 자리다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 교과서 93~95쪽</div>
+    <h2>오차까지는 구했다</h2>
+
+    <p class="prob-stmt">
+      추세선 \(f(x)\)에 \(x\)를 넣으면 <b>예측값</b>이 나오고,
+      실제 <b>측정값</b>에서 그 예측값을 뺀 것이 <span class="kw">오차</span>였다.
+    </p>
+
+    <div class="formula-box">
+      \[(\text{오차}) = y - f(x)\]
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      그런데 오차는 <b>자료의 개수만큼</b> 나온다. 자료가 다섯 개면 오차도 다섯 개다.
+      <span class="kw-danger">추세선이 둘이면 오차가 열 개다.</span>
+      이걸 어떻게 견주어 더 나은 직선을 고를까?
+    </div>
+    <aside class="notes">오차의 정의를 학생이 말하게 한 뒤 넘어간다. 부호가 있다는 점(측정값이 예측값보다 작으면 음수)을 반드시 확인시켜야 오늘 9장의 제곱이 필요해진다. 마지막 물음이 오늘 차시 전체의 질문이다 — 칠판 구석에 적어 두고 12장에서 지운다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>여러 개의 오차를 <span class="kw">제곱의 평균</span>으로 요약할 수 있다.</span></li>
+      <li><span class="num">2</span><span>추세선에 대한 <span class="kw">손실함수</span> \(L(a)\)의 뜻을 말할 수 있다.</span></li>
+      <li><span class="num">3</span><span>손실함수의 값을 비교하여 <span class="kw">더 적합한 추세선</span>을 고를 수 있다.</span></li>
+      <li><span class="num">4</span><span>손실함수가 기울기 \(a\)에 대한 <span class="kw">이차함수</span>임을 확인할 수 있다.</span></li>
+    </ul>
+    <div class="info-box">
+      성취기준 <span class="badge">12인수04-01</span>
+      주어진 자료로부터 분류와 예측을 할 때, 오차를 표현할 수 있는 함수를 구성하는 원리와 방법을 이해한다.
+    </div>
+    <aside class="notes">4번이 오늘의 숨은 목표다. 손실함수가 이차함수라는 사실 자체는 계산의 부산물처럼 보이지만, 다음 절(미분)과 그다음 절(최적화)이 전부 여기에 기대고 있다. "이차함수면 최솟값을 찾을 수 있다"는 한마디를 12장에서 흘려 두면 단원 전체가 하나로 묶인다.</aside>
+  </section>
+
+  <!-- 4. 자료 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 103쪽 · 자료</div>
+    <h2>연료를 넣으면 얼마나 도는가</h2>
+
+    <p class="prob-stmt">
+      어느 기계에 넣은 연료 \(x\) L에 대한 작동 시간 \(y\)시간을 조사한 자료다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3); align-items: center;">
+      <table class="dt">
+        <thead>
+          <tr><th>연료 \(x\) (L)</th><th>4</th><th>8</th><th>12</th><th>16</th><th>20</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="rowhead">작동 시간 \(y\) (시간)</td><td>6</td><td>5</td><td>15</td><td>12</td><td>20</td></tr>
+        </tbody>
+      </table>
+
+      <svg class="dg" viewBox="0 0 400 300" width="400" height="300"
+           preserveAspectRatio="xMidYMid meet" role="img"
+           aria-label="연료와 작동 시간의 산점도">
+        <line class="gridln" x1="60" y1="40" x2="370" y2="40"></line>
+        <line class="gridln" x1="60" y1="145" x2="370" y2="145"></line>
+        <line class="axis" x1="60" y1="250" x2="370" y2="250"></line>
+        <line class="axis" x1="60" y1="250" x2="60" y2="40"></line>
+        <text class="t-ax" x="52" y="256" text-anchor="end">0</text>
+        <text class="t-ax" x="52" y="151" text-anchor="end">12</text>
+        <text class="t-ax" x="52" y="46" text-anchor="end">24</text>
+        <text class="t-ax" x="370" y="274" text-anchor="middle">24</text>
+        <text class="t-lab" x="215" y="292" text-anchor="middle">연료 (L)</text>
+
+        <circle class="pt" cx="112" cy="197" r="6"></circle>
+        <circle class="pt" cx="164" cy="206" r="6"></circle>
+        <circle class="pt" cx="215" cy="119" r="6"></circle>
+        <circle class="pt" cx="267" cy="145" r="6"></circle>
+        <circle class="pt" cx="318" cy="75"  r="6"></circle>
+      </svg>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      점들이 <b>대체로 오른쪽 위로</b> 올라간다 — 연료를 많이 넣을수록 오래 돈다.
+      원점을 지나는 직선 \(f(x)=ax\) 꼴로 추세선을 잡아 보자.
+    </div>
+    <aside class="notes">연료가 0이면 작동 시간도 0이므로 원점을 지나는 것이 자연스럽다는 점을 짚으면 왜 \(ax+b\)가 아니라 \(ax\)인지 학생이 납득한다. 교과서가 Ⅳ단원 내내 \(f(x)=ax\)만 쓰는 이유이기도 하다 — 미지수가 하나여야 손실함수가 \(a\) 하나에 대한 이차함수가 된다. 산점도는 눈대중이 아니라 축 눈금으로 찍은 것이니 값을 물어봐도 된다.</aside>
+  </section>
+
+  <!-- 5. 후보 두 개 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 103쪽 · 문제 상황</div>
+    <h2>후보가 둘이다</h2>
+
+    <svg class="dg" viewBox="0 0 680 400" width="680" height="400"
+         preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="같은 자료에 두 추세선을 얹은 산점도">
+      <line class="gridln" x1="90" y1="40" x2="640" y2="40"></line>
+      <line class="gridln" x1="90" y1="190" x2="640" y2="190"></line>
+      <line class="axis" x1="90" y1="340" x2="640" y2="340"></line>
+      <line class="axis" x1="90" y1="340" x2="90" y2="40"></line>
+      <text class="t-ax" x="82" y="346" text-anchor="end">0</text>
+      <text class="t-ax" x="82" y="196" text-anchor="end">12</text>
+      <text class="t-ax" x="82" y="46" text-anchor="end">24</text>
+      <text class="t-ax" x="640" y="368" text-anchor="middle">24</text>
+      <text class="t-lab" x="365" y="392" text-anchor="middle">연료 (L)</text>
+
+      <line class="trend"  x1="90" y1="340" x2="578.9" y2="40"></line>
+      <line class="trend2" x1="90" y1="340" x2="640" y2="77.5"></line>
+
+      <circle class="pt" cx="182" cy="265" r="7"></circle>
+      <circle class="pt" cx="273" cy="277" r="7"></circle>
+      <circle class="pt" cx="365" cy="152" r="7"></circle>
+      <circle class="pt" cx="457" cy="190" r="7"></circle>
+      <circle class="pt" cx="548" cy="90"  r="7"></circle>
+
+      <!-- 라벨은 두 직선·자료점이 모두 비켜 가는 왼쪽 위에 범례처럼 둔다.
+           색이 곧 범례다 — 실선 주황 = 9/8, 점선 파랑 = 7/8. -->
+      <foreignObject class="m-lab" x="112" y="52" width="200" height="36">
+        <div xmlns="http://www.w3.org/1999/xhtml">\(f(x)=\frac{9}{8}x\)</div>
+      </foreignObject>
+      <foreignObject class="m-lab2" x="112" y="98" width="200" height="36">
+        <div xmlns="http://www.w3.org/1999/xhtml">\(f(x)=\frac{7}{8}x\)</div>
+      </foreignObject>
+    </svg>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      둘 다 그럴듯해 보인다. <b>어느 쪽이 예측에 더 적합한가?</b>
+      눈으로는 정할 수 없으니 <span class="kw-danger">수로 견주어야 한다.</span>
+    </div>
+    <aside class="notes">여기서 학생에게 먼저 손을 들게 한다 — 어느 직선이 더 나아 보이는지. 의견이 갈리는 것이 정상이고, 갈린다는 사실 자체가 오늘 수업의 출발점이다. 위쪽 실선이 9/8, 아래쪽 점선이 7/8이다. 자료점 다섯 개 중 위쪽 직선에 가까운 것과 아래쪽에 가까운 것이 섞여 있다는 점을 눈으로 확인시키고 다음 장으로 넘어간다.</aside>
+  </section>
+
+  <!-- 6. 표 1 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 103쪽 · [표 1]</div>
+    <h2>첫째 후보의 성적표</h2>
+
+    <div class="formula-box">
+      \[f(x)=\tfrac{9}{8}x \qquad (\text{오차}) = (\text{측정값}) - (\text{예측값})\]
+    </div>
+
+    <table class="dt">
+      <thead>
+        <tr><th>연료 \(x\) (L)</th><th>4</th><th>8</th><th>12</th><th>16</th><th>20</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">측정 \(y\) (시간)</td><td>6</td><td>5</td><td>15</td><td>12</td><td>20</td></tr>
+        <tr><td class="rowhead">예측 (시간)</td><td>4.5</td><td>9.0</td><td>13.5</td><td>18.0</td><td>22.5</td></tr>
+        <tr><td class="rowhead">오차</td><td class="hit">1.5</td><td class="warn">-4.0</td><td class="hit">1.5</td><td class="warn">-6.0</td><td>-2.5</td></tr>
+      </tbody>
+    </table>
+
+    <p class="prob-stmt">
+      예측이 <b>모자란 곳</b>은 오차가 양수(주황), <b>지나친 곳</b>은 음수(노랑)다.
+      \(x=16\)에서 \(-6.0\)으로 가장 크게 빗나갔다.
+    </p>
+    <aside class="notes">예측값 한 칸을 학생에게 직접 계산시킨다 — 9/8 × 8 = 9. 나머지는 읽어 준다. 부호의 뜻을 여기서 확실히 해 둔다: 양수면 실제가 예측보다 컸다는 뜻이다. 색은 부호를 구분하려는 것일 뿐 좋고 나쁨이 아니라는 점도 한마디 덧붙인다.</aside>
+  </section>
+
+  <!-- 7. 표 2 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 103쪽 · [표 2]</div>
+    <h2>둘째 후보의 성적표</h2>
+
+    <div class="formula-box">
+      \[f(x)=\tfrac{7}{8}x\]
+    </div>
+
+    <table class="dt">
+      <thead>
+        <tr><th>연료 \(x\) (L)</th><th>4</th><th>8</th><th>12</th><th>16</th><th>20</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">측정 \(y\) (시간)</td><td>6</td><td>5</td><td>15</td><td>12</td><td>20</td></tr>
+        <tr><td class="rowhead">예측 (시간)</td><td>3.5</td><td>7.0</td><td>10.5</td><td>14.0</td><td>17.5</td></tr>
+        <tr><td class="rowhead">오차</td><td class="hit">2.5</td><td class="warn">-2.0</td><td class="hit">4.5</td><td class="warn">-2.0</td><td class="hit">2.5</td></tr>
+      </tbody>
+    </table>
+
+    <p class="prob-stmt">
+      이쪽은 기울기가 작아 대체로 <b>예측이 모자란다</b> — 양수가 셋이다.
+      가장 크게 빗나간 곳은 \(x=12\)의 \(4.5\)다.
+    </p>
+    <aside class="notes">두 표를 나란히 놓고 보게 하려면 6장과 7장을 번갈아 오가며 보여 준다(좌우 방향키). 여기서 "어느 쪽이 나아 보이나?"를 다시 물으면 학생들이 오차를 하나씩 짚어 가며 비교하기 시작하는데, 그 시도가 바로 다음 장에서 막힌다. 막히는 경험을 하게 두는 것이 목적이다.</aside>
+  </section>
+
+  <!-- 8. 하나씩 견주면 무승부 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 103쪽 <span class="badge">오늘의 중심</span></div>
+    <h2>하나씩 견주면 승부가 안 난다</h2>
+
+    <table class="dt">
+      <thead>
+        <tr><th>연료 \(x\) (L)</th><th>4</th><th>8</th><th>12</th><th>16</th><th>20</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowhead">[표 1] 오차의 크기</td><td class="hit">1.5</td><td>4.0</td><td class="hit">1.5</td><td>6.0</td><td>2.5</td></tr>
+        <tr><td class="rowhead">[표 2] 오차의 크기</td><td>2.5</td><td class="hit">2.0</td><td>4.5</td><td class="hit">2.0</td><td>2.5</td></tr>
+        <tr><td class="rowhead">이긴 쪽</td><td>표 1</td><td>표 2</td><td>표 1</td><td>표 2</td><td class="warn">무승부</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      <b>2 대 2, 그리고 무승부 하나.</b>
+      오차를 하나씩 견주는 방법으로는
+      <span class="kw-danger">어느 추세선이 더 적합한지 판단할 수 없다.</span>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      다섯 개의 오차를 <b>숫자 하나로 요약</b>해야 비교할 수 있다.
+    </div>
+    <aside class="notes">이 장이 오늘의 중심이다. 교과서가 손실함수를 도입하는 근거가 여기에 있다 — 새로운 개념이 필요해서가 아니라, 있는 방법이 막혀서 필요해진 것이다. 표를 채우기 전에 학생들에게 각 열의 승자를 말하게 하면 2대2 무승부가 스스로 드러난다. "그러면 어떻게 하죠?"라는 물음이 나올 때까지 기다린다.</aside>
+  </section>
+
+  <!-- 9. 왜 제곱인가 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 104쪽 · 방법</div>
+    <h2>제곱해서 평균을 낸다</h2>
+
+    <p class="prob-stmt">
+      다섯 개를 하나로 묶으려면 평균이 자연스럽다. 그런데 <b>그냥 평균은 안 된다</b> —
+      오차에는 부호가 있어서 서로 <span class="kw-danger">상쇄</span>되기 때문이다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="warning-box">
+        오차가 \(+5\)와 \(-5\)인 자료를 그냥 평균 내면 \(0\)이다.
+        <span class="kw-danger">하나도 안 맞는데 완벽해 보인다.</span>
+      </div>
+      <div class="result-box">
+        제곱하면 <b>부호가 사라지고</b>,
+        <span class="kw-success">큰 오차가 더 크게 반영된다.</span>
+        \((-6)^2 = 36\)은 \(1.5^2 = 2.25\)의 열여섯 배다.
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      그래서 <b>오차의 제곱의 평균</b>을 쓴다.
+      이것을 <span class="kw-info">평균제곱오차</span>(MSE, Mean Squared Error)라고도 부른다.
+    </div>
+    <aside class="notes">교과서는 제곱을 쓰는 까닭을 따로 설명하지 않고 "일반적으로 사용한다"고만 적었다. 왼쪽 상자의 반례는 그 빈자리를 메우려고 넣은 것이다. 절댓값을 써도 부호는 사라지는데 왜 제곱이냐고 묻는 학생이 있으면 — 좋은 질문이라고 말해 주고, 제곱은 미분하기 좋아서라고만 답한다. 그 이유는 다음 절(다항함수의 미분)에서 실제로 쓰게 된다. 여기서 길게 끌지 않는다.</aside>
+  </section>
+
+  <!-- 10. 계산 결과 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 104쪽 · 계산</div>
+    <h2>이제 승부가 난다</h2>
+
+    <div class="formula-box">
+      \[\text{[표 1]}\ \ \frac{1.5^2+(-4)^2+1.5^2+(-6)^2+(-2.5)^2}{5}
+        = \frac{62.75}{5} = 12.55\]
+    </div>
+    <div class="formula-box">
+      \[\text{[표 2]}\ \ \frac{2.5^2+(-2)^2+4.5^2+(-2)^2+2.5^2}{5}
+        = \frac{40.75}{5} = 8.15\]
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      \(8.15 < 12.55\) 이므로 <span class="kw-success">\(f(x)=\frac{7}{8}x\)가 더 적합하다.</span>
+      이 값이 작을수록 자료를 잘 설명하는 직선이다.
+    </div>
+    <aside class="notes">한 항만 학생에게 계산시키고 나머지는 읽어 준다. 8장에서 2대2로 갈렸던 것이 여기서 한 번에 정리된다는 점을 분명히 짚는다. 왜 7/8이 이겼는지 물으면 8장 표로 돌아가 큰 오차(-6.0, -4.0)가 표 1에만 있다는 것을 보여 준다 — 제곱이 큰 오차를 크게 벌한 결과다.</aside>
+  </section>
+
+  <!-- 11. 손실함수 정의 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 104쪽 · 정의 <span class="badge">오늘의 중심</span></div>
+    <h2>이 값에 이름을 붙인다</h2>
+
+    <div class="definition-box">
+      입력값 \(x_1,\ x_2,\ \cdots,\ x_n\)에 대한 측정값이 \(y_1,\ y_2,\ \cdots,\ y_n\)이고,
+      추세선 \(f(x)=ax\)에 따른 예측값이 \(ax_1,\ ax_2,\ \cdots,\ ax_n\)일 때 —
+      <div class="formula-box" style="margin-top: var(--lm-space-2);">
+        \[L(a)=\frac{(y_1-ax_1)^2+(y_2-ax_2)^2+\cdots+(y_n-ax_n)^2}{n}\]
+      </div>
+      를 추세선 \(f(x)=ax\)에 대한 <span class="kw">손실함수</span>라고 한다.
+    </div>
+
+    <p class="prob-stmt">
+      <b>손실</b>이라는 이름 그대로, 이 값은 <span class="kw-danger">작을수록 좋다.</span>
+    </p>
+    <aside class="notes">기호 주의 — Ⅲ-1에서 유클리드 유사도를 \(L(P,\ Q)\)로 썼다. 같은 글자 L이지만 전혀 다른 것이다. 손실함수의 L은 loss의 L이고 괄호 안에 들어가는 것은 점이 아니라 기울기 \(a\)라는 점을 분명히 해 둔다. 학생이 헷갈려 하면 "무엇의 함수인가"를 되묻는 것이 가장 빠르다.</aside>
+  </section>
+
+  <!-- 12. a에 대한 이차함수 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 104쪽 <span class="badge">오늘의 중심</span></div>
+    <h2>기울기를 미지수로 두면</h2>
+
+    <p class="prob-stmt">
+      추세선을 \(f(x)=ax\)로 두고, 앞의 자료로 손실함수를 그대로 세워 보자.
+    </p>
+
+    <div class="formula-box">
+      \[L(a)=\frac{(6-4a)^2+(5-8a)^2+(15-12a)^2+(12-16a)^2+(20-20a)^2}{5}
+        = \frac{880a^2-1672a+830}{5}\]
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      손실함수 \(L(a)\)는 기울기 \(a\)에 대한 <span class="kw-success">이차함수</span>다.
+      \(a^2\)의 계수가 양수이므로 아래로 볼록하고, <b>최솟값이 반드시 있다.</b>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      그 최솟값을 주는 \(a\)가 <b>가장 적합한 추세선의 기울기</b>다 —
+      <span class="kw-info">이 단원이 앞으로 할 일이 그것이다.</span>
+    </div>
+    <aside class="notes">전개는 보여 주되 학생에게 시키지 않는다. 오늘 중요한 것은 결과의 모양이지 계산이 아니다. 이 장에서 2장의 물음("어떻게 더 나은 직선을 고를까")이 닫히고 단원 전체의 물음("가장 나은 직선은 무엇인가")이 열린다. 이차함수의 최솟값은 완전제곱으로도 구할 수 있는데 왜 미분을 배우느냐는 물음이 나오면, 손실함수가 늘 이차함수인 것은 아니라고만 답해 둔다(3절에서 다룬다).</aside>
+  </section>
+
+  <!-- 13. 확인 활동 -->
+  <section class="tight">
+    <div class="chapter-tag">확인하기</div>
+    <h2>직접 확인해 보자</h2>
+
+    <ul class="qlist" id="qList">
+      <li>
+        <b>⑴</b> 오차를 그냥 평균 내지 않고 <b>제곱해서</b> 평균 내는 까닭 두 가지를 쓰시오.
+        <div class="ans">① 부호가 섞여 있어 그냥 더하면 서로 상쇄된다.
+          ② 제곱하면 큰 오차가 더 크게 반영된다.</div>
+      </li>
+      <li>
+        <b>⑵</b> 어떤 추세선에 대한 오차가 \(2,\ -3,\ 1,\ 0\)일 때 손실함수의 값을 구하시오.
+        <div class="ans">\(\dfrac{2^2+(-3)^2+1^2+0^2}{4}=\dfrac{14}{4}=3.5\)</div>
+      </li>
+      <li>
+        <b>⑶</b> 같은 자료에 대해 손실함수의 값이 각각 \(3.5\)와 \(9.2\)인 두 추세선이 있다.
+        어느 쪽이 예측에 더 적합한가?
+        <div class="ans">\(3.5\)인 쪽. 손실함수의 값은 <b>작을수록</b> 자료를 잘 설명한다.</div>
+      </li>
+    </ul>
+    <aside class="notes">⑵에서 오차가 0인 항을 빠뜨리고 3으로 나누는 학생이 반드시 나온다. 분모는 자료의 개수이지 0이 아닌 오차의 개수가 아니라는 점을 짚는다. ⑶은 한 문장으로 끝나지만 오늘 배운 것의 전부이기도 하다. 시간이 남으면 ⑵의 오차 부호를 바꿔도(예: 2, 3, 1, 0) 답이 같다는 것을 확인시키면 제곱의 뜻이 분명해진다.</aside>
+  </section>
+
+  <!-- 14. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>여러 개의 오차를 하나로 요약한다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body-lg);">
+      오차를 하나씩 견주면 승부가 안 난다.<br>
+      <span class="kw-success">제곱해서 평균 내면 숫자 하나</span>가 되고, 그제야 비교할 수 있다.
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-5);">
+      그리고 그 숫자는 기울기 \(a\)에 대한 <b>이차함수</b> \(L(a)\)였다.
+      다음 시간부터는 <span class="kw-danger">이 함수의 최솟값을 찾는 일</span>을 한다 —
+      그러려면 <b>미분</b>이 필요하다.
+    </div>
+    <aside class="notes">오늘의 결론과 다음 단계를 한 화면에 둔다. 다음 시간은 곧바로 미분이 아니라 손실함수를 직접 구해 보고 공학적 도구(desmos)로 기울기에 따른 변화를 관찰하는 차시라는 점도 함께 예고해 두면 흐름이 끊기지 않는다. 2장에 적어 둔 물음을 여기서 지운다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04,
+    center: false, hash: true,
+    controls: true, controlsLayout: 'bottom-right',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 (13장) */
+  (function () {
+    const list = document.getElementById('qList');
+    if (!list) return;
+    list.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
