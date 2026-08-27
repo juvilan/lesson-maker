@@ -71,8 +71,12 @@
                          font-weight: 700; margin-bottom: var(--lm-space-2); }
     .grid-item .g-sub { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
                         margin-top: var(--lm-space-2); }
+    /* 전광판 몸체 — 켜진 칸이 흰색이라 밝은 슬라이드 바탕에서는 묻힌다.
+       격자 뒤에만 어두운 판을 깔아 흰 칸이 드러나게 한다. */
     .pix { display: grid; grid-template-columns: repeat(5, 28px); gap: 3px;
-           justify-content: center; }
+           justify-content: center;
+           background: var(--lm-ink-2); padding: 8px;
+           border-radius: var(--lm-radius-md); }
     .pix i { display: block; width: 28px; height: 28px; border-radius: 3px;
              background: var(--lm-ink); border: 1px solid var(--lm-rule-strong); }
     .pix i.on { background: var(--lm-page); }
