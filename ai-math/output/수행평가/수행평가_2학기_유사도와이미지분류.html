@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수행평가 — 유사도와 퍼셉트론을 이용한 텍스트·이미지 분류</title>
+
+<link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+<link rel="stylesheet" href="../../../_shared/templates/worksheet-system.css">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      packages: { '[+]': ['boldsymbol', 'ams'] },
+      tags: 'ams'
+    },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] },
+    chtml: { scale: 0.95 }
+  };
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+<style>
+  /* ─────────────────────────────────────────────────────────────────
+   * 이 문서는 인쇄 → 손글씨 → 스캔 → 판독의 경로를 지난다.
+   * 그래서 두 가지 규칙을 지킨다.
+   *   (1) 읽어야 하는 것은 전부 테두리와 글자로 만든다. 배경색으로만
+   *       구분되는 정보를 두지 않는다 — 인쇄 대화상자의 '배경 그래픽'이
+   *       기본 꺼짐이고, 흑백 스캔에서 옅은 배경은 통째로 날아간다.
+   *   (2) 답이 들어갈 자리는 반드시 테두리로 닫아 둔다. 어느 칸의 답인지
+   *       스캔본에서 특정할 수 있어야 한다.
+   * 유일한 예외가 전광판 격자다. 켜짐/꺼짐이 색 자체이므로 배경을 쓰되
+   * @media print 에서 강제 출력시킨다.
+   * ───────────────────────────────────────────────────────────────── */
+
+  /* 수행평가는 답란이 넓어야 한다. 2단 기본값을 1단으로 되돌린다. */
+  .ws-body { column-count: 1; }
+  .ws-head { margin-bottom: 2mm; padding-bottom: 2mm; }
+  .ws-title { font-size: var(--lm-page-h2); }
+  .ws-student { padding-bottom: 1.5mm; margin-bottom: 2.5mm; }
+
+  /* ── 머리 ── */
+  .exam-guide { padding: 0 0.5mm; margin-bottom: 2.5mm;
+                font-size: var(--lm-page-small);
+                line-height: var(--lm-page-line-body); }
+  /* 채점기준 쪽의 메모는 상자를 유지한다 (그 쪽은 세로 여유가 있다) */
+  .ws-page:nth-last-child(-n+2) .exam-guide {
+                border: var(--lm-border-thin) solid var(--lm-page-ink);
+                border-radius: var(--lm-radius-sm); padding: 1.5mm 3mm; }
+  .exam-guide b { color: var(--lm-accent); }
+
+  /* 풀이 공간 — 채점 요소 ①의 '시도가 나타남'(4점)을 관찰하는 자리다.
+     표 안에 넣으면 세로를 너무 먹어 세 유사도가 한 쪽에 못 들어간다. */
+  .work { position: relative; border: 0.3mm solid var(--lm-page-ink);
+          border-radius: 1mm; height: 20mm; margin-bottom: 1.2mm; }
+  .work-t { position: absolute; top: 0.8mm; left: 2mm;
+            font-size: var(--lm-page-caption); color: var(--lm-page-ink-3); }
+
+  /* 쪽마다 되풀이하는 식별 띠 — 스캔본이 흩어져도 누구 것인지 남는다 */
+  .idbar { display: flex; gap: var(--lm-space-5); align-items: baseline;
+           font-size: var(--lm-page-small); color: var(--lm-page-ink);
+           border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+           padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .idbar .who { margin-left: auto; color: var(--lm-page-ink-3);
+                font-size: var(--lm-page-caption); }
+  .idbar .ln { display: inline-block; border-bottom: 0.25mm solid var(--lm-page-ink-2);
+               height: 1.3em; }
+  .idbar .ln.s { width: 12mm; }
+  .idbar .ln.m { width: 26mm; }
+
+  /* ── 채점 요소 머리 (반전 배지를 쓰지 않는다) ── */
+  .elem { display: flex; align-items: baseline; gap: 3mm;
+          border: 0.4mm solid var(--lm-page-ink); border-radius: var(--lm-radius-sm);
+          padding: 1.2mm 3mm; margin: 0 0 2.5mm; }
+  .elem-no    { font-weight: 700; font-size: var(--lm-page-body); white-space: nowrap; }
+  .elem-title { font-weight: 700; font-size: var(--lm-page-body); }
+  .elem-pt    { margin-left: auto; font-weight: 700; white-space: nowrap; }
+  /* 절마다 점수를 적는 자리. 따로 채점표를 두는 것보다 어느 요소의
+     점수인지 헷갈릴 여지가 없다. */
+  .elem-pt .sblank { display: inline-block; width: 20mm; margin-right: 1.5mm;
+                     border-bottom: 0.35mm solid var(--lm-page-ink); }
+
+  /* ── 문항 ── */
+  .q { margin: 0 0 3mm; break-inside: avoid; page-break-inside: avoid; }
+  .q:last-child { margin-bottom: 0; }
+  .q-head { display: flex; gap: 2mm; align-items: baseline;
+            font-size: var(--lm-page-small); line-height: var(--lm-page-line-body);
+            margin-bottom: 1.5mm; }
+  .qcode { flex: none; font-weight: 700; font-size: 0.92em;
+           border: 0.3mm solid var(--lm-page-ink); border-radius: 0.8mm;
+           padding: 0.2mm 1.8mm; font-variant-numeric: tabular-nums; }
+  .q-head b { color: var(--lm-accent); }
+  .q-form { font-size: var(--lm-page-caption); color: var(--lm-page-ink-2);
+            margin: -0.5mm 0 1.5mm 11mm; }
+
+  /* ── 서술 답란 — 줄은 배경이 아니라 테두리로 긋는다 ── */
+  .lines { border: 0.3mm solid var(--lm-page-ink); border-radius: 1mm;
+           padding: 0 2.5mm; }
+  .lines i { display: block; height: 8mm;
+             border-bottom: 0.2mm solid var(--lm-page-rule); }
+  .lines i:last-child { border-bottom: none; }
+
+  /* ── 자료 ── */
+  .src { border: 0.3mm solid var(--lm-page-ink-2); border-radius: var(--lm-radius-sm);
+         padding: 1.5mm 3mm 2mm; margin-bottom: 2.5mm; }
+  .src .ws-table th, .src .ws-table td { padding: 0.5mm 2mm; }
+  .src-t { font-size: var(--lm-page-caption); font-weight: 700; letter-spacing: 0.05em;
+           color: var(--lm-accent); margin-bottom: 1.2mm; }
+  .src p { font-size: var(--lm-page-small); line-height: var(--lm-page-line-body);
+           margin: 0 0 1.2mm; }
+  .src .fx { font-size: var(--lm-page-small); text-align: center; margin: 1.2mm 0 0;
+             padding-top: 1.2mm;
+             border-top: var(--lm-border-hair) solid var(--lm-page-rule); }
+  .src .fx span { display: inline-block; margin: 0 4mm; }
+
+  .ws-table td.left, .ws-table th.left { text-align: left; }
+  .ws-table td.nm { font-weight: 700; color: var(--lm-accent); white-space: nowrap; }
+  .ws-table.grid th, .ws-table.grid td { border: 0.25mm solid var(--lm-page-ink-2); }
+  td.fill { height: 11mm; }
+  td.fill.tall { height: 16mm; }
+  td.fill.xl   { height: 24mm; }
+
+  .bk { display: inline-block; min-width: 26mm;
+        border-bottom: 0.3mm solid var(--lm-page-ink); margin: 0 1.5mm; }
+
+  /* ── 전광판 픽셀 격자 (배경색이 정보 그 자체인 유일한 예외) ── */
+  .pix-row { display: flex; justify-content: center; gap: 10mm; margin: 1mm 0 0; }
+  .pix-cell { text-align: center; }
+  .pix-cell .pname { font-size: var(--lm-page-small); font-weight: 700;
+                     color: var(--lm-accent); margin-bottom: 1mm; }
+  .pix-cell .psub  { font-size: var(--lm-page-caption); color: var(--lm-page-ink-3);
+                     margin-top: 1mm; }
+  .wpix { display: grid; grid-template-columns: repeat(5, 4.8mm); gap: 0.5mm;
+          justify-content: center; background: var(--lm-page-ink);
+          padding: 0.8mm; border-radius: 0.8mm; }
+  .wpix i { display: block; width: 4.8mm; height: 4.8mm;
+            background: var(--lm-page-ink-2); }
+  .wpix i.on { background: var(--lm-page); }
+
+  @media print {
+    /* 격자는 배경색으로만 뜻을 나르므로 강제 출력시킨다 */
+    .wpix, .wpix i {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body data-subject="ai_math">
+
+
+<!-- ══════════════════ PAGE 1 · 채점 요소 ① ══════════════════ -->
+<div class="ws-page">
+
+  <header class="ws-head">
+    <div class="ws-title-group">
+      <div class="ws-chapter">Ⅲ. 분류와 예측 · 2학기 수행평가 · 만점 40점</div>
+      <h1 class="ws-title">유사도와 퍼셉트론을 이용한 텍스트·이미지 분류</h1>
+    </div>
+    <div class="ws-meta">인공지능수학 · 3학년</div>
+  </header>
+
+  <div class="ws-student">
+    <span class="ws-student-field"><label>학년</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>반</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>번호</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>이름</label><span class="line"></span></span>
+  </div>
+
+  <div class="ws-body">
+
+    <article class="q">
+      <div class="exam-guide">
+        답은 <b>지정된 칸 안에</b> 쓰고 계산 과정은 <b>지우지 말 것.</b>
+        분수는 <b>기약분수</b>, 근호는 <b>벗기지 말고 그대로</b> 둔다.
+      </div>
+
+      <div class="src">
+        <div class="src-t">자료 1 · 서평 세 편</div>
+        <p>
+          어떤 책에 달린 서평 \(\mathrm{P}\), \(\mathrm{Q}\), \(\mathrm{R}\)를
+          <b>(그림, 감동, 이야기, 정보, 쉽다)</b>가 나타난 횟수로 적으면 다음과 같다.
+          \(A_{\mathrm{P}}\)는 \(\mathrm{P}\)에 <b>한 번 이상</b> 나타난 낱말의 집합이다.
+        </p>
+        <table class="ws-table" style="margin: 0;">
+          <thead>
+            <tr><th class="left" style="width: 14%;">서평</th>
+                <th class="left" style="width: 36%;">벡터</th>
+                <th class="left">단어 집합</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="nm">P</td>
+                <td class="left">\(\mathrm{P}=(0,\ 0,\ 1,\ 2,\ 2)\)</td>
+                <td class="left">\(A_{\mathrm{P}}=\{\)이야기, 정보, 쉽다\(\}\)</td></tr>
+            <tr><td class="nm">Q</td>
+                <td class="left">\(\mathrm{Q}=(0,\ 2,\ 4,\ 1,\ 2)\)</td>
+                <td class="left">\(A_{\mathrm{Q}}=\{\)감동, 이야기, 정보, 쉽다\(\}\)</td></tr>
+            <tr><td class="nm">R</td>
+                <td class="left">\(\mathrm{R}=(1,\ 1,\ 1,\ 0,\ 1)\)</td>
+                <td class="left">\(A_{\mathrm{R}}=\{\)그림, 감동, 이야기, 쉽다\(\}\)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="q">
+      <div class="elem">
+        <span class="elem-title">유사도를 이용한 텍스트 분류</span>
+        <span class="elem-pt"><span class="sblank"></span>/ 12점</span>
+      </div>
+
+      <div class="q-head">
+        <span class="qcode">1-1</span>
+        <span>세 서평의 짝마다 <b>유클리드 유사도</b> \(L\)을 구하고,
+              이 기준에서 가장 유사한 두 서평을 고르시오.</span>
+      </div>
+      <div class="work"><span class="work-t">계산 과정</span></div>
+      <table class="ws-table grid" style="margin: 0;">
+        <thead>
+          <tr><th>\(L(\mathrm{P},\mathrm{Q})\)</th>
+              <th>\(L(\mathrm{Q},\mathrm{R})\)</th>
+              <th>\(L(\mathrm{R},\mathrm{P})\)</th>
+              <th style="width: 32%;">가장 유사한 두 서평</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="q">
+      <div class="q-head">
+        <span class="qcode">1-2</span>
+        <span>세 서평의 짝마다 <b>코사인 유사도</b> \(C\)를 구하고,
+              이 기준에서 가장 유사한 두 서평을 고르시오.</span>
+      </div>
+      <div class="work"><span class="work-t">계산 과정 (\(|\mathrm{P}|,\ |\mathrm{Q}|,\ |\mathrm{R}|\)부터 구할 것)</span></div>
+      <table class="ws-table grid" style="margin: 0;">
+        <thead>
+          <tr><th>\(C(\mathrm{P},\mathrm{Q})\)</th>
+              <th>\(C(\mathrm{Q},\mathrm{R})\)</th>
+              <th>\(C(\mathrm{R},\mathrm{P})\)</th>
+              <th style="width: 32%;">가장 유사한 두 서평</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="q">
+      <div class="q-head">
+        <span class="qcode">1-3</span>
+        <span>세 서평의 짝마다 <b>자카드 유사도</b> \(J\)를 구하고,
+              이 기준에서 가장 유사한 두 서평을 고르시오.</span>
+      </div>
+      <div class="work"><span class="work-t">계산 과정</span></div>
+      <table class="ws-table grid" style="margin: 0;">
+        <thead>
+          <tr><th>\(J(A_{\mathrm{P}},A_{\mathrm{Q}})\)</th>
+              <th>\(J(A_{\mathrm{Q}},A_{\mathrm{R}})\)</th>
+              <th>\(J(A_{\mathrm{R}},A_{\mathrm{P}})\)</th>
+              <th style="width: 32%;">가장 유사한 두 서평</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+        </tbody>
+      </table>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">1 / 4</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 2 · 채점 요소 ② ══════════════════ -->
+<div class="ws-page">
+
+  <div class="idbar">
+    <span>학년 <span class="ln s"></span></span>
+    <span>반 <span class="ln s"></span></span>
+    <span>번호 <span class="ln s"></span></span>
+    <span>이름 <span class="ln m"></span></span>
+    <span class="who">인공지능수학 · 2학기 수행평가</span>
+  </div>
+
+  <div class="ws-body">
+
+    <article class="q">
+      <div class="elem">
+        <span class="elem-title">세 유사도의 비교와 해석</span>
+        <span class="elem-pt"><span class="sblank"></span>/ 8점</span>
+      </div>
+
+      <div class="q-head">
+        <span class="qcode">2-1</span>
+        <span>세 유사도가 각각 <b>무엇을 재는지</b> 구분하여 쓰시오.</span>
+      </div>
+      <table class="ws-table grid" style="margin-top: 0;">
+        <thead>
+          <tr><th class="left" style="width: 20%;">유사도</th>
+              <th class="left">무엇을 재는가</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left nm">유클리드 \(L\)</td><td class="fill tall"></td></tr>
+          <tr><td class="left nm">코사인 \(C\)</td><td class="fill tall"></td></tr>
+          <tr><td class="left nm">자카드 \(J\)</td><td class="fill tall"></td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="q">
+      <div class="q-head">
+        <span class="qcode">2-2</span>
+        <span>1-1, 1-2, 1-3에서 <b>가장 유사한 짝이 서로 다르게 나왔다.</b>
+              그 까닭을 각 유사도가 재는 대상과 관련지어 설명하시오.</span>
+      </div>
+      <div class="q-form">※ 앞에서 구한 값을 <b>직접 인용</b>하여 근거로 들 것.</div>
+      <div class="lines">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </article>
+
+    <article class="q">
+      <div class="q-head">
+        <span class="qcode">2-3</span>
+        <span>세 서평 중 하나만 골라 <b>이 책의 대표 서평</b>으로 걸어 두려고 한다.
+              <b>어떤 유사도를 기준으로 삼을지 먼저 밝히고</b>, 그 기준에서
+              대표 서평을 고른 뒤 까닭을 쓰시오.</span>
+      </div>
+      <div class="q-form">※ 기준으로 삼은 유사도를 쓰지 않으면 근거를 인정하지 않는다.</div>
+      <div class="lines">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">2 / 4</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 3 · 채점 요소 ③ ══════════════════ -->
+<div class="ws-page">
+
+  <div class="idbar">
+    <span>학년 <span class="ln s"></span></span>
+    <span>반 <span class="ln s"></span></span>
+    <span>번호 <span class="ln s"></span></span>
+    <span>이름 <span class="ln m"></span></span>
+    <span class="who">인공지능수학 · 2학기 수행평가</span>
+  </div>
+
+  <div class="ws-body">
+
+    <article class="q">
+      <div class="src">
+        <div class="src-t">자료 2 · 전광판에 뜬 숫자</div>
+        <p>
+          가로 5, 세로 7인 전광판이 있다. 켜진 칸을 \(1\), 꺼진 칸을 \(0\)으로 적으면
+          각 화면은 \(7 \times 5\) 행렬이 된다. 견본 \(A\)는 숫자 \(2\),
+          견본 \(B\)는 숫자 \(3\)이고, 전구 몇 개가 나간 채로
+          <b>입력 \(C\)</b>가 들어왔다.
+        </p>
+        <div class="pix-row">
+          <div class="pix-cell">
+            <div class="pname">견본 \(A\)</div>
+            <div class="wpix">
+              <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+              <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+              <i></i><i></i><i></i><i></i><i class="on"></i>
+              <i></i><i></i><i></i><i class="on"></i><i></i>
+              <i></i><i></i><i class="on"></i><i></i><i></i>
+              <i></i><i class="on"></i><i></i><i></i><i></i>
+              <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+            </div>
+            <div class="psub">숫자 2</div>
+          </div>
+          <div class="pix-cell">
+            <div class="pname">견본 \(B\)</div>
+            <div class="wpix">
+              <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+              <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+              <i></i><i></i><i></i><i></i><i class="on"></i>
+              <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+              <i></i><i></i><i></i><i></i><i class="on"></i>
+              <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+              <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            </div>
+            <div class="psub">숫자 3</div>
+          </div>
+          <div class="pix-cell">
+            <div class="pname">입력 \(C\)</div>
+            <div class="wpix">
+              <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+              <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+              <i></i><i></i><i></i><i></i><i></i>
+              <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i>
+              <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+              <i></i><i class="on"></i><i></i><i class="on"></i><i></i>
+            </div>
+            <div class="psub">전구 몇 개가 나갔다</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="q">
+      <div class="elem">
+        <span class="elem-title">해밍 거리와 퍼셉트론을 이용한 이미지 분류</span>
+        <span class="elem-pt"><span class="sblank"></span>/ 12점</span>
+      </div>
+
+      <div class="q-head">
+        <span class="qcode">3-1</span>
+        <span><b>해밍 거리</b> \(H(C,A)\)와 \(H(C,B)\)를 구하고,
+              이 기준에서 \(C\)를 어느 숫자로 분류할지 쓰시오.</span>
+      </div>
+      <div class="q-form">※ 가로줄마다 값이 <b>다른 칸의 개수</b>를 세어 적은 뒤 합할 것.</div>
+      <table class="ws-table grid" style="margin-top: 0;">
+        <thead>
+          <tr><th class="left" style="width: 22%;">가로줄</th>
+              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+              <th style="width: 14%;">합 \(=H\)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">\(C\)와 \(A\)</td>
+              <td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td>
+              <td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left">\(C\)와 \(B\)</td>
+              <td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td>
+              <td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left"><b>판정</b></td>
+              <td class="left" colspan="8">\(C\)는 숫자<span class="bk"></span>이다.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="q-head">
+        <span class="qcode">3-2</span>
+        <span>견본을 그대로 가중치로 쓴 <b>퍼셉트론</b>의 출력값은
+              <b>둘 다 켜진 칸의 개수</b>를 <b>견본의 켜진 칸 개수</b>로 나눈 값이다.
+              \(\mathrm{P}\)와 \(\mathrm{P}'\)을 구하고, 이 기준에서 \(C\)를 분류하시오.</span>
+      </div>
+      <table class="ws-table grid" style="margin-top: 0;">
+        <thead>
+          <tr><th class="left" style="width: 26%;">퍼셉트론</th>
+              <th style="width: 22%;">둘 다 켜진 칸 수</th>
+              <th style="width: 22%;">견본의 켜진 칸 수</th>
+              <th>출력값 (기약분수)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">\(\mathrm{P}\) — \(A\)일 가능성</td>
+              <td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left">\(\mathrm{P}'\) — \(B\)일 가능성</td>
+              <td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left"><b>판정</b></td>
+              <td class="left" colspan="3">\(C\)는 숫자<span class="bk"></span>이다.</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">3 / 4</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 4 · 채점 요소 ④ ══════════════════ -->
+<div class="ws-page">
+
+  <div class="idbar">
+    <span>학년 <span class="ln s"></span></span>
+    <span>반 <span class="ln s"></span></span>
+    <span>번호 <span class="ln s"></span></span>
+    <span>이름 <span class="ln m"></span></span>
+    <span class="who">인공지능수학 · 2학기 수행평가</span>
+  </div>
+
+  <div class="ws-body">
+
+    <article class="q">
+      <div class="elem">
+        <span class="elem-title">분류 방법의 관점 차이와 한계</span>
+        <span class="elem-pt"><span class="sblank"></span>/ 8점</span>
+      </div>
+
+      <div class="q-head">
+        <span class="qcode">4-1</span>
+        <span>해밍 거리와 퍼셉트론이 각각 <b>무엇을 기준으로</b> 분류하는지
+              구분하여 쓰시오.</span>
+      </div>
+      <table class="ws-table grid" style="margin-top: 0;">
+        <thead>
+          <tr><th class="left" style="width: 22%;">방법</th>
+              <th class="left">무엇을 기준으로 분류하는가</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left nm">해밍 거리</td><td class="fill xl"></td></tr>
+          <tr><td class="left nm">퍼셉트론</td><td class="fill xl"></td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="q">
+      <div class="q-head">
+        <span class="qcode">4-2</span>
+        <span>전광판은 모두 \(35\)칸이다. 입력 \(C\)와 견본 \(A\)를 칸마다 견주어
+              아래 표를 채우시오.</span>
+      </div>
+      <table class="ws-table grid" style="margin-top: 0;">
+        <thead>
+          <tr><th>전체 칸</th>
+              <th>값이 <b>다른</b> 칸<br>\(=H(C,A)\)</th>
+              <th>값이 <b>같은</b> 칸</th>
+              <th>같은 칸 중<br>둘 다 <b>켜진</b> 칸</th>
+              <th>같은 칸 중<br>둘 다 <b>꺼진</b> 칸</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>35</td><td class="fill"></td><td class="fill"></td>
+              <td class="fill"></td><td class="fill"></td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="q">
+      <div class="q-head">
+        <span class="qcode">4-3</span>
+        <span>4-2에서 <b>값이 같은 칸</b>의 대부분은 어떤 칸인가?
+              이 사실에 비추어 <b>해밍 거리를 이용한 분류의 한계</b>를 서술하시오.</span>
+      </div>
+      <div class="q-form">※ 4-2에서 구한 수를 <b>직접 인용</b>하여 근거로 들 것.</div>
+      <div class="lines">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">4 / 4</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 5 · 채점 기준 (학생 배부 아님) ══════════════════ -->
+<div class="ws-page">
+
+  <header class="ws-head">
+    <div class="ws-title-group">
+      <div class="ws-chapter">2학기 수행평가 · 채점 기준과 정답</div>
+      <h1 class="ws-title">유사도와 퍼셉트론을 이용한 텍스트·이미지 분류</h1>
+    </div>
+    <div class="ws-meta">교사용 · 학생 배부 금지</div>
+  </header>
+
+  <div class="ws-body">
+
+    <article class="q">
+      <div class="elem">
+        <span class="elem-no">정답</span>
+        <span class="elem-title">문항 코드별 정답과 배점 귀속</span>
+        <span class="elem-pt">40점</span>
+      </div>
+
+      <table class="ws-table grid" style="margin-top: 0;">
+        <thead>
+          <tr><th style="width: 11%;">문항</th><th class="left">정답</th>
+              <th style="width: 13%;">채점 요소</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1-1</td>
+              <td class="left">\(L(\mathrm{P},\mathrm{Q})=\sqrt{14}\), \(L(\mathrm{Q},\mathrm{R})=\sqrt{13}\),
+                  \(L(\mathrm{R},\mathrm{P})=\sqrt{7}\) → <b>R 와 P</b> (거리가 가장 짧다)</td>
+              <td>①</td></tr>
+          <tr><td>1-2</td>
+              <td class="left">\(|\mathrm{P}|=3,\ |\mathrm{Q}|=5,\ |\mathrm{R}|=2\)이므로
+                  \(C(\mathrm{P},\mathrm{Q})=\dfrac{10}{15}=\dfrac{2}{3}\),
+                  \(C(\mathrm{Q},\mathrm{R})=\dfrac{8}{10}=\dfrac{4}{5}\),
+                  \(C(\mathrm{R},\mathrm{P})=\dfrac{3}{6}=\dfrac{1}{2}\) → <b>Q 와 R</b></td>
+              <td>①</td></tr>
+          <tr><td>1-3</td>
+              <td class="left">\(J(\mathrm{P},\mathrm{Q})=\dfrac{3}{4}\),
+                  \(J(\mathrm{Q},\mathrm{R})=\dfrac{3}{5}\),
+                  \(J(\mathrm{R},\mathrm{P})=\dfrac{2}{5}\) → <b>P 와 Q</b></td>
+              <td>①</td></tr>
+          <tr><td>2-1</td>
+              <td class="left">\(L\) 두 벡터 <b>끝점 사이의 거리</b>(성분 크기까지 반영) /
+                  \(C\) 두 벡터가 이루는 <b>방향</b>(각) /
+                  \(J\) 두 단어 집합의 <b>공통 낱말 비율</b>(횟수는 무시)</td>
+              <td>②</td></tr>
+          <tr><td>2-2</td>
+              <td class="left">재는 대상이 달라서다. \(\mathrm{Q}\)는 낱말이 많아 벡터가 길어
+                  거리로는 멀지만(\(\sqrt{14},\sqrt{13}\)) 방향은 \(\mathrm{R}\)와 가깝다(\(\tfrac45\)).
+                  \(A_{\mathrm{P}} \subset A_{\mathrm{Q}}\)라 자카드는 P·Q가 가장 크다(\(\tfrac34\)).</td>
+              <td>②</td></tr>
+          <tr><td>2-3</td>
+              <td class="left"><b>정답은 하나가 아니다.</b> 밝힌 기준과 고른 서평이 어긋나지 않고
+                  값을 근거로 들었으면 인정. (다른 둘과의 유사도 합 기준:
+                  \(L\)이면 R, \(C\)·\(J\)면 Q)</td>
+              <td>②</td></tr>
+          <tr><td>3-1</td>
+              <td class="left">\(H(C,A)=10\) (가로줄 \(0,0,1,2,1,3,3\)),
+                  \(H(C,B)=3\) (가로줄 \(0,0,1,0,1,0,1\)) → <b>숫자 3</b></td>
+              <td>③</td></tr>
+          <tr><td>3-2</td>
+              <td class="left">둘 다 켜진 칸 \(8\)과 \(12\), 견본의 켜진 칸 \(14\)와 \(15\)이므로
+                  \(\mathrm{P}=\dfrac{8}{14}=\dfrac{4}{7}\),
+                  \(\mathrm{P}'=\dfrac{12}{15}=\dfrac{4}{5}\) → <b>숫자 3</b></td>
+              <td>③</td></tr>
+          <tr><td>4-1</td>
+              <td class="left">해밍은 <b>다른 칸이 몇 개인가</b>(작을수록 같은 쪽) /
+                  퍼셉트론은 <b>견본의 켜진 칸을 얼마나 덮었는가</b>(클수록 그 쪽)</td>
+              <td>④</td></tr>
+          <tr><td>4-2</td>
+              <td class="left">전체 \(35\) / 다른 칸 \(10\) / 같은 칸 \(25\) /
+                  둘 다 켜짐 \(8\) / 둘 다 꺼짐 \(17\)</td>
+              <td>④</td></tr>
+          <tr><td>4-3</td>
+              <td class="left">같은 칸 \(25\)의 대부분인 \(17\)칸이 <b>둘 다 꺼진 칸</b>이다.
+                  아래 <b>인정 논거</b> 참조</td>
+              <td>④</td></tr>
+        </tbody>
+      </table>
+
+      <div class="src" style="margin-top: 3mm;">
+        <div class="src-t">4-3 인정 논거 (하나 이상을 값과 함께 들면 인정)</div>
+        <p>
+          ⑴ <b>꺼진 칸이 서로 같은 것도 '같음'으로 센다.</b> 같은 \(25\)칸 가운데
+          둘 다 켜진 칸은 \(8\)칸뿐이고 나머지 \(17\)칸은 둘 다 꺼진 칸이다.
+          일치의 대부분이 배경이라 숫자 모양이 아니라
+          <b>빈 자리가 닮은 정도</b>를 재고 있다.
+        </p>
+        <p>
+          ⑵ <b>모자란 획과 남는 획을 구분하지 않는다.</b> \(H(C,A)=10\)은
+          \(C\)만 켜진 \(4\)칸과 \(A\)만 켜진 \(6\)칸을 그냥 더한 값이다.
+        </p>
+        <p>
+          ⑶ <b>켜진 칸이 적은 견본이 유리해진다.</b> 전구가 많이 나갈수록 해밍 거리는
+          켜진 칸이 적은 쪽으로 기운다. 퍼셉트론은 견본의 켜진 칸 수로 나누어 이를 보정한다.
+        </p>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">5 / 6</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 6 · 채점 척도 (학생 배부 아님) ══════════════════ -->
+<div class="ws-page">
+
+  <div class="idbar">
+    <span>2학기 수행평가 · 채점 척도</span>
+    <span class="who">교사용 · 학생 배부 금지</span>
+  </div>
+
+  <div class="ws-body">
+
+    <article class="q">
+      <div class="elem">
+        <span class="elem-no">척도</span>
+        <span class="elem-title">채점 요소별 판정 (답안에서 관찰되는 상태로 바꾼 것)</span>
+      </div>
+
+      <table class="ws-table grid" style="margin-top: 0;">
+        <thead>
+          <tr><th class="left" style="width: 17%;">채점 요소</th>
+              <th class="left">답안에서 관찰되는 상태 → 점수</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left nm">① 12점</td>
+              <td class="left">
+                값 9칸 전부 정확 + 판정 3개 전부 정확 → <b>12</b> /
+                세 유사도를 모두 계산했고 값 또는 판정 오류가 1~2곳 → <b>9</b> /
+                세 유사도 중 1~2개만 정확 → <b>7</b> /
+                식만 세우고 값이 없음 → <b>4</b><br>
+                ※ 값이 모두 맞는데 \(L\)에서 <b>가장 큰 짝</b>을 골랐으면 판정 오류로 보아 <b>9</b>.
+                근호를 소수로 바꿔 썼어도 대소 판정이 맞으면 감점하지 않는다.
+              </td></tr>
+          <tr><td class="left nm">② 8점</td>
+              <td class="left">
+                2-1 셋 구분 + 2-2 까닭 + 2-3 기준·근거가 모두 있고
+                <b>값을 인용</b> → <b>8</b> /
+                까닭과 근거는 썼으나 값 인용이 없거나 한쪽뿐 → <b>6</b> /
+                결과가 다르다는 사실만 확인 → <b>4</b> /
+                서술하려는 시도만 → <b>4</b>
+              </td></tr>
+          <tr><td class="left nm">③ 12점</td>
+              <td class="left">
+                \(H\) 둘 + \(\mathrm{P},\mathrm{P}'\) 둘 + 판정 둘이 전부 정확 → <b>12</b> /
+                두 방법을 모두 적용했고 계산 또는 판정 오류가 1~2곳 → <b>9</b> /
+                해밍과 퍼셉트론 중 <b>한 가지만</b> 바르게 적용 → <b>7</b> /
+                두 행렬을 비교하려는 시도만 → <b>4</b><br>
+                ※ 3-2는 분자·분모 칸이 맞으면 기약분수로 못 줄였어도 정확으로 본다.
+              </td></tr>
+          <tr><td class="left nm">④ 8점</td>
+              <td class="left">
+                4-1 두 관점 구분 + 4-2 다섯 칸 정확 + 4-3이 그 수를 들어 한계 서술 → <b>8</b> /
+                4-1·4-2는 맞으나 4-3이 값 없이 막연함 → <b>6</b> /
+                4-2의 값은 채웠으나 4-3이 한계로 이어지지 않음 → <b>4</b> /
+                서술하려는 시도만 → <b>3</b>
+              </td></tr>
+        </tbody>
+      </table>
+
+      <div class="exam-guide" style="margin-top: 3mm;">
+        <b>스캔 채점 메모</b> &nbsp; 답란은 모두 테두리로 닫혀 있고 각 문항 좌측에
+        <b>문항 코드</b>(1-1 … 4-3)가 인쇄되어 있다. 쪽마다 학년·반·번호·이름이
+        되풀이되므로 스캔본이 흩어져도 복원된다. 채점 결과는
+        <b>문항 코드 단위로 기록</b>하되, 점수는 위 척도에 따라
+        <b>채점 요소 단위(12·9·7·4 등)로만</b> 매긴다 — 문항마다 배점을 쪼개면
+        채점기준에 없는 점수가 나온다.
+      </div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">6 / 6</div>
+</div>
+
+
+<script>
+  window.addEventListener('load', function () { window.safeTypeset(); });
+</script>
+</body>
+</html>
