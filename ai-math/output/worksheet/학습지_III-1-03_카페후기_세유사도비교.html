@@ -33,14 +33,12 @@
      확정 높이가 없어 단이 채워지지 않는다 → 이 파일에서만 balance 로 되돌린다. */
   .ws-body { column-fill: balance; }
 
-  /* ── 미션 배너 ── */
   .mission { border: var(--lm-border-thin) solid var(--lm-page-ink);
              border-radius: var(--lm-radius-sm); padding: 2.5mm 3mm;
              margin-bottom: 2.5mm; font-size: var(--lm-page-small);
              line-height: var(--lm-page-line-body); }
   .mission b { color: var(--lm-accent); }
 
-  /* ── STEP 머리 ── */
   .step-header { display: flex; align-items: baseline; gap: var(--lm-space-2);
                  margin: var(--lm-space-4) 0 var(--lm-space-2);
                  padding-bottom: var(--lm-space-1);
@@ -56,26 +54,22 @@
            margin: 2.5mm 0 1mm; }
   .qline .qn { font-weight: 700; color: var(--lm-accent); margin-right: 1.5mm; }
 
-  /* 후기 / 사전 표 */
   .ws-table td.left, .ws-table th.left { text-align: left; }
   .ws-table td.rv { text-align: left; font-size: 0.95em;
                     line-height: var(--lm-page-line-body); }
   .ws-table td.nm { font-weight: 700; color: var(--lm-accent); white-space: nowrap; }
   td.fill { background: var(--lm-page); height: 9mm; }
-  td.fill.tall { height: 13mm; }
+  td.fill.tall { height: 12mm; }
 
   .bk { display: inline-block; min-width: 14mm;
         border-bottom: 0.3mm solid var(--lm-page-ink); margin: 0 1mm; }
-  .bk.sm { min-width: 8mm; }
 
   .ans-key { font-size: var(--lm-page-small); line-height: var(--lm-page-line-body); }
-  .ans-key h3 { font-size: var(--lm-page-h3); margin: var(--lm-space-4) 0 var(--lm-space-2);
+  .ans-key h3 { font-size: var(--lm-page-h3); margin: 2mm 0 1.2mm;
                 padding-bottom: var(--lm-space-1);
                 border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
                 break-after: avoid; page-break-after: avoid; }
-  /* 정답 쪽은 문단이 스물몇 개라 기본 간격이면 A4 를 넘는다 */
   .ans-key p { margin: 0 0 1.4mm; }
-  .ans-key h3 { margin-top: 2mm; margin-bottom: 1.2mm; }
   .ans-key .why { color: var(--lm-page-ink-2); }
   .teacher-only { font-size: 0.72em; font-weight: 600; letter-spacing: 0.06em;
                   color: var(--lm-page); background: var(--lm-accent);
@@ -85,7 +79,7 @@
 </head>
 <body data-subject="ai_math">
 
-<!-- ══════════════════ PAGE 1 · 자료와 감성 사전 ══════════════════ -->
+<!-- ══════════════════ PAGE 1 · 자료와 벡터화 ══════════════════ -->
 <div class="ws-page">
 
   <header class="ws-head">
@@ -108,7 +102,7 @@
     <article class="ws-problem ws-span-all">
       <div class="mission">
         <b>미션</b> &nbsp; 한 카페가 온라인 후기 3편을 분석해 마케팅 전략을 세우려 한다.
-        AI 데이터 분석가가 되어 <b>세 가지 유사도</b>로 후기를 분석하고,
+        AI 데이터 분석가가 되어 <b>세 가지 유사도</b>로 후기를 견주고,
         <b>‘대표 후기’</b>를 추천하시오.
       </div>
 
@@ -120,21 +114,40 @@
         </tbody>
       </table>
     </article>
+
     <article class="ws-problem ws-span-all">
       <div class="step-header">
-        <span class="step-badge">감성 사전</span>
-        <span class="step-title">벡터를 만들 때 쓸 단어 목록</span>
-        <span class="step-note">사전에 없는 말(분위기·가격·커피 등)은 세지 않는다</span>
+        <span class="step-badge">STEP 1</span>
+        <span class="step-title">후기를 벡터로 바꾸기</span>
+        <span class="step-note">활용형은 기본형으로 (좋아요·좋았고 → 좋다)</span>
       </div>
+
+      <p class="qline" style="margin-top: 0;"><span class="qn">①</span>단어 사전
+        \(U=\{\)분위기, 가격, 맛있다, 좋다, 깨끗하다, 시끄럽다\(\}\) 의 여섯 단어가
+        각 후기에 <b>몇 번</b> 나오는지 세어 적으시오. 사전에 없는 말은 세지 않는다.</p>
 
       <table class="ws-table">
         <thead>
-          <tr><th class="left" style="width: 16%;">분류</th><th class="left">단어</th></tr>
+          <tr><th class="left" style="width: 13%;"></th><th>분위기</th><th>가격</th><th>맛있다</th><th>좋다</th><th>깨끗하다</th><th>시끄럽다</th></tr>
         </thead>
         <tbody>
-          <tr><td class="left"><b>긍정</b></td><td class="left">맛있다, 친절하다, 깨끗하다, 좋다, 저렴하다, 따뜻하다, 만족, 추천, 편안하다, 달콤하다, 신선하다</td></tr>
-          <tr><td class="left"><b>중립</b></td><td class="left">보통, 평범하다, 위치, 크기, 넓다, 조용하다, 많다, 적다</td></tr>
-          <tr><td class="left"><b>부정</b></td><td class="left">비싸다, 불친절하다, 좁다, 느리다, 별로다, 아쉽다, 불편하다, 시끄럽다, 부담스럽다</td></tr>
+          <tr><td class="left"><b>후기 A</b></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left"><b>후기 B</b></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left"><b>후기 C</b></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+        </tbody>
+      </table>
+
+      <p class="qline"><span class="qn">②</span>표의 한 줄이 그대로 벡터다.
+        벡터의 <b>크기</b>도 구해 두자. (뒤에서 코사인 유사도에 쓴다.)</p>
+
+      <table class="ws-table">
+        <thead>
+          <tr><th class="left" style="width: 13%;"></th><th>벡터</th><th style="width: 26%;">크기</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left"><b>후기 A</b></td><td class="fill">\(\mathrm{A}=(\quad,\ \quad,\ \quad,\ \quad,\ \quad,\ \quad)\)</td><td class="fill">\(|\mathrm{A}|=\)</td></tr>
+          <tr><td class="left"><b>후기 B</b></td><td class="fill">\(\mathrm{B}=(\quad,\ \quad,\ \quad,\ \quad,\ \quad,\ \quad)\)</td><td class="fill">\(|\mathrm{B}|=\)</td></tr>
+          <tr><td class="left"><b>후기 C</b></td><td class="fill">\(\mathrm{C}=(\quad,\ \quad,\ \quad,\ \quad,\ \quad,\ \quad)\)</td><td class="fill">\(|\mathrm{C}|=\)</td></tr>
         </tbody>
       </table>
     </article>
@@ -145,7 +158,7 @@
 </div>
 
 
-<!-- ══════════════════ PAGE 2 · 벡터화와 유클리드 ══════════════════ -->
+<!-- ══════════════════ PAGE 2 · 유클리드 · 코사인 ══════════════════ -->
 <div class="ws-page">
 
   <h2 class="ws-section">실생활 텍스트 데이터 분석 (이어서)</h2>
@@ -154,59 +167,49 @@
 
     <article class="ws-problem ws-span-all">
       <div class="step-header">
-        <span class="step-badge">STEP 1</span>
-        <span class="step-title">후기를 벡터로 바꾸기</span>
-        <span class="step-note">활용형은 기본형으로 (좋아요·좋았고 → 좋다)</span>
-      </div>
-
-      <p class="qline"><span class="qn">①</span>각 후기에서 감성 사전의 단어를 찾아 적고,
-        <b>몇 번</b> 나왔는지 세시오. 같은 단어가 두 번 나오면 <b>2로 센다.</b></p>
-
-      <table class="ws-table">
-        <thead>
-          <tr><th class="left" style="width: 12%;"></th><th>긍정 단어</th><th>중립 단어</th><th>부정 단어</th></tr>
-        </thead>
-        <tbody>
-          <tr><td class="left"><b>후기 A</b></td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left"><b>후기 B</b></td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left"><b>후기 C</b></td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
-        </tbody>
-      </table>
-
-      <p class="qline"><span class="qn">②</span>각 후기를
-        <b>(긍정 수, 중립 수, 부정 수)</b> 꼴의 벡터로 나타내고, 벡터의 크기도 구하시오.</p>
-
-      <table class="ws-table">
-        <thead>
-          <tr><th class="left" style="width: 12%;"></th><th>벡터</th><th>크기</th></tr>
-        </thead>
-        <tbody>
-          <tr><td class="left"><b>후기 A</b></td><td class="fill">\(\mathrm{A}=(\qquad,\ \qquad,\ \qquad)\)</td><td class="fill">\(|\mathrm{A}|=\)</td></tr>
-          <tr><td class="left"><b>후기 B</b></td><td class="fill">\(\mathrm{B}=(\qquad,\ \qquad,\ \qquad)\)</td><td class="fill">\(|\mathrm{B}|=\)</td></tr>
-          <tr><td class="left"><b>후기 C</b></td><td class="fill">\(\mathrm{C}=(\qquad,\ \qquad,\ \qquad)\)</td><td class="fill">\(|\mathrm{C}|=\)</td></tr>
-        </tbody>
-      </table>
-    </article>
-    <article class="ws-problem ws-span-all">
-      <div class="step-header">
         <span class="step-badge">STEP 2</span>
-        <span class="step-title">유클리드 유사도 \(L\) 계산하기</span>
-        <span class="step-note">두 점 사이의 거리 · 값이 <b>작을수록</b> 유사</span>
+        <span class="step-title">유클리드 유사도 \(L\)</span>
+        <span class="step-note">두 점 사이의 거리 · <b>작을수록</b> 유사</span>
       </div>
 
       <p class="qline" style="margin-top: 0;">
-        유사도는 <b>두 후기의 짝</b>마다 하나씩 나온다. 세 짝을 모두 구하시오.
+        유사도는 <b>두 후기의 짝</b>마다 하나씩 나온다.
+        근호를 벗기기 어려우면 <b>\(L^2\)끼리 견주어도</b> 대소는 그대로다.
       </p>
 
       <table class="ws-table">
         <thead>
-          <tr><th class="left" style="width: 14%;">짝</th><th>계산 과정</th><th style="width: 20%;">값</th></tr>
+          <tr><th class="left" style="width: 15%;">짝</th><th>계산 과정</th><th style="width: 16%;">\(L^2\)</th><th style="width: 16%;">\(L\)</th></tr>
         </thead>
         <tbody>
-          <tr><td class="left">\(L(\mathrm{A},\mathrm{B})\)</td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left">\(L(\mathrm{A},\mathrm{C})\)</td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left">\(L(\mathrm{B},\mathrm{C})\)</td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left"><b>결론</b></td><td class="left" colspan="2">유클리드 유사도로 가장 유사한 두 후기 : <span class="bk"></span></td></tr>
+          <tr><td class="left">A 와 B</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
+          <tr><td class="left">A 와 C</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
+          <tr><td class="left">B 와 C</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
+          <tr><td class="left"><b>결론</b></td><td class="left" colspan="3">유클리드 유사도로 가장 유사한 두 후기 : <span class="bk"></span></td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="ws-problem ws-span-all">
+      <div class="step-header">
+        <span class="step-badge">STEP 3</span>
+        <span class="step-title">코사인 유사도 \(C\)</span>
+        <span class="step-note">\(C(X,Y)=\dfrac{X \cdot Y}{|X||Y|}\) · <b>클수록</b> 유사</span>
+      </div>
+
+      <p class="qline" style="margin-top: 0;">
+        여기서도 <b>\(C^2\)끼리 견주면</b> 근호가 사라져 분수 비교로 끝난다.
+      </p>
+
+      <table class="ws-table">
+        <thead>
+          <tr><th class="left" style="width: 15%;">짝</th><th style="width: 16%;">\(X \cdot Y\)</th><th>계산 과정</th><th style="width: 16%;">\(C^2\)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">A 와 B</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
+          <tr><td class="left">A 와 C</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
+          <tr><td class="left">B 와 C</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
+          <tr><td class="left"><b>결론</b></td><td class="left" colspan="3">코사인 유사도로 가장 유사한 두 후기 : <span class="bk"></span></td></tr>
         </tbody>
       </table>
     </article>
@@ -217,7 +220,7 @@
 </div>
 
 
-<!-- ══════════════════ PAGE 3 · 코사인과 자카드 ══════════════════ -->
+<!-- ══════════════════ PAGE 3 · 자카드 · 종합 ══════════════════ -->
 <div class="ws-page">
 
   <h2 class="ws-section">실생활 텍스트 데이터 분석 (이어서)</h2>
@@ -226,37 +229,18 @@
 
     <article class="ws-problem ws-span-all">
       <div class="step-header">
-        <span class="step-badge">STEP 3</span>
-        <span class="step-title">코사인 유사도 \(C\) 계산하기</span>
-        <span class="step-note">\(C(X,Y)=\dfrac{X \cdot Y}{|X||Y|}\) · 값이 <b>클수록</b> 유사</span>
-      </div>
-
-      <table class="ws-table">
-        <thead>
-          <tr><th class="left" style="width: 14%;">짝</th><th>계산 과정</th><th style="width: 20%;">값</th></tr>
-        </thead>
-        <tbody>
-          <tr><td class="left">\(C(\mathrm{A},\mathrm{B})\)</td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left">\(C(\mathrm{A},\mathrm{C})\)</td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left">\(C(\mathrm{B},\mathrm{C})\)</td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left"><b>결론</b></td><td class="left" colspan="2">코사인 유사도로 가장 유사한 두 후기 : <span class="bk"></span></td></tr>
-        </tbody>
-      </table>
-    </article>
-    <article class="ws-problem ws-span-all">
-      <div class="step-header">
         <span class="step-badge">STEP 4</span>
-        <span class="step-title">자카드 유사도 \(J\) 계산하기</span>
-        <span class="step-note">몇 번 나왔는지는 묻지 않는다 · 중복 제거</span>
+        <span class="step-title">자카드 유사도 \(J\)</span>
+        <span class="step-note">몇 번 나왔는지는 묻지 않는다</span>
       </div>
 
       <p class="qline" style="margin-top: 0;">
-        각 후기가 <b>쓴 단어의 집합</b>을 적으시오. (감성 사전에 있는 단어만, 중복 제거)
+        각 후기가 <b>쓴 단어의 집합</b>을 적으시오. (0이 아닌 칸의 단어만, 중복 없이)
       </p>
 
       <table class="ws-table">
         <thead>
-          <tr><th class="left" style="width: 12%;"></th><th>단어 집합</th><th style="width: 16%;">원소 개수</th></tr>
+          <tr><th class="left" style="width: 13%;"></th><th>단어 집합</th><th style="width: 18%;">원소 개수</th></tr>
         </thead>
         <tbody>
           <tr><td class="left"><b>후기 A</b></td><td class="fill tall">\(\mathrm{A}=\{\)</td><td class="fill tall"></td></tr>
@@ -267,29 +251,16 @@
 
       <table class="ws-table">
         <thead>
-          <tr><th class="left" style="width: 14%;">짝</th><th>\(n(X \cap Y)\)</th><th>\(n(X \cup Y)\)</th><th style="width: 20%;">값</th></tr>
+          <tr><th class="left" style="width: 15%;">짝</th><th>\(n(X \cap Y)\)</th><th>\(n(X \cup Y)\)</th><th style="width: 18%;">\(J(X,Y)\)</th></tr>
         </thead>
         <tbody>
-          <tr><td class="left">\(J(\mathrm{A},\mathrm{B})\)</td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
-          <tr><td class="left">\(J(\mathrm{A},\mathrm{C})\)</td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
-          <tr><td class="left">\(J(\mathrm{B},\mathrm{C})\)</td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left">A 와 B</td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left">A 와 C</td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left">B 와 C</td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
           <tr><td class="left"><b>결론</b></td><td class="left" colspan="3">자카드 유사도로 가장 유사한 두 후기 : <span class="bk"></span></td></tr>
         </tbody>
       </table>
     </article>
-
-  </div>
-
-  <div class="ws-pagenum">3 / 5</div>
-</div>
-
-
-<!-- ══════════════════ PAGE 4 · 종합 비교 및 해석 ══════════════════ -->
-<div class="ws-page">
-
-  <h2 class="ws-section">실생활 텍스트 데이터 분석 (이어서)</h2>
-
-  <div class="ws-body">
 
     <article class="ws-problem ws-span-all">
       <div class="step-header">
@@ -297,11 +268,11 @@
         <span class="step-title">종합 비교 및 해석</span>
       </div>
 
-      <p class="qline" style="margin-top: 0;"><span class="qn">①</span>세 유사도의 결과를 한눈에 정리하시오.</p>
+      <p class="qline" style="margin-top: 0;"><span class="qn">①</span>세 결과를 한눈에 정리하시오.</p>
 
       <table class="ws-table">
         <thead>
-          <tr><th class="left" style="width: 22%;">유사도</th><th>가장 유사한 짝</th><th>값</th><th style="width: 30%;">이 유사도가 재는 것</th></tr>
+          <tr><th class="left" style="width: 22%;">유사도</th><th>가장 유사한 짝</th><th>값</th><th style="width: 32%;">이 유사도가 재는 것</th></tr>
         </thead>
         <tbody>
           <tr><td class="left">유클리드 \(L\)</td><td class="fill"></td><td class="fill"></td><td class="left">단어 사용 <b>양(크기)</b>의 차이</td></tr>
@@ -310,13 +281,27 @@
         </tbody>
       </table>
 
-      <p class="qline"><span class="qn">②</span>세 유사도가 <b>모두 같은 짝</b>을 골랐는가? 결과를 쓰시오.</p>
+      <p class="qline"><span class="qn">②</span>세 유사도가 <b>같은 짝</b>을 골랐는가? 결과를 쓰시오.</p>
       <div class="ws-answer-space sm"></div>
     </article>
+
+  </div>
+
+  <div class="ws-pagenum">3 / 5</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 4 · 해석과 제안 ══════════════════ -->
+<div class="ws-page">
+
+  <h2 class="ws-section">실생활 텍스트 데이터 분석 (이어서)</h2>
+
+  <div class="ws-body">
+
     <article class="ws-problem ws-span-all">
-      <p class="qline" style="margin-top: 0;"><span class="qn">③</span>유사도마다 결론이 달라진 <b>까닭</b>은 무엇인가?
+      <p class="qline" style="margin-top: 0;"><span class="qn">③</span>결론이 갈린 <b>까닭</b>은 무엇인가?
         각 유사도가 <b>무엇을 재는지</b>의 차이를 근거로 서술하시오.
-        (앞에서 구한 \(|\mathrm{A}|,\ |\mathrm{B}|,\ |\mathrm{C}|\) 값을 함께 쓰면 좋다.)</p>
+        (앞에서 구한 \(|\mathrm{A}|,\ |\mathrm{B}|,\ |\mathrm{C}|\) 와 단어 집합을 함께 쓰면 좋다.)</p>
       <div class="ws-answer-space md"></div>
 
       <p class="qline"><span class="qn">④</span>카페 마케팅 담당자 입장에서 세 후기 중
@@ -325,7 +310,7 @@
 
       <table class="ws-table">
         <tbody>
-          <tr><td class="left nm" style="width: 24%;">내가 고른 후기</td><td class="fill tall"></td></tr>
+          <tr><td class="left nm" style="width: 26%;">내가 고른 후기</td><td class="fill tall"></td></tr>
           <tr><td class="left nm">사용한 유사도<br>및 근거</td><td class="fill tall"></td></tr>
           <tr><td class="left nm">마케팅 활용 제안</td><td class="fill tall"></td></tr>
         </tbody>
@@ -351,79 +336,76 @@
   <div class="ws-body ans-key">
 
     <div class="mission">
-      <b>이 활동의 목적</b> &nbsp; 계산 연습이 아니라 <b>답이 갈리는 경험</b>이다.
-      ②에서 “유클리드만 다르다”가 나오는 순간이 절정이므로,
-      세 STEP이 다 끝날 때까지 답을 공개하지 말 것.
+      <b>이 활동의 목적</b> &nbsp; 계산 연습이 아니라 <b>세 답이 모두 갈리는 경험</b>이다.
+      ②에서 “셋 다 다르다”가 드러나는 순간이 절정이므로,
+      STEP 4까지 끝날 때까지 답을 공개하지 말 것.
     </div>
 
     <h3>STEP 1</h3>
-    <p><b>후기 A</b> 긍정 5(따뜻하다·좋다·달콤하다·맛있다·친절하다) /
-       중립 1(조용하다) / 부정 4(아쉽다·좁다·시끄럽다·불편하다) →
-       \(\mathrm{A}=(5,\ 1,\ 4)\), \(|\mathrm{A}|=\sqrt{42}\approx 6.48\)</p>
-    <p><b>후기 B</b> 긍정 2(신선하다·맛있다) / 중립 4(위치·보통×2·평범하다) /
-       부정 2(비싸다·부담스럽다) →
-       \(\mathrm{B}=(2,\ 4,\ 2)\), \(|\mathrm{B}|=\sqrt{24}\approx 4.90\)</p>
-    <p><b>후기 C</b> 긍정 8(좋다×2·맛있다·저렴하다·만족·친절하다·추천·깨끗하다) /
-       중립 0 / 부정 0 →
-       \(\mathrm{C}=(8,\ 0,\ 0)\), \(|\mathrm{C}|=8\)</p>
-    <p class="why">B의 ‘보통’이 두 번(위치는 보통 / 직원은 보통) 나오는 것을 놓치기 쉽다.
-       C의 ‘좋다’도 두 번(좋고 / 좋았고)이다. 여기서 갈리면 뒤가 전부 어긋나므로
-       ①을 반드시 확인하고 ②로 넘어갈 것.</p>
+    <p>\(\mathrm{A}=(1,\ 0,\ 1,\ 1,\ 0,\ 1)\), \(|\mathrm{A}|=\sqrt{4}=2\)<br>
+       \(\mathrm{B}=(1,\ 1,\ 1,\ 0,\ 0,\ 0)\), \(|\mathrm{B}|=\sqrt{3}\approx 1.73\)<br>
+       \(\mathrm{C}=(1,\ 1,\ 1,\ 2,\ 1,\ 0)\), \(|\mathrm{C}|=\sqrt{8}=2\sqrt{2}\approx 2.83\)</p>
+    <p class="why">C의 ‘좋다’가 <b>두 번</b>(좋고 / 좋았고)인 것을 놓치기 쉽다.
+       여기서 갈리면 뒤가 전부 어긋나므로 ①을 확인하고 ②로 넘어갈 것.
+       ‘커피·직원’은 세 후기에 다 있지만 사전에 없으므로 세지 않는다.</p>
 
     <h3>STEP 2 · 유클리드</h3>
-    <p>\(L(\mathrm{A},\mathrm{B})=\sqrt{3^2+3^2+2^2}=\sqrt{22}\approx 4.69\)<br>
-       \(L(\mathrm{A},\mathrm{C})=\sqrt{3^2+1^2+4^2}=\sqrt{26}\approx 5.10\)<br>
-       \(L(\mathrm{B},\mathrm{C})=\sqrt{6^2+4^2+2^2}=\sqrt{56}\approx 7.48\)</p>
-    <p>가장 작은 값 → <strong>A와 B</strong></p>
+    <p>\(L(\mathrm{A},\mathrm{B})^2=0+1+0+1+0+1=3\) → \(L=\sqrt{3}\approx 1.73\)<br>
+       \(L(\mathrm{A},\mathrm{C})^2=0+1+0+1+1+1=4\) → \(L=2\)<br>
+       \(L(\mathrm{B},\mathrm{C})^2=0+0+0+4+1+0=5\) → \(L=\sqrt{5}\approx 2.24\)</p>
+    <p>가장 작은 값 → <strong>A와 B</strong> <span class="why">(3, 4, 5로 딱 떨어진다)</span></p>
 
     <h3>STEP 3 · 코사인</h3>
-    <p>\(\mathrm{A}\cdot\mathrm{B}=22\), \(\mathrm{A}\cdot\mathrm{C}=40\), \(\mathrm{B}\cdot\mathrm{C}=16\)</p>
-    <p>\(C(\mathrm{A},\mathrm{B})=\dfrac{22}{\sqrt{42}\sqrt{24}}\approx 0.69\),
-       \(C(\mathrm{A},\mathrm{C})=\dfrac{40}{\sqrt{42}\times 8}\approx 0.77\),
-       \(C(\mathrm{B},\mathrm{C})=\dfrac{16}{\sqrt{24}\times 8}\approx 0.41\)</p>
-    <p>가장 큰 값 → <strong>A와 C</strong></p>
+    <p>\(\mathrm{A}\cdot\mathrm{B}=2\), \(\mathrm{A}\cdot\mathrm{C}=4\), \(\mathrm{B}\cdot\mathrm{C}=3\)</p>
+    <p>\(C(\mathrm{A},\mathrm{B})=\dfrac{2}{2\sqrt{3}}=\dfrac{1}{\sqrt{3}}\approx 0.58\)
+       &nbsp;→&nbsp; \(C^2=\dfrac{1}{3}\)<br>
+       \(C(\mathrm{A},\mathrm{C})=\dfrac{4}{2 \cdot 2\sqrt{2}}=\dfrac{1}{\sqrt{2}}\approx 0.71\)
+       &nbsp;→&nbsp; \(C^2=\dfrac{1}{2}\)<br>
+       \(C(\mathrm{B},\mathrm{C})=\dfrac{3}{\sqrt{3}\cdot 2\sqrt{2}}\approx 0.61\)
+       &nbsp;→&nbsp; \(C^2=\dfrac{3}{8}\)</p>
+    <p>\(\dfrac{1}{2} &gt; \dfrac{3}{8} &gt; \dfrac{1}{3}\) 이므로 → <strong>A와 C</strong></p>
+    <p class="why">제곱해서 분수로 견주면 <b>계산기가 필요 없다.</b> 통분해 \(\frac{12}{24},\ \frac{9}{24},\ \frac{8}{24}\).</p>
 
     <h3>STEP 4 · 자카드</h3>
-    <p>\(\mathrm{A}\)(10개) = {따뜻하다, 좋다, 달콤하다, 맛있다, 친절하다, 조용하다, 아쉽다, 좁다, 시끄럽다, 불편하다}<br>
-       \(\mathrm{B}\)(7개) = {신선하다, 맛있다, 비싸다, 부담스럽다, 위치, 보통, 평범하다}<br>
-       \(\mathrm{C}\)(7개) = {좋다, 맛있다, 저렴하다, 만족, 친절하다, 추천, 깨끗하다}</p>
-    <p>\(J(\mathrm{A},\mathrm{B})=\dfrac{1}{16}\approx 0.06\) (공통: 맛있다)<br>
-       \(J(\mathrm{A},\mathrm{C})=\dfrac{3}{14}\approx 0.21\) (공통: 맛있다, 좋다, 친절하다)<br>
-       \(J(\mathrm{B},\mathrm{C})=\dfrac{1}{13}\approx 0.08\) (공통: 맛있다)</p>
-    <p>가장 큰 값 → <strong>A와 C</strong></p>
-    <p class="why">집합이므로 ‘보통×2’, ‘좋다×2’를 <b>1개로</b> 센다. STEP 1과 다른 점이다.</p>
+    <p>\(\mathrm{A}\)(4개) = {분위기, 맛있다, 좋다, 시끄럽다}<br>
+       \(\mathrm{B}\)(3개) = {분위기, 가격, 맛있다}<br>
+       \(\mathrm{C}\)(5개) = {분위기, 가격, 맛있다, 좋다, 깨끗하다}</p>
+    <p>\(J(\mathrm{A},\mathrm{B})=\dfrac{2}{5}\), \(J(\mathrm{A},\mathrm{C})=\dfrac{3}{6}=\dfrac{1}{2}\),
+       \(J(\mathrm{B},\mathrm{C})=\dfrac{3}{5}\) → <strong>B와 C</strong></p>
+    <p class="why">B가 쓴 세 단어가 <b>전부 C에 들어 있다</b>(\(\mathrm{B} \subset \mathrm{C}\)).
+       그래서 자카드가 가장 크다. 집합이므로 C의 ‘좋다×2’는 <b>1개로</b> 센다.</p>
 
     <h3>STEP 5 ①②</h3>
-    <p>유클리드 → <strong>A·B</strong> (\(\sqrt{22}\)) / 코사인 → <strong>A·C</strong> (0.77) /
-       자카드 → <strong>A·C</strong> (3/14)</p>
-    <p>② <strong>아니다. 유클리드만 다른 짝을 골랐다.</strong></p>
+    <p>유클리드 → <strong>A·B</strong> (\(\sqrt{3}\)) / 코사인 → <strong>A·C</strong> (\(1/\sqrt{2}\)) /
+       자카드 → <strong>B·C</strong> (3/5)</p>
+    <p>② <strong>아니다. 셋이 모두 다른 짝을 골랐다.</strong></p>
 
     <h3>STEP 5 ③</h3>
-    <p>C는 긍정만 8개여서 벡터가 크다(\(|\mathrm{C}|=8\)). A(\(\approx 6.48\))와
-       B(\(\approx 4.90\))는 <b>크기가 서로 비슷하다.</b>
-       유클리드는 성분의 차를 그대로 재므로 <b>쓴 단어의 양이 비슷하면 가깝게</b> 나온다.
-       그래서 내용이 달라도 A와 B가 뽑혔다.</p>
-    <p>반면 코사인은 크기를 나눠 없애고 <b>방향만</b> 본다. A와 C는 둘 다 긍정 쪽으로
-       기울어 있어 가장 유사하게 나온다. 자카드도 ‘맛있다·좋다·친절하다’가 겹쳐 A와 C를 고른다.</p>
-    <p class="why"><b>“유클리드가 틀렸다”가 아니다.</b> 분량까지 포함해 재는 자일 뿐이다.
+    <p><b>유클리드(A·B)</b> — 성분의 차를 그대로 잰다. A와 B는 쓴 단어가 적어
+       벡터가 작다(\(|\mathrm{A}|=2\), \(|\mathrm{B}|\approx1.73\)). C는 ‘좋다’가 2이고
+       단어도 다섯이라 커서(\(\approx 2.83\)) 누구와도 멀어진다.
+       <b>내용이 아니라 분량이 비슷하면 가깝게 나온다.</b></p>
+    <p><b>코사인(A·C)</b> — 크기를 나눠 없애고 방향만 본다. A와 C는 ‘분위기·맛있다·좋다’를
+       함께 쓰고, 특히 <b>‘좋다’를 쓴 쪽이 이 둘뿐</b>이라 방향이 가장 잘 맞는다.</p>
+    <p><b>자카드(B·C)</b> — 몇 번인지 버리고 <b>어떤 단어를 썼는지</b>만 본다.
+       \(\mathrm{B} \subset \mathrm{C}\) 이므로 B의 단어는 전부 C에 있다.</p>
+    <p class="why">어느 하나가 틀린 것이 아니다. <b>세 자가 서로 다른 것을 재고 있을 뿐</b>이다.
        교과서 67쪽 방주도 “각각의 방법이 어떤 차이가 있고 어떤 의미가 있는지 이해하는 데
        중점을 두어 평가한다”고 밝히고 있다.</p>
 
     <h3>STEP 5 ④</h3>
     <p>정답은 하나가 아니다. <b>근거를 댔는지</b>로 채점한다.</p>
-    <p>· 가장 무난한 답 — <strong>후기 C</strong>. 긍정만 8개이고 A·C가 코사인·자카드
-       모두에서 가장 유사하므로, C가 A까지 대표할 수 있다. B는 어느 쪽과도 멀다.<br>
-       · <strong>후기 A</strong>를 고르는 것도 가능하다 — 세 유사도 모두에서 A가 한쪽에
-       들어가 있어 <b>세 후기의 가운데</b>에 있다. (다만 부정 4개를 홍보에 쓰기는 어렵다는
-       점을 짚어 줄 것.)</p>
-    <p class="why">“C가 제일 좋아 보여서”처럼 유사도를 근거로 대지 않으면 감점.
-       마케팅 활용 제안은 자유롭게 — 예: C를 대표 후기로 걸고,
-       A가 지적한 ‘좁음·소음’은 개선 과제로 삼는다.</p>
+    <p>· <strong>후기 C</strong> — 코사인·자카드 모두에서 한쪽에 들어가고, 부정적인 말이 없어
+       홍보에 쓰기 좋다. 가장 무난한 답.<br>
+       · <strong>후기 A</strong> — 세 유사도 중 둘에서 한쪽에 들어가 <b>가운데</b>에 있다.
+       다만 ‘시끄럽다’가 있어 홍보용으로는 부담이라는 점을 함께 짚어야 한다.</p>
+    <p class="why">“C가 좋아 보여서”처럼 유사도를 근거로 대지 않으면 감점.
+       마케팅 제안은 자유 — 예: C를 대표 후기로 걸고, A가 지적한 소음은 개선 과제로 삼는다.</p>
 
-    <div class="mission" style="margin-top: 3mm;">
-      <b>운영 메모</b> &nbsp; STEP 2~4를 모둠별로 하나씩 맡기면 25분 안에 끝난다.
-      코사인은 계산기가 필요하다(\(\sqrt{42}\), \(\sqrt{24}\)).
-      계산기가 없으면 값을 주고 <b>대소 비교만</b> 시켜도 목적은 달성된다.
+    <div class="mission" style="margin-top: 2.5mm;">
+      <b>운영 메모</b> &nbsp; STEP 2~4를 모둠별로 하나씩 맡기면 20분 안에 끝난다.
+      \(L^2\)과 \(C^2\)으로 견주게 하면 <b>계산기 없이</b> 전 과정을 손으로 할 수 있다.
+      칠판에 세 답을 나란히 적는 순간이 이 활동의 절정이다.
     </div>
 
   </div>
