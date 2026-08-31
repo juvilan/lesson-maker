@@ -67,11 +67,22 @@
                   margin-left: 6px; vertical-align: 0.15em; }
 
   /* ── 픽셀 격자 (전광판 이미지) ── */
+  /* 전광판 몸체 — 켜진 칸이 흰색이라, 칸 사이 gap 과 격자 바깥이 종이 흰색이면
+     숫자 모양이 배경에 녹아 읽히지 않는다. 격자에 어두운 바탕을 깔아 틈까지 메운다. */
   .wpix { display: grid; grid-template-columns: repeat(5, 4.6mm); gap: 0.5mm;
-          justify-content: center; margin: 1.5mm auto 1mm; }
+          justify-content: center; margin: 1.5mm auto 1mm;
+          background: var(--lm-page-ink); padding: 0.8mm; border-radius: 0.8mm; }
   .wpix i { display: block; width: 4.6mm; height: 4.6mm;
-            background: var(--lm-page-ink); border: 0.2mm solid var(--lm-page-rule); }
+            background: var(--lm-page-ink-2); }
   .wpix i.on { background: var(--lm-page); }
+
+  /* 인쇄 대화상자의 '배경 그래픽'은 기본이 꺼짐이라 격자와 배지가 사라진다 */
+  @media print {
+    .wpix, .wpix i, .teacher-only, .lvl-adv {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
   .pix-row { display: flex; justify-content: center; gap: 8mm; }
   .pix-cell { text-align: center; }
   .pix-cell .pname { font-size: var(--lm-page-small); font-weight: 700;
