@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전광판 숫자 분류 — 해밍 거리와 퍼셉트론 · 학습지</title>
+
+<link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+<link rel="stylesheet" href="../../../_shared/templates/worksheet-system.css">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      packages: { '[+]': ['boldsymbol', 'ams'] },
+      tags: 'ams'
+    },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] },
+    chtml: { scale: 0.95 }
+  };
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+<style>
+  .ws-body { column-fill: balance; }
+
+  .mission { border: var(--lm-border-thin) solid var(--lm-page-ink);
+             border-radius: var(--lm-radius-sm); padding: 2.5mm 3mm;
+             margin-bottom: 2.5mm; font-size: var(--lm-page-small);
+             line-height: var(--lm-page-line-body); }
+  .mission b { color: var(--lm-accent); }
+
+  .step-header { display: flex; align-items: baseline; gap: var(--lm-space-2);
+                 margin: var(--lm-space-4) 0 var(--lm-space-2);
+                 padding-bottom: var(--lm-space-1);
+                 border-bottom: var(--lm-border-thin) solid var(--lm-page-ink);
+                 break-after: avoid; page-break-after: avoid; }
+  .step-badge { flex: none; font-size: 0.78em; font-weight: 700; letter-spacing: 0.06em;
+                color: var(--lm-page); background: var(--lm-accent);
+                border-radius: var(--lm-radius-sm); padding: 1.5px 7px; }
+  .step-title { font-size: var(--lm-page-h3); font-weight: 700; color: var(--lm-page-ink); }
+  .step-note  { margin-left: auto; font-size: var(--lm-page-small); color: var(--lm-page-ink-3); }
+
+  .qline { font-size: var(--lm-page-small); line-height: var(--lm-page-line-body);
+           margin: 2.5mm 0 1mm; }
+  .qline .qn { font-weight: 700; color: var(--lm-accent); margin-right: 1.5mm; }
+
+  /* ── 전광판 픽셀 격자 ── */
+  .pix-row { display: flex; justify-content: center; gap: 12mm; margin: 2mm 0 1mm; }
+  .pix-cell { text-align: center; }
+  .pix-cell .pname { font-size: var(--lm-page-small); font-weight: 700;
+                     color: var(--lm-accent); margin-bottom: 1mm; }
+  .pix-cell .psub  { font-size: var(--lm-page-caption); color: var(--lm-page-ink-3);
+                     margin-top: 1mm; }
+  /* 전광판 몸체 — 켜진 칸이 흰색이라, 칸 사이 틈과 격자 바깥이 종이 흰색이면
+     숫자 모양이 배경에 녹는다. 격자 자체에 어두운 바탕을 깔아 틈까지 메운다. */
+  .wpix { display: grid; grid-template-columns: repeat(5, 5mm); gap: 0.5mm;
+          justify-content: center; background: var(--lm-page-ink);
+          padding: 0.8mm; border-radius: 0.8mm; }
+  .wpix i { display: block; width: 5mm; height: 5mm;
+            background: var(--lm-page-ink-2); }
+  .wpix i.on { background: var(--lm-page); }
+
+  .ws-table td.left, .ws-table th.left { text-align: left; }
+  .ws-table td.nm { font-weight: 700; color: var(--lm-accent); white-space: nowrap; }
+  td.fill { background: var(--lm-page); height: 9mm; }
+  td.fill.tall { height: 13mm; }
+  td.row { color: var(--lm-page-ink-3); }
+
+  .bk { display: inline-block; min-width: 14mm;
+        border-bottom: 0.3mm solid var(--lm-page-ink); margin: 0 1mm; }
+  .bk.sm { min-width: 8mm; }
+
+  .ans-key { font-size: var(--lm-page-small); line-height: var(--lm-page-line-body); }
+  .ans-key h3 { font-size: var(--lm-page-h3); margin: 2mm 0 1.2mm;
+                padding-bottom: var(--lm-space-1);
+                border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+                break-after: avoid; page-break-after: avoid; }
+  .ans-key p { margin: 0 0 1.4mm; }
+  .ans-key .why { color: var(--lm-page-ink-2); }
+  .teacher-only { font-size: 0.72em; font-weight: 600; letter-spacing: 0.06em;
+                  color: var(--lm-page); background: var(--lm-accent);
+                  border-radius: var(--lm-radius-sm); padding: 1px 7px;
+                  margin-left: 6px; vertical-align: 0.15em; }
+
+  /* 인쇄 대화상자의 '배경 그래픽'은 기본이 꺼짐이라 배지와 픽셀이 사라진다 */
+  @media print {
+    .step-badge, .teacher-only, .wpix i {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body data-subject="ai_math">
+
+<!-- ══════════════════ PAGE 1 · 자료와 행렬 ══════════════════ -->
+<div class="ws-page">
+
+  <header class="ws-head">
+    <div class="ws-title-group">
+      <div class="ws-chapter">Ⅲ-1 자료의 분류 · 교과서 78~82쪽</div>
+      <h1 class="ws-title">전광판 숫자 분류 — 해밍 거리와 퍼셉트론</h1>
+    </div>
+    <div class="ws-meta">인공지능수학 · 3학년</div>
+  </header>
+
+  <div class="ws-student">
+    <span class="ws-student-field"><label>학년</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>반</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>번호</label><span class="line"></span></span>
+    <span class="ws-student-field"><label>이름</label><span class="line"></span></span>
+  </div>
+
+  <div class="ws-body">
+
+    <article class="ws-problem ws-span-all">
+      <div class="mission">
+        <b>미션</b> &nbsp; 가로 5, 세로 7인 전광판에 숫자가 떠 있다.
+        전구 몇 개가 나가 <b>일부만 표시된 이미지 C</b>가 들어왔다.
+        인공지능이 이것을 <b>0과 8 중 어느 쪽</b>으로 판정하는지,
+        <b>두 가지 방법</b>으로 알아보자.
+      </div>
+
+      <div class="pix-row">
+        <div class="pix-cell">
+          <div class="pname">이미지 A</div>
+          <div class="wpix">
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i class="on"></i><i class="on"></i>
+            <i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i>
+            <i class="on"></i><i class="on"></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+          </div>
+          <div class="psub">숫자 0</div>
+        </div>
+        <div class="pix-cell">
+          <div class="pname">이미지 B</div>
+          <div class="wpix">
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+          </div>
+          <div class="psub">숫자 8</div>
+        </div>
+        <div class="pix-cell">
+          <div class="pname">입력 이미지 C</div>
+          <div class="wpix">
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i></i><i></i><i></i><i></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+            <i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+          </div>
+          <div class="psub">전구 몇 개가 나갔다</div>
+        </div>
+      </div>
+    </article>
+
+    <article class="ws-problem ws-span-all">
+      <div class="step-header">
+        <span class="step-badge">STEP 1</span>
+        <span class="step-title">이미지를 행렬로 바꾸기</span>
+        <span class="step-note">켜진 칸 1, 꺼진 칸 0</span>
+      </div>
+
+      <p class="qline" style="margin-top: 0;"><span class="qn">①</span>
+        세 이미지는 각각 성분이 0 또는 1인 \(7 \times 5\) 행렬이 된다.
+        <b>켜진 칸(1인 칸)의 개수</b>를 세어 적으시오.</p>
+
+      <table class="ws-table">
+        <thead>
+          <tr><th class="left" style="width: 34%;"></th><th>이미지 A (0)</th><th>이미지 B (8)</th><th>입력 이미지 C</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">켜진 칸의 개수</td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+        </tbody>
+      </table>
+
+      <p class="qline"><span class="qn">②</span>
+        이 개수는 뒤에서 <b>퍼셉트론의 가중치</b>를 정할 때 쓰인다.
+        어디에 쓰일지 미리 적어 두자 — 가중치 행렬은
+        \(W=\dfrac{1}{(\text{행렬 } A \text{의 모든 성분의 합})}\times A\) 이다.</p>
+
+      <table class="ws-table">
+        <tbody>
+          <tr><td class="left" style="width: 34%;">\(A\)에 대한 가중치 행렬 \(W\)</td><td class="fill">\(W=\dfrac{1}{\phantom{000}}A\)</td></tr>
+          <tr><td class="left">\(B\)에 대한 가중치 행렬 \(W'\)</td><td class="fill">\(W'=\dfrac{1}{\phantom{000}}B\)</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">1 / 5</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 2 · 해밍 거리 ══════════════════ -->
+<div class="ws-page">
+
+  <h2 class="ws-section">전광판 숫자 분류 (이어서)</h2>
+
+  <div class="ws-body">
+
+    <article class="ws-problem ws-span-all">
+      <div class="step-header">
+        <span class="step-badge">STEP 2</span>
+        <span class="step-title">해밍 거리 \(H\) 로 분류하기</span>
+        <span class="step-note">값이 다른 칸의 개수 · <b>작을수록</b> 유사</span>
+      </div>
+
+      <p class="qline" style="margin-top: 0;"><span class="qn">①</span>
+        \(C\)와 \(A\), \(C\)와 \(B\)를 <b>한 줄씩</b> 견주며 값이 다른 칸의 개수를 세시오.
+        (1쪽의 그림을 보고 가로줄 단위로 세면 편하다.)</p>
+
+      <table class="ws-table">
+        <thead>
+          <tr><th class="left" style="width: 22%;">가로줄</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th style="width: 14%;">합</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">\(C\)와 \(A\)가 다른 칸</td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left">\(C\)와 \(B\)가 다른 칸</td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+        </tbody>
+      </table>
+
+      <p class="qline"><span class="qn">②</span>해밍 거리를 쓰고, 어느 숫자로 분류되는지 판정하시오.</p>
+
+      <table class="ws-table">
+        <tbody>
+          <tr><td class="left" style="width: 30%;">\(H(\mathrm{C},\ \mathrm{A})\)</td><td class="fill"></td>
+              <td class="left" style="width: 30%;">\(H(\mathrm{C},\ \mathrm{B})\)</td><td class="fill"></td></tr>
+          <tr><td class="left"><b>판정</b></td><td class="left" colspan="3">해밍 거리로 분류하면 입력 이미지 C는 숫자 <span class="bk sm"></span> 이다. &nbsp; 그렇게 판단한 까닭 : <span class="bk"></span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="mission" style="margin-top: 3mm;">
+        <b>기억할 것</b> &nbsp; 해밍 거리는 <b>켜져야 할 칸이 꺼진 것</b>과
+        <b>꺼져야 할 칸이 켜진 것</b>을 <b>똑같이 1</b>로 센다. 방향을 따지지 않는다.
+      </div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">2 / 5</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 3 · 퍼셉트론 ══════════════════ -->
+<div class="ws-page">
+
+  <h2 class="ws-section">전광판 숫자 분류 (이어서)</h2>
+
+  <div class="ws-body">
+
+    <article class="ws-problem ws-span-all">
+      <div class="step-header">
+        <span class="step-badge">STEP 3</span>
+        <span class="step-title">퍼셉트론으로 분류하기</span>
+        <span class="step-note">겹쳐서 켜진 칸의 비율 · <b>클수록</b> 가능성 높음</span>
+      </div>
+
+      <p class="qline" style="margin-top: 0;">
+        정답 이미지를 그대로 가중치로 쓰면, 퍼셉트론의 출력은
+        <b>양쪽 다 켜진 칸의 개수</b>를 <b>정답 이미지의 켜진 칸 개수</b>로 나눈 값이 된다.
+      </p>
+
+      <p class="qline"><span class="qn">①</span>
+        \(C\)와 \(A\)가 <b>둘 다 켜진</b> 칸, \(C\)와 \(B\)가 <b>둘 다 켜진</b> 칸의 개수를 세시오.</p>
+
+      <table class="ws-table">
+        <thead>
+          <tr><th class="left" style="width: 22%;">가로줄</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th style="width: 14%;">합</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">\(C\)와 \(A\) 둘 다 켜짐</td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left">\(C\)와 \(B\) 둘 다 켜짐</td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+        </tbody>
+      </table>
+
+      <p class="qline"><span class="qn">②</span>두 퍼셉트론의 출력값을 분수로 쓰고 크기를 견주시오.</p>
+
+      <table class="ws-table">
+        <thead>
+          <tr><th class="left" style="width: 26%;">퍼셉트론</th><th>출력값 (분수)</th><th style="width: 24%;">소수로 (반올림)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">\(\mathrm{P}\) — \(A\)일 가능성</td><td class="fill tall"></td><td class="fill tall"></td></tr>
+          <tr><td class="left">\(\mathrm{P}'\) — \(B\)일 가능성</td><td class="fill tall"></td><td class="fill tall"></td></tr>
+          <tr><td class="left"><b>판정</b></td><td class="left" colspan="2">퍼셉트론으로 분류하면 입력 이미지 C는 숫자 <span class="bk sm"></span> 이다.</td></tr>
+        </tbody>
+      </table>
+
+      <p class="qline"><span class="qn">③</span>
+        두 출력값의 <b>분자</b>를 견주어 보시오. 무엇을 발견했는가?
+        그렇다면 답을 가른 것은 무엇인가?</p>
+      <div class="ws-answer-space md"></div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">3 / 5</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 4 · 비교와 한계 ══════════════════ -->
+<div class="ws-page">
+
+  <h2 class="ws-section">전광판 숫자 분류 (이어서)</h2>
+
+  <div class="ws-body">
+
+    <article class="ws-problem ws-span-all">
+      <div class="step-header">
+        <span class="step-badge">STEP 4</span>
+        <span class="step-title">두 방법은 무엇이 다른가</span>
+      </div>
+
+      <p class="qline" style="margin-top: 0;"><span class="qn">①</span>표를 채워 두 방법을 견주시오.</p>
+
+      <table class="ws-table">
+        <thead>
+          <tr><th class="left" style="width: 24%;"></th><th>해밍 거리 \(H\)</th><th>퍼셉트론</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="left">무엇을 재나</td><td class="fill tall">얼마나 &nbsp;<span class="bk"></span>&nbsp; 가</td><td class="fill tall">얼마나 &nbsp;<span class="bk"></span>&nbsp; 가</td></tr>
+          <tr><td class="left">세는 것</td><td class="fill tall"></td><td class="fill tall"></td></tr>
+          <tr><td class="left">언제 닮았다고 하나</td><td class="fill tall"><span class="bk"></span> 수록 유사</td><td class="fill tall"><span class="bk"></span> 수록 가능성 높음</td></tr>
+          <tr><td class="left">C의 판정</td><td class="fill"></td><td class="fill"></td></tr>
+        </tbody>
+      </table>
+
+      <p class="qline"><span class="qn">②</span>두 방법이 <b>같은 답</b>을 냈는가?</p>
+      <div class="ws-answer-space sm"></div>
+    </article>
+
+    <article class="ws-problem ws-span-all">
+      <div class="step-header">
+        <span class="step-badge">STEP 5</span>
+        <span class="step-title">해밍 거리로 분류할 때의 한계</span>
+      </div>
+
+      <p class="qline" style="margin-top: 0;"><span class="qn">①</span>
+        해밍 거리로 분류하려면 <b>반드시 있어야 하는 것</b>이 무엇인가?
+        (\(H(\mathrm{C},\ \mathrm{A})\)를 구하려면 무엇이 필요했는지 떠올려 보시오.)</p>
+      <div class="ws-answer-space sm"></div>
+
+      <p class="qline"><span class="qn">②</span>
+        손글씨 숫자처럼 <b>같은 3이라도 사람마다 모양이 다른</b> 자료에도
+        해밍 거리를 그대로 쓸 수 있을까? <b>계산 결과를 근거로</b> 설명하시오.</p>
+      <div class="ws-answer-space md"></div>
+
+      <div class="mission" style="margin-top: 2mm;">
+        <b>한 줄 정리</b> &nbsp; 두 방법 모두 틀린 것이 아니다.
+        <b>재는 것이 서로 다를 뿐</b>이다. 공식을 고르기 전에
+        <b>무엇을 닮음으로 볼 것인지</b>부터 정해야 한다.
+      </div>
+    </article>
+
+  </div>
+
+  <div class="ws-pagenum">4 / 5</div>
+</div>
+
+
+<!-- ══════════════════ PAGE 5 · 교사용 정답 ══════════════════ -->
+<div class="ws-page">
+
+  <h2 class="ws-section">정답 및 해설 <span class="teacher-only">교사용</span></h2>
+
+  <div class="ws-body ans-key">
+
+    <div class="mission">
+      <b>수행평가 대비</b> &nbsp; 채점 요소 <b>③ 해밍 거리와 퍼셉트론을 이용한 이미지 분류(12점)</b>,
+      <b>④ 분류 방법의 관점 차이와 한계(8점)</b>에 대응한다.
+      자료는 교과서 78~82쪽 그대로이므로, 수업에서 다룬 것을 손으로 다시 밟는 연습이다.
+    </div>
+
+    <h3>STEP 1</h3>
+    <p>켜진 칸 — \(A\) <strong>19</strong>개, \(B\) <strong>17</strong>개, \(C\) <strong>14</strong>개</p>
+    <p>\(W=\dfrac{1}{19}A\), \(W'=\dfrac{1}{17}B\)</p>
+    <p class="why">A는 사선이 그어진 0이라 8보다 켜진 칸이 많다. 이 19와 17이 STEP 3의 분모가 된다.</p>
+
+    <h3>STEP 2 · 해밍 거리</h3>
+    <p>가로줄별 다른 칸 — \(C\)와 \(A\) : 0, 0, 1, 3, 1, 0, 0 → 합 <strong>5</strong><br>
+       \(C\)와 \(B\) : 0, 0, 0, 3, 0, 0, 0 → 합 <strong>3</strong></p>
+    <p>\(H(\mathrm{C},\mathrm{A})=5\), \(H(\mathrm{C},\mathrm{B})=3\).
+       해밍 거리는 작을수록 유사하므로 \(3&lt;5\) 에서 → <strong>숫자 8</strong></p>
+    <p class="why">A와 다른 5칸은 사선(3·4·5행)과 넷째 줄이고, B와 다른 3칸은 넷째 줄뿐이다.
+       C는 8에서 가운데 획 세 칸이 꺼진 것이다.</p>
+
+    <h3>STEP 3 · 퍼셉트론</h3>
+    <p>둘 다 켜진 칸 — \(C\)와 \(A\) : 3, 2, 2, 0, 2, 2, 3 → 합 <strong>14</strong><br>
+       \(C\)와 \(B\) : 3, 2, 2, 0, 2, 2, 3 → 합 <strong>14</strong></p>
+    <p>\(\mathrm{P}=\dfrac{14}{19}\approx 0.74\), \(\mathrm{P}'=\dfrac{14}{17}\approx 0.82\)
+       → 큰 쪽인 <strong>숫자 8</strong></p>
+    <p>③ <strong>분자가 둘 다 14로 같다.</strong> C에서 켜진 14칸이 A에도 B에도 통째로
+       들어 있기 때문이다. 그러므로 답을 가른 것은 <strong>분모뿐</strong> —
+       어느 정답 이미지가 <b>덜 켜져 있는가</b>이다(8은 17칸, 사선 있는 0은 19칸).</p>
+    <p class="why">이 발견이 STEP 4·5로 이어진다. 분자를 견주라고 했는데 그냥 값만 계산하고
+       넘어가는 학생이 많으니, 14와 14를 나란히 적게 하고 잠깐 멈춰 준다.</p>
+
+    <h3>STEP 4 · 두 방법의 차이</h3>
+    <p>해밍 거리 — 얼마나 <strong>다른가</strong> / 값이 다른 칸의 개수 / <strong>작을수록</strong> 유사 / 숫자 8<br>
+       퍼셉트론 — 얼마나 <strong>들어맞는가</strong> / 양쪽 다 켜진 칸의 비율 /
+       <strong>클수록</strong> 가능성 높음 / 숫자 8</p>
+    <p>② <strong>두 방법이 같은 답(숫자 8)을 냈다.</strong></p>
+    <p class="why">같은 답이 나온 것이 우연이 아니라는 점을 짚어 준다 —
+       이 문제는 견본이 0과 8 둘뿐이고 C가 8에서 일부만 꺼진 것이라 어느 잣대로 재도 8이 나온다.
+       “그러면 왜 두 가지를 배우나?”가 나오면 좋은 질문이라고 인정하고 STEP 5로 넘어간다.</p>
+
+    <h3>STEP 5 · 해밍 거리의 한계</h3>
+    <p>① <strong>정답 이미지(견본)를 통째로 갖고 있어야 한다.</strong>
+       \(H(\mathrm{C},\mathrm{A})\)를 구하려면 A의 35칸을 전부 알아야 한 칸씩 대 볼 수 있다.</p>
+    <p>② <strong>그대로 쓸 수 없다.</strong> 손글씨는 같은 숫자라도 사람마다 모양이 달라
+       <b>견본을 하나로 정할 수 없기</b> 때문이다.</p>
+    <p class="why">계산 결과를 근거로 드는 방법 — C는 8에서 <b>세 칸</b>만 꺼졌는데도
+       \(H=3\)이 나왔다. 손글씨처럼 획의 위치가 조금만 달라져도 어긋나는 칸이 금세 늘어나
+       거리가 크게 벌어진다. 또 해밍 거리는 어긋난 칸이 <b>어디인지</b>는 말해 주지 않고
+       개수만 세므로, 중요한 획이 틀린 것과 구석 한 칸이 틀린 것을 구별하지 못한다.</p>
+    <p class="why">채점 시 ②는 “견본을 하나로 정할 수 없다”는 취지가 나오면 인정한다.
+       숫자를 인용해 설명하면 <b>탁월</b>, 취지만 쓰면 <b>우수</b>로 본다.
+       그때 필요한 것이 가중치를 자료에서 찾는 <b>학습</b>이라는 데까지 나아가면 더 좋다.</p>
+
+    <div class="mission" style="margin-top: 2.5mm;">
+      <b>운영 메모</b> &nbsp; STEP 2와 STEP 3의 표를 <b>모둠에서 나눠</b> 세게 하면 15분이면 끝난다.
+      가로줄 단위로 세게 하는 것이 핵심 — 35칸을 한꺼번에 보면 반드시 틀린다.
+      넷째 줄에서 갈린다는 것만 확인되면 나머지는 빠르다.
+    </div>
+
+  </div>
+
+  <div class="ws-pagenum">5 / 5</div>
+</div>
+
+<script>
+  window.addEventListener('load', function () { window.safeTypeset(); });
+</script>
+</body>
+</html>
