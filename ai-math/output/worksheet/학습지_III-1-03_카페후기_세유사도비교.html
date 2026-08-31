@@ -60,6 +60,8 @@
   .ws-table td.nm { font-weight: 700; color: var(--lm-accent); white-space: nowrap; }
   td.fill { background: var(--lm-page); height: 9mm; }
   td.fill.tall { height: 12mm; }
+  td.fill.mid  { height: 13mm; }   /* 단어를 적는 칸 */
+  td.fill.calc { height: 19mm; }   /* 계산 과정을 적는 칸 */
 
   .bk { display: inline-block; min-width: 14mm;
         border-bottom: 0.3mm solid var(--lm-page-ink); margin: 0 1mm; }
@@ -75,6 +77,16 @@
                   color: var(--lm-page); background: var(--lm-accent);
                   border-radius: var(--lm-radius-sm); padding: 1px 7px;
                   margin-left: 6px; vertical-align: 0.15em; }
+
+  /* 브라우저 인쇄 대화상자의 '배경 그래픽'은 기본이 꺼짐이다.
+     그대로 두면 STEP 배지가 흰 글씨 + 흰 배경이 되어 글자가 사라진다.
+     아래 두 줄이 있으면 옵션과 무관하게 배경이 찍힌다. */
+  @media print {
+    .step-badge, .teacher-only {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
 </style>
 </head>
 <body data-subject="ai_math">
@@ -131,9 +143,9 @@
           <tr><th class="left" style="width: 13%;"></th><th>분위기</th><th>가격</th><th>맛있다</th><th>좋다</th><th>깨끗하다</th><th>시끄럽다</th></tr>
         </thead>
         <tbody>
-          <tr><td class="left"><b>후기 A</b></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
-          <tr><td class="left"><b>후기 B</b></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
-          <tr><td class="left"><b>후기 C</b></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+          <tr><td class="left"><b>후기 A</b></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td></tr>
+          <tr><td class="left"><b>후기 B</b></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td></tr>
+          <tr><td class="left"><b>후기 C</b></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td><td class="fill mid"></td></tr>
         </tbody>
       </table>
 
@@ -182,9 +194,9 @@
           <tr><th class="left" style="width: 15%;">짝</th><th>계산 과정</th><th style="width: 16%;">\(L^2\)</th><th style="width: 16%;">\(L\)</th></tr>
         </thead>
         <tbody>
-          <tr><td class="left">A 와 B</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left">A 와 C</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left">B 와 C</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
+          <tr><td class="left">A 와 B</td><td class="fill calc"></td><td class="fill calc"></td><td class="fill calc"></td></tr>
+          <tr><td class="left">A 와 C</td><td class="fill calc"></td><td class="fill calc"></td><td class="fill calc"></td></tr>
+          <tr><td class="left">B 와 C</td><td class="fill calc"></td><td class="fill calc"></td><td class="fill calc"></td></tr>
           <tr><td class="left"><b>결론</b></td><td class="left" colspan="3">유클리드 유사도로 가장 유사한 두 후기 : <span class="bk"></span></td></tr>
         </tbody>
       </table>
@@ -206,9 +218,9 @@
           <tr><th class="left" style="width: 15%;">짝</th><th style="width: 16%;">\(X \cdot Y\)</th><th>계산 과정</th><th style="width: 16%;">\(C^2\)</th></tr>
         </thead>
         <tbody>
-          <tr><td class="left">A 와 B</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left">A 와 C</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
-          <tr><td class="left">B 와 C</td><td class="fill tall"></td><td class="fill tall"></td><td class="fill tall"></td></tr>
+          <tr><td class="left">A 와 B</td><td class="fill calc"></td><td class="fill calc"></td><td class="fill calc"></td></tr>
+          <tr><td class="left">A 와 C</td><td class="fill calc"></td><td class="fill calc"></td><td class="fill calc"></td></tr>
+          <tr><td class="left">B 와 C</td><td class="fill calc"></td><td class="fill calc"></td><td class="fill calc"></td></tr>
           <tr><td class="left"><b>결론</b></td><td class="left" colspan="3">코사인 유사도로 가장 유사한 두 후기 : <span class="bk"></span></td></tr>
         </tbody>
       </table>
@@ -302,7 +314,7 @@
       <p class="qline" style="margin-top: 0;"><span class="qn">③</span>결론이 갈린 <b>까닭</b>은 무엇인가?
         각 유사도가 <b>무엇을 재는지</b>의 차이를 근거로 서술하시오.
         (앞에서 구한 \(|\mathrm{A}|,\ |\mathrm{B}|,\ |\mathrm{C}|\) 와 단어 집합을 함께 쓰면 좋다.)</p>
-      <div class="ws-answer-space md"></div>
+      <div class="ws-answer-space lg"></div>
 
       <p class="qline"><span class="qn">④</span>카페 마케팅 담당자 입장에서 세 후기 중
         <b>‘대표 후기’</b>로 가장 적합한 것은 무엇인가?
@@ -310,9 +322,9 @@
 
       <table class="ws-table">
         <tbody>
-          <tr><td class="left nm" style="width: 26%;">내가 고른 후기</td><td class="fill tall"></td></tr>
-          <tr><td class="left nm">사용한 유사도<br>및 근거</td><td class="fill tall"></td></tr>
-          <tr><td class="left nm">마케팅 활용 제안</td><td class="fill tall"></td></tr>
+          <tr><td class="left nm" style="width: 26%;">내가 고른 후기</td><td class="fill calc"></td></tr>
+          <tr><td class="left nm">사용한 유사도<br>및 근거</td><td class="fill calc"></td></tr>
+          <tr><td class="left nm">마케팅 활용 제안</td><td class="fill calc"></td></tr>
         </tbody>
       </table>
 
