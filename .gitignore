@@ -33,3 +33,9 @@ node_modules/
 
 # 공유용 빌드 산출물 (tools/build_share_package.py 가 생성)
 dist/
+
+# ── Windows ───────────────────────────────────────────────────────────
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
