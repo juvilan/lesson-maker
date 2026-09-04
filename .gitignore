@@ -42,3 +42,8 @@ $RECYCLE.BIN/
 
 # Cowork 가 대화로 보낸 파일을 자동 저장하는 폴더
 Claude outputs/
+
+# 시험지 작업 중 생긴 임시 추출 파일
+_q2*.svg
+_k_block.txt
+ai-math/book/_pg-*.png
