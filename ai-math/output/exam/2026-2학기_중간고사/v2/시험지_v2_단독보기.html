@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>2026학년도 2학기 중간고사 인공지능 수학</title>
+  <style>
+/* ===== design-tokens.css ===== */
+/* ============================================================================
+ * lesson-maker · design-tokens.css
+ *
+ * 모든 수업자료(슬라이드·학습지·시험지·수행평가)의 단일 진실 공급원.
+ * 이 파일을 변경하면 전 과목·전 매체에 파급됩니다.
+ *
+ * 규칙:
+ *   1. 색상·폰트·크기·간격은 반드시 토큰(변수) 경유해서 사용할 것.
+ *      하드코딩된 hex 값이나 픽셀 숫자를 컴포넌트 파일에 넣지 말 것.
+ *   2. 새 토큰을 추가할 때는 의미 기반 네이밍 사용.
+ *      (예: `--lm-ink-3` O, `--lm-gray-mid` X)
+ *   3. 과목별 변형은 [data-subject="..."] 셀렉터로만 override.
+ *
+ * Last updated: 2026-04-24
+ * ============================================================================ */
+
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Pretendard 폰트 — 저장소 번들 woff2 (오프라인 동작, CDN 의존 없음)
+ * 파일: _shared/fonts/PretendardVariable.woff2 (SIL OFL 1.1, LICENSE 동봉)
+ * 로드 실패 시 --lm-font-sans 폴백 체인(맑은 고딕 등)으로 자동 대체됨.
+ * ────────────────────────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Pretendard Variable';
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src: url('../fonts/PretendardVariable.woff2') format('woff2-variations');
+}
+
+
+:root {
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 1. 슬라이드 서피스 — 따뜻한 종이 톤 (온스크린 투영 최적)
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-paper:         #FCFAF6;  /* 슬라이드 기본 바탕 */
+  --lm-paper-soft:    #F7F2E8;  /* 보조 서피스 (섹션 배경) */
+  --lm-paper-tint:    #F4EBD8;  /* 따뜻한 탠트 (수식박스, 표 헤더) */
+
+  --lm-ink:           #1E1C18;  /* 본문 잉크 (약간 따뜻한 near-black) */
+  --lm-ink-2:         #3D3830;  /* 보조 잉크 */
+  --lm-ink-3:         #75706A;  /* 캡션·메타 */
+  --lm-ink-4:         #A39B8C;  /* 옅은 회색 */
+
+  --lm-rule:          #E6DDCC;  /* 기본 hairline */
+  --lm-rule-strong:   #D6CDBA;  /* 강조 보더 */
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 2. 학습지·시험지 서피스 — 순백 · 중성 회색 (인쇄 최적)
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-page:              #FFFFFF;  /* 순백 바탕 */
+  --lm-page-ink:          #1A1A1A;  /* 본문 (순흑 대신 살짝 부드럽게) */
+  --lm-page-ink-2:        #555555;  /* 메타·캡션 */
+  --lm-page-ink-3:        #888888;  /* 옅은 회색 */
+  --lm-page-rule:         #D0D0D0;  /* 가는 규칙선 */
+  --lm-page-rule-heavy:   #1A1A1A;  /* 굵은 띠 (헤더 아래) */
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 3. 과목별 액센트 컬러
+   *    HTML body에 data-subject="ai_math" 등을 지정하면 --lm-accent가 바뀜
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-accent-ai-math:     #8F6A1F;   /* 인공지능수학 · 오크색 */
+  --lm-accent-math1:       #2C5282;   /* 수학Ⅰ · 네이비 */
+  --lm-accent-math2:       #6B4C8A;   /* 수학Ⅱ · 머브 */
+  --lm-accent-calculus:    #8B3A2E;   /* 미적분 · 버건디 */
+  --lm-accent-statistics:  #3F6B3E;   /* 확률통계 · 포레스트 */
+  --lm-accent-geometry:    #2D6B66;   /* 기하 · 딥틸 */
+
+  /* 기본 액센트 (subject 미지정 시) */
+  --lm-accent:              var(--lm-accent-ai-math);
+  --lm-accent-tint:         rgba(143, 106, 31, 0.08);
+  --lm-accent-tint-strong:  rgba(143, 106, 31, 0.14);
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 4. 시맨틱 컬러 (슬라이드·학습지 모두에서 공통 의미)
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-success: #3F6B3E;  /* 정답·결론·성공 */
+  --lm-danger:  #8B3A2E;  /* 오류·주의·함정 */
+  --lm-info:    #2C5282;  /* 정보·참고 */
+  --lm-warning: #8F6A1F;  /* 경고 */
+
+  --lm-success-tint: rgba(63, 107, 62, 0.08);
+  --lm-danger-tint:  rgba(139, 58, 46, 0.08);
+  --lm-info-tint:    rgba(44, 82, 130, 0.08);
+  --lm-warning-tint: rgba(143, 106, 31, 0.08);
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 5. 타이포그래피 패밀리
+   *    Windows 학교 노트북에서도 안정적으로 동작하도록 Malgun Gothic 폴백
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-font-sans: 'Pretendard Variable', Pretendard, 'Malgun Gothic',
+                  'Apple SD Gothic Neo', 'Noto Sans KR',
+                  -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --lm-font-mono: 'JetBrains Mono', 'D2Coding', 'SF Mono', Consolas, Menlo, monospace;
+  --lm-font-math: 'STIX Two Math', 'Latin Modern Math', 'Cambria Math', serif;
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 6. 슬라이드 타입 스케일 (1920×1080 캔버스 기준)
+   *    본문 36px = 캔버스 높이의 3.3% — 교실 뒷자리 가독성 기준
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-slide-caption:  24px;
+  --lm-slide-small:    28px;
+  --lm-slide-body:     36px;
+  --lm-slide-body-lg:  42px;
+  --lm-slide-h3:       46px;
+  --lm-slide-h2:       60px;
+  --lm-slide-h1:       88px;
+  --lm-slide-display:  120px;
+
+  --lm-slide-line-tight:  1.2;
+  --lm-slide-line-body:   1.5;
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 7. 학습지·시험지 타입 스케일 (A4 · pt 단위)
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-page-caption:   8.5pt;
+  --lm-page-small:     9.5pt;
+  --lm-page-body:      10.5pt;
+  --lm-page-body-lg:   11pt;
+  --lm-page-h3:        11.5pt;
+  --lm-page-h2:        13pt;
+  --lm-page-h1:        15pt;
+
+  --lm-page-line-tight:  1.3;
+  --lm-page-line-body:   1.65;
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 8. 일반 간격 (4px 기반 8단계)
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-space-1:   4px;
+  --lm-space-2:   8px;
+  --lm-space-3:  12px;
+  --lm-space-4:  16px;
+  --lm-space-5:  24px;
+  --lm-space-6:  32px;
+  --lm-space-7:  48px;
+  --lm-space-8:  64px;
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 9. 학습지·시험지 간격 규칙 (mm 단위 · 인쇄 기준)
+   *
+   *    이 네 개 토큰이 모든 문제·선택지·답란·참고박스의 수직 리듬을 통제한다.
+   *    전체를 "좀 더 타이트/여유있게" 조정하고 싶으면 여기만 손대면 된다.
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-problem-gap:        6mm;     /* 문제 ↔ 다음 문제 */
+  --lm-problem-inner-gap:  2mm;     /* 발문 ↔ 선택지·답란 */
+  --lm-choice-row-gap:     0.5mm;   /* 선택지 각 행 사이 */
+  --lm-aside-gap:          2.5mm;   /* <보기>·자료표 위아래 */
+  --lm-section-gap:        7mm;     /* 섹션 헤더 위 간격 */
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 10. 답안 공간 크기 (mm 단위 · 완전 공백 · 장식 없음)
+   *
+   *     '한 페이지 최대 6문항' 규칙과 맞물린다:
+   *       xl → 페이지당 2문항 (1+1)
+   *       lg → 페이지당 2~3문항
+   *       md → 페이지당 3~4문항
+   *       기본/sm → 페이지당 5~6문항
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-answer-sm:    18mm;   /* 단답 */
+  --lm-answer-md:    30mm;   /* 기본 · 짧은 계산 */
+  --lm-answer-lg:    45mm;   /* 중간 계산·간단 서술 */
+  --lm-answer-xl:    65mm;   /* 서술형 */
+  --lm-answer-2xl:   90mm;   /* 긴 서술형 */
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 11. 모서리 반경
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-radius-sm:  4px;
+  --lm-radius-md:  6px;
+  --lm-radius-lg: 10px;
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 12. 보더 두께
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-border-hair:    0.5px;   /* 초세 (학습지 표 내부) */
+  --lm-border-thin:    1px;     /* 기본 hairline */
+  --lm-border-accent:  3px;     /* 왼쪽 액센트선 */
+  --lm-border-heavy:   2px;     /* 섹션 구분 */
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 13. 슬라이드 캔버스 크기 (고정)
+   *     reveal.js 설정(width/height)도 이 값을 따름
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-slide-width:  1920px;
+  --lm-slide-height: 1080px;
+
+
+  /* ──────────────────────────────────────────────────────────────────────────
+   * 14. 학습지·시험지 2단 레이아웃
+   * ────────────────────────────────────────────────────────────────────────── */
+  --lm-column-count:  2;
+  --lm-column-gap:    6mm;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 과목별 accent override
+ * body 또는 최상위 래퍼에 data-subject 속성 부여:
+ *   <body data-subject="ai_math">
+ * ────────────────────────────────────────────────────────────────────────── */
+[data-subject="ai_math"] {
+  --lm-accent:             var(--lm-accent-ai-math);
+  --lm-accent-tint:        rgba(143, 106, 31, 0.08);
+  --lm-accent-tint-strong: rgba(143, 106, 31, 0.14);
+}
+[data-subject="math1"] {
+  --lm-accent:             var(--lm-accent-math1);
+  --lm-accent-tint:        rgba(44, 82, 130, 0.07);
+  --lm-accent-tint-strong: rgba(44, 82, 130, 0.13);
+}
+[data-subject="math2"] {
+  --lm-accent:             var(--lm-accent-math2);
+  --lm-accent-tint:        rgba(107, 76, 138, 0.07);
+  --lm-accent-tint-strong: rgba(107, 76, 138, 0.13);
+}
+[data-subject="calculus"] {
+  --lm-accent:             var(--lm-accent-calculus);
+  --lm-accent-tint:        rgba(139, 58, 46, 0.07);
+  --lm-accent-tint-strong: rgba(139, 58, 46, 0.13);
+}
+[data-subject="statistics"] {
+  --lm-accent:             var(--lm-accent-statistics);
+  --lm-accent-tint:        rgba(63, 107, 62, 0.07);
+  --lm-accent-tint-strong: rgba(63, 107, 62, 0.13);
+}
+[data-subject="geometry"] {
+  --lm-accent:             var(--lm-accent-geometry);
+  --lm-accent-tint:        rgba(45, 107, 102, 0.07);
+  --lm-accent-tint-strong: rgba(45, 107, 102, 0.13);
+}
+
+/* ===== worksheet-system.css ===== */
+/* ============================================================================
+ * lesson-maker · worksheet-system.css
+ *
+ * 학습지·시험지·수행평가 공통 컴포넌트.
+ *
+ * 설계 원칙:
+ *   1. 순백 바탕, 장식 최소, 타이포그래피와 하이라인으로만 위계 형성
+ *   2. 2단 레이아웃 — 수능·EBS 문제집 스타일
+ *   3. 문제 번호는 발문 앞에 인라인, 점수 표기 없음
+ *   4. 답안 공간은 완전한 공백 (밑줄·박스·점선 없음)
+ *   5. 모든 간격은 design-tokens.css의 토큰으로만 통제
+ *   6. A4 인쇄가 최종 매체 — pt·mm 단위 사용
+ *
+ * 한 페이지당 문항 수 규칙:
+ *   - 최대 6문항 (한 단에 최대 3문항)
+ *   - 최소 2문항 (1+1, 긴 서술형 수행평가)
+ *   - 가능한 분포: 1+1, 2+1, 1+2, 2+2, 3+2, 2+3, 3+3
+ *   - 7문항 이상은 다음 페이지로 분할
+ *
+ * 의존성: design-tokens.css (먼저 로드)
+ * ============================================================================ */
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 페이지 & 인쇄
+ * ────────────────────────────────────────────────────────────────────────── */
+@page {
+  size: A4;
+  margin: 15mm 15mm 20mm 15mm;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--lm-font-sans);
+  font-size: var(--lm-page-body);
+  line-height: var(--lm-page-line-body);
+  color: var(--lm-page-ink);
+  background: var(--lm-page);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum";
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { font-size: var(--lm-page-body); }
+}
+
+.ws-page {
+  width: 210mm;
+  padding: 15mm 15mm 20mm 15mm;
+  margin: 0 auto;
+  background: var(--lm-page);
+  page-break-after: always;
+  display: flex;
+  flex-direction: column;
+  min-height: 297mm;
+}
+.ws-page:last-child {
+  page-break-after: auto;
+}
+@media print {
+  .ws-page {
+    padding: 0;            /* @page margin이 여백 담당 */
+    width: auto;
+    min-height: auto;
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 헤더 영역
+ *   <header class="ws-head">
+ *     <div class="ws-title-group">
+ *       <div class="ws-chapter">Ⅲ-1-03</div>
+ *       <h1 class="ws-title">유사도 분석</h1>
+ *     </div>
+ *     <div class="ws-meta">인공지능수학 · 2학년 · 영일고</div>
+ *   </header>
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--lm-space-4);
+  padding-bottom: var(--lm-space-2);
+  margin-bottom: var(--lm-space-3);
+  border-bottom: var(--lm-border-heavy) solid var(--lm-page-rule-heavy);
+}
+.ws-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: var(--lm-space-3);
+}
+.ws-chapter {
+  font-size: var(--lm-page-caption);
+  font-weight: 500;
+  color: var(--lm-accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.ws-title {
+  font-size: var(--lm-page-h1);
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  letter-spacing: -0.01em;
+}
+.ws-meta {
+  font-size: var(--lm-page-small);
+  color: var(--lm-page-ink-2);
+  text-align: right;
+  white-space: nowrap;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 학생 정보란
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-student {
+  display: flex;
+  gap: var(--lm-space-5);
+  font-size: var(--lm-page-small);
+  color: var(--lm-page-ink-2);
+  padding-bottom: var(--lm-space-2);
+  margin-bottom: var(--lm-space-3);
+  border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+}
+.ws-student-field {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--lm-space-1);
+}
+.ws-student-field label {
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  white-space: nowrap;
+}
+.ws-student-field .line {
+  display: inline-block;
+  width: 22mm;
+  border-bottom: var(--lm-border-hair) solid var(--lm-page-ink-2);
+  height: 1.4em;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 섹션 구분선
+ *   <h2 class="ws-section">서답형 문항</h2>
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-section {
+  font-size: var(--lm-page-h3);
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  letter-spacing: 0.02em;
+  padding-bottom: var(--lm-space-1);
+  margin: var(--lm-section-gap) 0 var(--lm-space-3);
+  border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+}
+.ws-section:first-child {
+  margin-top: 0;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * 2단 본문 컨테이너 — 수능·EBS 문제집 스타일
+ *
+ *   <div class="ws-body">
+ *     <article class="ws-problem">...</article>
+ *     <article class="ws-problem">...</article>
+ *     ...
+ *   </div>
+ *
+ * column-fill: auto → 왼쪽 단부터 차곡차곡 채우고 넘치면 오른쪽 단으로.
+ * break-inside: avoid 는 .ws-problem에 걸려있어 문제 단위가 단 경계에서 잘리지 않음.
+ * ══════════════════════════════════════════════════════════════════════════ */
+.ws-body {
+  column-count: var(--lm-column-count);
+  column-gap: var(--lm-column-gap);
+  column-fill: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 문제 (하나의 단위로 묶어 단·페이지 분할 방지)
+ *
+ *   <article class="ws-problem">
+ *     <div class="ws-problem-body">
+ *       <span class="ws-problem-number">1.</span>발문 내용 ...
+ *     </div>
+ *     <ol class="ws-choices">...</ol>        <!-- 객관식 -->
+ *     <div class="ws-answer-space"></div>     <!-- 서답형 -->
+ *   </article>
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-problem {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: var(--lm-problem-gap);
+}
+.ws-problem:last-child {
+  margin-bottom: 0;
+}
+
+/* 문제 번호 — 발문 앞에 인라인으로 붙음. 점수 표기 없음. */
+.ws-problem-number {
+  font-weight: 500;
+  font-size: var(--lm-page-body-lg);
+  color: var(--lm-page-ink);
+  margin-right: var(--lm-space-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.ws-problem-body {
+  font-size: var(--lm-page-body);
+  line-height: var(--lm-page-line-body);
+  color: var(--lm-page-ink);
+}
+.ws-problem-body > p {
+  margin-bottom: var(--lm-space-2);
+}
+.ws-problem-body > p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 객관식 선택지
+ *
+ * 기본 규칙: 5지선다 · 1열 (수능·내신 표준)
+ *
+ *   <ol class="ws-choices">
+ *     <li>① 값1</li> <li>② 값2</li> <li>③ 값3</li> <li>④ 값4</li> <li>⑤ 값5</li>
+ *   </ol>
+ *
+ * 예외: 4지선다이고 선택지가 매우 짧을 때만 .two-col
+ *   <ol class="ws-choices two-col"> ... </ol>
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-choices {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--lm-choice-row-gap) var(--lm-space-4);
+  margin: var(--lm-problem-inner-gap) 0 0 var(--lm-space-3);
+  font-size: var(--lm-page-body);
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.ws-choices li {
+  display: flex;
+  gap: var(--lm-space-1);
+  align-items: baseline;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.ws-choices.two-col {
+  grid-template-columns: 1fr 1fr;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 답안 공간 (서답형 · 풀이 과정)
+ *
+ * 설계 원칙: 순수한 공백만 제공. 밑줄·줄선·네모 상자·바탕 탠트 등
+ * 어떠한 시각적 장식도 넣지 않는다. 학생이 자유롭게 여백을 활용하도록 한다.
+ *
+ * 크기 ↔ 한 페이지 권장 문항 수 매핑:
+ *   sm (18mm)  → 페이지당 5~6문항   단답
+ *   기본 (30mm) → 페이지당 3~4문항   짧은 계산
+ *   md (45mm)  → 페이지당 3~4문항   중간 계산·간단 서술
+ *   lg (65mm)  → 페이지당 2~3문항   서술형
+ *   xl (90mm)  → 페이지당 1~2문항   긴 서술형 (수행평가)
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-answer-space {
+  min-height: var(--lm-answer-md);
+  margin-top: var(--lm-problem-inner-gap);
+  page-break-inside: avoid;
+  break-inside: avoid;
+  /* 의도적으로 비어있음: background, border, outline 없음 */
+}
+.ws-answer-space.sm  { min-height: var(--lm-answer-sm); }
+.ws-answer-space.md  { min-height: var(--lm-answer-lg); }   /* 실제 45mm */
+.ws-answer-space.lg  { min-height: var(--lm-answer-xl); }   /* 실제 65mm */
+.ws-answer-space.xl  { min-height: var(--lm-answer-2xl); }  /* 실제 90mm */
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 참고·제시 박스 (<보기>, 자료 제시, 유의사항)
+ *
+ *   <aside class="ws-info">
+ *     <strong>&lt;보기&gt;</strong> ...
+ *   </aside>
+ *
+ * 왼쪽 얇은 세로선만으로 구분. 바탕색 없음.
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-info {
+  border-left: var(--lm-border-heavy) solid var(--lm-page-ink);
+  padding: var(--lm-space-1) var(--lm-space-3);
+  margin: var(--lm-aside-gap) 0;
+  font-size: var(--lm-page-small);
+  color: var(--lm-page-ink);
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.ws-info strong {
+  font-weight: 500;
+  margin-right: var(--lm-space-2);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 표 (공통 · 계산표 · 자료표)
+ *
+ * 단 폭(약 85mm)에 맞춰 compact 기본값.
+ * 수능 문제집 스타일: 상·하단 굵은 선, 내부는 hairline.
+ *
+ * 표가 넓어서 단에 안 들어갈 때 편집 기법:
+ *   ① 4열 이하 compact 유지
+ *   ② transpose (행↔열 축 바꾸기)
+ *   ③ 짝 데이터는 한 행에 2쌍씩 묶기
+ *   ④ 조건·명제는 표 대신 <보기> ㄱ·ㄴ·ㄷ 서술
+ *
+ * 위 네 기법 모두 불가능한 비상 상황에만 .ws-span-all 사용 (아래 참조).
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--lm-aside-gap) 0;
+  font-size: var(--lm-page-small);
+  page-break-inside: avoid;
+  break-inside: avoid;
+  font-variant-numeric: tabular-nums;
+  table-layout: auto;
+}
+.ws-table th {
+  background: transparent;
+  border-top: var(--lm-border-thin) solid var(--lm-page-ink);
+  border-bottom: var(--lm-border-thin) solid var(--lm-page-ink);
+  padding: var(--lm-space-1) var(--lm-space-2);
+  text-align: center;
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  white-space: nowrap;
+}
+.ws-table td {
+  border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+  padding: var(--lm-space-1) var(--lm-space-2);
+  text-align: center;
+  color: var(--lm-page-ink);
+}
+.ws-table td.left,
+.ws-table th.left   { text-align: left; }
+.ws-table td.right,
+.ws-table th.right  { text-align: right; }
+.ws-table tr:last-child td {
+  border-bottom: var(--lm-border-thin) solid var(--lm-page-ink);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * [예외 · 비권장] 2단을 가로지르는 문제 · 자료
+ *
+ * 기본 원칙: 모든 표·자료는 위 4가지 편집 기법으로 한 단 안에 들어가도록 한다.
+ * .ws-span-all은 정말로 어쩔 수 없을 때만 (예: 6열 이상 원본 자료, 넓은 그림)
+ * 사용하며, 해당 문제는 페이지의 맨 위 또는 맨 아래에 배치해야 2단 흐름이
+ * 가장 적게 끊긴다.
+ *
+ *   <article class="ws-problem ws-span-all">...</article>
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-problem.ws-span-all {
+  column-span: all;
+  margin: var(--lm-space-3) 0 var(--lm-problem-gap);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 루브릭 (수행평가 채점표)
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-rubric {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--lm-page-small);
+  margin: var(--lm-aside-gap) 0;
+  page-break-inside: avoid;
+  break-inside: avoid;
+  font-variant-numeric: tabular-nums;
+}
+.ws-rubric th {
+  border-top: var(--lm-border-thin) solid var(--lm-page-ink);
+  border-bottom: var(--lm-border-thin) solid var(--lm-page-ink);
+  padding: var(--lm-space-2) var(--lm-space-3);
+  text-align: left;
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  font-size: var(--lm-page-caption);
+  letter-spacing: 0.02em;
+}
+.ws-rubric th.center {
+  text-align: center;
+}
+.ws-rubric td {
+  border-bottom: var(--lm-border-hair) solid var(--lm-page-rule);
+  padding: var(--lm-space-2) var(--lm-space-3);
+  vertical-align: top;
+  color: var(--lm-page-ink);
+  line-height: 1.55;
+}
+.ws-rubric td.lvl {
+  font-weight: 500;
+  white-space: nowrap;
+  text-align: center;
+}
+.ws-rubric td.pts {
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ws-rubric tr:last-child td {
+  border-bottom: var(--lm-border-thin) solid var(--lm-page-ink);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 시험지 전용 헤더 (지필평가·수행평가)
+ *
+ *   <header class="exam-head">
+ *     <div class="exam-title">2026학년도 1학기 1차 지필평가</div>
+ *     <div class="exam-sub">인공지능수학 · 2학년 · 50분 · 100점 만점</div>
+ *     <div class="exam-metrics">
+ *       <span>과목코드 ···</span>
+ *       <span>일시 YYYY-MM-DD</span>
+ *     </div>
+ *   </header>
+ * ────────────────────────────────────────────────────────────────────────── */
+.exam-head {
+  text-align: center;
+  padding: var(--lm-space-4) 0 var(--lm-space-5);
+  border-bottom: var(--lm-border-thin) solid var(--lm-page-ink);
+  margin-bottom: var(--lm-space-4);
+}
+.exam-head .exam-title {
+  font-size: var(--lm-page-h1);
+  font-weight: 500;
+  color: var(--lm-page-ink);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--lm-space-2);
+}
+.exam-head .exam-sub {
+  font-size: var(--lm-page-body);
+  color: var(--lm-page-ink-2);
+  margin-bottom: var(--lm-space-3);
+}
+.exam-head .exam-metrics {
+  display: flex;
+  justify-content: center;
+  gap: var(--lm-space-5);
+  font-size: var(--lm-page-caption);
+  color: var(--lm-page-ink-2);
+  letter-spacing: 0.04em;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 페이지 번호
+ * ────────────────────────────────────────────────────────────────────────── */
+.ws-pagenum {
+  text-align: center;
+  font-size: var(--lm-page-caption);
+  color: var(--lm-page-ink-3);
+  margin-top: var(--lm-space-4);
+  padding-top: var(--lm-space-2);
+  border-top: var(--lm-border-hair) solid var(--lm-page-rule);
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * MathJax 조정 (인쇄 최적화)
+ * ────────────────────────────────────────────────────────────────────────── */
+mjx-container {
+  color: var(--lm-page-ink) !important;
+}
+mjx-container[jax="CHTML"][display="true"] {
+  margin: var(--lm-space-2) 0 !important;
+}
+</style>
+  <style>
+/* 시험지 전용 보조 스타일 — 토큰만 사용 */
+/* 2단 채움(column-fill:auto)이 동작하려면 페이지 높이가 고정되어야 함: 화면 297mm, 인쇄는 @page 여백(15/20mm) 제외 262mm */
+.ws-page { height: 297mm; }
+@media print { .ws-page { height: 262mm; } }
+.ws-problem-points { color: var(--lm-page-ink-2); font-size: var(--lm-page-caption); white-space: nowrap; }
+.ws-figure { margin: var(--lm-space-2) 0 var(--lm-space-1); text-align: center; break-inside: avoid; page-break-inside: avoid; }
+.ws-figure > svg { display: inline-block; max-width: 100%; height: auto; }
+.ws-figure svg svg { overflow: visible; }
+.ws-table td.nw, .ws-table th.nw { white-space: nowrap; }
+.ws-math { margin: var(--lm-space-2) 0; text-align: center; font-size: var(--lm-page-small); line-height: 1.9; }
+.ws-set { margin-bottom: var(--lm-space-3); }
+.ws-set strong { color: var(--lm-accent); }
+/* 그림 클래스 → 디자인 토큰 */
+.fg-board { fill: var(--lm-page-rule); }
+.fg-off   { fill: var(--lm-page-ink); stroke: var(--lm-page); stroke-width: 0.35; }
+.fg-on    { fill: var(--lm-page);     stroke: var(--lm-page-ink); stroke-width: 0.35; }
+.fg-title { font-family: var(--lm-font-sans); font-weight: 700; fill: var(--lm-accent); text-anchor: middle; }
+.fg-cap   { font-family: var(--lm-font-sans); fill: var(--lm-page-ink-2); text-anchor: middle; }
+.fg-node-x  { fill: var(--lm-paper-tint); }
+.fg-node-z1 { fill: #D9D5E2; }   /* accent-math2 tint — 토큰 없음, 인쇄 무채색 */
+.fg-node-z2 { fill: #D2E0D5; }   /* accent-statistics tint */
+.fg-node-y  { fill: #F0DBD4; }   /* accent-calculus tint */
+.fg-node-text { color: var(--lm-page-ink); overflow: visible; }
+.fg-edge-z1 { stroke: var(--lm-accent-math2); stroke-width: 0.55; fill: none; stroke-linecap: round; }
+.fg-edge-z2 { stroke: var(--lm-accent-statistics); stroke-width: 0.55; fill: none; stroke-linecap: round; }
+.fg-edge-y  { stroke: var(--lm-page-ink-2); stroke-width: 0.55; fill: none; stroke-linecap: round; }
+.fg-w-z1 { color: var(--lm-accent-math2); overflow: visible; }
+.fg-w-z2 { color: var(--lm-accent-statistics); overflow: visible; }
+.fg-w-y  { color: var(--lm-page-ink); overflow: visible; }
+</style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'svg'] },
+      chtml: { scale: 0.95 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body data-subject="ai_math">
+
+  <div class="ws-page">
+    <header class="exam-head">
+      <div class="exam-title">2026학년도 2학기 중간고사</div>
+      <div class="exam-sub">인공지능 수학 · 3학년 · 50분 · 100점 만점</div>
+      <div class="exam-metrics">
+        <span>선택형 25문항</span>
+        <span>시행 2026. 10.</span>
+        <span>출제 교무부</span>
+      </div>
+    </header>
+    <div class="ws-student">
+      <span class="ws-student-field"><label>학년</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>반</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>번호</label><span class="line"></span></span>
+      <span class="ws-student-field"><label>이름</label><span class="line"></span></span>
+    </div>
+    <aside class="ws-info">
+      <strong>유의사항</strong> 답안은 모두 답안지(OMR)에 표시하시오. 계산 과정은 이 문제지의 여백을 활용할 수 있으며, 채점 대상에는 포함되지 않는다.
+    </aside>
+    <div class="ws-body">
+<article class="ws-problem" id="q1"><div class="ws-problem-body"><span class="ws-problem-number">1.</span>두 영화 감상평 P, Q에 나오는 단어 ‘감동’, ‘연기’, ‘음악’의 빈도수를 성분으로 하는 벡터가 각각 $\vec{P}=(3,\ 1,\ 4)$, $\vec{Q}=(1,\ 4,\ 2)$일 때, 두 감상평의 유클리드 유사도 $L(P, Q)$의 값은? <span class="ws-problem-points">[3점]</span></div><ol class="ws-choices"><li>① $3$</li><li>② $\sqrt{13}$</li><li>③ $4$</li><li>④ $\sqrt{17}$</li><li>⑤ $17$</li></ol></article><article class="ws-problem" id="q2"><div class="ws-problem-body"><span class="ws-problem-number">2.</span>두 텍스트 P, Q를 구성하는 단어의 집합이 각각 $P=\{$여행, 바다, 노을, 사진, 휴식$\}$, $Q=\{$바다, 사진, 휴식, 맛집$\}$일 때, 두 텍스트의 자카드 유사도 $J(P, Q)$의 값은? <span class="ws-problem-points">[3점]</span></div><ol class="ws-choices"><li>① $\dfrac{1}{3}$</li><li>② $\dfrac{1}{2}$</li><li>③ $\dfrac{3}{5}$</li><li>④ $\dfrac{2}{3}$</li><li>⑤ $\dfrac{3}{4}$</li></ol></article><article class="ws-problem" id="q3"><div class="ws-problem-body"><span class="ws-problem-number">3.</span>다음은 두 명제 $x_1, x_2$에 대한 논리곱(AND)과 배타적 논리합(XOR)의 진리표이다. ㉠+㉡+㉢+㉣의 값은? <span class="ws-problem-points">[3점]</span></div><table class="ws-table"><thead><tr><th>$x_1$</th><th>$x_2$</th><th>AND</th><th>XOR</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>㉠</td><td>㉡</td></tr><tr><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>㉢</td><td>㉣</td></tr></tbody></table><ol class="ws-choices"><li>① $0$</li><li>② $1$</li><li>③ $2$</li><li>④ $3$</li><li>⑤ $4$</li></ol></article><article class="ws-problem" id="q4"><div class="ws-problem-body"><span class="ws-problem-number">4.</span>입력값 $x_1, x_2$에 대한 가중치가 $w_1=0.6$, $w_2=-0.4$이고, 활성화함수가 $\sigma(x)=\begin{cases}0 & (x \lt 0)\\ 5 & (x\ge 0)\end{cases}$ 인 퍼셉트론이 있다. $x_1=2$, $x_2=1$을 입력할 때, 각각의 입력값과 가중치를 곱한 값들의 합 $x$와 출력값 $\sigma(x)$에 대하여 $x+\sigma(x)$의 값은? <span class="ws-problem-points">[3점]</span></div><ol class="ws-choices"><li>① $0.8$</li><li>② $1.6$</li><li>③ $5$</li><li>④ $5.8$</li><li>⑤ $6.6$</li></ol></article>
+    </div>
+    <div class="ws-pagenum">1 / 7</div>
+  </div>
+  <div class="ws-page">
+    <div class="ws-body">
+<article class="ws-problem" id="q5"><div class="ws-problem-body"><span class="ws-problem-number">5.</span>성분이 0 또는 1인 $3\times3$ 행렬로 나타낸 두 이미지 $P=\begin{pmatrix}1&0&1\\0&1&0\\1&1&0\end{pmatrix}$, $Q=\begin{pmatrix}1&1&1\\0&0&0\\1&1&1\end{pmatrix}$의 해밍 거리 $H(P, Q)$의 값은? <span class="ws-problem-points">[3점]</span></div><ol class="ws-choices"><li>① $3$</li><li>② $4$</li><li>③ $5$</li><li>④ $6$</li><li>⑤ $9$</li></ol></article><article class="ws-problem" id="q6"><div class="ws-problem-body"><span class="ws-problem-number">6.</span>성분이 0 또는 1인 $3\times3$ 행렬로 나타낸 이미지 A, B의 해밍 거리 $H(A, B)$에 대한 설명으로 옳은 것만을 &lt;보기&gt;에서 있는 대로 고른 것은? <span class="ws-problem-points">[3점]</span></div><aside class="ws-info"><strong>&lt;보기&gt;</strong><br>ㄱ. $H(A, A)=0$이다.<br>ㄴ. $H(A, B)=H(B, A)$이다.<br>ㄷ. $H(A, B)$의 값이 클수록 두 이미지 A, B는 더 유사하다.</aside><ol class="ws-choices"><li>① ㄱ</li><li>② ㄴ</li><li>③ ㄷ</li><li>④ ㄱ, ㄴ</li><li>⑤ ㄱ, ㄴ, ㄷ</li></ol></article><article class="ws-problem" id="q7"><div class="ws-problem-body"><span class="ws-problem-number">7.</span>성분이 0 또는 1인 행렬로 나타낸 이미지 A에 대하여, 입력되는 이미지가 A일 가능성을 계산하는 퍼셉트론 $\mathrm{P_A}$의 가중치 행렬을 $W_A=\dfrac{1}{(\text{행렬 } A\text{의 모든 성분의 합})}A$로 정하고, 활성화함수를 $\sigma(x)=x$라 하자. 이에 대한 설명으로 옳은 것만을 &lt;보기&gt;에서 있는 대로 고른 것은? <span class="ws-problem-points">[3점]</span></div><aside class="ws-info"><strong>&lt;보기&gt;</strong><br>ㄱ. 이미지 A 자신을 입력하면 출력값은 1이다.<br>ㄴ. 어떤 이미지를 입력하더라도 출력값은 0 이상 1 이하이다.<br>ㄷ. 두 이미지 A, B에 대한 퍼셉트론 $\mathrm{P_A}$, $\mathrm{P_B}$의 출력값 중 더 작은 쪽의 이미지로 분류한다.</aside><ol class="ws-choices"><li>① ㄱ</li><li>② ㄴ</li><li>③ ㄱ, ㄴ</li><li>④ ㄱ, ㄷ</li><li>⑤ ㄱ, ㄴ, ㄷ</li></ol></article><article class="ws-problem" id="q8"><div class="ws-problem-body"><span class="ws-problem-number">8.</span>두 텍스트 P, Q를 나타내는 벡터가 $\vec{P}=(1,\ 2,\ 2)$, $\vec{Q}=(2,\ 3,\ 6)$일 때, 두 텍스트의 코사인 유사도 $C(P, Q)$의 값은? <span class="ws-problem-points">[4점]</span></div><ol class="ws-choices"><li>① $\dfrac{2}{3}$</li><li>② $\dfrac{20}{21}$</li><li>③ $1$</li><li>④ $2$</li><li>⑤ $20$</li></ol></article>
+    </div>
+    <div class="ws-pagenum">2 / 7</div>
+  </div>
+  <div class="ws-page">
+    <div class="ws-body">
+<article class="ws-problem" id="q9"><div class="ws-problem-body"><span class="ws-problem-number">9.</span>세 학생 A, B, C가 네 가지 동아리 활동 ‘밴드, 영화, 축구, 코딩’에 대한 선호도를 1위부터 4위까지 순위로 매긴 결과가 다음과 같다. 각 학생의 선호도를 (밴드의 순위, 영화의 순위, 축구의 순위, 코딩의 순위)와 같은 벡터로 나타낼 때, 코사인 유사도를 이용하여 판단한 선호도가 가장 유사한 두 학생의 코사인 유사도의 값은? <span class="ws-problem-points">[4점]</span></div><table class="ws-table"><thead><tr><th></th><th>밴드</th><th>영화</th><th>축구</th><th>코딩</th></tr></thead><tbody><tr><td>A</td><td>1</td><td>2</td><td>3</td><td>4</td></tr><tr><td>B</td><td>2</td><td>1</td><td>4</td><td>3</td></tr><tr><td>C</td><td>4</td><td>3</td><td>1</td><td>2</td></tr></tbody></table><ol class="ws-choices"><li>① $\dfrac{7}{10}$</li><li>② $\dfrac{4}{5}$</li><li>③ $\dfrac{13}{15}$</li><li>④ $\dfrac{9}{10}$</li><li>⑤ $\dfrac{14}{15}$</li></ol></article><article class="ws-problem" id="q10"><div class="ws-problem-body"><span class="ws-problem-number">10.</span>다음은 단어 사전 $U=\{$금리, 주가, 공연, 수출, 전시$\}$에 대하여 경제 기사, 문화 기사, 그리고 새로운 기사 X에 나오는 단어의 빈도수를 나타낸 것이다. 유클리드 유사도를 이용하여 기사 X를 경제 기사 또는 문화 기사로 분류할 때, 분류 결과와 그때의 유클리드 유사도의 값을 순서대로 나열한 것은? <span class="ws-problem-points">[4점]</span></div><table class="ws-table"><thead><tr><th class="left nw"></th><th>금리</th><th>주가</th><th>공연</th><th>수출</th><th>전시</th></tr></thead><tbody><tr><td class="left nw">경제 기사</td><td>3</td><td>2</td><td>0</td><td>1</td><td>0</td></tr><tr><td class="left nw">문화 기사</td><td>0</td><td>1</td><td>3</td><td>0</td><td>2</td></tr><tr><td class="left nw">기사 X</td><td>2</td><td>2</td><td>1</td><td>0</td><td>1</td></tr></tbody></table><ol class="ws-choices"><li>① 경제 기사, $2$</li><li>② 경제 기사, $\sqrt{10}$</li><li>③ 경제 기사, $4$</li><li>④ 문화 기사, $2$</li><li>⑤ 문화 기사, $\sqrt{10}$</li></ol></article><article class="ws-problem" id="q11"><div class="ws-problem-body"><span class="ws-problem-number">11.</span>입력값 $x_1, x_2$에 대한 가중치가 $w_1=0.3$, $w_2=-0.5$이고, 활성화함수가 $\sigma(x)=\begin{cases}0 & (x \lt 0)\\ 2 & (x\ge 0)\end{cases}$ 인 퍼셉트론이 있다. 다음은 주어진 입력값에 대하여 각각의 입력값과 가중치를 곱한 값들의 합 $x$와 출력값 $\sigma(x)$를 나타낸 표이다. ㉠+㉡+㉢의 값은? <span class="ws-problem-points">[4점]</span></div><table class="ws-table"><thead><tr><th>$x_1$</th><th>$x_2$</th><th>$x$</th><th>$\sigma(x)$</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td><td>㉡</td></tr><tr><td>0</td><td>1</td><td>㉠</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0.3</td><td>2</td></tr><tr><td>1</td><td>1</td><td>㉢</td><td>0</td></tr></tbody></table><ol class="ws-choices"><li>① $-0.7$</li><li>② $1.3$</li><li>③ $1.7$</li><li>④ $2.3$</li><li>⑤ $2.7$</li></ol></article><article class="ws-problem" id="q12"><div class="ws-problem-body"><span class="ws-problem-number">12.</span>입력값 $x_1, x_2$에 대한 가중치가 $w_1=4$, $w_2=3$이고, 활성화함수가 $\sigma(x)=\begin{cases}0 & (x \lt h)\\ 1 & (x\ge h)\end{cases}$ 인 퍼셉트론이 논리합(OR) 연산을 수행하도록 하는 임곗값 $h$의 값의 범위는? <span class="ws-problem-points">[4점]</span></div><ol class="ws-choices"><li>① $0 \lt h \lt 3$</li><li>② $0\le h\le 3$</li><li>③ $0 \lt h\le 4$</li><li>④ $3 \lt h\le 7$</li><li>⑤ $0 \lt h\le 3$</li></ol></article>
+    </div>
+    <div class="ws-pagenum">3 / 7</div>
+  </div>
+  <div class="ws-page">
+    <div class="ws-body">
+<article class="ws-problem" id="q13"><div class="ws-problem-body"><span class="ws-problem-number">13.</span>입력값 $x_1, x_2$에 대한 가중치가 $w_1=-4$, $w_2=-2$이고, 활성화함수가 $\sigma(x)=\begin{cases}0 & (x \lt h)\\ 1 & (x\ge h)\end{cases}$ 인 퍼셉트론이 있다. 이 퍼셉트론의 출력값이 다음 표와 같도록 하는 정수 $h$의 개수는? <span class="ws-problem-points">[4점]</span></div><table class="ws-table"><thead><tr><th>$x_1$</th><th>$x_2$</th><th>$\sigma(x)$</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td>0</td></tr></tbody></table><ol class="ws-choices"><li>① $1$</li><li>② $2$</li><li>③ $3$</li><li>④ $4$</li><li>⑤ $5$</li></ol></article><article class="ws-problem" id="q14"><div class="ws-problem-body"><span class="ws-problem-number">14.</span>입력값 $x_1, x_2$에 대한 가중치가 $w_1, w_2$이고, 활성화함수가 $\sigma(x)=\begin{cases}0 & (x \lt 1)\\ 1 & (x\ge 1)\end{cases}$ 인 퍼셉트론에 대한 설명으로 옳은 것만을 &lt;보기&gt;에서 있는 대로 고른 것은? <span class="ws-problem-points">[4점]</span></div><aside class="ws-info"><strong>&lt;보기&gt;</strong><br>ㄱ. $w_1=0.6$, $w_2=0.6$이면 이 퍼셉트론은 논리곱(AND) 연산을 수행한다.<br>ㄴ. $w_1=1$, $w_2=1$이면 이 퍼셉트론은 논리곱(AND) 연산을 수행한다.<br>ㄷ. $w_1, w_2$의 값을 어떻게 정하더라도 이 퍼셉트론은 배타적 논리합(XOR) 연산을 수행할 수 없다.</aside><ol class="ws-choices"><li>① ㄱ</li><li>② ㄴ</li><li>③ ㄱ, ㄷ</li><li>④ ㄴ, ㄷ</li><li>⑤ ㄱ, ㄴ, ㄷ</li></ol></article><article class="ws-problem" id="q15"><div class="ws-problem-body"><span class="ws-problem-number">15.</span>성분이 0 또는 1인 $3\times3$ 행렬로 나타낸 네 이미지가 다음과 같다. 해밍 거리를 이용하여 세 이미지 A, B, C 중에서 이미지 X와 가장 유사한 이미지를 찾을 때, 그 이미지와 그때의 해밍 거리를 순서대로 나열한 것은? <span class="ws-problem-points">[4점]</span></div><p class="ws-math">$A=\begin{pmatrix}1&1&1\\1&0&1\\1&1&1\end{pmatrix},\ B=\begin{pmatrix}0&1&0\\0&1&0\\0&1&0\end{pmatrix},\ C=\begin{pmatrix}1&0&1\\0&1&0\\1&0&1\end{pmatrix}$<br>$X=\begin{pmatrix}0&1&0\\1&1&1\\0&1&0\end{pmatrix}$</p><ol class="ws-choices"><li>① A, $2$</li><li>② B, $2$</li><li>③ B, $3$</li><li>④ C, $1$</li><li>⑤ C, $8$</li></ol></article><article class="ws-problem" id="q16"><div class="ws-problem-body"><span class="ws-problem-number">16.</span>가로와 세로의 픽셀 수가 각각 5와 7인 전광판에 표시된 두 숫자 6과 9의 이미지 A, B와, 몇 개의 전구에 불이 들어오지 않아 일부만 표시된 어떤 숫자의 이미지 X가 다음 그림과 같다. 불이 켜진 픽셀을 1, 꺼진 픽셀을 0으로 하여 세 이미지를 행렬로 나타낸 뒤 해밍 거리를 이용할 때, 이미지 X가 6과 9 중 어느 숫자로 분류되는지와 그때의 해밍 거리를 순서대로 나열한 것은? <span class="ws-problem-points">[4점]</span></div><div class="ws-figure"><svg xmlns="http://www.w3.org/2000/svg" width="81.10mm" height="43.30mm" viewBox="0 0 81.10 43.30" role="img">
+<text class="fg-title" x="12.35" y="3.40" style="font-size:3.4px">이미지 A</text>
+<rect class="fg-board" x="0.00" y="5.00" width="24.70" height="33.80" rx="1.0"/>
+<rect class="fg-off" x="1.30" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="5.85" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="10.40" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="14.95" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="19.50" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="1.30" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="5.85" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="10.40" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="14.95" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="19.50" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="1.30" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="5.85" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="10.40" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="14.95" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="19.50" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="1.30" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="5.85" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="10.40" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="14.95" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="19.50" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="1.30" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="5.85" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="10.40" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="14.95" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="19.50" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="1.30" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="5.85" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="10.40" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="14.95" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="19.50" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="1.30" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="5.85" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="10.40" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="14.95" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="19.50" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<text class="fg-cap" x="12.35" y="42.00" style="font-size:2.8px">숫자 6</text>
+<text class="fg-title" x="40.55" y="3.40" style="font-size:3.4px">이미지 B</text>
+<rect class="fg-board" x="28.20" y="5.00" width="24.70" height="33.80" rx="1.0"/>
+<rect class="fg-off" x="29.50" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="34.05" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="38.60" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="43.15" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="47.70" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="29.50" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="34.05" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="38.60" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="43.15" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="47.70" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="29.50" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="34.05" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="38.60" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="43.15" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="47.70" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="29.50" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="34.05" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="38.60" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="43.15" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="47.70" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="29.50" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="34.05" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="38.60" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="43.15" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="47.70" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="29.50" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="34.05" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="38.60" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="43.15" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="47.70" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="29.50" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="34.05" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="38.60" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="43.15" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="47.70" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<text class="fg-cap" x="40.55" y="42.00" style="font-size:2.8px">숫자 9</text>
+<text class="fg-title" x="68.75" y="3.40" style="font-size:3.4px">이미지 X</text>
+<rect class="fg-board" x="56.40" y="5.00" width="24.70" height="33.80" rx="1.0"/>
+<rect class="fg-off" x="57.70" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="62.25" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="66.80" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="71.35" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="75.90" y="6.30" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="57.70" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="62.25" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="66.80" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="71.35" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="75.90" y="10.85" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="57.70" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="62.25" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="66.80" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="71.35" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="75.90" y="15.40" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="57.70" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="62.25" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="66.80" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="71.35" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="75.90" y="19.95" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="57.70" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="62.25" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="66.80" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="71.35" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="75.90" y="24.50" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="57.70" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="62.25" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="66.80" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="71.35" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="75.90" y="29.05" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="57.70" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="62.25" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="66.80" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-on" x="71.35" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<rect class="fg-off" x="75.90" y="33.60" width="3.9" height="3.9" rx="0.45"/>
+<text class="fg-cap" x="68.75" y="42.00" style="font-size:2.8px">일부만 표시된 숫자</text>
+</svg></div><ol class="ws-choices"><li>① 6, $2$</li><li>② 6, $4$</li><li>③ 9, $2$</li><li>④ 9, $4$</li><li>⑤ 9, $6$</li></ol></article>
+    </div>
+    <div class="ws-pagenum">4 / 7</div>
+  </div>
+  <div class="ws-page">
+    <div class="ws-body">
+<article class="ws-problem" id="q17"><div class="ws-problem-body"><span class="ws-problem-number">17.</span>성분이 0 또는 1인 $2\times3$ 행렬로 나타낸 이미지 $A=\begin{pmatrix}1&1&0\\1&0&1\end{pmatrix}$에 대하여, 입력되는 이미지가 A일 가능성을 계산하는 퍼셉트론의 가중치 행렬을 $W=\dfrac{1}{(\text{행렬 } A\text{의 모든 성분의 합})}A$로 정하고, 활성화함수를 $\sigma(x)=x$라 하자. 이 퍼셉트론에 이미지 $X=\begin{pmatrix}1&1&1\\1&0&1\end{pmatrix}$을 입력할 때, 출력값은? <span class="ws-problem-points">[4점]</span></div><ol class="ws-choices"><li>① $\dfrac{1}{4}$</li><li>② $\dfrac{1}{2}$</li><li>③ $\dfrac{3}{4}$</li><li>④ $1$</li><li>⑤ $4$</li></ol></article><article class="ws-problem" id="q18"><div class="ws-problem-body"><span class="ws-problem-number">18.</span>다음 표는 어느 지역의 연도별 전기차 등록 대수를 나타낸 것인데, 2022년의 자료가 누락되었다. 연도를 $x$년, 등록 대수를 $y$천 대라 하고 추세선의 식을 $f(x)=12(x-2019)+15$라 하자. 누락된 2022년의 등록 대수의 예측값을 $p$, 2023년의 등록 대수의 측정값과 예측값 사이의 오차를 $q$라 할 때, $p+q$의 값은? <span class="ws-problem-points">[4점]</span></div><table class="ws-table"><thead><tr><th>연도(년)</th><th>등록 대수(천 대)</th></tr></thead><tbody><tr><td>2019</td><td>14</td></tr><tr><td>2020</td><td>28</td></tr><tr><td>2021</td><td>40</td></tr><tr><td>2022</td><td></td></tr><tr><td>2023</td><td>60</td></tr><tr><td>2024</td><td>76</td></tr></tbody></table><ol class="ws-choices"><li>① $48$</li><li>② $51$</li><li>③ $54$</li><li>④ $60$</li><li>⑤ $66$</li></ol></article><article class="ws-problem" id="q19"><div class="ws-problem-body"><span class="ws-problem-number">19.</span>입력값 $x_1, x_2$에 대한 가중치가 $w_1, w_2$이고, 활성화함수가 $\sigma(x)=\begin{cases}0 & (x \lt 5)\\ 1 & (x\ge 5)\end{cases}$ 인 퍼셉트론이 있다. $w_1=2$일 때, 이 퍼셉트론이 논리곱(AND) 연산을 수행하도록 하는 모든 정수 $w_2$의 값의 합은? <span class="ws-problem-points">[5점]</span></div><ol class="ws-choices"><li>① $3$</li><li>② $4$</li><li>③ $7$</li><li>④ $9$</li><li>⑤ $12$</li></ol></article><article class="ws-problem" id="q20"><div class="ws-problem-body"><span class="ws-problem-number">20.</span>그림과 같은 다층 퍼셉트론에서 활성화함수는 $\sigma(x)=\begin{cases}0 & (x \lt 0)\\ 1 & (x\ge 0)\end{cases}$ 이고, 은닉층의 값 $z_1, z_2$와 출력값 $y$는 $z_1=\sigma(3x_1-2x_2)$, $z_2=\sigma(-x_1+2x_2)$, $y=\sigma(2z_1-3z_2)$이다. 다음 네 쌍의 입력값 $x_1, x_2$ 중 출력값 $y$가 1이 되는 것의 개수는? <span class="ws-problem-points">[5점]</span></div><div class="ws-figure"><svg xmlns="http://www.w3.org/2000/svg" width="80mm" height="44mm" viewBox="0 0 80 44" role="img">
+<line class="fg-edge-z1" x1="13.40" y1="8.00" x2="33.60" y2="8.00"/>
+<line class="fg-edge-z1" x1="12.28" y1="31.06" x2="34.72" y2="10.94"/>
+<line class="fg-edge-z2" x1="12.28" y1="10.94" x2="34.72" y2="31.06"/>
+<line class="fg-edge-z2" x1="13.40" y1="34.00" x2="33.60" y2="34.00"/>
+<line class="fg-edge-y" x1="42.09" y1="9.61" x2="66.91" y2="19.39"/>
+<line class="fg-edge-y" x1="42.09" y1="32.39" x2="66.91" y2="22.61"/>
+<svg class="fg-w-z1" x="18.42" y="4.53" width="10.15" height="2.77" viewBox="0.0 -665.0 2986.1 815.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(2486.1,0)"><path data-c="33" d="M127 463Q100 463 85 480T69 524Q69 579 117 622T233 665Q268 665 277 664Q351 652 390 611T430 522Q430 470 396 421T302 350L299 348Q299 347 308 345T337 336T375 315Q457 262 457 175Q457 96 395 37T238 -22Q158 -22 100 21T42 130Q42 158 60 175T105 193Q133 193 151 175T169 130Q169 119 166 110T159 94T148 82T136 74T126 70T118 67L114 66Q165 21 238 21Q293 21 321 74Q338 107 338 175V195Q338 290 274 322Q259 328 213 329L171 330L168 332Q166 335 166 348Q166 366 174 366Q202 366 232 371Q266 376 294 413T322 525V533Q322 590 287 612Q265 626 240 626Q208 626 181 615T143 592T132 580H135Q138 579 143 578T153 573T165 566T175 555T183 540T186 520Q186 498 172 481T127 463Z"></path></g></g></g></svg>
+<svg class="fg-w-z1" x="30.50" y="15.42" width="12.80" height="2.77" viewBox="0.0 -666.0 3764.1 816.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mo" transform="translate(2486.1,0)"><path data-c="2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path></g><g data-mml-node="mn" transform="translate(3264.1,0)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g></g></svg>
+<svg class="fg-w-z2" x="30.50" y="23.80" width="12.80" height="2.77" viewBox="0.0 -666.0 3764.1 816.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mo" transform="translate(2486.1,0)"><path data-c="2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path></g><g data-mml-node="mn" transform="translate(3264.1,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g></g></svg>
+<svg class="fg-w-z2" x="18.42" y="34.70" width="10.15" height="2.77" viewBox="0.0 -666.0 2986.1 816.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(2486.1,0)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g></g></svg>
+<svg class="fg-w-y" x="49.19" y="8.88" width="10.15" height="2.77" viewBox="0.0 -666.0 2986.1 816.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(2486.1,0)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g></g></svg>
+<svg class="fg-w-y" x="48.04" y="30.80" width="12.80" height="2.77" viewBox="0.0 -665.0 3764.1 815.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mo" transform="translate(2486.1,0)"><path data-c="2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path></g><g data-mml-node="mn" transform="translate(3264.1,0)"><path data-c="33" d="M127 463Q100 463 85 480T69 524Q69 579 117 622T233 665Q268 665 277 664Q351 652 390 611T430 522Q430 470 396 421T302 350L299 348Q299 347 308 345T337 336T375 315Q457 262 457 175Q457 96 395 37T238 -22Q158 -22 100 21T42 130Q42 158 60 175T105 193Q133 193 151 175T169 130Q169 119 166 110T159 94T148 82T136 74T126 70T118 67L114 66Q165 21 238 21Q293 21 321 74Q338 107 338 175V195Q338 290 274 322Q259 328 213 329L171 330L168 332Q166 335 166 348Q166 366 174 366Q202 366 232 371Q266 376 294 413T322 525V533Q322 590 287 612Q265 626 240 626Q208 626 181 615T143 592T132 580H135Q138 579 143 578T153 573T165 566T175 555T183 540T186 520Q186 498 172 481T127 463Z"></path></g></g></g></svg>
+<circle class="fg-node-x" cx="9" cy="8" r="4.4"/>
+<svg class="fg-node-text" x="6.78" y="6.70" width="4.44" height="2.60" viewBox="0.0 -442.0 1008.6 592.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path></g><g data-mml-node="mn" transform="translate(605,-150) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g></g></g></svg>
+<circle class="fg-node-x" cx="9" cy="34" r="4.4"/>
+<svg class="fg-node-text" x="6.78" y="32.70" width="4.44" height="2.60" viewBox="0.0 -442.0 1008.6 592.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path></g><g data-mml-node="mn" transform="translate(605,-150) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g></g></g></svg>
+<circle class="fg-node-z1" cx="38" cy="8" r="4.4"/>
+<svg class="fg-node-text" x="36.02" y="6.70" width="3.97" height="2.60" viewBox="0.0 -442.0 901.6 592.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D467" d="M347 338Q337 338 294 349T231 360Q211 360 197 356T174 346T162 335T155 324L153 320Q150 317 138 317Q117 317 117 325Q117 330 120 339Q133 378 163 406T229 440Q241 442 246 442Q271 442 291 425T329 392T367 375Q389 375 411 408T434 441Q435 442 449 442H462Q468 436 468 434Q468 430 463 420T449 399T432 377T418 358L411 349Q368 298 275 214T160 106L148 94L163 93Q185 93 227 82T290 71Q328 71 360 90T402 140Q406 149 409 151T424 153Q443 153 443 143Q443 138 442 134Q425 72 376 31T278 -11Q252 -11 232 6T193 40T155 57Q111 57 76 -3Q70 -11 59 -11H54H41Q35 -5 35 -2Q35 13 93 84Q132 129 225 214T340 322Q352 338 347 338Z"></path></g><g data-mml-node="mn" transform="translate(498,-150) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g></g></g></svg>
+<circle class="fg-node-z2" cx="38" cy="34" r="4.4"/>
+<svg class="fg-node-text" x="36.02" y="32.70" width="3.97" height="2.60" viewBox="0.0 -442.0 901.6 592.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D467" d="M347 338Q337 338 294 349T231 360Q211 360 197 356T174 346T162 335T155 324L153 320Q150 317 138 317Q117 317 117 325Q117 330 120 339Q133 378 163 406T229 440Q241 442 246 442Q271 442 291 425T329 392T367 375Q389 375 411 408T434 441Q435 442 449 442H462Q468 436 468 434Q468 430 463 420T449 399T432 377T418 358L411 349Q368 298 275 214T160 106L148 94L163 93Q185 93 227 82T290 71Q328 71 360 90T402 140Q406 149 409 151T424 153Q443 153 443 143Q443 138 442 134Q425 72 376 31T278 -11Q252 -11 232 6T193 40T155 57Q111 57 76 -3Q70 -11 59 -11H54H41Q35 -5 35 -2Q35 13 93 84Q132 129 225 214T340 322Q352 338 347 338Z"></path></g><g data-mml-node="mn" transform="translate(498,-150) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g></g></g></svg>
+<circle class="fg-node-y" cx="71" cy="21" r="4.4"/>
+<svg class="fg-node-text" x="69.92" y="19.58" width="2.16" height="2.85" viewBox="0.0 -442.0 490.0 647.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D466" d="M21 287Q21 301 36 335T84 406T158 442Q199 442 224 419T250 355Q248 336 247 334Q247 331 231 288T198 191T182 105Q182 62 196 45T238 27Q261 27 281 38T312 61T339 94Q339 95 344 114T358 173T377 247Q415 397 419 404Q432 431 462 431Q475 431 483 424T494 412T496 403Q496 390 447 193T391 -23Q363 -106 294 -155T156 -205Q111 -205 77 -183T43 -117Q43 -95 50 -80T69 -58T89 -48T106 -45Q150 -45 150 -87Q150 -107 138 -122T115 -142T102 -147L99 -148Q101 -153 118 -160T152 -167H160Q177 -167 186 -165Q219 -156 247 -127T290 -65T313 -9T321 21L315 17Q309 13 296 6T270 -6Q250 -11 231 -11Q185 -11 150 11T104 82Q103 89 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g></g></g></svg>
+</svg></div><table class="ws-table"><thead><tr><th class="left nw">$x_1$</th><th>2</th><th>1</th><th>$-1$</th><th>$-1$</th></tr></thead><tbody><tr><td class="left nw">$x_2$</td><td>1</td><td>$-1$</td><td>2</td><td>$-1$</td></tr></tbody></table><ol class="ws-choices"><li>① $0$</li><li>② $1$</li><li>③ $2$</li><li>④ $3$</li><li>⑤ $4$</li></ol></article>
+    </div>
+    <div class="ws-pagenum">5 / 7</div>
+  </div>
+  <div class="ws-page">
+    <div class="ws-body">
+<article class="ws-problem" id="q21"><div class="ws-problem-body"><span class="ws-problem-number">21.</span>그림과 같은 다층 퍼셉트론에서 활성화함수는 $\sigma(x)=\begin{cases}0 & (x \lt 4)\\ 1 & (x\ge 4)\end{cases}$ 이고, 은닉층의 값 $z_1, z_2$와 출력값 $y$는 $z_1=\sigma(6x_1+5x_2)$, $z_2=\sigma(3x_1+2x_2)$, $y=\sigma(5z_1+k\,z_2)$이다. 이 다층 퍼셉트론이 배타적 논리합(XOR) 연산을 수행하도록 하는 정수 $k$의 최댓값은? <span class="ws-problem-points">[5점]</span></div><div class="ws-figure"><svg xmlns="http://www.w3.org/2000/svg" width="80mm" height="44mm" viewBox="0 0 80 44" role="img">
+<line class="fg-edge-z1" x1="13.40" y1="8.00" x2="33.60" y2="8.00"/>
+<line class="fg-edge-z1" x1="12.28" y1="31.06" x2="34.72" y2="10.94"/>
+<line class="fg-edge-z2" x1="12.28" y1="10.94" x2="34.72" y2="31.06"/>
+<line class="fg-edge-z2" x1="13.40" y1="34.00" x2="33.60" y2="34.00"/>
+<line class="fg-edge-y" x1="42.09" y1="9.61" x2="66.91" y2="19.39"/>
+<line class="fg-edge-y" x1="42.09" y1="32.39" x2="66.91" y2="22.61"/>
+<svg class="fg-w-z1" x="18.42" y="4.53" width="10.15" height="2.77" viewBox="0.0 -666.0 2986.1 816.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(2486.1,0)"><path data-c="36" d="M42 313Q42 476 123 571T303 666Q372 666 402 630T432 550Q432 525 418 510T379 495Q356 495 341 509T326 548Q326 592 373 601Q351 623 311 626Q240 626 194 566Q147 500 147 364L148 360Q153 366 156 373Q197 433 263 433H267Q313 433 348 414Q372 400 396 374T435 317Q456 268 456 210V192Q456 169 451 149Q440 90 387 34T253 -22Q225 -22 199 -14T143 16T92 75T56 172T42 313ZM257 397Q227 397 205 380T171 335T154 278T148 216Q148 133 160 97T198 39Q222 21 251 21Q302 21 329 59Q342 77 347 104T352 209Q352 289 347 316T329 361Q302 397 257 397Z"></path></g></g></g></svg>
+<svg class="fg-w-z1" x="30.50" y="15.42" width="10.15" height="2.77" viewBox="0.0 -666.0 2986.1 816.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(2486.1,0)"><path data-c="35" d="M164 157Q164 133 148 117T109 101H102Q148 22 224 22Q294 22 326 82Q345 115 345 210Q345 313 318 349Q292 382 260 382H254Q176 382 136 314Q132 307 129 306T114 304Q97 304 95 310Q93 314 93 485V614Q93 664 98 664Q100 666 102 666Q103 666 123 658T178 642T253 634Q324 634 389 662Q397 666 402 666Q410 666 410 648V635Q328 538 205 538Q174 538 149 544L139 546V374Q158 388 169 396T205 412T256 420Q337 420 393 355T449 201Q449 109 385 44T229 -22Q148 -22 99 32T50 154Q50 178 61 192T84 210T107 214Q132 214 148 197T164 157Z"></path></g></g></g></svg>
+<svg class="fg-w-z2" x="30.50" y="23.80" width="10.15" height="2.77" viewBox="0.0 -665.0 2986.1 815.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(2486.1,0)"><path data-c="33" d="M127 463Q100 463 85 480T69 524Q69 579 117 622T233 665Q268 665 277 664Q351 652 390 611T430 522Q430 470 396 421T302 350L299 348Q299 347 308 345T337 336T375 315Q457 262 457 175Q457 96 395 37T238 -22Q158 -22 100 21T42 130Q42 158 60 175T105 193Q133 193 151 175T169 130Q169 119 166 110T159 94T148 82T136 74T126 70T118 67L114 66Q165 21 238 21Q293 21 321 74Q338 107 338 175V195Q338 290 274 322Q259 328 213 329L171 330L168 332Q166 335 166 348Q166 366 174 366Q202 366 232 371Q266 376 294 413T322 525V533Q322 590 287 612Q265 626 240 626Q208 626 181 615T143 592T132 580H135Q138 579 143 578T153 573T165 566T175 555T183 540T186 520Q186 498 172 481T127 463Z"></path></g></g></g></svg>
+<svg class="fg-w-z2" x="18.42" y="34.70" width="10.15" height="2.77" viewBox="0.0 -666.0 2986.1 816.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(2486.1,0)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g></g></svg>
+<svg class="fg-w-y" x="49.19" y="8.88" width="10.15" height="2.77" viewBox="0.0 -666.0 2986.1 816.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(2486.1,0)"><path data-c="35" d="M164 157Q164 133 148 117T109 101H102Q148 22 224 22Q294 22 326 82Q345 115 345 210Q345 313 318 349Q292 382 260 382H254Q176 382 136 314Q132 307 129 306T114 304Q97 304 95 310Q93 314 93 485V614Q93 664 98 664Q100 666 102 666Q103 666 123 658T178 642T253 634Q324 634 389 662Q397 666 402 666Q410 666 410 648V635Q328 538 205 538Q174 538 149 544L139 546V374Q158 388 169 396T205 412T256 420Q337 420 393 355T449 201Q449 109 385 44T229 -22Q148 -22 99 32T50 154Q50 178 61 192T84 210T107 214Q132 214 148 197T164 157Z"></path></g></g></g></svg>
+<svg class="fg-w-y" x="49.31" y="30.30" width="9.91" height="2.87" viewBox="0.0 -694.0 2915.1 844.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mn" transform="translate(749,-150) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(1430.3,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mi" transform="translate(2486.1,0)"><path data-c="1D44F" d="M73 647Q73 657 77 670T89 683Q90 683 161 688T234 694Q246 694 246 685T212 542Q204 508 195 472T180 418L176 399Q176 396 182 402Q231 442 283 442Q345 442 383 396T422 280Q422 169 343 79T173 -11Q123 -11 82 27T40 150V159Q40 180 48 217T97 414Q147 611 147 623T109 637Q104 637 101 637H96Q86 637 83 637T76 640T73 647ZM336 325V331Q336 405 275 405Q258 405 240 397T207 376T181 352T163 330L157 322L136 236Q114 150 114 114Q114 66 138 42Q154 26 178 26Q211 26 245 58Q270 81 285 114T318 219Q336 291 336 325Z"></path></g></g></g></svg>
+<circle class="fg-node-x" cx="9" cy="8" r="4.4"/>
+<svg class="fg-node-text" x="6.78" y="6.70" width="4.44" height="2.60" viewBox="0.0 -442.0 1008.6 592.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path></g><g data-mml-node="mn" transform="translate(605,-150) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g></g></g></svg>
+<circle class="fg-node-x" cx="9" cy="34" r="4.4"/>
+<svg class="fg-node-text" x="6.78" y="32.70" width="4.44" height="2.60" viewBox="0.0 -442.0 1008.6 592.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path></g><g data-mml-node="mn" transform="translate(605,-150) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g></g></g></svg>
+<circle class="fg-node-z1" cx="38" cy="8" r="4.4"/>
+<svg class="fg-node-text" x="36.02" y="6.70" width="3.97" height="2.60" viewBox="0.0 -442.0 901.6 592.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D467" d="M347 338Q337 338 294 349T231 360Q211 360 197 356T174 346T162 335T155 324L153 320Q150 317 138 317Q117 317 117 325Q117 330 120 339Q133 378 163 406T229 440Q241 442 246 442Q271 442 291 425T329 392T367 375Q389 375 411 408T434 441Q435 442 449 442H462Q468 436 468 434Q468 430 463 420T449 399T432 377T418 358L411 349Q368 298 275 214T160 106L148 94L163 93Q185 93 227 82T290 71Q328 71 360 90T402 140Q406 149 409 151T424 153Q443 153 443 143Q443 138 442 134Q425 72 376 31T278 -11Q252 -11 232 6T193 40T155 57Q111 57 76 -3Q70 -11 59 -11H54H41Q35 -5 35 -2Q35 13 93 84Q132 129 225 214T340 322Q352 338 347 338Z"></path></g><g data-mml-node="mn" transform="translate(498,-150) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g></g></g></svg>
+<circle class="fg-node-z2" cx="38" cy="34" r="4.4"/>
+<svg class="fg-node-text" x="36.02" y="32.70" width="3.97" height="2.60" viewBox="0.0 -442.0 901.6 592.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D467" d="M347 338Q337 338 294 349T231 360Q211 360 197 356T174 346T162 335T155 324L153 320Q150 317 138 317Q117 317 117 325Q117 330 120 339Q133 378 163 406T229 440Q241 442 246 442Q271 442 291 425T329 392T367 375Q389 375 411 408T434 441Q435 442 449 442H462Q468 436 468 434Q468 430 463 420T449 399T432 377T418 358L411 349Q368 298 275 214T160 106L148 94L163 93Q185 93 227 82T290 71Q328 71 360 90T402 140Q406 149 409 151T424 153Q443 153 443 143Q443 138 442 134Q425 72 376 31T278 -11Q252 -11 232 6T193 40T155 57Q111 57 76 -3Q70 -11 59 -11H54H41Q35 -5 35 -2Q35 13 93 84Q132 129 225 214T340 322Q352 338 347 338Z"></path></g><g data-mml-node="mn" transform="translate(498,-150) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g></g></g></svg>
+<circle class="fg-node-y" cx="71" cy="21" r="4.4"/>
+<svg class="fg-node-text" x="69.92" y="19.58" width="2.16" height="2.85" viewBox="0.0 -442.0 490.0 647.0"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D466" d="M21 287Q21 301 36 335T84 406T158 442Q199 442 224 419T250 355Q248 336 247 334Q247 331 231 288T198 191T182 105Q182 62 196 45T238 27Q261 27 281 38T312 61T339 94Q339 95 344 114T358 173T377 247Q415 397 419 404Q432 431 462 431Q475 431 483 424T494 412T496 403Q496 390 447 193T391 -23Q363 -106 294 -155T156 -205Q111 -205 77 -183T43 -117Q43 -95 50 -80T69 -58T89 -48T106 -45Q150 -45 150 -87Q150 -107 138 -122T115 -142T102 -147L99 -148Q101 -153 118 -160T152 -167H160Q177 -167 186 -165Q219 -156 247 -127T290 -65T313 -9T321 21L315 17Q309 13 296 6T270 -6Q250 -11 231 -11Q185 -11 150 11T104 82Q103 89 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g></g></g></svg>
+</svg></div><ol class="ws-choices"><li>① $-6$</li><li>② $-5$</li><li>③ $-4$</li><li>④ $-3$</li><li>⑤ $-2$</li></ol></article><article class="ws-problem" id="q22"><div class="ws-problem-body"><span class="ws-problem-number">22.</span>성분이 0 또는 1인 $3\times3$ 행렬로 나타낸 두 이미지 $P=\begin{pmatrix}1&0&1\\0&1&0\\1&0&1\end{pmatrix}$, $Q=\begin{pmatrix}1&a&1\\0&1&b\\0&0&1\end{pmatrix}$에 대하여 $H(P, Q)=3$일 때, $a, b$의 값은? <span class="ws-problem-points">[5점]</span></div><ol class="ws-choices"><li>① $a=0,\ b=0$</li><li>② $a=0,\ b=1$</li><li>③ $a=1,\ b=0$</li><li>④ $a=1,\ b=1$</li><li>⑤ 조건을 만족시키는 $a, b$는 존재하지 않는다.</li></ol></article>
+    </div>
+    <div class="ws-pagenum">6 / 7</div>
+  </div>
+  <div class="ws-page">
+    <div class="ws-body">
+<article class="ws-problem" id="q23"><aside class="ws-info ws-set"><strong>[23~24]</strong> 성분이 0 또는 1인 행렬로 나타낸 이미지 A에 대하여, 입력되는 이미지가 A일 가능성을 계산하는 퍼셉트론 $\mathrm{P_A}$의 가중치 행렬은 $W_A=\dfrac{1}{(\text{행렬 } A\text{의 모든 성분의 합})}A$이고, 활성화함수는 $\sigma(x)=x$이다. 물음에 답하시오.</aside><div class="ws-problem-body"><span class="ws-problem-number">23.</span>성분이 0 또는 1인 $3\times3$ 행렬로 나타낸 세 이미지 A, B, X가 그림과 같다. 이미지 X를 두 퍼셉트론 $\mathrm{P_A}$, $\mathrm{P_B}$에 입력할 때, 인공지능이 X를 어느 이미지로 분류하는지와 그때의 출력값을 순서대로 나열한 것은? <span class="ws-problem-points">[5점]</span></div><div class="ws-figure"><svg xmlns="http://www.w3.org/2000/svg" width="73.20mm" height="26.20mm" viewBox="0 0 73.20 26.20" role="img">
+<text class="fg-title" x="10.20" y="3.40" style="font-size:3.4px">이미지 A</text>
+<rect class="fg-board" x="0.00" y="5.00" width="20.40" height="20.40" rx="1.0"/>
+<rect class="fg-on" x="1.60" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="7.60" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="13.60" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="1.60" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="7.60" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="13.60" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="1.60" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="7.60" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="13.60" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<text class="fg-title" x="36.60" y="3.40" style="font-size:3.4px">이미지 B</text>
+<rect class="fg-board" x="26.40" y="5.00" width="20.40" height="20.40" rx="1.0"/>
+<rect class="fg-on" x="28.00" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="34.00" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="40.00" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="28.00" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="34.00" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="40.00" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="28.00" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="34.00" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="40.00" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<text class="fg-title" x="63.00" y="3.40" style="font-size:3.4px">이미지 X</text>
+<rect class="fg-board" x="52.80" y="5.00" width="20.40" height="20.40" rx="1.0"/>
+<rect class="fg-on" x="54.40" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="60.40" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="66.40" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="54.40" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="60.40" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="66.40" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="54.40" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="60.40" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="66.40" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+</svg></div><ol class="ws-choices"><li>① A, $\dfrac{3}{4}$</li><li>② A, $\dfrac{4}{5}$</li><li>③ B, $\dfrac{3}{4}$</li><li>④ B, $\dfrac{4}{5}$</li><li>⑤ B, $1$</li></ol></article><article class="ws-problem" id="q24"><div class="ws-problem-body"><span class="ws-problem-number">24.</span>성분이 0 또는 1인 $3\times3$ 행렬로 나타낸 세 이미지 A, B, X가 그림과 같다. 이미지 X를 두 이미지 A, B 중 하나로 분류하려고 한다. 옳은 것만을 &lt;보기&gt;에서 있는 대로 고른 것은? <span class="ws-problem-points">[5점]</span></div><div class="ws-figure"><svg xmlns="http://www.w3.org/2000/svg" width="73.20mm" height="26.20mm" viewBox="0 0 73.20 26.20" role="img">
+<text class="fg-title" x="10.20" y="3.40" style="font-size:3.4px">이미지 A</text>
+<rect class="fg-board" x="0.00" y="5.00" width="20.40" height="20.40" rx="1.0"/>
+<rect class="fg-on" x="1.60" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="7.60" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="13.60" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="1.60" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="7.60" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="13.60" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="1.60" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="7.60" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="13.60" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<text class="fg-title" x="36.60" y="3.40" style="font-size:3.4px">이미지 B</text>
+<rect class="fg-board" x="26.40" y="5.00" width="20.40" height="20.40" rx="1.0"/>
+<rect class="fg-off" x="28.00" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="34.00" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="40.00" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="28.00" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="34.00" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="40.00" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="28.00" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="34.00" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="40.00" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<text class="fg-title" x="63.00" y="3.40" style="font-size:3.4px">이미지 X</text>
+<rect class="fg-board" x="52.80" y="5.00" width="20.40" height="20.40" rx="1.0"/>
+<rect class="fg-on" x="54.40" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="60.40" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="66.40" y="6.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="54.40" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="60.40" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="66.40" y="12.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="54.40" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-off" x="60.40" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+<rect class="fg-on" x="66.40" y="18.60" width="5.2" height="5.2" rx="0.45"/>
+</svg></div><aside class="ws-info"><strong>&lt;보기&gt;</strong><br>ㄱ. $H(X, A)=3$이다.<br>ㄴ. 퍼셉트론 $\mathrm{P_A}$의 출력값은 퍼셉트론 $\mathrm{P_B}$의 출력값보다 작다.<br>ㄷ. 해밍 거리를 이용하든 두 퍼셉트론 $\mathrm{P_A}$, $\mathrm{P_B}$를 이용하든 X는 모두 A로 분류된다.</aside><ol class="ws-choices"><li>① ㄱ</li><li>② ㄷ</li><li>③ ㄱ, ㄴ</li><li>④ ㄱ, ㄷ</li><li>⑤ ㄱ, ㄴ, ㄷ</li></ol></article><article class="ws-problem" id="q25"><div class="ws-problem-body"><span class="ws-problem-number">25.</span>다음 표는 어느 카페에서 낮 최고 기온에 따른 아이스 음료 판매량을 조사한 것이다. 기온을 $x\,°\mathrm{C}$, 판매량을 $y$잔이라 하고 추세선의 식을 $f(x)=5x+20$이라 하자. 네 자료 중 오차의 크기가 가장 큰 자료의 오차는? <span class="ws-problem-points">[5점]</span></div><table class="ws-table"><thead><tr><th class="left nw">기온($°\mathrm{C}$)</th><th>20</th><th>24</th><th>28</th><th>32</th></tr></thead><tbody><tr><td class="left nw">판매량(잔)</td><td>118</td><td>144</td><td>155</td><td>183</td></tr></tbody></table><ol class="ws-choices"><li>① $-5$</li><li>② $-2$</li><li>③ $3$</li><li>④ $4$</li><li>⑤ $5$</li></ol></article>
+    </div>
+    <div class="ws-pagenum">7 / 7</div>
+  </div>
+</body>
+</html>
