@@ -1,0 +1,34 @@
+# ── 줄바꿈 정규화 ─────────────────────────────────────────────────────
+# 저장소에는 항상 LF로 저장하고, 체크아웃할 때도 LF로 내린다.
+# 맥/윈도우를 오가도 "파일 전체가 수정됨"으로 보이는 문제를 막는다.
+* text=auto eol=lf
+
+# ── 바이너리 (줄바꿈 변환·diff 금지) ──────────────────────────────────
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.svg   text eol=lf
+*.ico   binary
+*.pdf   binary
+*.zip   binary
+*.xls   binary
+*.xlsx  binary
+*.xlsm  binary
+*.doc   binary
+*.docx  binary
+*.ppt   binary
+*.pptx  binary
+*.hwp   binary
+*.hwpx  binary
+*.ttf   binary
+*.otf   binary
+*.woff  binary
+*.woff2 binary
+*.mp4   binary
+*.mp3   binary
+
+# ── 윈도우 배치 파일은 CRLF가 필요 ────────────────────────────────────
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
