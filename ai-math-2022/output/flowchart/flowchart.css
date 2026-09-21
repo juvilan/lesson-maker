@@ -1,0 +1,259 @@
+/* ============================================================
+   flowchart.css — 순서도 단계 추적 슬라이드 스타일
+   캔버스 1920×1080 기준 · 한 장 세로 994px 이하
+
+   색은 모두 토큰으로만 쓴다. 아래 --lm-fc-* 는 design-tokens.css의
+   의미 색과 같은 RGB를 쓰고 투명도만 달리한 순서도 전용 면색이다.
+     terminal ← --lm-danger  #8B3A2E
+     process  ← --lm-info    #2C5282
+     decision ← --lm-accent-math2 #6B4C8A
+     output   ← --lm-success #3F6B3E
+     active   ← --lm-accent-ai-math #8F6A1F
+   ============================================================ */
+
+:root {
+  --lm-fc-terminal-fill: rgba(139,  58,  46, 0.14);
+  --lm-fc-process-fill:  rgba( 44,  82, 130, 0.13);
+  --lm-fc-decision-fill: rgba(107,  76, 138, 0.14);
+  --lm-fc-output-fill:   rgba( 63, 107,  62, 0.13);
+  --lm-fc-active-fill:   rgba(143, 106,  31, 0.28);
+  --lm-fc-active-glow:   rgba(143, 106,  31, 0.55);
+  --lm-fc-row-current:   rgba(143, 106,  31, 0.15);
+}
+
+/* ── 슬라이드 기본 틀 ──────────────────────────────────── */
+
+.reveal .slides section.fc-slide { padding: 0; }
+
+.reveal .fc-title {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--lm-ink);
+  margin: 0 0 14px;
+  padding: 0 0 10px;
+  border-bottom: 2px solid var(--lm-rule-strong);
+  line-height: 1.25;
+}
+.reveal .fc-title .fc-src {
+  font-size: 27px;
+  font-weight: 500;
+  color: var(--lm-ink-3);
+  margin-left: 14px;
+}
+
+.fc-layout { display: flex; gap: 40px; align-items: flex-start; }
+.fc-layout--dual { gap: 52px; justify-content: center; }
+
+.fc-col { flex: 1 1 auto; min-width: 0; }
+.fc-col--fixed { flex: 0 0 auto; }
+
+/* 두 순서도의 높이가 달라도 아래 설명 상자는 같은 줄에서 시작하도록 */
+.fc-pair { display: flex; gap: 20px; align-items: flex-start; min-height: 562px; }
+
+.fc-pair-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--lm-accent);
+  margin: 0 0 8px;
+}
+
+/* ── 순서도 캔버스 ─────────────────────────────────────── */
+
+.fc-chart { position: relative; overflow: hidden; flex: 0 0 auto; }
+.fc-chart-inner { position: relative; }
+.fc-chart svg { display: block; overflow: hidden; }
+
+.fc-edge { stroke: var(--lm-ink-2); stroke-width: 2.2; }
+.fc-arrowhead { fill: var(--lm-ink-2); }
+
+.fc-shape {
+  stroke-width: 2.4;
+  transition: fill .18s ease, stroke .18s ease, stroke-width .18s ease;
+}
+.fc-shape--terminal { fill: var(--lm-fc-terminal-fill); stroke: var(--lm-danger); }
+.fc-shape--process  { fill: var(--lm-fc-process-fill);  stroke: var(--lm-info); }
+.fc-shape--decision { fill: var(--lm-fc-decision-fill); stroke: var(--lm-accent-math2); }
+.fc-shape--output   { fill: var(--lm-fc-output-fill);   stroke: var(--lm-success); }
+
+.fc-shape.is-active {
+  fill: var(--lm-fc-active-fill);
+  stroke: var(--lm-accent);
+  stroke-width: 5;
+  filter: drop-shadow(0 0 10px var(--lm-fc-active-glow));
+}
+
+.fc-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 28px;          /* 0.78em — 폰트 하한 0.7em 준수 */
+  line-height: 1.3;
+  color: var(--lm-ink);
+  pointer-events: none;
+}
+.fc-label.is-active { font-weight: 700; }
+
+.fc-edge-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 26px;          /* 0.72em */
+  color: var(--lm-ink-2);
+  background: var(--lm-paper);
+  padding: 0 6px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.fc-blank {
+  display: inline-block;
+  min-width: 70px;
+  padding: 2px 10px;
+  border: 2px dashed var(--lm-accent);
+  border-radius: 6px;
+  color: var(--lm-accent);
+  font-weight: 700;
+}
+
+.fc-label.is-revealed { animation: fc-pop .38s ease; }
+@keyframes fc-pop {
+  0%   { transform: translate(-50%, -50%) scale(.5);   opacity: 0; }
+  60%  { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ── 추적표 ────────────────────────────────────────────── */
+
+.fc-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+}
+.fc-table th,
+.fc-table td {
+  border: 1px solid var(--lm-rule-strong);
+  padding: 7px 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+.fc-table th {
+  background: var(--lm-paper-tint);
+  font-weight: 700;
+  color: var(--lm-ink);
+}
+.fc-table tr.is-current td {
+  background: var(--lm-fc-row-current);
+  font-weight: 700;
+}
+.fc-table tr.is-ellipsis td {
+  color: var(--lm-ink-4);
+  letter-spacing: 2px;
+}
+
+.fc-table-wrap { overflow: hidden; border-radius: 6px; }
+
+/* ── 설명 상자 ─────────────────────────────────────────── */
+
+.fc-desc {
+  margin-top: 18px;
+  padding: 18px 22px;
+  min-height: 116px;
+  font-size: 29px;
+  line-height: 1.5;
+  color: var(--lm-ink);
+  background: var(--lm-paper-soft);
+  border-left: 6px solid var(--lm-rule-strong);
+  border-radius: 4px;
+}
+.fc-desc--ok   { background: var(--lm-success-tint); border-left-color: var(--lm-success); }
+.fc-desc--warn { background: var(--lm-danger-tint);  border-left-color: var(--lm-danger); }
+.fc-desc--info { background: var(--lm-info-tint);    border-left-color: var(--lm-info); }
+.fc-desc--compact { min-height: 96px; font-size: 26px; padding: 13px 16px; margin-top: 12px; }
+
+/* ── 조작 버튼 ─────────────────────────────────────────── */
+
+.fc-controls { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+
+.fc-btn {
+  font-family: inherit;
+  font-size: 26px;
+  font-weight: 600;
+  padding: 9px 20px;
+  border: 2px solid var(--lm-rule-strong);
+  border-radius: 8px;
+  background: var(--lm-paper);
+  color: var(--lm-ink-2);
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, filter .15s ease;
+}
+.fc-btn:hover { background: var(--lm-paper-tint); border-color: var(--lm-accent); }
+.fc-btn--primary { background: var(--lm-accent); border-color: var(--lm-accent); color: var(--lm-page); }
+.fc-btn--primary:hover { filter: brightness(0.85); }
+
+.fc-counter {
+  margin-left: auto;
+  font-size: 26px;
+  color: var(--lm-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 보조 패널 (알고리즘 원문·선택지·결론) ──────────────── */
+
+.fc-aside {
+  padding: 18px 24px;
+  background: var(--lm-paper-soft);
+  border: 1px solid var(--lm-rule);
+  border-radius: 8px;
+  font-size: 28px;
+  line-height: 1.5;
+}
+.fc-aside h4 { font-size: 28px; color: var(--lm-accent); margin: 0 0 10px; }
+.fc-aside ol, .fc-aside ul { margin: 0; padding-left: 1.4em; }
+.fc-aside li { font-size: 28px; margin: 0 0 6px; }
+
+.fc-choices { display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 30px; }
+.fc-choices span { white-space: nowrap; }
+
+.fc-conclusion {
+  margin-top: 16px;
+  padding: 16px 26px;
+  font-size: 33px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--lm-success);
+  background: var(--lm-success-tint);
+  border: 2px solid var(--lm-success);
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.fc-conclusion.visible { opacity: 1; }
+
+/* ── 표지·마무리 ───────────────────────────────────────── */
+
+.fc-cover { padding-top: 40px; }
+.fc-cover h1 { font-size: 76px; margin-bottom: 16px; }
+.fc-cover .fc-lead { font-size: 34px; color: var(--lm-ink-2); margin-bottom: 34px; }
+
+.fc-key {
+  display: inline-block;
+  padding: 2px 14px;
+  margin: 0 4px;
+  border: 2px solid var(--lm-rule-strong);
+  border-radius: 6px;
+  background: var(--lm-paper-tint);
+  font-family: var(--lm-font-mono);
+  font-size: 26px;
+}
+
+.fc-oneline {
+  margin-top: 30px;
+  padding: 30px 40px;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--lm-ink);
+  background: var(--lm-accent-tint);
+  border-left: 8px solid var(--lm-accent);
+  border-radius: 6px;
+}

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>순서도, 한 칸씩 따라가 보기 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+  <link rel="stylesheet" href="../flowchart/flowchart.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+  </style>
+</head>
+
+<body data-subject="ai_math_2022">
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ══════════════ 표지 ══════════════ -->
+    <section class="fc-slide fc-cover">
+      <h1>순서도, 한 칸씩 따라가 보기</h1>
+      <p class="fc-lead">
+        지난 시간에 순서도 기호와 「두 직선의 위치 관계」까지 봤습니다.<br>
+        오늘은 <b>순서도가 실제로 도는 과정</b>을 값이 바뀌는 대로 따라갑니다.
+      </p>
+
+      <div class="fc-layout">
+        <div class="fc-col">
+          <div class="fc-aside">
+            <h4>조작법</h4>
+            <p style="margin:0">
+              <span class="fc-key">→</span> <span class="fc-key">Space</span> 다음 단계 ·
+              <span class="fc-key">←</span> 이전 단계 ·
+              <span class="fc-key">R</span> 처음부터<br>
+              순서도를 <b>클릭</b>해도 한 단계씩 진행됩니다.<br>
+              마지막 단계에서 한 번 더 누르면 다음 슬라이드로 넘어갑니다.
+            </p>
+          </div>
+        </div>
+        <div class="fc-col">
+          <div class="fc-aside">
+            <h4>오늘 도착할 곳</h4>
+            <ol>
+              <li>실근의 개수 — 판단 상자의 빈칸 (가)(나)(다)</li>
+              <li>1부터 10까지의 합 — 판단 조건 찾기</li>
+              <li>\(S\)와 \(T\) — 판정 위치가 만드는 차이</li>
+              <li>반복이 많을 때 — 규칙 찾아 건너뛰기</li>
+              <li>부분분수 합 — 지워지는 항 보기</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        지난 시간 마지막 문장("순서도는 판단 상자에서 길이 갈린다")을 회수하며 시작.
+        이 덱은 판서 대신 쓰는 도구다. 학생에게 먼저 답을 묻고, 그 다음에 화면을 한 단계씩 넘긴다.
+        절대 처음부터 끝까지 그냥 넘기지 말 것 — 매 단계에서 "다음은 어떤 값이 될까?"를 먼저 묻는다.
+      </aside>
+    </section>
+
+    <!-- ══════════════ ① 판별식 (원본 슬라이드 11) ══════════════ -->
+    <section class="fc-slide" id="s11">
+      <h2 class="fc-title">
+        ① 이차방정식의 서로 다른 실근의 개수
+        <span class="fc-src">교과서 문제 1</span>
+      </h2>
+      <div class="fc-layout" data-fc-root data-fc-spec="discriminant" data-fc-scale="1.2">
+        <div class="fc-col fc-col--fixed" data-fc-chart></div>
+        <div class="fc-col">
+          <div class="fc-aside">
+            <h4>알고리즘</h4>
+            이차방정식 \(ax^2+bx+c=0\)에 대하여
+            <ol style="margin-top:8px; list-style-type: lower-roman">
+              <li>판별식 \(D=b^2-4ac\)의 값을 계산한다.</li>
+              <li>\(D&gt;0\)이면, 서로 다른 실근의 개수는 2이다.</li>
+              <li>\(D=0\)이면, 서로 다른 실근의 개수는 1이다.</li>
+              <li>\(D&lt;0\)이면, 서로 다른 실근의 개수는 0이다.</li>
+            </ol>
+          </div>
+          <div class="fc-desc" data-fc-desc></div>
+          <div class="fc-controls">
+            <button class="fc-btn" data-fc-act="prev">◀ 이전</button>
+            <button class="fc-btn fc-btn--primary" data-fc-act="next">다음 ▶</button>
+            <button class="fc-btn" data-fc-act="reset">처음</button>
+            <span class="fc-counter" data-fc-counter></span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        이 문제는 값을 추적하는 문제가 아니라 <b>구조</b>를 읽는 문제다.
+        핵심 질문: "(가) 자리에서 「예」로 가면 2가 나온다. 그러면 (가)는 무슨 조건이어야 하나?"
+        출력에서 거꾸로 조건을 찾는 것이 요령임을 짚는다.
+        마지막에 한 번 더: 판단을 하나 지날 때마다 경우가 하나씩 걸러진다.
+      </aside>
+    </section>
+
+    <!-- ══════════════ ② 1~10의 합 (원본 슬라이드 12) ══════════════ -->
+    <section class="fc-slide" id="s12">
+      <h2 class="fc-title">
+        ② 1부터 10까지의 합 — 빈칸에 들어갈 조건은?
+        <span class="fc-src">교과서 유제</span>
+      </h2>
+      <div class="fc-layout" data-fc-root data-fc-spec="sumTen" data-fc-scale="1.15">
+        <div class="fc-col fc-col--fixed" data-fc-chart></div>
+        <div class="fc-col">
+          <div class="fc-aside" style="padding:12px 22px">
+            <div class="fc-choices">
+              <span>① \(N&lt;9\)</span>
+              <span>② \(N&gt;9\)</span>
+              <span>③ \(N \geq 9\)</span>
+              <span>④ \(N&gt;10\)</span>
+              <span>⑤ \(N&lt;10\)</span>
+            </div>
+          </div>
+          <div class="fc-table-wrap" data-fc-table style="margin-top:14px"></div>
+          <div class="fc-desc" data-fc-desc></div>
+          <div class="fc-controls">
+            <button class="fc-btn" data-fc-act="prev">◀ 이전</button>
+            <button class="fc-btn fc-btn--primary" data-fc-act="next">다음 ▶</button>
+            <button class="fc-btn" data-fc-act="reset">처음</button>
+            <span class="fc-counter" data-fc-counter></span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        조건을 비워 둔 채 먼저 굴린다. 표에서 \(S=55\)가 되는 순간의 \(N\)을 학생이 직접 찾게 한다.
+        답이 나온 뒤가 진짜 수업: ③ \(N \geq 9\)는 왜 안 되나(45에서 먼저 나감),
+        ④ \(N&gt;10\)은 왜 안 되나(66까지 감). 부등호 하나 차이로 갈린다는 걸 다섯 선택지 모두 돌려서 보여 준다.
+      </aside>
+    </section>
+
+    <!-- ══════════════ ③ S와 T (원본 슬라이드 13) ══════════════ -->
+    <section class="fc-slide" id="s13">
+      <h2 class="fc-title">
+        ③ 두 순서도에서 인쇄되는 \(S\)와 \(T\) — \(S-T\)의 값은?
+        <span class="fc-src">교과서 유제</span>
+      </h2>
+      <div class="fc-layout fc-layout--dual">
+
+        <div class="fc-col fc-col--fixed" data-fc-root data-fc-spec="sumS" data-fc-scale="0.86">
+          <div class="fc-pair">
+            <div data-fc-chart></div>
+            <div style="flex:1 1 auto; min-width:0">
+              <div class="fc-pair-title">왼쪽 순서도 · \(S\)</div>
+              <div class="fc-table-wrap" data-fc-table></div>
+            </div>
+          </div>
+          <div class="fc-desc fc-desc--compact" data-fc-desc></div>
+          <div class="fc-controls">
+            <button class="fc-btn" data-fc-act="prev">◀</button>
+            <button class="fc-btn fc-btn--primary" data-fc-act="next">다음 ▶</button>
+            <button class="fc-btn" data-fc-act="reset">처음</button>
+            <span class="fc-counter" data-fc-counter></span>
+          </div>
+        </div>
+
+        <div class="fc-col fc-col--fixed" data-fc-root data-fc-spec="sumT" data-fc-scale="0.86">
+          <div class="fc-pair">
+            <div data-fc-chart></div>
+            <div style="flex:1 1 auto; min-width:0">
+              <div class="fc-pair-title">오른쪽 순서도 · \(T\)</div>
+              <div class="fc-table-wrap" data-fc-table></div>
+            </div>
+          </div>
+          <div class="fc-desc fc-desc--compact" data-fc-desc></div>
+          <div class="fc-controls">
+            <button class="fc-btn" data-fc-act="prev">◀</button>
+            <button class="fc-btn fc-btn--primary" data-fc-act="next">다음 ▶</button>
+            <button class="fc-btn" data-fc-act="reset">처음</button>
+            <span class="fc-counter" data-fc-counter></span>
+          </div>
+        </div>
+
+      </div>
+      <div class="fc-conclusion" data-fc-conclusion></div>
+
+      <aside class="notes">
+        오늘의 핵심 장면. 두 순서도는 상자가 똑같고 <b>순서만</b> 다르다.
+        먼저 "두 순서도가 뭐가 다른가?"를 눈으로 찾게 한 뒤, 왼쪽을 끝까지 돌리고 오른쪽을 돌린다.
+        오른쪽에서 \(N \leftarrow N+1\)이 판정보다 먼저라 \(N=4\)까지만 더해진다는 지점에서 멈추고 확인.
+        둘 다 끝나면 아래 결론 띠가 나타난다. \(S-T=10\).
+      </aside>
+    </section>
+
+    <!-- ══════════════ ④-(1) a ← 2a−1 ══════════════ -->
+    <section class="fc-slide" id="s14a">
+      <h2 class="fc-title">
+        ④-(1) 인쇄되는 \(a\)의 값은? &nbsp;\(a \leftarrow 2a-1\)
+        <span class="fc-src">교과서 유제</span>
+      </h2>
+      <div class="fc-layout" data-fc-root data-fc-spec="doubleA" data-fc-scale="1.28">
+        <div class="fc-col fc-col--fixed" data-fc-chart></div>
+        <div class="fc-col">
+          <div class="fc-table-wrap" data-fc-table></div>
+          <div class="fc-desc" data-fc-desc></div>
+          <div class="fc-controls">
+            <button class="fc-btn" data-fc-act="prev">◀ 이전</button>
+            <button class="fc-btn fc-btn--primary" data-fc-act="next">다음 ▶</button>
+            <button class="fc-btn" data-fc-act="reset">처음</button>
+            <span class="fc-counter" data-fc-counter></span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        반복 29번. 다 돌릴 수 없으니 규칙을 찾아야 한다는 상황을 만들어 준다.
+        표의 \(a-1\) 열이 장치다. 2, 4, 8, 16 … 을 보여 주고 학생이 "2배"를 먼저 말하게 한다.
+        \(a \leftarrow 2a-1\)이 \(a-1 \leftarrow 2(a-1)\)과 같은 말이라는 점을 칠판 한 줄로 보충해도 좋다.
+        반복 횟수를 30이 아니라 <b>29</b>로 세는 것(\(n\)은 1에서 시작)이 이 문제의 함정이다.
+      </aside>
+    </section>
+
+    <!-- ══════════════ ④-(2) a ← a+n ══════════════ -->
+    <section class="fc-slide" id="s14b">
+      <h2 class="fc-title">
+        ④-(2) 인쇄되는 \(a\)의 값은? &nbsp;\(a \leftarrow a+n,\ n \leftarrow n+2\)
+        <span class="fc-src">교과서 유제</span>
+      </h2>
+      <div class="fc-layout" data-fc-root data-fc-spec="sumEven" data-fc-scale="1.2">
+        <div class="fc-col fc-col--fixed" data-fc-chart></div>
+        <div class="fc-col">
+          <div class="fc-table-wrap" data-fc-table></div>
+          <div class="fc-desc" data-fc-desc></div>
+          <div class="fc-controls">
+            <button class="fc-btn" data-fc-act="prev">◀ 이전</button>
+            <button class="fc-btn fc-btn--primary" data-fc-act="next">다음 ▶</button>
+            <button class="fc-btn" data-fc-act="reset">처음</button>
+            <span class="fc-counter" data-fc-counter></span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        ③에서 본 「순서가 만드는 차이」가 다시 나온다. \(a \leftarrow a+n\)이 \(n \leftarrow n+2\)보다 먼저라서
+        마지막에 더해지는 값은 100이 아니라 <b>98</b>이다. 여기서 틀리는 학생이 대부분이다.
+        「더한 값」 열을 가리키며 0, 2, 4, 6 … 을 읽히고, 마지막이 98임을 확인시킨 뒤 합 공식으로 넘어간다.
+      </aside>
+    </section>
+
+    <!-- ══════════════ ⑤ 부분분수 ══════════════ -->
+    <section class="fc-slide" id="s15">
+      <h2 class="fc-title">
+        ⑤ 출력되는 \(S\)의 값은? &nbsp;\(S \leftarrow S + \dfrac{1}{(3n-1)(3n+2)}\)
+        <span class="fc-src">교과서 유제</span>
+      </h2>
+      <div class="fc-layout" data-fc-root data-fc-spec="partialFrac" data-fc-scale="1.12">
+        <div class="fc-col fc-col--fixed" data-fc-chart></div>
+        <div class="fc-col">
+          <div class="fc-table-wrap" data-fc-table></div>
+          <div class="fc-desc" data-fc-desc></div>
+          <div class="fc-controls">
+            <button class="fc-btn" data-fc-act="prev">◀ 이전</button>
+            <button class="fc-btn fc-btn--primary" data-fc-act="next">다음 ▶</button>
+            <button class="fc-btn" data-fc-act="reset">처음</button>
+            <span class="fc-counter" data-fc-counter></span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        세 항만 직접 더해 보면 \(\frac{1}{10}, \frac{2}{35}, \frac{3}{88}\) … 규칙이 안 보인다.
+        "이대로 10번은 못 하겠다"는 말이 나오면 성공. 그때 부분분수를 꺼낸다.
+        화면은 한 항씩 더한 결과와 부분분수로 구한 결과가 <b>같다</b>는 것까지 보여 준다 — 둘이 맞아떨어지는 게 검산이다.
+        답 \(S=\frac{5}{32}\).
+      </aside>
+    </section>
+
+    <!-- ══════════════ 오늘 한 줄 ══════════════ -->
+    <section class="fc-slide">
+      <h2 class="fc-title">오늘 한 줄</h2>
+
+      <div class="fc-oneline">
+        순서도는 <b>상자의 순서</b>가 곧 답이다.<br>
+        같은 식이라도 판정이 어디에 있느냐에 따라 한 번 더 돌거나 한 번 덜 돈다.
+      </div>
+
+      <div class="fc-layout" style="margin-top:34px">
+        <div class="fc-col">
+          <div class="fc-aside">
+            <h4>오늘 확인한 것</h4>
+            <ul>
+              <li>판단 상자의 빈칸은 <b>출력에서 거꾸로</b> 찾는다</li>
+              <li>반복이 많으면 표에서 <b>규칙</b>을 먼저 찾는다</li>
+              <li>\(S-T=10\), \(a=2^{30}+1\), \(a=2450\), \(S=\dfrac{5}{32}\)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="fc-col">
+          <div class="fc-aside">
+            <h4>다음 시간</h4>
+            <p style="margin:0">
+              순서도의 판단 상자에 들어가는 조건을 <b>참·거짓</b>으로 다룹니다.
+              진리표와 논리 연산 — \(p \wedge q\), \(p \vee q\), \(p \veebar q\).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="notes">
+        네 문제의 답을 한 번에 훑고, 공통점 하나(상자의 순서)로 묶는다.
+        다음 차시(진리표와 논리 연산)로 넘어가는 다리: 판단 상자의 조건이 곧 명제의 참·거짓이다.
+      </aside>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920,
+    height: 1080,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 1.0,
+    center: false,
+    hash: true,
+    slideNumber: 'c/t',
+    progress: true,
+    controls: true,
+    controlsLayout: 'bottom-right',
+    transition: 'fade',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  /* MathJax 안전 호출 유틸 (lesson-maker 공통 규칙) */
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+</script>
+
+<!-- 순서도 엔진 + 문제 데이터 -->
+<script src="../flowchart/flowchart-engine.js"></script>
+<script src="../flowchart/fc-util.js"></script>
+<script src="../flowchart/problems-blank.js"></script>
+<script src="../flowchart/problems-trace.js"></script>
+<script src="../flowchart/deck-init.js"></script>
+
+</body>
+</html>
