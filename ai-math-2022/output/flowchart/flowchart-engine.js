@@ -241,9 +241,14 @@
     /* 추적표 */
     if (this.tbody) {
       this.tbody.innerHTML = '';
+      /* row: 한 줄 추가 · rows: 여러 줄 추가 · rowsReset: 지금까지의 줄을 버리고 다시 시작
+         (같은 순서도를 다른 조건으로 돌려 보여 줄 때 표를 갈아 끼운다) */
       var rows = [];
       for (var j = 0; j <= this.i; j++) {
-        if (this.steps[j].row) rows.push(this.steps[j].row);
+        var st = this.steps[j];
+        if (st.rowsReset) rows = [];
+        if (st.row) rows.push(st.row);
+        if (st.rows) rows = rows.concat(st.rows);
       }
       rows.forEach(function (r, idx) {
         var tr = document.createElement('tr');

@@ -152,22 +152,40 @@
         { tag: '⑤', tex: 'N &lt; 10',     f: function (n) { return n < 10; } }
       ];
 
-      var correct = null;
-      choices.forEach(function (c) {
-        var s2 = 1, n2 = 1, guard = 0;
-        while (guard++ < 500) {
+      /* 선택지마다 그 조건으로 순서도를 다시 돌리고, 추적표도 그 결과로 갈아 끼운다.
+         (빈칸으로 돌린 표를 그대로 두면 "N<9인데 N=10까지 돈다"는 모순이 화면에 남는다) */
+      var INIT_ROW = { '회차': '초기', 'N': 1, 'S': 1 };
+
+      function runWith(cond) {
+        var s2 = 1, n2 = 1, k2 = 0, log = [];
+        while (k2 < 500) {
+          k2++;
           n2 = n2 + 1;
           s2 = s2 + n2;
-          if (c.f(n2)) break;
+          log.push({ '회차': k2, 'N': n2, 'S': s2 });
+          if (cond(n2)) break;
         }
-        var good = (s2 === 55);
-        if (good) correct = c;
+        return { log: log, N: n2, S: s2 };
+      }
+
+      function condense(log) {
+        if (log.length <= 4) return log;
+        return log.slice(0, 3).concat([global.FlowChart.ELLIPSIS, log[log.length - 1]]);
+      }
+
+      var correct = null, correctRun = null;
+      choices.forEach(function (c) {
+        var run = runWith(c.f);
+        var good = (run.S === 55);
+        if (good) { correct = c; correctRun = run; }
         steps.push({
-          node: 'cond',
+          node: 'out',
           setLabel: { cond: '\\(' + c.tex + '\\)' },
           tone: good ? 'ok' : 'warn',
-          desc: c.tag + ' \\(' + c.tex + '\\) → 처음 참이 되는 때는 \\(N=' + n2 + '\\), ' +
-                '이때 출력값은 \\(S=' + s2 + '\\). ' +
+          rowsReset: true,
+          rows: [INIT_ROW].concat(condense(run.log)),
+          desc: c.tag + ' \\(' + c.tex + '\\)로 바꿔 돌려 봅시다. \\(N=' + run.N + '\\)에서 처음 참이 되므로 ' +
+                '<b>' + run.log.length + '번</b> 돌고 곧바로 「예」로 빠져나갑니다. 출력값 \\(S=' + run.S + '\\). ' +
                 (good ? '<b>55와 일치 → 정답</b>' : '55가 아니므로 <b>오답</b>')
         });
       });
@@ -176,9 +194,12 @@
         node: 'out',
         setLabel: { cond: '\\(' + correct.tex + '\\)' },
         tone: 'ok',
+        rowsReset: true,
+        rows: [INIT_ROW].concat(condense(correctRun.log)),
         desc: '정답은 <b>' + correct.tag + ' \\(' + correct.tex + '\\)</b>. ' +
-              '③ \\(N \\geq 9\\)는 \\(N=9\\)에서 먼저 빠져나가 45가 되고, ' +
-              '④ \\(N>10\\)은 한 번 더 돌아 66이 됩니다. <b>부등호 하나 차이로 답이 갈립니다.</b>'
+              '① \\(N &lt; 9\\)와 ⑤ \\(N &lt; 10\\)은 \\(N=2\\)에서 이미 참이라 <b>한 번 돌고 바로 나가</b> 3이 되고, ' +
+              '③ \\(N \\geq 9\\)는 \\(N=9\\)에서 나가 45, ④ \\(N>10\\)은 한 번 더 돌아 66이 됩니다. ' +
+              '<b>부등호 하나 차이로 답이 갈립니다.</b>'
       });
 
       return { columns: ['회차', 'N', 'S'], steps: steps, answer: correct.tag };
