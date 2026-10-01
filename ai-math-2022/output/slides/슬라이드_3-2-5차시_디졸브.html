@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>두 장면을 비율로 섞으면 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+    .plain-card.hl { border-color: var(--lm-accent); }
+    .plain-card.warn { border-color: var(--lm-danger); }
+
+    /* 픽셀 판 — 흰 칸(255)이 밝은 바탕에 묻히므로 어두운 판 위에 얹는다(3-2-1 규약).
+       칸 색은 교과서 값 그대로 rgb(v,v,v)로 칠한다(이 경우만 하드코딩 허용). */
+    .px { display: grid; gap: 2px; background: var(--lm-ink-4); padding: 2px;
+          border-radius: var(--lm-radius-sm); width: max-content;
+          outline: 5px solid var(--lm-ink-2); margin: 5px auto; }
+    .px i { display: flex; align-items: center; justify-content: center;
+            font-style: normal; font-variant-numeric: tabular-nums; font-weight: 600; }
+    .px i.lt { color: var(--lm-page); }
+    .px i.dk { color: var(--lm-ink); }
+    .px.edit i { cursor: pointer; }
+
+    .row-grids { display: flex; gap: var(--lm-space-5); justify-content: center;
+                 align-items: flex-start; margin-top: var(--lm-space-3); }
+    .row-grids .col { text-align: center; }
+    .row-grids .cap { font-size: var(--lm-slide-small); font-weight: 700;
+                      margin-bottom: var(--lm-space-2); }
+    .row-grids .sub { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                      margin-top: var(--lm-space-2); }
+    .row-grids .op { font-size: 40px; color: var(--lm-ink-3); align-self: center; }
+
+    /* α 슬라이더 (3-2-1 .kctl 패턴) */
+    .kctl { display: grid; grid-template-columns: 4em 1fr 4.5em; gap: var(--lm-space-4);
+            align-items: center; margin: var(--lm-space-3) auto 0; max-width: 820px;
+            font-size: var(--lm-slide-body); }
+    .kctl input { width: 100%; accent-color: var(--lm-accent); height: 26px; }
+    .kctl .v { text-align: right; font-weight: 700; color: var(--lm-accent);
+               font-variant-numeric: tabular-nums; }
+    .presets { text-align: center; margin-top: var(--lm-space-2); }
+    .presets .anim-btn { margin: 0 4px; }
+    .presets.seg .anim-btn:not(.on) { opacity: 0.45; }
+    .presets.seg .anim-btn.on { box-shadow: 0 0 0 4px var(--lm-accent-tint-strong); }
+
+    .readout { font-family: var(--lm-font-mono); font-size: var(--lm-slide-small);
+               color: var(--lm-ink-2); text-align: center; margin-top: var(--lm-space-2);
+               min-height: 1.5em; }
+    .readout b { color: var(--lm-accent); }
+
+    /* 스프레드시트 화면 */
+    .sheet { border-collapse: collapse; margin: var(--lm-space-2) auto 0;
+             font-size: 21px; font-variant-numeric: tabular-nums; }
+    .sheet th { background: var(--lm-paper-soft); color: var(--lm-ink-3); font-weight: 500;
+                border: 1px solid var(--lm-rule); height: 34px; padding: 0; text-align: center; }
+    .sheet td { border: 1px solid var(--lm-rule); width: 60px; height: 44px; padding: 0;
+                text-align: center; background: var(--lm-page); color: var(--lm-ink); }
+    .sheet th.rh { width: 40px; }
+    .sheet td.sp, .sheet th.sp { width: 22px; }
+    .sheet td.lt { color: var(--lm-page); }
+    .sheet td.lab { color: var(--lm-danger); font-weight: 700; font-size: 26px; }
+    .sheet td.j1 { outline: 3px solid var(--lm-accent); outline-offset: -3px;
+                   font-weight: 700; color: var(--lm-accent); }
+    .sheet td.pick { outline: 3px solid var(--lm-accent); outline-offset: -3px; }
+    .sheet td.mid { cursor: pointer; }
+    .sheet td.cur { outline: 3px solid var(--lm-warning); outline-offset: -3px; }
+
+    /* 조건부 서식 대화상자 화면 */
+    .dlg { border: var(--lm-border-thin) solid var(--lm-rule-strong); border-radius: var(--lm-radius-md);
+           background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+           max-width: 980px; margin: var(--lm-space-3) auto 0; font-size: var(--lm-slide-small); }
+    .dlg .ttl { font-weight: 700; margin-bottom: var(--lm-space-2); }
+    .dlg .grid2 { display: grid; grid-template-columns: 6em 1fr 1fr; gap: 10px 24px; align-items: center; }
+    .dlg .fld { border: 1px solid var(--lm-rule-strong); border-radius: 4px; padding: 4px 12px;
+                background: var(--lm-page); }
+    .dlg .hd { font-weight: 700; color: var(--lm-ink-2); }
+    .dlg .sw { height: 30px; border: 1px solid var(--lm-rule-strong); border-radius: 4px; }
+    .dlg .prev { height: 34px; border: 1px solid var(--lm-rule-strong); border-radius: 4px;
+                 background: linear-gradient(to right, rgb(0,0,0), rgb(255,255,255)); }
+
+    .steps-ol { list-style: none; padding: 0; margin: var(--lm-space-2) 0 0;
+                font-size: var(--lm-slide-small); line-height: var(--lm-slide-line-tight); }
+    .steps-ol li { margin-bottom: var(--lm-space-1); color: var(--lm-ink-2); }
+    .steps-ol .n { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em;
+                   border-radius: 50%; background: var(--lm-accent); color: var(--lm-page);
+                   text-align: center; font-weight: 700; margin-right: 8px; font-size: 0.85em; }
+
+    .code { font-family: var(--lm-font-mono); background: var(--lm-paper-soft);
+            border: 1px solid var(--lm-rule); border-radius: 4px; padding: 2px 10px; }
+
+    /* 수직선 (더 깊이 ②) */
+    .nline { width: 100%; max-width: 1200px; height: 230px; display: block; margin: 0 auto;
+             overflow: hidden; }
+    .nline .axis { stroke: var(--lm-ink-2); stroke-width: 3; }
+    .nline .tick { stroke: var(--lm-ink-3); stroke-width: 2; }
+    .nline .lbl { fill: var(--lm-ink-3); font-size: 22px; font-family: var(--lm-font-sans); }
+    .nline .trail { fill: var(--lm-accent-tint-strong); stroke: var(--lm-accent); stroke-width: 2; }
+    .nline .trail-l { fill: var(--lm-accent); font-size: 20px; font-family: var(--lm-font-sans); }
+    .nline .endp { fill: var(--lm-ink-2); font-size: 24px; font-weight: 700; font-family: var(--lm-font-sans); }
+    .nline .dot { stroke: var(--lm-danger); stroke-width: 5; }
+
+    .swatch { display: inline-block; width: 46px; height: 46px; vertical-align: middle;
+              border: 4px solid var(--lm-ink-2); border-radius: 6px; margin-left: 10px; }
+
+    /* 확인 문항 */
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅲ-2 이미지 데이터 처리 · 5차시 <span class="badge">공학 도구</span></div>
+    <h1>두 장면을 비율로 섞으면</h1>
+    <p class="slide-sub">행렬의 덧셈과 실수배로 디졸브 연출하기</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 100~101쪽</span>
+    </div>
+    <aside class="notes">Ⅲ-2의 마지막 차시이자 공학 도구 차시다. 새 연산은 없다 — 3-2-1·3-2-2에서 쓴 덧셈과 실수배를 이미지 두 장에 동시에 쓴다. 교과서는 스프레드시트 실습이 중심이지만 컴퓨터실이 아니어도 수업이 되도록 화면 실습 장을 마련했다. 「더 깊이」 장 세 개는 교과서 밖 보강이므로 시험 범위가 아니라고 미리 말해 둔다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 3-2-4</div>
+    <h2>행과 열을 바꾸면 그림이 뒤집힌다</h2>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>덧셈과 실수배 — 값을 바꿨다</h4>
+        <p>3-2-1 \(kK\) — 밝기</p>
+        <p>3-2-2 \(\dfrac{1}{3}(R+G+B)\) — 흑백</p>
+      </div>
+      <div class="plain-card">
+        <h4>곱셈과 전치 — 자리를 바꿨다</h4>
+        <p>3-2-3 \(KS_4\), \(KT_4\) — 평행이동</p>
+        <p>3-2-4 \(KF_4\), \(K^T\) — 대칭이동</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      오늘은 다시 <span class="kw-info">덧셈과 실수배</span>로 돌아간다.
+      이번에는 이미지를 <b>두 장</b> 섞는다.
+    </div>
+    <aside class="notes">지난 시간 마지막 문장 "행과 열을 바꾸면 그림이 뒤집힌다"를 다시 읽어 주며 시작한다. 지금까지 배운 네 가지를 두 묶음으로 정리한다 — 값을 바꾸는 연산(덧셈·실수배)과 자리를 바꾸는 연산(곱셈·전치). 오늘은 앞 묶음만 쓰는데, 재료가 한 장이 아니라 두 장이라는 것이 새롭다.</aside>
+  </section>
+
+  <!-- 3. 생각 열기 -->
+  <section>
+    <div class="chapter-tag">교과서 100쪽 · 영화의 장면 전환</div>
+    <h2>한 장면이 흐려지고, 새 장면이 뚜렷해진다</h2>
+
+    <p class="prob-stmt">
+      영화에서 한 장면이 흐려지고 새로운 장면이 뚜렷해지는 방식으로 장면이 전환되는 기법을
+      <span class="kw">디졸브(dissolve)</span>라고 한다. 복선을 제시하고 그 복선에 해당하는 장면으로
+      전환하면서 <b>전후의 연결성</b>을 강조할 때 사용한다.
+    </p>
+
+    <div class="row-grids" id="filmStrip" style="margin-top: var(--lm-space-4);"></div>
+
+    <p class="prob-stmt" style="text-align:center; font-size: var(--lm-slide-caption); color: var(--lm-ink-3);">
+      <span class="badge">보조 그림</span> 교과서의 도시·다리 사진 대신, 오늘 실습할 숫자 이미지로 그렸다.
+    </p>
+    <aside class="notes">교과서 사진은 아파트 숲이 다리 풍경으로 넘어가는 네 컷이다. 화면에는 오늘 스프레드시트로 만들 "숫자 1 → 숫자 8" 전환을 미리 보여 준다. 영화나 드라마에서 회상 장면으로 넘어갈 때 화면이 겹치며 바뀌는 것을 떠올리게 하면 바로 알아듣는다. "이걸 수학으로 어떻게 만들까?"를 질문으로 남긴다.</aside>
+  </section>
+
+  <!-- 4. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>디졸브를 행렬 \(C=(1-\alpha)A+\alpha B\)로 <span class="kw">나타낼 수 있다.</span></span></li>
+      <li><span class="num">2</span><span>\(\alpha \)의 값에 따라 이미지 C가 <span class="kw">어떻게 바뀌는지</span> 설명할 수 있다.</span></li>
+      <li><span class="num">3</span><span>스프레드시트로 숫자 1이 숫자 8로 바뀌는 디졸브를 <span class="kw">연출할 수 있다.</span></span></li>
+    </ul>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      새 연산은 없다. <span class="kw-success">덧셈과 실수배</span>만으로 장면 전환이 만들어진다.
+    </div>
+    <aside class="notes">목표 3번은 교과서의 공학 도구 활동이다. 컴퓨터실이면 학생이 직접 따라 하고, 교실이면 화면의 단계별 장을 보며 함께 읽는다. 새 연산이 없다는 말을 먼저 해 두면 학생들이 부담을 덜고 식의 의미에 집중한다.</aside>
+  </section>
+
+  <!-- 5. 식 -->
+  <section>
+    <div class="chapter-tag">교과서 100쪽 · 디졸브의 식</div>
+    <h2>두 행렬을 비율로 섞는다</h2>
+
+    <div class="definition-box">
+      두 이미지 A와 B를 변환하여 나타낸 행렬 \(A\)와 \(B\)에 대하여,
+      두 이미지 A와 B가 겹쳐진 이미지 C를 변환하여 나타낸 행렬 \(C\)를
+      \[C=(1-\alpha)A+\alpha B\quad(0\le \alpha\le 1)\]
+      와 같이 정한다.
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>A의 몫 \(\;1-\alpha \)</h4>
+        <p>\(\alpha \)가 커질수록 <b>줄어든다</b></p>
+      </div>
+      <div class="plain-card">
+        <h4>B의 몫 \(\;\alpha \)</h4>
+        <p>\(\alpha \)가 커질수록 <b>늘어난다</b></p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      두 몫의 합은 언제나 \((1-\alpha)+\alpha=1\). <span class="kw-info">전체를 나눠 갖는다.</span>
+    </div>
+    <aside class="notes">실수배 두 번(1−α배, α배)과 덧셈 한 번이다. 3-2-1의 실수배, 3-2-2의 덧셈이 그대로 쓰인다. "몫의 합이 1"은 교과서에 쓰여 있지 않지만, 피자 한 판을 A와 B가 나눠 먹는 그림으로 말해 주면 다음 장의 (i)(ii)(iii)이 자연스럽게 따라 나온다. 이미지 이름(A)과 행렬 이름(이탤릭 A)을 교과서가 구분해 쓰는 것도 짚어 준다.</aside>
+  </section>
+
+  <!-- 6. a의 값에 따라 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 100쪽 · 세 가지 경우</div>
+    <h2>\(\alpha \)가 0에서 1로 가면 A가 B로 바뀐다</h2>
+
+    <div class="three-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>(i) \(\alpha=0\)</h4>
+        <p>\(C=A\) — 이미지 C는 <b>이미지 A</b>와 같다</p>
+        <div class="px" data-grid="A1" data-k="0" data-size="34"></div>
+      </div>
+      <div class="plain-card">
+        <h4>(ii) \(\alpha=1\)</h4>
+        <p>\(C=B\) — 이미지 C는 <b>이미지 B</b>와 같다</p>
+        <div class="px" data-grid="A1" data-k="100" data-size="34"></div>
+      </div>
+      <div class="plain-card hl">
+        <h4>(iii) \(0&lt;\alpha&lt;1\)</h4>
+        <p>A와 B가 <b>겹쳐진</b> 이미지. \(\alpha \)가 커질수록 A는 흐려지고 B는 뚜렷해진다</p>
+        <div class="px" data-grid="A1" data-k="50" data-size="34"></div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      \(\alpha \)의 값을 0에서 1로 증가시키면 <span class="kw-success">이미지 A가 이미지 B로 전환되는 디졸브</span>가 연출된다.
+    </div>
+    <aside class="notes">(i)과 (ii)는 직접 대입하게 한다 — α=0이면 (1−0)A+0·B=A, α=1이면 0·A+1·B=B. 그림은 오늘 실습의 숫자 1과 8이고, (iii)의 그림은 α=0.5일 때다. 회색 칸이 바로 "겹쳐진" 부분이다. 1에서도 8에서도 검은 칸(0)인 자리는 섞어도 그대로 0이라는 것을 짚어 주면 다음 장으로 이어진다.</aside>
+  </section>
+
+  <!-- 7. 더 깊이 ① 넘치지 않는다 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="badge">더 깊이</span> 교과서 밖 보강 · 3-2-1과 비교</div>
+    <h2>섞기는 넘치지 않고, 곱하기는 넘친다</h2>
+
+    <p class="prob-stmt" style="margin-top: var(--lm-space-2);">
+      한 픽셀만 보자. A의 값이 \(p\), B의 값이 \(q\)이면 C의 값은
+    </p>
+    <div class="formula-box" style="margin: var(--lm-space-2) 0;">
+      \(c=(1-\alpha)p+\alpha q=p+\alpha(q-p)\)
+    </div>
+    <p class="prob-stmt" style="margin-top: 0;">
+      \(p\)에서 출발해 \(q\)까지 거리의 \(\alpha \)배만큼만 간다. \(0\le \alpha\le 1\)이므로
+      <b>\(c\)는 언제나 \(p\)와 \(q\) 사이</b>에 있다.
+    </p>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card hl">
+        <h4>섞기 \((1-\alpha)A+\alpha B\)</h4>
+        <p>\(p,\ q\)가 0~255 사이 → \(c\)도 0~255 사이</p>
+        <p>예: \(p=255,\ q=0,\ \alpha=0.3\)이면 \(0.7\cdot255=178.5\to179\)</p>
+      </div>
+      <div class="plain-card warn">
+        <h4>곱하기 \(2K\) (3-2-1)</h4>
+        <p>\(200\cdot2=400\) → 255를 넘어 <b>255로 잘랐다</b></p>
+        <p>곱하는 수가 1보다 크면 범위를 벗어날 수 있다</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      반올림해도 벗어나지 않는다 — 양 끝 0과 255가 <b>정수</b>이기 때문이다.
+      그래서 디졸브에는 <span class="kw-info">255 자르기 규칙이 필요 없다.</span>
+    </div>
+    <aside class="notes">3-2-1에서 2K를 계산할 때 400이 나와 255로 잘랐던 것을 떠올리게 한다. 디졸브는 아무리 α를 바꿔도 그런 일이 없다. 이유는 한 줄 — c는 p와 q 사이에 있다. p+α(q−p)는 "p에서 q 쪽으로 α만큼 간 자리"로 읽게 한다. 반올림해도 벗어나지 않는 이유: 예컨대 c가 254.6이면 255로 반올림될 뿐 256이 될 수는 없다. 그래서 스프레드시트 수식에 ROUND만 있고 255 자르기가 없다.</aside>
+  </section>
+
+  <!-- 8. 더 깊이 ② 수직선 위의 한 픽셀 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="badge">더 깊이</span> 교과서 밖 보강 · 선형 보간</div>
+    <h2>한 픽셀은 일정한 속도로 걸어간다</h2>
+
+    <p class="prob-stmt" style="margin-top: var(--lm-space-2);">
+      가운데 영역의 한 칸을 골라 \(\alpha \)를 0에서 1로 움직여 보자.
+      \(c=p+\alpha(q-p)\)는 \(\alpha \)에 대한 <b>일차식</b>이다.
+    </p>
+
+    <div class="presets seg" style="margin-top: var(--lm-space-3);">
+      <button class="anim-btn on" data-pix="0">H3 칸 (A: 255 → B: 0)</button>
+      <button class="anim-btn" data-pix="1">H4 칸 (A: 0 → B: 255)</button>
+    </div>
+
+    <svg class="nline" id="nline" viewBox="0 0 1200 230" preserveAspectRatio="xMidYMid meet"></svg>
+
+    <div class="kctl" style="margin-top: 0;">
+      <label for="sLine">\(\alpha=\)</label>
+      <input type="range" id="sLine" min="0" max="100" step="5" value="0">
+      <span class="v" id="vLine">0.00</span>
+    </div>
+    <div class="readout" id="rLine"></div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-2);">
+      \(\alpha \)가 0.2 늘 때마다 픽셀값은 늘 <b>51씩</b> 움직인다.
+      일정한 속도로 이어 주는 이 방법을 <span class="kw-success">선형 보간</span>이라 한다.
+    </div>
+    <aside class="notes">수직선은 0부터 255까지의 픽셀값이다. 빨간 점이 현재 C의 값이고, 아래 흐린 점들은 α=0, 0.2, …, 1일 때의 자리다. 간격이 모두 51로 똑같다는 것을 손으로 짚게 한다 — 255의 0.2배다. 두 칸을 번갈아 고르면 하나는 왼쪽으로, 하나는 오른쪽으로 같은 속도로 간다. "선형 보간"은 교과서 용어가 아니다. 컴퓨터 그래픽에서 두 값 사이를 메우는 가장 기본적인 방법이라는 정도로만 소개한다.</aside>
+  </section>
+
+  <!-- 9. 공학 도구 ① 조건부 서식 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 101쪽 · 공학 도구 <span class="badge">1단계</span></div>
+    <h2>숫자를 흑백으로 보이게 하기 — 조건부 서식</h2>
+
+    <ol class="steps-ol">
+      <li><span class="n">1</span>셀 <b>A3</b>부터 셀 <b>Q9</b>까지 드래그하고, ‘조건부 서식’에서 ‘새 규칙’을 클릭한 후
+        ‘셀 값을 기준으로 모든 셀의 서식 지정’에서 다음과 같이 설정한다.</li>
+    </ol>
+
+    <div class="dlg">
+      <div class="ttl">셀 값을 기준으로 모든 셀의 서식 지정:</div>
+      <div class="grid2">
+        <div>서식 스타일:</div><div class="fld">2가지 색조</div><div></div>
+        <div></div><div class="hd">최솟값</div><div class="hd">최댓값</div>
+        <div>종류:</div><div class="fld">숫자</div><div class="fld">숫자</div>
+        <div>값:</div><div class="fld">0</div><div class="fld">255</div>
+        <div>색:</div><div class="sw" style="background: rgb(0,0,0);"></div><div class="sw" style="background: rgb(255,255,255);"></div>
+        <div>미리 보기:</div><div class="prev" style="grid-column: 2 / 4;"></div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      0은 <b>검정</b>, 255는 <b>흰색</b>, 그 사이 값은 <b>회색 단계</b>로 칠해진다 —
+      셀 하나가 흑백 <span class="kw-info">픽셀 하나</span>가 된다.
+    </div>
+    <aside class="notes">A3:Q9 전체(왼쪽 A, 가운데 C, 오른쪽 B 영역)를 한꺼번에 선택해서 서식을 거는 것이 요점이다. 그래야 가운데 영역에 계산 결과가 들어오는 순간 회색으로 칠해진다. 교과서 화면의 미리 보기 띠는 인쇄 때문에 청록색처럼 보이지만 실제 설정은 검정 → 흰색이다(화면에는 검정 → 흰색으로 그렸다). 엑셀 기준 메뉴 이름이며, 구글 스프레드시트는 "조건부 서식 → 색상 스케일"에서 같은 설정을 한다.</aside>
+  </section>
+
+  <!-- 10. 공학 도구 ②③ 두 숫자 입력 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 101쪽 · 공학 도구 <span class="badge">2·3단계</span></div>
+    <h2>두 영역에 숫자 1과 8을 적는다</h2>
+
+    <ol class="steps-ol">
+      <li><span class="n">2</span>두 영역 A와 B에 0과 255를 입력하여 각각 숫자 1과 8의 이미지를 나타낸다.</li>
+      <li><span class="n">3</span>셀 <b>J1</b>에 \(\alpha \)의 값으로 <b>0.2</b>를 입력한다. &nbsp;<span style="color: var(--lm-ink-3);">(\(\alpha \)의 값은 0 이상 1 이하)</span></li>
+    </ol>
+
+    <table class="sheet" id="sheetEmpty"></table>
+    <aside class="notes">왼쪽 A3:E9가 숫자 1(행렬 A), 오른쪽 M3:Q9가 숫자 8(행렬 B)이다. 둘 다 7행 5열, 해상도로는 5×7이다. 가운데 G3:K9는 아직 비어 있다 — 다음 단계에서 수식이 들어갈 자리다. J1이 α의 자리라는 것을 강조한다. 이 칸 하나만 바꾸면 가운데 그림 전체가 바뀌게 만드는 것이 오늘 실습의 설계다.</aside>
+  </section>
+
+  <!-- 11. 공학 도구 ④ 수식 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 101쪽 · 공학 도구 <span class="badge">4단계</span></div>
+    <h2>수식 한 줄로 가운데를 채운다</h2>
+
+    <ol class="steps-ol">
+      <li><span class="n">4</span>셀 <b>G3</b>에 <span class="code">=ROUND((1-$J$1)*A3+$J$1*M3,0)</span>을 입력하고,
+        셀 G3을 복사한 후 셀 G3부터 셀 K9까지 드래그하여 붙여 넣는다.</li>
+    </ol>
+
+    <div class="two-col" style="margin-top: var(--lm-space-3);">
+      <div class="plain-card">
+        <h4>식과 수식의 대응</h4>
+        <p>\((1-\alpha)\) ↔ <span class="code">(1-$J$1)</span></p>
+        <p>A의 칸 ↔ <span class="code">A3</span> &nbsp; B의 칸 ↔ <span class="code">M3</span></p>
+        <p><span class="code">ROUND(x,0)</span>: 소수점 아래 첫째 자리에서 반올림</p>
+      </div>
+      <div class="plain-card hl">
+        <h4>$가 붙으면 따라 움직이지 않는다</h4>
+        <p><span class="code">$J$1</span>은 어느 칸에 붙여도 <b>J1 그대로</b></p>
+        <p><span class="code">A3</span>, <span class="code">M3</span>은 붙인 칸을 따라 <b>함께 움직인다</b></p>
+      </div>
+    </div>
+
+    <div class="step-box" data-s style="margin-top: var(--lm-space-3);">
+      셀 <b>H4</b>에는 &nbsp;<span class="code">=ROUND((1-$J$1)*B4+$J$1*N4,0)</span>
+      &nbsp;→&nbsp; \(0.8\cdot0+0.2\cdot255=51\)
+    </div>
+    <div class="step-box" data-s>
+      셀 <b>K9</b>에는 &nbsp;<span class="code">=ROUND((1-$J$1)*E9+$J$1*Q9,0)</span>
+      &nbsp;→&nbsp; \(0.8\cdot255+0.2\cdot255=255\)
+    </div>
+
+    <div style="margin-top: var(--lm-space-2);">
+      <button class="anim-btn" id="stepNext">다른 칸 보기</button>
+      <button class="anim-btn" id="stepReset">처음부터</button>
+      <span class="step-counter" id="stepCnt" style="font-size: var(--lm-slide-caption); color: var(--lm-ink-3); margin-left: var(--lm-space-3);">0 / 2</span>
+    </div>
+    <aside class="notes">$ 표시(절대 참조)가 이 실습의 숨은 핵심이다. $J$1을 그냥 J1로 쓰면 옆 칸에 붙일 때 K1, L1…로 밀려 빈 칸을 참조하게 되고 그림이 망가진다. 반대로 A3과 M3은 칸마다 달라져야 하므로 $를 붙이지 않는다. G3에서 A3, M3까지는 각각 6칸 떨어져 있어서, 가운데 칸 하나가 A의 같은 자리와 B의 같은 자리를 정확히 집는다. 버튼을 누르기 전에 H4의 수식을 학생에게 먼저 말하게 한다.</aside>
+  </section>
+
+  <!-- 12. 공학 도구 ⑤ 직접 움직이기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 101쪽 · 공학 도구 <span class="badge">5단계</span></div>
+    <h2>J1을 바꾸면 가운데 그림이 바뀐다</h2>
+
+    <table class="sheet" id="sheetLive"></table>
+
+    <div class="kctl">
+      <label for="sSheet">J1 \(=\)</label>
+      <input type="range" id="sSheet" min="0" max="100" step="5" value="20">
+      <span class="v" id="vSheet">0.20</span>
+    </div>
+    <div class="presets seg" id="presetSheet">
+      <button class="anim-btn" data-k="0">0</button>
+      <button class="anim-btn on" data-k="20">0.2</button>
+      <button class="anim-btn" data-k="40">0.4</button>
+      <button class="anim-btn" data-k="60">0.6</button>
+      <button class="anim-btn" data-k="80">0.8</button>
+      <button class="anim-btn" data-k="100">1</button>
+    </div>
+    <div class="readout" id="rSheet"></div>
+    <aside class="notes">교과서 101쪽 스프레드시트 화면을 그대로 옮겼다. J1이 0.2일 때 가운데 값(255, 204, 0, 204, 255 / 204, 51, 51, 255, 204 …)이 교과서와 같다. 가운데 칸을 누르면 그 칸의 수식과 계산값이 아래에 나온다. 학생에게 "J1=0.5이면 H3은?"을 먼저 묻고 확인한다 — 127.5를 반올림해 128이다. 컴퓨터실이라면 이 장을 띄워 두고 학생이 직접 같은 화면을 만들게 한다.</aside>
+  </section>
+
+  <!-- 13. 공학 도구 ⑤ 결과 -->
+  <section>
+    <div class="chapter-tag">교과서 101쪽 · 공학 도구 <span class="badge">5단계</span></div>
+    <h2>숫자 1이 숫자 8로 바뀐다</h2>
+
+    <ol class="steps-ol">
+      <li><span class="n">5</span>셀 J1의 \(\alpha \)의 값을 0에서 1로 증가시키면서 가운데 영역의 이미지의 변화를 확인한다.</li>
+    </ol>
+
+    <div class="row-grids" id="sixFrames" style="gap: var(--lm-space-3); margin-top: var(--lm-space-4);"></div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      0.2씩 늘릴 때마다 값이 <b>51씩</b> 바뀐다. 1과 8에서 둘 다 검은 칸(0)과
+      둘 다 흰 칸(255)은 <span class="kw-success">끝까지 그대로</span>다.
+    </div>
+    <aside class="notes">교과서 101쪽 아래의 여섯 컷이다. 숫자 하나하나를 읽기보다 색이 변하는 칸과 변하지 않는 칸을 구분하게 한다. 1의 세로획 가운데와 8의 가로획이 겹치는 칸(예: 3행 가운데)은 처음부터 끝까지 0이다. 둘 다 흰 칸인 바깥 테두리도 그대로 255다. 변하는 칸은 한쪽에만 획이 있는 칸뿐이다.</aside>
+  </section>
+
+  <!-- 14. 더 깊이 ③ 페이드 아웃도 디졸브 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="badge">더 깊이</span> 교과서 밖 보강 · 3-2-1 회수</div>
+    <h2>페이드 아웃은 검은 화면과의 디졸브다</h2>
+
+    <div class="formula-box" style="margin: var(--lm-space-3) 0 var(--lm-space-2);">
+      \((1-\alpha)A+\alpha O=(1-\alpha)A\)
+    </div>
+
+    <div class="row-grids">
+      <div class="col"><div class="cap">A</div><div class="px" id="fadeA"></div></div>
+      <div class="op">+</div>
+      <div class="col"><div class="cap">검은 화면 \(O\) (모든 성분 0)</div><div class="px" id="fadeO"></div></div>
+      <div class="op">→</div>
+      <div class="col"><div class="cap">\((1-\alpha)A\)</div><div class="px" id="fadeC"></div>
+        <div class="sub" id="fadeK"></div></div>
+    </div>
+
+    <div class="kctl">
+      <label for="sFade">\(\alpha=\)</label>
+      <input type="range" id="sFade" min="0" max="100" step="5" value="30">
+      <span class="v" id="vFade">0.30</span>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      어두워지는 실수배(\(0\le k\le 1\))는 <span class="kw-danger">디졸브의 특수한 경우</span>다.
+      밝게 하는 \(k&gt;1\)은 디졸브가 아니다 — 그래서 255를 넘었다.
+    </div>
+    <aside class="notes">3-2-1 생각 열기의 페이드 아웃(경복궁 영상이 점점 어두워지던 것)을 다시 꺼낸다. 섞을 상대가 검은 화면이면 αO가 0이 되어 실수배만 남는다. 따라서 "실수배 = 섞을 상대가 없는 디졸브"라고 말할 수 있다. 단, 거꾸로 모든 실수배가 디졸브는 아니다: k&gt;1(밝게 하기)은 두 값 사이에 머물지 않으므로 255를 넘을 수 있고, 앞 장의 "섞기는 넘치지 않는다"와 맞아떨어진다. 참고로 흰 화면 W로 가는 페이드(3-2-1의 페이드 인)는 (1−α)A+αW로, 255α가 더해지므로 실수배 하나로는 쓸 수 없다 — 학생이 물으면 답한다.</aside>
+  </section>
+
+  <!-- 15. 확인 활동 — 다른 이미지로 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 101쪽 · 확인</div>
+    <h2>다른 두 이미지로 바꿔 보자</h2>
+
+    <p class="prob-stmt" style="margin-top: var(--lm-space-2); font-size: var(--lm-slide-small);">
+      두 숫자 1과 8의 이미지를 다른 이미지로 바꾸고, 같은 방법으로 디졸브를 연출해 보자.
+      <b>A와 B의 칸을 누르면 0과 255가 바뀐다.</b>
+    </p>
+
+    <div class="row-grids">
+      <div class="col"><div class="cap">A</div><div class="px edit" id="edA"></div></div>
+      <div class="col"><div class="cap">C</div><div class="px" id="edC"></div></div>
+      <div class="col"><div class="cap">B</div><div class="px edit" id="edB"></div></div>
+    </div>
+
+    <div class="kctl">
+      <label for="sEd">\(\alpha=\)</label>
+      <input type="range" id="sEd" min="0" max="100" step="5" value="40">
+      <span class="v" id="vEd">0.40</span>
+    </div>
+    <div class="presets" id="presetEd">
+      <button class="anim-btn" data-set="18">교과서: 1 → 8</button>
+      <button class="anim-btn" data-set="49">정답및풀이 184쪽 예시: 4 → 9</button>
+      <button class="anim-btn" data-set="clr">A·B 모두 흰 칸으로</button>
+    </div>
+    <aside class="notes">교과서의 확인 활동은 열린 과제다. 정답및풀이 184쪽은 예시로 숫자 4가 9로 바뀌는 디졸브를 보여 준다(버튼으로 불러올 수 있다). 교실에서는 학생 두 명에게 A와 B를 하나씩 그리게 한 뒤 α를 움직여 본다. 이니셜이나 간단한 도형도 좋다. 확인할 것: 두 그림이 겹치는 칸은 α와 상관없이 그대로라는 점.</aside>
+  </section>
+
+  <!-- 16. 확인 문항 -->
+  <section>
+    <div class="chapter-tag">확인 활동 <span class="badge">보조 문항</span></div>
+    <h2>스스로 점검</h2>
+
+    <ul class="qlist" id="qList">
+      <li><b>⑴</b> \(\alpha=0.5\)일 때, A의 값이 255이고 B의 값이 0인 칸의 C 값은?
+        <div class="ans">\(0.5\cdot255+0.5\cdot0=127.5\) → 반올림하여 <b>128</b></div></li>
+      <li><b>⑵</b> \(\alpha=0.3\)인 이미지 C에서 A와 B 중 더 뚜렷하게 보이는 것은?
+        <div class="ans">A의 몫이 \(1-0.3=0.7\), B의 몫이 \(0.3\)이므로 <b>A</b></div></li>
+      <li><b>⑶</b> 0~255 사이 값만 가진 A와 B를 디졸브할 때, C의 성분이 255보다 커질 수 있을까?
+        <div class="ans"><b>없다.</b> C의 각 성분은 A와 B의 같은 자리 값 사이에 있다(「더 깊이」 ①).</div></li>
+    </ul>
+    <aside class="notes">교과서에 없는 점검 문항이라 화면에 「보조 문항」으로 표시했다. ⑴은 반올림, ⑵는 몫의 해석, ⑶은 「더 깊이」 내용이므로 ⑶은 시간이 없으면 건너뛴다. 문항을 누르면 답이 열린다. 먼저 손을 들어 답하게 한 뒤 연다.</aside>
+  </section>
+
+  <!-- 17. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>두 장면을 비율로 섞으면 전환이 된다</h2>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-4);">
+      \(C=(1-\alpha)A+\alpha B\quad(0\le \alpha\le 1)\)
+    </div>
+
+    <div class="two-col" style="margin-top: var(--lm-space-4);">
+      <div class="plain-card">
+        <h4>\(\alpha \)가 0 → 1</h4>
+        <p>A는 흐려지고 B는 뚜렷해진다 — 덧셈과 실수배만으로</p>
+      </div>
+      <div class="plain-card">
+        <h4>Ⅲ-2 정리</h4>
+        <p>값을 바꾸면 밝기·색·전환, 자리를 바꾸면 이동·대칭</p>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      다음 시간부터는 이미지를 <b>바꾸는</b> 것이 아니라 <b>알아보는</b> 일이다 —
+      Ⅲ-3 이미지를 분류하는 인공지능. 특징을 일일이 적어 주는 데는 한계가 있다.
+    </p>
+    <aside class="notes">Ⅲ-2를 닫는 장이다. 오늘의 식 한 줄을 다시 읽고, Ⅲ-2 전체를 "값을 바꾸는 연산과 자리를 바꾸는 연산"으로 정리한다. 다음 차시(3-3-1, 교과서 102~103쪽)는 이미지를 분류하는 인공지능이다. "사람은 고양이와 개를 어떻게 구별할까? 그 규칙을 컴퓨터에 다 적어 줄 수 있을까?"를 질문으로 던지고 마친다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 교과서 101쪽 — 지면 이미지에서 옮긴 값(행 우선). A = 숫자 1, B = 숫자 8 */
+  const DIG1 = [
+    [255,255,  0,255,255],
+    [255,  0,  0,255,255],
+    [255,255,  0,255,255],
+    [255,255,  0,255,255],
+    [255,255,  0,255,255],
+    [255,255,  0,255,255],
+    [255,  0,  0,  0,255]
+  ];
+  const DIG8 = [
+    [255,  0,  0,  0,255],
+    [  0,255,255,255,  0],
+    [  0,255,255,255,  0],
+    [255,  0,  0,  0,255],
+    [  0,255,255,255,  0],
+    [  0,255,255,255,  0],
+    [255,  0,  0,  0,255]
+  ];
+  /* 정답및풀이 184쪽 확인 예시 — 숫자 4 → 숫자 9 */
+  const DIG4 = [
+    [255,255,255,  0,255],
+    [255,255,  0,  0,255],
+    [255,  0,255,  0,255],
+    [  0,255,255,  0,255],
+    [  0,  0,  0,  0,  0],
+    [255,255,255,  0,255],
+    [255,255,255,  0,255]
+  ];
+  const DIG9 = [
+    [255,  0,  0,  0,255],
+    [  0,255,255,255,  0],
+    [  0,255,255,255,  0],
+    [255,  0,  0,  0,  0],
+    [255,255,255,255,  0],
+    [  0,255,255,255,  0],
+    [255,  0,  0,  0,255]
+  ];
+  const BLACK = DIG1.map(r => r.map(() => 0));
+
+  /* a를 100분의 k로 두고 정수로 계산한다.
+     ROUND(x,0)(소수점 아래 첫째 자리에서 반올림)과 같고, 0.7*255 같은 부동소수 오차가 없다. */
+  function mix(p, q, k) { return Math.floor(((100 - k) * p + k * q + 50) / 100); }
+  function mixGrid(A, B, k) { return A.map((r, i) => r.map((p, j) => mix(p, B[i][j], k))); }
+  function fmtA(k) { return (k / 100).toFixed(2); }
+  function gray(v) { return 'rgb(' + v + ',' + v + ',' + v + ')'; }
+
+  /* 픽셀 판 그리기. size = 칸 한 변(px), nums = 숫자 표시 */
+  function drawPx(el, M, size, nums) {
+    el.style.gridTemplateColumns = 'repeat(' + M[0].length + ', ' + size + 'px)';
+    el.innerHTML = '';
+    M.forEach((row, i) => row.forEach((v, j) => {
+      const c = document.createElement('i');
+      c.style.height = size + 'px';
+      c.style.background = gray(v);
+      c.className = v < 128 ? 'lt' : 'dk';
+      c.dataset.r = i; c.dataset.c = j;
+      if (nums) { c.textContent = v; c.style.fontSize = Math.round(size * 0.36) + 'px'; }
+      el.appendChild(c);
+    }));
+  }
+  window.LM = { DIG1, DIG8, DIG4, DIG9, mix, mixGrid };
+</script>
+
+<script>
+  /* 3장 필름 띠 · 6장 (i)(ii)(iii) · 13장 여섯 컷 */
+  (function () {
+    const strip = document.getElementById('filmStrip');
+    [0, 33, 67, 100].forEach((k, n) => {
+      const col = document.createElement('div'); col.className = 'col';
+      const g = document.createElement('div'); g.className = 'px';
+      drawPx(g, mixGrid(DIG1, DIG8, k), 40, false);
+      const s = document.createElement('div'); s.className = 'sub';
+      s.textContent = ['처음 장면', '흐려지며', '겹쳐지며', '새 장면'][n];
+      col.appendChild(g); col.appendChild(s); strip.appendChild(col);
+    });
+
+    document.querySelectorAll('.px[data-grid]').forEach(el => {
+      drawPx(el, mixGrid(DIG1, DIG8, +el.dataset.k), +el.dataset.size, false);
+    });
+
+    const six = document.getElementById('sixFrames');
+    [0, 20, 40, 60, 80, 100].forEach(k => {
+      const col = document.createElement('div'); col.className = 'col';
+      const g = document.createElement('div'); g.className = 'px';
+      g.dataset.k = k;
+      drawPx(g, mixGrid(DIG1, DIG8, k), 46, true);
+      const s = document.createElement('div'); s.className = 'sub';
+      s.style.fontSize = 'var(--lm-slide-small)';
+      s.textContent = 'α = ' + (k / 100);
+      col.appendChild(g); col.appendChild(s); six.appendChild(col);
+    });
+  })();
+</script>
+
+<script>
+  /* 10장·12장 — 스프레드시트 화면 (A3:E9 = A, G3:K9 = C, M3:Q9 = B, J1 = a) */
+  (function () {
+    const COLS = 'ABCDEFGHIJKLMNOPQ'.split('');
+    function build(table) {
+      let html = '<tr><th class="rh"></th>' +
+        COLS.map(c => '<th' + (c === 'F' || c === 'L' ? ' class="sp"' : '') + '>' + c + '</th>').join('') + '</tr>';
+      for (let r = 1; r <= 9; r++) {
+        html += '<tr><th class="rh">' + r + '</th>';
+        COLS.forEach((c, ci) => {
+          const sp = (c === 'F' || c === 'L') ? ' sp' : '';
+          let cls = sp, txt = '';
+          if (r === 1 && c === 'J') { cls += ' j1'; txt = '0.2'; }
+          if (r === 2 && c === 'C') { cls += ' lab'; txt = 'A'; }
+          if (r === 2 && c === 'O') { cls += ' lab'; txt = 'B'; }
+          if (r >= 3 && ci >= 6 && ci <= 10) cls += ' mid';
+          html += '<td class="' + cls.trim() + '" data-cell="' + c + r + '">' + txt + '</td>';
+        });
+        html += '</tr>';
+      }
+      table.innerHTML = html;
+    }
+    function paint(td, v) {
+      if (v === null) { td.textContent = ''; td.style.background = ''; td.classList.remove('lt'); return; }
+      td.textContent = v; td.style.background = gray(v); td.classList.toggle('lt', v < 128);
+    }
+    function fill(table, k, withMid) {
+      for (let i = 0; i < 7; i++) for (let j = 0; j < 5; j++) {
+        const r = i + 3;
+        paint(table.querySelector('[data-cell="' + 'ABCDE'[j] + r + '"]'), DIG1[i][j]);
+        paint(table.querySelector('[data-cell="' + 'MNOPQ'[j] + r + '"]'), DIG8[i][j]);
+        paint(table.querySelector('[data-cell="' + 'GHIJK'[j] + r + '"]'), withMid ? mix(DIG1[i][j], DIG8[i][j], k) : null);
+      }
+      table.querySelector('[data-cell="J1"]').textContent = String(k / 100);
+    }
+
+    const t1 = document.getElementById('sheetEmpty');
+    build(t1); fill(t1, 20, false);
+
+    const t2 = document.getElementById('sheetLive');
+    build(t2);
+    const s = document.getElementById('sSheet');
+    const v = document.getElementById('vSheet');
+    const out = document.getElementById('rSheet');
+    const btns = Array.from(document.querySelectorAll('#presetSheet .anim-btn'));
+    let cur = 'H4';
+    function explain() {
+      const k = +s.value;
+      const col = cur[0], r = +cur.slice(1);
+      const j = 'GHIJK'.indexOf(col), i = r - 3;
+      const p = DIG1[i][j], q = DIG8[i][j], a = k / 100;
+      const raw = Math.round(((100 - k) * p + k * q)) / 100;
+      out.innerHTML = cur + ' = ROUND((1-' + a + ')*' + 'ABCDE'[j] + r + '+' + a + '*' + 'MNOPQ'[j] + r + ',0)' +
+        ' = ROUND(' + (1 - k / 100).toFixed(2).replace(/0+$/, '').replace(/\.$/, '') + '×' + p + '+' + a + '×' + q + ',0)' +
+        ' = ROUND(' + raw + ',0) = <b>' + mix(p, q, k) + '</b>';
+      t2.querySelectorAll('td.cur').forEach(td => td.classList.remove('cur'));
+      t2.querySelector('[data-cell="' + cur + '"]').classList.add('cur');
+    }
+    function draw() {
+      const k = +s.value;
+      fill(t2, k, true);
+      v.textContent = fmtA(k);
+      btns.forEach(b => b.classList.toggle('on', +b.dataset.k === k));
+      explain();
+    }
+    s.addEventListener('input', draw);
+    btns.forEach(b => b.addEventListener('click', () => { s.value = b.dataset.k; draw(); }));
+    t2.addEventListener('click', e => {
+      const td = e.target.closest('td.mid');
+      if (!td) return;
+      cur = td.dataset.cell; explain();
+    });
+    draw();
+  })();
+</script>
+
+<script>
+  /* 8장 — 더 깊이 ②: 수직선 위의 한 픽셀 (H3: 255→0, H4: 0→255) */
+  (function () {
+    const PIX = [{ name: 'H3', p: 255, q: 0 }, { name: 'H4', p: 0, q: 255 }];
+    const svg = document.getElementById('nline');
+    const s = document.getElementById('sLine');
+    const v = document.getElementById('vLine');
+    const out = document.getElementById('rLine');
+    const btns = Array.from(document.querySelectorAll('[data-pix]'));
+    const X0 = 80, X1 = 1120, Y = 110;
+    const xOf = val => X0 + (X1 - X0) * val / 255;
+    let pick = 0;
+    function draw() {
+      const k = +s.value, P = PIX[pick];
+      const c = mix(P.p, P.q, k);
+      let g = '<line class="axis" x1="' + X0 + '" y1="' + Y + '" x2="' + X1 + '" y2="' + Y + '"/>';
+      [0, 51, 102, 153, 204, 255].forEach(t => {
+        g += '<line class="tick" x1="' + xOf(t) + '" y1="' + (Y - 10) + '" x2="' + xOf(t) + '" y2="' + (Y + 10) + '"/>';
+        g += '<text class="lbl" x="' + xOf(t) + '" y="' + (Y + 40) + '" text-anchor="middle">' + t + '</text>';
+      });
+      [0, 20, 40, 60, 80, 100].forEach(t => {
+        const x = xOf(mix(P.p, P.q, t));
+        g += '<circle class="trail" cx="' + x + '" cy="' + (Y + 72) + '" r="9"/>';
+        g += '<text class="trail-l" x="' + x + '" y="' + (Y + 108) + '" text-anchor="middle">α=' + (t / 100) + '</text>';
+      });
+      g += '<text class="endp" x="' + xOf(P.p) + '" y="' + (Y - 52) + '" text-anchor="middle">A의 값 ' + P.p + '</text>';
+      g += '<text class="endp" x="' + xOf(P.q) + '" y="' + (Y - 52) + '" text-anchor="middle">B의 값 ' + P.q + '</text>';
+      g += '<circle class="dot" cx="' + xOf(c) + '" cy="' + Y + '" r="20" style="fill:' + gray(c) + '"/>';
+      svg.innerHTML = g;
+      v.textContent = fmtA(k);
+      out.innerHTML = P.name + ': c = ' + P.p + ' + ' + fmtA(k) + '×(' + P.q + ' − ' + P.p + ') → 반올림 <b>' + c + '</b>' +
+        '<span class="swatch" style="background:' + gray(c) + '"></span>';
+      btns.forEach((b, n) => b.classList.toggle('on', n === pick));
+    }
+    s.addEventListener('input', draw);
+    btns.forEach((b, n) => b.addEventListener('click', () => { pick = n; draw(); }));
+    draw();
+  })();
+</script>
+
+<script>
+  /* 14장 — 더 깊이 ③: 검은 화면과의 디졸브 */
+  (function () {
+    const s = document.getElementById('sFade');
+    drawPx(document.getElementById('fadeA'), DIG1, 34, true);
+    drawPx(document.getElementById('fadeO'), BLACK, 34, true);
+    function draw() {
+      const k = +s.value;
+      drawPx(document.getElementById('fadeC'), mixGrid(DIG1, BLACK, k), 34, true);
+      document.getElementById('vFade').textContent = fmtA(k);
+      document.getElementById('fadeK').textContent = '실수배 k = 1 − α = ' + fmtA(100 - k);
+    }
+    s.addEventListener('input', draw);
+    draw();
+  })();
+</script>
+
+<script>
+  /* 15장 — 확인: A·B를 직접 그리고 섞기 */
+  (function () {
+    const elA = document.getElementById('edA'), elB = document.getElementById('edB'), elC = document.getElementById('edC');
+    const s = document.getElementById('sEd');
+    let A = DIG1.map(r => r.slice()), B = DIG8.map(r => r.slice());
+    const SIZE = 50;
+    function draw() {
+      const k = +s.value;
+      drawPx(elA, A, SIZE, true); drawPx(elB, B, SIZE, true);
+      drawPx(elC, mixGrid(A, B, k), SIZE, true);
+      document.getElementById('vEd').textContent = fmtA(k);
+    }
+    function toggler(get, set) {
+      return e => {
+        const c = e.target.closest('i'); if (!c) return;
+        const i = +c.dataset.r, j = +c.dataset.c;
+        set(get().map((row, ri) => row.map((x, ci) => (ri === i && ci === j) ? 255 - x : x)));
+        draw();
+      };
+    }
+    elA.addEventListener('click', toggler(() => A, m => { A = m; }));
+    elB.addEventListener('click', toggler(() => B, m => { B = m; }));
+    document.querySelectorAll('#presetEd .anim-btn').forEach(b => b.addEventListener('click', () => {
+      const w = DIG1.map(r => r.map(() => 255));
+      if (b.dataset.set === '18') { A = DIG1.map(r => r.slice()); B = DIG8.map(r => r.slice()); }
+      if (b.dataset.set === '49') { A = DIG4.map(r => r.slice()); B = DIG9.map(r => r.slice()); }
+      if (b.dataset.set === 'clr') { A = w; B = w.map(r => r.slice()); }
+      draw();
+    }));
+    s.addEventListener('input', draw);
+    draw();
+  })();
+</script>
+
+<script>
+  /* 11장 — 다른 칸 보기 (step-box는 .visible로만 표시) */
+  (function () {
+    const items = Array.from(document.querySelectorAll('[data-s]'));
+    if (!items.length) return;
+    const cnt = document.getElementById('stepCnt');
+    let i = 0;
+    function render() {
+      items.forEach((el, k) => el.classList.toggle('visible', k < i));
+      cnt.textContent = i + ' / ' + items.length;
+      window.safeTypeset(items.slice(0, i));
+    }
+    document.getElementById('stepNext').addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+    document.getElementById('stepReset').addEventListener('click', () => { i = 0; render(); });
+    render();
+  })();
+
+  /* 16장 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('#qList li').forEach(li => {
+      li.addEventListener('click', () => { li.classList.toggle('revealed'); window.safeTypeset([li]); });
+    });
+  })();
+</script>
+
+</body>
+</html>
