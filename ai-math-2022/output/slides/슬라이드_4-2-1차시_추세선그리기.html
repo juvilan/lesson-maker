@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>추세선 그리기 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .maptbl { border-collapse: collapse; margin: var(--lm-space-2) auto 0;
+              font-size: var(--lm-slide-small); }
+    .maptbl th, .maptbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: var(--lm-space-1) var(--lm-space-4); text-align: center; }
+    .maptbl th { background: var(--lm-paper-tint); font-weight: 700; }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+    .note-box { border-left: var(--lm-border-accent) solid var(--lm-info); background: var(--lm-info-tint);
+                padding: var(--lm-space-3) var(--lm-space-4); font-size: var(--lm-slide-small);
+                margin-top: var(--lm-space-3); }
+
+    /* ── 좌표평면 (JS가 data-* 로 SVG를 만든다. 수식 라벨은 .ov HTML 덧씌우기) ── */
+    .chart { position: relative; flex: none; }
+    .chart svg { display: block; width: 100%; height: auto; overflow: hidden; }
+    .chart .grid line { stroke: var(--lm-rule); stroke-width: 1.5; }
+    .chart .axis line { stroke: var(--lm-ink-3); stroke-width: 2.5; }
+    .chart .axis path { fill: var(--lm-ink-3); }
+    .chart .tick { fill: var(--lm-ink-3); font-size: 24px; font-family: var(--lm-font-sans); }
+    .chart .pt { fill: var(--lm-accent); stroke: var(--lm-page); stroke-width: 2; }
+    .chart .ghost { fill: none; stroke: var(--lm-danger); stroke-width: 3; stroke-dasharray: 6 5; opacity: 0;
+                    transition: opacity 0.3s; }
+    .chart .tl { stroke: var(--lm-danger); stroke-width: 4; transition: opacity 0.4s; }
+    .chart .guide line { stroke: var(--lm-info); stroke-width: 3; stroke-dasharray: 8 6; }
+    .chart .guide circle { fill: var(--lm-info); }
+    .chart .stairs line { stroke: var(--lm-success); stroke-width: 4; }
+    .chart .yint { fill: var(--lm-page); stroke: var(--lm-danger); stroke-width: 5; }
+    .readout i, .chart .ov i { font-style: italic; }
+    .chart .ov { position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+                 font-size: var(--lm-slide-caption); color: var(--lm-ink-2); line-height: 1.2; }
+    .chart .ov.r { transform: translate(8px, -50%); }
+    .chart .ov.l { transform: translate(calc(-100% - 8px), -50%); }
+    .chart .ov.a { transform: translate(-50%, calc(-100% - 8px)); }
+    .chart .ov.b { transform: translate(-50%, 8px); }
+    .chart .ov.tag { background: var(--lm-page); border: 2px solid var(--lm-danger); color: var(--lm-danger);
+                     border-radius: var(--lm-radius-sm); padding: 0 var(--lm-space-2); font-weight: 600; }
+    .chart .ov.info { color: var(--lm-info); font-weight: 700; }
+    .chart .ov.ok { color: var(--lm-success); font-weight: 700; }
+    .chart.hide-line .tl, .chart.hide-line .ov.lineq { opacity: 0; }
+    .chart.hide-guide .guide, .chart.hide-guide .ov.gd { opacity: 0; }
+    .chart .guide, .chart .ov { transition: opacity 0.3s; }
+    /* 단계(step-box)가 펼쳐지면 그림의 해당 요소가 나타난다 */
+    section:has(.show-line.visible) .chart.hide-line .tl,
+    section:has(.show-line.visible) .chart.hide-line .ov.lineq { opacity: 1; }
+    section:has(.show-guide.visible) .chart.hide-guide .guide,
+    section:has(.show-guide.visible) .chart.hide-guide .ov.gd { opacity: 1; }
+    section:has(.show-ghost.visible) .chart .ghost,
+    section:has(.show-ghost.visible) .chart .ov.gh { opacity: 1; }
+    .chart .ov.gh { opacity: 0; }
+    section:has(.show-pts.visible) .chart.hide-pts .pt { opacity: 1; }
+    .chart.hide-pts .pt { opacity: 0; transition: opacity 0.4s; }
+    .axis-cap { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); text-align: center;
+                margin-top: var(--lm-space-1); }
+
+    .row { display: flex; gap: var(--lm-space-6); align-items: flex-start; margin-top: var(--lm-space-3); }
+    .row > .grow { flex: 1; min-width: 0; }
+
+    /* ── 통그라미 화면 재현 (실제 도구가 아니다) ── */
+    .tg-win { border: 2px solid var(--lm-rule-strong); border-radius: var(--lm-radius-md);
+              background: var(--lm-page); font-size: var(--lm-slide-caption); overflow: hidden; flex: none; }
+    .tg-title { background: var(--lm-paper-tint); padding: var(--lm-space-1) var(--lm-space-3);
+                font-weight: 700; display: flex; justify-content: space-between; align-items: center;
+                border-bottom: 1px solid var(--lm-rule); }
+    .tg-title .x { color: var(--lm-ink-3); font-weight: 400; }
+    .tg-body { padding: var(--lm-space-3); }
+    .tg-grid { border-collapse: collapse; font-family: var(--lm-font-mono); }
+    .tg-grid th, .tg-grid td { border: 1px solid var(--lm-rule); padding: 0 var(--lm-space-3);
+                               min-width: 64px; text-align: center; line-height: 1.5; }
+    .tg-grid th { background: var(--lm-paper-tint); font-family: var(--lm-font-sans); }
+    .tg-grid td.rn { background: var(--lm-paper-tint); color: var(--lm-ink-3); min-width: 36px; }
+    .tg-grid tr.vname td { color: var(--lm-accent); font-family: var(--lm-font-sans); font-weight: 600; }
+    .tg-field { display: flex; align-items: center; gap: var(--lm-space-2); margin-bottom: var(--lm-space-2); }
+    .tg-field .lab { color: var(--lm-ink-3); min-width: 5.5em; }
+    .tg-input { border: 1px solid var(--lm-rule-strong); border-radius: var(--lm-radius-sm);
+                padding: 0 var(--lm-space-2); min-width: 7em; background: var(--lm-paper); }
+    .tg-input.on { border-color: var(--lm-accent); color: var(--lm-accent); font-weight: 700; }
+    .tg-btn { display: inline-block; border: 1px solid var(--lm-ink-3); border-radius: var(--lm-radius-sm);
+              padding: 0 var(--lm-space-3); background: var(--lm-paper-tint); }
+    .tg-btn.go { background: var(--lm-ink); color: var(--lm-paper); border-color: var(--lm-ink); }
+    .tg-menu { display: flex; gap: var(--lm-space-4); padding: var(--lm-space-1) var(--lm-space-3);
+               border-bottom: 1px solid var(--lm-rule); }
+    .tg-menu .sel { color: var(--lm-accent); font-weight: 700; border-bottom: 3px solid var(--lm-accent); }
+    .tg-check { display: flex; align-items: center; gap: var(--lm-space-2); margin: var(--lm-space-1) 0; }
+    .tg-cb { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px;
+             border: 2px solid var(--lm-ink-3); border-radius: 4px; font-size: 20px; color: var(--lm-paper); }
+    .tg-cb.on { background: var(--lm-ink-2); border-color: var(--lm-ink-2); }
+    .tg-cb.on::after { content: '✔'; }
+    section:has(.show-line.visible) .tg-cb.line { background: var(--lm-danger); border-color: var(--lm-danger); }
+    section:has(.show-line.visible) .tg-cb.line::after { content: '✔'; }
+    .tg-check.target { color: var(--lm-danger); font-weight: 700; }
+
+    /* ── 보조 활동: 직선 조절판 ── */
+    .ctrl { flex: 1; min-width: 0; }
+    .ctrl .param-slider-group label { min-width: 8.5em; }
+    .ctrl .param-slider-group input[type=range] { height: 36px; }
+    .readout { margin-top: var(--lm-space-3); border: var(--lm-border-thin) solid var(--lm-accent);
+               border-radius: var(--lm-radius-md); background: var(--lm-page);
+               padding: var(--lm-space-3) var(--lm-space-4); font-size: var(--lm-slide-body); }
+    .readout .fx { font-family: var(--lm-font-math); }
+    .readout .big { color: var(--lm-info); font-weight: 700; }
+    .readout .sub { display: block; font-size: var(--lm-slide-caption); color: var(--lm-ink-3); margin-top: var(--lm-space-1); }
+    .ctrl-btns { display: flex; gap: var(--lm-space-3); margin-top: var(--lm-space-3); }
+
+    .datatbl { border-collapse: collapse; font-size: var(--lm-slide-small); }
+    .datatbl th, .datatbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                               padding: 2px var(--lm-space-4); text-align: center; }
+    .datatbl th { background: var(--lm-paper-tint); font-weight: 700; }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-2 추세선과 예측 · 1차시</div>
+    <h1>추세선 그리기</h1>
+    <p class="slide-sub">흩어진 점들이 가는 방향을 직선 하나로</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 127~129쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄이다. 흩어진 점들이 대체로 가는 방향을 직선 하나로 요약하면 그것이 추세선이고, 그 직선으로 y를 예측한다. 4-1에서는 "어느 쪽일까"를 확률로 예측했다면, 오늘부터는 "얼마일까"를 직선으로 예측한다. 「더 깊이」 장과 보조 활동은 교과서 밖 보강이다. 통그라미 화면은 교과서 지면을 재현한 그림이며 실제 도구가 아니다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>칸이 너무 적으면 “1000명이었다면”으로 예측해 바꿔 쓴다</h2>
+
+    <div class="sides">
+      <div class="side">
+        <div class="where">4-1 확률을 이용한 예측</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">“<b>어느 쪽</b>일까?” — 확률이 가장 큰 쪽</div>
+      </div>
+      <div class="side known">
+        <div class="where">4-2 추세선과 예측 (오늘)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">“<b>얼마</b>일까?” — 두 양 사이의 경향</div>
+      </div>
+    </div>
+
+    <div class="note-box" style="margin-top: var(--lm-space-5);">
+      <b>119쪽 준비 학습 ③</b> 학생 20명의 수학 점수와 과학 점수의 산점도 — 수학 점수가 높을수록 과학 점수도 대체로 높다 → <b>양의 상관관계</b>
+    </div>
+    <p class="prob-stmt sm">오늘은 그 “대체로”를 <b>직선 하나</b>로 그려 본다.</p>
+    <aside class="notes">지난 시간(4-1-4, 탐구와 융합)의 한 줄: 칸이 너무 적으면 "1000명이었다면"으로 예측해 바꿔 쓴다. 제목은 차시 설계 문서 차시표의 한 줄을 그대로 옮긴 것이며, 4-1-4 덱의 실제 마지막 문장과 다르면 그쪽에 맞춰 말한다. 4-1 전체는 "어느 지역일까, 어느 상품일까"처럼 범주를 고르는 예측이었다. 오늘부터는 "파고가 몇 m일까"처럼 수치를 예측한다. 119쪽 준비 학습 3번(정답및풀이 188쪽: 양의 상관관계)을 중3 때 배운 상관관계와 함께 떠올리게 한다. 산점도의 정식 정의는 교과서 위치대로 128쪽 '배웠어요'에서 다시 꺼낸다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>두 변량 사이의 <span class="kw">경향성</span>을 나타내는 <span class="kw">추세선</span>과 <span class="kw">예측값</span>의 뜻을 말할 수 있다.</span></li>
+      <li><span class="num">2</span><span>공학 도구로 산점도를 그리고 <span class="kw">추세선의 식</span>을 구할 수 있다.</span></li>
+      <li><span class="num">3</span><span>추세선의 식에 \(x\)의 값을 대입하여 <span class="kw">\(y\)의 예측값</span>을 구할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">흩어진 점들이 가는 방향을 직선 하나로 요약하면 그것이 추세선이다.</span>
+    </div>
+    <aside class="notes">교과서 127쪽 학습 목표: 공학 도구를 사용하여 데이터의 경향성을 추세선으로 나타내고 이를 예측에 이용할 수 있다. 오늘은 그중 "추세선을 얻는" 부분이고, 다음 시간에는 얻은 식을 읽고(기울기, 절편) 얼마나 틀렸는지(오차) 잰다.</aside>
+  </section>
+
+  <!-- 4. 생각 열기 -->
+  <section class="tight">
+    <div class="chapter-tag">생각 열기 · 교과서 127쪽</div>
+    <h2>차령에 따른 자동차 검사 부적합률</h2>
+
+    <div class="row">
+      <div>
+        <div class="chart" data-w="980" data-h="600" data-x="0.5,9.5,1" data-y="0,45,10" data-ygrid="5"
+             data-cats="5~6,6~7,7~8,8~9,9~10,10~11,11~12,12~13,13~14"
+             data-pts="1,13.3;2,15.4;3,23.1;4,26.8;5,31.8;6,35.2;7,35.5;8,37.8" data-ghost="9,40">
+          <div class="ov a gh" data-at="9,40" style="color: var(--lm-danger); font-weight: 700;">?</div>
+        </div>
+        <div class="axis-cap">가로: 차령(년) · 첫 칸은 5년 이상 6년 미만 &nbsp;|&nbsp; 세로: 부적합률(%) &nbsp;(출처: 한국교통안전공단, 2023)</div>
+      </div>
+      <div class="grow">
+        <p class="prob-stmt sm" style="margin-top: 0;">2022년 승용·화물·승합·특수 자동차의 <b>차령</b>에 따른 자동차 검사 부적합률</p>
+        <p class="cap-sm">차령: 차량이 처음 출고된 해를 기준으로 현재까지 사용한 햇수</p>
+        <div class="info-box" style="font-size: var(--lm-slide-small);">차령에 따라 부적합률이 어떻게 변화하는지 말해 보자.</div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          차령이 증가하면 자동차 검사 부적합률도 <b>증가하는 경향성</b>을 보인다.
+        </div>
+        <div class="step-box show-ghost" data-s style="font-size: var(--lm-slide-small);">
+          이 경향성으로부터 차령이 13년 이상 14년 미만일 때 부적합률은 <b>\(40\,\%\) 정도</b>일 것으로 예상할 수 있다.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 2</span>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 127쪽 생각 열기. 점의 정확한 값은 교과서가 숫자로 주지 않으므로 화면에도 값을 붙이지 않았다. 점의 위치는 지면을 보고 재현한 것이라 대략 13~38% 사이일 뿐 확정값이 아니다. 먼저 학생에게 "오른쪽으로 갈수록 점이 어떻게 되나?"를 묻는다. 정답및풀이 188쪽: 차령이 증가하면 자동차 검사 부적합률도 증가하는 경향성을 보인다. 두 번째 단계에서 13~14년 칸의 물음표 자리를 보여 주며 "점이 없는데 어떻게 40% 정도라고 말할 수 있을까?"를 던진다. 답은 "경향성을 따라 이어 그렸기 때문"이고, 그 '이어 그린 선'이 오늘의 추세선이다.</aside>
+  </section>
+
+  <!-- 5. 추세선과 예측값 -->
+  <section>
+    <div class="chapter-tag">교과서 127쪽</div>
+    <h2>추세선과 예측값</h2>
+
+    <div class="row">
+      <div class="grow">
+        <div class="definition-box" style="font-size: var(--lm-slide-small); margin-top: 0;">
+          서로 대응하는 두 변량 \(x\)와 \(y\) 사이의 경향성을 나타내는 직선 또는 곡선을 <b>추세선</b>이라고 한다.
+        </div>
+        <p class="prob-stmt sm">추세선을 이용하면 두 변량 사이의 경향성을 쉽게 파악할 수 있을 뿐만 아니라 변량 \(y\)의 값도 예측할 수 있다.</p>
+        <p class="prob-stmt sm">여기서는 추세선이 <b>직선</b>인 경우만 다루고, 추세선의 식을</p>
+        <div class="formula-box" style="font-size: var(--lm-slide-body); margin: var(--lm-space-2) 0;">
+          \(f(x)=ax+b\) &nbsp;(\(a\)와 \(b\)는 상수)
+        </div>
+        <p class="prob-stmt sm">와 같이 \(x\)에 대한 일차함수로 나타낸다. 이때 추세선의 값 \(f(x)\)를 변량 \(x\)에 대응하는 변량 \(y\)의 <span class="kw">예측값</span>이라고 한다.</p>
+      </div>
+      <div>
+        <div class="chart" data-w="560" data-h="420" data-x="-0.4,10,1" data-y="-0.4,6,1" data-noticks="1"
+             data-pts="1,1.3;1.6,0.7;2.6,2.1;4.6,1.6;5.2,3.2;6.5,3.6;7.4,2.7;8.3,4.3;9.1,5.0" data-line="0.42,0.95">
+          <div class="ov lineq" data-at="4.4,4.6" style="color: var(--lm-danger);">\(f(x)=ax+b\)</div>
+          <div class="ov tag" data-at="8.7,2.3">추세선</div>
+          <div class="ov l" data-at="0,5.8">\(y\)</div>
+          <div class="ov b" data-at="9.7,0">\(x\)</div>
+          <div class="ov l" data-at="0,-0.22">O</div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 127쪽 아래. 추세선의 정의는 직선 '또는 곡선'이지만 이 교과서는 직선만 다룬다(지도서 유의점 1). 중요한 약속: 추세선의 식은 y=...가 아니라 f(x)=ax+b로 쓴다. 지도서 178쪽은 추세선의 식을 y=f(x)로 쓰는 것을 지양하라고 한다. y는 실제로 잰 값(실젯값)이고 f(x)는 직선이 내놓는 예측값이라 둘을 섞으면 다음 시간의 오차(y에서 f(x)를 뺀 값)가 무너진다. 오른쪽 그림은 교과서의 모식도를 다시 그린 것이다. 점들이 직선 위에 딱 놓이지 않는다는 것도 짚는다.</aside>
+  </section>
+
+  <!-- 6. 더 깊이 — 기울기와 절편의 뜻 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 기울기와 절편은 무엇을 말하나</div>
+    <h2>기울기 \(a\)와 절편 \(b\)를 예측값으로 읽기</h2>
+
+    <div class="row">
+      <div class="grow">
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          <b>기울기 \(a\)</b> — \(x\)가 \(1\) 늘 때 <b>예측값</b> \(f(x)\)가 늘어나는 양<br>
+          \(f(x+1)-f(x)=\{a(x+1)+b\}-(ax+b)=a\) &nbsp;(\(a&lt;0\)이면 그만큼 <b>줄어든다</b>)
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          <b>절편 \(b\)</b> — \(x=0\)일 때의 <b>예측값</b><br>
+          \(f(0)=a\times0+b=b\)
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          <span class="aux-badge">보조 예시</span> \(f(x)=2x+1\) — \(x\)가 \(1\) 늘 때마다 예측값이 \(2\)씩 늘고(초록 계단),
+          \(x=0\)에서 예측값은 \(1\)(빈 원)이다.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 3</span>
+        </div>
+        <p class="cap-sm" style="margin-top: var(--lm-space-3);">늘어나는 것은 실제 \(y\)가 아니라 <b>직선의 예측값</b>이다. 실제 점은 직선 위·아래에 흩어져 있다.</p>
+      </div>
+      <div>
+        <div class="chart" data-w="720" data-h="560" data-x="0,4,1" data-y="0,10,1" data-line="2,1" data-stairs="0,1,2,3" data-yint="1">
+          <div class="ov a ok" data-at="0.62,1" style="font-size: var(--lm-slide-small);">+1</div>
+          <div class="ov r ok" data-at="1,2.1" style="font-size: var(--lm-slide-small);">+2</div>
+          <div class="ov lineq" data-at="1.5,6.6" style="color: var(--lm-danger);">\(f(x)=2x+1\)</div>
+          <div class="ov r" data-at="0.08,0.4" style="color: var(--lm-danger);">\(f(0)=1\)</div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 밖 보강이다(지도서 180쪽 내용 연구 1이 같은 뜻을 적는다: 기울기 a의 부호는 x가 증가함에 따라 y의 예측값 f(x)가 증가하는지 감소하는지를, y절편 b는 x가 0일 때의 예측값을 나타낸다). 강조할 점: "x가 1 늘면 y가 a만큼 는다"고 말하면 틀린다. 실제 y는 들쭉날쭉하고, 정확히 a만큼 느는 것은 직선이 내놓는 예측값 f(x)뿐이다. 그래서 '예측값'이라는 말을 꼭 붙인다. 보조 예시 f(x)=2x+1은 교과서 밖 수치이며, 계단 하나가 가로 1, 세로 2임을 손가락으로 따라가게 한다. 다음 시간(4-2-2)에 교과서 130쪽이 풍속 추세선으로 이 읽기를 직접 한다.</aside>
+  </section>
+
+  <!-- 7. 공학 도구 — 데이터 -->
+  <section>
+    <div class="chapter-tag">교과서 128쪽 · 공학 도구를 이용하여 추세선 그리기</div>
+    <h2>평균 풍속과 최대 파고</h2>
+
+    <p class="prob-stmt sm">어느 날 우리나라 여러 지점의 평균 풍속에 대한 최대 파고를 조사한 데이터이다.</p>
+    <table class="maptbl" style="margin-top: var(--lm-space-4); font-size: var(--lm-slide-body);">
+      <tr><th>지점</th><th>칠발도</th><th>거문도</th><th>거제도</th><th>동해</th><th>포항</th><th>마라도</th><th>신안</th><th>추자도</th></tr>
+      <tr><th>평균 풍속(m/s)</th><td>6.3</td><td>6.1</td><td>3.5</td><td>4.6</td><td>4.4</td><td>7.9</td><td>6.5</td><td>6.9</td></tr>
+      <tr><th>최대 파고(m)</th><td>1.3</td><td>0.9</td><td>0.8</td><td>0.9</td><td>0.7</td><td>1.6</td><td>0.6</td><td>1.2</td></tr>
+    </table>
+    <p class="cap-sm" style="text-align: right; margin-top: var(--lm-space-1);">(출처: 기상자료개방포털, 2024)</p>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4); font-size: var(--lm-slide-small);">
+      <b>통그라미</b>를 이용하여 평균 풍속과 최대 파고 사이의 경향성을 나타내는 추세선을 그리는 방법을 알아보자.
+    </div>
+    <p class="cap-sm">통그라미는 통계교육원에서 운영하는 교육용 소프트웨어이다 (https://tong.kostat.go.kr) · 방주: 갈톤(1822~1911) — 부모와 아이들의 키 사이의 연관 관계를 추세선을 이용하여 연구했다.</p>
+    <aside class="notes">교과서 128쪽. 표의 값은 지면 그대로다. 교과서 표는 세로로 되어 있지만 화면 폭에 맞게 가로로 눕혔다. 지점 이름을 하나씩 읽으며 "바람이 셀수록 파도가 높을까?" 예상을 받는다. 마라도(풍속 7.9, 파고 1.6)와 신안(풍속 6.5, 파고 0.6)을 짚어 두면 다음 시간 오차에서 다시 쓴다. 갈톤은 회귀(regression)라는 말을 처음 쓴 사람으로, 부모 키와 자녀 키의 관계를 연구했다. 지도서는 통그라미 외에 지오지브라, 스프레드시트도 가능하다고 한다. 실습실이 없으면 다음 세 장의 화면 재현으로 교사가 시연한다.</aside>
+  </section>
+
+  <!-- 8. ① 변량 입력 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 128쪽 · 통그라미 ①</div>
+    <h2>① ‘평균 풍속’과 ‘최대 파고’의 변량을 입력한다</h2>
+
+    <div class="row" style="gap: var(--lm-space-5);">
+      <div class="tg-win">
+        <div class="tg-title"><span>자료창</span><span class="x">×</span></div>
+        <div class="tg-body">
+          <table class="tg-grid">
+            <tr><th></th><th>V1</th><th>V2</th><th>V3</th><th>V4</th><th>V5</th></tr>
+            <tr class="vname"><td class="rn"></td><td>평균 풍속</td><td>최대 파고</td><td></td><td></td><td></td></tr>
+            <tr><td class="rn">1</td><td>6.3</td><td>1.3</td><td></td><td></td><td></td></tr>
+            <tr><td class="rn">2</td><td>6.1</td><td>0.9</td><td></td><td></td><td></td></tr>
+            <tr><td class="rn">3</td><td>3.5</td><td>0.8</td><td></td><td></td><td></td></tr>
+            <tr><td class="rn">4</td><td>4.6</td><td>0.9</td><td></td><td></td><td></td></tr>
+            <tr><td class="rn">5</td><td>4.4</td><td>0.7</td><td></td><td></td><td></td></tr>
+            <tr><td class="rn">6</td><td>7.9</td><td>1.6</td><td></td><td></td><td></td></tr>
+            <tr><td class="rn">7</td><td>6.5</td><td>0.6</td><td></td><td></td><td></td></tr>
+            <tr><td class="rn">8</td><td>6.9</td><td>1.2</td><td></td><td></td><td></td></tr>
+            <tr><td class="rn">9</td><td></td><td></td><td></td><td></td><td></td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="grow">
+        <div class="tg-win">
+          <div class="tg-title"><span>변수설정</span><span class="x">×</span></div>
+          <div class="tg-body">
+            <div class="tg-field"><span class="lab">변수 선택</span><span class="tg-input">V2</span></div>
+            <div class="tg-field"><span class="lab">변수 명</span><span class="tg-input on">최대 파고</span></div>
+            <div class="tg-field"><span class="lab">단위</span><span class="tg-input">m</span></div>
+            <div style="text-align: right;"><span class="tg-btn go">적용</span></div>
+          </div>
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          V1 열에 평균 풍속 8개, V2 열에 최대 파고 8개를 <b>같은 행끼리 짝이 맞게</b> 입력한다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          변수설정 창에서 V1의 이름을 ‘평균 풍속’, V2의 이름을 ‘최대 파고’로 바꾼다.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 2</span>
+        </div>
+      </div>
+    </div>
+    <p class="cap-sm" style="margin-top: var(--lm-space-2);">교과서 128쪽 화면을 다시 그린 그림이다(실제 도구 화면과 세부 모양은 다를 수 있다).</p>
+    <aside class="notes">교과서 128쪽 1단계 화면 재현이다. 실제로 조작되는 도구가 아니다. 한 행이 한 지점이라는 것을 강조한다. 칠발도의 풍속과 파고는 반드시 같은 1행에 있어야 한다. 행이 어긋나면 산점도의 점이 엉뚱한 짝으로 찍힌다. 실습실이 있으면 학생이 직접 통그라미(tong.kostat.go.kr)에 입력하게 하고, 없으면 이 화면으로 설명만 한다.</aside>
+  </section>
+
+  <!-- 9. ② 산점도 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 128쪽 · 통그라미 ②</div>
+    <h2>② 메뉴 ‘그래프 &gt; 산점도’로 산점도를 만든다</h2>
+
+    <div class="row" style="gap: var(--lm-space-5);">
+      <div style="width: 760px; flex: none;">
+        <div class="tg-win">
+          <div class="tg-menu"><span>파일</span><span>통계</span><span class="sel">그래프</span><span>도움말</span></div>
+          <div class="tg-title"><span>산점도</span><span class="x">×</span></div>
+          <div class="tg-body">
+            <div class="tg-field"><span class="lab">변수</span><span class="tg-input">V1 : 평균 풍속</span><span class="tg-input">V2 : 최대 파고</span></div>
+            <div class="tg-field"><span class="lab">가로축 변수</span><span class="tg-input on">V1 : 평균 풍속</span></div>
+            <div class="tg-field"><span class="lab">세로축 변수</span><span class="tg-input on">V2 : 최대 파고</span></div>
+            <div style="text-align: right;"><span class="tg-btn go">확인</span></div>
+          </div>
+        </div>
+        <div class="step-box show-pts" data-s style="font-size: var(--lm-slide-small);">
+          ‘확인’을 클릭하면 평균 풍속과 최대 파고의 <b>산점도</b>가 만들어진다.
+        </div>
+        <div class="note-box" style="font-size: var(--lm-slide-caption);">
+          <b>배웠어요</b> 어떤 자료에서 두 변량 \(x\)와 \(y\)에 대하여 순서쌍 \((x,\ y)\)를 좌표평면 위에 점으로 나타낸 그래프를 \(x\)와 \(y\)의 <b>산점도</b>라고 한다.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 1</span>
+        </div>
+      </div>
+      <div class="grow">
+        <div class="chart hide-pts" data-w="860" data-h="520" data-x="0,8,1" data-y="0,3,1"
+             data-pts="6.3,1.3;6.1,0.9;3.5,0.8;4.6,0.9;4.4,0.7;7.9,1.6;6.5,0.6;6.9,1.2"></div>
+        <div class="axis-cap">가로: 평균 풍속(m/s) &nbsp;|&nbsp; 세로: 최대 파고(m) — 도구 화면의 축 범위(0~8, 0~3)</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 128쪽 2단계 화면 재현이다. 가로축이 x(원인 쪽, 평균 풍속), 세로축이 y(예측하고 싶은 쪽, 최대 파고)다. 가로와 세로를 바꾸면 다른 추세선이 나온다는 점을 한마디 해 둔다. '다음'을 누르면 점 8개가 나타난다. 128쪽 '배웠어요' 방주의 산점도 정의를 이 자리에서 읽는다(중3 내용). 점들이 오른쪽 위로 올라가는 경향을 학생 말로 표현하게 한다.</aside>
+  </section>
+
+  <!-- 10. ③ 추세선(선형)표시 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 129쪽 · 통그라미 ③</div>
+    <h2>③ ‘옵션 선택 &gt; 추세선(선형)표시’를 선택한다</h2>
+
+    <div class="row" style="gap: var(--lm-space-5);">
+      <div style="width: 640px; flex: none;">
+        <div class="tg-win">
+          <div class="tg-title"><span>옵션 선택 · 설정</span><span class="x">×</span></div>
+          <div class="tg-body">
+            <div class="tg-check"><span class="tg-cb on"></span>범례정보보기</div>
+            <div class="tg-check"><span class="tg-cb on"></span>빈도표시</div>
+            <div class="tg-check target"><span class="tg-cb line"></span>추세선(선형)표시</div>
+          </div>
+        </div>
+        <div class="step-box show-line" data-s style="font-size: var(--lm-slide-small);">
+          추세선과 추세선의 식이 나타난다. 도구 화면에는 <b>y = 0.15x + 0.11</b>로 찍힌다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          평균 풍속을 \(x\) m/s, 최대 파고를 \(y\) m라 할 때, 추세선의 식은
+          <div style="text-align: center; font-size: var(--lm-slide-body); margin: var(--lm-space-2) 0;">\(f(x)=0.15x+0.11\)</div>
+          도구는 “y =”로 표시하지만 <b>우리는 \(f(x)\)로 쓴다</b> — \(y\)는 실젯값, \(f(x)\)는 예측값.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 2</span>
+        </div>
+      </div>
+      <div class="grow">
+        <div class="chart hide-line" data-w="920" data-h="540" data-x="0,8,1" data-y="0,3,1"
+             data-pts="6.3,1.3;6.1,0.9;3.5,0.8;4.6,0.9;4.4,0.7;7.9,1.6;6.5,0.6;6.9,1.2" data-line="0.15,0.11">
+          <div class="ov tag lineq" data-at="5.6,1.75" style="font-family: var(--lm-font-mono);">y = 0.15x + 0.11</div>
+        </div>
+        <div class="axis-cap">가로: 평균 풍속(m/s) &nbsp;|&nbsp; 세로: 최대 파고(m)</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 129쪽 3단계 화면 재현이다. 산점도 팝업 창의 '옵션 선택'에서 '추세선(선형)표시'를 고르면 직선과 식이 함께 나타난다. 여기서 반드시 짚을 점: 통그라미 화면(그리고 정답및풀이 188쪽 그래프)에는 'y = 0.15x + 0.11'로 찍힌다. 그러나 교과서 본문은 f(x)=0.15x+0.11로 쓴다. 지도서 178쪽은 추세선의 식을 y=f(x)로 쓰지 말라고 한다. 다음 시간 오차(y에서 f(x)를 뺀 값)를 위해 y와 f(x)를 구분해 둔다. '선형'은 직선이라는 뜻이다. 직선이 모든 점을 지나지 않는다는 것, 위에도 아래에도 점이 있다는 것을 눈으로 확인하게 한다.</aside>
+  </section>
+
+  <!-- 11. 예측 f(5.2) -->
+  <section>
+    <div class="chapter-tag">교과서 129쪽</div>
+    <h2>추세선으로 최대 파고를 예측한다</h2>
+
+    <div class="row">
+      <div class="grow">
+        <p class="prob-stmt sm" style="margin-top: 0;">이 추세선의 식을 이용하여 평균 풍속에 대한 최대 파고의 예측값을 구할 수 있다.</p>
+        <div class="formula-box" style="font-size: var(--lm-slide-body); margin: var(--lm-space-3) 0;">\(f(x)=0.15x+0.11\)</div>
+        <p class="prob-stmt sm">예를 들어 평균 풍속이 \(5.2\) m/s인 어느 지점의 최대 파고의 예측값은?</p>
+        <div class="step-box show-guide" data-s style="font-size: var(--lm-slide-body);">
+          \(f(5.2)=0.15\times5.2+0.11=0.89\,(\mathrm{m})\)
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 1</span>
+        </div>
+        <p class="cap-sm" style="margin-top: var(--lm-space-4);">다른 도구(스프레드시트 등)는 계수를 더 긴 자릿수로 보여 줄 수 있다. 수업과 교과서의 계산은 모두 위의 식으로 통일한다.</p>
+      </div>
+      <div>
+        <div class="chart hide-guide" data-w="820" data-h="500" data-x="0,8,1" data-y="0,3,1"
+             data-pts="6.3,1.3;6.1,0.9;3.5,0.8;4.6,0.9;4.4,0.7;7.9,1.6;6.5,0.6;6.9,1.2" data-line="0.15,0.11" data-guide="5.2">
+          <div class="ov r info gd" data-at="5.2,0.18">5.2</div>
+          <div class="ov a info gd" data-at="0.6,0.89">0.89</div>
+        </div>
+        <div class="axis-cap">가로: 평균 풍속(m/s) &nbsp;|&nbsp; 세로: 최대 파고(m)</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 129쪽. 5.2 m/s인 지점은 표에 없는 지점이다. 데이터에 없는 x에 대해서도 직선이 답을 준다는 것이 '예측'이다. 그래프에서는 x=5.2에서 위로 올라가 직선과 만나는 점의 높이를 왼쪽으로 읽는다. 계산 0.15×5.2=0.78, 여기에 0.11을 더해 0.89. 교사 참고(화면에 쓰지 않는다): 같은 데이터로 최소제곱 직선을 정확히 구하면 계수가 약 0.1533과 0.1148이고, 그 식으로는 x=5.2에서 약 0.912가 나온다. 교과서는 반올림한 0.15와 0.11을 쓰며, 다음 시간 오차 표 전체가 이 반올림된 식으로 계산되어 있다. 스프레드시트나 지오지브라를 쓰는 학생이 "선생님, 0.91이 나와요"라고 하면 이 사정을 설명하고 교과서 식으로 맞추게 한다.</aside>
+  </section>
+
+  <!-- 12. 보조 활동 — 직선 조절 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 보조 활동 · 직선을 직접 움직여 보기</div>
+    <h2>\(a\)와 \(b\)를 바꾸면 직선과 예측값이 어떻게 바뀔까</h2>
+
+    <div class="row" data-prevent-swipe>
+      <div>
+        <div class="chart" id="playChart" data-w="860" data-h="540" data-x="0,8,1" data-y="0,3,1"
+             data-pts="6.3,1.3;6.1,0.9;3.5,0.8;4.6,0.9;4.4,0.7;7.9,1.6;6.5,0.6;6.9,1.2" data-line="0.15,0.11" data-guide="5.2" data-yint="0.11"></div>
+        <div class="axis-cap">교과서 128쪽 데이터 · 가로: 평균 풍속(m/s) · 세로: 최대 파고(m)</div>
+      </div>
+      <div class="ctrl" data-prevent-swipe>
+        <div class="param-slider-group"><label for="sA">기울기 a</label>
+          <input type="range" id="sA" min="-20" max="40" step="1" value="15"><span class="val-display" id="vA">0.15</span></div>
+        <div class="param-slider-group"><label for="sB">절편 b</label>
+          <input type="range" id="sB" min="-50" max="150" step="1" value="11"><span class="val-display" id="vB">0.11</span></div>
+        <div class="param-slider-group"><label for="sX">예측할 x</label>
+          <input type="range" id="sX" min="0" max="80" step="1" value="52"><span class="val-display" id="vX">5.2</span></div>
+        <div class="readout">
+          <span class="fx" id="rLine"><i>f</i>(<i>x</i>) = 0.15<i>x</i> + 0.11</span><br>
+          <span class="fx" id="rVal"><i>f</i>(5.2) = <span class="big">0.89</span></span>
+          <span class="sub">파란 점: 고른 \(x\)에서의 예측값 · 빈 원: \(x=0\)일 때의 예측값 \(b\)</span>
+        </div>
+        <div class="ctrl-btns">
+          <button class="anim-btn" id="btnTb">교과서 추세선으로</button>
+        </div>
+        <p class="cap-sm" style="margin-top: var(--lm-space-3);">
+          <span class="aux-badge">보조</span>해 볼 것 — ① \(a\)만 바꾸면? ② \(b\)만 바꾸면? ③ 점들의 경향을 가장 잘 나타낸다고 느끼는 직선은?
+        </p>
+      </div>
+    </div>
+    <aside class="notes">교과서 밖 보조 활동이다. 점은 교과서 128쪽 데이터 그대로다. 학생 한두 명을 불러 슬라이더를 움직이게 한다. 확인할 것 세 가지. 1) 기울기 a만 바꾸면 빈 원(x=0에서의 높이 b)을 중심으로 직선이 돈다. a가 음수가 되면 오른쪽 아래로 내려가 점들의 경향과 반대가 된다. 2) 절편 b만 바꾸면 직선이 기울기를 유지한 채 위아래로 평행이동한다. 3) 예측할 x를 바꾸면 파란 점이 직선을 따라 움직이고, 오른쪽 상자의 f(x) 값이 바뀐다. x를 5.2로 두고 '교과서 추세선으로'를 누르면 0.89가 다시 나온다. 마지막 질문 "어느 직선이 가장 잘 나타내나?"에 학생마다 다른 직선을 고를 것이다. 바로 그 '눈대중의 차이'를 숫자로 판정하는 방법이 4-3의 손실함수다. 오늘은 답을 정하지 말고 질문으로 남긴다. 다음 시간에 '얼마나 틀렸나(오차)'를 먼저 잰다. 예측의 한계(교사 참고): x를 데이터 범위(3.5~7.9) 밖, 예컨대 0 근처로 옮기면 예측값이 0.11 m 정도가 나오지만, 그런 바람의 데이터는 없으므로 믿을 근거가 약하다. 다음 시간 예제 1에서 지도서 자료로 다시 다룬다.</aside>
+  </section>
+
+  <!-- 13. 문제 1 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 129쪽 문제 1</div>
+    <h2>주행 속도와 제동 거리</h2>
+
+    <div class="row">
+      <table class="datatbl" style="flex: none;">
+        <tr><th>주행 속도(km/h)</th><th>제동 거리(m)</th></tr>
+        <tr><td>21.5</td><td>3.7</td></tr>
+        <tr><td>32.3</td><td>5.8</td></tr>
+        <tr><td>40.8</td><td>11.4</td></tr>
+        <tr><td>52.4</td><td>18.7</td></tr>
+        <tr><td>61.7</td><td>27.3</td></tr>
+        <tr><td>72.8</td><td>38.4</td></tr>
+        <tr><td>80.8</td><td>55.9</td></tr>
+        <tr><td>90.6</td><td>64.5</td></tr>
+        <tr><td>100.4</td><td>83.8</td></tr>
+      </table>
+      <div class="grow">
+        <p class="prob-stmt sm" style="margin-top: 0;"><b>문제 1</b> 왼쪽 표는 어느 자동차의 주행 속도 \(x\) km/h에 따른 제동 거리 \(y\) m를 조사한 데이터이다. 다음에 답하시오.</p>
+        <ul class="qlist">
+          <li><b>⑴</b> 통그라미를 이용하여 추세선의 식을 구하시오.
+            <div class="ans">\(f(x)=1.02x-28.29\) &nbsp;<span style="font-weight: 400; color: var(--lm-ink-3);">(도구 화면에는 y = 1.02x − 28.29로 찍힌다)</span></div></li>
+          <li><b>⑵</b> 주행 속도가 \(50\) km/h일 때, 제동 거리의 예측값을 구하시오.
+            <div class="ans">\(f(50)=1.02\times50-28.29=22.71\) → <b>\(22.71\) m</b></div></li>
+        </ul>
+        <div class="info-box" style="font-size: var(--lm-slide-caption);">
+          순서 — ① V1에 주행 속도, V2에 제동 거리 입력 → ② 그래프 &gt; 산점도 (가로축: 주행 속도) → ③ 옵션 선택 &gt; 추세선(선형)표시
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 129쪽 문제 1. 정답및풀이 188쪽: (1) f(x)=1.02x−28.29 (2) x=50일 때 f(50)=1.02×50−28.29=22.71, 따라서 제동 거리의 예측값은 22.71 m. 실습실이 있으면 학생이 통그라미에 9행 2열을 직접 입력해 식을 얻게 한다(약 10분). 없으면 앞의 세 장 순서를 다시 짚으며 교사가 시연하고 식만 알려 준다. 교사 참고: 같은 데이터의 최소제곱 직선은 약 1.0196x−28.294이고, 반올림하면 교과서 식과 같다. 절편이 −28.29라 속도가 작으면(약 27.7 km/h 아래) 예측값이 음수가 된다. 제동 거리가 음수일 수는 없으므로 "직선 예측은 데이터 범위 근처에서만 믿는다"는 말을 한마디 해 둔다(다음 시간 지도서 자료와 연결).</aside>
+  </section>
+
+  <!-- 14. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>흩어진 점들이 가는 방향을 직선 하나로 요약하면 그것이 추세선이다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">평균 풍속 \(x\) m/s → 최대 파고</div>
+        <div class="what">\(f(x)=0.15x+0.11\)</div>
+      </div>
+      <div class="side">
+        <div class="where">평균 풍속 \(5.2\) m/s일 때 예측값</div>
+        <div class="what">\(f(5.2)=0.89\) m</div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      산점도 → 추세선(선형)표시 → 식에 \(x\)를 대입하면 <span class="kw-success">\(y\)의 예측값</span>이 나온다.
+    </div>
+
+    <p class="prob-stmt">
+      다음 시간 — 도구가 준 식을 <b>읽을 줄</b> 알아야 한다. 기울기와 절편이 뜻하는 것, 그리고 이 직선이 <b>얼마나 틀렸는가(오차)</b>.
+    </p>
+    <aside class="notes">오늘 한 줄을 학생이 따라 말하게 한다. 다음 시간(4-2-2) 예고: 같은 풍속 추세선 f(x)=0.15x+0.11 하나로 기울기와 절편을 읽고, 마라도처럼 실제 파고(1.6 m)와 예측값(1.295 m)이 다른 지점에서 '오차'를 잰다. 1단원과의 연결(시간이 되면): 퍼셉트론이 데이터에서 가중치를 배우듯, 추세선도 데이터에서 숫자 두 개(a와 b)를 배우는 가장 단순한 모형이다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 좌표평면 그리기 — SVG에는 도형과 눈금 숫자만 넣는다(수식은 .ov HTML 덧씌우기).
+     data-x, data-y : "최소,최대,눈금간격"   data-pts : "x,y;x,y;…"
+     data-line : "a,b" (f(x)=ax+b)   data-guide : x 값   data-cats : 범주 눈금 이름
+     data-noticks : 눈금·격자 없이 축만(모식도)   data-ghost : "x,y" 점선 원
+     data-stairs : 계단을 그릴 x 목록   data-yint : x=0에서의 예측값 점 */
+  (function () {
+    const NS = 'http://www.w3.org/2000/svg';
+    function mk(tag, attrs, parent) {
+      const e = document.createElementNS(NS, tag);
+      Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k]));
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+    function nums(s) { return s.split(',').map(Number); }
+    function pairs(s) { return s ? s.split(';').map(nums) : []; }
+    function clean(v) { return String(Number(v.toFixed(6))); }
+    let uid = 0;
+
+    function build(el) {
+      const W = Number(el.dataset.w || 800), H = Number(el.dataset.h || 480);
+      const [x0, x1, xs] = nums(el.dataset.x), [y0, y1, ys] = nums(el.dataset.y);
+      const bare = !!el.dataset.noticks;
+      const L = bare ? 24 : 64, R = 20, T = 20, B = bare ? 24 : 44;
+      const sx = x => L + (x - x0) / (x1 - x0) * (W - L - R);
+      const sy = y => T + (y1 - y) / (y1 - y0) * (H - T - B);
+      el.style.width = W + 'px';
+      const svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMid meet' });
+      el.insertBefore(svg, el.firstChild);
+      const id = 'plot' + (++uid);
+      const cp = mk('clipPath', { id: id }, mk('defs', {}, svg));
+      mk('rect', { x: L, y: T, width: W - L - R, height: H - T - B }, cp);
+
+      const ax0 = (x0 <= 0 && x1 >= 0) ? 0 : x0, ay0 = (y0 <= 0 && y1 >= 0) ? 0 : y0;
+      if (!bare) {
+        const g = mk('g', { class: 'grid' }, svg);
+        const gy = Number(el.dataset.ygrid || ys);
+        for (let i = 0, n = Math.round((y1 - y0) / gy); i <= n; i++) {
+          const v = y0 + i * gy;
+          mk('line', { x1: L, x2: W - R, y1: sy(v), y2: sy(v) }, g);
+        }
+        const cats = el.dataset.cats ? el.dataset.cats.split(',') : null;
+        const tk = mk('g', {}, svg);
+        const xv = [];
+        if (cats) cats.forEach((_, k) => xv.push(k + 1));
+        else for (let i = 0, n = Math.round((x1 - x0) / xs); i <= n; i++) xv.push(x0 + i * xs);
+        for (const v of xv) {
+          mk('line', { x1: sx(v), x2: sx(v), y1: T, y2: H - B }, g);
+          const t = mk('text', { x: sx(v), y: H - B + 30, 'text-anchor': 'middle', class: 'tick' }, tk);
+          t.textContent = cats ? cats[Math.round(v) - 1] : clean(v);
+        }
+        for (let i = 0, n = Math.round((y1 - y0) / ys); i <= n; i++) {
+          const v = y0 + i * ys;
+          const t = mk('text', { x: L - 12, y: sy(v) + 8, 'text-anchor': 'end', class: 'tick' }, tk);
+          t.textContent = clean(v);
+        }
+      }
+      const ax = mk('g', { class: 'axis' }, svg);
+      mk('line', { x1: L, x2: W - R, y1: sy(ay0), y2: sy(ay0) }, ax);
+      mk('line', { x1: sx(ax0), x2: sx(ax0), y1: T, y2: H - B }, ax);
+      if (bare) {
+        mk('path', { d: 'M' + (W - R) + ' ' + sy(ay0) + ' l-16 -8 v16 z' }, ax);
+        mk('path', { d: 'M' + sx(ax0) + ' ' + T + ' l-8 16 h16 z' }, ax);
+      }
+
+      const plot = mk('g', { 'clip-path': 'url(#' + id + ')' }, svg);
+      const c = { sx: sx, sy: sy, x0: x0, x1: x1, plot: plot };
+
+      if (el.dataset.stairs) {
+        const [a, b] = nums(el.dataset.line);
+        const st = mk('g', { class: 'stairs' }, plot);
+        nums(el.dataset.stairs).forEach(x => {
+          const y = a * x + b;
+          mk('line', { x1: sx(x), x2: sx(x + 1), y1: sy(y), y2: sy(y) }, st);
+          mk('line', { x1: sx(x + 1), x2: sx(x + 1), y1: sy(y), y2: sy(y + a) }, st);
+        });
+      }
+      if (el.dataset.line) {
+        c.line = mk('line', { class: 'tl' }, plot);
+        c.setLine = function (a, b) {
+          c.a = a; c.b = b;
+          c.line.setAttribute('x1', sx(x0)); c.line.setAttribute('y1', sy(a * x0 + b));
+          c.line.setAttribute('x2', sx(x1)); c.line.setAttribute('y2', sy(a * x1 + b));
+          if (c.yint) { c.yint.setAttribute('cy', sy(b)); }
+          if (c.gx !== undefined) c.setGuide(c.gx);
+        };
+      }
+      if (el.dataset.guide) {
+        const g = mk('g', { class: 'guide' }, plot);
+        c.gv = mk('line', {}, g); c.gh = mk('line', {}, g);
+        c.gp = mk('circle', { r: 10 }, g);
+        c.setGuide = function (x) {
+          c.gx = x;
+          const y = c.a * x + c.b;
+          c.gv.setAttribute('x1', sx(x)); c.gv.setAttribute('x2', sx(x));
+          c.gv.setAttribute('y1', sy(ay0)); c.gv.setAttribute('y2', sy(y));
+          c.gh.setAttribute('x1', sx(ax0)); c.gh.setAttribute('x2', sx(x));
+          c.gh.setAttribute('y1', sy(y)); c.gh.setAttribute('y2', sy(y));
+          c.gp.setAttribute('cx', sx(x)); c.gp.setAttribute('cy', sy(y));
+        };
+      }
+      pairs(el.dataset.pts).forEach((p, i) => {
+        mk('circle', { class: 'pt', cx: sx(p[0]), cy: sy(p[1]), r: 9, 'data-i': i }, plot);
+      });
+      if (el.dataset.ghost) {
+        const [gx, gy] = nums(el.dataset.ghost);
+        mk('circle', { class: 'ghost', cx: sx(gx), cy: sy(gy), r: 14 }, plot);
+      }
+      if (el.dataset.yint) {
+        c.yint = mk('circle', { class: 'yint', cx: sx(0), cy: sy(Number(el.dataset.yint)), r: 10 }, svg);
+      }
+      if (c.setLine) {
+        const [a, b] = nums(el.dataset.line);
+        if (el.dataset.guide) c.gx = Number(el.dataset.guide);
+        c.setLine(a, b);
+      }
+      el.querySelectorAll('.ov[data-at]').forEach(o => {
+        const [x, y] = nums(o.dataset.at);
+        o.style.left = (sx(x) / W * 100) + '%';
+        o.style.top = (sy(y) / H * 100) + '%';
+      });
+      el._c = c;
+    }
+    document.querySelectorAll('.chart[data-x]').forEach(build);
+  })();
+</script>
+
+<script>
+  /* 보조 활동 — 정수 단위(a·b는 0.01, x는 0.1)로 계산해 0.89가 0.8900000001로 찍히지 않게 한다.
+     표시는 HTML 조각만 쓴다(수식 문자열을 JS에 두지 않는다). */
+  (function () {
+    const ch = document.getElementById('playChart');
+    if (!ch || !ch._c) return;
+    const sA = document.getElementById('sA'), sB = document.getElementById('sB'), sX = document.getElementById('sX');
+    const vA = document.getElementById('vA'), vB = document.getElementById('vB'), vX = document.getElementById('vX');
+    const rLine = document.getElementById('rLine'), rVal = document.getElementById('rVal');
+    const MINUS = '−';
+    function fmt(n, places) {           /* n: 정수, places: 소수 자릿수 → 끝자리 0 제거 */
+      const neg = n < 0, m = Math.abs(n), d = Math.pow(10, places);
+      let s = String(Math.floor(m / d));
+      let frac = String(m % d).padStart(places, '0').replace(/0+$/, '');
+      if (frac) s += '.' + frac;
+      return (neg && m !== 0 ? MINUS : '') + s;
+    }
+    function update() {
+      const a = Number(sA.value), b = Number(sB.value), x = Number(sX.value);
+      vA.textContent = fmt(a, 2); vB.textContent = fmt(b, 2); vX.textContent = fmt(x, 1);
+      const f = a * x + b * 10;          /* 단위: 0.001 */
+      let line = '<i>f</i>(<i>x</i>) = ';
+      if (a === 0) line += '';
+      else line += (a === 100 ? '' : (a === -100 ? MINUS : fmt(a, 2))) + '<i>x</i>';
+      if (b !== 0 || a === 0) {
+        if (a === 0) line += fmt(b, 2);
+        else line += (b < 0 ? ' ' + MINUS + ' ' : ' + ') + fmt(Math.abs(b), 2);
+      }
+      rLine.innerHTML = line;
+      rVal.innerHTML = '<i>f</i>(' + fmt(x, 1) + ') = <span class="big">' + fmt(f, 3) + '</span>';
+      ch._c.setLine(a / 100, b / 100);
+      ch._c.setGuide(x / 10);
+    }
+    [sA, sB, sX].forEach(s => s.addEventListener('input', update));
+    document.getElementById('btnTb').addEventListener('click', () => {
+      sA.value = 15; sB.value = 11; update();
+    });
+    update();
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
