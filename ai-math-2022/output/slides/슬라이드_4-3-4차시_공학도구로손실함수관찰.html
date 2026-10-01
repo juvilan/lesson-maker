@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공학 도구로 손실함수 관찰 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+
+    /* ── 좌표평면 (JS가 data-* 로 SVG를 만든다. 수식 라벨은 .ov HTML 덧씌우기) ── */
+    .chart { position: relative; flex: none; }
+    .chart svg { display: block; width: 100%; height: auto; overflow: hidden; }
+    .chart .grid line { stroke: var(--lm-rule); stroke-width: 1.5; }
+    .chart .axis line { stroke: var(--lm-ink-3); stroke-width: 2.5; }
+    .chart .tick { fill: var(--lm-ink-3); font-size: 24px; font-family: var(--lm-font-sans); }
+    .chart .pt { fill: var(--lm-ink-2); stroke: var(--lm-page); stroke-width: 2; }
+    .chart .ln { stroke-width: 4; }
+    .chart .ln.c-info { stroke: var(--lm-info); }
+    .chart .ln.c-success { stroke: var(--lm-success); }
+    .chart .ln.c-danger { stroke: var(--lm-danger); }
+    .chart .ln.c-accent { stroke: var(--lm-accent); }
+    .chart .err { stroke-width: 5; }
+    .chart .err.pos { stroke: var(--lm-info); }
+    .chart .err.neg { stroke: var(--lm-danger); }
+    .chart .sq { fill: var(--lm-warning-tint); stroke: var(--lm-warning); stroke-width: 2; opacity: 0.75; }
+    .chart .sq.big { fill: var(--lm-danger-tint); stroke: var(--lm-danger); }
+    .chart .pt.drag { fill: var(--lm-accent); cursor: grab; }
+    .chart .pt.drag.on { stroke: var(--lm-ink); stroke-width: 4; }
+    .chart .ov { position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+                 font-size: var(--lm-slide-caption); color: var(--lm-ink-2); line-height: 1.2; }
+    .chart .ov.r { transform: translate(8px, -50%); }
+    .chart .ov.l { transform: translate(calc(-100% - 8px), -50%); }
+    .chart .ov.a { transform: translate(-50%, calc(-100% - 8px)); }
+    .chart .ov.b { transform: translate(-50%, 8px); }
+    .chart .ov.k-info { color: var(--lm-info); font-weight: 700; }
+    .chart .ov.k-success { color: var(--lm-success); font-weight: 700; }
+    .chart .ov.k-danger { color: var(--lm-danger); font-weight: 700; }
+    .chart .ov.k-accent { color: var(--lm-accent); font-weight: 700; }
+    .chart.drag-area svg { touch-action: none; }
+    .axis-cap { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); text-align: center;
+                margin-top: var(--lm-space-1); }
+
+    .row { display: flex; gap: var(--lm-space-6); align-items: flex-start; margin-top: var(--lm-space-3); }
+    .row > .grow { flex: 1; min-width: 0; }
+
+    .datatbl { border-collapse: collapse; font-size: var(--lm-slide-small); }
+    .datatbl th, .datatbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                               padding: 2px var(--lm-space-4); text-align: center; }
+    .datatbl th { background: var(--lm-paper-tint); font-weight: 700; }
+
+    .errtbl { border-collapse: collapse; font-size: var(--lm-slide-small); flex: none; }
+    .errtbl caption { font-size: var(--lm-slide-small); font-weight: 700; color: var(--lm-ink-2);
+                      padding-bottom: var(--lm-space-1); }
+    .errtbl th, .errtbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: 2px var(--lm-space-3); text-align: center; }
+    .errtbl th { background: var(--lm-paper-tint); font-weight: 700; font-size: var(--lm-slide-caption); }
+    .errtbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .errtbl td.small { box-shadow: inset 0 0 0 3px var(--lm-success); font-weight: 700; }
+    .errtbl.sm { font-size: var(--lm-slide-caption); }
+    .errtbl.sm td { padding: 0 var(--lm-space-3); }
+    section:not(.show-small) .errtbl.cmp td.small { box-shadow: none; font-weight: 400; }
+
+    .legend-line { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); margin-top: var(--lm-space-1); }
+    .src-badge { display: inline-block; background: var(--lm-ink-2); color: var(--lm-paper);
+                 font-weight: 700; padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .anim-btn.on { outline: 3px solid var(--lm-info); }
+
+    /* ── 4-3-4 전용: 공학 도구 재현 ── */
+    .chart .curve { fill: none; stroke: var(--lm-accent); stroke-width: 3; opacity: 0.5; }
+    .chart .cur { fill: var(--lm-danger); stroke: var(--lm-page); stroke-width: 3; }
+    .chart .seen { fill: var(--lm-ink-3); }
+    .chart line.dash { stroke: var(--lm-ink-3); stroke-width: 2; stroke-dasharray: 8 6; }
+    .chart .pt { fill: var(--lm-success); }
+    .readout { border: var(--lm-border-thin) solid var(--lm-accent);
+               border-radius: var(--lm-radius-md); background: var(--lm-page);
+               padding: var(--lm-space-2) var(--lm-space-4); font-size: var(--lm-slide-small); }
+    .readout .big { color: var(--lm-danger); font-weight: 700; font-size: var(--lm-slide-body); font-variant-numeric: tabular-nums; }
+    .ctrl { display: flex; gap: var(--lm-space-5); align-items: center; margin-top: var(--lm-space-3); }
+    .ctrl .param-slider-group { flex: 1; margin: 0; }
+    .ctrl .param-slider-group input[type=range] { height: 36px; }
+    .errtbl td.e1 { background: var(--lm-warning-tint); }
+    .errtbl.vt td { padding: 0 var(--lm-space-3); }
+    .errtbl tr.best td { background: var(--lm-danger-tint); font-weight: 700; }
+    .errtbl td.neg { color: var(--lm-danger); }
+    .errtbl td.pos { color: var(--lm-info); }
+    .wide-tbl td, .wide-tbl th { padding: 2px var(--lm-space-3); }
+    .ex-badge { display: inline-block; background: var(--lm-warning); color: var(--lm-paper); font-weight: 700;
+                padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm); font-size: var(--lm-slide-caption); }
+    .snap { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-5); margin-top: var(--lm-space-3); }
+    .snap .card { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+                  background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4); text-align: center;
+                  font-size: var(--lm-slide-small); }
+    .snap .card .v { font-size: var(--lm-slide-h3); font-weight: 700; color: var(--lm-ink); font-variant-numeric: tabular-nums; }
+    .snap .card.best { border-color: var(--lm-danger); }
+    .snap .card.best .v { color: var(--lm-danger); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-3 손실함수 · 4차시 · 공학 도구</div>
+    <h1>공학 도구로 손실함수의 값 관찰</h1>
+    <p class="slide-sub">기울기를 조금씩 바꿔 보면 손실이 가장 작은 자리가 보인다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 138~139쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄이다. 기울기 a를 0.1씩 바꿔 보면 손실함수의 값이 가장 작아지는 자리가 보인다. 교과서는 Desmos를 쓰지만 교실에서 열린다고 가정하지 않고, 같은 표와 슬라이더를 덱 안에 다시 만들었다. 숫자는 교과서 화면 값과 정확히 같게 나오도록 정수로 계산한다(15.6304, 3.199400125, 16.8409205). Desmos는 '집에서 해 보기'로 교과서 QR을 쓰게 한다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>손실함수 값이 기울기에 따라 어떻게 변하는지 도구로 직접 보자</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">최적 추세선 (4-3-2)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(L(a)\)는 포물선<br>꼭짓점의 \(a\)가 최적</div>
+      </div>
+      <div class="side">
+        <div class="where">이상점 (4-3-3)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">손실함수를 고르는 것도<br>중요한 선택이다</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 — <b>“손실함수 값이 기울기에 따라 어떻게 변하는지 도구로 직접 보자.”</b>
+    </p>
+    <aside class="notes">지난 시간 예고 문장을 그대로 읽는다. 4-3-2에서는 L(a)의 식을 전개하고 완전제곱식으로 꼭짓점을 찾았다. 데이터가 8개, 소수 둘째 자리 값이면 손으로 전개하기가 힘들다. 오늘은 식을 전개하지 않고, a를 0.1씩 바꿔 가며 손실함수의 값을 직접 재 보는 방법을 쓴다. 4-3-3의 결론(데이터에 맞는 손실함수를 고른다)은 짧게 회수만 하고, 오늘 계산은 다시 제곱 손실 L(a)로 한다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>공학 도구로 추세선 \(f(x)=ax\)의 <span class="kw">예측값과 오차</span>를 구할 수 있다.</span></li>
+      <li><span class="num">2</span><span>\(a\)의 값에 따른 <span class="kw">손실함수의 값의 변화</span>를 관찰하여 최소가 되는 \(a\)를 찾을 수 있다.</span></li>
+      <li><span class="num">3</span><span>간격을 정해 찾은 값이 <span class="kw">근삿값</span>이라는 것을 설명할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">기울기 \(a\)를 \(0.1\)씩 바꿔 보면 손실함수가 가장 작아지는 자리가 보인다.</span>
+    </div>
+    <aside class="notes">교과서 138쪽 상단 역량 표시: 추론, 정보처리. 목표 3은 교과서 밖 「더 깊이」로 보강한다. 0.1 간격으로 찾은 4.7은 '0.1 간격 칸 중에서 가장 좋은 값'이지 꼭짓점 자체는 아니다. 이 생각이 다음 단원(경사하강법)으로 넘어가는 다리다.</aside>
+  </section>
+
+  <!-- 4. 데이터와 도구 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 138쪽 · 공학 도구</div>
+    <h2>합금의 전압과 전류</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;">어느 합금의 전기 저항을 알아보기 위한 실험에서 전압 \(x\) V에 대한 전류 \(y\) mA를 측정한 데이터이다.</p>
+    <table class="errtbl wide-tbl" style="margin-top: var(--lm-space-2);">
+      <tr><th>전압(V)</th><td>1.05</td><td>2.11</td><td>2.96</td><td>3.97</td><td>5.23</td><td>6.02</td><td>7.24</td><td>8.17</td></tr>
+      <tr><th>전류(mA)</th><td>5.22</td><td>7.65</td><td>12.42</td><td>18.91</td><td>21.65</td><td>29.44</td><td>32.86</td><td>41.01</td></tr>
+    </table>
+    <div class="row">
+      <div class="grow">
+        <p class="prob-stmt sm">공학 도구를 이용하여 이 데이터의 산점도를 그리고 추세선 \(f(x)=ax\)의 오차와 손실함수의 값의 변화를 관찰해 보자.</p>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          ❶ 그래핑 계산기를 연다. &nbsp;❷ 표의 \(x_1\)열과 \(y_1\)열에 전압과 전류를 입력하면 산점도가 나타난다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          ❸ ‘y=ax’를 입력하면 \(a\)에 대한 슬라이더가 생긴다. 범위 \(4.0\le a\le5.8\), 간격 \(0.1\).
+          ‘\(y_1\sim ax_1\)’을 입력하면 추세선 \(f(x)=ax\)가 나타난다.
+        </div>
+        <p class="cap-sm">교과서는 Desmos(https://www.desmos.com)를 사용한다. 교실에서는 다음 장부터 같은 동작을 이 화면 안에서 한다. 집에서는 교과서 138쪽 QR로 해 볼 수 있다.</p>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 2</span>
+        </div>
+      </div>
+      <div>
+        <div class="chart" data-w="600" data-h="440" data-x="0,9,1" data-y="0,45,5" data-ylab="10" data-r="9"
+             data-pts="1.05,5.22;2.11,7.65;2.96,12.42;3.97,18.91;5.23,21.65;6.02,29.44;7.24,32.86;8.17,41.01"></div>
+        <div class="axis-cap">가로: 전압(V) &nbsp;|&nbsp; 세로: 전류(mA)</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 138쪽. 데이터는 지면 그대로다. Desmos 단계 ❶~❸을 요약했다. 교과서 원문: 입력 창 2행에 'y=ax'를 입력하면 a에 대한 슬라이더가 나타나고, a의 값의 범위를 4.0≤a≤5.8로, 간격을 0.1로 설정한다. 입력 창 4행에 'y₁~ax₁'을 입력하면 추세선 f(x)=ax가 나타난다. Desmos 화면에 함께 나오는 R²(결정계수)는 이 단원에서 다루지 않는다. 학생이 물으면 '추세선이 얼마나 잘 맞는지 나타내는 다른 점수'라고만 말한다. 산점도를 보면 점들이 원점 근처에서 시작해 거의 직선으로 올라간다. 전압과 전류는 비례한다(옴의 법칙, 물리 시간과 연결). 그래서 원점을 지나는 직선 f(x)=ax가 잘 어울리는 데이터다.</aside>
+  </section>
+
+  <!-- 5. 4단계: 예측값과 오차 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 139쪽 · ❹</div>
+    <h2>\(a=4\)일 때 예측값과 오차</h2>
+
+    <div class="row">
+      <table class="errtbl">
+        <tr><th>\(x_1\)</th><th>\(y_1\)</th><th>\(ax_1\)</th><th>\(e_1\)</th></tr>
+        <tr><td>1.05</td><td>5.22</td><td class="num">4.2</td><td class="num e1">1.02</td></tr>
+        <tr><td>2.11</td><td>7.65</td><td class="num">8.44</td><td class="num e1">−0.79</td></tr>
+        <tr><td>2.96</td><td>12.42</td><td class="num">11.84</td><td class="num e1">0.58</td></tr>
+        <tr><td>3.97</td><td>18.91</td><td class="num">15.88</td><td class="num e1">3.03</td></tr>
+        <tr><td>5.23</td><td>21.65</td><td class="num">20.92</td><td class="num e1">0.73</td></tr>
+        <tr><td>6.02</td><td>29.44</td><td class="num">24.08</td><td class="num e1">5.36</td></tr>
+        <tr><td>7.24</td><td>32.86</td><td class="num">28.96</td><td class="num e1">3.9</td></tr>
+        <tr><td>8.17</td><td>41.01</td><td class="num">32.68</td><td class="num e1">8.33</td></tr>
+      </table>
+      <div class="grow">
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          ❹ 입력 창 1행의 표의 1행 3열에 ‘\(ax_1\)’을 입력하면 추세선 \(f(x)=ax\)에 대한 <b>예측값</b>이 \(ax_1\)열에 나타난다.
+          <span class="cap-sm" style="display: block;">예: \(4\times1.05=4.2\)</span>
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          입력 창 4행의 「구성」을 클릭하면 <b>오차</b>의 값이 \(e_1\)열에 나타난다.
+          <span class="cap-sm" style="display: block;">\(e_1=y_1-ax_1\) — 예: \(5.22-4.2=1.02\) (4-2에서 배운 실젯값 − 예측값)</span>
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          생각해 보기 — 오차가 모두 크고 대부분 <b>양수</b>이다. 직선이 점들보다 <b>아래</b>에 있다는 뜻이다. \(a\)를 키우면 어떻게 될까?
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 3</span>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 139쪽 ❹. 표의 값은 지면 화면 그대로다. 7번째 오차는 지면에 '3.9'로 인쇄되어 있다(3.90에서 끝의 0이 빠진 Desmos 표기). 한 행만 학생과 함께 계산한다: 4×1.05=4.2, 5.22−4.2=1.02. Desmos의 '구성' 버튼은 회귀식 y₁~ax₁의 잔차를 표에 붙이는 기능이다. 교과서 용어로는 오차 e₁=y₁−ax₁이다. 마지막 단계는 4-2-2 「더 깊이」(오차의 부호 = 점의 위·아래)를 회수하는 화면 보강이다. 오차가 하나만 빼고 모두 양수이면 직선이 너무 낮다, 즉 기울기를 키워야 한다.</aside>
+  </section>
+
+  <!-- 6. 5단계: mean(e^2) 세 장면 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 139쪽 · ❺</div>
+    <h2>손실함수의 값 = 오차의 제곱의 평균</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;">❺ 입력 창 5행에 ‘mean((e₁)²)’을 입력하면 손실함수의 값이 나타난다. <span class="cap-sm">(‘mean( )’은 평균을 계산하는 명령어이다.)</span><br>
+      입력 창 3행의 ▶을 클릭하고, \(a\)의 값에 따른 손실함수의 값의 변화를 관찰해 보면</p>
+    <div class="snap">
+      <div class="card step-box" data-s><div>\(a=4\)</div><div class="v">15.6304</div></div>
+      <div class="card best step-box" data-s><div>\(a=4.7\)</div><div class="v">3.199400125</div></div>
+      <div class="card step-box" data-s><div>\(a=5.4\)</div><div class="v">16.8409205</div></div>
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small); margin-top: var(--lm-space-4);">
+      \(a=4.7\)일 때 손실함수의 값이 <b class="kw-danger">3.199400125로 최소</b>가 됨을 확인할 수 있다.
+      <span class="cap-sm" style="display: block;">‘mean((e₁)²)’ \(=\dfrac{e_1^{\,2}+e_2^{\,2}+\cdots+e_8^{\,2}}{8}=L(a)\) — 134쪽의 손실함수 그대로이다.</span>
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 4</span>
+    </div>
+    <aside class="notes">교과서 139쪽 ❺와 세 장의 화면. 값은 지면 그대로다: a=4 → 15.6304, a=4.7 → 3.199400125, a=5.4 → 16.8409205(python Fraction 재계산 모두 일치. 데이터가 소수 둘째 자리, a가 소수 첫째 자리라서 값이 정확히 끝나는 소수다). 세 카드를 하나씩 펼치며 "다음 카드의 값은 더 클까 작을까?"를 예측하게 한다. 4에서 4.7로 가면 줄고, 4.7에서 5.4로 가면 다시 커진다 → 4-3-2의 포물선과 같은 모양이다. mean((e₁)²)가 134쪽 L(a)의 정의와 똑같다는 것을 마지막 줄에서 짚는다. Desmos 화면의 R² 값(0.8881, 0.9771, 0.8795)은 화면에 올리지 않았다.</aside>
+  </section>
+
+  <!-- 7. 덱 안의 공학 도구 -->
+  <section class="tight" data-prevent-swipe>
+    <div class="chapter-tag">교과서 138~139쪽 · 화면 안에서 다시 해 보기</div>
+    <h2>\(a\)를 \(0.1\)씩 움직이며 손실함수의 값을 관찰한다</h2>
+
+    <div class="row" data-prevent-swipe style="gap: var(--lm-space-5);">
+      <div>
+        <table class="errtbl sm" id="toolTbl">
+          <tr><th>\(x_1\)</th><th>\(y_1\)</th><th>\(ax_1\)</th><th>\(e_1\)</th></tr>
+          <tr><td>1.05</td><td>5.22</td><td class="num"></td><td class="num e1"></td></tr>
+          <tr><td>2.11</td><td>7.65</td><td class="num"></td><td class="num e1"></td></tr>
+          <tr><td>2.96</td><td>12.42</td><td class="num"></td><td class="num e1"></td></tr>
+          <tr><td>3.97</td><td>18.91</td><td class="num"></td><td class="num e1"></td></tr>
+          <tr><td>5.23</td><td>21.65</td><td class="num"></td><td class="num e1"></td></tr>
+          <tr><td>6.02</td><td>29.44</td><td class="num"></td><td class="num e1"></td></tr>
+          <tr><td>7.24</td><td>32.86</td><td class="num"></td><td class="num e1"></td></tr>
+          <tr><td>8.17</td><td>41.01</td><td class="num"></td><td class="num e1"></td></tr>
+        </table>
+        <div class="readout" style="margin-top: var(--lm-space-2);">mean((e₁)²) = <span class="big" id="toolMean"></span></div>
+      </div>
+      <div class="grow">
+        <div class="chart" id="toolChart" data-w="900" data-h="560" data-x="4,5.8,0.1" data-y="0,40,5" data-xlab="0.2" data-ylab="10"
+             data-quad="26.6046125,-249.2187,586.8314"></div>
+        <div class="axis-cap">가로: 기울기 \(a\) &nbsp;|&nbsp; 세로: 손실함수의 값 · 회색 점: 지나온 값 · 연한 곡선: \(L(a)\)의 그래프</div>
+      </div>
+    </div>
+    <div class="ctrl" data-prevent-swipe>
+      <div class="param-slider-group"><label for="sA4">a (간격 0.1)</label>
+        <input type="range" id="sA4" min="40" max="58" step="1" value="40"><span class="val-display" id="vA4">4.0</span></div>
+      <button class="anim-btn" id="toolPlay">▶ 4.0부터 5.8까지</button>
+      <button class="anim-btn" id="toolClear">지나온 점 지우기</button>
+    </div>
+    <aside class="notes">교과서의 Desmos 활동을 덱 안에 다시 만든 것이다. 표의 ax₁, e₁열과 mean((e₁)²)이 a에 따라 바뀐다. 정수로 계산하므로 a=4에서 15.6304, 4.7에서 3.199400125, 5.4에서 16.8409205가 지면과 똑같이 나온다(수업 전에 확인). a=4에서 7번째 오차는 지면처럼 3.9로 표시된다. 학생에게 슬라이더를 한 칸씩 움직이게 하고, 값이 줄다가 늘어나기 시작하는 자리에서 멈추게 한다. ▶ 버튼은 Desmos의 재생 버튼처럼 4.0부터 5.8까지 자동으로 움직인다. 회색 점(지나온 값)이 4-3-2의 포물선 위에 찍힌다는 것을 보여 준다. 연한 곡선은 L(a)의 실제 그래프로, 4-3-2와 이어진다. 회수: 4-3-2에서는 꼭짓점을 계산으로 찾았고, 오늘은 탐색으로 찾는다.</aside>
+  </section>
+
+  <!-- 8. 더 깊이 — 값의 변화 표 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 어디가 바닥인가</div>
+    <h2>줄어들던 값이 늘기 시작하는 곳이 바닥이다</h2>
+
+    <div class="row" style="gap: var(--lm-space-5); margin-top: var(--lm-space-2);">
+        <table class="errtbl sm vt"><tr><th>\(a\)</th><th>손실함수의 값</th><th>바로 위 칸보다</th></tr><tr><td>4.0</td><td class="num">15.6304</td><td class="num pos"></td></tr><tr><td>4.1</td><td class="num">12.258266125</td><td class="num neg">−3.372133875</td></tr><tr><td>4.2</td><td class="num">9.4182245</td><td class="num neg">−2.840041625</td></tr><tr><td>4.3</td><td class="num">7.110275125</td><td class="num neg">−2.307949375</td></tr><tr><td>4.4</td><td class="num">5.334418</td><td class="num neg">−1.775857125</td></tr><tr><td>4.5</td><td class="num">4.090653125</td><td class="num neg">−1.243764875</td></tr><tr><td>4.6</td><td class="num">3.3789805</td><td class="num neg">−0.711672625</td></tr><tr class="best"><td>4.7</td><td class="num">3.199400125</td><td class="num neg">−0.179580375</td></tr><tr><td>4.8</td><td class="num">3.551912</td><td class="num pos">+0.352511875</td></tr><tr><td>4.9</td><td class="num">4.436516125</td><td class="num pos">+0.884604125</td></tr></table>
+        <table class="errtbl sm vt"><tr><th>\(a\)</th><th>손실함수의 값</th><th>바로 위 칸보다</th></tr><tr><td>5.0</td><td class="num">5.8532125</td><td class="num pos">+1.416696375</td></tr><tr><td>5.1</td><td class="num">7.802001125</td><td class="num pos">+1.948788625</td></tr><tr><td>5.2</td><td class="num">10.282882</td><td class="num pos">+2.480880875</td></tr><tr><td>5.3</td><td class="num">13.295855125</td><td class="num pos">+3.012973125</td></tr><tr><td>5.4</td><td class="num">16.8409205</td><td class="num pos">+3.545065375</td></tr><tr><td>5.5</td><td class="num">20.918078125</td><td class="num pos">+4.077157625</td></tr><tr><td>5.6</td><td class="num">25.527328</td><td class="num pos">+4.609249875</td></tr><tr><td>5.7</td><td class="num">30.668670125</td><td class="num pos">+5.141342125</td></tr><tr><td>5.8</td><td class="num">36.3421045</td><td class="num pos">+5.673434375</td></tr></table>
+      <div class="grow">
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          ① <b class="kw-danger">4.7까지</b>는 바로 위 칸보다 <b>작아지고</b>(−), <b class="kw-info">4.8부터</b>는 <b>커진다</b>(+). 부호가 바뀌는 곳이 바닥이다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          ② 줄어드는 양이 \(3.37\to2.84\to\cdots\to0.18\)로 <b>점점 작아진다</b>. 바닥에 가까울수록 그래프가 평평해지기 때문이다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          ③ 그런데 \(0.1\) 간격으로만 보았다. 진짜 바닥은 <b>4.6과 4.8 사이 어딘가</b>이고, 4.7은 그중 <b>가장 가까운 칸</b>이다.
+          <span class="cap-sm" style="display: block;">4-3-2 「더 깊이」의 식 \(a=\dfrac{\sum x_iy_i}{\sum x_i^2}\)로 계산하면 \(a\approx4.68\)</span>
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 3</span>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 표의 값은 a를 0.1씩 바꾼 손실함수의 값 19개 전부이며 python Fraction으로 계산한 정확한 값이다(4.0, 4.7, 5.4는 교과서 값과 같다). '바로 위 칸보다'는 앞 칸과의 차이다. ① 부호가 −에서 +로 바뀌는 곳(4.7과 4.8 사이)이 바닥이다. ② 차이가 매번 약 0.53씩 일정하게 줄어든다(이차함수라서 그렇다. 학생에게는 '평평해진다'까지만). ③ 0.1 간격 탐색은 근삿값이다. 4-3-2 「더 깊이」의 식으로 계산하면 a=Σxy/Σx²≈4.68375, 이때 손실함수의 값 ≈3.19237로 4.7일 때(3.1994)보다 조금 더 작다. 간격을 0.01로 줄이면 더 가까워지지만 계산 횟수가 10배가 된다. 교과서 149쪽 방주와 같은 메시지다(149쪽 창의 Up 자체는 쓰지 않는다). 다음 단원으로 넘기는 질문: "칸을 하나하나 다 재 보지 않고, 어느 쪽으로 얼마나 가야 할지 알 수 있다면?"</aside>
+  </section>
+
+  <!-- 9. 확인 -->
+  <section class="tight" data-prevent-swipe>
+    <div class="chapter-tag">확인 활동 · 교과서 139쪽 확인</div>
+    <h2>운동 시간과 칼로리 소모량</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;">다음은 운동 시간 \(x\)분에 대한 칼로리 소모량 \(y\) kcal를 조사한 데이터이다. 위와 같은 방법으로 손실함수의 값의 변화를 관찰해 보자.</p>
+    <table class="errtbl wide-tbl" style="margin-top: var(--lm-space-2);">
+      <tr><th>운동 시간(분)</th><td>10</td><td>15</td><td>20</td><td>25</td><td>30</td><td>35</td><td>40</td><td>45</td><td>50</td><td>55</td><td>60</td></tr>
+      <tr><th>칼로리 소모량(kcal)</th><td>82</td><td>124</td><td>158</td><td>215</td><td>241</td><td>292</td><td>315</td><td>358</td><td>409</td><td>438</td><td>481</td></tr>
+    </table>
+    <div class="ctrl" data-prevent-swipe>
+      <div class="param-slider-group"><label for="sC">a (간격 0.1)</label>
+        <input type="range" id="sC" min="70" max="83" step="1" value="70"><span class="val-display" id="vC">7.0</span></div>
+      <div class="readout">mean((e₁)²) = <span class="big" id="calMean"></span></div>
+    </div>
+    <p class="cap-sm"><span class="ex-badge">예시 범위</span> 슬라이더 범위 \(7.0\le a\le8.3\)은 정답및풀이의 예시 설정이다(교과서는 범위를 정해 주지 않는다).</p>
+    <ul class="qlist">
+      <li><b>답 확인</b> 손실함수의 값이 최소가 되는 \(a\)와 그때의 값은? (먼저 슬라이더로 찾은 뒤 누른다)
+        <div class="ans"><span class="ex-badge">예시 답 · 정답및풀이</span> \(a\)의 값의 범위를 \(7.0\le a\le8.3\)으로, 간격을 \(0.1\)로 설정하면 <b>\(a=8.1\)</b>일 때 손실함수의 값이 <b>43.2954545455</b>로 최소가 됨을 확인할 수 있다.</div></li>
+    </ul>
+    <aside class="notes">교과서 139쪽 확인. 교과서에는 답이 없고, 범위 7.0≤a≤8.3과 답 a=8.1, 값 43.2954545455는 정답및풀이(190쪽)의 예시다. 그래서 화면에 '예시'로 표시했다. 슬라이더 값은 Desmos처럼 유효숫자 12자리로 표시한다(데이터가 11개라 11로 나누면 끝나지 않는 소수가 된다). 범위 7.0~8.3을 어떻게 정했을지 학생에게 묻는다: 점 (60, 481)을 보면 481÷60≈8.0, 대략 8 근처에서 찾으면 된다. 교사 참고(화면에 없음): 실제 최솟점은 a≈8.060, 그때 값 ≈40.946이다. 0.1 간격으로는 8.1이 가장 가까운 칸이다. 앞 장 「더 깊이」와 같은 이야기다. 8.0일 때 46.27…, 8.2일 때 69.81…로 8.1 양쪽이 모두 크다.</aside>
+  </section>
+
+  <!-- 10. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>기울기 \(a\)를 \(0.1\)씩 바꿔 보면 손실함수가 가장 작아지는 자리가 보인다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">합금 데이터 (138~139쪽)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(a=4.7\)일 때<br>3.199400125로 최소</div>
+      </div>
+      <div class="side">
+        <div class="where">탐색의 한계</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">간격이 \(0.1\)이면 근삿값<br>촘촘히 하면 계산이 늘어난다</div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-small);">
+      다음 시간 예고 — 꼭짓점 공식이 없으면? 미분으로 내려간다. → <b>4-4 경사하강법</b>
+    </div>
+    <aside class="notes">오늘 한 줄을 따라 말하게 한다. 4-3 손실함수 절을 마무리한다: 오차를 제곱해 평균 낸 손실함수(4-3-1) → 꼭짓점이 최적 추세선(4-3-2) → 이상점과 절대 손실함수(4-3-3) → 도구로 탐색(4-3-4). 예고: 4-3-2에서는 L(a)가 이차함수라 완전제곱식(꼭짓점 공식)으로 최솟값을 찾았다. 인공지능이 쓰는 손실함수는 훨씬 복잡해서 꼭짓점 공식이 없다. 오늘처럼 칸을 하나하나 다 재 보는 것도 너무 오래 걸린다. 그래서 '지금 서 있는 자리에서 어느 쪽이 내리막인지'를 알려 주는 도구, 미분계수를 배운다(4-4-1, 140쪽). 준비: 4-3-2의 포물선 그림을 다시 보고 오게 한다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 좌표평면 그리기 — SVG에는 도형과 눈금 숫자만 넣는다(수식은 .ov HTML 덧씌우기).
+     data-x, data-y : "최소,최대,눈금간격"   data-pts : "x,y;x,y;…"
+     data-lines : "기울기,색클래스;…" (원점을 지나는 직선 f(x)=ax)
+     data-quad : "c2,c1,c0" (곡선 y=c2·x²+c1·x+c0)   data-dots : "x,y;…" 강조 점
+     data-dash : "x1,y1,x2,y2;…" 점선 안내선   data-xlab/data-ylab : 눈금 숫자 간격(기본=격자 간격)
+     data-bare : 눈금·격자 없이 화살표 축만(개념도)   data-hl : 강조할 점 번호 */
+  (function () {
+    const NS = 'http://www.w3.org/2000/svg';
+    function mk(tag, attrs, parent) {
+      const e = document.createElementNS(NS, tag);
+      Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k]));
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+    function nums(s) { return s.split(',').map(Number); }
+    function clean(v) { return String(Number(v.toFixed(6))); }
+    let uid = 0;
+
+    function build(el) {
+      const W = Number(el.dataset.w || 800), H = Number(el.dataset.h || 480);
+      const [x0, x1, xs] = nums(el.dataset.x), [y0, y1, ys] = nums(el.dataset.y);
+      const xl = Number(el.dataset.xlab || xs), yl = Number(el.dataset.ylab || ys);
+      const bare = !!el.dataset.bare;
+      const L = bare ? 24 : 76, R = 20, T = 20, B = bare ? 24 : 44;
+      const sx = x => L + (x - x0) / (x1 - x0) * (W - L - R);
+      const sy = y => T + (y1 - y) / (y1 - y0) * (H - T - B);
+      el.style.width = W + 'px';
+      const svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMid meet' });
+      el.insertBefore(svg, el.firstChild);
+      const id = 'plot' + (++uid);
+      const cp = mk('clipPath', { id: id }, mk('defs', {}, svg));
+      mk('rect', { x: L, y: T, width: W - L - R, height: H - T - B }, cp);
+
+      const g = mk('g', { class: 'grid' }, svg), tk = mk('g', {}, svg);
+      const near = (v, s) => Math.abs(v / s - Math.round(v / s)) < 1e-6;
+      if (!bare) for (let i = 0, n = Math.round((y1 - y0) / ys); i <= n; i++) {
+        const v = y0 + i * ys;
+        mk('line', { x1: L, x2: W - R, y1: sy(v), y2: sy(v) }, g);
+        if (near(v - y0, yl)) mk('text', { x: L - 12, y: sy(v) + 8, 'text-anchor': 'end', class: 'tick' }, tk).textContent = clean(v);
+      }
+      if (!bare) for (let i = 0, n = Math.round((x1 - x0) / xs); i <= n; i++) {
+        const v = x0 + i * xs;
+        mk('line', { x1: sx(v), x2: sx(v), y1: T, y2: H - B }, g);
+        if (near(v - x0, xl)) mk('text', { x: sx(v), y: H - B + 30, 'text-anchor': 'middle', class: 'tick' }, tk).textContent = clean(v);
+      }
+      const ax0 = (x0 <= 0 && x1 >= 0) ? 0 : x0, ay0 = (y0 <= 0 && y1 >= 0) ? 0 : y0;
+      const ax = mk('g', { class: 'axis' }, svg);
+      mk('line', { x1: L, x2: W - R, y1: sy(ay0), y2: sy(ay0) }, ax);
+      mk('line', { x1: sx(ax0), x2: sx(ax0), y1: T, y2: H - B }, ax);
+      if (bare) {
+        mk('path', { d: 'M' + (W - R) + ' ' + sy(ay0) + ' l-16 -8 v16 z' }, ax);
+        mk('path', { d: 'M' + sx(ax0) + ' ' + T + ' l-8 16 h16 z' }, ax);
+      }
+
+      const plot = mk('g', { 'clip-path': 'url(#' + id + ')' }, svg);
+      const c = { svg: svg, sx: sx, sy: sy, x0: x0, x1: x1, y0: y0, y1: y1, plot: plot, mk: mk };
+      c.under = mk('g', {}, plot);
+      if (el.dataset.dash) {
+        const gd = mk('g', { class: 'dash' }, plot);
+        el.dataset.dash.split(';').forEach(s => {
+          const [a, b, p, q] = nums(s);
+          mk('line', { x1: sx(a), y1: sy(b), x2: sx(p), y2: sy(q) }, gd);
+        });
+      }
+      if (el.dataset.lines) {
+        el.dataset.lines.split(';').forEach(s => {
+          const [a, cls] = s.split(',');
+          const k = Number(a);
+          mk('line', { class: 'ln ' + cls, x1: sx(x0), y1: sy(k * x0), x2: sx(x1), y2: sy(k * x1) }, plot);
+        });
+      }
+      if (el.dataset.quad) {
+        const [p2, p1, p0] = nums(el.dataset.quad);
+        let d = '';
+        for (let i = 0; i <= 200; i++) {
+          const x = x0 + (x1 - x0) * i / 200;
+          d += (i ? 'L' : 'M') + sx(x).toFixed(1) + ' ' + sy(p2 * x * x + p1 * x + p0).toFixed(1);
+        }
+        c.curve = mk('path', { class: 'curve', d: d }, plot);
+      }
+      c.mid = mk('g', {}, plot);
+      c.pts = [];
+      const hl = el.dataset.hl ? nums(el.dataset.hl) : [];
+      if (el.dataset.pts) {
+        el.dataset.pts.split(';').forEach((s, i) => {
+          const p = nums(s);
+          c.pts.push(mk('circle', { class: 'pt' + (hl.indexOf(i) >= 0 ? ' hl' : ''), cx: sx(p[0]), cy: sy(p[1]), r: Number(el.dataset.r || 10), 'data-i': i }, plot));
+        });
+      }
+      if (el.dataset.dots) {
+        el.dataset.dots.split(';').forEach(s => {
+          const p = nums(s);
+          mk('circle', { class: 'dot', cx: sx(p[0]), cy: sy(p[1]), r: 11 }, plot);
+        });
+      }
+      c.top = mk('g', {}, plot);
+      el.querySelectorAll('.ov[data-at]').forEach(o => {
+        const [x, y] = nums(o.dataset.at);
+        o.style.left = (sx(x) / W * 100) + '%';
+        o.style.top = (sy(y) / H * 100) + '%';
+      });
+      el._c = c;
+    }
+    document.querySelectorAll('.chart[data-x]').forEach(build);
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 · 장 단위 토글 버튼 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+    document.querySelectorAll('[data-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const on = btn.closest('section').classList.toggle(btn.dataset.toggle);
+        btn.classList.toggle('on', on);
+      });
+    });
+  })();
+</script>
+
+<script>
+  /* 공학 도구 재현 — 값은 정수로 계산한다.
+     합금: x, y는 100배(정수), a는 10배(k) → 예측값·오차는 1000배 정수, 오차의 제곱의 합 ÷ 8 ÷ 10⁶
+     칼로리: x, y는 정수, a는 10배(k) → 오차는 10배 정수, 오차의 제곱의 합 ÷ 11 ÷ 100 (Desmos처럼 유효숫자 12자리) */
+  (function () {
+    const MINUS = '−';
+    const fmt3 = v => String(Number((v / 1000).toFixed(3))).replace('-', MINUS);
+    const sig12 = v => String(Number(v.toPrecision(12)));
+    const X = [105, 211, 296, 397, 523, 602, 724, 817], Y = [522, 765, 1242, 1891, 2165, 2944, 3286, 4101];
+    function alloy(k) {
+      let sum = 0;
+      const rows = X.map((x, i) => { const p = k * x, e = 10 * Y[i] - p; sum += e * e; return [p, e]; });
+      return { rows: rows, mean: sum / 8e6 };
+    }
+    window.alloyLoss = k => alloy(k).mean;
+
+    const el = document.getElementById('toolChart');
+    const s = document.getElementById('sA4');
+    if (el && el._c && s) {
+      const c = el._c, mk = c.mk;
+      const seenG = mk('g', {}, c.mid), drop = mk('line', { class: 'dash' }, c.mid);
+      const dot = mk('circle', { class: 'cur', r: 12 }, mk('g', {}, c.svg));
+      const trs = Array.from(document.querySelectorAll('#toolTbl tr')).slice(1);
+      const seen = {};
+      function update() {
+        const k = Number(s.value), a = k / 10, r = alloy(k);
+        r.rows.forEach((v, i) => { trs[i].children[2].textContent = fmt3(v[0]); trs[i].children[3].textContent = fmt3(v[1]); });
+        document.getElementById('toolMean').textContent = sig12(r.mean);
+        document.getElementById('vA4').textContent = a.toFixed(1);
+        if (!seen[k]) { seen[k] = 1; mk('circle', { class: 'seen', r: 7, cx: c.sx(a), cy: c.sy(r.mean) }, seenG); }
+        dot.setAttribute('cx', c.sx(a)); dot.setAttribute('cy', c.sy(r.mean));
+        drop.setAttribute('x1', c.sx(a)); drop.setAttribute('x2', c.sx(a));
+        drop.setAttribute('y1', c.sy(0)); drop.setAttribute('y2', c.sy(r.mean));
+      }
+      s.addEventListener('input', update);
+      let timer = null;
+      document.getElementById('toolPlay').addEventListener('click', () => {
+        if (timer) return;
+        s.value = 40; update();
+        timer = setInterval(() => {
+          if (Number(s.value) >= 58) { clearInterval(timer); timer = null; return; }
+          s.value = Number(s.value) + 1; update();
+        }, 450);
+      });
+      document.getElementById('toolClear').addEventListener('click', () => {
+        Object.keys(seen).forEach(k => delete seen[k]); seenG.innerHTML = ''; update();
+      });
+      update();
+    }
+
+    const CX = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60], CY = [82, 124, 158, 215, 241, 292, 315, 358, 409, 438, 481];
+    const sc = document.getElementById('sC');
+    window.calLoss = k => { let sum = 0; CX.forEach((x, i) => { const e = 10 * CY[i] - k * x; sum += e * e; }); return sig12(sum / 1100); };
+    if (sc) {
+      const upd = () => {
+        document.getElementById('vC').textContent = (Number(sc.value) / 10).toFixed(1);
+        document.getElementById('calMean').textContent = window.calLoss(Number(sc.value));
+      };
+      sc.addEventListener('input', upd);
+      upd();
+    }
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오차의 제곱의 평균 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+
+    /* ── 좌표평면 (JS가 data-* 로 SVG를 만든다. 수식 라벨은 .ov HTML 덧씌우기) ── */
+    .chart { position: relative; flex: none; }
+    .chart svg { display: block; width: 100%; height: auto; overflow: hidden; }
+    .chart .grid line { stroke: var(--lm-rule); stroke-width: 1.5; }
+    .chart .axis line { stroke: var(--lm-ink-3); stroke-width: 2.5; }
+    .chart .tick { fill: var(--lm-ink-3); font-size: 24px; font-family: var(--lm-font-sans); }
+    .chart .pt { fill: var(--lm-ink-2); stroke: var(--lm-page); stroke-width: 2; }
+    .chart .ln { stroke-width: 4; }
+    .chart .ln.c-info { stroke: var(--lm-info); }
+    .chart .ln.c-success { stroke: var(--lm-success); }
+    .chart .ln.c-danger { stroke: var(--lm-danger); }
+    .chart .ln.c-accent { stroke: var(--lm-accent); }
+    .chart .err { stroke-width: 5; }
+    .chart .err.pos { stroke: var(--lm-info); }
+    .chart .err.neg { stroke: var(--lm-danger); }
+    .chart .sq { fill: var(--lm-warning-tint); stroke: var(--lm-warning); stroke-width: 2; opacity: 0.75; }
+    .chart .sq.big { fill: var(--lm-danger-tint); stroke: var(--lm-danger); }
+    .chart .pt.drag { fill: var(--lm-accent); cursor: grab; }
+    .chart .pt.drag.on { stroke: var(--lm-ink); stroke-width: 4; }
+    .chart .ov { position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+                 font-size: var(--lm-slide-caption); color: var(--lm-ink-2); line-height: 1.2; }
+    .chart .ov.r { transform: translate(8px, -50%); }
+    .chart .ov.l { transform: translate(calc(-100% - 8px), -50%); }
+    .chart .ov.a { transform: translate(-50%, calc(-100% - 8px)); }
+    .chart .ov.b { transform: translate(-50%, 8px); }
+    .chart .ov.k-info { color: var(--lm-info); font-weight: 700; }
+    .chart .ov.k-success { color: var(--lm-success); font-weight: 700; }
+    .chart .ov.k-danger { color: var(--lm-danger); font-weight: 700; }
+    .chart .ov.k-accent { color: var(--lm-accent); font-weight: 700; }
+    .chart.drag-area svg { touch-action: none; }
+    .axis-cap { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); text-align: center;
+                margin-top: var(--lm-space-1); }
+
+    .row { display: flex; gap: var(--lm-space-6); align-items: flex-start; margin-top: var(--lm-space-3); }
+    .row > .grow { flex: 1; min-width: 0; }
+
+    .datatbl { border-collapse: collapse; font-size: var(--lm-slide-small); }
+    .datatbl th, .datatbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                               padding: 2px var(--lm-space-4); text-align: center; }
+    .datatbl th { background: var(--lm-paper-tint); font-weight: 700; }
+
+    .errtbl { border-collapse: collapse; font-size: var(--lm-slide-small); flex: none; }
+    .errtbl caption { font-size: var(--lm-slide-small); font-weight: 700; color: var(--lm-ink-2);
+                      padding-bottom: var(--lm-space-1); }
+    .errtbl th, .errtbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: 2px var(--lm-space-3); text-align: center; }
+    .errtbl th { background: var(--lm-paper-tint); font-weight: 700; font-size: var(--lm-slide-caption); }
+    .errtbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .errtbl td.small { box-shadow: inset 0 0 0 3px var(--lm-success); font-weight: 700; }
+    .errtbl.sm { font-size: var(--lm-slide-caption); }
+    .errtbl.sm td { padding: 0 var(--lm-space-3); }
+    section:not(.show-small) .errtbl.cmp td.small { box-shadow: none; font-weight: 400; }
+
+    .legend-line { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); margin-top: var(--lm-space-1); }
+    .src-badge { display: inline-block; background: var(--lm-ink-2); color: var(--lm-paper);
+                 font-weight: 700; padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .anim-btn.on { outline: 3px solid var(--lm-info); }
+
+    /* ── 4-3-1 전용 ── */
+    .sqdemo { display: flex; gap: var(--lm-space-7); align-items: flex-end; justify-content: center;
+              margin-top: var(--lm-space-3); }
+    .sqdemo .grp { text-align: center; font-size: var(--lm-slide-caption); color: var(--lm-ink-2); }
+    .sqdemo .boxes { display: flex; gap: var(--lm-space-3); align-items: flex-end; justify-content: center;
+                     min-height: 164px; }
+    .sqdemo .bx { background: var(--lm-warning-tint); border: 2px solid var(--lm-warning); }
+    .sqdemo .bx.big { background: var(--lm-danger-tint); border-color: var(--lm-danger); }
+    .sqdemo .bx.zero { width: 6px; height: 6px; background: var(--lm-ink-3); border: none; border-radius: 50%; }
+    .readout { border: var(--lm-border-thin) solid var(--lm-accent);
+               border-radius: var(--lm-radius-md); background: var(--lm-page);
+               padding: var(--lm-space-2) var(--lm-space-4); font-size: var(--lm-slide-small);
+               margin-top: var(--lm-space-2); }
+    .readout .big { color: var(--lm-danger); font-weight: 700; font-size: var(--lm-slide-body); }
+    .ctrl-btns { display: flex; gap: var(--lm-space-3); flex-wrap: wrap; }
+    .ctrl-btns .anim-btn.sel { outline: 3px solid var(--lm-accent); font-weight: 700; }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-3 손실함수 · 1차시</div>
+    <h1>오차의 제곱의 평균</h1>
+    <p class="slide-sub">오차를 제곱해 평균 내면 추세선마다 점수가 하나씩 붙는다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 132~135쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄이다. 오차를 제곱해 평균 내면 추세선마다 점수가 하나씩 붙고, 그 점수가 작을수록 좋은 추세선이다. 그 점수에 '손실함수'라는 이름을 붙이는 것까지가 오늘이다. 오늘부터 4-4까지는 원점을 지나는 추세선 f(x)=ax만 다룬다(성취기준 해설: y=ax 형태의 추세선에 대한 일변수 손실함수만). 「더 깊이」 장과 보조 활동은 교과서 밖 보강이며 화면에 그렇게 표시해 두었다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>오차의 합으로는 판단할 수 없다 → 부호를 없애고 모으는 방법이 필요하다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">오차 (교과서 131쪽)</div>
+        <div class="what">\((\text{오차})=y-f(x)\)</div>
+      </div>
+      <div class="side">
+        <div class="where"><span class="aux-badge">보조 예시</span>두 점의 오차 \(-3\)과 \(+3\)</div>
+        <div class="what">합 \(=0\) — 그런데 나쁜 직선</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 예고 — <b>“한 데이터에 추세선을 여러 개 그려 보면 어느 것이 가장 좋을까? 오차를 제곱해 평균 내면 추세선마다 점수가 하나씩 붙는다.”</b>
+    </p>
+    <p class="cap-sm">오늘부터는 원점을 지나는 추세선 \(f(x)=ax\) 꼴만 다룬다.</p>
+    <aside class="notes">지난 시간(4-2-2) 「더 깊이」의 마지막 문장과 오늘 한 줄의 예고를 함께 회수한다. 학생에게 묻는다: "오차 −3과 +3을 더하면? 0. 그럼 이 직선은 완벽한가?" 아니다. 지난 시간 끝에서 "부호를 없애려면?"이라고 물었을 때 나온 답(절댓값, 제곱)을 다시 떠올리게 한다. 오늘 교과서는 그중 '제곱'을 택한다. 오차의 정의(실젯값−예측값)도 한 번 소리 내어 읽는다. 원점을 지나는 직선만 다룬다는 약속을 다시 말한다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>추세선의 <span class="kw">오차의 제곱의 평균</span>을 구하여 어느 추세선이 예측에 더 적합한지 판단할 수 있다.</span></li>
+      <li><span class="num">2</span><span>원점을 지나는 추세선 \(f(x)=ax\)에 대한 <span class="kw">손실함수</span> \(L(a)\)를 구할 수 있다.</span></li>
+      <li><span class="num">3</span><span>오차를 <span class="kw">제곱</span>하는 까닭을 설명할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">오차를 제곱해 평균 내면 추세선마다 점수가 하나 붙고, 작을수록 좋은 추세선이다.</span>
+    </div>
+    <aside class="notes">목표 1·2는 교과서 학습 목표("손실함수를 이해하고 최적화된 추세선을 찾을 수 있다")의 앞부분이다. 최적화된 추세선 찾기는 다음 시간이다. 목표 3은 교과서 밖 「더 깊이」로 보강한다. 교과서는 "오차의 제곱의 평균을 구하여 비교하는 방법이 가장 많이 사용"된다고만 쓰고, 왜 제곱인지는 말하지 않는다(지도서 183쪽 ④에 교사용 설명이 있다).</aside>
+  </section>
+
+  <!-- 4. 생각 열기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 132쪽 · 생각 열기</div>
+    <h2>네 추세선 중 예측에 가장 적합한 것은?</h2>
+
+    <div class="row">
+      <div class="grow">
+        <p class="prob-stmt sm" style="margin-top: 0;">어느 농작물 수확량 \(x\) kg에 대한 매출액 \(y\)만 원을 조사한 데이터이다.</p>
+        <div class="row" style="margin-top: var(--lm-space-2); gap: var(--lm-space-5);">
+          <table class="datatbl">
+            <tr><th>수확량(kg)</th><th>매출액(만 원)</th></tr>
+            <tr><td>64</td><td>78</td></tr>
+            <tr><td>67</td><td>56</td></tr>
+            <tr><td>83</td><td>82</td></tr>
+            <tr><td>88</td><td>99</td></tr>
+            <tr><td>98</td><td>84</td></tr>
+          </table>
+          <div style="font-size: var(--lm-slide-small); line-height: 1.7;">
+            원점을 지나는 추세선<br>
+            <span class="kw-info">\(A:\ f_A(x)=1.5x\)</span><br>
+            <span class="kw-success">\(B:\ f_B(x)=1.1x\)</span><br>
+            <span class="kw-danger">\(C:\ f_C(x)=0.9x\)</span><br>
+            <span class="kw">\(D:\ f_D(x)=0.7x\)</span>
+          </div>
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(A\)는 \(B\)보다 매출액을 더 크게 예측하며 오차의 크기도 더 크다 → <b>\(B\)가 \(A\)보다</b> 적합하다. 마찬가지로 <b>\(C\)가 \(D\)보다</b> 적합하다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          그러나 <b>\(B\)와 \(C\)</b> 중에서 어느 것이 더 정확한지 산점도와 추세선만 보고 판단하는 것은 <b>쉽지 않다</b>.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 2</span>
+        </div>
+      </div>
+      <div>
+        <div class="chart" data-w="760" data-h="620" data-x="0,110,20" data-y="0,120,20"
+             data-pts="64,78;67,56;83,82;88,99;98,84"
+             data-lines="1.5,c-info;1.1,c-success;0.9,c-danger;0.7,c-accent">
+          <div class="ov r k-info" data-at="76,105">\(A\)</div>
+          <div class="ov r k-success" data-at="101,103">\(B\)</div>
+          <div class="ov r k-danger" data-at="104,86">\(C\)</div>
+          <div class="ov r k-accent" data-at="104,66">\(D\)</div>
+        </div>
+        <div class="axis-cap">가로: 수확량(kg) &nbsp;|&nbsp; 세로: 매출액(만 원)</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 132쪽 생각 열기. 네 직선 모두 원점을 지난다는 점을 먼저 짚는다(f(x)=ax 꼴). 학생에게 손을 들게 한다: "가장 좋은 직선은?" A와 D는 금방 탈락한다. A는 모든 점보다 위에 있어 늘 크게 예측하고, D는 거의 모든 점보다 아래에 있다. 문제는 B와 C다. 반이 갈릴 것이다. 그 갈림이 바로 오늘의 질문이다: 눈으로 못 가르는 것을 숫자로 가르는 방법. 지난 시간 4-2-1 보조 활동에서 "어느 직선이 가장 잘 나타내나?"에 학생마다 다른 직선을 골랐던 것과 같은 상황이다.</aside>
+  </section>
+
+  <!-- 5. B, C 표 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 133쪽</div>
+    <h2>추세선 \(B\)와 \(C\)의 예측값, 오차, 오차의 크기</h2>
+
+    <div class="row" style="gap: var(--lm-space-6); justify-content: center;">
+      <table class="errtbl cmp">
+        <caption>추세선 \(B:\ f_B(x)=1.1x\)</caption>
+        <tr><th>수확량(kg)</th><th>매출액(만 원)</th><th>예측값(만 원)</th><th>오차(만 원)</th><th>오차의 크기</th></tr>
+        <tr><td>64</td><td>78</td><td class="num">70.4</td><td class="num">7.6</td><td class="num small">7.6</td></tr>
+        <tr><td>67</td><td>56</td><td class="num">73.7</td><td class="num">−17.7</td><td class="num">17.7</td></tr>
+        <tr><td>83</td><td>82</td><td class="num">91.3</td><td class="num">−9.3</td><td class="num">9.3</td></tr>
+        <tr><td>88</td><td>99</td><td class="num">96.8</td><td class="num">2.2</td><td class="num small">2.2</td></tr>
+        <tr><td>98</td><td>84</td><td class="num">107.8</td><td class="num">−23.8</td><td class="num">23.8</td></tr>
+      </table>
+      <table class="errtbl cmp">
+        <caption>추세선 \(C:\ f_C(x)=0.9x\)</caption>
+        <tr><th>수확량(kg)</th><th>매출액(만 원)</th><th>예측값(만 원)</th><th>오차(만 원)</th><th>오차의 크기</th></tr>
+        <tr><td>64</td><td>78</td><td class="num">57.6</td><td class="num">20.4</td><td class="num">20.4</td></tr>
+        <tr><td>67</td><td>56</td><td class="num">60.3</td><td class="num">−4.3</td><td class="num small">4.3</td></tr>
+        <tr><td>83</td><td>82</td><td class="num">74.7</td><td class="num">7.3</td><td class="num small">7.3</td></tr>
+        <tr><td>88</td><td>99</td><td class="num">79.2</td><td class="num">19.8</td><td class="num">19.8</td></tr>
+        <tr><td>98</td><td>84</td><td class="num">88.2</td><td class="num">−4.2</td><td class="num small">4.2</td></tr>
+      </table>
+    </div>
+    <button class="anim-btn" data-expand data-toggle="show-small" style="margin-top: var(--lm-space-3);">오차의 크기가 더 작은 쪽 표시</button>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      오차의 크기가 수확량이 \(64\) kg, \(88\) kg일 때는 <b>추세선 \(B\)</b>에서 더 작지만, \(67\) kg, \(83\) kg, \(98\) kg일 때는 <b>추세선 \(C\)</b>에서 더 작다.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      따라서 단순히 추세선의 오차의 크기를 비교하는 것으로는 \(B\)와 \(C\) 중에서 어느 것이 예측에 더 적합한지 <b>판단하기 어렵다</b>.
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">교과서 133쪽 두 표. 값은 지면 그대로다. 64 kg 행 하나만 함께 계산한다: 1.1×64=70.4, 78−70.4=7.6 / 0.9×64=57.6, 78−57.6=20.4. 버튼을 누르면 각 행에서 오차의 크기가 더 작은 쪽에 초록 테가 생긴다. B가 이긴 행이 2개, C가 이긴 행이 3개다. "그럼 C가 3대 2로 이긴 것 아니냐?"고 묻는 학생이 있을 수 있다. 되묻는다: "B가 이긴 두 행에서는 차이가 12.8, 17.6으로 크고, C가 이긴 행에서는 차이가 13.4, 2.0, 19.6이다. 몇 번 이겼는지만 세는 게 공정할까?" 행별 승부로는 결론을 못 낸다는 것이 교과서의 결론이다. 그래서 다섯 개의 오차를 '한 숫자'로 모아야 한다.</aside>
+  </section>
+
+  <!-- 6. 오차의 제곱의 평균 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 133쪽</div>
+    <h2>오차를 제곱해 평균 내어 비교한다</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;">
+      예측에 적합한 추세선을 찾는 방법은 다양하지만 <b>오차의 제곱의 평균</b>을 구하여 비교하는 방법이 가장 많이 사용되며, 이 값이 <b>더 작은</b> 추세선이 예측에 더 적합하다고 판단한다.
+    </p>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      (i) 추세선 \(B\)로 예측하는 경우, 오차의 제곱의 평균은
+      \[\frac{7.6^2+(-17.7)^2+(-9.3)^2+2.2^2+(-23.8)^2}{5}=205.764\]
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      (ii) 추세선 \(C\)로 예측하는 경우, 오차의 제곱의 평균은
+      \[\frac{20.4^2+(-4.3)^2+7.3^2+19.8^2+(-4.2)^2}{5}=179.524\]
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      따라서 추세선 \(C\)로 예측할 때 오차의 제곱의 평균이 더 작으므로, <b class="kw-danger">추세선 \(C\)가 예측에 더 적합하다</b>고 판단한다.
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 3</span>
+    </div>
+    <aside class="notes">교과서 133쪽. 계산기를 허용한다. B의 분자: 57.76+313.29+86.49+4.84+566.44=1028.82, ÷5=205.764. C의 분자: 416.16+18.49+53.29+392.04+17.64=897.62, ÷5=179.524(python 재계산 일치). 음수 오차도 제곱하면 양수가 된다는 것을 (−17.7)²에서 짚는다. 괄호를 빼먹고 −17.7²으로 계산기에 넣으면 음수가 나오는 실수가 흔하다. 5로 나누는 까닭: 점의 개수가 다른 데이터끼리도 비교할 수 있게 '한 점당 평균'으로 맞춘다. 다음 장 「더 깊이」에서 "왜 하필 제곱인가"를 짚는다.</aside>
+  </section>
+
+  <!-- 7. 더 깊이 — 왜 제곱인가 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 왜 하필 제곱인가</div>
+    <h2>제곱하면 부호가 사라지고, 큰 오차가 더 크게 보인다</h2>
+
+    <div class="row">
+      <div class="grow">
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          <b>① 부호를 없앤다.</b> 지난 시간 <span class="aux-badge">보조 예시</span> 오차 \(-3\)과 \(+3\)은 더하면 \(0\)이었다.
+          제곱하면 \((-3)^2=9,\ 3^2=9\) → 평균 \(9\). <b>서로 지우지 못한다.</b>
+          <span class="cap-sm" style="display: block;">오차의 제곱은 항상 \(0\) 이상이고, 평균이 \(0\)이면 모든 점이 추세선 위에 있다.</span>
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          <b>② 절댓값도 부호를 없앤다.</b> 그런데 제곱은 한 가지가 다르다. <span class="aux-badge">보조 예시</span> 오른쪽 두 경우에서
+          오차의 크기의 평균은 둘 다 \(2\)인데, 오차의 제곱의 평균은 \(4\)와 \(8\)이다.
+          → 제곱은 <b>크게 빗나간 점 하나</b>를 더 무겁게 친다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          <b>③ 미리 보기.</b> 제곱으로 모으면 다음 쪽(134쪽)에서 이 값이 기울기 \(a\)에 대한 <b>이차함수</b>가 된다 → 매끈한 포물선이라 가장 낮은 곳을 찾기 쉽다.
+          절댓값으로 모으는 방법은 <b>137쪽(4-3-3)</b>에서 다시 만난다.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 3</span>
+        </div>
+      </div>
+      <div style="flex: none; width: 640px;">
+        <div class="sqdemo">
+          <div class="grp">
+            <div class="boxes"><div class="bx" style="width: 80px; height: 80px;"></div><div class="bx" style="width: 80px; height: 80px;"></div></div>
+            <div style="margin-top: var(--lm-space-2);">오차 \(2,\ 2\)<br>넓이 \(4+4=8\)</div>
+          </div>
+          <div class="grp">
+            <div class="boxes"><div class="bx zero"></div><div class="bx big" style="width: 160px; height: 160px;"></div></div>
+            <div style="margin-top: var(--lm-space-2);">오차 \(0,\ 4\)<br>넓이 \(0+16=16\)</div>
+          </div>
+        </div>
+        <table class="errtbl sm" style="margin: var(--lm-space-3) auto 0;">
+          <tr><th></th><th>오차 \(2,\ 2\)</th><th>오차 \(0,\ 4\)</th></tr>
+          <tr><td>오차의 크기의 평균</td><td>\(\dfrac{2+2}{2}=2\)</td><td>\(\dfrac{0+4}{2}=2\)</td></tr>
+          <tr><td>오차의 제곱의 평균</td><td>\(\dfrac{4+4}{2}=4\)</td><td class="small">\(\dfrac{0+16}{2}=8\)</td></tr>
+        </table>
+        <div class="legend-line" style="text-align: center;"><span class="aux-badge">보조</span>오차의 제곱 = 한 변이 오차의 크기인 정사각형의 넓이</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. ①은 지난 시간 「더 깊이」의 +3/−3을 그대로 회수한다. ②가 핵심이다. 오차의 크기(절댓값)로 모으면 '2만큼 두 번 틀림'과 '한 번은 맞고 한 번은 4만큼 틀림'이 같은 점수다. 제곱으로 모으면 뒤의 경우가 두 배 나쁘다. 정사각형 그림으로 보면 한 변이 2배면 넓이는 4배다. 지도서 183쪽 ④: 제곱은 큰 오차를 더 크게 반영한다. 비유: 시험에서 한 문제를 크게 틀리는 것과 여러 문제를 조금씩 틀리는 것 중 무엇을 더 나쁘게 칠지의 선택이다. 제곱은 '크게 틀리는 것'을 훨씬 엄하게 벌한다. 이 성질은 장점이자 약점이다. 엉뚱한 점(이상점) 하나가 있으면 그 점에 끌려가는데, 그것이 4-3-3(137쪽)의 내용이다. ③은 미리 보기만 한다. '손실함수 L(a)'라는 이름은 134쪽에서 붙으므로 여기서는 아직 쓰지 않는다. 절댓값의 평균을 손으로 최소화하는 것은 성취기준 범위 밖이다.</aside>
+  </section>
+
+  <!-- 8. 더 깊이 — 보조 활동: 정사각형으로 보는 오차의 제곱 -->
+  <section class="tight" data-prevent-swipe>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 보조 활동 · 점을 끌어 보기</div>
+    <h2>오차의 제곱을 정사각형으로 보면</h2>
+
+    <div class="row" data-prevent-swipe>
+      <div>
+        <div class="chart drag-area" id="sqChart" data-w="900" data-h="660" data-x="50,110,10" data-y="20,140,20"
+             data-pts="64,78;67,56;83,82;88,99;98,84"></div>
+        <div class="axis-cap">132쪽 데이터 · 가로: 수확량(kg) · 세로: 매출액(만 원) · 점을 위아래로 끌 수 있다</div>
+      </div>
+      <div class="grow">
+        <div class="ctrl-btns">
+          <button class="anim-btn sel" data-sqline="11">추세선 \(B\)</button>
+          <button class="anim-btn" data-sqline="9">추세선 \(C\)</button>
+          <button class="anim-btn" id="sqReset">처음 데이터로</button>
+        </div>
+        <table class="errtbl sm" id="sqTbl" style="margin-top: var(--lm-space-2);">
+          <tr><th>\(x\)</th><th>\(y\)</th><th>오차</th><th>오차의 제곱</th></tr>
+          <tr><td>64</td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+          <tr><td>67</td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+          <tr><td>83</td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+          <tr><td>88</td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+          <tr><td>98</td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+        </table>
+        <div class="readout">
+          오차의 제곱의 평균<br>
+          <span id="sqSum">−</span> ÷ 5 = <span class="big" id="sqMean">−</span>
+        </div>
+        <p class="cap-sm" style="margin-top: var(--lm-space-2);">
+          <span class="aux-badge">보조</span>해 볼 것 — ① 가장 큰 정사각형의 점을 직선 쪽으로 끌면? ② 한 점을 직선에서 멀리 끌면 평균이 얼마나 커지나?
+        </p>
+      </div>
+    </div>
+    <aside class="notes">교과서 밖 보조 활동이다. 처음 데이터는 132쪽 그대로이고, 직선 B를 고르면 평균 205.764, C를 고르면 179.524가 나온다(교과서 값과 같아야 한다. 수업 전에 확인). 각 점에서 직선까지의 세로 선분이 오차이고, 그 선분을 한 변으로 하는 정사각형의 넓이가 오차의 제곱이다. 정사각형은 그래프의 세로 눈금 기준으로 그렸다(가로 눈금과 크기가 달라도 '넓이 비교'는 그대로 성립한다). 직선 B에서는 98 kg 점의 정사각형(23.8²=566.44)이 압도적으로 크다. 학생을 불러 그 점을 직선 쪽으로 끌게 하면 평균이 크게 줄어든다. 반대로 아무 점이나 직선에서 멀리 끌면 평균이 빠르게 커진다. 오차가 2배가 되면 넓이는 4배가 된다는 것을 눈으로 확인한다. 점은 세로 방향으로만 움직이고 매출액은 정수로 맞춰진다. '처음 데이터로'를 눌러 원래 값으로 되돌린다.</aside>
+  </section>
+
+  <!-- 9. 문제 1 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 133쪽 문제 1</div>
+    <h2>추세선 \(A\)와 \(D\)도 점수를 매겨 보자</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;"><b>문제 1</b> 132쪽의 생각 열기의 두 추세선 \(A\)와 \(D\)의 오차의 제곱의 평균을 구하고, 추세선 \(C\)의 오차의 제곱의 평균과 비교하시오. &nbsp;<span class="cap-sm">계산기 사용 가능</span></p>
+    <ul class="qlist">
+      <li><b>추세선 \(A:\ f_A(x)=1.5x\)</b>
+        <div class="ans">오차 \(-18.0,\ {-44.5},\ {-42.5},\ {-33.0},\ {-63.0}\)<br>
+          \(\dfrac{(-18)^2+(-44.5)^2+(-42.5)^2+(-33)^2+(-63)^2}{5}=1833.7\)</div></li>
+      <li><b>추세선 \(D:\ f_D(x)=0.7x\)</b>
+        <div class="ans">오차 \(33.2,\ 9.1,\ 23.9,\ 37.4,\ 15.4\)<br>
+          \(\dfrac{33.2^2+9.1^2+23.9^2+37.4^2+15.4^2}{5}=678.436\)</div></li>
+      <li><b>비교</b>
+        <div class="ans">\(1833.7>179.524\), \(678.436>179.524\) → 두 추세선 \(A\)와 \(D\)의 오차의 제곱의 평균은 모두 추세선 \(C\)의 오차의 제곱의 평균보다 크다.</div></li>
+    </ul>
+    <aside class="notes">교과서 133쪽 문제 1. 정답및풀이 189쪽: A 1833.7, D 678.436, 둘 다 C의 179.524보다 크다(python 재계산 일치). 예측값은 A: 96.0, 100.5, 124.5, 132.0, 147.0 / D: 44.8, 46.9, 58.1, 61.6, 68.6. A의 오차가 모두 음수인 것은 A가 모든 점보다 위에 있기 때문이고, D의 오차가 모두 양수인 것은 D가 모든 점보다 아래에 있기 때문이다(지난 시간 「더 깊이」: 오차의 부호 = 위·아래). 네 추세선의 점수를 순서대로 놓으면 C(179.524) < B(205.764) < D(678.436) < A(1833.7). 생각 열기에서 눈으로 내린 판단(B가 A보다, C가 D보다 낫다)이 숫자로도 맞는다. 교사 참고(교과서 밖, 화면에 없음): 이 데이터의 실제 최적 기울기는 약 0.990이다. C는 넷 중에서 이겼을 뿐 '가장 좋은 직선'은 아니다. 다음 시간의 질문이 바로 그것이다.</aside>
+  </section>
+
+  <!-- 10. 손실함수 정의 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 134쪽</div>
+    <h2>오차의 제곱의 평균 = 손실함수</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;">일반적으로 추세선을 이용하여 예측할 때, 오차의 제곱의 평균을 이 추세선에 대한 <b class="kw-danger">손실함수</b>(loss function)라고 한다.</p>
+    <div class="definition-box" style="font-size: var(--lm-slide-small);">
+      변량 \(x\)의 값 \(x_1,\ x_2,\ \cdots,\ x_n\)에 대응하는 변량 \(y\)의 값이 각각 \(y_1,\ y_2,\ \cdots,\ y_n\)일 때, 원점을 지나는 추세선 \(f(x)=ax\)에 대한 손실함수를 기호 \(L(a)\)로 나타내고
+      <div style="font-size: var(--lm-slide-body); margin-top: var(--lm-space-2);">
+        \[L(a)=\frac{(y_1-ax_1)^2+(y_2-ax_2)^2+\cdots+(y_n-ax_n)^2}{n}\]
+      </div>
+      과 같이 정한다.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      따라서 원점을 지나는 추세선 \(f(x)=ax\)에 대한 손실함수 \(L(a)\)는 추세선의 기울기 <b>\(a\)에 대한 이차함수</b>이며, \(L(a)\)의 값이 <b>더 작을수록</b> 추세선 \(f(x)=ax\)가 데이터의 예측에 더 적합하다.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      주의 — \(x_i,\ y_i\)는 <b>데이터라 고정</b>된 수이고, 바뀌는 것은 <b>기울기 \(a\)</b>이다. 그래서 \(L(x)\)가 아니라 \(L(a)\)이다.
+      <span class="cap-sm" style="display: block;">예: 132쪽 데이터에서 \(L(1.1)=205.764,\ L(0.9)=179.524\)</span>
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">교과서 134쪽 정의. 분자의 한 칸 (y₁−ax₁)²이 '첫 번째 점의 오차의 제곱'이라는 것을 133쪽 계산과 짝지어 읽는다. 오차는 4-2와 같은 부호로 y−ax(실젯값−예측값)이다. n으로 나누므로 합이 아니라 평균이다. 두 번째 단계는 흔한 오개념(“L은 x의 함수다”)을 바로잡는 문장으로 화면 보강이다. 데이터는 이미 정해져 있고, 우리가 고르는 것은 직선의 기울기 a뿐이다. 그래서 a를 넣으면 점수 하나가 나오는 함수다. 앞 장의 205.764와 179.524가 각각 L(1.1), L(0.9)였다. 1단원 회수: 1-1-3차시에서 "학습이란 적절한 가중치를 찾아가는 과정"이라고 했다. 추세선의 기울기 a가 바로 그 가중치이고, 손실함수는 그 가중치의 성적표다(낮을수록 좋은 성적). 이차함수라는 사실은 예제 1에서 직접 전개해 확인한다. 지도서 183쪽 ⑥: 손실함수의 값은 항상 0 이상이다.</aside>
+  </section>
+
+  <!-- 11. 예제 1 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 134쪽 · 예제 1</div>
+    <h2>배양 시간과 미생물 수</h2>
+
+    <div class="row" style="margin-top: 0;">
+      <div class="grow">
+        <div class="example-box" style="font-size: var(--lm-slide-small); margin-top: 0;">
+          오른쪽 표는 어느 미생물의 배양 시간 \(x\)분에 대한 미생물 수 \(y\)마리를 조사한 데이터이다.<br>
+          ⑴ 추세선 \(f(x)=ax\)에 대한 손실함수 \(L(a)\)를 구하시오.<br>
+          ⑵ 두 추세선 \(f(x)=x\)와 \(f(x)=2x\) 중에서 어느 것이 예측에 더 적합한지 설명하시오.
+        </div>
+      </div>
+      <table class="errtbl" style="margin-top: var(--lm-space-4);">
+        <tr><th>배양 시간<br>(분)</th><th>미생물 수<br>(마리)</th><th>예측값<br>(마리)</th><th>오차<br>(마리)</th></tr>
+        <tr><td>1</td><td>1</td><td>\(a\)</td><td>\(1-a\)</td></tr>
+        <tr><td>2</td><td>3</td><td>\(2a\)</td><td>\(3-2a\)</td></tr>
+        <tr><td>3</td><td>5</td><td>\(3a\)</td><td>\(5-3a\)</td></tr>
+      </table>
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      ⑴ 예측값 \(ax\)와 오차 \(y-ax\)를 표로 구하면(오른쪽 표의 3, 4열)
+      \[L(a)=\frac{(1-a)^2+(3-2a)^2+(5-3a)^2}{3}=\frac{14a^2-44a+35}{3}\]
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      ⑵ \(L(1)=1.6\cdots,\ L(2)=1\)이므로 \(L(2)&lt;L(1)\) &nbsp;→ 따라서 추세선 <b>\(f(x)=2x\)</b>가 예측에 더 적합하다.
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">교과서 134쪽 예제 1. 답: ⑴ L(a)=(14a²−44a+35)/3 ⑵ f(x)=2x. 표의 예측값·오차 열은 교과서 풀이의 표다. 오차 열에 a가 들어 있다는 것이 오늘의 새로움이다. 지금까지는 직선이 정해져 있었지만, 이제는 직선을 정하지 않은 채로 오차를 식으로 쓴다. 전개는 칠판에서 함께 한다: (1−a)²=1−2a+a², (3−2a)²=9−12a+4a², (5−3a)²=25−30a+9a², 더하면 14a²−44a+35. a²의 계수 14=1²+2²+3²(x값의 제곱의 합)이라는 것은 다음 시간 「더 깊이」의 복선이니 말로만 짚는다. ⑵: L(1)=(14−44+35)/3=5/3=1.6…, L(2)=(56−88+35)/3=1. 교사 참고(교과서 밖, 화면에 없음): 이 데이터의 최적 기울기는 11/7≈1.571이다. f(x)=2x는 두 후보 중에서 이겼을 뿐이다.</aside>
+  </section>
+
+  <!-- 12. 문제 2 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 135쪽 문제 2</div>
+    <h2>장난감 기차의 이동 거리</h2>
+
+    <div class="row" style="margin-top: 0;">
+      <p class="prob-stmt sm grow" style="margin-top: 0;"><b>문제 2</b> 오른쪽 표는 어느 장난감 기차가 레일 위를 움직인 시간 \(x\)초에 대한 이동 거리 \(y\) m를 조사한 데이터에서 추세선 \(f(x)=ax\)를 이용하여 이동 거리의 예측값과 오차를 나타낸 것이다.</p>
+      <table class="errtbl">
+        <tr><th>시간(초)</th><th>이동 거리(m)</th><th>예측값(m)</th><th>오차(m)</th></tr>
+        <tr><td>2</td><td>1</td><td></td><td></td></tr>
+        <tr><td></td><td>2</td><td>\(5a\)</td><td></td></tr>
+        <tr><td></td><td></td><td></td><td>\(4-9a\)</td></tr>
+      </table>
+    </div>
+    <ul class="qlist">
+      <li><b>⑴</b> 표를 완성하시오.
+        <div class="ans">
+          <table class="errtbl sm">
+            <tr><th>시간(초)</th><th>이동 거리(m)</th><th>예측값(m)</th><th>오차(m)</th></tr>
+            <tr><td>2</td><td>1</td><td>\(2a\)</td><td>\(1-2a\)</td></tr>
+            <tr><td>5</td><td>2</td><td>\(5a\)</td><td>\(2-5a\)</td></tr>
+            <tr><td>9</td><td>4</td><td>\(9a\)</td><td>\(4-9a\)</td></tr>
+          </table></div></li>
+      <li><b>⑵</b> 추세선 \(f(x)=ax\)에 대한 손실함수 \(L(a)\)를 구하시오.
+        <div class="ans">\(L(a)=\dfrac{(1-2a)^2+(2-5a)^2+(4-9a)^2}{3}=\dfrac{110a^2-96a+21}{3}\)</div></li>
+      <li><b>⑶</b> 두 추세선 \(f(x)=x\)와 \(f(x)=2x\) 중에서 어느 것이 예측에 더 적합한지 설명하시오.
+        <div class="ans">\(L(1)=11.6\cdots,\ L(2)=89.6\cdots\)이므로 \(L(1)&lt;L(2)\) → 추세선 <b>\(f(x)=x\)</b>가 예측에 더 적합하다.</div></li>
+    </ul>
+    <aside class="notes">교과서 135쪽 문제 2. 정답및풀이 189쪽: ⑴ 시간 5, 9 / 이동 거리 4 / 예측값 2a, 5a, 9a / 오차 1−2a, 2−5a, 4−9a ⑵ L(a)=(110a²−96a+21)/3 ⑶ f(x)=x(L(1)=35/3=11.6…, L(2)=269/3=89.6…, python 재계산 일치). ⑴의 빈칸 추론: 예측값 5a에서 시간이 5초, 오차 4−9a에서 시간 9초·이동 거리 4 m를 읽어 낸다. 전개: 1−4a+4a², 4−20a+25a², 16−72a+81a², 더하면 110a²−96a+21. 예제 1과 달리 이번에는 기울기가 작은 쪽(f(x)=x)이 이긴다. 교사 참고(화면에 없음): 이 데이터의 최적 기울기는 24/55≈0.436이다.</aside>
+  </section>
+
+  <!-- 13. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>오차를 제곱해 평균 내면 추세선마다 점수가 하나 붙고, 작을수록 좋은 추세선이다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">손실함수 (134쪽)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(L(a)=\dfrac{(y_1-ax_1)^2+\cdots+(y_n-ax_n)^2}{n}\)</div>
+      </div>
+      <div class="side">
+        <div class="where">비교하는 법</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(L(a)\)가 더 작은 추세선이<br>예측에 더 적합하다</div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-small);">
+      다음 시간 예고 — 두 개 중 고르기는 됐다. 그럼 <b>가장 좋은 \(a\)</b>는? \(L(a)\)는 \(a\)에 대한 이차함수이다. → <b>최적 추세선</b>
+    </div>
+    <aside class="notes">오늘 한 줄을 따라 말하게 한다. 예고: 오늘은 주어진 두 직선 중 하나를 골랐다(L(1) 대 L(2)). 다음 시간(4-3-2, 135쪽 「최적 추세선」)은 질문이 바뀐다. 모든 a 중에서 L(a)가 가장 작은 a는 무엇인가? L(a)가 a에 대한 이차함수라는 것이 열쇠다. 준비 학습: 이차함수를 p(a−q)²+r 꼴로 고쳐 최솟값을 구하는 방법(완전제곱식)을 복습해 오게 한다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 좌표평면 그리기 — SVG에는 도형과 눈금 숫자만 넣는다(수식은 .ov HTML 덧씌우기).
+     data-x, data-y : "최소,최대,눈금간격"   data-pts : "x,y;x,y;…"
+     data-lines : "기울기,색클래스;…" (원점을 지나는 직선 f(x)=ax) */
+  (function () {
+    const NS = 'http://www.w3.org/2000/svg';
+    function mk(tag, attrs, parent) {
+      const e = document.createElementNS(NS, tag);
+      Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k]));
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+    function nums(s) { return s.split(',').map(Number); }
+    function clean(v) { return String(Number(v.toFixed(6))); }
+    let uid = 0;
+
+    function build(el) {
+      const W = Number(el.dataset.w || 800), H = Number(el.dataset.h || 480);
+      const [x0, x1, xs] = nums(el.dataset.x), [y0, y1, ys] = nums(el.dataset.y);
+      const L = 72, R = 20, T = 20, B = 44;
+      const sx = x => L + (x - x0) / (x1 - x0) * (W - L - R);
+      const sy = y => T + (y1 - y) / (y1 - y0) * (H - T - B);
+      el.style.width = W + 'px';
+      const svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMid meet' });
+      el.insertBefore(svg, el.firstChild);
+      const id = 'plot' + (++uid);
+      const cp = mk('clipPath', { id: id }, mk('defs', {}, svg));
+      mk('rect', { x: L, y: T, width: W - L - R, height: H - T - B }, cp);
+
+      const g = mk('g', { class: 'grid' }, svg), tk = mk('g', {}, svg);
+      for (let i = 0, n = Math.round((y1 - y0) / ys); i <= n; i++) {
+        const v = y0 + i * ys;
+        mk('line', { x1: L, x2: W - R, y1: sy(v), y2: sy(v) }, g);
+        mk('text', { x: L - 12, y: sy(v) + 8, 'text-anchor': 'end', class: 'tick' }, tk).textContent = clean(v);
+      }
+      for (let i = 0, n = Math.round((x1 - x0) / xs); i <= n; i++) {
+        const v = x0 + i * xs;
+        mk('line', { x1: sx(v), x2: sx(v), y1: T, y2: H - B }, g);
+        mk('text', { x: sx(v), y: H - B + 30, 'text-anchor': 'middle', class: 'tick' }, tk).textContent = clean(v);
+      }
+      const ax0 = (x0 <= 0 && x1 >= 0) ? 0 : x0, ay0 = (y0 <= 0 && y1 >= 0) ? 0 : y0;
+      const ax = mk('g', { class: 'axis' }, svg);
+      mk('line', { x1: L, x2: W - R, y1: sy(ay0), y2: sy(ay0) }, ax);
+      mk('line', { x1: sx(ax0), x2: sx(ax0), y1: T, y2: H - B }, ax);
+
+      const plot = mk('g', { 'clip-path': 'url(#' + id + ')' }, svg);
+      const c = { svg: svg, sx: sx, sy: sy, x0: x0, x1: x1, y0: y0, y1: y1, plot: plot, mk: mk };
+      c.under = mk('g', {}, plot);
+      if (el.dataset.lines) {
+        el.dataset.lines.split(';').forEach(s => {
+          const [a, cls] = s.split(',');
+          const k = Number(a);
+          mk('line', { class: 'ln ' + cls, x1: sx(x0), y1: sy(k * x0), x2: sx(x1), y2: sy(k * x1) }, plot);
+        });
+      }
+      c.mid = mk('g', {}, plot);
+      c.pts = [];
+      if (el.dataset.pts) {
+        el.dataset.pts.split(';').forEach((s, i) => {
+          const p = nums(s);
+          c.pts.push(mk('circle', { class: 'pt', cx: sx(p[0]), cy: sy(p[1]), r: 10, 'data-i': i }, plot));
+        });
+      }
+      el.querySelectorAll('.ov[data-at]').forEach(o => {
+        const [x, y] = nums(o.dataset.at);
+        o.style.left = (sx(x) / W * 100) + '%';
+        o.style.top = (sy(y) / H * 100) + '%';
+      });
+      el._c = c;
+    }
+    document.querySelectorAll('.chart[data-x]').forEach(build);
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 · 장 단위 토글 버튼 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+    document.querySelectorAll('[data-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const on = btn.closest('section').classList.toggle(btn.dataset.toggle);
+        btn.classList.toggle('on', on);
+      });
+    });
+  })();
+</script>
+
+<script>
+  /* 보조 활동 — 점을 끌면 오차의 제곱(정사각형)과 평균이 바뀐다.
+     계산은 정수로 한다: 기울기는 10배(k), 오차는 10배(10y − kx)로 다뤄 부동소수 잡음을 없앤다. */
+  (function () {
+    const el = document.getElementById('sqChart');
+    if (!el || !el._c) return;
+    const c = el._c, mk = c.mk;
+    const X = [64, 67, 83, 88, 98], Y0 = [78, 56, 82, 99, 84];
+    let Y = Y0.slice(), k = 11, drag = -1;
+    const MINUS = '\u2212';
+    const fmt = v => String(v).replace('-', MINUS);
+    const line = mk('line', { class: 'ln c-success' }, c.under);
+    const sqG = mk('g', {}, c.under), errG = mk('g', {}, c.mid);
+    c.pts.forEach(p => p.classList.add('drag'));
+    const rows = Array.from(document.querySelectorAll('#sqTbl tr')).slice(1);
+
+    function draw() {
+      const a = k / 10;
+      line.setAttribute('class', 'ln ' + (k === 11 ? 'c-success' : 'c-danger'));
+      line.setAttribute('x1', c.sx(c.x0)); line.setAttribute('y1', c.sy(a * c.x0));
+      line.setAttribute('x2', c.sx(c.x1)); line.setAttribute('y2', c.sy(a * c.x1));
+      sqG.innerHTML = ''; errG.innerHTML = '';
+      let sum100 = 0, maxI = 0, maxV = -1;
+      const e10 = X.map((x, i) => 10 * Y[i] - k * x);
+      e10.forEach((e, i) => { const s = e * e; sum100 += s; if (s > maxV) { maxV = s; maxI = i; } });
+      X.forEach((x, i) => {
+        const f = a * x, py = c.sy(Y[i]), pf = c.sy(f), side = Math.abs(pf - py);
+        const px = c.sx(x);
+        const left = (x >= 90);
+        if (side > 0.5) {
+          mk('rect', { class: 'sq' + (i === maxI ? ' big' : ''), x: left ? px - side : px, y: Math.min(py, pf),
+                       width: side, height: side }, sqG);
+          mk('line', { class: 'err ' + (e10[i] > 0 ? 'pos' : 'neg'), x1: px, x2: px, y1: py, y2: pf }, errG);
+        }
+        c.pts[i].setAttribute('cy', py);
+        const td = rows[i].children;
+        td[1].textContent = Y[i];
+        td[2].textContent = fmt(Number((e10[i] / 10).toFixed(1)));
+        td[3].textContent = Number((e10[i] * e10[i] / 100).toFixed(2));
+      });
+      document.getElementById('sqSum').textContent = Number((sum100 / 100).toFixed(2));
+      document.getElementById('sqMean').textContent = Number((sum100 / 500).toFixed(3));
+    }
+
+    function yAt(evt) {
+      const pt = c.svg.createSVGPoint();
+      pt.x = evt.clientX; pt.y = evt.clientY;
+      const p = pt.matrixTransform(c.svg.getScreenCTM().inverse());
+      const y = c.y1 - (p.y - c.sy(c.y1)) / (c.sy(c.y0) - c.sy(c.y1)) * (c.y1 - c.y0);
+      return Math.max(c.y0 + 2, Math.min(c.y1 - 2, Math.round(y)));
+    }
+    c.svg.addEventListener('pointerdown', evt => {
+      const t = evt.target.closest('.pt');
+      if (!t) return;
+      drag = Number(t.dataset.i);
+      t.classList.add('on');
+      c.svg.setPointerCapture(evt.pointerId);
+      evt.preventDefault();
+    });
+    c.svg.addEventListener('pointermove', evt => {
+      if (drag < 0) return;
+      Y[drag] = yAt(evt);
+      draw();
+    });
+    function end() { if (drag >= 0) c.pts[drag].classList.remove('on'); drag = -1; }
+    c.svg.addEventListener('pointerup', end);
+    c.svg.addEventListener('pointercancel', end);
+
+    document.querySelectorAll('[data-sqline]').forEach(b => b.addEventListener('click', () => {
+      k = Number(b.dataset.sqline);
+      document.querySelectorAll('[data-sqline]').forEach(o => o.classList.toggle('sel', o === b));
+      draw();
+    }));
+    document.getElementById('sqReset').addEventListener('click', () => { Y = Y0.slice(); draw(); });
+    el._setY = (i, y) => { Y[i] = y; draw(); };
+    draw();
+  })();
+</script>
+
+</body>
+</html>
