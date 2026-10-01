@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>행과 열을 바꾸면 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    /* 픽셀 판 — 흰 칸(255)이 밝은 바탕에 묻히므로 어두운 판 위에 얹는다
+       (3-2-1 에서 확인된 규약). 칸은 data-m 의 실제 흑백값으로 칠한다 */
+    .kgrid { display: grid; gap: 3px; background: var(--lm-ink-4); padding: 3px;
+             border-radius: var(--lm-radius-sm); width: max-content;
+             outline: 6px solid var(--lm-ink-2); margin: 0 auto; }
+    .kgrid i { display: block; }
+
+    /* 대칭축 l — 판 위에 겹치는 선 */
+    .axis-wrap { position: relative; display: inline-block; padding: 24px; }
+    .axis-wrap svg { position: absolute; left: 0; top: 0; overflow: hidden; pointer-events: none; }
+    .axis-line { stroke: var(--lm-danger); stroke-width: 4; stroke-linecap: round; }
+    .axis-label { position: absolute; font-family: 'Times New Roman', serif; font-style: italic;
+                  font-size: var(--lm-slide-small); color: var(--lm-danger); font-weight: 700; }
+
+    .trio { display: flex; gap: var(--lm-space-5); justify-content: center;
+            align-items: center; margin-top: var(--lm-space-3); }
+    .trio .col { text-align: center; }
+    .trio .col .cap { font-size: var(--lm-slide-small); font-weight: 700;
+                      margin-bottom: var(--lm-space-1); }
+    .trio .col .sub { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                      margin-top: var(--lm-space-1); }
+    .trio .arrow { font-size: 40px; color: var(--lm-ink-3); }
+
+    /* 좌우 대비 카드 */
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+    .side.lost { border-color: var(--lm-danger); }
+    .side.lost .what { color: var(--lm-danger); }
+
+    /* 세 행렬 비교 카드 */
+    .mats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-4);
+            margin-top: var(--lm-space-3); }
+    .mats .side { font-size: var(--lm-slide-small); }
+    .mats .side .what { font-size: var(--lm-slide-small); }
+
+    /* 열 대응표 */
+    .maptbl { border-collapse: collapse; margin: var(--lm-space-2) auto 0;
+              font-size: var(--lm-slide-small); }
+    .maptbl th, .maptbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: var(--lm-space-1) var(--lm-space-4); text-align: center; }
+    .maptbl th { background: var(--lm-paper-tint); font-weight: 700; }
+    .maptbl td.hl { color: var(--lm-accent); font-weight: 700; }
+
+    /* 확인 활동 */
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible;
+                              border-top-color: var(--lm-rule); }
+    .qlist.compact { margin-top: var(--lm-space-2); }
+    .qlist.compact li { margin-bottom: var(--lm-space-1); }
+    .ans-row { display: flex; align-items: center; gap: var(--lm-space-5); }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅲ-2 이미지 데이터 처리 · 4차시</div>
+    <h1>행과 열을 바꾸면</h1>
+    <p class="slide-sub">행렬의 곱과 전치행렬로 이미지를 대칭이동하기</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 98~99쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄 — 행과 열을 바꾸면 그림이 뒤집힌다. 지난 시간의 S, T 대신 반대각선 행렬 F를 곱하고, 이어서 전치행렬을 새로 배운다. 「더 깊이」라고 표시된 장은 교과서 밖 보강이다. 시험 범위는 교과서 장이라고 처음에 말해 두면 학생이 부담 없이 듣는다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>곱하는 쪽이 방향을 정한다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">\(K\)의 <b>뒤</b>에서 곱하면 — \(KS_4\), \(KT_4\)</div>
+        <div class="what">좌우로</div>
+      </div>
+      <div class="side known">
+        <div class="where">\(K\)의 <b>앞</b>에서 곱하면 — \(S_3K\), \(T_3K\)</div>
+        <div class="what">위아래로</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 문장 — <b>“다음 시간에는 그림을 뒤집는다.”</b>
+      그림을 <b>옮기는</b> 대신 거울에 비추듯 <b>뒤집어</b> 보자.
+    </p>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      오늘도 같은 질문이 따라다닌다 —
+      <span class="kw-info">어느 쪽에서 곱하느냐에 따라 무엇이 달라질까?</span>
+    </div>
+    <aside class="notes">지난 시간의 결론을 학생 입으로 먼저 말하게 한다. "뒤에서 곱하면?" "좌우!" "앞에서 곱하면?" "위아래!" 이 대비가 오늘 F 행렬에서 그대로 다시 나온다. 평행이동은 옮기기, 대칭이동은 뒤집기라는 차이만 짚고 넘어간다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>행렬 \(F_n\)을 곱해 이미지를 <span class="kw">좌우·상하로 대칭이동</span>할 수 있다.</span></li>
+      <li><span class="num">2</span><span>주어진 행렬의 <span class="kw">전치행렬</span>을 구할 수 있다.</span></li>
+      <li><span class="num">3</span><span>전치행렬을 이용해 이미지를 <span class="kw">직선 \(l\)에 대하여 대칭이동</span>할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">행과 열을 바꾸면 그림이 뒤집힌다.</span>
+    </div>
+    <aside class="notes">목표 1은 지난 시간과 같은 "행렬의 곱"이고, 목표 2·3은 새로운 연산 "전치"다. 곱셈 없이 행과 열을 바꾸기만 해도 그림이 뒤집힌다는 것이 오늘의 반전이다.</aside>
+  </section>
+
+  <!-- 4. F_n 정의 -->
+  <section>
+    <div class="chapter-tag">교과서 98쪽 · 2. 이미지의 대칭이동</div>
+    <h2>1이 놓이는 줄이 달라졌다</h2>
+
+    <div class="definition-box">
+      행렬 <span class="kw">\(F_n\)</span>은 \(i+j=n+1\)인 \((i,\ j)\) 성분만 \(1\)이고,
+      그 외 모든 성분은 \(0\)인 \(n\times n\) 행렬이다.
+    </div>
+
+    <div class="mats">
+      <div class="side">
+        <div class="where">지난 시간 \(S_4\)</div>
+        <div>\(\begin{pmatrix}0&1&0&0\\0&0&1&0\\0&0&0&1\\0&0&0&0\end{pmatrix}\)</div>
+        <div class="what">대각선 바로 위</div>
+      </div>
+      <div class="side">
+        <div class="where">지난 시간 \(T_4\)</div>
+        <div>\(\begin{pmatrix}0&0&0&0\\1&0&0&0\\0&1&0&0\\0&0&1&0\end{pmatrix}\)</div>
+        <div class="what">대각선 바로 아래</div>
+      </div>
+      <div class="side known">
+        <div class="where">오늘 \(F_4\)</div>
+        <div>\(\begin{pmatrix}0&0&0&1\\0&0&1&0\\0&1&0&0\\1&0&0&0\end{pmatrix}\)</div>
+        <div class="what">오른쪽 위 → 왼쪽 아래</div>
+      </div>
+    </div>
+    <aside class="notes">F4에서 1이 있는 자리 (1,4), (2,3), (3,2), (4,1)을 짚으며 행 번호와 열 번호를 더하면 늘 5, 즉 n+1임을 확인한다. S, T가 주대각선 옆줄이었다면 F는 반대 방향 대각선이다. 이 모양만 보고 "무슨 일이 일어날까" 예상을 받아 둔다.</aside>
+  </section>
+
+  <!-- 5. 함께하기 KF_4 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 98쪽 · 함께하기</div>
+    <h2>\(F_4\)를 뒤에 곱하면</h2>
+
+    <div class="formula-box" style="margin: var(--lm-space-2) 0; font-size: var(--lm-slide-small);">
+      \(KF_4=\begin{pmatrix}0&0&0&0\\0&255&0&0\\0&255&255&0\end{pmatrix}
+        \begin{pmatrix}0&0&0&1\\0&0&1&0\\0&1&0&0\\1&0&0&0\end{pmatrix}\)
+    </div>
+
+    <div class="two-col" style="grid-template-columns: 1fr 1.25fr; align-items: start;">
+      <div class="step-box" data-s>
+        <b>①</b> &nbsp;
+        \(KF_4=\begin{pmatrix}0&0&0&0\\0&0&255&0\\0&255&255&0\end{pmatrix}\)
+      </div>
+      <div class="step-box" data-s>
+        <b>②</b> &nbsp; [그림 1]을 직선 \(l\)을 대칭축으로 하여 <b>좌우로</b> 대칭이동한 것
+        <div class="trio" style="margin-top: var(--lm-space-1);">
+          <div class="col">
+            <div class="cap">[그림 1]</div>
+            <div class="kgrid" data-c="40" data-axis="v:2" data-m="0,0,0,0;0,255,0,0;0,255,255,0"></div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="col">
+            <div class="cap">\(KF_4\)</div>
+            <div class="kgrid" data-c="40" data-axis="v:2" data-m="0,0,0,0;0,0,255,0;0,255,255,0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">①은 학생이 먼저 계산하게 하고 버튼으로 맞춰 본다. 계산할 때 "K의 2행 (0, 255, 0, 0)과 F4의 3열 (0, 1, 0, 0)" 하는 식으로 행과 열을 짚게 한다. ②에서 2행을 따라가면 255가 2열에서 3열로, 3행은 2·3열이 3·2열로 — 가운데 세로선 l을 거울로 놓은 모양이다. 정답및풀이 184쪽과 같은 값이다.</aside>
+  </section>
+
+  <!-- 6. 더 깊이 — 오른쪽 곱은 열을 섞는다 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 왜 좌우로 뒤집힐까</div>
+    <h2>결과의 \(j\)열은 원래의 \(n+1-j\)열이다</h2>
+
+    <div class="formula-box" style="margin: var(--lm-space-2) 0;">
+      \((KF_n)_{ij}=k_{i,\,n+1-j}\)
+      &nbsp;— \(F_n\)의 \(j\)열에는 \((n+1-j)\)행에만 \(1\)이 있으니, \(K\)의 \(n+1-j\)열만 남는다
+    </div>
+
+    <table class="maptbl">
+      <tr><th>\(KF_4\)의</th><td>1열</td><td>2열</td><td>3열</td><td>4열</td></tr>
+      <tr><th>← \(K\)의</th><td class="hl">4열</td><td class="hl">3열</td><td class="hl">2열</td><td class="hl">1열</td></tr>
+      <tr><th>← (지난 시간 \(KS_4\))</th><td>0</td><td>1열</td><td>2열</td><td>3열</td></tr>
+    </table>
+
+    <p class="prob-stmt">
+      지난 시간 \(KS_4\)는 “\(j\)열 ← \(j-1\)열”이었다. 같은 틀로 읽으면 \(KF_4\)는
+      “\(j\)열 ← \(5-j\)열”. 둘 다 <b>열을 다른 자리로 옮기는</b> 일이다.
+    </p>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      <span class="kw-success">오른쪽에서 곱하면 열을 섞는다.</span>
+      열의 순서가 바뀌니 그림은 <b>좌우</b>로 움직이거나 뒤집힌다.
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 성분 공식이 부담스러우면 표의 둘째 줄만 읽어도 된다 — "결과의 1열 자리에 원래 4열이 온다." 셋째 줄은 지난 시간 KS4를 같은 표로 읽은 것으로, 1열 자리는 가져올 열이 없어 0이 된다. 평행이동과 대칭이동이 모두 "열 옮기기"라는 같은 틀이라는 점이 핵심이다.</aside>
+  </section>
+
+  <!-- 7. 문제 5 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 98쪽 문제 5</div>
+    <h2>이번엔 앞에서 곱해 보자</h2>
+
+    <div class="formula-box" style="margin: var(--lm-space-2) 0; font-size: var(--lm-slide-small);">
+      \(F_3=\begin{pmatrix}0&0&1\\0&1&0\\1&0&0\end{pmatrix}\)
+      &nbsp;— [그림 1]의 행렬 \(K\)에 대하여 \(F_3K\)가 나타내는 이미지를 그리고 [그림 1]과 비교하시오.
+    </div>
+
+    <ul class="qlist compact" id="qList5">
+      <li><b>문제 5 \(F_3K\)</b> — 계산하고 그림으로 그려 보자.
+        <div class="ans">
+          <div class="ans-row">
+            <div>\(F_3K=\begin{pmatrix}0&255&255&0\\0&255&0&0\\0&0&0&0\end{pmatrix}\)</div>
+            <div class="kgrid" data-c="40" data-axis="h:2" data-m="0,255,255,0;0,255,0,0;0,0,0,0" style="margin:0;"></div>
+          </div>
+          <div style="margin-top: var(--lm-space-2);">→ [그림 1]을 직선 \(l\)을 대칭축으로 하여 <b>상하로</b> 대칭이동한 것</div>
+        </div></li>
+    </ul>
+
+    <div class="info-box" style="margin-top: var(--lm-space-2);">
+      지난 시간을 떠올리자 — <b>앞</b>에서 곱하면 어느 방향이었나? 예상한 뒤 계산하자.
+    </div>
+    <aside class="notes">답을 미리 열지 않는다. F3는 3×3이라 K의 앞에만 곱할 수 있다는 점부터 확인한다. 지난 시간 결론(앞 = 위아래)을 쓰면 상하 대칭을 예상할 수 있다. 결과의 1행은 K의 3행, 3행은 K의 1행 — 가운데 행을 지나는 가로선이 대칭축이다. 정답및풀이 184쪽 값과 같다.</aside>
+  </section>
+
+  <!-- 8. 더 깊이 — 왼쪽 곱은 행을 섞는다 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 앞에서 곱하면</div>
+    <h2>결과의 \(i\)행은 원래의 \(n+1-i\)행이다</h2>
+
+    <div class="formula-box" style="margin: var(--lm-space-2) 0;">
+      \((F_nK)_{ij}=k_{n+1-i,\,j}\)
+      &nbsp;— \(F_n\)의 \(i\)행에는 \((n+1-i)\)열에만 \(1\)이 있으니, \(K\)의 \(n+1-i\)행만 남는다
+    </div>
+
+    <div class="step-box" data-s>
+      <span class="aux-badge">보조 예시</span>
+      \(F_3\begin{pmatrix}1&2\\3&4\\5&6\end{pmatrix}
+        =\begin{pmatrix}0&0&1\\0&1&0\\1&0&0\end{pmatrix}\begin{pmatrix}1&2\\3&4\\5&6\end{pmatrix}
+        =\begin{pmatrix}5&6\\3&4\\1&2\end{pmatrix}\)
+      &nbsp; — 1행과 3행이 자리를 바꿨다
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">계산 보기</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 1</span>
+    </div>
+
+    <div class="sides" style="margin-top: var(--lm-space-3);">
+      <div class="side known">
+        <div class="where">오른쪽에서 곱하면 — \(KS_n\), \(KT_n\), \(KF_n\)</div>
+        <div class="what">열을 섞는다 → 좌우</div>
+      </div>
+      <div class="side known">
+        <div class="where">왼쪽에서 곱하면 — \(S_nK\), \(T_nK\), \(F_nK\)</div>
+        <div class="what">행을 섞는다 → 위아래</div>
+      </div>
+    </div>
+    <aside class="notes">보조 예시는 교과서에 없는 행렬이다. 픽셀값 대신 1~6을 쓴 것은 어느 행이 어디로 갔는지 눈으로 바로 보이게 하려는 것이다. 마지막 두 카드가 3-2-3과 오늘을 묶는 결론이다 — 오른쪽 곱은 열, 왼쪽 곱은 행. 평행이동이든 대칭이동이든 이 규칙 하나로 방향을 맞힐 수 있다.</aside>
+  </section>
+
+  <!-- 9. 전치행렬 정의 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 98쪽 · 전치행렬</div>
+    <h2>곱하지 않고 행과 열을 바꾼다</h2>
+
+    <div class="definition-box">
+      \(m\times n\) 행렬 \(A\)에 대하여 \(A\)의 <b>행과 열을 바꾸어</b> 만든 \(n\times m\) 행렬을
+      \(A\)의 <span class="kw">전치행렬</span>이라 하고, 기호로 \(A^T\)와 같이 나타낸다.
+    </div>
+
+    <p class="prob-stmt">
+      \(A^T\)의 제 \(i\)행은 \(A\)의 제 \(i\)열이고, \(A^T\)의 제 \(j\)열은 \(A\)의 제 \(j\)행이다.
+    </p>
+    <p style="color: var(--lm-ink-3); font-size: var(--lm-slide-caption); margin: var(--lm-space-1) 0 0;">\(A^T\)의 \(T\)는 ‘바꾸다’를 뜻하는 Transpose의 첫 글자이다.</p>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-2); font-size: var(--lm-slide-small);">
+      <b>보기</b> &nbsp; \(A=\begin{pmatrix}1&0&2\\3&1&0\end{pmatrix}\) 의 전치행렬은
+    </div>
+    <div class="step-box" data-s>
+      \(A^T=\begin{pmatrix}1&3\\0&1\\2&0\end{pmatrix}\)
+      &nbsp; — \(A\)의 1행 \((1,0,2)\)가 \(A^T\)의 1열로 세워졌다. \(2\times3\) → \(3\times2\)
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">전치행렬 보기</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 1</span>
+    </div>
+    <aside class="notes">버튼을 누르기 전에 학생에게 A^T의 크기부터 물어본다 — 2×3이 3×2가 된다. "가로로 누운 행을 세로로 세운다"고 손동작으로 보여 주면 좋다. 전치는 곱셈이 아니라 자리만 바꾸는 연산이다.</aside>
+  </section>
+
+  <!-- 10. 문제 6 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 99쪽 문제 6</div>
+    <h2>전치행렬을 구해 보자</h2>
+
+    <ul class="qlist compact" id="qList6">
+      <li><b>⑴</b> &nbsp; \(\begin{pmatrix}-5&3\\6&2\\3&-1\end{pmatrix}\)
+        <div class="ans">\(3\times2\) → \(2\times3\) &nbsp;→&nbsp;
+          \(\begin{pmatrix}-5&6&3\\3&2&-1\end{pmatrix}\)</div></li>
+      <li><b>⑵</b> &nbsp; \(\begin{pmatrix}1&2\\3&4\end{pmatrix}\)
+        <div class="ans">\(2\times2\) → \(2\times2\) &nbsp;→&nbsp;
+          \(\begin{pmatrix}1&3\\2&4\end{pmatrix}\)</div></li>
+    </ul>
+
+    <div class="info-box" style="margin-top: var(--lm-space-2);">
+      <b>먼저 크기부터 적고</b> 직접 구한 뒤에 문항을 눌러 답을 확인하자.
+    </div>
+    <aside class="notes">⑴은 크기가 바뀌고 ⑵는 정사각이라 크기가 그대로다. ⑵에서 주대각선 1과 4는 제자리에 있고 2와 3만 자리를 바꾼다는 것을 짚어 두면, 다음 장의 "대각선을 축으로 뒤집는다"가 자연스럽게 이어진다. 정답및풀이 184쪽과 같다.</aside>
+  </section>
+
+  <!-- 11. K^T와 그림 2 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 99쪽 · 전치행렬로 대칭이동</div>
+    <h2>\(K^T\)는 그림을 대각선으로 뒤집는다</h2>
+
+    <div class="trio" style="align-items: flex-start;">
+      <div class="col">
+        <div class="cap">[그림 1]</div>
+        <div class="kgrid" data-c="44" data-axis="d" data-m="0,0,0,0;0,255,0,0;0,255,255,0"></div>
+        <div style="margin-top: var(--lm-space-2); font-size: var(--lm-slide-small);">
+          \(K=\begin{pmatrix}0&0&0&0\\0&255&0&0\\0&255&255&0\end{pmatrix}\)
+        </div>
+      </div>
+      <div class="arrow" style="margin-top: 120px;">→</div>
+      <div class="col">
+        <div class="step-box" data-s style="text-align: center;">
+          <div class="cap">[그림 2]</div>
+          <div class="kgrid" data-c="44" data-axis="d" data-m="0,0,0;0,255,255;0,0,255;0,0,0"></div>
+          <div style="margin-top: var(--lm-space-2); font-size: var(--lm-slide-small);">
+            \(K^T=\begin{pmatrix}0&0&0\\0&255&255\\0&0&255\\0&0&0\end{pmatrix}\)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-box" data-s>
+      [그림 1]의 이미지를 <b>직선 \(l\)을 대칭축으로 하여 대칭이동</b>한 것과 같다.
+      흰 칸 \((2,2)\)는 제자리, \((3,2)\)와 \((2,3)\)이 서로 자리를 바꿨다.
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">K^T를 먼저 학생이 구하게 하고 버튼으로 맞춘다. 직선 l은 왼쪽 위 꼭짓점에서 45도로 내려가는 선이다 — 직사각형의 꼭짓점끼리 잇는 대각선이 아니라는 점을 짚는다. 대각선 위의 칸 (1,1), (2,2), (3,3)은 움직이지 않는다. 학생이 "돌린 것 아니에요?"라고 물으면 돌린 것과는 다르다고 짚고, 회전은 고등학교 범위 밖이라고만 답한다.</aside>
+  </section>
+
+  <!-- 12. 더 깊이 — 해상도가 바뀐다 -->
+  <section>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 전치하면 해상도는?</div>
+    <h2>정사각이 아니면 그림의 모양이 바뀐다</h2>
+
+    <table class="maptbl" style="margin-top: var(--lm-space-3);">
+      <tr><th></th><th>행렬의 크기 (행 × 열)</th><th>해상도 (가로 × 세로)</th></tr>
+      <tr><th>[그림 1] \(K\)</th><td>\(3\times4\)</td><td>\(4\times3\)</td></tr>
+      <tr><th>[그림 2] \(K^T\)</th><td class="hl">\(4\times3\)</td><td class="hl">\(3\times4\)</td></tr>
+    </table>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      3-1-2차시의 함정 — 해상도는 <b>가로 × 세로</b>, 행렬은 <b>행 × 열</b>이라
+      <span class="kw-danger">순서가 거꾸로</span>다. 전치는 그 둘을 한 번 더 뒤집는다.
+    </div>
+
+    <div class="sides">
+      <div class="side">
+        <div class="where">\(KF_n\), \(F_nK\) — 좌우·상하 대칭</div>
+        <div class="what">해상도 그대로</div>
+      </div>
+      <div class="side known">
+        <div class="where">\(K^T\) — 직선 \(l\)에 대한 대칭</div>
+        <div class="what">가로와 세로가 바뀐다</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 밖 보강이지만 [그림 1]→[그림 2]에 이미 보이는 사실이다 — 가로로 긴 그림이 세로로 긴 그림이 되었다. 해상도 1920×1080인 가로 사진을 전치하면 1080×1920 세로 사진이 된다고 예를 들어 준다. 행렬 크기와 해상도를 섞어 말하는 실수가 3-1-2에서 많았으니 표의 두 열을 소리 내어 구분하게 한다.</aside>
+  </section>
+
+  <!-- 13. 문제 7 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 99쪽 문제 7</div>
+    <h2>가로로 긴 그림을 전치하면</h2>
+
+    <div class="trio" style="justify-content: flex-start; margin-top: var(--lm-space-2);">
+      <div class="col">
+        <div class="cap">이미지 K</div>
+        <div class="kgrid" data-c="40" data-m="0,255,0,0;0,0,255,255"></div>
+      </div>
+      <div style="font-size: var(--lm-slide-small);">
+        \(K=\begin{pmatrix}0&255&0&0\\0&0&255&255\end{pmatrix}\) &nbsp;(\(2\times4\) 행렬)
+      </div>
+    </div>
+
+    <ul class="qlist compact" id="qList7">
+      <li><b>⑴</b> 행렬 \(K\)의 전치행렬 \(K^T\)를 구하시오.
+        <div class="ans">\(K^T=\begin{pmatrix}0&0\\255&0\\0&255\\0&255\end{pmatrix}\)</div></li>
+      <li><b>⑵</b> \(K^T\)가 나타내는 이미지를 그리고 이미지 K와 비교하시오.
+        <div class="ans">
+          <div class="ans-row">
+            <div class="kgrid" data-c="40" data-axis="d" data-m="0,0;255,0;0,255;0,255" style="margin:0;"></div>
+            <div>→ 이미지 K를 <b>직선 \(l\)을 대칭축으로 하여</b> 대칭이동한 것<br>
+              해상도 \(4\times2\) → \(2\times4\)</div>
+          </div>
+        </div></li>
+    </ul>
+    <aside class="notes">⑴을 다 구한 뒤에 ⑵를 연다. 빈칸이 세로로 긴 2칸×4칸이라는 점을 먼저 확인시키면 해상도가 바뀐다는 앞 장의 내용이 다시 살아난다. 정답및풀이 184쪽: K^T = (0 0 / 255 0 / 0 255 / 0 255).</aside>
+  </section>
+
+  <!-- 14. 더 깊이 — 두 번 뒤집으면 제자리 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 두 번 뒤집으면</div>
+    <h2>두 번 뒤집으면 제자리로 돌아온다</h2>
+
+    <div class="step-box" data-s>
+      <b>①</b> &nbsp;
+      \(F_3F_3=\begin{pmatrix}0&0&1\\0&1&0\\1&0&0\end{pmatrix}\begin{pmatrix}0&0&1\\0&1&0\\1&0&0\end{pmatrix}
+        =\begin{pmatrix}1&0&0\\0&1&0\\0&0&1\end{pmatrix}=E\)
+      <div style="font-size: var(--lm-slide-caption); color: var(--lm-ink-3); margin-top: var(--lm-space-1);">
+        \(E\): 주대각선 성분만 \(1\)인 정사각행렬(단위행렬) — 곱해도 아무것도 바뀌지 않는다. \(KE=K\)
+      </div>
+    </div>
+    <div class="step-box" data-s>
+      <b>②</b> &nbsp; 그래서 \(KF_4F_4=K(F_4F_4)=KE=K\) &nbsp;— 좌우로 두 번 뒤집으면 [그림 1]
+    </div>
+    <div class="step-box" data-s>
+      <b>③</b> &nbsp;
+      \((K^T)^T=\begin{pmatrix}0&0&0\\0&255&255\\0&0&255\\0&0&0\end{pmatrix}^T
+        =\begin{pmatrix}0&0&0&0\\0&255&0&0\\0&255&255&0\end{pmatrix}=K\)
+      &nbsp;— 행과 열을 두 번 바꾸면 원래대로
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 3</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 거울 앞에서 거울에 비친 모습을 다시 거울에 비추면 원래 모습이 된다는 비유로 시작한다. ①은 한 성분만 같이 계산해 보이고 나머지는 패턴으로 읽게 한다. E라는 기호는 교과서에 나오지 않으므로 "곱해도 그대로인 행렬"이라는 뜻만 전한다. ②에서 결합법칙을 쓴 것은 설명하지 않고 넘어가도 된다.</aside>
+  </section>
+
+  <!-- 15. 더 깊이 — 평행이동은 정보를 잃는다 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 되돌릴 수 있을까</div>
+    <h2>평행이동은 정보를 잃는다</h2>
+
+    <p class="prob-stmt" style="margin-top: var(--lm-space-2);">
+      <span class="aux-badge">보조 예시</span>
+      \(M=KS_4=\begin{pmatrix}0&0&0&0\\0&0&255&0\\0&0&255&255\end{pmatrix}\)
+      (지난 시간 결과 — 오른쪽 끝에 닿은 그림)을 오른쪽으로 옮겼다가 다시 왼쪽으로 옮겨 보자.
+    </p>
+
+    <div class="trio">
+      <div class="col">
+        <div class="cap">\(M\)</div>
+        <div class="kgrid" data-c="40" data-m="0,0,0,0;0,0,255,0;0,0,255,255"></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="col step-box" data-s>
+        <div class="cap">\(MS_4\) &nbsp;오른쪽으로</div>
+        <div class="kgrid" data-c="40" data-m="0,0,0,0;0,0,0,255;0,0,0,255"></div>
+        <div class="sub">\((3,4)\)의 \(255\)가 판 밖으로</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="col step-box" data-s>
+        <div class="cap">\(MS_4T_4\) &nbsp;다시 왼쪽으로</div>
+        <div class="kgrid" data-c="40" data-m="0,0,0,0;0,0,255,0;0,0,255,0"></div>
+        <div class="sub">마지막 열이 \(0\) — \(MS_4T_4\ne M\)</div>
+      </div>
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+
+    <div class="sides" style="margin-top: var(--lm-space-2);">
+      <div class="side lost">
+        <div class="where">평행이동 \(S_4T_4\ne E\)</div>
+        <div class="what">밀려난 열은 되돌릴 수 없다</div>
+      </div>
+      <div class="side known">
+        <div class="where">대칭이동 \(F_4F_4=E\), \((K^T)^T=K\)</div>
+        <div class="what">아무것도 잃지 않는다</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 교과서의 K로 하면 마지막 열이 원래 모두 0이라 KS4T4 = K가 우연히 성립해 손실이 보이지 않는다. 그래서 지난 시간 결과 KS4를 M으로 다시 썼다. S4T4는 (1,1), (2,2), (3,3)만 1이고 (4,4)는 0인 행렬이라 E가 아니다 — 4열 정보를 지운다. 평행이동은 판 밖으로 나간 픽셀을 버리지만, 대칭이동은 픽셀의 자리만 바꿀 뿐 하나도 버리지 않는다.</aside>
+  </section>
+
+  <!-- 16. 확인하기 OX -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 99쪽 확인하기</div>
+    <h2>옳으면 ○, 옳지 않으면 ×</h2>
+
+    <ul class="qlist" id="qListOX">
+      <li><b>⑴</b> 이미지 P를 변환하여 나타낸 행렬 \(P\)에 대하여 행렬 \(kP\)가 나타내는 이미지를 \(\mathrm{P}_k\)라 할 때,
+        \(k&gt;1\)이면 이미지 \(\mathrm{P}_k\)는 이미지 P보다 어두워진다.
+        <div class="ans">× &nbsp;— \(k&gt;1\)이면 각 성분이 커지므로 <b>밝아진다</b>. 어두워지는 것은 \(0&lt;k&lt;1\)일 때 (3-2-1차시)</div></li>
+      <li><b>⑵</b> 전치행렬을 이용하면 이미지를 대칭이동할 수 있다.
+        <div class="ans">○ &nbsp;— \(K^T\)는 [그림 1]을 직선 \(l\)에 대하여 대칭이동한 [그림 2]를 나타낸다</div></li>
+    </ul>
+    <aside class="notes">⑴은 3-2-1차시 복습이다. 255에 가까울수록 밝다는 것만 기억하면 된다. ⑵는 오늘 내용. 둘 다 손을 들어 ○× 투표를 받은 뒤 문항을 눌러 확인한다. 정답및풀이 184쪽: ⑴ ×, ⑵ ○.</aside>
+  </section>
+
+  <!-- 17. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>행과 열을 바꾸면 그림이 뒤집힌다</h2>
+
+    <div class="mats">
+      <div class="side known">
+        <div class="where">\(KF_n\) — 뒤에서 곱하기</div>
+        <div class="what">좌우 대칭</div>
+      </div>
+      <div class="side known">
+        <div class="where">\(F_nK\) — 앞에서 곱하기</div>
+        <div class="what">상하 대칭</div>
+      </div>
+      <div class="side known">
+        <div class="where">\(K^T\) — 행과 열을 바꾸기</div>
+        <div class="what">직선 \(l\)에 대한 대칭</div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      지금까지 <span class="kw-success">덧셈·실수배·곱·전치</span>로 밝기와 색을 바꾸고, 그림을 옮기고, 뒤집었다.
+    </div>
+
+    <p class="prob-stmt">
+      다음 시간에는 두 장면을 <b>비율로 섞어</b> 자연스럽게 바꾼다 —
+      영화의 <b>디졸브</b>를 스프레드시트로 연출한다.
+    </p>
+    <aside class="notes">세 카드를 학생이 채우게 하며 닫는다. 다음 차시 디졸브는 새 연산이 아니라 3-2-1·3-2-2의 덧셈과 실수배만으로 만든다는 점을 예고해 두면, 학생이 "이미 아는 걸로 영화 효과를 만든다"는 기대를 갖고 온다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 픽셀 판 — data-m 의 흑백값(0~255)으로 칸을 칠하고, data-axis 가 있으면 대칭축 l 을 겹친다
+     data-axis: "v:k" = k열 오른쪽 세로선 · "h:k" = k행 가운데 가로선 · "d" = 왼쪽 위 꼭짓점에서 45° */
+  (function () {
+    const GAP = 3, PAD = 3, MARGIN = 24, SVGNS = 'http://www.w3.org/2000/svg';
+
+    function makeLine(svg, x1, y1, x2, y2) {
+      const ln = document.createElementNS(SVGNS, 'line');
+      [['x1', x1], ['y1', y1], ['x2', x2], ['y2', y2]].forEach(([k, v]) => ln.setAttribute(k, v));
+      ln.setAttribute('class', 'axis-line');
+      svg.appendChild(ln);
+    }
+
+    function addAxis(grid, spec, rows, cols, c) {
+      const gw = cols * c + (cols - 1) * GAP + 2 * PAD;
+      const gh = rows * c + (rows - 1) * GAP + 2 * PAD;
+      const W = gw + 2 * MARGIN, H = gh + 2 * MARGIN, o = MARGIN + PAD;
+      const wrap = document.createElement('div');
+      wrap.className = 'axis-wrap';
+      wrap.style.margin = grid.style.margin || '0 auto';
+      grid.style.margin = '0';
+      grid.parentNode.insertBefore(wrap, grid);
+      wrap.appendChild(grid);
+
+      const svg = document.createElementNS(SVGNS, 'svg');
+      svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      svg.setAttribute('width', W);
+      svg.setAttribute('height', H);
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      const label = document.createElement('span');
+      label.className = 'axis-label';
+      label.textContent = 'l';
+
+      const [kind, num] = spec.split(':');
+      const k = Number(num);
+      if (kind === 'v') {
+        const x = o + k * (c + GAP) - GAP / 2;
+        makeLine(svg, x, 4, x, H - 4);
+        label.style.left = (x + 12) + 'px';
+        label.style.top = (H - 40) + 'px';
+      } else if (kind === 'h') {
+        const y = o + (k - 1) * (c + GAP) + c / 2;
+        makeLine(svg, 4, y, W - 4, y);
+        label.style.left = (W + 2) + 'px';
+        label.style.top = (y - 30) + 'px';
+      } else {
+        const m = Math.min(W, H) - 4;
+        makeLine(svg, 4, 4, m, m);
+        label.style.left = (m + 8) + 'px';
+        label.style.top = (m - 38) + 'px';
+      }
+      wrap.appendChild(svg);
+      wrap.appendChild(label);
+    }
+
+    document.querySelectorAll('.kgrid[data-m]').forEach(grid => {
+      const rows = grid.dataset.m.split(';').map(r => r.split(',').map(Number));
+      const c = Number(grid.dataset.c || 44);
+      grid.style.gridTemplateColumns = 'repeat(' + rows[0].length + ', ' + c + 'px)';
+      rows.forEach(r => r.forEach(v => {
+        const cell = document.createElement('i');
+        cell.style.height = c + 'px';
+        cell.style.background = 'rgb(' + v + ',' + v + ',' + v + ')';
+        grid.appendChild(cell);
+      }));
+      if (grid.dataset.axis) addAxis(grid, grid.dataset.axis, rows.length, rows[0].length, c);
+    });
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
