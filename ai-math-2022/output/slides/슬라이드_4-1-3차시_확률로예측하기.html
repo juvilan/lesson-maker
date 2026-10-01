@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>확률로 예측하기 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .maptbl { border-collapse: collapse; margin: var(--lm-space-2) auto 0;
+              font-size: var(--lm-slide-small); }
+    .maptbl th, .maptbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: var(--lm-space-1) var(--lm-space-4); text-align: center; }
+    .maptbl th { background: var(--lm-paper-tint); font-weight: 700; }
+    .maptbl td.hl { color: var(--lm-accent); font-weight: 700; }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+    .note-box { border-left: var(--lm-border-accent) solid var(--lm-info); background: var(--lm-info-tint);
+                padding: var(--lm-space-3) var(--lm-space-4); font-size: var(--lm-slide-small);
+                margin-top: var(--lm-space-3); }
+
+    /* 4-1-x — 교과서 데이터 표. 분자 칸 = 분홍(교과서의 분홍 동그라미), 분모 칸 = 노랑 */
+    .dt { border-collapse: collapse; margin: var(--lm-space-2) auto 0; font-size: var(--lm-slide-small); }
+    .dt th, .dt td { border: var(--lm-border-thin) solid var(--lm-rule); padding: 3px var(--lm-space-4);
+                     text-align: center; min-width: 92px; }
+    .dt th { background: var(--lm-paper-tint); font-weight: 700; }
+    .dt td.num { background: var(--lm-danger-tint); color: var(--lm-danger); font-weight: 700; }
+    .dt td.den { background: var(--lm-warning-tint); font-weight: 700; }
+    .dt tr.sum th, .dt tr.sum td { border-top: 3px solid var(--lm-ink-3); font-weight: 700; }
+    .dt caption { caption-side: top; text-align: right; font-size: var(--lm-slide-caption);
+                  color: var(--lm-ink-3); }
+    .dt.sm { font-size: var(--lm-slide-caption); }
+    .dt.sm th, .dt.sm td { min-width: 80px; padding: 2px var(--lm-space-3); }
+
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-6); margin-top: var(--lm-space-2); }
+    .pair .step-box { font-size: var(--lm-slide-body); }
+
+
+    /* 4-1-3 — 막대·사람 점·시뮬레이션 */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .axis { stroke: var(--lm-ink-3); stroke-width: 2; fill: none; }
+    .dg .grid { stroke: var(--lm-rule); stroke-width: 1; fill: none; }
+    .dg .bar { fill: var(--lm-rule-strong); }
+    .dg .bar.top { fill: var(--lm-accent); }
+    .dg .tick { fill: var(--lm-ink-3); font-size: 24px; font-family: var(--lm-font-sans); }
+    .dg .val { fill: var(--lm-ink); font-size: 28px; font-weight: 700; font-family: var(--lm-font-sans); }
+    .dg .val.top { fill: var(--lm-accent); }
+    .dg .ref { stroke: var(--lm-danger); stroke-width: 3; stroke-dasharray: 10 8; fill: none; }
+    .dg .reflbl { fill: var(--lm-danger); font-size: 24px; font-weight: 700; font-family: var(--lm-font-sans); }
+    .dg .sdot { fill: var(--lm-info); }
+    .people { display: grid; grid-template-columns: repeat(20, 30px); gap: 8px; justify-content: center; }
+    .people i { display: block; width: 30px; height: 30px; border-radius: 50%; background: var(--lm-rule); }
+    .people i.on { background: var(--lm-accent); }
+    .chips { display: flex; gap: var(--lm-space-2); flex-wrap: wrap; font-size: var(--lm-slide-small); min-height: 46px; }
+    .chips span { border: var(--lm-border-thin) solid var(--lm-info); color: var(--lm-info); border-radius: var(--lm-radius-sm);
+                  padding: 0 var(--lm-space-3); font-weight: 700; }
+    .sim-bar { display: flex; align-items: center; gap: var(--lm-space-3); flex-wrap: wrap; margin-top: var(--lm-space-2); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-1 확률을 이용한 예측 · 3차시</div>
+    <h1>확률로 예측하기</h1>
+    <p class="slide-sub">확률이 가장 큰 쪽을 고르고, 확률에 인원수를 곱한다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 123~124쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄 — 인공지능은 확률이 가장 큰 쪽을 고르고, 확률에 인원수를 곱해 몇 명일지 예측한다. 교과서 소제목 「확률을 이용한 예측」이 여기서 시작한다. 확률을 '구하는' 일에서 그 확률로 '판단하는' 일로 넘어간다. 예제 1, 문제 2, 확인하기까지 다룬다. 「더 깊이」 두 장(예측은 보장이 아니다, 반올림한 합)은 교과서 밖 보강이다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>같은 ‘부산 방문’이라도 조건이 다르면 세는 표가 다르다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">분모</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">조건에 맞는 전체</div>
+      </div>
+      <div class="side known">
+        <div class="where">분자</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">그중 사건이 일어난 수</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 문장 — <b>“다음 시간에는 이 확률로 인공지능이 무엇을 예측하는지 알아본다.”</b>
+    </p>
+    <aside class="notes">지난 시간 결론(분모 = 조건에 맞는 전체, 분자 = 그중 사건이 일어난 수)과 마지막 문장을 확인한다. 오늘은 121쪽의 같은 표에서 '남성 회원' 줄만 쓴다. 지난 시간 pB를 구할 때 만든 남성 합계 줄(47, 46, 45, 44, 182)을 떠올리게 한다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>데이터로 구한 확률을 비교하여 <span class="kw">어떤 사건이 일어날지</span> 예측할 수 있다.</span></li>
+      <li><span class="num">2</span><span>확률에 인원수를 곱하여 <span class="kw">그 사건이 몇 번 일어날지</span> 예측할 수 있다.</span></li>
+      <li><span class="num">3</span><span>표에서 <span class="kw">필요한 줄만 골라</span> 예측 문제를 해결할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">확률이 가장 큰 쪽을 고르고, 확률에 인원수를 곱해 예측한다.</span>
+    </div>
+    <aside class="notes">목표 1은 '어느 쪽?', 목표 2는 '몇 명?'이다. 목표 3은 문제 2의 함정(합계 행)을 겨냥한다.</aside>
+  </section>
+
+  <!-- 4. 두 예측 과제와 남성 회원 표 -->
+  <section>
+    <div class="chapter-tag">교과서 123쪽 · 확률을 이용한 예측</div>
+    <h2>인공지능이 예측할 두 가지</h2>
+
+    <div class="note-box" style="font-size: var(--lm-slide-body);">
+      (ⅰ) 새로 가입한 남성 회원이 방문할 <b>지역</b><br>
+      (ⅱ) 새로 가입한 남성 회원 \(100\)명 중에서 제주를 방문할 <b>회원 수</b>
+    </div>
+
+    <p class="prob-stmt sm">이와 같은 예측을 하기 위하여 인공지능은 121쪽의 데이터에서 <b>남성 회원</b>에 해당하는 데이터로부터 구한 확률을 이용한다.</p>
+    <table class="dt">
+      <caption>(단위: 명)</caption>
+      <tr><th>성별</th><th>계절</th><th>제주</th><th>부산</th><th>속초</th><th>전주</th><th>합계</th></tr>
+      <tr><th rowspan="2">남</th><th>여름</th><td>28</td><td>31</td><td>29</td><td>27</td><td>115</td></tr>
+      <tr><th>겨울</th><td>19</td><td>15</td><td>16</td><td>17</td><td>67</td></tr>
+      <tr class="sum"><th colspan="2">합계</th><td class="num">47</td><td class="num">46</td><td class="num">45</td><td class="num">44</td><td class="den">182</td></tr>
+    </table>
+
+    <p class="prob-stmt" style="text-align: center;">
+      \(p_1=\dfrac{47}{182},\quad p_2=\dfrac{46}{182},\quad p_3=\dfrac{45}{182},\quad p_4=\dfrac{44}{182}\)
+    </p>
+    <aside class="notes">123쪽이다. 두 과제의 차이를 먼저 짚는다 — (ⅰ)은 '어디로?'(종류), (ⅱ)는 '몇 명?'(개수). 둘 다 '새로 가입한 남성 회원'이므로 남성 두 줄만 쓴다. p1~p4는 남성 회원이 제주, 부산, 속초, 전주를 방문할 확률이고 분모는 모두 182다. 네 확률을 모두 더하면 182/182=1이라는 지난 4-1-1 「더 깊이」 내용으로 검산할 수 있다.</aside>
+  </section>
+
+  <!-- 5. (i) 가장 큰 확률 -->
+  <section>
+    <div class="chapter-tag">교과서 123쪽 · (ⅰ)</div>
+    <h2>확률이 가장 큰 지역을 고른다</h2>
+
+    <div class="pair" style="grid-template-columns: 820px 1fr; align-items: center;">
+      <svg class="dg" viewBox="0 0 760 420" width="800" height="442" preserveAspectRatio="xMidYMid meet" role="img" aria-label="남성 회원이 네 지역을 방문한 인원 막대그래프">
+        <line class="grid" x1="70" y1="100" x2="740" y2="100"></line>
+        <line class="grid" x1="70" y1="220" x2="740" y2="220"></line>
+        <line class="axis" x1="70" y1="340" x2="740" y2="340"></line>
+        <line class="axis" x1="70" y1="340" x2="70" y2="40"></line>
+        <text class="tick" x="60" y="348" text-anchor="end">0</text>
+        <text class="tick" x="60" y="228" text-anchor="end">20</text>
+        <text class="tick" x="60" y="108" text-anchor="end">40</text>
+        <rect class="bar top" x="110" y="58" width="110" height="282"></rect>
+        <rect class="bar" x="270" y="64" width="110" height="276"></rect>
+        <rect class="bar" x="430" y="70" width="110" height="270"></rect>
+        <rect class="bar" x="590" y="76" width="110" height="264"></rect>
+        <text class="val top" x="165" y="46" text-anchor="middle">47</text>
+        <text class="val" x="325" y="52" text-anchor="middle">46</text>
+        <text class="val" x="485" y="58" text-anchor="middle">45</text>
+        <text class="val" x="645" y="64" text-anchor="middle">44</text>
+        <text class="tick" x="165" y="376" text-anchor="middle">제주</text>
+        <text class="tick" x="325" y="376" text-anchor="middle">부산</text>
+        <text class="tick" x="485" y="376" text-anchor="middle">속초</text>
+        <text class="tick" x="645" y="376" text-anchor="middle">전주</text>
+        <text class="tick" x="740" y="410" text-anchor="end">남성 회원 수(명), 전체 182명</text>
+      </svg>
+      <div>
+        <div class="note-box" style="font-size: var(--lm-slide-body); margin-top: 0;">
+          (ⅰ) 남성 회원이 제주를 방문할 확률 \(p_1=\dfrac{47}{182}\)이 가장 크므로,
+          새로 가입한 남성 회원은 <b>제주</b>를 방문할 것이다.
+        </div>
+        <div class="info-box">
+          3-3-4에서는 두 퍼셉트론 중 <b>점수가 큰 쪽</b>으로 분류했다. 오늘은 <b>확률이 큰 쪽</b>으로 예측한다.
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 123쪽 (ⅰ)을 막대로 그렸다(막대그래프는 교과서에 없는 시각화이고 값은 교과서 그대로). 0부터 그린 막대라 47과 44의 차이가 작게 보인다 — 실제로 근소한 차이다. 그래도 인공지능은 가장 큰 쪽을 고른다. 판단 규칙이 3단원 3-3-4(점수가 큰 쪽으로 분류)와 같다는 것을 연결한다. 확률이 같은 지역이 둘 이상이면? 지도서 ⑧(175쪽)은 예측에 사용할 기준을 사전에 정해 두어야 한다고 한다(예: 'A와 B 중 어느 한 지역을 방문한다').</aside>
+  </section>
+
+  <!-- 6. (ii) 100명 중 몇 명 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 123쪽 · (ⅱ)</div>
+    <h2>확률에 인원수를 곱한다</h2>
+
+    <div class="pair" style="grid-template-columns: 1fr 1fr; align-items: center;">
+      <div>
+        <div class="note-box" style="font-size: var(--lm-slide-body); margin-top: 0;">
+          (ⅱ) 남성 회원 \(100\)명이 새로 가입한 경우<br>
+          \(100\times p_1=100\times\dfrac{47}{182}=25.8\cdots\)<br>
+          따라서 남성 회원 <b>\(26\)명</b>이 제주를 방문할 것이다.
+        </div>
+        <p class="cap-sm" style="margin-top: var(--lm-space-3);">방주 — 사람 수, 개수, 일수 등은 보통 반올림하여 자연수로 나타내므로, 여기서는 반올림하여 계산하기로 한다.</p>
+      </div>
+      <div>
+        <div class="people" data-n="100" data-on="26" aria-label="100명 중 26명"></div>
+        <p class="cap-sm" style="text-align: center; margin-top: var(--lm-space-2);">새로 가입한 남성 회원 100명 중 제주로 예측되는 26명</p>
+      </div>
+    </div>
+
+    <div class="result-box">
+      이처럼 인공지능은 확률을 이용하여 <b>어떤 사건이 일어날 것인지</b> 예측하며, 그 사건이 <b>몇 번 일어날 것인지</b> 예측한다.
+    </div>
+    <aside class="notes">교과서 123쪽 (ⅱ)와 정리 문장이다. 182명 중 47명이 제주였으니 100명이면 그 비율만큼, 곧 100×47/182=25.8…명 → 반올림하여 26명이다. 방주의 반올림 규칙을 소리 내어 읽힌다(사람은 0.8명이 있을 수 없다). 지도서 자료(⑥): 인공지능에서 '예측'은 미래뿐 아니라 아직 알려지지 않은 값을 추정하는 것까지 포함한다 — 한 줄로 언급할 만하다.</aside>
+  </section>
+
+  <!-- 7. 예제 1 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 124쪽 · 예제 1</div>
+    <h2>쇼핑몰 — 2학년 100명은 무엇을 살까?</h2>
+    <p class="cap-sm" style="margin: 0;">어느 쇼핑몰에 방문한 고등학교 학생을 대상으로 세 상품 A, B, C 중에서 구매한 상품 한 개를 성별과 학년별로 조사한 데이터이다. 고등학교 2학년 학생 100명이 방문할 경우 세 상품을 구매할 학생이 각각 몇 명일지 예측하시오.</p>
+
+    <div class="pair" style="grid-template-columns: auto 1fr; gap: var(--lm-space-5); align-items: start;">
+      <table class="dt sm">
+        <caption>(단위: 명)</caption>
+        <tr><th>성별</th><th>학년</th><th>상품 A</th><th>상품 B</th><th>상품 C</th><th>합계</th></tr>
+        <tr><th rowspan="3">남</th><th>1학년</th><td>24</td><td>32</td><td>55</td><td>111</td></tr>
+        <tr><th>2학년</th><td class="num">57</td><td class="num">45</td><td class="num">33</td><td class="den">135</td></tr>
+        <tr><th>3학년</th><td>24</td><td>19</td><td>23</td><td>66</td></tr>
+        <tr><th rowspan="3">여</th><th>1학년</th><td>42</td><td>28</td><td>35</td><td>105</td></tr>
+        <tr><th>2학년</th><td class="num">62</td><td class="num">51</td><td class="num">52</td><td class="den">165</td></tr>
+        <tr><th>3학년</th><td>25</td><td>24</td><td>34</td><td>83</td></tr>
+        <tr class="sum"><th colspan="2">합계</th><td>234</td><td>199</td><td>232</td><td>665</td></tr>
+      </table>
+      <div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">2학년 두 줄을 더하면 A \(119\), B \(96\), C \(85\), 합계 \(300\)<br>
+          \(p_A=\dfrac{119}{300},\ \ p_B=\dfrac{96}{300},\ \ p_C=\dfrac{85}{300}\)</div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">\(100\times p_A=39.6\cdots,\ \ 100\times p_B=32,\ \ 100\times p_C=28.3\cdots\)</div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">따라서 상품 A는 <b>\(40\)명</b>, 상품 B는 <b>\(32\)명</b>, 상품 C는 <b>\(28\)명</b>이 구매할 것이다.</div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 3</span>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">124쪽 예제 1이다. '2학년'이라는 조건이므로 남 2학년(57, 45, 33)과 여 2학년(62, 51, 52) 두 줄만 쓴다. 더하면 119, 96, 85, 합계 300(=135+165). 100×119/300=39.66…인데 교과서는 39.6…으로 적었다(소수점 아래를 잘라 쓰고 …을 붙이는 표기). 반올림하면 40명. 32는 나누어떨어진다. 40+32+28=100으로 딱 맞는다 — 그러나 항상 그런 것은 아니라는 것을 「더 깊이」에서 본다.</aside>
+  </section>
+
+  <!-- 8. 문제 2 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 124쪽 · 문제 2</div>
+    <h2>남학생 100명이라면?</h2>
+
+    <table class="dt sm">
+      <caption>(단위: 명)</caption>
+      <tr><th>성별</th><th>학년</th><th>상품 A</th><th>상품 B</th><th>상품 C</th><th>합계</th></tr>
+      <tr><th rowspan="3">남</th><th>1학년</th><td>24</td><td>32</td><td>55</td><td>111</td></tr>
+      <tr><th>2학년</th><td>57</td><td>45</td><td>33</td><td>135</td></tr>
+      <tr><th>3학년</th><td>24</td><td>19</td><td>23</td><td>66</td></tr>
+      <tr><th rowspan="3">여</th><th>1학년</th><td>42</td><td>28</td><td>35</td><td>105</td></tr>
+      <tr><th>2학년</th><td>62</td><td>51</td><td>52</td><td>165</td></tr>
+      <tr><th>3학년</th><td>25</td><td>24</td><td>34</td><td>83</td></tr>
+      <tr class="sum"><th colspan="2">합계</th><td>234</td><td>199</td><td>232</td><td>665</td></tr>
+    </table>
+
+    <ul class="qlist" id="qList2">
+      <li><b>문제 2</b> 예제 1에서 고등학교 남학생 100명이 이 쇼핑몰에 방문할 경우 가장 많이 구매할 상품과 이 상품을 구매할 학생이 몇 명일지 예측하시오.
+        <div class="ans">남학생은 모두 \(312\)명, 상품 A, B, C를 구매한 학생은 각각 \(105\)명, \(96\)명, \(111\)명 →
+          \(p_A=\dfrac{105}{312},\ p_B=\dfrac{96}{312},\ p_C=\dfrac{111}{312}\)<br>
+          \(p_C\)가 가장 크므로 <b>상품 C</b>. &nbsp;\(100\times p_C=100\times\dfrac{111}{312}=35.5\cdots\)이므로 <b>\(36\)명</b>이 상품 C를 구매할 것이다.</div></li>
+    </ul>
+    <aside class="notes">문제 2다(정답및풀이 188쪽: 상품 C, 36명). 함정: 표 맨 아래 합계 행(234, 199, 232)은 남녀 전체다. 남학생만 쓰려면 남 1·2·3학년 세 줄을 직접 더해야 한다 — A 24+57+24=105, B 32+45+19=96, C 55+33+23=111, 합 312(=111+135+66). 합계 행을 그대로 쓰면 틀린다. 학생들이 먼저 '어느 줄을 남기나'를 말하게 한 뒤 문항을 눌러 답을 연다.</aside>
+  </section>
+
+  <!-- 9. 더 깊이 — 예측은 보장이 아니다 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 36명은 약속이 아니다</div>
+    <h2>(인원수) × (확률)은 ‘가장 그럴듯한 값’이다</h2>
+
+    <div class="note-box" style="font-size: var(--lm-slide-body); margin-top: 0;">
+      \(100\times\dfrac{111}{312}=35.5\cdots\) → <b>\(36\)명</b>은 남학생 100명이 올 때 상품 C를 살 인원의 <b>예측값</b>이다.
+      실제로 100명이 오면 33명일 수도, 38명일 수도 있다.
+    </div>
+
+    <div class="sim-bar">
+      <span class="aux-badge">시뮬레이션 · 교과서 데이터 아님</span>
+      <button class="anim-btn expand-btn sim3-run">100명 방문을 10번 흉내 내기</button>
+      <button class="anim-btn sim3-reset">처음부터</button>
+    </div>
+    <div class="chips" id="sim3Chips" style="margin-top: var(--lm-space-2);"></div>
+
+    <svg class="dg" id="sim3Svg" viewBox="0 0 780 230" width="960" height="283" preserveAspectRatio="xMidYMid meet" role="img" aria-label="10번 흉내 낸 결과의 분포와 예측값 35.5">
+      <line class="axis" x1="50" y1="180" x2="740" y2="180"></line>
+      <text class="tick" x="60" y="210" text-anchor="middle">20</text>
+      <text class="tick" x="170" y="210" text-anchor="middle">25</text>
+      <text class="tick" x="280" y="210" text-anchor="middle">30</text>
+      <text class="tick" x="390" y="210" text-anchor="middle">35</text>
+      <text class="tick" x="500" y="210" text-anchor="middle">40</text>
+      <text class="tick" x="610" y="210" text-anchor="middle">45</text>
+      <text class="tick" x="720" y="210" text-anchor="middle">50</text>
+      <line class="ref" x1="402.5" y1="20" x2="402.5" y2="180"></line>
+      <text class="reflbl" x="412" y="36">예측값 35.5…</text>
+      <g id="sim3Dots"></g>
+    </svg>
+
+    <div class="result-box" style="margin-top: var(--lm-space-2);">
+      한 번 한 번은 들쭉날쭉해도, 여러 번의 결과는 <b>예측값 근처</b>에 모인다. 예측은 ‘정확히 이만큼’이 아니라 ‘이 정도’다.
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 버튼을 누르면 컴퓨터가 "남학생 한 명이 상품 C를 살 확률 = 111/312"로 100명을 흉내 내는 일을 10번 반복한다(시뮬레이션이며 교과서 데이터가 아니다. 씨앗값을 정해 두어 누를 때마다 같은 결과가 재현된다). 칩에 적힌 숫자가 각 회의 인원이고, 아래 점이 그 분포다. 빨간 점선이 교과서의 예측값 35.5…이다. 결과가 30명대 초중반~후반에 흩어지지만 점선 근처에 모인다. 4-1-1의 동전과 같은 이야기다 — 100명은 '많이'가 아니라서 출렁임이 남는다. 그래서 '36명'은 가장 그럴듯한 값이지 약속이 아니다.</aside>
+  </section>
+
+  <!-- 10. 더 깊이 — 반올림한 합 -->
+  <section>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 반올림하면 합이 어긋날 수 있다</div>
+    <h2>예측한 인원을 다 더하면 100명일까?</h2>
+
+    <table class="maptbl" style="margin-top: var(--lm-space-4); font-size: var(--lm-slide-body);">
+      <tr><th></th><th>상품 A</th><th>상품 B</th><th>상품 C</th><th>합</th></tr>
+      <tr><th>예제 1 (2학년 100명)</th><td>\(39.6\cdots\to 40\)</td><td>\(32\)</td><td>\(28.3\cdots\to 28\)</td><td class="hl">\(100\)</td></tr>
+      <tr><th>문제 2 (남학생 100명)</th><td>\(33.6\cdots\to 34\)</td><td>\(30.7\cdots\to 31\)</td><td>\(35.5\cdots\to 36\)</td><td class="hl">\(101\)</td></tr>
+    </table>
+    <p class="cap-sm" style="margin-top: var(--lm-space-2);">문제 2의 상품 A, B 인원은 교과서가 묻지 않은 값으로, \(100\times\dfrac{105}{312}\), \(100\times\dfrac{96}{312}\)를 계산한 것이다.</p>
+
+    <div class="result-box">
+      반올림하기 전의 합은 언제나 \(100\)이다(확률의 합이 \(1\)이므로). 각각을 반올림하면 합이 \(100\)에서 조금 어긋날 수 있다 — 계산 실수가 아니다.
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 예제 1은 40+32+28=100으로 딱 맞지만, 문제 2에서 세 상품을 모두 예측하면 34+31+36=101이 된다. 반올림 전의 합은 100×(105+96+111)/312=100으로 정확하다 — 4-1-1 「더 깊이」의 '확률의 합은 1'이다. 학생이 "왜 101명이에요?"라고 물으면 반올림 때문이라고 답한다. 교과서 123쪽 남성 회원 100명도 네 지역을 모두 예측하면 26+25+25+24=100이다(참고).</aside>
+  </section>
+
+  <!-- 11. 확인하기 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 124쪽 확인하기</div>
+    <h2>옳으면 ○, 옳지 않으면 ×</h2>
+
+    <ul class="qlist" id="qListOX">
+      <li><b>⑴</b> 데이터로부터 구한 상대도수를 확률로 사용할 수 있다.
+        <div class="ans">○ &nbsp;— 실험이 불가능한 사건은 데이터로부터 구한 상대도수를 그 사건의 확률로 사용한다 (120쪽)</div></li>
+      <li><b>⑵</b> 인공지능은 확률이 가장 작은 사건이 발생할 것으로 예측한다.
+        <div class="ans">× &nbsp;— 확률이 가장 <b>큰</b> 사건이 발생할 것으로 예측한다 (123쪽 (ⅰ))</div></li>
+    </ul>
+    <aside class="notes">손을 들어 ○× 투표를 받은 뒤 문항을 눌러 확인한다(정답및풀이 188쪽: ⑴ ○, ⑵ ×). ⑴은 4-1-1, ⑵는 오늘의 (ⅰ)을 확인한다.</aside>
+  </section>
+
+  <!-- 12. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄 · 다음 시간 예고</div>
+    <h2>확률이 가장 큰 쪽을 고르고, 확률에 인원수를 곱해 예측한다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">어느 쪽? — 확률이 가장 큰 쪽</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">남성 회원 → 제주</div>
+      </div>
+      <div class="side known">
+        <div class="where">몇 명? — (인원수) × (확률)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">100명 중 26명</div>
+      </div>
+    </div>
+
+    <div class="info-box">그런데 121쪽 표에서 겨울에 여행한 여성 회원은 \(4+5+2+3=14\)명뿐이다. 이것으로 예측해도 될까?</div>
+    <p class="prob-stmt">
+      다음 시간에는 데이터가 너무 적을 때 인공지능이 <b>빈도수를 대체하여</b> 예측하는 방법을 알아본다.
+    </p>
+    <aside class="notes">오늘의 한 줄을 다시 읽는다. 예고 질문을 던지고 답은 받지 않는다. "14명 중 한 명만 다른 곳에 갔어도 1등이 바뀔 수 있다"는 정도까지만 말한다. 다음 시간은 탐구&융합(125~126쪽)이다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 사람 점 100개 — data-on 개수만큼 칠한다(값은 교과서의 26명을 HTML 에 적었다) */
+  (function () {
+    document.querySelectorAll('.people[data-n]').forEach(el => {
+      const n = Number(el.dataset.n), on = Number(el.dataset.on);
+      for (let i = 0; i < n; i++) {
+        const d = document.createElement('i');
+        if (i < on) d.classList.add('on');
+        el.appendChild(d);
+      }
+    });
+  })();
+</script>
+
+<script>
+  /* 「더 깊이」 시뮬레이션 — 남학생 100명이 각각 111/312 의 확률로 상품 C를 산다고 흉내 낸다.
+     씨앗값을 정한 난수(mulberry32)라 누를 때마다 같은 결과가 재현된다. 화면에는 숫자만 넣는다. */
+  (function () {
+    const svg = document.getElementById('sim3Svg');
+    if (!svg) return;
+    const sec = svg.closest('section');
+    const dots = document.getElementById('sim3Dots');
+    const chips = document.getElementById('sim3Chips');
+    const NS = 'http://www.w3.org/2000/svg';
+    const P = 111 / 312, ROUNDS = 10, PEOPLE = 100;
+
+    function mulberry32(a) {
+      return function () {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    function clear() { dots.textContent = ''; chips.textContent = ''; }
+    function run() {
+      clear();
+      const rnd = mulberry32(15);
+      const stack = {};
+      for (let r = 0; r < ROUNDS; r++) {
+        let c = 0;
+        for (let k = 0; k < PEOPLE; k++) if (rnd() < P) c++;
+        const chip = document.createElement('span');
+        chip.textContent = (r + 1) + '회: ' + c + '명';
+        chips.appendChild(chip);
+        stack[c] = (stack[c] || 0) + 1;
+        const cx = 60 + (Math.min(Math.max(c, 20), 50) - 20) * 22;
+        const cy = 168 - (stack[c] - 1) * 24;
+        const dot = document.createElementNS(NS, 'circle');
+        dot.setAttribute('class', 'sdot');
+        dot.setAttribute('cx', String(cx));
+        dot.setAttribute('cy', String(cy));
+        dot.setAttribute('r', '10');
+        dots.appendChild(dot);
+      }
+    }
+    sec.querySelector('.sim3-run').addEventListener('click', run);
+    sec.querySelector('.sim3-reset').addEventListener('click', clear);
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>

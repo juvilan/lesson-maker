@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상대도수에서 확률로 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .maptbl { border-collapse: collapse; margin: var(--lm-space-2) auto 0;
+              font-size: var(--lm-slide-small); }
+    .maptbl th, .maptbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: var(--lm-space-1) var(--lm-space-4); text-align: center; }
+    .maptbl th { background: var(--lm-paper-tint); font-weight: 700; }
+    .maptbl td.hl { color: var(--lm-accent); font-weight: 700; }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+    .note-box { border-left: var(--lm-border-accent) solid var(--lm-info); background: var(--lm-info-tint);
+                padding: var(--lm-space-3) var(--lm-space-4); font-size: var(--lm-slide-small);
+                margin-top: var(--lm-space-3); }
+
+    /* 4-1-1 — 대단원 도입 */
+    .cover-line { font-size: var(--lm-slide-body); line-height: 1.6; color: var(--lm-ink);
+                  border-left: var(--lm-border-accent) solid var(--lm-accent);
+                  padding: var(--lm-space-2) var(--lm-space-5); margin-top: var(--lm-space-4); }
+    .quote { font-size: var(--lm-slide-body-lg); line-height: 1.55; color: var(--lm-ink);
+             background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+             border-radius: var(--lm-radius-md); padding: var(--lm-space-5) var(--lm-space-6);
+             margin-top: var(--lm-space-5); }
+    .quote .who { display: block; margin-top: var(--lm-space-3); font-size: var(--lm-slide-small);
+                  color: var(--lm-ink-3); }
+
+    /* 단원 지도 — 네 소단원을 화살표로 잇는다 */
+    .flow { display: flex; align-items: stretch; gap: var(--lm-space-3); margin-top: var(--lm-space-5); }
+    .flow .stage { flex: 1; border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+                   background: var(--lm-page); padding: var(--lm-space-4); text-align: center; }
+    .flow .stage .no { font-size: var(--lm-slide-h3); font-weight: 700; color: var(--lm-accent); }
+    .flow .stage .nm { font-size: var(--lm-slide-body); font-weight: 700; margin-top: var(--lm-space-1); }
+    .flow .stage .ds { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); margin-top: var(--lm-space-2); line-height: 1.4; }
+    .flow .stage.now { border-color: var(--lm-accent); background: var(--lm-accent-tint); }
+    .flow .arr { align-self: center; font-size: 40px; color: var(--lm-ink-3); }
+
+    /* 준비 학습 ②③ 예고 카드 */
+    .later { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-4); margin-top: var(--lm-space-4); }
+    .later > div { border: var(--lm-border-thin) dashed var(--lm-rule-strong); border-radius: var(--lm-radius-md);
+                   padding: var(--lm-space-3) var(--lm-space-4); font-size: var(--lm-slide-small); color: var(--lm-ink-2); }
+    .later b.to { color: var(--lm-info); }
+
+    /* 동전 표 — 열을 하나씩 연다 */
+    .coin { font-size: var(--lm-slide-small); }
+    .coin td, .coin th { padding: var(--lm-space-1) var(--lm-space-3); min-width: 88px; }
+    .coin th.rowh { min-width: 150px; }
+    .coin td.cc { color: transparent; }
+    .coin td.cc.on { color: var(--lm-ink); }
+    .coin tr.rf td.cc.on { color: var(--lm-accent); font-weight: 700; }
+
+    /* SVG 도식 — 글자는 숫자 눈금만, 수식은 넣지 않는다 */
+    .dg { display: block; margin: 0 auto; max-width: 100%; overflow: hidden; }
+    .dg .axis { stroke: var(--lm-ink-3); stroke-width: 2; fill: none; }
+    .dg .grid { stroke: var(--lm-rule); stroke-width: 1; fill: none; }
+    .dg .ref  { stroke: var(--lm-info); stroke-width: 3; stroke-dasharray: 10 8; fill: none; }
+    .dg .seg  { stroke: var(--lm-danger); stroke-width: 4; fill: none; }
+    .dg .dot  { fill: var(--lm-ink); }
+    .dg .tick { fill: var(--lm-ink-3); font-size: 22px; font-family: var(--lm-font-sans); }
+    .dg .reflbl { fill: var(--lm-info); font-size: 24px; font-weight: 700; font-family: var(--lm-font-sans); }
+    .dg .simline { stroke: var(--lm-accent); stroke-width: 3; fill: none; }
+    .dg .cc { opacity: 0; transition: opacity 0.3s ease; }
+    .dg .cc.on { opacity: 1; }
+
+    .chart-row { display: grid; grid-template-columns: 920px 1fr; gap: var(--lm-space-5);
+                 align-items: center; margin-top: var(--lm-space-3); }
+    .def-box { border: var(--lm-border-heavy, 3px) solid var(--lm-accent); border-radius: var(--lm-radius-md);
+               background: var(--lm-page); padding: var(--lm-space-4) var(--lm-space-5);
+               font-size: var(--lm-slide-body); line-height: 1.6; margin-top: var(--lm-space-4); }
+    .def-box .kw { color: var(--lm-danger); font-weight: 700; }
+
+    /* 시뮬레이션 */
+    .sim-bar { display: flex; align-items: center; gap: var(--lm-space-3); flex-wrap: wrap; margin-top: var(--lm-space-2); }
+    .sim-read { font-size: var(--lm-slide-body); margin-left: var(--lm-space-4); }
+    .sim-read b { color: var(--lm-accent); }
+    .anim-btn.sel { outline: 3px solid var(--lm-accent); outline-offset: 2px; }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-1 확률을 이용한 예측 · 1차시</div>
+    <h1>상대도수에서 확률로</h1>
+    <p class="slide-sub">많이 던질수록 한 값에 모인다 — 그 값이 확률이다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 117~120쪽</span>
+    </div>
+    <aside class="notes">Ⅳ단원 '예측과 최적화'의 첫 시간이다. 오늘의 결론은 한 줄 — 같은 실험을 많이 반복하면 상대도수가 한 값에 모이고, 그 값을 확률이라 한다. 앞부분은 대단원 도입(117~119쪽: 표지, 데이크스트라, 단원 지도, 준비 학습)이고, 본론은 120쪽의 동전 실험이다. 「더 깊이」 두 장(시뮬레이션, 확률의 범위와 합)은 교과서 밖 보강이다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>Ⅲ단원의 끝 — 퍼셉트론이 분류기가 되었다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">3-3-4 0이냐 6이냐</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">점수가 큰 쪽으로 분류한다</div>
+      </div>
+      <div class="side">
+        <div class="where">오늘부터 Ⅳ단원</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">데이터로 확률을 구해 예측한다</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 문장 — <b>“1단원에서 만난 퍼셉트론이 여기서 실제 분류기가 되었다.”</b>
+    </p>
+    <p class="prob-stmt sm">퍼셉트론은 견본과 <b>닮은 정도</b>로 판단했다. 이번 단원의 인공지능은 데이터에서 <b>얼마나 자주 일어났는지</b>를 세어 판단한다.</p>
+    <aside class="notes">3-3-4차시 마지막 결론 상자를 그대로 읽는다. Ⅲ단원은 '닮은 정도(해밍 거리, 출력값)'로 판단했고, Ⅳ단원은 '얼마나 자주'(상대도수, 확률)로 판단한다는 대비를 한 문장으로 만든다. 1단원 '데이터로 배우는 기계'와도 이어진다 — 인공지능은 규칙을 받는 것이 아니라 데이터에서 빈도를 센다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>Ⅳ단원에서 배울 <span class="kw">네 가지(확률 → 추세선 → 손실함수 → 경사하강법)</span>의 흐름을 안다.</span></li>
+      <li><span class="num">2</span><span>실험 횟수가 많아질수록 <span class="kw">상대도수가 일정한 값에 가까워짐</span>을 표와 그래프로 확인할 수 있다.</span></li>
+      <li><span class="num">3</span><span><span class="kw">확률</span>의 뜻을 말하고, 실험할 수 없는 사건은 <span class="kw">데이터의 상대도수</span>를 확률로 쓴다는 것을 안다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">많이 반복하면 상대도수가 한 값에 모이고, 그 값이 확률이다.</span>
+    </div>
+    <aside class="notes">목표 1은 대단원 도입이라 가볍게 지나간다. 이 차시에는 교과서 '문제'가 없다. 확인 활동은 생각 열기 추측과 준비 학습 ①이다. 목표 3의 둘째 문장("실험이 불가능한 사건은 데이터의 상대도수를 확률로 쓴다")이 4-1 전체의 전제이므로 반드시 짚는다.</aside>
+  </section>
+
+  <!-- 4. 대단원 도입 117~118 -->
+  <section>
+    <div class="chapter-tag">교과서 117~118쪽 · 대단원 도입</div>
+    <h2>Ⅳ. 예측과 최적화</h2>
+
+    <div class="cover-line">
+      확률, 함수, 미분 등에 기반한 인공지능 기술은 데이터의 경향성을 파악하고 최적화하며
+      합리적인 의사 결정을 하는 데 활용된다.
+    </div>
+
+    <div class="quote">
+      “컴퓨터가 생각할 수 있을까 하는 의문은 이제 잠수함이 헤엄칠 수 있을까 하는 의문만큼이나 분명하다.”
+      <span class="who">에츠허르 데이크스트라(1930~2002) · 튜링상을 수상한 네덜란드의 컴퓨터 과학자 · 1984년 컴퓨팅 기계 학회 기조 강연</span>
+    </div>
+
+    <p class="prob-stmt sm">잠수함은 물고기처럼 헤엄치지 않지만 물속을 잘 다닌다. 인공지능도 사람처럼 ‘생각’하는지보다 <b>무엇을 해내는지</b>가 중요하다.</p>
+    <aside class="notes">117쪽 표지 문장과 118쪽 인용이다. 1단원 '인공지능의 의미'에서 "기계가 생각한다는 것은 무엇인가"를 물었던 것을 회수한다. 잠수함이 헤엄치느냐는 말장난 같은 질문이다 — 잠수함은 물고기처럼 지느러미를 쓰지 않지만 물속을 잘 다닌다. 인공지능도 사람과 같은 방식으로 생각하는지보다, 데이터로 예측하고 결정하는 일을 해내는지가 중요하다는 뜻으로 풀어 준다. 이 단원은 그 '해내는 방법'(확률, 함수, 미분)을 배운다.</aside>
+  </section>
+
+  <!-- 5. 단원 지도 119 -->
+  <section>
+    <div class="chapter-tag">교과서 119쪽 · 단원 지도</div>
+    <h2>네 단계로 ‘최적화된 예측’까지</h2>
+
+    <div class="flow">
+      <div class="stage now"><div class="no">1</div><div class="nm">확률을 이용한 예측</div><div class="ds">데이터로 확률을 구해<br>어느 쪽일지 예측</div></div>
+      <div class="arr">→</div>
+      <div class="stage"><div class="no">2</div><div class="nm">추세선과 예측</div><div class="ds">점들의 경향을<br>직선 하나로</div></div>
+      <div class="arr">→</div>
+      <div class="stage"><div class="no">3</div><div class="nm">손실함수</div><div class="ds">추세선이 얼마나<br>틀렸는지 점수로</div></div>
+      <div class="arr">→</div>
+      <div class="stage"><div class="no">4</div><div class="nm">경사하강법</div><div class="ds">점수가 가장 작은<br>추세선을 찾아가기</div></div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5);">
+      이 단원에서는 — 데이터의 경향성을 추세선으로 나타내고, 손실함수와 경사하강법을 이용하여 최적화된 예측을 한다.
+    </div>
+    <aside class="notes">119쪽 소단원 목록과 '이 단원에서는' 상자다. 네 칸의 짧은 설명(회색 글씨)은 교사가 붙인 요약이다. 오늘은 1번의 첫 시간이다. 2~4번은 하나의 이야기다 — 경향을 직선으로 잡고(2), 그 직선이 얼마나 틀렸는지 재고(3), 덜 틀리는 쪽으로 고쳐 간다(4).</aside>
+  </section>
+
+  <!-- 6. 준비 학습 -->
+  <section>
+    <div class="chapter-tag">교과서 119쪽 · 준비 학습</div>
+    <h2>중학교에서 배운 확률 꺼내기</h2>
+
+    <ul class="qlist" id="qPrep">
+      <li><b>①</b> 빨간 구슬 3개와 파란 구슬 2개가 들어 있는 주머니에서 구슬 1개를 임의로 꺼낼 때, 꺼낸 구슬이 빨간 구슬일 확률을 구하시오. <span class="cap-sm">(중학교 수학 2 · 확률)</span>
+        <div class="ans">\(\dfrac{3}{3+2}=\dfrac{3}{5}\) &nbsp;— (빨간 구슬의 개수) ÷ (모든 구슬의 개수)</div></li>
+    </ul>
+
+    <div class="later">
+      <div><b>②</b> 이차함수 \(y=(x-2)^2-4\), \(y=2x^2+4x+3\)의 최솟값 <span class="cap-sm">(중학교 수학 3)</span><br>
+        → <b class="to">3. 손실함수</b>에서 ‘가장 작은 값’을 찾을 때 다시 만난다.</div>
+      <div><b>③</b> 수학 점수와 과학 점수의 산점도, 상관관계 <span class="cap-sm">(중학교 수학 3)</span><br>
+        → <b class="to">2. 추세선과 예측</b>의 출발점이다.</div>
+    </div>
+    <aside class="notes">준비 학습 ①만 오늘 푼다. 문항을 눌러 답을 연다(정답및풀이 188쪽: 3/(3+2)=3/5). 이 꼴, 곧 '해당하는 경우 ÷ 모든 경우'가 오늘 120쪽 마지막 공식과 똑같다는 것을 기억시킨다. ②③은 예고만 한다. 참고로 정답은 ② ⑴ x=2일 때 최솟값 -4, ⑵ y=2(x+1)²+1이므로 x=-1일 때 최솟값 1, ③ 양의 상관관계다(정답및풀이 188쪽).</aside>
+  </section>
+
+  <!-- 7. 생각 열기 — 동전 표와 그래프 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 120쪽 · 생각 열기</div>
+    <h2>동전을 던진 횟수가 많아지면?</h2>
+
+    <table class="maptbl coin" id="coinTbl">
+      <tr><th class="rowh">던진 횟수(회)</th><th>50</th><th>100</th><th>150</th><th>200</th><th>250</th><th>300</th><th>350</th><th>400</th><th>450</th><th>500</th></tr>
+      <tr><th class="rowh">앞면(회)</th><td class="cc" data-k="1">28</td><td class="cc" data-k="2">53</td><td class="cc" data-k="3">68</td><td class="cc" data-k="4">105</td><td class="cc" data-k="5">119</td><td class="cc" data-k="6">147</td><td class="cc" data-k="7">180</td><td class="cc" data-k="8">195</td><td class="cc" data-k="9">229</td><td class="cc" data-k="10">252</td></tr>
+      <tr class="rf"><th class="rowh">상대도수</th><td class="cc" data-k="1">0.560</td><td class="cc" data-k="2">0.530</td><td class="cc" data-k="3">0.453</td><td class="cc" data-k="4">0.525</td><td class="cc" data-k="5">0.476</td><td class="cc" data-k="6">0.490</td><td class="cc" data-k="7">0.514</td><td class="cc" data-k="8">0.488</td><td class="cc" data-k="9">0.509</td><td class="cc" data-k="10">0.504</td></tr>
+    </table>
+
+    <div class="chart-row">
+      <svg class="dg" id="coinSvg" viewBox="0 0 760 420" width="900" height="497" preserveAspectRatio="xMidYMid meet" role="img" aria-label="동전을 던진 횟수에 따른 앞면의 상대도수 꺾은선 그래프">
+        <line class="grid" x1="80" y1="40" x2="720" y2="40"></line>
+        <line class="grid" x1="80" y1="120" x2="720" y2="120"></line>
+        <line class="grid" x1="80" y1="280" x2="720" y2="280"></line>
+        <line class="ref" x1="80" y1="200" x2="720" y2="200"></line>
+        <line class="axis" x1="80" y1="360" x2="730" y2="360"></line>
+        <line class="axis" x1="80" y1="360" x2="80" y2="30"></line>
+        <text class="tick" x="70" y="368" text-anchor="end">0.40</text>
+        <text class="tick" x="70" y="288" text-anchor="end">0.45</text>
+        <text class="reflbl" x="70" y="208" text-anchor="end">0.50</text>
+        <text class="tick" x="70" y="128" text-anchor="end">0.55</text>
+        <text class="tick" x="70" y="48" text-anchor="end">0.60</text>
+        <text class="tick" x="208" y="392" text-anchor="middle">100</text>
+        <text class="tick" x="336" y="392" text-anchor="middle">200</text>
+        <text class="tick" x="464" y="392" text-anchor="middle">300</text>
+        <text class="tick" x="592" y="392" text-anchor="middle">400</text>
+        <text class="tick" x="720" y="392" text-anchor="middle">500</text>
+        <text class="tick" x="740" y="416" text-anchor="end">던진 횟수(회)</text>
+        <line class="seg cc" data-k="2" x1="144" y1="104" x2="208" y2="152"></line>
+        <line class="seg cc" data-k="3" x1="208" y1="152" x2="272" y2="275.2"></line>
+        <line class="seg cc" data-k="4" x1="272" y1="275.2" x2="336" y2="160"></line>
+        <line class="seg cc" data-k="5" x1="336" y1="160" x2="400" y2="238.4"></line>
+        <line class="seg cc" data-k="6" x1="400" y1="238.4" x2="464" y2="216"></line>
+        <line class="seg cc" data-k="7" x1="464" y1="216" x2="528" y2="177.6"></line>
+        <line class="seg cc" data-k="8" x1="528" y1="177.6" x2="592" y2="219.2"></line>
+        <line class="seg cc" data-k="9" x1="592" y1="219.2" x2="656" y2="185.6"></line>
+        <line class="seg cc" data-k="10" x1="656" y1="185.6" x2="720" y2="193.6"></line>
+        <circle class="dot cc" data-k="1" cx="144" cy="104" r="7"></circle>
+        <circle class="dot cc" data-k="2" cx="208" cy="152" r="7"></circle>
+        <circle class="dot cc" data-k="3" cx="272" cy="275.2" r="7"></circle>
+        <circle class="dot cc" data-k="4" cx="336" cy="160" r="7"></circle>
+        <circle class="dot cc" data-k="5" cx="400" cy="238.4" r="7"></circle>
+        <circle class="dot cc" data-k="6" cx="464" cy="216" r="7"></circle>
+        <circle class="dot cc" data-k="7" cx="528" cy="177.6" r="7"></circle>
+        <circle class="dot cc" data-k="8" cx="592" cy="219.2" r="7"></circle>
+        <circle class="dot cc" data-k="9" cx="656" cy="185.6" r="7"></circle>
+        <circle class="dot cc" data-k="10" cx="720" cy="193.6" r="7"></circle>
+      </svg>
+      <div>
+        <p class="prob-stmt sm" style="margin-top: 0;">\((\text{상대도수})=\dfrac{(\text{앞면이 나온 횟수})}{(\text{동전을 던진 횟수})}\)</p>
+        <p class="cap-sm">상대도수는 반올림하여 소수점 아래 셋째 자리까지 나타낸 것이다.</p>
+        <div class="note-box">동전을 던진 횟수가 많아질수록 앞면이 나온 횟수의 상대도수가 어떤 값에 가까워지는지 추측해 보자.</div>
+        <div class="stepper" id="coinStep">
+          <button class="anim-btn coin-next">한 칸 더</button>
+          <button class="anim-btn coin-all">모두</button>
+          <button class="anim-btn coin-reset">처음부터</button>
+          <span class="step-counter">0 / 10</span>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">120쪽 생각 열기 표와 그래프다. 값은 교과서 표 그대로다(400회는 195/400=0.4875를 반올림한 0.488). '한 칸 더'를 누를 때마다 열 하나와 그래프의 점 하나가 나타난다. 처음 몇 칸은 크게 출렁이다가(0.560 → 0.453 → 0.525) 뒤로 갈수록 0.5 점선 근처에 붙는 것을 학생이 먼저 말하게 한다. 교과서 그래프는 세로 눈금이 0.4, 0.5만 표시되어 있는데, 여기서는 0.05 간격으로 눈금을 더 그었다. 오개념 주의: "500번 던졌으니 정확히 250번 나와야 한다" — 표에서도 500회에 252번, 0.504다.</aside>
+  </section>
+
+  <!-- 8. 확률의 정의 -->
+  <section>
+    <div class="chapter-tag">교과서 120쪽</div>
+    <h2>일정한 값에 가까워진다 — 그 값이 확률</h2>
+
+    <p class="prob-stmt sm">위의 그래프에서 동전을 던진 횟수가 많아질수록 앞면이 나온 횟수의 상대도수가 <b>일정한 값 \(0.5\)</b>에 가까워짐을 알 수 있다.</p>
+
+    <div class="def-box">
+      동일한 조건에서 이루어지는 많은 횟수의 실험이나 관찰에서 어떤 사건이 일어나는 횟수의 상대도수가
+      일정한 값에 가까워질 때, 이 일정한 값을 그 사건이 일어날 <span class="kw">확률</span>이라고 한다.
+    </div>
+
+    <div class="sides" style="margin-top: var(--lm-space-5);">
+      <div class="side">
+        <div class="where">50번 던졌을 때</div>
+        <div class="what">\(0.560\)</div>
+      </div>
+      <div class="side known">
+        <div class="where">500번 던졌을 때</div>
+        <div class="what">\(0.504\)</div>
+      </div>
+    </div>
+    <div class="warning-box">500번 던져도 정확히 250번은 아니다(252번). 상대도수는 \(0.5\)에 <b>가까워질</b> 뿐이다.</div>
+    <aside class="notes">교과서의 확률 정의 문장을 그대로 읽힌다. 지도서는 이것을 '통계적 확률'이라고 부르지만 교과서 본문에는 그 말이 없으므로 화면에는 '확률'만 쓴다(필요하면 말로만 덧붙인다). 지도서 유의점: 상대도수가 가까워지는 그 값이 확률이다. 아래 두 카드로 50회와 500회를 비교한다 — 0.06 차이에서 0.004 차이로 줄었다. 그런데 '정확히 0.5'가 되는 것은 아니라는 점을 경고 상자로 못 박는다.</aside>
+  </section>
+
+  <!-- 9. 더 깊이 — 시뮬레이션 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 컴퓨터로 동전 던지기</div>
+    <h2>왜 한 값에 모일까? — 직접 던져 보자</h2>
+
+    <div class="sim-bar">
+      <span class="aux-badge">시뮬레이션 · 교과서 데이터 아님</span>
+      <button class="anim-btn sim-n" data-n="10">10번</button>
+      <button class="anim-btn sim-n" data-n="100">100번</button>
+      <button class="anim-btn sim-n" data-n="1000">1000번</button>
+      <button class="anim-btn sim-seed">다른 동전으로</button>
+      <span class="sim-read">앞면 <b id="simH">-</b>번 / <b id="simN">-</b>번 → 상대도수 <b id="simR">-</b></span>
+    </div>
+
+    <svg class="dg" id="simSvg" viewBox="0 0 1240 440" width="1240" height="440" preserveAspectRatio="xMidYMid meet" role="img" aria-label="던질 때마다 바뀌는 앞면의 상대도수 그래프" style="margin-top: var(--lm-space-3);">
+      <line class="grid" x1="90" y1="40" x2="1200" y2="40"></line>
+      <line class="grid" x1="90" y1="120" x2="1200" y2="120"></line>
+      <line class="grid" x1="90" y1="280" x2="1200" y2="280"></line>
+      <line class="ref" x1="90" y1="200" x2="1200" y2="200"></line>
+      <line class="axis" x1="90" y1="360" x2="1210" y2="360"></line>
+      <line class="axis" x1="90" y1="360" x2="90" y2="30"></line>
+      <text class="tick" x="80" y="368" text-anchor="end">0</text>
+      <text class="tick" x="80" y="288" text-anchor="end">0.25</text>
+      <text class="reflbl" x="80" y="208" text-anchor="end">0.5</text>
+      <text class="tick" x="80" y="128" text-anchor="end">0.75</text>
+      <text class="tick" x="80" y="48" text-anchor="end">1</text>
+      <text class="tick" id="simX1" x="367.5" y="392" text-anchor="middle"></text>
+      <text class="tick" id="simX2" x="645" y="392" text-anchor="middle"></text>
+      <text class="tick" id="simX3" x="922.5" y="392" text-anchor="middle"></text>
+      <text class="tick" id="simX4" x="1200" y="392" text-anchor="middle"></text>
+      <text class="tick" x="1210" y="426" text-anchor="end">던진 횟수(회)</text>
+      <polyline class="simline" id="simLine" points=""></polyline>
+    </svg>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      몇 번 안 던지면 한두 번의 결과가 상대도수를 크게 흔든다. 많이 던지면 한 번의 결과가 전체에 주는 영향이
+      \(\dfrac{1}{(\text{던진 횟수})}\)로 작아져서 선이 \(0.5\) 근처에 머문다.
+    </div>
+    <aside class="notes">교과서 밖 보강이며, 컴퓨터가 동전을 흉내 내는 시뮬레이션이다(교과서 표의 데이터가 아니다). '10번'을 먼저 누르면 선이 0과 1 사이를 크게 오간다. '100번', '1000번'으로 갈수록 0.5 점선 근처에 붙는다. '다른 동전으로'를 누르면 다른 결과가 나온다 — 그래도 1000번이면 매번 0.5 근처라는 것이 핵심이다. 이유: 1000번째 한 번의 결과는 상대도수를 많아야 1/1000만큼밖에 바꾸지 못한다. 처음 10번째의 한 번은 1/10씩 바꾼다. 컴퓨터의 난수는 씨앗값을 정해 두어서, 같은 버튼을 누르면 같은 그림이 다시 나온다(수업 재현용).</aside>
+  </section>
+
+  <!-- 10. 실험이 불가능한 사건 -->
+  <section>
+    <div class="chapter-tag">교과서 120쪽</div>
+    <h2>실험할 수 없는 사건은 데이터로</h2>
+
+    <div class="sides">
+      <div class="side">
+        <div class="where">동전의 앞면</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">실험을 반복하여 구한다</div>
+      </div>
+      <div class="side known">
+        <div class="where">실험이 불가능한 사건</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">데이터의 상대도수를 확률로</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt sm">이때 어떤 사건이 일어날 확률 \(p\)는 다음과 같이 계산한다.</p>
+    <div class="def-box" style="text-align: center;">
+      \(p=\dfrac{(\text{어떤 사건이 일어나는 경우의 수})}{(\text{일어나는 모든 경우의 수})}\)
+    </div>
+    <div class="note-box">준비 학습 ①의 \(\dfrac{3}{3+2}=\dfrac{3}{5}\)가 바로 이 꼴이다 — (빨간 구슬 수) ÷ (모든 구슬 수).</div>
+    <aside class="notes">120쪽 마지막 단락이다. 동전은 몇 번이고 던질 수 있지만, '새로 가입한 회원이 어디로 여행 갈까', '내일 이 손님이 무엇을 살까' 같은 일은 실험을 반복할 수 없다. 그럴 때는 이미 모인 데이터에서 상대도수를 구해 그것을 확률로 쓴다. 이 문장이 4-1 전체의 전제다. 다음 시간부터 다룰 여행사·쇼핑몰 표가 모두 이 방식이다.</aside>
+  </section>
+
+  <!-- 11. 더 깊이 — 0과 1 사이, 합은 1 -->
+  <section>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 확률의 범위와 합</div>
+    <h2>확률은 0과 1 사이, 모두 더하면 1</h2>
+
+    <div class="sides">
+      <div class="side">
+        <div class="where">일어나는 횟수는 \(0\)번 이상, 전체 횟수 이하</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(0\le p\le 1\)</div>
+      </div>
+      <div class="side">
+        <div class="where">가능한 결과를 모두 모으면 전체</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">(모든 확률의 합) \(=1\)</div>
+      </div>
+    </div>
+
+    <table class="maptbl" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-body);">
+      <tr><th></th><th>한쪽</th><th>다른 쪽</th><th>합</th></tr>
+      <tr><th>동전 500회 (120쪽 표)</th><td>앞면 \(\dfrac{252}{500}=0.504\)</td><td>뒷면 \(\dfrac{248}{500}=0.496\)</td><td class="hl">\(1\)</td></tr>
+      <tr><th>구슬 (준비 학습 ①)</th><td>빨강 \(\dfrac{3}{5}\)</td><td>파랑 \(\dfrac{2}{5}\)</td><td class="hl">\(1\)</td></tr>
+    </table>
+    <p class="cap-sm" style="margin-top: var(--lm-space-2);">뒷면 248회와 파란 구슬의 확률은 교과서 값에서 계산한 것이다.</p>
+
+    <div class="result-box">
+      확률이 \(0\)이면 일어나지 않는 사건, \(1\)이면 반드시 일어나는 사건이다. 확률이 \(1\)보다 크거나 음수이면 계산이 틀린 것이다.
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 상대도수는 (일어난 횟수)/(전체 횟수)이고, 일어난 횟수는 0번에서 전체 횟수 사이이므로 상대도수, 곧 확률도 0과 1 사이다. 또 앞면과 뒷면처럼 가능한 결과를 모두 더하면 전체 횟수가 되므로 상대도수의 합은 1이다(252+248=500). 이 성질은 다음 시간들에 계산을 검산하는 도구로 쓴다 — 예를 들어 네 지역의 확률을 모두 더하면 1이 되어야 한다. 뒷면 248회는 교과서에 없고 500-252로 계산한 값이다.</aside>
+  </section>
+
+  <!-- 12. 확인 활동 -->
+  <section>
+    <div class="chapter-tag">확인 활동</div>
+    <h2>오늘 배운 것 확인하기</h2>
+
+    <ul class="qlist" id="qCheck">
+      <li><b>⑴</b> <span class="cap-sm">(생각 열기)</span> 동전을 던진 횟수가 많아질수록 앞면이 나온 횟수의 상대도수는 어떤 값에 가까워지는가?
+        <div class="ans">\(0.5\)에 가까워진다. (정답및풀이 188쪽)</div></li>
+      <li><b>⑵</b> 400번 던져 앞면이 195번 나왔다. 상대도수를 반올림하여 소수점 아래 셋째 자리까지 구하시오.
+        <div class="ans">\(\dfrac{195}{400}=0.4875\) → 넷째 자리에서 반올림하여 \(0.488\) (120쪽 표)</div></li>
+      <li><span class="aux-badge">보조 예시</span><b>⑶</b> “동전을 500번 던지면 앞면은 반드시 250번 나온다.” 옳은가?
+        <div class="ans">× — 교과서 표에서도 500번에 252번(\(0.504\))이었다. 상대도수는 \(0.5\)에 가까워질 뿐이다.</div></li>
+      <li><span class="aux-badge">더 깊이</span><b>⑷</b> 준비 학습 ①의 주머니에서 파란 구슬이 나올 확률은? 두 확률의 합은?
+        <div class="ans">\(\dfrac{2}{5}\), 합은 \(\dfrac{3}{5}+\dfrac{2}{5}=1\)</div></li>
+    </ul>
+    <aside class="notes">문항을 눌러 답을 연다. ⑴은 교과서 생각 열기의 답(정답및풀이 188쪽), ⑵는 표의 400회 값이다 — 0.4875는 다섯째 자리가 없으므로 넷째 자리 5에서 올려 0.488이다. ⑶은 교과서 밖 보조 문항으로, 오개념을 겨냥한다. ⑷는 「더 깊이」 장의 내용 확인이다.</aside>
+  </section>
+
+  <!-- 13. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄 · 다음 시간 예고</div>
+    <h2>많이 반복하면 상대도수가 한 값에 모이고, 그 값이 확률이다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">동전 — 실험할 수 있다</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">상대도수 → \(0.5\)</div>
+      </div>
+      <div class="side">
+        <div class="where">실험할 수 없는 사건</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">데이터의 상대도수를 확률로</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      다음 시간에는 여행사 회원 데이터에서 <b>조건에 맞는 칸을 골라</b> 확률을 구한다.
+    </p>
+    <aside class="notes">오늘의 한 줄을 다시 읽는다. 예고 질문: "그럼 실험을 할 수 없는 일, 예컨대 '새 회원이 어디로 여행 갈까'의 확률은 어떻게 구할까?" — 다음 시간 121쪽의 여행사 표로 이어진다. 오른쪽 카드가 다음 시간의 출발점이다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 동전 표 — 열을 하나씩 연다. 값은 교과서 표를 HTML 에 그대로 적었다(계산하지 않는다). */
+  (function () {
+    const box = document.getElementById('coinStep');
+    if (!box) return;
+    const sec = box.closest('section');
+    const cells = Array.from(sec.querySelectorAll('.cc'));
+    const cnt = box.querySelector('.step-counter');
+    const N = 10;
+    let k = 0;
+    function render() {
+      cells.forEach(el => el.classList.toggle('on', Number(el.dataset.k) <= k));
+      cnt.textContent = k + ' / ' + N;
+    }
+    box.querySelector('.coin-next').addEventListener('click', () => { if (k < N) { k++; render(); } });
+    box.querySelector('.coin-all').addEventListener('click', () => { k = N; render(); });
+    box.querySelector('.coin-reset').addEventListener('click', () => { k = 0; render(); });
+    render();
+  })();
+</script>
+
+<script>
+  /* 「더 깊이」 동전 시뮬레이션 — 씨앗값을 정한 난수(mulberry32)로 재현 가능하게.
+     화면에는 숫자만 textContent 로 넣는다(수식 문자열을 JS 에 두지 않는다). */
+  (function () {
+    const svg = document.getElementById('simSvg');
+    if (!svg) return;
+    const sec = svg.closest('section');
+    const line = document.getElementById('simLine');
+    const X0 = 90, X1 = 1200, Y0 = 360, H = 320;
+    let seed = 2026, lastN = 0;
+
+    function mulberry32(a) {
+      return function () {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    function run(n) {
+      const rnd = mulberry32(seed);
+      let heads = 0;
+      const pts = [];
+      for (let i = 1; i <= n; i++) {
+        if (rnd() < 0.5) heads++;
+        const x = X0 + (X1 - X0) * i / n;
+        const y = Y0 - H * heads / i;
+        pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+      }
+      line.setAttribute('points', pts.join(' '));
+      [1, 2, 3, 4].forEach(q => { document.getElementById('simX' + q).textContent = String(n * q / 4); });
+      document.getElementById('simH').textContent = String(heads);
+      document.getElementById('simN').textContent = String(n);
+      document.getElementById('simR').textContent = (heads / n).toFixed(3);
+      sec.querySelectorAll('.sim-n').forEach(b => b.classList.toggle('sel', Number(b.dataset.n) === n));
+      lastN = n;
+    }
+    sec.querySelectorAll('.sim-n').forEach(b => b.addEventListener('click', () => run(Number(b.dataset.n))));
+    sec.querySelector('.sim-seed').addEventListener('click', () => { seed += 1; run(lastN || 1000); });
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
