@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>수학 탐구 안내 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+
+    /* 5-2 전용: 5단계 · 주제 카드 · 표 · 체크리스트 */
+    .steps5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--lm-space-3); margin-top: var(--lm-space-3); }
+    .stp { border: var(--lm-border-thin) solid var(--lm-rule); border-top: 6px solid var(--lm-accent);
+           border-radius: var(--lm-radius-md); background: var(--lm-page);
+           padding: var(--lm-space-3) var(--lm-space-3); font-size: var(--lm-slide-caption);
+           line-height: 1.45; color: var(--lm-ink-2); }
+    .stp .n { font-size: var(--lm-slide-h3); font-weight: 700; color: var(--lm-accent); line-height: 1; }
+    .stp .t { font-size: var(--lm-slide-small); font-weight: 700; color: var(--lm-ink); margin: var(--lm-space-2) 0; }
+    .stp .pg { display: block; margin-top: var(--lm-space-2); color: var(--lm-ink-3); }
+
+    .topics { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-3); margin-top: var(--lm-space-3); }
+    .tp { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+          background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+          font-size: var(--lm-slide-small); line-height: 1.4; color: var(--lm-ink); }
+    .tp .ty { visibility: hidden; display: block; margin-top: var(--lm-space-2);
+              font-size: var(--lm-slide-caption); font-weight: 700; }
+    .tp .ty.a { color: var(--lm-info); }
+    .tp .ty.b { color: var(--lm-success); }
+    .topics.visible .tp .ty { visibility: visible; }
+    .two-type { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-4); margin-top: var(--lm-space-3);
+                font-size: var(--lm-slide-small); line-height: 1.45; color: var(--lm-ink-2); }
+    .two-type > div { border-left: var(--lm-border-accent) solid var(--lm-info); background: var(--lm-info-tint);
+                      padding: var(--lm-space-2) var(--lm-space-4); }
+    .two-type > div.b { border-left-color: var(--lm-success); background: var(--lm-success-tint); }
+
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    .datatbl { border-collapse: collapse; font-size: var(--lm-slide-caption); width: 100%; margin-top: var(--lm-space-3); }
+    .datatbl th, .datatbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                               padding: var(--lm-space-1) var(--lm-space-3); text-align: center; line-height: 1.4; }
+    .datatbl th { background: var(--lm-paper-tint); font-weight: 700; color: var(--lm-ink); }
+    .datatbl td { background: var(--lm-page); color: var(--lm-ink-2); }
+    .datatbl td.l, .datatbl th.l { text-align: left; }
+    .datatbl td.hide { visibility: hidden; }
+    .datatbl td.hide.visible { visibility: visible; }
+    .datatbl tr.hide-row td { visibility: hidden; }
+    .datatbl tr.hide-row.visible td { visibility: visible; }
+    .datatbl td.deck { color: var(--lm-accent); font-weight: 700; }
+    .datatbl td.deck small { display: block; font-weight: 400; color: var(--lm-ink-3); }
+    .portals { display: flex; flex-wrap: wrap; gap: var(--lm-space-2) var(--lm-space-5); margin-top: var(--lm-space-2);
+               font-size: var(--lm-slide-caption); color: var(--lm-ink-2); }
+    .portals span b { color: var(--lm-ink); }
+
+    .check2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5); margin-top: var(--lm-space-3); }
+    .ck { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+          background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4); }
+    .ck .ckt { font-size: var(--lm-slide-small); font-weight: 700; color: var(--lm-accent); margin-bottom: var(--lm-space-2); }
+    .ck .ckt small { font-weight: 400; color: var(--lm-ink-3); font-size: var(--lm-slide-caption); }
+    .ck ol { margin: 0; padding-left: 1.4em; }
+    .reveal .slides section .ck li { font-size: var(--lm-slide-small); line-height: 1.45; color: var(--lm-ink-2);
+                                     margin: 0 0 var(--lm-space-1); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅴ-2 인공지능과 수학 탐구 · 수행평가 안내</div>
+    <h1>수학 탐구 안내</h1>
+    <p class="slide-sub">배운 수학으로, 데이터로 확인할 수 있는 주제를 고른다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 164~167쪽</span>
+    </div>
+    <aside class="notes">이 차시는 164~167쪽을 수행평가 안내로 쓴다. 164~167쪽에는 데이터도 문항도 정답도 없다 — 탐구 절차, 예시 주제, 비교표, 대응표, 체크리스트가 전부다. 그래서 강의가 아니라 '수행평가를 어떻게 할지' 안내하는 시간으로 진행한다. 흐름: 탐구 5단계 → 주제 예시 6개 → 데이터 정리(166쪽 표) → 1~4단원 수학 도구 대응표(167쪽) → 체크리스트(165·167쪽). 수행평가의 구체적인 일정·분량·채점 기준은 화면에 넣지 않았다. 교사가 말로 덧붙이거나 마지막 장에 직접 추가한다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간 · 오늘 도착할 곳 (164쪽 학습 목표) · 생각 열기</div>
+    <h2>인공지능의 결정도 틀릴 수 있다 — 전적으로 의존하지 않고, 인간이 책임을 다하며 협력한다</h2>
+
+    <div class="sides">
+      <div class="side">
+        <div class="where">학생 1</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">“지구 온난화 때문에 우리나라 여름이 길어지고 있대.”</div>
+      </div>
+      <div class="side known">
+        <div class="where">학생 2</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">“진짜? 앞으로 여름이 얼마나 더 길어질까?”</div>
+      </div>
+    </div>
+
+    <ul class="objective-list" style="margin-top: var(--lm-space-5);">
+      <li><span class="num">1</span><span>인공지능과 관련된 <span class="kw">수학 주제를 선정하여 탐구</span>할 수 있다.</span></li>
+    </ul>
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      어떤 <b>데이터</b>가 있으면, 배운 어떤 <b>수학</b>으로 답할 수 있을까?
+    </div>
+    <aside class="notes">지난 시간 오늘 한 줄을 그대로 다시 읽는다. 지난 시간에는 인공지능이 내린 결정을 따져 보았다. 오늘은 우리가 직접 근거(데이터)를 모으고 수학으로 답을 내는 쪽에 선다. 164쪽 생각 열기의 두 학생 대화를 읽고, 아래 질문을 칠판에 적는다. 정답은 없다. "기온 기록", "해마다 여름이 며칠이었는지" 같은 대답이 나오면 4단원 추세선과 연결해 준다. 164쪽 본문: 과거에는 사람의 직관이나 경험에 의존했지만, 지금은 인공지능으로 합리적인 문제해결 방안을 찾는다 — 한정된 시간과 자원을 효율적으로 쓰고, 미래 상태를 높은 정확도로 예측해 대비할 수 있다.</aside>
+  </section>
+
+  <!-- 3. 탐구 5단계 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 164~167쪽 · 인공지능을 활용한 문제해결 절차</div>
+    <h2>탐구는 다섯 단계로 한다</h2>
+
+    <div class="steps5">
+      <div class="stp"><div class="n">1</div><div class="t">주제 선정</div>
+        이 교과서의 학습 개념으로 해결할 수 있고, 해결 결과를 수학적으로 확인할 수 있는 주제를 탐색하고 선정한다.<span class="pg">165쪽</span></div>
+      <div class="stp"><div class="n">2</div><div class="t">데이터 수집과 정리</div>
+        필요한 데이터를 신뢰할 수 있는 출처에서 수집하고, 인공지능이 학습하고 분석할 수 있도록 정리한다.<span class="pg">166쪽</span></div>
+      <div class="stp"><div class="n">3</div><div class="t">탐구 수행</div>
+        문제해결에 적합한 수학적 개념과 인공지능 알고리즘을 선택하고, 데이터를 분석하여 결과를 도출한다.<span class="pg">167쪽</span></div>
+      <div class="stp"><div class="n">4</div><div class="t">결과 해석</div>
+        결과를 수학적으로 해석하고, 타당성을 검토하고, 실생활에서의 의미를 구체적으로 설명한다.<span class="pg">167쪽</span></div>
+      <div class="stp"><div class="n">5</div><div class="t">평가와 후속 계획</div>
+        모든 과정을 종합적으로 평가하고, 좋았던 부분과 개선할 부분을 찾아 다음 탐구 계획을 작성한다.<span class="pg">167쪽</span></div>
+    </div>
+
+    <p class="prob-stmt sm">수행평가도 이 다섯 단계를 그대로 따른다. 오늘은 <b>1~3단계</b>를 준비하는 데 필요한 것을 본다.</p>
+    <aside class="notes">교과서 164쪽 문제해결 5단계. 칸 안의 설명은 165~167쪽 각 단계의 첫 문단을 줄인 것이다. 비유: 요리와 같다 — 메뉴를 정하고(주제), 장을 보고 손질하고(데이터), 조리하고(탐구 수행), 맛을 보고(결과 해석), 다음에 무엇을 바꿀지 적는다(평가). 1-3-2 빅데이터 활용 단계, 3-3-1 지도학습 단계와 같은 모양이라는 것을 짚어 준다(문제 → 데이터 → 모델 → 적용). 4단계 방주: 결과를 해석할 때 시각적 자료(그래프 등)를 활용하면 직관적인 이해를 도울 수 있다.</aside>
+  </section>
+
+  <!-- 4. 주제 예시 6개 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 165쪽 · 단계 1 주제 탐색하기</div>
+    <h2>어떤 주제가 가능할까?</h2>
+
+    <div class="two-type" style="margin-top: 0;">
+      <div><b>㉠</b> 이 교과서의 학습 개념을 활용하여 데이터를 분석해 <b>분류와 예측</b>을 수행하는 것</div>
+      <div class="b"><b>㉡</b> 특정한 문제를 해결하는 <b>인공지능 모델을 개발</b>하는 것</div>
+    </div>
+
+    <div class="topics" data-s>
+      <div class="tp">신작 영화에 대한 국가별 사회 관계망 서비스(SNS) 감성 분석<span class="ty a">㉠ 분류와 예측</span></div>
+      <div class="tp">재활용 쓰레기 사진의 분류<span class="ty a">㉠ 분류와 예측</span></div>
+      <div class="tp">우리나라 주변 해수 온도의 변화 예측<span class="ty a">㉠ 분류와 예측</span></div>
+      <div class="tp">학급 학생들 간의 학습 유형에 대한 유사도 분석<span class="ty b">㉡ 모델 개발</span></div>
+      <div class="tp">환경 관련 키워드 분석과 환경 정책 간의 연관성 탐구<span class="ty a">㉠ 분류와 예측</span></div>
+      <div class="tp">진로와 관심사를 바탕으로 학교 교육 활동을 추천하는 프로그램 개발<span class="ty b">㉡ 모델 개발</span></div>
+    </div>
+    <div class="stepper" style="margin-top: var(--lm-space-3);">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 1</span>
+      <span class="aux-badge" style="margin-left: var(--lm-space-4);">지도서 자료</span><span class="cap-sm">유형 구분은 지도서 212쪽 내용 연구</span>
+    </div>
+    <aside class="notes">교과서 165쪽 단계 1 ① 주제 탐색하기. 위의 두 유형은 본문 문장이고, 기호 ㉠㉡은 화면에서 구분하려고 붙였다(교과서에는 기호 없음). 여섯 주제를 읽고 "각 주제는 ㉠일까 ㉡일까?" 손을 들게 한 뒤 '다음'을 누른다. 구분의 근거는 지도서 212쪽 내용 연구다(교과서 지면에는 없음): ⑴ 분류와 예측 — 영화 SNS 감성 분석(텍스트 데이터 분석), 쓰레기 사진 분류(이미지 분류 모델), 해수 온도 예측(추세선), 환경 키워드와 정책(텍스트 마이닝·상관관계) / ⑵ 인공지능 모델 개발 — 학습 유형 유사도 분석(유사도 기반 군집화·추천 알고리즘), 교육 활동 추천 프로그램(규칙 기반 추천 시스템, 전문가시스템). 수행평가 주제는 이 여섯 개를 그대로 써도 되고, 같은 모양으로 새 주제를 만들어도 된다(교사 결정).</aside>
+  </section>
+
+  <!-- 5. 데이터 수집과 정리 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 166쪽 · 단계 2 데이터 수집과 정리</div>
+    <h2>데이터는 모으고, 정리해야 쓸 수 있다</h2>
+
+    <div class="portals"><span><b>신뢰할 수 있는 출처</b></span><span>국가통계포털 kosis.kr</span><span>공공데이터포털 www.data.go.kr</span><span>기상자료개방포털 data.kma.go.kr</span><span>AI-Hub aihub.or.kr</span></div>
+
+    <table class="datatbl">
+      <tr><th style="width: 13%;">인공지능의<br>학습과 분석</th><th>신작 영화에 대한 국가별<br>SNS 감성 분석</th><th>재활용 쓰레기<br>사진의 분류</th><th>우리나라 주변<br>해수 온도의 변화 예측</th></tr>
+      <tr><th>데이터 유형</th><td>텍스트 데이터</td><td>이미지 데이터</td><td>수치형 데이터</td></tr>
+      <tr><th>데이터 수집</th><td>사회 관계망 서비스(SNS)에서 영화에 대한 국가별 텍스트 데이터 수집</td><td>분류하려는 범주에 해당되는 쓰레기 사진 수집</td><td>기상청 등에서 제공하는 관측 데이터 수집</td></tr>
+      <tr><th>수집된<br>데이터 상태</th><td>영화관 정보와 같이 영화와 관계없는 내용 포함</td><td>사진의 해상도와 배경 등 분석 대상 외의 요소 포함</td><td>해수 온도와 풍속 등 다양한 기상 요소 포함</td></tr>
+      <tr class="hide-row" data-s><th>데이터 정리</th><td>텍스트 데이터에서 감성 분석의 목적과 관련된 문장을 선별</td><td>사진 크기와 형식을 통일하고, 지도학습에 적합하도록 범주별로 라벨링 수행</td><td>분석에 필요한 수치만을 추출하여 날짜별로 정리</td></tr>
+    </table>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 1</span>
+      <span class="cap-sm" style="margin-left: var(--lm-space-4);"><b>라벨링(labeling)</b> — 지도학습에서 학습용 데이터에 정답을 명시해 주는 과정</span>
+    </div>
+    <aside class="notes">교과서 166쪽. 표는 지면 그대로다. 방주: 데이터를 수집할 때에는 출처의 신뢰성을 반드시 검토해야 한다. 활동: '데이터 정리' 행을 가린 채 "수집된 데이터 상태"를 보고 무엇을 해야 할지 예상하게 한 뒤 '다음'을 누른다. 본문: 수집된 데이터는 형식이 서로 다를 수 있고, 측정값의 일부가 누락되거나 분석에 불필요한 요소가 포함될 수도 있다. 라벨링은 1-1 지도학습("정답을 줄까")과 3-3-1의 지도학습 단계에서 본 것이다. 지도서 212쪽에 포털별 제공 데이터와 활용 예가 있다(기상자료개방포털: 해수 온도 변화 예측, 여름 일수 변화 분석 등) — 학생이 출처를 고를 때 말로 안내한다.</aside>
+  </section>
+
+  <!-- 6. 1~4단원 수학 도구 대응표 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 167쪽 · 단계 3 탐구 수행</div>
+    <h2>쓸 수학은 이미 1~4단원에 있다</h2>
+
+    <table class="datatbl" style="margin-top: 0;">
+      <tr><th class="l">탐구 주제</th><th class="l">수학적 개념과 인공지능 알고리즘</th><th>교과서 쪽</th><th>우리가 본 덱</th></tr>
+      <tr><td class="l">신작 영화 국가별 SNS 감성 분석</td><td class="l">감성 사전을 이용한 감성 분석</td><td>감성 분석 64쪽</td>
+          <td class="deck hide" data-s>2-3-1<small>감성 사전과 감성 점수</small></td></tr>
+      <tr><td class="l">재활용 쓰레기 사진의 분류</td><td class="l">지도학습을 이용한 이미지 데이터 분류</td><td>티처블 머신 110쪽</td>
+          <td class="deck hide" data-s>3단원 창의 Up<small>덱 없음</small></td></tr>
+      <tr><td class="l">우리나라 주변 해수 온도의 변화 예측</td><td class="l">추세선과 경사하강법을 이용한 최적화 분석</td><td>추세선 127쪽<br>경사하강법 144쪽</td>
+          <td class="deck hide" data-s>4-2-1 · 4-4-3<small>추세선 그리기 · 경사하강법과 학습률</small></td></tr>
+      <tr><td class="l">학급 학생들 간의 학습 유형에 대한 유사도 분석</td><td class="l">학습 태도 설문 결과에 대한 유사도 분석</td><td>유사도 분석 72쪽</td>
+          <td class="deck hide" data-s>2-3-4<small>자카드 유사도와 비교</small></td></tr>
+      <tr><td class="l">환경 관련 키워드 분석과 환경 정책 간의 연관성 탐구</td><td class="l">TF-IDF 분석과 유사도 분석을 이용한 주제어 선정, 관계도 분석</td><td>빅카인즈 40쪽<br>TF-IDF 58쪽 · 워드 클라우드 62쪽</td>
+          <td class="deck hide" data-s>2-2-2<small>TF-IDF (40쪽 빅카인즈는 덱 없음)</small></td></tr>
+      <tr><td class="l">진로와 관심사를 바탕으로 학교 교육 활동을 추천하는 프로그램 개발</td><td class="l">학교 교육 활동 내용을 지식 베이스로 설계한 전문가시스템</td><td>전문가시스템 27쪽</td>
+          <td class="deck hide" data-s>1-2-2<small>진리표와 논리연산</small></td></tr>
+    </table>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 6</span>
+    </div>
+    <aside class="notes">교과서 167쪽 단계 3 표. 왼쪽 세 열은 지면 그대로이고, 오른쪽 '우리가 본 덱' 열은 교사가 붙인 대응이다. 활동(역방향 매칭): 한 줄씩 "이 도구, 몇 단원 몇 차시에서 배웠지?"를 묻고 '다음'으로 공개한다. 64쪽 → 2-3-1(감성 사전·감성 점수), 110쪽 → 3단원 창의 Up(티처블 머신, 수업 덱 없음), 127쪽 → 4-2-1(추세선 그리기), 144쪽 → 4-4-3(경사하강법과 학습률), 72쪽 → 2-3-4(자카드 유사도와 비교), 40쪽 → 1-3 절 끝의 빅카인즈 실습(1-3-2 덱 범위 밖, 덱 없음), 58·62쪽 → 2-2-2(TF-IDF), 27쪽 → 1-2-2(전문가시스템). 수행평가에서 학생이 주제를 고르면 이 표에서 쓸 수학과 다시 볼 덱을 찾게 한다. 본문: 탐구 주제와 목적을 고려하여 문제해결에 적합한 수학적 개념과 인공지능 알고리즘을 선택하고, 이를 활용하여 데이터를 분석하고 결과를 도출한다.</aside>
+  </section>
+
+  <!-- 7. 체크리스트 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 165·167쪽 · 수행평가 체크리스트</div>
+    <h2>주제를 고를 때, 탐구를 마칠 때 점검한다</h2>
+
+    <div class="check2">
+      <div class="ck">
+        <div class="ckt">주제를 고를 때 <small>165쪽 · 단계 1 주제 선정하기</small></div>
+        <ol>
+          <li>탐구 가치가 있는 주제인가?</li>
+          <li>주어진 시간에 해결 가능한 주제인가?</li>
+          <li>이 교과서의 학습 개념을 활용하여 해결할 수 있는 주제인가?</li>
+          <li>문제를 파악하고 해결 여부를 데이터를 이용하여 확인할 수 있는가?</li>
+          <li>문제를 해결하는 데 필요한 데이터를 충분히 수집할 수 있는가?</li>
+          <li>탐구 결과가 기존 연구와 비교하여 차별성을 갖는가?</li>
+        </ol>
+      </div>
+      <div class="ck">
+        <div class="ckt">탐구를 마칠 때 <small>167쪽 · 단계 5 평가와 후속 계획</small></div>
+        <ol>
+          <li>탐구 주제가 명확하고 구체적으로 설정되었는가?</li>
+          <li>필요한 데이터를 충분히 확보하여 합리적이고 타당하게 데이터를 해석하였는가?</li>
+          <li>탐구 과정에서 이 교과서의 학습 개념을 효과적으로 활용하였는가?</li>
+          <li>탐구 결과가 주제 해결과 탐구 목표 달성에 충분히 기여하였는가?</li>
+          <li>다음 탐구에서 개선할 부분은 무엇인가?</li>
+          <li>다음에 탐구하고 싶은 주제는 무엇인가?</li>
+        </ol>
+      </div>
+    </div>
+    <p class="cap-sm" style="margin-top: var(--lm-space-3);">왼쪽은 주제를 정하기 전에, 오른쪽은 보고서를 내기 전에 스스로 점검한다.</p>
+    <aside class="notes">교과서 165쪽 주제 선정하기의 고려 사항 6개(왼쪽)와 167쪽 단계 5 점검 6문항(오른쪽). 문구는 지면 그대로이고, 번호는 화면에서 붙였다. 165쪽 본문: 탐색한 주제의 실현 가능성, 분석 가능성, 문제해결 가능성을 평가하여 최종 탐구 주제를 선정한다. 활동: 2장의 질문("앞으로 여름이 얼마나 길어질까?")을 왼쪽 6개로 함께 심사해 본다(○/△/×). 이어서 학생 각자 후보 주제 1개를 적고 짝과 왼쪽 6개로 교차 심사한다 — 이것이 수행평가의 출발점이다. 오른쪽 6개는 보고서 마지막의 자기 평가 항목으로 쓸 수 있다. 채점 기준표로 바꿀지는 교사가 정한다.</aside>
+  </section>
+
+  <!-- 8. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>배운 수학으로, 데이터로 확인할 수 있는 주제를 고른다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">주제</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">165쪽 체크리스트<br>6개를 통과하는 주제</div>
+      </div>
+      <div class="side">
+        <div class="where">도구</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">167쪽 대응표에서<br>쓸 수학과 다시 볼 덱</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt sm" style="margin-top: var(--lm-space-6);"><b>다음 시간까지</b> — 후보 주제 1개 · 쓸 데이터와 출처 · 쓸 수학 도구(몇 쪽, 몇 차시)를 적어 온다.</p>
+    <aside class="notes">오늘 한 줄을 학생이 따라 말하게 한다. 마지막 줄의 준비물은 교사가 수행평가 일정에 맞게 바꾼다. 교사 참고: 교과서 168~170쪽 창의 Up(CO₂ 농도와 여름 일수로 2050년 여름 일수 예측)은 2장 질문의 실제 풀이라 수행평가 시범 예시로 쓸 수 있으나 화면에는 넣지 않았다. 교과서의 2050년 예측값은 반올림한 계수로 계산되어 재계산 값과 차이가 있으니, 보여 줄 때는 설계 문서 C절 6-②를 먼저 확인한다. 지도서 214~215쪽의 창의 Up 대체 주제도 수행평가 주제 목록으로 쓸 수 있다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
