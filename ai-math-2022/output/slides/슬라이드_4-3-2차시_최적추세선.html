@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>최적 추세선 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+
+    /* ── 좌표평면 (JS가 data-* 로 SVG를 만든다. 수식 라벨은 .ov HTML 덧씌우기) ── */
+    .chart { position: relative; flex: none; }
+    .chart svg { display: block; width: 100%; height: auto; overflow: hidden; }
+    .chart .grid line { stroke: var(--lm-rule); stroke-width: 1.5; }
+    .chart .axis line { stroke: var(--lm-ink-3); stroke-width: 2.5; }
+    .chart .tick { fill: var(--lm-ink-3); font-size: 24px; font-family: var(--lm-font-sans); }
+    .chart .pt { fill: var(--lm-ink-2); stroke: var(--lm-page); stroke-width: 2; }
+    .chart .ln { stroke-width: 4; }
+    .chart .ln.c-info { stroke: var(--lm-info); }
+    .chart .ln.c-success { stroke: var(--lm-success); }
+    .chart .ln.c-danger { stroke: var(--lm-danger); }
+    .chart .ln.c-accent { stroke: var(--lm-accent); }
+    .chart .err { stroke-width: 5; }
+    .chart .err.pos { stroke: var(--lm-info); }
+    .chart .err.neg { stroke: var(--lm-danger); }
+    .chart .sq { fill: var(--lm-warning-tint); stroke: var(--lm-warning); stroke-width: 2; opacity: 0.75; }
+    .chart .sq.big { fill: var(--lm-danger-tint); stroke: var(--lm-danger); }
+    .chart .pt.drag { fill: var(--lm-accent); cursor: grab; }
+    .chart .pt.drag.on { stroke: var(--lm-ink); stroke-width: 4; }
+    .chart .ov { position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+                 font-size: var(--lm-slide-caption); color: var(--lm-ink-2); line-height: 1.2; }
+    .chart .ov.r { transform: translate(8px, -50%); }
+    .chart .ov.l { transform: translate(calc(-100% - 8px), -50%); }
+    .chart .ov.a { transform: translate(-50%, calc(-100% - 8px)); }
+    .chart .ov.b { transform: translate(-50%, 8px); }
+    .chart .ov.k-info { color: var(--lm-info); font-weight: 700; }
+    .chart .ov.k-success { color: var(--lm-success); font-weight: 700; }
+    .chart .ov.k-danger { color: var(--lm-danger); font-weight: 700; }
+    .chart .ov.k-accent { color: var(--lm-accent); font-weight: 700; }
+    .chart.drag-area svg { touch-action: none; }
+    .axis-cap { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); text-align: center;
+                margin-top: var(--lm-space-1); }
+
+    .row { display: flex; gap: var(--lm-space-6); align-items: flex-start; margin-top: var(--lm-space-3); }
+    .row > .grow { flex: 1; min-width: 0; }
+
+    .datatbl { border-collapse: collapse; font-size: var(--lm-slide-small); }
+    .datatbl th, .datatbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                               padding: 2px var(--lm-space-4); text-align: center; }
+    .datatbl th { background: var(--lm-paper-tint); font-weight: 700; }
+
+    .errtbl { border-collapse: collapse; font-size: var(--lm-slide-small); flex: none; }
+    .errtbl caption { font-size: var(--lm-slide-small); font-weight: 700; color: var(--lm-ink-2);
+                      padding-bottom: var(--lm-space-1); }
+    .errtbl th, .errtbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: 2px var(--lm-space-3); text-align: center; }
+    .errtbl th { background: var(--lm-paper-tint); font-weight: 700; font-size: var(--lm-slide-caption); }
+    .errtbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .errtbl td.small { box-shadow: inset 0 0 0 3px var(--lm-success); font-weight: 700; }
+    .errtbl.sm { font-size: var(--lm-slide-caption); }
+    .errtbl.sm td { padding: 0 var(--lm-space-3); }
+    section:not(.show-small) .errtbl.cmp td.small { box-shadow: none; font-weight: 400; }
+
+    .legend-line { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); margin-top: var(--lm-space-1); }
+    .src-badge { display: inline-block; background: var(--lm-ink-2); color: var(--lm-paper);
+                 font-weight: 700; padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .anim-btn.on { outline: 3px solid var(--lm-info); }
+
+    /* ── 4-3-2 전용: 포물선 · 안내 점선 · 슬라이더 ── */
+    .chart .curve { fill: none; stroke: var(--lm-accent); stroke-width: 4; }
+    .chart .dot { fill: var(--lm-danger); stroke: var(--lm-page); stroke-width: 3; }
+    .chart .dash line, .chart line.dash { stroke: var(--lm-ink-3); stroke-width: 2; stroke-dasharray: 8 6; }
+    .chart .cur { fill: var(--lm-danger); stroke: var(--lm-page); stroke-width: 3; }
+    .readout { border: var(--lm-border-thin) solid var(--lm-accent);
+               border-radius: var(--lm-radius-md); background: var(--lm-page);
+               padding: var(--lm-space-2) var(--lm-space-4); font-size: var(--lm-slide-small); }
+    .readout .big { color: var(--lm-danger); font-weight: 700; font-size: var(--lm-slide-body); }
+    .ctrl { display: flex; gap: var(--lm-space-5); align-items: center; margin-top: var(--lm-space-3); }
+    .ctrl .param-slider-group { flex: 1; margin: 0; }
+    .ctrl .param-slider-group input[type=range] { height: 36px; }
+    .boxed { display: inline-block; border: 3px solid var(--lm-danger); border-radius: var(--lm-radius-sm);
+             padding: 0 var(--lm-space-3); }
+    .readout i { font-family: var(--lm-font-math); font-style: italic; }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-3 손실함수 · 2차시</div>
+    <h1>최적 추세선</h1>
+    <p class="slide-sub">손실함수는 포물선이니, 꼭짓점이 곧 최적 추세선이다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 135~136쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄이다. 손실함수 L(a)는 a에 대한 아래로 볼록한 포물선이라, 꼭짓점의 a가 최적 추세선의 기울기다. 지난 시간에는 주어진 두 직선을 비교했고, 오늘은 모든 직선 중에서 가장 좋은 하나를 찾는다. 「더 깊이」 장(최적 기울기 공식, a 슬라이더)은 교과서 밖 보강이며 화면에 그렇게 표시해 두었다. 오늘도 원점을 지나는 f(x)=ax만 다룬다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>두 개 중 고르기는 됐다. 그럼 가장 좋은 \(a\)는?</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">손실함수 (교과서 134쪽)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(L(a)=\dfrac{(y_1-ax_1)^2+\cdots+(y_n-ax_n)^2}{n}\)</div>
+      </div>
+      <div class="side">
+        <div class="where">예제 1 (배양 시간)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(L(1)=1.6\cdots,\ L(2)=1\)<br>→ \(f(x)=2x\)가 더 적합</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 — <b>“두 개 중 고르기는 됐다. 그럼 가장 좋은 \(a\)는? \(L(a)\)는 \(a\)에 대한 이차함수이다.”</b>
+    </p>
+    <aside class="notes">지난 시간 오늘 한 줄의 예고 문장을 그대로 읽는다. 학생에게 묻는다: "예제 1에서 f(x)=2x가 f(x)=x보다 나았다. 그럼 2x가 가장 좋은 직선인가?" 1.5x나 1.6x는 어떤가? 후보가 끝없이 많아서 하나하나 비교할 수는 없다. 열쇠는 지난 시간에 확인한 사실, L(a)가 a에 대한 이차함수라는 것이다. 이차함수의 최솟값을 구하는 방법(완전제곱식)을 학생들이 기억하는지 확인한다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>손실함수 \(L(a)\)를 \(p(a-q)^2+r\) 꼴로 나타내어 <span class="kw">최솟값</span>을 구할 수 있다.</span></li>
+      <li><span class="num">2</span><span><span class="kw">최적화</span>와 <span class="kw">최적 추세선</span>의 뜻을 말할 수 있다.</span></li>
+      <li><span class="num">3</span><span>최적 추세선의 기울기를 데이터로 바로 구하는 식을 이해할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">손실함수는 \(a\)에 대한 아래로 볼록한 포물선이라, 꼭짓점의 \(a\)가 최적 추세선의 기울기다.</span>
+    </div>
+    <aside class="notes">목표 1·2는 교과서 135~136쪽이다. 목표 3은 교과서 밖 「더 깊이」다. 시험 범위를 묻는 학생에게는 「더 깊이」 라벨이 붙은 장은 교과서 밖이라고 말해 둔다. 이차함수 p(a−q)²+r의 r은 상수다. 다음 단원(4-4)의 학습률 r과는 다른 글자라는 것을 미리 짚어 둔다.</aside>
+  </section>
+
+  <!-- 4. 함께하기 1 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 135쪽 · 최적 추세선 · 함께하기</div>
+    <h2>손실함수의 값이 최소가 되는 추세선을 찾자</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;">앞에서는 손실함수를 구하여 어떤 추세선이 예측에 더 적합한지 <b>비교</b>하였다. 이제 손실함수의 값이 <b>최소</b>가 되도록 하는 원점을 지나는 추세선을 찾는 방법을 알아보자.</p>
+    <div class="row">
+      <table class="datatbl">
+        <tr><th>연료(L)</th><th>작동 시간(시간)</th></tr>
+        <tr><td>4</td><td>6</td></tr>
+        <tr><td>8</td><td>5</td></tr>
+        <tr><td>12</td><td>15</td></tr>
+        <tr><td>16</td><td>12</td></tr>
+        <tr><td>20</td><td>20</td></tr>
+      </table>
+      <div class="grow">
+        <div class="example-box" style="font-size: var(--lm-slide-small); margin-top: 0;">
+          왼쪽 표는 어느 기계에 넣은 연료 \(x\) L에 대한 작동 시간 \(y\)시간을 조사한 데이터이다.<br>
+          ❶ 추세선 \(f(x)=ax\)에 대한 손실함수 \(L(a)\)를 구해 보자.<br>
+          ❷ ❶에서 구한 \(L(a)\)를 \(p(a-q)^2+r\)의 꼴로 나타내어 예측에 가장 적합한 \(a\)의 값을 구해 보자. <span class="cap-sm">(단, \(p,\ q,\ r\)은 상수)</span>
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          ❶ \(L(a)=\dfrac{1}{5}\{(6-4a)^2+(5-8a)^2+(15-12a)^2+(12-16a)^2+(20-20a)^2\}\)
+          <div style="text-align: center; margin-top: var(--lm-space-2);">\(=\dfrac{880a^2-1672a+830}{5}\)</div>
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 1</span>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 135쪽 「최적 추세선」과 함께하기 ❶. 지난 시간과 질문이 바뀌었다는 것을 첫 문단으로 강조한다: 비교 → 최소. 학생이 각 칸을 맡아 전개하게 한다(정답및풀이 189쪽). (6−4a)²=36−48a+16a², (5−8a)²=25−80a+64a², (15−12a)²=225−360a+144a², (12−16a)²=144−384a+256a², (20−20a)²=400−800a+400a². a²의 계수 합 16+64+144+256+400=880, a의 계수 합 −(48+80+360+384+800)=−1672, 상수항 합 36+25+225+144+400=830. 계산이 길어서 조별로 나누면 좋다. 880이 x값의 제곱의 합이라는 것은 뒤의 「더 깊이」에서 쓴다.</aside>
+  </section>
+
+  <!-- 5. 함께하기 2 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 135쪽 · 함께하기 ❷</div>
+    <h2>완전제곱식으로 꼭짓점을 찾는다</h2>
+
+    <div class="row">
+      <div class="grow">
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(L(a)=\dfrac{880a^2-1672a+830}{5}=176a^2-334.4a+166\)
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(=176(a^2-1.9a)+166=176(a-0.95)^2-176\times0.95^2+166\)
+          <span class="cap-sm" style="display: block;">\(176\times0.95^2=158.84\)</span>
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          <b class="kw-danger">\(=176(a-0.95)^2+7.16\)</b>
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          이것은 \(a\)에 대한 이차함수이므로 <b class="kw-danger">\(a=0.95\)일 때 최솟값 \(7.16\)</b>을 갖는다.<br>
+          예측에 가장 적합한 \(a\)의 값은 손실함수의 값이 최소가 되도록 해야 하므로 \(a=0.95\)
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 4</span>
+        </div>
+      </div>
+      <div>
+        <div class="chart" data-w="700" data-h="600" data-x="0.5,1.4,0.1" data-y="0,50,5" data-xlab="0.1" data-ylab="10"
+             data-quad="176,-334.4,166" data-dots="0.95,7.16" data-dash="0.95,0,0.95,7.16;0.5,7.16,0.95,7.16">
+          <div class="ov a" data-at="0.95,9.5" style="color: var(--lm-danger); font-weight: 700;">\((0.95,\ 7.16)\)</div>
+          <div class="ov" data-at="0.95,45" style="color: var(--lm-accent);">\(L(a)=176(a-0.95)^2+7.16\)</div>
+        </div>
+        <div class="axis-cap">가로: 기울기 \(a\) &nbsp;|&nbsp; 세로: 손실함수 \(L(a)\)</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 135쪽 아래와 함께하기 ❷(정답및풀이 189쪽: L(a)=176(a−0.95)²+7.16, a=0.95). 교과서 본문은 결과만 쓰므로 중간 단계는 칠판 풀이를 화면에 옮긴 것이다. 880÷5=176, 1672÷5=334.4, 830÷5=166. 334.4÷176=1.9, 그 절반이 0.95. 0.95²=0.9025, 176×0.9025=158.84, 166−158.84=7.16. 오른쪽 그래프는 교과서 135쪽 방주 그림을 다시 그린 것이다. 가로축이 x가 아니라 a라는 것을 짚는다. 이 그래프 위의 한 점은 '직선 하나'다. 가장 낮은 점이 가장 좋은 직선이다. 0.95보다 크든 작든 L(a)가 커진다. 확인: python 재계산 최솟값 179/25=7.16 일치.</aside>
+  </section>
+
+  <!-- 6. 최적화 · 최적 추세선 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 136쪽</div>
+    <h2>최적화와 최적 추세선</h2>
+
+    <div class="row">
+      <div class="grow">
+        <div class="definition-box" style="font-size: var(--lm-slide-small); margin-top: 0;">
+          이와 같이 손실함수의 값을 최소로 하는 추세선의 기울기를 찾는 과정을 <b class="kw-danger">최적화</b>(optimization)라 하고,
+          손실함수의 값이 최소가 되도록 하는 추세선을 <b class="kw-danger">최적 추세선</b>이라고 한다.
+        </div>
+        <p class="prob-stmt sm">예를 들어 135쪽의 함께하기에서 최적 추세선의 식은 \(f(x)=0.95x\)이다.</p>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          1단원에서 “학습이란 적절한 가중치를 찾아가는 과정”이라고 했다. 기울기 \(a\)가 그 가중치이고, <b>가중치를 찾는 일에 이름이 붙었다 = 최적화</b>.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          4-2에서는 눈대중으로 추세선을 그었다. 이제는 <b>계산으로 하나로 정해진다</b>.
+          <span class="cap-sm" style="display: block;">최적 추세선이라도 모든 점에서 오차가 가장 작은 것은 아니다 — 전체(평균)로 가장 작다.</span>
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 2</span>
+        </div>
+      </div>
+      <div>
+        <div class="chart" data-w="640" data-h="560" data-x="0,22,2" data-y="0,22,1" data-xlab="4" data-ylab="5"
+             data-pts="4,6;8,5;12,15;16,12;20,20" data-lines="0.95,c-danger"
+             data-dash="4,0,4,6;0,6,4,6;8,0,8,5;0,5,8,5;12,0,12,15;0,15,12,15;16,0,16,12;0,12,16,12;20,0,20,20;0,20,20,20">
+          <div class="ov l k-danger" data-at="18.5,19.5">\(f(x)=0.95x\)</div>
+        </div>
+        <div class="axis-cap">가로: 연료(L) &nbsp;|&nbsp; 세로: 작동 시간(시간)</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 136쪽 정의 두 개를 소리 내어 읽게 한다. 최적화는 '과정'(찾는 일), 최적 추세선은 그 '결과'(찾은 직선)다. 그래프는 136쪽 그림을 다시 그린 것이다. 1단원 회수: 1-1-3차시에서 학습이란 적절한 가중치를 찾아가는 과정이라고 했다. 추세선의 기울기 a가 가중치 하나짜리 인공지능의 가중치다. 4-2 회수: 4-2-1에서는 통그라미가 그어 준 직선, 4-2-1 보조 활동에서는 학생마다 다른 직선을 골랐다. 이제는 같은 데이터면 누가 계산해도 같은 직선이 나온다. 지도서 184쪽 ④: 최적 추세선이 모든 점에서 오차가 가장 작은 것은 아니다. 이 그림에서 8 L 점(오차 5−7.6=−2.6)은 다른 직선이 더 가깝게 지날 수 있다. 확인하기 ⑴과 연결된다. 지도서 184쪽 ②: 완전제곱식 방법이 유일한 최적화 방법은 아니며 손실함수가 복잡하면 비효율적이다 → 4-4 경사하강법의 명분(지금은 말로만).</aside>
+  </section>
+
+  <!-- 7. 더 깊이 — 최적 기울기 공식 -->
+  <section class="tight wide-measure">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 최적 기울기를 바로 구하는 식</div>
+    <h2>최적 기울기는 데이터로 바로 구할 수 있다</h2>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      ① 한 칸을 펼치면 \((y_i-ax_i)^2=x_i^2\,a^2-2x_iy_i\,a+y_i^2\). 칸 \(n\)개를 모두 더해 \(n\)으로 나누면
+      \[L(a)=\frac{(x_1^2+\cdots+x_n^2)\,a^2-2(x_1y_1+\cdots+x_ny_n)\,a+(y_1^2+\cdots+y_n^2)}{n}\]
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      ② \(\sum x_i^2>0\)이라 아래로 볼록. \(Pa^2-2Qa+R\)의 꼭짓점은 \(a=\frac{Q}{P}\)이므로 &nbsp;<span class="boxed">\(a=\dfrac{x_1y_1+\cdots+x_ny_n}{x_1^2+\cdots+x_n^2}=\dfrac{\sum x_iy_i}{\sum x_i^2}\)</span> <span class="cap-sm">(\(\sum\)는 ‘모두 더한다’는 줄임 기호)</span>
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      ③ 함께하기 검산 — \(a=836\div880=\mathbf{0.95}\) &nbsp;<span class="kw-success">교과서의 완전제곱식 답과 같다</span>
+      <span class="cap-sm" style="display: block;">\(\sum x_i^2=16+64+144+256+400=880\), &nbsp;\(\sum x_iy_i=24+40+180+192+400=836\)</span>
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      ④ \(n\)으로 나누지 않고 <b>합</b>으로 해도 꼭짓점의 \(a\)는 같다. \(\frac{1}{n}\)은 포물선의 <b>높이만</b> 바꾼다.
+      <span class="cap-sm" style="display: block;">합 \(880a^2-1672a+830\)의 최솟값 \(35.8\), 평균의 최솟값 \(7.16\) — 둘 다 \(a=0.95\)에서</span>
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 4</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 성취기준 범위(y=ax의 일변수 손실함수) 안이다. ① 예제 1에서 a²의 계수 14가 1²+2²+3²이었고, 함께하기에서 880이 4²+8²+…+20²이었다. 그 규칙을 일반화한 것이다. Σ 기호는 수열 단원 내용이므로 '줄여 쓰기'로만 소개하고, 칠판에는 x₁²+⋯+xₙ² 꼴을 먼저 쓴다. ② 이차함수 Pa²−2Qa+R=P(a−Q/P)²+R−Q²/P. 학생이 아는 꼭짓점 공식(−b/2a)으로 해도 같다. 단, 여기서 a는 변수라 글자가 겹치므로 P, Q로 쓴다. ③ 836/880=0.95. 최솟값도 확인: (830−836×0.95)/5=(830−794.2)/5=7.16. ④ 비유: 반 전체의 키를 cm로 재든 mm로 재든 누가 가장 큰지는 같다. 1/n을 곱하면 그래프가 위아래로 눌릴 뿐 가장 낮은 자리(a)는 그대로다. 교사 참고: 이 식이 통계의 '최소제곱법'(원점을 지나는 경우)이다. 이름은 말하지 않아도 된다. 4-3-1에서 남겨 둔 132쪽 데이터에 이 식을 쓰면 32494/32822≈0.990이다(교과서 밖).</aside>
+  </section>
+
+  <!-- 8. 더 깊이 — 보조 활동: a 슬라이더 -->
+  <section class="tight" data-prevent-swipe>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 보조 활동 · 직선 하나 = 포물선 위의 점 하나</div>
+    <h2>기울기 \(a\)를 돌리면 \(L(a)\)는 포물선을 따라 움직인다</h2>
+
+    <div class="row" data-prevent-swipe style="gap: var(--lm-space-6);">
+      <div>
+        <div class="chart" id="lnChart" data-w="790" data-h="520" data-x="0,22,2" data-y="0,30,2" data-xlab="4" data-ylab="10"
+             data-pts="4,6;8,5;12,15;16,12;20,20"></div>
+        <div class="axis-cap">135쪽 함께하기 데이터 · 직선 \(f(x)=ax\)와 오차</div>
+      </div>
+      <div>
+        <div class="chart" id="parChart" data-w="790" data-h="520" data-x="0.5,1.5,0.1" data-y="0,70,10" data-xlab="0.1"
+             data-quad="176,-334.4,166" data-dash="0.95,0,0.95,7.16"></div>
+        <div class="axis-cap">가로: 기울기 \(a\) &nbsp;|&nbsp; 세로: 손실함수 \(L(a)\)</div>
+      </div>
+    </div>
+    <div class="ctrl" data-prevent-swipe>
+      <div class="param-slider-group"><label for="sA">기울기 a</label>
+        <input type="range" id="sA" min="50" max="150" step="1" value="120"><span class="val-display" id="vA">1.20</span></div>
+      <div class="readout" id="rL"></div>
+      <button class="anim-btn" id="btnBest">\(a=0.95\)로</button>
+    </div>
+    <aside class="notes">교과서 밖 보조 활동이다. 데이터는 135쪽 함께하기 그대로다. 학생 한 명을 불러 슬라이더를 천천히 움직이게 한다. 왼쪽: 직선이 원점을 중심으로 돌고, 세로 선분(오차)이 길어졌다 짧아졌다 한다. 오른쪽: 빨간 점이 포물선 위를 움직인다. 질문: "빨간 점이 가장 낮을 때 왼쪽 직선은?" a=0.95에서 L=7.16이 나온다(교과서 값과 같아야 한다. 수업 전에 확인). a=0.5와 a=1.4에서 L이 둘 다 42.8로 같다는 것도 보여 줄 수 있다(꼭짓점에 대한 대칭). 핵심 메시지: 오른쪽 그래프 위의 점 하나하나가 왼쪽의 직선 하나하나다. 최적화는 오른쪽 그래프에서 가장 낮은 점을 찾는 일이다. 4-3-4(공학 도구)에서 같은 활동을 다른 데이터로 다시 한다. 계산은 기울기를 100배한 정수로 해서 표시값에 부동소수 잡음이 없다.</aside>
+  </section>
+
+  <!-- 9. 문제 3 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 136쪽 문제 3</div>
+    <h2>손실함수에서 최적 추세선으로</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;"><b>문제 3</b> 추세선 \(f(x)=ax\)에 대한 손실함수가 \(L(a)=2a^2-12a+20\)일 때, 다음에 답하시오.</p>
+    <ul class="qlist">
+      <li><b>⑴</b> 최적 추세선의 식을 구하시오.
+        <div class="ans">\(L(a)=2a^2-12a+20=2(a-3)^2+2\)<br>손실함수의 값이 최소가 되도록 하는 \(a\)의 값은 \(3\)이므로 최적 추세선의 식은 <b>\(f(x)=3x\)</b></div></li>
+      <li><b>⑵</b> \(x=4\)일 때 ⑴에서 구한 최적 추세선의 예측값을 구하시오.
+        <div class="ans">\(f(4)=3\times4=\mathbf{12}\)</div></li>
+    </ul>
+    <aside class="notes">교과서 136쪽 문제 3. 정답및풀이 189쪽: ⑴ f(x)=3x ⑵ 12. 학생이 자주 하는 실수: 최솟값 2를 기울기로 착각해 f(x)=2x로 쓰는 것. 꼭짓점의 '가로 좌표'가 기울기, '세로 좌표'는 그때의 손실이다. ⑵는 4-2에서 배운 예측값 계산을 다시 쓴다. 최적 추세선을 찾는 이유가 결국 '예측'이라는 것을 연결한다.</aside>
+  </section>
+
+  <!-- 10. 탐구 문제 4 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 136쪽 탐구 문제 4</div>
+    <h2>거꾸로 추리하기</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;"><b>탐구 문제 4</b> 추세선 \(f(x)=ax\)에 대한 손실함수가 \(L(a)=3a^2-12pa+q\)이다. 최적 추세선의 식이 \(f(x)=2x\)일 때, 다음에 답하시오. <span class="cap-sm">(단, \(p\)와 \(q\)는 상수)</span></p>
+    <ul class="qlist">
+      <li><b>⑴</b> \(p\)의 값을 구하시오.
+        <div class="ans">\(L(a)=3a^2-12pa+q=3(a-2p)^2-12p^2+q\)<br>손실함수의 값이 최소가 되도록 하는 \(a\)의 값은 \(2p\)이므로 최적 추세선은 \(f(x)=2px\). 따라서 \(2p=2\)이므로 <b>\(p=1\)</b></div></li>
+      <li><b>⑵</b> \(q\)의 값의 범위를 구하시오.
+        <div class="ans">손실함수는 오차의 제곱의 평균이므로 모든 \(a\)에 대하여 항상 \(0\) 이상이다.<br>즉, 판별식 \(D\le0\): \(144p^2-12q\le0\), \(144-12q\le0\) → <b>\(q\ge12\)</b>
+          <span style="font-weight: 400; font-size: var(--lm-slide-caption); display: block;">다른 풀이: 최솟값 \(-12p^2+q=q-12\ge0\)</span></div></li>
+    </ul>
+    <aside class="notes">교과서 136쪽 탐구 문제 4. 정답및풀이 189~190쪽: ⑴ p=1 ⑵ q≥12. ⑴은 문제 3을 거꾸로 한 것이다. ⑵가 탐구의 핵심이다. 힌트: "손실함수가 음수가 될 수 있나?" 오차의 제곱의 평균이므로 절대 음수가 아니다(지도서 183쪽 ⑥). 정답및풀이는 판별식으로 풀었고, 완전제곱식에서 최솟값 q−12≥0으로 보는 것이 더 짧다. 시간이 부족하면 ⑵는 과제로 돌린다. 교사 참고: 등호 q=12이면 최솟값이 0, 즉 모든 점이 직선 y=2x 위에 있다는 뜻이다.</aside>
+  </section>
+
+  <!-- 11. 확인하기 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 136쪽 확인하기</div>
+    <h2>옳으면 ○, 옳지 않으면 ×</h2>
+
+    <ul class="qlist">
+      <li><b>⑴</b> 추세선의 오차의 크기를 비교하면 예측에 더 적합한 추세선을 항상 찾을 수 있다.
+        <div class="ans">× — 133쪽 표에서 오차의 크기는 점마다 \(B\)가 작기도, \(C\)가 작기도 했다. 오차의 제곱의 평균으로 판단한다.</div></li>
+      <li><b>⑵</b> 손실함수 \(L(a)\)의 값이 더 큰 추세선 \(f(x)=ax\)가 데이터의 예측에 더 적합하다.
+        <div class="ans">× — \(L(a)\)의 값이 더 <b>작은</b> 추세선이 더 적합하다.</div></li>
+      <li><b>⑶</b> 추세선 \(f(x)=ax\)에 대한 손실함수가 \(L(a)=3a^2-6a+10\)일 때, 최적 추세선의 식은 \(f(x)=x\)이다.
+        <div class="ans">○ — \(L(a)=3(a-1)^2+7\)이므로 \(a=1\)에서 최소 → \(f(x)=x\)</div></li>
+    </ul>
+    <aside class="notes">교과서 136쪽 확인하기. 정답및풀이 190쪽: ⑴ × ⑵ × ⑶ ○. ⑴은 4-3-1의 133쪽 표 장면을 떠올리게 한다. ⑵는 '손실'이라는 말 그대로, 잃는 것이 적을수록 좋다. ⑶은 3a²−6a+10=3(a²−2a)+10=3(a−1)²+7. 「더 깊이」 공식을 쓴 학생은 데이터가 없어서 못 쓴다는 것도 짚는다(손실함수의 식만 주어졌다). 계수로 보면 3a²의 3이 Σx²/n, −6a의 6이 2Σxy/n이라 Σxy/Σx²=3/3=1로도 같다.</aside>
+  </section>
+
+  <!-- 12. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>손실함수는 \(a\)에 대한 포물선이라, 꼭짓점의 \(a\)가 최적 추세선의 기울기다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">최적화 (136쪽)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(L(a)=p(a-q)^2+r\)<br>→ \(a=q\)에서 최소</div>
+      </div>
+      <div class="side">
+        <div class="where">최적 추세선 (함께하기)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(f(x)=0.95x\)<br>\(L(0.95)=7.16\)</div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-small);">
+      다음 시간 예고 — 하지만 이 '가장 좋은 선'도 <b>엉뚱한 점 하나</b>에 흔들린다. → <b>이상점과 절대 손실함수</b>
+    </div>
+    <aside class="notes">오늘 한 줄을 따라 말하게 한다. 예고: 다음 시간(4-3-3, 137쪽 인공지능 이야기)은 오늘 찾은 최적 추세선의 약점을 본다. 4-3-1 「더 깊이」에서 '제곱은 크게 빗나간 점 하나를 더 무겁게 친다'고 했다. 그 성질 때문에, 다른 점들과 동떨어진 점 하나가 있으면 최적 추세선이 그쪽으로 끌려간다. 학생에게 미리 생각해 오게 한다: "점 하나가 이상하게 튀어 있으면, 지울까? 아니면 계산법을 바꿀까?"</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 좌표평면 그리기 — SVG에는 도형과 눈금 숫자만 넣는다(수식은 .ov HTML 덧씌우기).
+     data-x, data-y : "최소,최대,눈금간격"   data-pts : "x,y;x,y;…"
+     data-lines : "기울기,색클래스;…" (원점을 지나는 직선 f(x)=ax)
+     data-quad : "c2,c1,c0" (곡선 y=c2·x²+c1·x+c0)   data-dots : "x,y;…" 강조 점
+     data-dash : "x1,y1,x2,y2;…" 점선 안내선   data-xlab/data-ylab : 눈금 숫자 간격(기본=격자 간격)
+     data-bare : 눈금·격자 없이 화살표 축만(개념도)   data-hl : 강조할 점 번호 */
+  (function () {
+    const NS = 'http://www.w3.org/2000/svg';
+    function mk(tag, attrs, parent) {
+      const e = document.createElementNS(NS, tag);
+      Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k]));
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+    function nums(s) { return s.split(',').map(Number); }
+    function clean(v) { return String(Number(v.toFixed(6))); }
+    let uid = 0;
+
+    function build(el) {
+      const W = Number(el.dataset.w || 800), H = Number(el.dataset.h || 480);
+      const [x0, x1, xs] = nums(el.dataset.x), [y0, y1, ys] = nums(el.dataset.y);
+      const xl = Number(el.dataset.xlab || xs), yl = Number(el.dataset.ylab || ys);
+      const bare = !!el.dataset.bare;
+      const L = bare ? 24 : 76, R = 20, T = 20, B = bare ? 24 : 44;
+      const sx = x => L + (x - x0) / (x1 - x0) * (W - L - R);
+      const sy = y => T + (y1 - y) / (y1 - y0) * (H - T - B);
+      el.style.width = W + 'px';
+      const svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMid meet' });
+      el.insertBefore(svg, el.firstChild);
+      const id = 'plot' + (++uid);
+      const cp = mk('clipPath', { id: id }, mk('defs', {}, svg));
+      mk('rect', { x: L, y: T, width: W - L - R, height: H - T - B }, cp);
+
+      const g = mk('g', { class: 'grid' }, svg), tk = mk('g', {}, svg);
+      const near = (v, s) => Math.abs(v / s - Math.round(v / s)) < 1e-6;
+      if (!bare) for (let i = 0, n = Math.round((y1 - y0) / ys); i <= n; i++) {
+        const v = y0 + i * ys;
+        mk('line', { x1: L, x2: W - R, y1: sy(v), y2: sy(v) }, g);
+        if (near(v - y0, yl)) mk('text', { x: L - 12, y: sy(v) + 8, 'text-anchor': 'end', class: 'tick' }, tk).textContent = clean(v);
+      }
+      if (!bare) for (let i = 0, n = Math.round((x1 - x0) / xs); i <= n; i++) {
+        const v = x0 + i * xs;
+        mk('line', { x1: sx(v), x2: sx(v), y1: T, y2: H - B }, g);
+        if (near(v - x0, xl)) mk('text', { x: sx(v), y: H - B + 30, 'text-anchor': 'middle', class: 'tick' }, tk).textContent = clean(v);
+      }
+      const ax0 = (x0 <= 0 && x1 >= 0) ? 0 : x0, ay0 = (y0 <= 0 && y1 >= 0) ? 0 : y0;
+      const ax = mk('g', { class: 'axis' }, svg);
+      mk('line', { x1: L, x2: W - R, y1: sy(ay0), y2: sy(ay0) }, ax);
+      mk('line', { x1: sx(ax0), x2: sx(ax0), y1: T, y2: H - B }, ax);
+      if (bare) {
+        mk('path', { d: 'M' + (W - R) + ' ' + sy(ay0) + ' l-16 -8 v16 z' }, ax);
+        mk('path', { d: 'M' + sx(ax0) + ' ' + T + ' l-8 16 h16 z' }, ax);
+      }
+
+      const plot = mk('g', { 'clip-path': 'url(#' + id + ')' }, svg);
+      const c = { svg: svg, sx: sx, sy: sy, x0: x0, x1: x1, y0: y0, y1: y1, plot: plot, mk: mk };
+      c.under = mk('g', {}, plot);
+      if (el.dataset.dash) {
+        const gd = mk('g', { class: 'dash' }, plot);
+        el.dataset.dash.split(';').forEach(s => {
+          const [a, b, p, q] = nums(s);
+          mk('line', { x1: sx(a), y1: sy(b), x2: sx(p), y2: sy(q) }, gd);
+        });
+      }
+      if (el.dataset.lines) {
+        el.dataset.lines.split(';').forEach(s => {
+          const [a, cls] = s.split(',');
+          const k = Number(a);
+          mk('line', { class: 'ln ' + cls, x1: sx(x0), y1: sy(k * x0), x2: sx(x1), y2: sy(k * x1) }, plot);
+        });
+      }
+      if (el.dataset.quad) {
+        const [p2, p1, p0] = nums(el.dataset.quad);
+        let d = '';
+        for (let i = 0; i <= 200; i++) {
+          const x = x0 + (x1 - x0) * i / 200;
+          d += (i ? 'L' : 'M') + sx(x).toFixed(1) + ' ' + sy(p2 * x * x + p1 * x + p0).toFixed(1);
+        }
+        c.curve = mk('path', { class: 'curve', d: d }, plot);
+      }
+      c.mid = mk('g', {}, plot);
+      c.pts = [];
+      const hl = el.dataset.hl ? nums(el.dataset.hl) : [];
+      if (el.dataset.pts) {
+        el.dataset.pts.split(';').forEach((s, i) => {
+          const p = nums(s);
+          c.pts.push(mk('circle', { class: 'pt' + (hl.indexOf(i) >= 0 ? ' hl' : ''), cx: sx(p[0]), cy: sy(p[1]), r: Number(el.dataset.r || 10), 'data-i': i }, plot));
+        });
+      }
+      if (el.dataset.dots) {
+        el.dataset.dots.split(';').forEach(s => {
+          const p = nums(s);
+          mk('circle', { class: 'dot', cx: sx(p[0]), cy: sy(p[1]), r: 11 }, plot);
+        });
+      }
+      c.top = mk('g', {}, plot);
+      el.querySelectorAll('.ov[data-at]').forEach(o => {
+        const [x, y] = nums(o.dataset.at);
+        o.style.left = (sx(x) / W * 100) + '%';
+        o.style.top = (sy(y) / H * 100) + '%';
+      });
+      el._c = c;
+    }
+    document.querySelectorAll('.chart[data-x]').forEach(build);
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 · 장 단위 토글 버튼 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+    document.querySelectorAll('[data-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const on = btn.closest('section').classList.toggle(btn.dataset.toggle);
+        btn.classList.toggle('on', on);
+      });
+    });
+  })();
+</script>
+
+<script>
+  /* 보조 활동 — a 슬라이더: 왼쪽 직선·오차, 오른쪽 포물선 위의 점.
+     계산은 정수로 한다: 기울기는 100배(k), 오차는 100배(100y − kx)로 다뤄 부동소수 잡음을 없앤다. */
+  (function () {
+    const ln = document.getElementById('lnChart'), par = document.getElementById('parChart');
+    if (!ln || !ln._c || !par || !par._c) return;
+    const A = ln._c, P = par._c, mk = A.mk;
+    const X = [4, 8, 12, 16, 20], Y = [6, 5, 15, 12, 20];
+    const s = document.getElementById('sA'), v = document.getElementById('vA'), r = document.getElementById('rL');
+    const line = mk('line', { class: 'ln c-danger' }, A.under);
+    const errG = mk('g', {}, A.mid);
+    const drop = mk('line', { class: 'dash' }, P.mid);
+    const dot = mk('circle', { class: 'cur', r: 13 }, mk('g', {}, P.svg));
+
+    function update() {
+      const k = Number(s.value), a = k / 100;
+      let sum = 0;
+      errG.innerHTML = '';
+      X.forEach((x, i) => {
+        const e = 100 * Y[i] - k * x;
+        sum += e * e;
+        if (e !== 0) mk('line', { class: 'err ' + (e > 0 ? 'pos' : 'neg'), x1: A.sx(x), x2: A.sx(x), y1: A.sy(Y[i]), y2: A.sy(a * x) }, errG);
+      });
+      const L = Number((sum / 50000).toFixed(5));
+      line.setAttribute('x1', A.sx(A.x0)); line.setAttribute('y1', A.sy(a * A.x0));
+      line.setAttribute('x2', A.sx(A.x1)); line.setAttribute('y2', A.sy(a * A.x1));
+      dot.setAttribute('cx', P.sx(a)); dot.setAttribute('cy', P.sy(L));
+      drop.setAttribute('x1', P.sx(a)); drop.setAttribute('x2', P.sx(a));
+      drop.setAttribute('y1', P.sy(0)); drop.setAttribute('y2', P.sy(L));
+      v.textContent = a.toFixed(2);
+      r.innerHTML = '<i>f</i>(<i>x</i>) = ' + a.toFixed(2) + '<i>x</i> &nbsp;→&nbsp; <i>L</i>(' + a.toFixed(2) + ') = <span class="big">' + L + '</span>';
+    }
+    s.addEventListener('input', update);
+    document.getElementById('btnBest').addEventListener('click', () => { s.value = 95; update(); });
+    update();
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이상점과 절대 손실함수 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+
+    /* ── 좌표평면 (JS가 data-* 로 SVG를 만든다. 수식 라벨은 .ov HTML 덧씌우기) ── */
+    .chart { position: relative; flex: none; }
+    .chart svg { display: block; width: 100%; height: auto; overflow: hidden; }
+    .chart .grid line { stroke: var(--lm-rule); stroke-width: 1.5; }
+    .chart .axis line { stroke: var(--lm-ink-3); stroke-width: 2.5; }
+    .chart .tick { fill: var(--lm-ink-3); font-size: 24px; font-family: var(--lm-font-sans); }
+    .chart .pt { fill: var(--lm-ink-2); stroke: var(--lm-page); stroke-width: 2; }
+    .chart .ln { stroke-width: 4; }
+    .chart .ln.c-info { stroke: var(--lm-info); }
+    .chart .ln.c-success { stroke: var(--lm-success); }
+    .chart .ln.c-danger { stroke: var(--lm-danger); }
+    .chart .ln.c-accent { stroke: var(--lm-accent); }
+    .chart .err { stroke-width: 5; }
+    .chart .err.pos { stroke: var(--lm-info); }
+    .chart .err.neg { stroke: var(--lm-danger); }
+    .chart .sq { fill: var(--lm-warning-tint); stroke: var(--lm-warning); stroke-width: 2; opacity: 0.75; }
+    .chart .sq.big { fill: var(--lm-danger-tint); stroke: var(--lm-danger); }
+    .chart .pt.drag { fill: var(--lm-accent); cursor: grab; }
+    .chart .pt.drag.on { stroke: var(--lm-ink); stroke-width: 4; }
+    .chart .ov { position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+                 font-size: var(--lm-slide-caption); color: var(--lm-ink-2); line-height: 1.2; }
+    .chart .ov.r { transform: translate(8px, -50%); }
+    .chart .ov.l { transform: translate(calc(-100% - 8px), -50%); }
+    .chart .ov.a { transform: translate(-50%, calc(-100% - 8px)); }
+    .chart .ov.b { transform: translate(-50%, 8px); }
+    .chart .ov.k-info { color: var(--lm-info); font-weight: 700; }
+    .chart .ov.k-success { color: var(--lm-success); font-weight: 700; }
+    .chart .ov.k-danger { color: var(--lm-danger); font-weight: 700; }
+    .chart .ov.k-accent { color: var(--lm-accent); font-weight: 700; }
+    .chart.drag-area svg { touch-action: none; }
+    .axis-cap { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); text-align: center;
+                margin-top: var(--lm-space-1); }
+
+    .row { display: flex; gap: var(--lm-space-6); align-items: flex-start; margin-top: var(--lm-space-3); }
+    .row > .grow { flex: 1; min-width: 0; }
+
+    .datatbl { border-collapse: collapse; font-size: var(--lm-slide-small); }
+    .datatbl th, .datatbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                               padding: 2px var(--lm-space-4); text-align: center; }
+    .datatbl th { background: var(--lm-paper-tint); font-weight: 700; }
+
+    .errtbl { border-collapse: collapse; font-size: var(--lm-slide-small); flex: none; }
+    .errtbl caption { font-size: var(--lm-slide-small); font-weight: 700; color: var(--lm-ink-2);
+                      padding-bottom: var(--lm-space-1); }
+    .errtbl th, .errtbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: 2px var(--lm-space-3); text-align: center; }
+    .errtbl th { background: var(--lm-paper-tint); font-weight: 700; font-size: var(--lm-slide-caption); }
+    .errtbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .errtbl td.small { box-shadow: inset 0 0 0 3px var(--lm-success); font-weight: 700; }
+    .errtbl.sm { font-size: var(--lm-slide-caption); }
+    .errtbl.sm td { padding: 0 var(--lm-space-3); }
+    section:not(.show-small) .errtbl.cmp td.small { box-shadow: none; font-weight: 400; }
+
+    .legend-line { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); margin-top: var(--lm-space-1); }
+    .src-badge { display: inline-block; background: var(--lm-ink-2); color: var(--lm-paper);
+                 font-weight: 700; padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .anim-btn.on { outline: 3px solid var(--lm-info); }
+
+    /* ── 4-3-3 전용: 이상점 · 두 최적 추세선 ── */
+    .chart .axis path { fill: var(--lm-ink-3); }
+    .chart .pt { fill: var(--lm-info); }
+    .chart .pt.hl { fill: var(--lm-danger); }
+    .chart .pt.drag { cursor: grab; stroke: var(--lm-ink); stroke-width: 3; }
+    .chart .pt.gone { opacity: 0.25; }
+    .chart .ln.thin { stroke-width: 3; stroke-dasharray: 10 8; stroke: var(--lm-ink-3); }
+    .readout { border: var(--lm-border-thin) solid var(--lm-accent);
+               border-radius: var(--lm-radius-md); background: var(--lm-page);
+               padding: var(--lm-space-2) var(--lm-space-4); font-size: var(--lm-slide-small);
+               line-height: 1.6; }
+    .readout i { font-family: var(--lm-font-math); font-style: italic; }
+    .readout .g { color: var(--lm-success); font-weight: 700; }
+    .readout .r { color: var(--lm-danger); font-weight: 700; }
+    .ctrl-btns { display: flex; gap: var(--lm-space-3); flex-wrap: wrap; margin-top: var(--lm-space-3); }
+    .fig-cap { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); text-align: center; margin-top: var(--lm-space-1); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-3 손실함수 · 3차시 · 인공지능 이야기</div>
+    <h1>이상점과 절대 손실함수</h1>
+    <p class="slide-sub">제곱은 큰 오차를 키워서, 엉뚱한 점 하나에 끌려간다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 137쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄이다. 제곱은 큰 오차를 더 크게 쳐서, 엉뚱한 점 하나가 최적 추세선을 끌어당긴다. 교과서 137쪽 '인공지능 이야기' 한 쪽을 읽는 차시다. 새 계산 대신 지난 시간에 만든 최적 추세선의 약점을 본다. 절대 손실함수 M(a)는 이야기로만 다룬다. M(a)의 최솟값을 손으로 구하는 것은 범위 밖이다(지도서 유의점: 오차의 제곱의 평균을 이용한 손실함수만). 그래프에 쓴 점의 좌표는 교과서에 없는 보조 예시다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>하지만 이 '가장 좋은 선'도 엉뚱한 점 하나에 흔들린다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">최적 추세선 (교과서 136쪽)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">손실함수 \(L(a)\)의 값이<br>최소가 되는 추세선</div>
+      </div>
+      <div class="side">
+        <div class="where">4-3-1 「더 깊이」</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">제곱은 크게 빗나간<br>점 하나를 더 무겁게 친다</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 — <b>“하지만 이 '가장 좋은 선'도 엉뚱한 점 하나에 흔들린다.”</b>
+    </p>
+    <aside class="notes">지난 시간 예고 문장을 그대로 읽는다. 최적 추세선은 L(a)가 최소인 직선이었다. 4-3-1 「더 깊이」에서 본 정사각형 그림을 떠올리게 한다. 오차가 2배면 넓이는 4배였다. 질문: "점 하나가 다른 점들과 아주 멀리 떨어져 있으면, 그 점의 정사각형은 얼마나 클까?" 지난 시간 끝에 생각해 오라고 한 질문(지울까, 계산법을 바꿀까?)을 다시 묻고 답은 미룬다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span><span class="kw">이상점</span>이 무엇인지 말할 수 있다.</span></li>
+      <li><span class="num">2</span><span>이상점이 있으면 최적 추세선이 <span class="kw">치우치는</span> 까닭을 설명할 수 있다.</span></li>
+      <li><span class="num">3</span><span><span class="kw">절대 손실함수</span>가 치우침을 줄인다는 것을 이해할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">제곱은 큰 오차를 더 크게 쳐서, 엉뚱한 점 하나가 최적 추세선을 끌어당긴다.</span>
+    </div>
+    <aside class="notes">137쪽은 인공지능 이야기라 문제가 없다. 확인 활동은 토의 한 문항과 교과서 밖 보조 문항(○×)으로 했다. 목표 2의 '까닭'은 4-3-1 「더 깊이」(왜 제곱인가)의 뒷면이다. 큰 오차를 크게 벌주는 성질이 여기서는 약점이 된다.</aside>
+  </section>
+
+  <!-- 4. 이상점 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 137쪽 · 인공지능 이야기</div>
+    <h2>엉뚱한 점 하나가 바꾼 최적 추세선의 운명</h2>
+
+    <div class="row">
+      <div class="grow">
+        <p class="prob-stmt sm" style="margin-top: 0;">오른쪽 그림은 두 변량 \(x\)와 \(y\)의 값 \(20\)개를 조사하여 얻은 데이터의 산점도이다.</p>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(19\)개의 <b class="kw-info">파란색 점</b>은 비슷한 경향성을 보이지만, <b class="kw-danger">빨간색 점</b>은 파란색 점이 나타내는 경향성을 많이 벗어난 것으로 보인다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          이와 같이 대부분의 데이터가 나타내는 경향성에서 벗어난 점을 <b class="kw-danger">이상점</b>(outlier)이라고 한다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          이상점이 있는 데이터를 그대로 사용하여 앞에서 배운 손실함수를 이용하면 최적 추세선이 이상점을 제외한 데이터의 경향성을 정확하게 나타낼 수 없다.
+          따라서 <b>이상점을 제거</b>하거나 <b>다른 손실함수</b>를 사용해야 한다.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 3</span>
+        </div>
+      </div>
+      <div>
+        <div class="chart" data-bare="1" data-w="620" data-h="520" data-x="0,10.5,1" data-y="0,16,1" data-r="9"
+             data-pts="0.5,0.45;1,0.35;1.5,0.85;2,0.75;2.5,1.4;3,1.55;3.5,1.55;4,2.25;4.5,2.15;5,2.7;5.5,2.45;6,3.1;6.5,3.4;7,3.3;7.5,4.05;8,3.85;8.5,4.3;9,4.7;9.5,4.5;8,14" data-hl="19">
+          <div class="ov l" data-at="0,-0.4">O</div>
+          <div class="ov b" data-at="10.2,0">\(x\)</div>
+          <div class="ov r" data-at="0,15.6">\(y\)</div>
+        </div>
+        <div class="fig-cap"><span class="aux-badge">보조</span>교과서 그림을 다시 그린 개념도 · 점의 위치는 보조 예시</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 137쪽 첫 문단과 둘째 문단. 그림은 교과서 개념도를 다시 그린 것이다(교과서 그림에는 좌표가 없다). 점의 위치는 보조 예시이며, 뒤의 보조 활동과 같은 데이터다. 이상점의 예를 학생에게 묻는다: 키·몸무게 조사에서 몸무게를 kg 대신 g으로 잘못 쓴 학생, 시험 점수 데이터에서 결석한 학생의 0점 등. 지도서 지도 자료(186쪽): 이상점은 단순한 오류일 수도 있지만 현실에서 중요한 의미를 지닌 데이터일 수도 있다. 예를 들어 어떤 환자의 혈압 수치가 다른 환자들과 확연히 다르게 높다면, 단순한 예외가 아니라 어떤 질환의 새로운 패턴일 수도 있다. 1단원(1-3 빅데이터)과 연결: 데이터를 그대로 믿지 말고 살펴야 한다.</aside>
+  </section>
+
+  <!-- 5. 제곱 손실의 치우침 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 137쪽</div>
+    <h2>제곱하는 손실함수는 이상점 쪽으로 치우친다</h2>
+
+    <div class="row">
+      <div class="grow">
+        <p class="prob-stmt sm" style="margin-top: 0;">추세선 \(f(x)=ax\)를 이용하여 변량 \(x\)의 값 \(x_1,\ x_2,\ \cdots,\ x_n\)에 대응하는 변량 \(y\)의 값 \(y_1,\ y_2,\ \cdots,\ y_n\)을 예측할 때, 오차
+          \(e_1=y_1-ax_1,\ e_2=y_2-ax_2,\ \cdots,\ e_n=y_n-ax_n\)의 제곱의 평균을 이용하여 손실함수를 구하는 방법에 대해 살펴보았다.</p>
+        <div class="formula-box" style="font-size: var(--lm-slide-body);">\(L(a)=\dfrac{e_1^{\,2}+e_2^{\,2}+\cdots+e_n^{\,2}}{n}\)</div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          이 손실함수를 이용하면 이상점의 오차의 제곱이 <b>너무 커지므로</b>, 오른쪽 그림과 같이 최적 추세선이 <b class="kw-success">이상점이 있는 방향으로 치우치는</b> 현상이 나타난다.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 1</span>
+        </div>
+      </div>
+      <div>
+        <div class="chart" data-bare="1" data-w="620" data-h="520" data-x="0,10.5,1" data-y="0,16,1" data-r="9"
+             data-pts="0.5,0.45;1,0.35;1.5,0.85;2,0.75;2.5,1.4;3,1.55;3.5,1.55;4,2.25;4.5,2.15;5,2.7;5.5,2.45;6,3.1;6.5,3.4;7,3.3;7.5,4.05;8,3.85;8.5,4.3;9,4.7;9.5,4.5;8,14" data-hl="19" data-lines="0.618,c-success">
+          <div class="ov l" data-at="0,-0.4">O</div>
+          <div class="ov b" data-at="10.2,0">\(x\)</div>
+          <div class="ov r" data-at="0,15.6">\(y\)</div>
+        </div>
+        <div class="fig-cap"><span class="aux-badge">보조</span>초록 직선: 제곱 손실의 최적 추세선(원점을 지난다)</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 137쪽 셋째 문단. 기호가 하나 새로 나온다: 오차를 e₁, e₂, …로 줄여 쓴 것이다. e_i=y_i−ax_i이므로 134쪽의 L(a)와 같은 식이다. 그림의 초록 직선은 보조 데이터로 계산한 제곱 손실의 최적 추세선이다(기울기 약 0.62, 이상점이 없으면 약 0.50). 교과서 그림의 초록 직선은 원점을 지나지 않는 것처럼 그려져 있지만, 이 단원은 원점을 지나는 직선만 다루므로 다시 그릴 때 원점을 지나게 했다. 파란 점들의 오른쪽 끝을 보면 초록 직선이 점들보다 위로 떠 있다. 이상점 하나 때문에 나머지 19개 점에 대한 예측이 모두 나빠진 것이다.</aside>
+  </section>
+
+  <!-- 6. 절대 손실함수 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 137쪽</div>
+    <h2>절대 손실함수 — 제곱 대신 절댓값</h2>
+
+    <div class="row">
+      <div class="grow">
+        <p class="prob-stmt sm" style="margin-top: 0;">이러한 치우침 현상을 방지하기 위하여 다음과 같이 오차의 제곱 대신 <b>오차의 절댓값의 평균</b>을 이용하며, 이를 <b class="kw-danger">절대 손실함수</b>(absolute loss function)라고 한다.</p>
+        <div class="formula-box" style="font-size: var(--lm-slide-body);">\(M(a)=\dfrac{|e_1|+|e_2|+\cdots+|e_n|}{n}\)</div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          절대 손실함수를 이용하면 오른쪽 그림과 같이 최적 추세선이 이상점이 있는 방향으로 치우치는 현상이 <b class="kw-danger">완화</b>된다.
+          즉, 이상점을 <b>제거하지 않아도</b> 이상점의 영향력을 줄여 주는 효과를 얻을 수 있다.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 1</span>
+        </div>
+      </div>
+      <div>
+        <div class="chart" data-bare="1" data-w="620" data-h="520" data-x="0,10.5,1" data-y="0,16,1" data-r="9"
+             data-pts="0.5,0.45;1,0.35;1.5,0.85;2,0.75;2.5,1.4;3,1.55;3.5,1.55;4,2.25;4.5,2.15;5,2.7;5.5,2.45;6,3.1;6.5,3.4;7,3.3;7.5,4.05;8,3.85;8.5,4.3;9,4.7;9.5,4.5;8,14" data-hl="19" data-lines="0.516,c-danger">
+          <div class="ov l" data-at="0,-0.4">O</div>
+          <div class="ov b" data-at="10.2,0">\(x\)</div>
+          <div class="ov r" data-at="0,15.6">\(y\)</div>
+        </div>
+        <div class="fig-cap"><span class="aux-badge">보조</span>빨간 직선: 절대 손실의 최적 추세선(원점을 지난다)</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 137쪽 넷째·다섯째 문단. M(a)는 4-3-1에서 미리 말해 둔 '절댓값으로 모으는 방법'이다. 오차의 크기(4-2-2)의 평균이라고 읽어도 된다. 빨간 직선은 보조 데이터로 계산한 절대 손실의 최적 추세선이다(기울기 약 0.52). 이상점이 없을 때(약 0.50)와 거의 같다. 주의: M(a)는 이차함수가 아니다(꺾인 선 모양). 그래서 135쪽처럼 완전제곱식으로 최솟값을 구할 수 없고, 수업에서도 손으로 구하지 않는다(범위 밖). 덱의 보조 활동은 컴퓨터가 a를 0.001씩 바꿔 보며 가장 작은 값을 찾은 것이다. 지도서 186쪽 내용 연구: 절대 손실함수는 변화가 연속적이지 않아(꺾인 점이 있어) 다루기 불편한 점이 있다. 교사 참고: 후버 손실함수(오차가 작을 때는 제곱, 클 때는 절댓값처럼)는 지도서 지도 자료이며 화면에는 올리지 않는다.</aside>
+  </section>
+
+  <!-- 7. 더 깊이 — 왜 제곱이 더 끌려가나 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 왜 제곱이 더 크게 끌려가나</div>
+    <h2>제곱하면 이상점 하나가 손실을 독차지한다</h2>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <span class="aux-badge">보조 예시</span> 앞 그림의 데이터에서 직선 \(f(x)=0.5x\)를 생각하자. 파란 점 \(19\)개의 오차는 모두 \(0.3\) 이하이고, 이상점 \((8,\ 14)\)의 오차는 \(14-0.5\times8=10\)이다.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <table class="errtbl" style="margin: var(--lm-space-1) auto;">
+        <tr><th></th><th>파란 점 \(19\)개의 합</th><th>이상점 하나</th></tr>
+        <tr><td>오차의 크기</td><td class="num">\(3.35\)</td><td class="num">\(10\)</td></tr>
+        <tr><td>오차의 제곱</td><td class="num">\(0.6925\)</td><td class="num small">\(100\)</td></tr>
+      </table>
+      제곱으로 모으면 이상점 하나가 나머지 \(19\)개를 합친 것의 <b>\(140\)배가 넘는다</b>. 절댓값으로 모으면 약 \(3\)배이다.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      제곱 손실을 줄이려면 그 \(100\)을 줄이는 것이 가장 효과적이다 → 직선이 <b>이상점 쪽으로 기운다</b>.
+      절댓값은 큰 오차를 키우지 않으므로 이상점의 몫이 작다 → <b>덜 끌려간다</b>.
+      <span class="cap-sm" style="display: block;">4-3-1에서 본 “제곱은 큰 오차를 더 무겁게 친다”의 뒷면이다.</span>
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 3</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 수치는 보조 예시 데이터로 python 계산했다: 파란 점 19개의 직선 y=0.5x에 대한 오차는 ±0.05~0.3, 오차의 크기의 합 3.35, 오차의 제곱의 합 0.6925. 이상점의 오차 10, 제곱 100. 100÷0.6925≈144, 10÷3.35≈3. 비유(줄다리기): 각 점이 직선을 자기 쪽으로 당긴다고 하자. 제곱 손실에서는 멀리 있는 점일수록 더 센 힘으로 당긴다(오차가 클수록 세게). 절대 손실에서는 가깝든 멀든 모든 점이 같은 힘으로 당긴다. 그래서 절대 손실에서는 점의 '개수'가 중요하고, 19 대 1이면 19개 쪽이 이긴다. 교사 참고(화면에 없음): 수 몇 개의 대푯값으로 말하면, 오차의 제곱의 합을 최소로 하는 값은 평균이고, 오차의 절댓값의 합을 최소로 하는 값은 중앙값이다. 1, 2, 3, 4, 100의 평균은 22로 100에 끌려가지만 중앙값은 3이다. 원점을 지나는 직선의 경우 절대 손실의 최적 기울기는 y_i/x_i들의 (x_i를 가중치로 한) 중앙값이 된다. 학생이 궁금해하면 '평균은 큰 값에 끌려가고 중앙값은 안 끌려간다'까지만 말한다.</aside>
+  </section>
+
+  <!-- 8. 더 깊이 — 보조 활동: 이상점 끌기 -->
+  <section class="tight" data-prevent-swipe>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 보조 활동 · 이상점을 끌어 보기</div>
+    <h2>이상점을 움직이면 두 최적 추세선은 어떻게 달라질까</h2>
+
+    <div class="row" data-prevent-swipe>
+      <div>
+        <div class="chart drag-area" id="outChart" data-w="900" data-h="680" data-x="0,10,1" data-y="0,16,2" data-xlab="1" data-ylab="2" data-r="9"
+             data-pts="0.5,0.45;1,0.35;1.5,0.85;2,0.75;2.5,1.4;3,1.55;3.5,1.55;4,2.25;4.5,2.15;5,2.7;5.5,2.45;6,3.1;6.5,3.4;7,3.3;7.5,4.05;8,3.85;8.5,4.3;9,4.7;9.5,4.5;8,14" data-hl="19"></div>
+        <div class="axis-cap"><span class="aux-badge">보조</span>교과서 밖 데이터 · 빨간 점(이상점)을 끌 수 있다</div>
+      </div>
+      <div class="grow">
+        <div class="readout" id="outRead"></div>
+        <div class="ctrl-btns">
+          <button class="anim-btn" id="outToggle">이상점 지우기</button>
+          <button class="anim-btn" id="outReset">처음 위치로</button>
+        </div>
+        <p class="cap-sm" style="margin-top: var(--lm-space-3);">
+          <span class="aux-badge">보조</span>해 볼 것 — ① 이상점을 더 위로 끌면 어느 직선이 많이 움직이나? ② 이상점을 파란 점들 사이로 옮기면? ③ 이상점을 왼쪽(\(x\)가 작은 쪽)으로 옮기면 영향이 커지나 작아지나?
+        </p>
+        <p class="cap-sm">회색 점선: 이상점이 없을 때의 제곱 손실 최적 추세선</p>
+      </div>
+    </div>
+    <aside class="notes">교과서 밖 보조 활동이다. 데이터는 앞 장들의 보조 예시와 같다. 초록 직선은 제곱 손실 L(a)의 최적 추세선(기울기는 4-3-2 「더 깊이」의 식 Σx_iy_i÷Σx_i²로 계산), 빨간 직선은 절대 손실 M(a)의 최적 추세선이다. 빨간 직선은 컴퓨터가 a를 0부터 3까지 0.001씩 바꿔 가며 M(a)가 가장 작은 a를 찾은 것이다. 손으로 구하는 방법은 다루지 않는다. 처음 위치에서는 초록 약 0.62, 빨강 약 0.52, 이상점이 없으면 둘 다 약 0.50이다. 확인할 것: ① 이상점을 위로 끌수록 초록은 계속 따라 올라가지만 빨강은 거의 그대로다. ② 이상점을 파란 점들 사이로 옮기면 두 직선이 거의 겹친다. 이상점이 아니게 되었으니 당연하다. ③ x가 작은 쪽으로 옮기면 초록 직선도 덜 움직인다. 원점을 지나는 직선은 원점 근처의 점에는 잘 휘둘리지 않는다(x가 클수록 지렛대가 길다). '이상점 지우기'는 교과서의 첫째 방법(제거)이다. 지운 결과와 절대 손실의 결과가 비슷하다는 것이 '제거하지 않아도 영향력을 줄인다'는 교과서 문장의 뜻이다.</aside>
+  </section>
+
+  <!-- 9. 확인 활동 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 토의와 보조 문항</div>
+    <h2>이상점을 지울까, 손실함수를 바꿀까?</h2>
+
+    <ul class="qlist">
+      <li><b>토의</b> 이상점이 발견되면 지워 버리는 것이 좋을까, 손실함수를 바꾸는 것이 좋을까? 근거를 들어 말해 보자.
+        <div class="ans">이상점은 오류일 수도 있지만 중요한 신호(예: 다른 환자들과 확연히 다른 혈압 수치 → 새로운 질환의 패턴)일 수도 있다. 사람이 임의로 지우면 결과가 왜곡될 수 있고, 데이터가 많으면 일일이 판단하기도 어렵다. → 무조건 지우기보다 <b>영향력을 줄이는 손실함수를 고르는 것</b>이 더 실용적이고 안전하다. <span style="font-weight: 400; font-size: var(--lm-slide-caption);">(지도서 자료)</span></div></li>
+      <li><span class="aux-badge">보조 문항</span><b>⑴</b> 이상점이 있는 데이터에 오차의 제곱의 평균을 손실함수로 쓰면, 최적 추세선이 이상점이 있는 방향으로 치우친다. (○, ×)
+        <div class="ans">○ — 이상점의 오차의 제곱이 너무 커지기 때문이다.</div></li>
+      <li><span class="aux-badge">보조 문항</span><b>⑵</b> 절대 손실함수를 쓰면 이상점의 영향이 완전히 사라진다. (○, ×)
+        <div class="ans">× — 치우치는 현상이 <b>완화</b>될 뿐이다. 보조 활동에서도 빨간 직선이 조금은 움직였다.</div></li>
+    </ul>
+    <aside class="notes">137쪽에는 문제가 없으므로 토의 1문항과 교과서 밖 보조 문항 2개를 두었다. 토의는 2~3분 짝 토의 후 몇 명 발표. '지운다' 쪽 근거(측정 실수라면 지우는 게 맞다)와 '바꾼다' 쪽 근거(중요한 신호일 수 있다, 사람이 다 볼 수 없다)를 모두 칠판에 적는다. 답의 내용은 지도서 186쪽 지도 자료 「이상점을 제거하지 않고 다른 손실함수를 사용하는 이유」의 결론이다: 이상점을 무조건 제거하는 것보다 그 영향력을 줄이면서도 데이터 전체의 경향성을 잘 나타낼 수 있는 손실함수를 선택하는 것이 더 실용적이고 안전하다. 손실함수는 어떤 오차에 얼마나 민감하게 반응할지를 결정하므로 인공지능 모델의 학습 방향에 큰 영향을 준다. 보조 문항 ⑵는 교과서 문장 '완화된다'를 정확히 읽었는지 확인한다.</aside>
+  </section>
+
+  <!-- 10. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>제곱은 큰 오차를 더 크게 쳐서, 엉뚱한 점 하나가 최적 추세선을 끌어당긴다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">손실함수 (제곱)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(L(a)=\dfrac{e_1^{\,2}+\cdots+e_n^{\,2}}{n}\)<br>이상점 쪽으로 치우친다</div>
+      </div>
+      <div class="side">
+        <div class="where">절대 손실함수</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(M(a)=\dfrac{|e_1|+\cdots+|e_n|}{n}\)<br>치우침이 완화된다</div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-small);">
+      다음 시간 예고 — 손실함수 값이 기울기에 따라 어떻게 변하는지 <b>도구로 직접</b> 보자. → <b>공학 도구로 손실함수의 값 관찰</b>
+    </div>
+    <aside class="notes">오늘 한 줄을 따라 말하게 한다. 두 손실함수 중 무엇이 '옳다'가 아니라, 데이터의 특성에 따라 고른다는 것이 결론이다. 이 단원의 계산은 앞으로도 제곱 손실 L(a)만 쓴다. 예고: 다음 시간(4-3-4, 138~139쪽 공학 도구)은 실제 실험 데이터로 a를 0.1씩 바꿔 가며 L(a)의 값이 어떻게 변하는지 표로 관찰한다. 꼭짓점 공식 없이도 가장 작은 자리를 찾을 수 있는지 보는 것이다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 좌표평면 그리기 — SVG에는 도형과 눈금 숫자만 넣는다(수식은 .ov HTML 덧씌우기).
+     data-x, data-y : "최소,최대,눈금간격"   data-pts : "x,y;x,y;…"
+     data-lines : "기울기,색클래스;…" (원점을 지나는 직선 f(x)=ax)
+     data-quad : "c2,c1,c0" (곡선 y=c2·x²+c1·x+c0)   data-dots : "x,y;…" 강조 점
+     data-dash : "x1,y1,x2,y2;…" 점선 안내선   data-xlab/data-ylab : 눈금 숫자 간격(기본=격자 간격)
+     data-bare : 눈금·격자 없이 화살표 축만(개념도)   data-hl : 강조할 점 번호 */
+  (function () {
+    const NS = 'http://www.w3.org/2000/svg';
+    function mk(tag, attrs, parent) {
+      const e = document.createElementNS(NS, tag);
+      Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k]));
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+    function nums(s) { return s.split(',').map(Number); }
+    function clean(v) { return String(Number(v.toFixed(6))); }
+    let uid = 0;
+
+    function build(el) {
+      const W = Number(el.dataset.w || 800), H = Number(el.dataset.h || 480);
+      const [x0, x1, xs] = nums(el.dataset.x), [y0, y1, ys] = nums(el.dataset.y);
+      const xl = Number(el.dataset.xlab || xs), yl = Number(el.dataset.ylab || ys);
+      const bare = !!el.dataset.bare;
+      const L = bare ? 24 : 76, R = 20, T = 20, B = bare ? 24 : 44;
+      const sx = x => L + (x - x0) / (x1 - x0) * (W - L - R);
+      const sy = y => T + (y1 - y) / (y1 - y0) * (H - T - B);
+      el.style.width = W + 'px';
+      const svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMid meet' });
+      el.insertBefore(svg, el.firstChild);
+      const id = 'plot' + (++uid);
+      const cp = mk('clipPath', { id: id }, mk('defs', {}, svg));
+      mk('rect', { x: L, y: T, width: W - L - R, height: H - T - B }, cp);
+
+      const g = mk('g', { class: 'grid' }, svg), tk = mk('g', {}, svg);
+      const near = (v, s) => Math.abs(v / s - Math.round(v / s)) < 1e-6;
+      if (!bare) for (let i = 0, n = Math.round((y1 - y0) / ys); i <= n; i++) {
+        const v = y0 + i * ys;
+        mk('line', { x1: L, x2: W - R, y1: sy(v), y2: sy(v) }, g);
+        if (near(v - y0, yl)) mk('text', { x: L - 12, y: sy(v) + 8, 'text-anchor': 'end', class: 'tick' }, tk).textContent = clean(v);
+      }
+      if (!bare) for (let i = 0, n = Math.round((x1 - x0) / xs); i <= n; i++) {
+        const v = x0 + i * xs;
+        mk('line', { x1: sx(v), x2: sx(v), y1: T, y2: H - B }, g);
+        if (near(v - x0, xl)) mk('text', { x: sx(v), y: H - B + 30, 'text-anchor': 'middle', class: 'tick' }, tk).textContent = clean(v);
+      }
+      const ax0 = (x0 <= 0 && x1 >= 0) ? 0 : x0, ay0 = (y0 <= 0 && y1 >= 0) ? 0 : y0;
+      const ax = mk('g', { class: 'axis' }, svg);
+      mk('line', { x1: L, x2: W - R, y1: sy(ay0), y2: sy(ay0) }, ax);
+      mk('line', { x1: sx(ax0), x2: sx(ax0), y1: T, y2: H - B }, ax);
+      if (bare) {
+        mk('path', { d: 'M' + (W - R) + ' ' + sy(ay0) + ' l-16 -8 v16 z' }, ax);
+        mk('path', { d: 'M' + sx(ax0) + ' ' + T + ' l-8 16 h16 z' }, ax);
+      }
+
+      const plot = mk('g', { 'clip-path': 'url(#' + id + ')' }, svg);
+      const c = { svg: svg, sx: sx, sy: sy, x0: x0, x1: x1, y0: y0, y1: y1, plot: plot, mk: mk };
+      c.under = mk('g', {}, plot);
+      if (el.dataset.dash) {
+        const gd = mk('g', { class: 'dash' }, plot);
+        el.dataset.dash.split(';').forEach(s => {
+          const [a, b, p, q] = nums(s);
+          mk('line', { x1: sx(a), y1: sy(b), x2: sx(p), y2: sy(q) }, gd);
+        });
+      }
+      if (el.dataset.lines) {
+        el.dataset.lines.split(';').forEach(s => {
+          const [a, cls] = s.split(',');
+          const k = Number(a);
+          mk('line', { class: 'ln ' + cls, x1: sx(x0), y1: sy(k * x0), x2: sx(x1), y2: sy(k * x1) }, plot);
+        });
+      }
+      if (el.dataset.quad) {
+        const [p2, p1, p0] = nums(el.dataset.quad);
+        let d = '';
+        for (let i = 0; i <= 200; i++) {
+          const x = x0 + (x1 - x0) * i / 200;
+          d += (i ? 'L' : 'M') + sx(x).toFixed(1) + ' ' + sy(p2 * x * x + p1 * x + p0).toFixed(1);
+        }
+        c.curve = mk('path', { class: 'curve', d: d }, plot);
+      }
+      c.mid = mk('g', {}, plot);
+      c.pts = [];
+      const hl = el.dataset.hl ? nums(el.dataset.hl) : [];
+      if (el.dataset.pts) {
+        el.dataset.pts.split(';').forEach((s, i) => {
+          const p = nums(s);
+          c.pts.push(mk('circle', { class: 'pt' + (hl.indexOf(i) >= 0 ? ' hl' : ''), cx: sx(p[0]), cy: sy(p[1]), r: Number(el.dataset.r || 10), 'data-i': i }, plot));
+        });
+      }
+      if (el.dataset.dots) {
+        el.dataset.dots.split(';').forEach(s => {
+          const p = nums(s);
+          mk('circle', { class: 'dot', cx: sx(p[0]), cy: sy(p[1]), r: 11 }, plot);
+        });
+      }
+      c.top = mk('g', {}, plot);
+      el.querySelectorAll('.ov[data-at]').forEach(o => {
+        const [x, y] = nums(o.dataset.at);
+        o.style.left = (sx(x) / W * 100) + '%';
+        o.style.top = (sy(y) / H * 100) + '%';
+      });
+      el._c = c;
+    }
+    document.querySelectorAll('.chart[data-x]').forEach(build);
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 · 장 단위 토글 버튼 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+    document.querySelectorAll('[data-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const on = btn.closest('section').classList.toggle(btn.dataset.toggle);
+        btn.classList.toggle('on', on);
+      });
+    });
+  })();
+</script>
+
+<script>
+  /* 보조 활동 — 이상점을 끌면 제곱 손실(초록)과 절대 손실(빨강)의 최적 추세선이 다시 그려진다.
+     제곱: a = Σxy ÷ Σx² / 절대: a를 0~3에서 0.001씩 바꿔 M(a)가 가장 작은 a(같으면 작은 쪽)를 찾는다. */
+  (function () {
+    const el = document.getElementById('outChart');
+    if (!el || !el._c) return;
+    const c = el._c, mk = c.mk;
+    const BX = [], BY = [];
+    el.dataset.pts.split(';').slice(0, 19).forEach(s => { const p = s.split(',').map(Number); BX.push(p[0]); BY.push(p[1]); });
+    const O0 = [8, 14];
+    let ox = O0[0], oy = O0[1], on = true, drag = false;
+    const out = c.pts[19];
+    out.classList.add('drag');
+    const base = mk('line', { class: 'ln thin' }, c.under);
+    const lsq = mk('line', { class: 'ln c-success' }, c.under);
+    const lab = mk('line', { class: 'ln c-danger' }, c.under);
+    function setLine(l, a) {
+      l.setAttribute('x1', c.sx(0)); l.setAttribute('y1', c.sy(0));
+      l.setAttribute('x2', c.sx(c.x1)); l.setAttribute('y2', c.sy(a * c.x1));
+    }
+    function slopes(X, Y) {
+      let sxy = 0, sxx = 0;
+      X.forEach((x, i) => { sxy += x * Y[i]; sxx += x * x; });
+      let best = 0, bv = Infinity;
+      for (let k = 0; k <= 3000; k++) {
+        const a = k / 1000;
+        let v = 0;
+        for (let i = 0; i < X.length; i++) v += Math.abs(Y[i] - a * X[i]);
+        if (v < bv - 1e-9) { bv = v; best = a; }
+      }
+      return [sxy / sxx, best];
+    }
+    const a0 = slopes(BX, BY)[0];
+    setLine(base, a0);
+    function draw() {
+      const X = on ? BX.concat([ox]) : BX, Y = on ? BY.concat([oy]) : BY;
+      const [aq, aa] = slopes(X, Y);
+      setLine(lsq, aq); setLine(lab, aa);
+      out.setAttribute('cx', c.sx(ox)); out.setAttribute('cy', c.sy(oy));
+      out.classList.toggle('gone', !on);
+      document.getElementById('outRead').innerHTML =
+        (on ? '이상점 (' + ox + ', ' + oy + ')' : '이상점을 지운 데이터') + '<br>' +
+        '<span class="g">제곱 손실</span>의 최적 기울기 ≈ <span class="g">' + aq.toFixed(2) + '</span><br>' +
+        '<span class="r">절대 손실</span>의 최적 기울기 ≈ <span class="r">' + aa.toFixed(2) + '</span><br>' +
+        '<span style="color: var(--lm-ink-3);">이상점이 없을 때(제곱) ≈ ' + a0.toFixed(2) + '</span>';
+      el._last = [aq, aa];
+    }
+    function at(evt) {
+      const pt = c.svg.createSVGPoint();
+      pt.x = evt.clientX; pt.y = evt.clientY;
+      const p = pt.matrixTransform(c.svg.getScreenCTM().inverse());
+      const x = c.x0 + (p.x - c.sx(c.x0)) / (c.sx(c.x1) - c.sx(c.x0)) * (c.x1 - c.x0);
+      const y = c.y1 - (p.y - c.sy(c.y1)) / (c.sy(c.y0) - c.sy(c.y1)) * (c.y1 - c.y0);
+      return [Math.max(0.5, Math.min(9.5, Math.round(x * 2) / 2)), Math.max(0, Math.min(15.5, Math.round(y * 2) / 2))];
+    }
+    c.svg.addEventListener('pointerdown', evt => {
+      if (evt.target !== out || !on) return;
+      drag = true; c.svg.setPointerCapture(evt.pointerId); evt.preventDefault();
+    });
+    c.svg.addEventListener('pointermove', evt => { if (!drag) return; [ox, oy] = at(evt); draw(); });
+    const end = () => { drag = false; };
+    c.svg.addEventListener('pointerup', end);
+    c.svg.addEventListener('pointercancel', end);
+    const tg = document.getElementById('outToggle');
+    tg.addEventListener('click', () => { on = !on; tg.textContent = on ? '이상점 지우기' : '이상점 되살리기'; draw(); });
+    document.getElementById('outReset').addEventListener('click', () => { ox = O0[0]; oy = O0[1]; on = true; tg.textContent = '이상점 지우기'; draw(); });
+    el._move = (x, y) => { ox = x; oy = y; draw(); return el._last; };
+    draw();
+  })();
+</script>
+
+</body>
+</html>
