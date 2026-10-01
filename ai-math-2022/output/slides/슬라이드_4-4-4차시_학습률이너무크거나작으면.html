@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학습률이 너무 크거나 작으면 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+    .note-badge { display: inline-block; background: var(--lm-warning-tint); color: var(--lm-ink);
+                  border: var(--lm-border-thin) solid var(--lm-warning); font-size: var(--lm-slide-caption);
+                  font-weight: 700; padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                  margin-right: var(--lm-space-2); }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+    .ox { display: inline-block; min-width: 1.4em; text-align: center; font-weight: 700; }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+    .row { display: flex; gap: var(--lm-space-6); align-items: flex-start; margin-top: var(--lm-space-3); }
+    .row > .grow { flex: 1; min-width: 0; }
+
+    /* ── 좌표평면 (JS가 data-* 로 SVG를 만든다. 수식 라벨은 .ov HTML 덧씌우기) ── */
+    .chart { position: relative; flex: none; }
+    .chart svg { display: block; width: 100%; height: auto; overflow: hidden; }
+    .chart .grid line { stroke: var(--lm-rule); stroke-width: 1.5; }
+    .chart .axis line { stroke: var(--lm-ink-3); stroke-width: 2.5; }
+    .chart .axis path { fill: var(--lm-ink-3); }
+    .chart .tick { fill: var(--lm-ink-3); font-size: 24px; font-family: var(--lm-font-sans); }
+    .chart .curve { fill: none; stroke: var(--lm-ink); stroke-width: 4; }
+    .chart .pt { fill: var(--lm-accent); stroke: var(--lm-page); stroke-width: 2; }
+    .chart .pt.p { fill: var(--lm-danger); }
+    .chart .pt.q { fill: var(--lm-info); }
+    .chart .dash { stroke: var(--lm-ink-3); stroke-width: 2; stroke-dasharray: 6 6; }
+    .chart .sec { stroke: var(--lm-info); stroke-width: 4; }
+    .chart .sec.faint { stroke-width: 2; opacity: 0.55; }
+    .chart .tan { stroke: var(--lm-danger); stroke-width: 4; }
+    .chart .tan.dashed { stroke-dasharray: 14 9; }
+    .chart .arw { stroke-width: 4; fill: none; }
+    .chart .arw.acc { stroke: var(--lm-accent); }
+    .chart .arw.dan { stroke: var(--lm-danger); }
+    .chart .arw.inf { stroke: var(--lm-info); }
+    .chart .arw.suc { stroke: var(--lm-success); }
+    .chart .mk-acc { fill: var(--lm-accent); }
+    .chart .mk-dan { fill: var(--lm-danger); }
+    .chart .mk-inf { fill: var(--lm-info); }
+    .chart .mk-suc { fill: var(--lm-success); }
+    .chart .mk-ink { fill: var(--lm-ink-2); }
+    .chart .ov { position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+                 font-size: var(--lm-slide-caption); color: var(--lm-ink-2); line-height: 1.2; }
+    .chart .ov.r { transform: translate(8px, -50%); }
+    .chart .ov.l { transform: translate(calc(-100% - 8px), -50%); }
+    .chart .ov.a { transform: translate(-50%, calc(-100% - 8px)); }
+    .chart .ov.b { transform: translate(-50%, 8px); }
+    .chart .ov.dan { color: var(--lm-danger); font-weight: 700; }
+    .chart .ov.inf { color: var(--lm-info); font-weight: 700; }
+    .chart .ov.acc { color: var(--lm-accent); font-weight: 700; }
+    .chart .fade { transition: opacity 0.35s; }
+    .axis-cap { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); text-align: center;
+                margin-top: var(--lm-space-1); }
+
+    .datatbl { border-collapse: collapse; font-size: var(--lm-slide-small); }
+    .datatbl th, .datatbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                               padding: 2px var(--lm-space-4); text-align: center; }
+    .datatbl th { background: var(--lm-paper-tint); font-weight: 700; }
+    .datatbl td.num { font-variant-numeric: tabular-nums; }
+    .datatbl td.hl { color: var(--lm-danger); font-weight: 700; }
+    .datatbl tr[data-s] { visibility: hidden; }
+    .datatbl tr[data-s].visible { visibility: visible; }
+
+    .ctrl { flex: 1; min-width: 0; }
+    .ctrl .param-slider-group label { min-width: 4em; }
+    .ctrl .param-slider-group input[type=range] { height: 36px; }
+    .btnrow { display: flex; flex-wrap: wrap; gap: var(--lm-space-2); margin: var(--lm-space-2) 0; }
+    .btnrow .anim-btn { padding: var(--lm-space-1) var(--lm-space-4); }
+    .anim-btn.on { outline: 4px solid var(--lm-info); outline-offset: 2px; }
+    .readout { margin-top: var(--lm-space-3); border: var(--lm-border-thin) solid var(--lm-accent);
+               border-radius: var(--lm-radius-md); background: var(--lm-page);
+               padding: var(--lm-space-3) var(--lm-space-4); font-size: var(--lm-slide-small);
+               line-height: 1.6; }
+    .readout .big { color: var(--lm-info); font-weight: 700; font-size: var(--lm-slide-body); }
+    .readout .msg { color: var(--lm-danger); font-weight: 700; }
+    .mono { font-variant-numeric: tabular-nums; }
+
+    /* 4-4-4 전용: 방주 표 · 배수 표 · 거리 막대 · 시뮬레이터 */
+    .mtbl { border-collapse: collapse; font-size: var(--lm-slide-small); flex: none; }
+    .mtbl th, .mtbl td { border: var(--lm-border-thin) solid var(--lm-rule); padding: 1px var(--lm-space-4);
+                         text-align: center; font-variant-numeric: tabular-nums; }
+    .mtbl th { background: var(--lm-success-tint); }
+    .mtbl td.hl { color: var(--lm-danger); font-weight: 700; }
+    .mtbl tr[data-s] { visibility: hidden; }
+    .mtbl tr[data-s].visible { visibility: visible; }
+    .mtbl.sm { font-size: var(--lm-slide-caption); }
+    .chart .zz { opacity: 0; }
+    section:has(.s-z.visible) .chart .zz { opacity: 1; }
+    .ratiotbl { border-collapse: collapse; font-size: var(--lm-slide-small); width: 100%; }
+    .ratiotbl th, .ratiotbl td { border: var(--lm-border-thin) solid var(--lm-rule); padding: 2px var(--lm-space-3); text-align: center; }
+    .ratiotbl th { background: var(--lm-paper-tint); }
+    .ratiotbl td.l { text-align: left; }
+    .ratiotbl tr[data-s] { visibility: hidden; }
+    .ratiotbl tr[data-s].visible { visibility: visible; }
+    .ratiotbl .bad { color: var(--lm-danger); font-weight: 700; }
+    .ratiotbl .good { color: var(--lm-success); font-weight: 700; }
+    .rbtn.on, .fnbtn.on { outline: 4px solid var(--lm-info); outline-offset: 2px; }
+    .anim-btn.ghost { background: transparent; color: var(--lm-ink-2); border: var(--lm-border-thin) solid var(--lm-rule-strong); }
+    .ratiobox { border: var(--lm-border-thin) solid var(--lm-accent); border-radius: var(--lm-radius-md);
+                background: var(--lm-page); padding: var(--lm-space-2) var(--lm-space-3); font-size: var(--lm-slide-small); line-height: 1.5; }
+    .ratiobox .big { color: var(--lm-info); font-weight: 700; font-size: var(--lm-slide-body); }
+    .ratiobox .verdict { font-weight: 700; }
+    .ratiobox .verdict.bad { color: var(--lm-danger); }
+    .ratiobox .verdict.good { color: var(--lm-success); }
+    .bars { display: flex; align-items: flex-end; gap: var(--lm-space-2); height: 120px; margin-top: var(--lm-space-2);
+            border-bottom: 2px solid var(--lm-ink-3); position: relative; }
+    .bars .ref { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--lm-ink-3); }
+    .bars .b { flex: 1; position: relative; min-height: 1px; }
+    .bars .b.pos { background: var(--lm-info); }
+    .bars .b.neg { background: var(--lm-danger); }
+    .bars .b.over::after { content: '▲'; position: absolute; top: -26px; left: 0; right: 0; text-align: center;
+                           color: var(--lm-danger); font-size: var(--lm-slide-caption); }
+    .barlab { display: flex; gap: var(--lm-space-2); font-size: var(--lm-slide-caption); color: var(--lm-ink-3); }
+    .barlab span { flex: 1; text-align: center; }
+    .jtbl { border-collapse: collapse; width: 100%; font-size: var(--lm-slide-caption); margin-top: var(--lm-space-2); }
+    .jtbl th, .jtbl td { border: 1px solid var(--lm-rule); padding: 0 var(--lm-space-3); text-align: right; font-variant-numeric: tabular-nums; }
+    .jtbl th { background: var(--lm-paper-tint); text-align: center; }
+    .jtbl tr.jump td { background: var(--lm-accent-tint); font-weight: 700; }
+    .unit-flow { display: flex; gap: var(--lm-space-2); align-items: center; flex-wrap: wrap; margin-top: var(--lm-space-3); }
+    .unit-flow .st { border: var(--lm-border-thin) solid var(--lm-accent); border-radius: var(--lm-radius-md);
+                     background: var(--lm-page); padding: var(--lm-space-2) var(--lm-space-3); font-size: var(--lm-slide-small); text-align: center; }
+    .unit-flow .st small { display: block; color: var(--lm-ink-3); font-size: var(--lm-slide-caption); }
+    .unit-flow .ar { font-size: var(--lm-slide-body); color: var(--lm-accent); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-4 경사하강법 · 4차시</div>
+    <h1>학습률이 너무 크거나 작으면</h1>
+    <p class="slide-sub">보폭이 크면 튀어 나가고, 작으면 하세월이다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 146~147쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄이다. 학습률이 너무 크면 튀어 나가고, 너무 작으면 한없이 느리다. 교과서 순서대로 146쪽 탐구 문제 6을 먼저 풀고 147쪽 설명으로 간다. 오늘의 핵심 보강은 「더 깊이」 세 장과 시뮬레이터다: 경사하강법을 한 번 할 때마다 꼭짓점까지의 거리가 늘 '같은 배수'로 바뀐다는 사실(사실상 등비수열)이다. 이것 하나로 147쪽의 수치, 문제 6의 범위 0&lt;r&lt;1, 지난 시간 시뮬레이터에서 본 움직임이 모두 설명된다. 이 차시로 Ⅳ단원 수업 덱이 끝난다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>미분계수에 학습률을 곱한 만큼 거꾸로 걸어 내려간다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">경사하강법 (145쪽)</div>
+        <div class="what">\(a=c-rL'(c)\)</div>
+      </div>
+      <div class="side">
+        <div class="where">시뮬레이터 — 멈출 때까지 이동 횟수</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(r=\frac56\): 22번 · \(0.3\): 10번 · \(0.1\): 39번</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 — <b>“학습률 \(r\)을 아무렇게나 잡아도 될까?”</b>
+    </p>
+    <aside class="notes">지난 시간 오늘 한 줄과 예고 문장을 그대로 다시 읽는다. 시뮬레이터에서 본 것을 떠올리게 한다(L(a)=a²−2a+2, 초깃값 4, 멈추는 조건 |L'(a)|&lt;0.001). r=5/6은 좌우로 오가며 22번, 0.3은 한쪽에서 10번, 0.1은 39번 만에 멈췄다. 학생들의 질문 "어떤 r이 가장 빠를까? r을 아주 크게 하면?"을 칠판에 적어 두고 오늘 답한다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>손실함수의 값이 작아지는 <span class="kw">학습률의 범위</span>를 구할 수 있다.</span></li>
+      <li><span class="num">2</span><span>학습률이 <span class="kw">너무 크거나 작을 때</span> 생기는 문제를 설명할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">학습률이 너무 크면 튀어 나가고, 너무 작으면 한없이 느리다.</span>
+    </div>
+    <aside class="notes">목표 2가 147쪽 결론 상자다. 「더 깊이」에서는 '왜 그런가'를 '매번 몇 배'라는 한 문장으로 설명한다. 오개념 두 가지를 오늘 깨뜨린다: "학습률은 클수록 빨리 끝난다"(147쪽 (i)이 반례), "작을수록 정확하다"((ii)는 1000번 해도 1.0545에 머문다).</aside>
+  </section>
+
+  <!-- 4. 탐구 문제 6 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 146쪽 탐구 문제 6</div>
+    <h2>손실함수가 작아지는 학습률의 범위</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;"><b>문제 6</b> 초깃값이 \(a=3\)이고 학습률이 \(r\)인 경사하강법을 이용하여 손실함수 \(L(a)=(a-2)^2+1\)을 최적화하려고 한다. 다음에 답하시오.</p>
+    <ul class="qlist">
+      <li><b>⑴</b> 초깃값을 1회 이동시켰을 때 손실함수의 값이 더 작아지는 학습률 \(r\)의 값의 범위를 구하시오.
+        <div class="ans">\(L(a)=a^2-4a+5\)이므로 \(L'(t)=2t-4\). 1회 이동하면 \(a=3-rL'(3)=3-2r\)<br>
+          \(L(3)=2\)보다 작아져야 하므로 \(L(3-2r)=(1-2r)^2+1&lt;2\)에서 \(4r(r-1)&lt;0\) → <b>\(0&lt;r&lt;1\)</b></div></li>
+      <li><b>⑵</b> 학습률이 \(r=1\)일 때, 초깃값 \(a=3\)을 2회 이동시킨 새로운 \(a\)의 값을 구하시오.
+        <div class="ans">\(a=3-2\times1=1\) → \(a=1-1\times L'(1)=1-(2\times1-4)=\mathbf{3}\)</div></li>
+      <li><b>⑶</b> 학습률이 \(r=1\)일 때, 초깃값 \(a=3\)을 이동시키는 과정을 반복하면 어떤 현상이 나타나는지 설명하시오.
+        <div class="ans">\(a=3\)을 짝수 번 이동시킬 때마다 \(a=3\)으로 다시 돌아오므로(\(3\to1\to3\to1\to\cdots\)) <b>최적화가 이루어지지 않는다.</b></div></li>
+    </ul>
+    <aside class="notes">교과서 146쪽 탐구 문제 6. 정답및풀이 190~191쪽: (1) 0&lt;r&lt;1 (2) 3 (3) 짝수 번 이동시킬 때마다 a=3으로 돌아오므로 최적화가 이루어지지 않는다. (1)은 이차부등식이다. 부담스러우면 (2)(3)을 먼저 풀고, 「더 깊이」 시뮬레이터에서 '문제 6' 함수로 바꿔 r=0.9는 되고 1.1은 안 되는 것을 보여 준 뒤 (1)로 돌아온다(설계 문서의 제안). (1)의 풀이: (1−2r)²+1&lt;2 → 1−4r+4r²&lt;1 → 4r²−4r&lt;0 → 4r(r−1)&lt;0 → 0&lt;r&lt;1. (2)에서 a=1은 사실 꼭짓점(2)을 정확히 1만큼 지나친 자리이고, 다시 반대로 1만큼 지나쳐 3으로 돌아온다. 오늘 「더 깊이」에서 이 현상이 '거리가 매번 −1배'라는 것으로 설명된다.</aside>
+  </section>
+
+  <!-- 5. 너무 큰 경우 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 147쪽 · (i) 학습률이 너무 큰 경우</div>
+    <h2>\(r=1.05\) — 손실함수의 값이 매번 커진다</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;">이제 144쪽의 손실함수 \(L(a)=a^2-2a+2\)를 이용하여 경사하강법의 학습률이 너무 크거나 작으면 어떤 문제가 발생하는지 알아보자.</p>
+    <div class="row">
+      <div class="grow">
+        <div class="step-box s-z" data-s style="font-size: var(--lm-slide-small);">
+          학습률이 \(r=1.05\)일 때, 초깃값 \(a=4\)를 새로운 \(a\)의 값
+          <div style="text-align: center; font-size: var(--lm-slide-body);">\(a=4-1.05\times6=-2.3\)</div>
+          으로 이동시킨다. 그러면 손실함수의 값은 \(L(4)=10\)에서 \(L(-2.3)=11.89\)로 <b>증가</b>하게 된다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          따라서 학습률이 너무 클 경우, 오른쪽 그림과 같이 손실함수의 값이 매번 증가하므로 손실함수를 <b>최적화할 수 없다</b>.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 5</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: var(--lm-space-4); align-items: flex-start;">
+        <div>
+          <div class="chart" id="cBig" data-w="520" data-h="560" data-x="-4,6,1" data-y="0,20,4"></div>
+          <div class="axis-cap">가로: \(a\) · 세로: \(L(a)\)</div>
+        </div>
+        <div>
+          <p class="cap-sm" style="margin: 0 0 var(--lm-space-1);">방주 — 3회 반복한 결과</p>
+          <table class="mtbl">
+            <tr><th>\(a\)</th><th>\(L(a)\)</th></tr>
+            <tr><td>\(4\)</td><td>\(10\)</td></tr>
+            <tr data-s><td>\(-2.3\)</td><td class="hl">\(11.89\)</td></tr>
+            <tr data-s><td>\(4.63\)</td><td class="hl">\(14.1769\)</td></tr>
+            <tr data-s><td>\(-2.993\)</td><td class="hl">\(16.94405\)</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 147쪽 (i)과 방주 표. 1.05×6=6.3이므로 4−6.3=−2.3. 꼭짓점 1을 지나쳐 반대편의 더 높은 곳에 떨어졌다(L=11.89). 방주 표의 다음 값: L'(−2.3)=−6.6, a=−2.3+1.05×6.6=4.63, L=14.1769. 다시 L'(4.63)=7.26, a=4.63−7.623=−2.993, L=16.94405(정확히는 16.944049, 교과서는 유효숫자 7자리로 반올림). 화살표가 좌우로 튀며 점점 위로 올라간다. 모든 값은 python으로 재계산해 지면과 일치함을 확인했다. 질문: "보폭이 클수록 빨리 도착할 것 같았는데?" — 오히려 바닥을 지나쳐 계속 더 높은 곳으로 간다.</aside>
+  </section>
+
+  <!-- 6. 너무 작은 경우 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 147쪽 · (ii) 학습률이 너무 작은 경우</div>
+    <h2>\(r=0.002\) — 손실함수의 값이 너무 조금씩 줄어든다</h2>
+
+    <div class="row" style="margin-top: 0;">
+      <div class="grow">
+        <div class="step-box s-z" data-s style="font-size: var(--lm-slide-small);">
+          학습률이 \(r=0.002\)일 때, 초깃값 \(a=4\)를 새로운 \(a\)의 값
+          <div style="text-align: center; font-size: var(--lm-slide-body);">\(a=4-0.002\times6=3.988\)</div>
+          로 이동시킨다. 그러면 손실함수의 값은 \(L(4)=10\)에서 \(L(3.988)=9.928144\)로 <b>너무 조금 감소</b>한다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          따라서 학습률이 너무 작을 경우, 오른쪽 그림과 같이 매우 많이 반복해야 손실함수의 값이 최소가 되는 값 \(a=1\)에 가까워짐을 알 수 있다.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 5</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: var(--lm-space-4); align-items: flex-start;">
+        <div>
+          <div class="chart" id="cSmall" data-w="480" data-h="520" data-x="-1,5,1" data-y="0,12,2"></div>
+          <div class="axis-cap">점: 10번마다 하나씩(200번까지)</div>
+        </div>
+        <div>
+          <p class="cap-sm" style="margin: 0 0 var(--lm-space-1);">방주 — \(10^3\)회 반복한 결과</p>
+          <table class="mtbl sm">
+            <tr><th>\(a\)</th><th>\(L(a)\)</th></tr>
+            <tr><td>\(4\)</td><td>\(10\)</td></tr>
+            <tr><td>\(3.988\)</td><td>\(9.928144\)</td></tr>
+            <tr><td>\(3.976048\)</td><td>\(9.856862\)</td></tr>
+            <tr data-s><td>\(\vdots\)<br>\(3.465068\)</td><td>\(\vdots\)<br>\(7.076558\)</td></tr>
+            <tr data-s><td>\(\vdots\)<br>\(2.351231\)</td><td>\(\vdots\)<br>\(2.825825\)</td></tr>
+            <tr data-s><td>\(\vdots\)<br>\(1.054508\)</td><td class="hl">\(\vdots\)<br>\(1.002971\)</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 147쪽 (ii)과 방주 표. 0.002×6=0.012만큼만 움직인다. 한 번에 손실이 10에서 9.928144로 겨우 0.07 정도 줄었다. 방주 표는 1000번(10³회) 반복한 결과다. 표의 중간 값들이 몇 번째 반복인지는 교과서에 없다. python으로 역추적하면 3.465068은 49번째, 2.351231은 199번째, 1.054508은 1000번째 값이다(교과서에 없는 반복 횟수, 계산으로 찾음). 1000번을 반복해도 아직 1.0545로 a=1에 '도착'하지 못했다. 오른쪽 그림의 점은 10번마다 하나씩 찍은 것이다(200번까지). 처음에는 점 사이가 넓다가 점점 촘촘해진다. 오개념: "학습률이 작을수록 정확하다" — 정확해지기 전에 시간이 다 간다.</aside>
+  </section>
+
+  <!-- 7. 결론 -->
+  <section>
+    <div class="chapter-tag">교과서 147쪽</div>
+    <h2>학습률은 너무 커도, 너무 작아도 안 된다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body); margin-top: 0;">
+      이상으로부터 다음을 알 수 있다.<br>
+      ⑴ 학습률이 너무 크면 최적화가 제대로 이루어지지 않는다.<br>
+      ⑵ 학습률이 너무 작으면 최적화가 매우 느리게 이루어진다.
+    </div>
+    <div class="sides">
+      <div class="side">
+        <div class="where">오개념 ①</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">“클수록 빨리 끝난다” → <span class="kw-danger">\(r=1.05\)는 끝나지 않는다</span></div>
+      </div>
+      <div class="side">
+        <div class="where">오개념 ②</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">“작을수록 정확하다” → <span class="kw-danger">1000번 해도 \(1.054508\)</span></div>
+      </div>
+    </div>
+    <p class="prob-stmt sm">그렇다면 ‘너무 크다’와 ‘너무 작다’의 <b>경계</b>는 어디일까? → 「더 깊이」</p>
+    <aside class="notes">교과서 147쪽 결론 상자. 두 문장을 학생이 소리 내어 읽는다. 비유: 계단을 내려가는데 한 번에 다섯 칸씩 뛰면 넘어지고(너무 큼), 한 칸의 십분의 일씩만 내려가면 해가 진다(너무 작음). 4-3-4 공학 도구와 대비: 거기서는 칸 간격(0.1)이 속도와 정밀도를 정했고, 경사하강법에서는 학습률이 그 역할을 한다. 다음 세 장은 교과서 밖 「더 깊이」로, 경계가 어디인지 계산으로 찾는다.</aside>
+  </section>
+
+  <!-- 8. 더 깊이 ① 매번 몇 배 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 경사하강법은 ‘매번 몇 배’</div>
+    <h2>꼭짓점까지의 거리가 매번 같은 수만큼 곱해진다</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;">\(L(a)=a^2-2a+2=(a-1)^2+1\)에서 꼭짓점은 \(a=1\), \(L'(t)=2t-2=2(t-1)\)이다. 지금 값을 \(c\)라 하면</p>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-body);">
+      \(a=c-r\times2(c-1)\) &nbsp;이므로 양변에서 \(1\)을 빼면 &nbsp;\(a-1=(1-2r)(c-1)\)
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      \(c-1\)은 지금 자리에서 꼭짓점까지의 (부호 있는) 거리, \(a-1\)은 이동한 뒤의 거리다.
+      → 한 번 이동할 때마다 꼭짓점까지의 거리가 <b>\((1-2r)\)배</b>가 된다. \(r\)이 정해지면 이 배수는 <b>매번 같다</b>.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      초깃값 \(4\)는 꼭짓점에서 \(3\)만큼 떨어져 있으므로, \(n\)번 이동하면 \(3\)에 \((1-2r)\)을 \(n\)번 곱한다.
+      <div style="text-align: center; font-size: var(--lm-slide-body); margin-top: var(--lm-space-1);">\(n\)번 이동한 뒤의 \(a=1+3\times(1-2r)^n\)</div>
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>일반적으로</b> \(L(a)=p(a-m)^2+k\) (\(p>0\), 꼭짓점 \((m,\ k)\))이면 \(L'(t)=2p(t-m)\)이므로
+      &nbsp;\(a-m=(1-2pr)(c-m)\) — 거리가 매번 <b>\((1-2pr)\)배</b>.
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 4</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다(수열은 대수 과목 내용이므로 「더 깊이」로 표시했다. 등비수열이라는 말을 몰라도 '매번 몇 배'로만 읽으면 된다). 첫 단계: 갱신 규칙에 L'(c)=2(c−1)을 넣고 양변에서 1을 빼면 c−1로 묶인다. 둘째 단계: 비유 — 통장 이자처럼 매번 같은 비율을 곱한다. 배수가 0.4면 남은 거리가 매번 40%로 줄고, −1.1이면 반대편으로 넘어가며 1.1배로 늘어난다. 셋째 단계: 3에 (1−2r)을 n번 곱한 것이 n번 뒤의 거리다. 거듭제곱은 중학교에서 배웠다. 넷째 단계: 일반형. 지난 시간 공식 2pa+q를 p(a−m)²+k를 전개한 꼴(q=−2pm)에 쓰면 2pa−2pm=2p(a−m)이다. m, k는 꼭짓점의 좌표를 나타내려고 새로 쓴 글자이고, p는 142쪽의 이차항 계수 그대로다. 교사 참고: 수학적으로는 a_n−m이 공비 (1−2pr)인 등비수열이다.</aside>
+  </section>
+
+  <!-- 9. 더 깊이 ② 배수 표 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 147쪽 수치를 한 줄로 설명</div>
+    <h2>배수 \(1-2r\) 하나로 모든 경우가 보인다</h2>
+
+    <table class="ratiotbl">
+      <tr><th>학습률 \(r\)</th><th>배수 \(1-2r\)</th><th>꼭짓점까지의 거리</th><th>\(a=1+3\times(1-2r)^n\)</th></tr>
+      <tr data-s><td>\(1.05\)</td><td class="bad">\(-1.1\)</td><td class="l">부호가 바뀌며 <b class="bad">1.1배씩 커진다</b> — 튀어 나간다</td>
+        <td class="l">\(1+3(-1.1)=-2.3\), \(1+3(1.21)=4.63\), \(1+3(-1.331)=-2.993\) <b>= 147쪽</b></td></tr>
+      <tr data-s><td>\(1\)</td><td class="bad">\(-1\)</td><td class="l">부호만 바뀌고 크기 그대로 — <b>왕복</b></td>
+        <td class="l">\(4,\ -2,\ 4,\ -2,\ \cdots\) (문제 6의 \(3\leftrightarrow1\)과 같은 현상)</td></tr>
+      <tr data-s><td>\(\frac56\)</td><td>\(-\frac23\)</td><td class="l">좌우로 오가며 줄어든다</td>
+        <td class="l">\(1+3(-\frac23)=-1\), \(1+3(\frac49)=\frac73\) <b>= 145쪽</b></td></tr>
+      <tr data-s><td>\(\frac12\)</td><td class="good">\(0\)</td><td class="l"><b class="good">한 번에 \(0\)</b> — 바로 꼭짓점</td>
+        <td class="l">\(a=4-\frac12\times6=1\)</td></tr>
+      <tr data-s><td>\(0.3\)</td><td>\(0.4\)</td><td class="l">한쪽에서 40%씩으로 줄어든다</td>
+        <td class="l">\(2.2,\ 1.48,\ 1.192,\ \cdots\)</td></tr>
+      <tr data-s><td>\(0.002\)</td><td class="bad">\(0.996\)</td><td class="l"><b class="bad">겨우 0.4%씩</b> 줄어든다 — 하세월</td>
+        <td class="l">\(1+3\times0.996^{1000}\approx1.0545\) <b>= 147쪽</b> \(1.054508\)</td></tr>
+    </table>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 6</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 한 줄씩 열며 학생에게 배수를 먼저 계산하게 한다(1−2×1.05=−1.1 등). 147쪽 (i)의 −2.3, 4.63, −2.993이 1+3×(−1.1)ⁿ으로 정확히 나온다(−1.1²=1.21, −1.1³=−1.331). 147쪽 (ii)의 1000번째 값도 1+3×0.996¹⁰⁰⁰≈1.0545로 맞는다(지면 1.054508). 145쪽 r=5/6의 −1, 7/3도 이 식에서 나온다. 문제 6의 r=1 왕복은 배수가 −1인 경우다(문제 6 함수는 꼭짓점 2, 초깃값 3이라 거리 1이 +1, −1, +1로 바뀐다). r=1/2이면 배수가 0이라 한 번에 꼭짓점에 도착한다 — 교과서 밖 사실로, 이 손실함수에서 가장 빠른 학습률이다. 0.3은 배수 0.4라 지난 시간 시뮬레이터에서 한쪽에서만 다가갔다. 모든 값은 python으로 검산했다.</aside>
+  </section>
+
+  <!-- 10. 더 깊이 ③ 경계 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 너무 큼과 너무 작음의 경계</div>
+    <h2>배수의 크기가 \(1\)보다 작아야 꼭짓점에 다가간다</h2>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      거리가 줄어들려면 &nbsp;\(-1&lt;1-2pr&lt;1\) &nbsp;⇔&nbsp; \(0&lt;r&lt;\dfrac1p\) &nbsp;&nbsp; · &nbsp;&nbsp; 가장 빠른 것은 배수가 \(0\)일 때, 즉 \(r=\dfrac{1}{2p}\) (한 번에 도착)
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>문제 6과 맞춰 보기</b> — \(L(a)=(a-2)^2+1\)은 \(p=1\)이므로 \(0&lt;r&lt;1\). 문제 6 ⑴의 답과 <b>같다</b>. \(r=1\)은 경계(배수 \(-1\))라 왕복한다.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>147쪽 다시 보기</b> — \(L(a)=a^2-2a+2\)도 \(p=1\): \(r=1.05\)는 경계 \(1\)을 넘었다(너무 큼). \(r=0.002\)는 범위 안이지만 가장 빠른 \(\frac12\)에서 아주 멀다(너무 작음).
+    </div>
+    <div class="formula-box" style="font-size: var(--lm-slide-small); margin-top: var(--lm-space-3);">
+      \(0\) &nbsp;—— 한쪽에서 다가감 ——&nbsp; \(\dfrac{1}{2p}\) (한 번에) &nbsp;—— 좌우로 오가며 다가감 ——&nbsp; \(\dfrac1p\) (왕복) &nbsp;—— 튀어 나감 ——→ \(r\)
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 3</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. −1&lt;1−2pr&lt;1을 풀면: 오른쪽 부등식에서 r&gt;0, 왼쪽에서 2pr&lt;2, 즉 r&lt;1/p. 문제 6 (1)은 '1회 이동해서 손실함수가 작아지는 범위'를 물었는데, 이차함수에서는 손실이 작아지는 것과 거리가 줄어드는 것이 같은 말이라 답이 일치한다. 아래 수직선이 전체 그림이다: 0과 1/(2p) 사이는 배수가 양수라 한쪽에서 다가가고(0.3, 0.002), 1/(2p)과 1/p 사이는 배수가 음수라 좌우로 오가며 다가가고(5/6), 1/p에서는 왕복, 그보다 크면 튀어 나간다(1.05). 실제 인공지능의 손실함수는 이차함수가 아니어서 이 공식을 그대로 쓸 수는 없다. 그래서 학습률을 여러 개 시험해 보고 고른다. 그러나 '너무 크면 튀고 너무 작으면 느리다'는 그림은 그대로 통한다. 발산이라는 용어는 교육과정 범위 밖이므로 쓰지 않는다('튀어 나간다', '멀어진다'로 말한다).</aside>
+  </section>
+
+  <!-- 11. 더 깊이 — 시뮬레이터 -->
+  <section class="tight" data-prevent-swipe>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 학습률 실험실</div>
+    <h2>학습률을 바꾸면 배수가 바뀌고, 움직임이 바뀐다</h2>
+
+    <div class="row" data-prevent-swipe style="margin-top: 0;">
+      <div>
+        <div class="chart" id="cLab" data-w="700" data-h="640" data-x="-4,6,1" data-y="0,20,2"></div>
+        <div class="axis-cap" id="labCap">처음 12번 이동을 화살표로</div>
+      </div>
+      <div class="ctrl" data-prevent-swipe>
+        <div class="btnrow">
+          <button class="anim-btn ghost fnbtn on" data-fn="A">144쪽 \(a^2-2a+2\), 초깃값 \(4\)</button>
+          <button class="anim-btn ghost fnbtn" data-fn="B">문제 6 \((a-2)^2+1\), 초깃값 \(3\)</button>
+        </div>
+        <div class="param-slider-group" style="margin: 0;"><label for="sR">\(r\)</label>
+          <input type="range" id="sR" min="1" max="1200" step="1" value="1050"><span class="val-display" id="vR">1.05</span></div>
+        <div class="btnrow">
+          <button class="anim-btn ghost rbtn on" data-r="1050">1.05</button>
+          <button class="anim-btn ghost rbtn" data-r="1000">1</button>
+          <button class="anim-btn ghost rbtn" data-r="500">0.5</button>
+          <button class="anim-btn ghost rbtn" data-r="300">0.3</button>
+          <button class="anim-btn ghost rbtn" data-r="2">0.002</button>
+        </div>
+        <div class="ratiobox">
+          배수 = 1 − 2 × <span id="rR">1.05</span> = <span class="big" id="rRatio">−1.1</span>
+          &nbsp;<span class="verdict" id="rVerdict">…</span>
+          <div class="bars" id="bars"></div>
+          <div class="barlab" id="barlab"></div>
+        </div>
+        <table class="jtbl">
+          <thead><tr><th>이동 횟수</th><th><i>a</i></th><th><i>L</i>(<i>a</i>)</th></tr></thead>
+          <tbody id="jBody"></tbody>
+        </table>
+        <div class="btnrow" style="align-items: center; margin-bottom: 0;">
+          <span class="cap-sm">횟수로 건너뛰기</span>
+          <button class="anim-btn ghost jbtn" data-n="49">49회</button>
+          <button class="anim-btn ghost jbtn" data-n="199">199회</button>
+          <button class="anim-btn ghost jbtn" data-n="1000">1000회</button>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 밖 보조 활동이다. 막대는 꼭짓점까지의 거리(0회~8회)이고, 점선은 처음 거리다. 파랑은 꼭짓점의 오른쪽, 빨강은 왼쪽이다(부호). 순서대로 프리셋을 누른다. 1.05: 배수 −1.1, 막대가 빨강·파랑을 번갈아 가며 점선을 넘어 커진다. 표의 −2.3, 4.63, −2.993 / 11.89, 14.1769, 16.94405가 147쪽 방주와 같다. 1: 배수 −1, 막대 높이가 그대로(왕복). '문제 6'으로 바꾸면 3, 1, 3, 1이 나온다. 0.5: 배수 0, 한 번에 꼭짓점(문제 6 함수에서는 3→2). 0.3: 배수 0.4, 파란 막대가 빠르게 줄어든다. 0.002: 배수 0.996, 막대가 거의 줄지 않는다. 표의 3.988 / 9.928144, 3.976048 / 9.856862가 방주와 같고, '49회', '199회', '1000회'를 누르면 3.465068, 2.351231, 1.054508(손실 7.076558, 2.825825, 1.002971)이 나온다 — 147쪽 방주 표와 같다(반복 횟수 49·199·1000은 교과서에 없고 계산으로 찾은 값). 문제 6 ⑴ 확인: 문제 6 함수에서 슬라이더를 0.9와 1.1에 두고 1회째 손실을 2와 비교한다. 0.9는 1.64로 작아지고 1.1은 2.44로 커진다. 값은 유효숫자 7자리로 표시한다(147쪽 방주 규칙).</aside>
+  </section>
+
+  <!-- 12. 확인하기 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 147쪽 확인하기</div>
+    <h2>옳으면 ○, 옳지 않으면 ×</h2>
+
+    <ul class="qlist">
+      <li><b>⑴</b> 이차함수 \(f(x)=3x^2+4x\)의 \(x=2\)에서의 미분계수는 \(16\)이다.
+        <div class="ans"><span class="ox">○</span> — \(f'(a)=2\times3\times a+4=6a+4\)이므로 \(f'(2)=12+4=16\)</div></li>
+      <li><b>⑵</b> \(x=a\)에서 이차함수 \(f(x)\)의 미분계수가 음수이면 \(x=a\)보다 더 작은 \(x\)의 값에서 함숫값이 더 작아진다.
+        <div class="ans"><span class="ox">×</span> — 미분계수가 음수이면 <b>양의 방향</b>(더 <b>큰</b> \(x\)의 값)으로 이동해야 함숫값이 더 작아진다.</div></li>
+    </ul>
+    <aside class="notes">교과서 147쪽 확인하기. 정답및풀이 191쪽: (1) ○ (2) ×. (1) 지면 확인: 3x²+4x(이차항 있음)다. 텍스트 추출본에는 '3x +4x'로 깨져 7x처럼 보이는데, 그렇게 읽으면 미분계수가 7이 되어 ×로 뒤집힌다. 학생 책과 화면이 같은지 한 번 확인시킨다. p=3, q=4이므로 2pa+q=6a+4, a=2에서 16. (2) 4-4-2의 핵심 규칙(부호의 반대 방향)을 묻는 문항이다. 미분계수가 음수면 내리막이 오른쪽에 있으므로 더 큰 x에서 작아진다. 왼쪽(더 작은 x)으로 가면 오히려 커진다.</aside>
+  </section>
+
+  <!-- 13. 오늘 한 줄 + 단원 닫기 -->
+  <section class="tight">
+    <div class="chapter-tag">오늘 한 줄 · Ⅳ단원 닫기</div>
+    <h2>학습률이 너무 크면 튀어 나가고, 너무 작으면 한없이 느리다</h2>
+
+    <div class="sides" style="margin-top: var(--lm-space-2);">
+      <div class="side known">
+        <div class="where">교과서 147쪽</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">너무 크면 최적화 실패<br>너무 작으면 매우 느림</div>
+      </div>
+      <div class="side">
+        <div class="where">「더 깊이」</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">거리는 매번 \((1-2pr)\)배<br>\(0&lt;r&lt;\frac1p\)이면 다가간다</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt sm" style="margin-bottom: 0;"><b>Ⅳ단원 한 줄</b> — 확률로 예측하고, 추세선으로 경향을 잡고, 손실함수로 얼마나 틀렸는지 재고, 경사하강법으로 그 손실을 줄인다.</p>
+    <div class="unit-flow">
+      <div class="st">확률<small>4-1 · 상대도수로 예측</small></div><span class="ar">→</span>
+      <div class="st">추세선<small>4-2 · 직선으로 경향</small></div><span class="ar">→</span>
+      <div class="st">손실함수<small>4-3 · 얼마나 틀렸나</small></div><span class="ar">→</span>
+      <div class="st">경사하강법<small>4-4 · 손실을 줄이는 법</small></div>
+    </div>
+    <p class="cap-sm" style="margin-top: var(--lm-space-3);">교과서 148쪽 창의 Up — 138쪽 합금 데이터에 경사하강법(\(r=0.001\), 초깃값 \(5.5\), 200회)을 쓰면 0.1 간격 탐색의 \(4.7\)보다 더 정확한 \(a=4.68376\cdots\)이 나온다.</p>
+    <aside class="notes">오늘 한 줄을 학생이 따라 말하게 한다. 이어서 Ⅳ단원 전체를 한 줄로 닫는다: 확률(4-1)로 예측하고, 추세선(4-2)으로 경향을 잡고, 손실함수(4-3)로 얼마나 틀렸는지 재고, 경사하강법(4-4)으로 그 손실을 줄인다. 1단원 연결: 인공지능이 '학습한다'는 것은 이 걸음을 수천, 수만 번 반복해 가중치를 찾는 일이다. 4-3-4 연결: 공학 도구에서 a를 0.1 간격으로 바꿔 찾은 4.7을, 경사하강법은 간격 없이 미분계수를 따라가 4.68376…으로 더 정확히 찾는다(창의 Up 148~149쪽, 차시 밖. 교사가 시간이 되면 알지오매스로 보여 줄 수 있다. 교과서 계수로 python 재계산 일치: a=4.683764399…). 교사 참고: 지도서 193쪽·정답 191쪽의 창의 Up 예시표 중 r=1 행은 교과서 계수로 재현되지 않는다(설계 문서 6절). 오늘 「더 깊이」로 설명하면 r=1은 이 데이터의 경계 1/p≈0.0376(이 손실함수는 p≈26.6)을 훨씬 넘으므로 손실이 폭증하는 것이 맞다. 다음은 대단원 마무리(150~154쪽)다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 좌표평면 — SVG에는 도형과 눈금 숫자만 넣는다(수식은 .ov HTML 덧씌우기).
+     data-x, data-y : "최소,최대,눈금간격"   data-w, data-h : 픽셀 크기
+     data-noticks : 눈금·격자 없이 축만(모식도)
+     만든 뒤 el._p 에 그리기 도구(curve, line, pt, arrow …)를 붙여 둔다.
+     JS 문자열에는 TeX를 넣지 않는다(백슬래시 이스케이프 사고 방지). */
+  window.LMPlot = (function () {
+    const NS = 'http://www.w3.org/2000/svg';
+    const MINUS = String.fromCharCode(0x2212);
+    function mk(tag, attrs, parent) {
+      const e = document.createElementNS(NS, tag);
+      Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k]));
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+    function nums(s) { return String(s).split(',').map(Number); }
+    function tickTxt(v) { return String(Number(v.toFixed(6))).replace('-', MINUS); }
+    let uid = 0;
+
+    function make(el) {
+      const W = Number(el.dataset.w || 800), H = Number(el.dataset.h || 480);
+      const [x0, x1, xs] = nums(el.dataset.x), [y0, y1, ys] = nums(el.dataset.y);
+      const bare = !!el.dataset.noticks;
+      const L = bare ? 24 : 64, R = 20, T = 20, B = bare ? 24 : 44;
+      const sx = x => L + (x - x0) / (x1 - x0) * (W - L - R);
+      const sy = y => T + (y1 - y) / (y1 - y0) * (H - T - B);
+      el.style.width = W + 'px';
+      const svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMid meet' });
+      el.insertBefore(svg, el.firstChild);
+      const id = 'pl' + (++uid);
+      const defs = mk('defs', {}, svg);
+      const cp = mk('clipPath', { id: id + 'c' }, defs);
+      mk('rect', { x: L, y: T, width: W - L - R, height: H - T - B }, cp);
+      ['acc', 'dan', 'inf', 'suc', 'ink'].forEach(c => {
+        const m = mk('marker', { id: id + c, viewBox: '0 0 10 10', refX: 8, refY: 5,
+                                 markerWidth: 4.5, markerHeight: 4.5, orient: 'auto-start-reverse' }, defs);
+        mk('path', { d: 'M0,0 L10,5 L0,10 z', class: 'mk-' + c }, m);
+      });
+
+      const ax0 = (x0 <= 0 && x1 >= 0) ? 0 : x0, ay0 = (y0 <= 0 && y1 >= 0) ? 0 : y0;
+      if (!bare) {
+        const g = mk('g', { class: 'grid' }, svg), tk = mk('g', {}, svg);
+        for (let i = 0, n = Math.round((y1 - y0) / ys); i <= n; i++) {
+          const v = y0 + i * ys;
+          mk('line', { x1: L, x2: W - R, y1: sy(v), y2: sy(v) }, g);
+          const t = mk('text', { x: L - 12, y: sy(v) + 8, 'text-anchor': 'end', class: 'tick' }, tk);
+          t.textContent = tickTxt(v);
+        }
+        for (let i = 0, n = Math.round((x1 - x0) / xs); i <= n; i++) {
+          const v = x0 + i * xs;
+          mk('line', { x1: sx(v), x2: sx(v), y1: T, y2: H - B }, g);
+          const t = mk('text', { x: sx(v), y: H - B + 30, 'text-anchor': 'middle', class: 'tick' }, tk);
+          t.textContent = tickTxt(v);
+        }
+      }
+      const ax = mk('g', { class: 'axis' }, svg);
+      mk('line', { x1: L, x2: W - R, y1: sy(ay0), y2: sy(ay0) }, ax);
+      mk('line', { x1: sx(ax0), x2: sx(ax0), y1: T, y2: H - B }, ax);
+      if (bare) {
+        mk('path', { d: 'M' + (W - R) + ' ' + sy(ay0) + ' l-16 -8 v16 z' }, ax);
+        mk('path', { d: 'M' + sx(ax0) + ' ' + T + ' l-8 16 h16 z' }, ax);
+      }
+      const plot = mk('g', { 'clip-path': 'url(#' + id + 'c)' }, svg);
+      const top = mk('g', {}, svg);
+
+      const api = {
+        W: W, H: H, x0: x0, x1: x1, y0: y0, y1: y1, sx: sx, sy: sy, svg: svg, plot: plot, top: top,
+        group(cls, layer) { return mk('g', { class: cls || '' }, layer || plot); },
+        curve(f, cls, xa, xb, layer) {
+          const a = xa === undefined ? x0 : xa, b = xb === undefined ? x1 : xb;
+          let d = '';
+          for (let i = 0; i <= 300; i++) {
+            const x = a + (b - a) * i / 300, y = f(x);
+            const yy = Math.max(-5000, Math.min(5000, sy(y)));
+            d += (i ? 'L' : 'M') + sx(x).toFixed(1) + ',' + yy.toFixed(1);
+          }
+          return mk('path', { d: d, class: 'curve ' + (cls || '') }, layer || plot);
+        },
+        line(xa, ya, xb, yb, cls, layer) {
+          return mk('line', { x1: sx(xa), y1: sy(ya), x2: sx(xb), y2: sy(yb), class: cls || '' }, layer || plot);
+        },
+        setLine(e, xa, ya, xb, yb) {
+          e.setAttribute('x1', sx(xa)); e.setAttribute('y1', sy(ya));
+          e.setAttribute('x2', sx(xb)); e.setAttribute('y2', sy(yb));
+        },
+        pt(x, y, cls, r, layer) {
+          return mk('circle', { cx: sx(x), cy: sy(y), r: r || 10, class: 'pt ' + (cls || '') }, layer || plot);
+        },
+        movePt(e, x, y) { e.setAttribute('cx', sx(x)); e.setAttribute('cy', sy(y)); },
+        arrow(xa, ya, xb, yb, color, cls, layer) {
+          return mk('line', { x1: sx(xa), y1: sy(ya), x2: sx(xb), y2: sy(yb),
+                              class: 'arw ' + color + ' ' + (cls || ''), 'marker-end': 'url(#' + id + color + ')' }, layer || plot);
+        },
+        arc(pts, color, cls, layer) {
+          let d = '';
+          pts.forEach((p, i) => { d += (i ? 'L' : 'M') + sx(p[0]).toFixed(1) + ',' + sy(p[1]).toFixed(1); });
+          return mk('path', { d: d, class: 'arw ' + color + ' ' + (cls || ''), 'marker-end': 'url(#' + id + color + ')' }, layer || plot);
+        },
+        clear(g) { while (g.firstChild) g.removeChild(g.firstChild); },
+        place(o, x, y) {
+          if (x === undefined) { const v = nums(o.dataset.at); x = v[0]; y = v[1]; }
+          o.style.left = (sx(x) / W * 100) + '%';
+          o.style.top = (sy(y) / H * 100) + '%';
+        }
+      };
+      el.querySelectorAll('.ov[data-at]').forEach(o => api.place(o));
+      el._p = api;
+      return api;
+    }
+    document.querySelectorAll('.chart[data-x]').forEach(make);
+    return { make: make, mk: mk, nums: nums, MINUS: MINUS };
+  })();
+
+  /* 표시용 숫자: 유효숫자 7자리, 끝의 0 생략, 음수는 − (교과서 147쪽 방주 규칙) */
+  window.fmt7 = function (x) {
+    if (!isFinite(x)) return '—';
+    if (Math.abs(x) < 1e-9) return '0';
+    const v = Number(x.toPrecision(7));
+    if (Math.abs(v) >= 1e7) return '매우 큼';
+    let s = String(v);
+    if (s.indexOf('e') >= 0) s = v.toFixed(9).replace(/0+$/, '').replace(/\.$/, '');
+    return s.replace('-', window.LMPlot.MINUS);
+  };
+</script>
+
+<script>
+  /* 4-4-4 정적 그림: 147쪽 (i) r=1.05 지그재그, (ii) r=0.002 촘촘한 점 */
+  (function () {
+    const L = a => a * a - 2 * a + 2, dL = a => 2 * a - 2;
+    const b = document.getElementById('cBig')._p;
+    b.curve(L, '');
+    b.line(4, 0, 4, 10, 'dash');
+    b.pt(4, 10, 'p', 10);
+    const gz = b.group('zz fade');
+    let a = 4;
+    for (let k = 0; k < 3; k++) {
+      const n = a - 1.05 * dL(a);
+      b.arrow(a, L(a), n, L(n), 'acc', '', gz);
+      b.pt(n, L(n), 'p', 8, gz);
+      a = n;
+    }
+    const s = document.getElementById('cSmall')._p;
+    s.curve(L, '');
+    s.line(4, 0, 4, 10, 'dash');
+    s.pt(4, 10, 'p', 10);
+    const gs = s.group('zz fade');
+    a = 4;
+    for (let k = 1; k <= 200; k++) {
+      a = a - 0.002 * dL(a);
+      if (k % 10 === 0) s.pt(a, L(a), 'p', 6, gs);
+    }
+  })();
+</script>
+
+<script>
+  /* 4-4-4 「더 깊이」 학습률 실험실: 배수 1-2r, 거리 막대, 지그재그, 횟수 건너뛰기 (147쪽 수치 재현) */
+  (function () {
+    const el = document.getElementById('cLab'), c = el._p, sec = el.closest('section');
+    const FN = {
+      A: { L: a => a * a - 2 * a + 2, dL: a => 2 * a - 2, m: 1, a0: 4 },
+      B: { L: a => (a - 2) * (a - 2) + 1, dL: a => 2 * a - 4, m: 2, a0: 3 }
+    };
+    const M = window.LMPlot.MINUS;
+    const sR = document.getElementById('sR'), vR = document.getElementById('vR');
+    const bars = document.getElementById('bars'), barlab = document.getElementById('barlab');
+    const jBody = document.getElementById('jBody');
+    let fk = 'A', jumpN = null, curve = null;
+    const gPath = c.group('');
+    const cur = c.pt(4, 10, 'p', 12);
+
+    function seq(F, r, n) { const out = [F.a0]; let a = F.a0; for (let k = 0; k < n; k++) { a = a - r * F.dL(a); out.push(a); } return out; }
+    function render() {
+      const F = FN[fk], v = Number(sR.value), r = v / 1000;
+      const q = (1000 - 2 * v) / 1000;
+      vR.textContent = fmt7(r);
+      document.getElementById('rR').textContent = fmt7(r);
+      document.getElementById('rRatio').textContent = fmt7(q);
+      const vd = document.getElementById('rVerdict');
+      let t, good;
+      if (q < -1) { t = '부호가 바뀌며 커진다 — 튀어 나간다'; good = false; }
+      else if (q === -1) { t = '크기 그대로 — 왕복'; good = false; }
+      else if (q < 0) { t = '좌우로 오가며 다가간다'; good = true; }
+      else if (q === 0) { t = '한 번에 꼭짓점!'; good = true; }
+      else if (q >= 0.98) { t = '한쪽에서 아주 느리게 다가간다'; good = false; }
+      else { t = '한쪽에서 다가간다'; good = true; }
+      vd.textContent = '→ ' + t; vd.className = 'verdict ' + (good ? 'good' : 'bad');
+
+      if (curve) curve.remove();
+      curve = c.curve(F.L, '');
+      c.svg.querySelector('g[clip-path]').insertBefore(curve, c.svg.querySelector('g[clip-path]').firstChild);
+      const S = seq(F, r, 12);
+      c.clear(gPath);
+      for (let k = 0; k < 12; k++) {
+        const a = S[k], b = S[k + 1];
+        if (!isFinite(b) || Math.abs(b) > 1e4) break;
+        if (Math.abs(c.sx(a) - c.sx(b)) + Math.abs(c.sy(F.L(a)) - c.sy(F.L(b))) > 12) c.arrow(a, F.L(a), b, F.L(b), 'acc', '', gPath);
+        c.pt(b, F.L(b), '', 6, gPath);
+      }
+      c.movePt(cur, F.a0, F.L(F.a0));
+
+      const d0 = Math.abs(S[0] - F.m);
+      bars.innerHTML = '<div class="ref" style="bottom: 60px;"></div>'; barlab.innerHTML = '';
+      for (let n = 0; n <= 8; n++) {
+        const d = S[n] - F.m, rel = Math.abs(d) / d0;
+        const div = document.createElement('div');
+        div.className = 'b ' + (d >= 0 ? 'pos' : 'neg') + (rel > 2 ? ' over' : '');
+        div.style.height = (Math.min(rel, 2) * 60) + 'px';
+        bars.appendChild(div);
+        const sp = document.createElement('span'); sp.textContent = n + '회'; barlab.appendChild(sp);
+      }
+
+      const rows = [0, 1, 2, 3].map(n => [n, S[n]]);
+      if (jumpN) { let a = F.a0; for (let k = 0; k < jumpN; k++) a = a - r * F.dL(a); rows.push([jumpN, a, true]); }
+      jBody.innerHTML = '';
+      rows.forEach(rw => {
+        const tr = document.createElement('tr');
+        if (rw[2]) tr.className = 'jump';
+        tr.innerHTML = '<td>' + rw[0] + '</td><td>' + fmt7(rw[1]) + '</td><td>' + fmt7(F.L(rw[1])) + '</td>';
+        jBody.appendChild(tr);
+      });
+      sec.querySelectorAll('.rbtn').forEach(x => x.classList.toggle('on', Number(x.dataset.r) === v));
+      sec.querySelectorAll('.jbtn').forEach(x => x.classList.toggle('on', Number(x.dataset.n) === jumpN));
+    }
+    sR.addEventListener('input', render);
+    sec.querySelectorAll('.rbtn').forEach(b => b.addEventListener('click', () => { sR.value = b.dataset.r; render(); }));
+    sec.querySelectorAll('.jbtn').forEach(b => b.addEventListener('click', () => {
+      const n = Number(b.dataset.n); jumpN = jumpN === n ? null : n; render();
+    }));
+    sec.querySelectorAll('.fnbtn').forEach(b => b.addEventListener('click', () => {
+      fk = b.dataset.fn;
+      sec.querySelectorAll('.fnbtn').forEach(x => x.classList.toggle('on', x === b));
+      render();
+    }));
+    window.__lab444 = {
+      set(f, v, j) { fk = f; sR.value = v; jumpN = j || null; render(); },
+      rows() { return Array.from(jBody.querySelectorAll('tr')).map(tr => Array.from(tr.children).map(td => td.textContent)); },
+      ratio() { return document.getElementById('rRatio').textContent + ' ' + document.getElementById('rVerdict').textContent; }
+    };
+    render();
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>

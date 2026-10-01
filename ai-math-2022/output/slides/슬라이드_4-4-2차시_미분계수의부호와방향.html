@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>미분계수의 부호와 방향 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+    .note-badge { display: inline-block; background: var(--lm-warning-tint); color: var(--lm-ink);
+                  border: var(--lm-border-thin) solid var(--lm-warning); font-size: var(--lm-slide-caption);
+                  font-weight: 700; padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                  margin-right: var(--lm-space-2); }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+    .ox { display: inline-block; min-width: 1.4em; text-align: center; font-weight: 700; }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+    .row { display: flex; gap: var(--lm-space-6); align-items: flex-start; margin-top: var(--lm-space-3); }
+    .row > .grow { flex: 1; min-width: 0; }
+
+    /* ── 좌표평면 (JS가 data-* 로 SVG를 만든다. 수식 라벨은 .ov HTML 덧씌우기) ── */
+    .chart { position: relative; flex: none; }
+    .chart svg { display: block; width: 100%; height: auto; overflow: hidden; }
+    .chart .grid line { stroke: var(--lm-rule); stroke-width: 1.5; }
+    .chart .axis line { stroke: var(--lm-ink-3); stroke-width: 2.5; }
+    .chart .axis path { fill: var(--lm-ink-3); }
+    .chart .tick { fill: var(--lm-ink-3); font-size: 24px; font-family: var(--lm-font-sans); }
+    .chart .curve { fill: none; stroke: var(--lm-ink); stroke-width: 4; }
+    .chart .pt { fill: var(--lm-accent); stroke: var(--lm-page); stroke-width: 2; }
+    .chart .pt.p { fill: var(--lm-danger); }
+    .chart .pt.q { fill: var(--lm-info); }
+    .chart .dash { stroke: var(--lm-ink-3); stroke-width: 2; stroke-dasharray: 6 6; }
+    .chart .sec { stroke: var(--lm-info); stroke-width: 4; }
+    .chart .sec.faint { stroke-width: 2; opacity: 0.55; }
+    .chart .tan { stroke: var(--lm-danger); stroke-width: 4; }
+    .chart .tan.dashed { stroke-dasharray: 14 9; }
+    .chart .arw { stroke-width: 4; fill: none; }
+    .chart .arw.acc { stroke: var(--lm-accent); }
+    .chart .arw.dan { stroke: var(--lm-danger); }
+    .chart .arw.inf { stroke: var(--lm-info); }
+    .chart .arw.suc { stroke: var(--lm-success); }
+    .chart .mk-acc { fill: var(--lm-accent); }
+    .chart .mk-dan { fill: var(--lm-danger); }
+    .chart .mk-inf { fill: var(--lm-info); }
+    .chart .mk-suc { fill: var(--lm-success); }
+    .chart .mk-ink { fill: var(--lm-ink-2); }
+    .chart .ov { position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+                 font-size: var(--lm-slide-caption); color: var(--lm-ink-2); line-height: 1.2; }
+    .chart .ov.r { transform: translate(8px, -50%); }
+    .chart .ov.l { transform: translate(calc(-100% - 8px), -50%); }
+    .chart .ov.a { transform: translate(-50%, calc(-100% - 8px)); }
+    .chart .ov.b { transform: translate(-50%, 8px); }
+    .chart .ov.dan { color: var(--lm-danger); font-weight: 700; }
+    .chart .ov.inf { color: var(--lm-info); font-weight: 700; }
+    .chart .ov.acc { color: var(--lm-accent); font-weight: 700; }
+    .chart .fade { transition: opacity 0.35s; }
+    .axis-cap { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); text-align: center;
+                margin-top: var(--lm-space-1); }
+
+    .datatbl { border-collapse: collapse; font-size: var(--lm-slide-small); }
+    .datatbl th, .datatbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                               padding: 2px var(--lm-space-4); text-align: center; }
+    .datatbl th { background: var(--lm-paper-tint); font-weight: 700; }
+    .datatbl td.num { font-variant-numeric: tabular-nums; }
+    .datatbl td.hl { color: var(--lm-danger); font-weight: 700; }
+    .datatbl tr[data-s] { visibility: hidden; }
+    .datatbl tr[data-s].visible { visibility: visible; }
+
+    .ctrl { flex: 1; min-width: 0; }
+    .ctrl .param-slider-group label { min-width: 4em; }
+    .ctrl .param-slider-group input[type=range] { height: 36px; }
+    .btnrow { display: flex; flex-wrap: wrap; gap: var(--lm-space-2); margin: var(--lm-space-2) 0; }
+    .btnrow .anim-btn { padding: var(--lm-space-1) var(--lm-space-4); }
+    .anim-btn.on { outline: 4px solid var(--lm-info); outline-offset: 2px; }
+    .readout { margin-top: var(--lm-space-3); border: var(--lm-border-thin) solid var(--lm-accent);
+               border-radius: var(--lm-radius-md); background: var(--lm-page);
+               padding: var(--lm-space-3) var(--lm-space-4); font-size: var(--lm-slide-small);
+               line-height: 1.6; }
+    .readout .big { color: var(--lm-info); font-weight: 700; font-size: var(--lm-slide-body); }
+    .readout .msg { color: var(--lm-danger); font-weight: 700; }
+    .mono { font-variant-numeric: tabular-nums; }
+
+    /* 4-4-2 전용 */
+    .twin { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5); margin-top: var(--lm-space-3); }
+    .twin .card2 { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+                   background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4); }
+    .twin .card2 .hd { font-size: var(--lm-slide-small); font-weight: 700; margin-bottom: var(--lm-space-1); }
+    .twin .card2 .bd { font-size: var(--lm-slide-small); line-height: 1.5; color: var(--lm-ink-2); }
+    .twin .card2.pos { border-color: var(--lm-danger); }
+    .twin .card2.neg { border-color: var(--lm-info); }
+    .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-3); margin-top: var(--lm-space-3); }
+    .three div { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+                 background: var(--lm-page); text-align: center; padding: var(--lm-space-2);
+                 font-size: var(--lm-slide-small); }
+    .readout .dirtxt { font-weight: 700; color: var(--lm-success); }
+    .fnbtn.on { outline: 4px solid var(--lm-info); outline-offset: 2px; }
+    .ineq { font-size: var(--lm-slide-small); }
+    .twin .card2 .chart { margin-bottom: 40px; }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-4 경사하강법 · 2차시</div>
+    <h1>미분계수의 부호와 방향</h1>
+    <p class="slide-sub">미분계수의 부호와 반대로 움직이면 함숫값이 작아진다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 142~143쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄이다. 미분계수의 부호와 반대 방향으로 x를 움직이면 함숫값이 작아진다. 지난 시간에는 정의(극한)로 한 점의 미분계수를 하나씩 구했다. 오늘은 이차함수의 미분계수를 공식 하나로 얻고(142쪽), 그 부호가 무엇을 알려 주는지 본다(143쪽). 다음 시간 경사하강법이 쓰는 도구는 오늘 것이 전부다. 「더 깊이」 장 두 개(ph가 사라지는 이유, 포물선 위의 화살표)와 교과서 밖 연결 장 하나가 있다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>할선의 두 점을 한없이 붙이면 접선이 되고, 그 기울기가 미분계수다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">예제 2 — \(f(x)=x^2\)</div>
+        <div class="what">\(f'(3)=\displaystyle\lim_{h\to0}(h+6)=6\)</div>
+      </div>
+      <div class="side">
+        <div class="where">문제 2 — \(x=2\)에서</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(2x-3\) → \(2\) &nbsp;·&nbsp; \(-x^2+3x\) → \(-1\)</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 — <b>“공식 하나면 모든 이차함수의 미분계수를 바로 얻는다. 그리고 그 부호가 내려갈 방향을 알려 준다.”</b>
+    </p>
+    <aside class="notes">지난 시간 오늘 한 줄과 예고 문장을 그대로 다시 읽는다. 예제 2의 계산 순서(정의에 넣기 → 분자 정리 → h로 약분 → h를 0에 가깝게)를 학생에게 말로 되짚게 한다. 문제 2의 두 답(2와 −1)을 확인한다. 지난 시간 「더 깊이」 표에서 h=0.1, 0.01, 0.001일 때 기울기가 6.1, 6.01, 6.001이었던 것을 기억하게 한다. 오늘 첫 「더 깊이」 장에서 그 표의 비밀(왜 정확히 6+h였나)이 풀린다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>이차함수의 미분계수 \(f'(a)=2pa+q\)를 구할 수 있다.</span></li>
+      <li><span class="num">2</span><span>미분계수의 <span class="kw">부호</span>로 함숫값의 증가·감소를 판단할 수 있다.</span></li>
+      <li><span class="num">3</span><span>함숫값이 더 작아지도록 \(x\)를 <span class="kw">어느 방향으로</span> 움직일지 말할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">미분계수의 부호와 반대로 움직이면 함숫값이 작아진다.</span>
+    </div>
+    <aside class="notes">목표 3이 경사하강법의 '방향' 부분이다. 다음 시간에 여기에 '얼마나'(학습률)가 더해진다. 오개념 예고: "미분계수가 양수면 양의 방향으로 간다"고 생각하는 학생이 많다. 오늘의 목표는 함숫값을 '작게' 만드는 것이므로 반대로 간다. 산에서 골짜기로 내려가는 것이 목표라는 비유를 미리 깔아 둔다.</aside>
+  </section>
+
+  <!-- 4. 이차함수의 미분계수 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 142쪽</div>
+    <h2>이차함수의 미분계수는 공식 하나로</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;">이차함수 \(f(x)=px^2+qx+r\) (\(p,\ q,\ r\)은 상수)의 \(x=a\)에서의 미분계수 \(f'(a)\)를 구하면 다음과 같다.</p>
+    <div class="row" style="align-items: stretch;">
+      <div class="grow">
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(\displaystyle f'(a)=\lim_{h\to0}\frac{f(a+h)-f(a)}{h}=\lim_{h\to0}\frac{p(a+h)^2+q(a+h)+r-(pa^2+qa+r)}{h}\)
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(\displaystyle \phantom{f'(a)}=\lim_{h\to0}\frac{ph^2+(2pa+q)h}{h}=\lim_{h\to0}(ph+2pa+q)\)
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(\phantom{f'(a)}=2pa+q\)
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 3</span>
+        </div>
+      </div>
+    </div>
+    <div class="formula-box" style="font-size: var(--lm-slide-body); margin: var(--lm-space-3) 0 0; text-align: left;">
+      이차함수 \(f(x)=px^2+qx+r\) (\(p,\ q,\ r\)은 상수)의 \(x=a\)에서의 미분계수 \(f'(a)\)는
+      <div style="text-align: center; font-size: var(--lm-slide-body-lg); margin-top: var(--lm-space-2);">\(f'(a)=2pa+q\)</div>
+    </div>
+    <p class="cap-sm" style="margin: var(--lm-space-2) 0 0;"><span class="note-badge">글자 주의</span>여기의 \(r\)은 이차함수의 <b>상수항</b>이다. 다음 시간에 나오는 학습률 \(r\)과는 다른 뜻이다.</p>
+    <aside class="notes">교과서 142쪽 아래의 다섯 줄 전개를 세 단계로 나눠 보인다. 둘째 줄의 분자 정리가 관건이다: p(a+h)²=pa²+2pah+ph², q(a+h)=qa+qh, r은 r. 여기서 (pa²+qa+r)을 빼면 ph²+2pah+qh만 남는다. 상수 r은 완전히 사라진다는 것도 짚어 준다(상수항은 미분계수에 영향이 없다). 확인: 예제 2의 x²은 p=1, q=0이므로 f'(3)=2×1×3+0=6. 지난 시간 극한으로 구한 값과 같다. 문제 2 (2)의 −x²+3x는 p=−1, q=3이므로 f'(2)=−4+3=−1. 이것도 같다. 글자 주의: 교과서는 상수항을 r이라 쓰고, 145쪽부터 학습률도 r이라 쓴다. 같은 글자, 다른 뜻이다. 지도서 189쪽의 '도함수'라는 말은 교사용이므로 화면에서는 쓰지 않는다.</aside>
+  </section>
+
+  <!-- 5. 더 깊이 — ph가 사라진다 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 지난 시간 표의 비밀</div>
+    <h2>직선 PQ의 기울기 \(=\) 접선의 기울기 \(+\ ph\)</h2>
+
+    <div class="formula-box" style="font-size: var(--lm-slide-body); margin: 0 0 var(--lm-space-3);">
+      \(\dfrac{f(a+h)-f(a)}{h}=\underbrace{2pa+q}_{\text{접선의 기울기}}+\underbrace{ph}_{\text{남는 부분}}\)
+    </div>
+    <div class="row" style="gap: var(--lm-space-5); margin-top: 0;">
+      <table class="datatbl">
+        <tr><th>\(h\)</th><th>\(f(x)=x^2,\ a=3\)<br>\(6+h\)</th><th>\(f(x)=-2x^2-x+3,\ a=1\)<br>\(-5-2h\)</th></tr>
+        <tr data-s><td class="num">\(0.1\)</td><td class="num">\(6+0.1=\mathbf{6.1}\)</td><td class="num">\(-5-0.2=\mathbf{-5.2}\)</td></tr>
+        <tr data-s><td class="num">\(0.01\)</td><td class="num">\(6+0.01=\mathbf{6.01}\)</td><td class="num">\(-5-0.02=\mathbf{-5.02}\)</td></tr>
+        <tr data-s><td class="num">\(0.001\)</td><td class="num">\(6+0.001=\mathbf{6.001}\)</td><td class="num">\(-5-0.002=\mathbf{-5.002}\)</td></tr>
+      </table>
+      <div class="grow">
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          남는 부분 \(ph\)는 \(h\)에 <b>\(p\)를 곱한 것</b>이라, \(h\)를 \(\dfrac{1}{10}\)로 줄이면 \(ph\)도 \(\dfrac{1}{10}\)로 줄어든다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(h\to0\)이면 \(ph\to0\) — 사라지고 <b>\(2pa+q\)만 남는다.</b> 지난 시간 표의 \(6.1,\ 6.01,\ 6.001\)이 정확히 \(6+h\)였던 이유다.
+        </div>
+      </div>
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 5</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 142쪽 전개의 넷째 줄 lim(ph+2pa+q)을 극한을 취하기 '전'에 멈춰서 읽는다. 할선의 기울기는 접선의 기울기 2pa+q에 '남는 부분' ph가 붙은 것이다. 왼쪽 열은 지난 시간 예제 2와 「더 깊이」 표의 함수(p=1, q=0, a=3)이고, 오른쪽 열은 오늘 문제 3 (1)의 함수(p=−2, q=−1, a=1)다. 오른쪽 열은 교과서 밖 수치이며 python으로 검산했다: f(1)=0, f(1.1)=−0.52이므로 −0.52÷0.1=−5.2. h가 10분의 1이 될 때마다 남는 부분도 10분의 1이 된다. 그래서 h를 0에 가깝게 하면 남는 부분은 0에 가까워지고 접선의 기울기만 남는다. 이것이 '극한을 취한다'의 구체적인 모습이다. 다음 장 문제 3에서 오른쪽 열의 −5가 답으로 다시 나온다.</aside>
+  </section>
+
+  <!-- 6. 문제 3 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 143쪽 문제 3</div>
+    <h2>공식으로 \(x=1\)에서의 미분계수를 구하자</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;"><b>문제 3</b> 다음 이차함수의 \(x=1\)에서의 미분계수를 구하시오.</p>
+    <ul class="qlist">
+      <li><b>⑴</b> \(f(x)=-2x^2-x+3\)
+        <div class="ans">\(x=a\)에서의 미분계수는 \(f'(a)=-4a-1\) → \(f'(1)=-4\times1-1=\mathbf{-5}\)</div></li>
+      <li><b>⑵</b> \(f(x)=x^2+3x-2\)
+        <div class="ans">\(x=a\)에서의 미분계수는 \(f'(a)=2a+3\) → \(f'(1)=2\times1+3=\mathbf{5}\)</div></li>
+    </ul>
+    <aside class="notes">교과서 143쪽 문제 3. 정답및풀이 190쪽: (1) −5 (2) 5. 먼저 p와 q를 찾게 한다. (1)은 p=−2, q=−1이므로 2pa+q=−4a−1. (2)는 p=1, q=3이므로 2a+3. 상수항(3과 −2)은 답에 영향이 없다. 정의(극한)로 풀어 같은 답이 나오는지 한 문항만 확인시켜도 좋다. 이 두 함수는 잠시 뒤 「더 깊이」 화살표 장에서 다시 쓴다.</aside>
+  </section>
+
+  <!-- 7. 미분계수와 증가·감소 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 143쪽 · 3. 이차함수의 미분계수와 함숫값의 증가, 감소</div>
+    <h2>미분계수의 부호가 오르막·내리막을 알려 준다</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;">이차함수 \(f(x)=px^2+qx+r\)의 \(x=a\)에서의 미분계수 \(f'(a)\)는 점 \((a,\ f(a))\)에서의 접선의 기울기이다. 이때 다음을 알 수 있다.</p>
+    <div class="twin">
+      <div class="card2 pos">
+        <div class="hd">(i) \(f'(a)>0\)이면 충분히 작은 양수 \(h\)에 대하여 \(f(a-h)&lt;f(a)&lt;f(a+h)\)</div>
+        <div class="chart" id="cUp" data-w="660" data-h="300" data-x="0,10,1" data-y="0,10,1" data-noticks="1">
+          <div class="ov b" data-at="3.6,0">\(a-h\)</div>
+          <div class="ov b" data-at="5.6,0">\(a\)</div>
+          <div class="ov b" data-at="7.6,0">\(a+h\)</div>
+          <div class="ov l" data-at="0,0">O</div>
+        </div>
+        <div class="bd">\(a\)에서 <b>양의 방향</b>으로 \(h\)만큼 → 함숫값이 더 <b>커지고</b>,<br><b>음의 방향</b>으로 \(h\)만큼 → 함숫값이 더 <b>작아진다</b>.</div>
+      </div>
+      <div class="card2 neg">
+        <div class="hd">(ii) \(f'(a)&lt;0\)이면 충분히 작은 양수 \(h\)에 대하여 \(f(a-h)>f(a)>f(a+h)\)</div>
+        <div class="chart" id="cDown" data-w="660" data-h="300" data-x="0,10,1" data-y="0,10,1" data-noticks="1">
+          <div class="ov b" data-at="2.4,0">\(a-h\)</div>
+          <div class="ov b" data-at="4.4,0">\(a\)</div>
+          <div class="ov b" data-at="6.4,0">\(a+h\)</div>
+          <div class="ov l" data-at="0,0">O</div>
+        </div>
+        <div class="bd">\(a\)에서 <b>양의 방향</b>으로 \(h\)만큼 → 함숫값이 더 <b>작아지고</b>,<br><b>음의 방향</b>으로 \(h\)만큼 → 함숫값이 더 <b>커진다</b>.</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 143쪽 (i), (ii). 왼쪽 그림은 접선이 오른쪽 위로 올라가는 경우(오르막), 오른쪽 그림은 오른쪽 아래로 내려가는 경우(내리막)다. 빨간 선이 접선이다. 지도서 190쪽 ①에 따라 구체적인 h로 한 번 확인한다(다음 장 아래쪽): f(x)=x²에서 f'(3)=6>0이고 h=1이면 f(2)=4&lt;f(3)=9&lt;f(4)=16. '충분히 작은'이라는 단서가 왜 붙는지 묻는 학생이 있으면: 꼭짓점을 넘어갈 만큼 h가 크면 반대편 언덕으로 올라가 버릴 수 있기 때문이라고 답한다(다음 시간 '주의'에서 실제로 일어난다). 지도서 190쪽 ②: '양의 방향/음의 방향' 대신 '오른쪽/왼쪽', 'x를 증가/감소'라고 말해도 된다. 다음 장에서 세 표현을 나란히 둔다.</aside>
+  </section>
+
+  <!-- 8. 결론 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 143쪽</div>
+    <h2>\(f'(a)\)의 부호의 <span class="kw-danger">반대</span> 방향으로 움직인다</h2>
+
+    <div class="result-box" style="font-size: var(--lm-slide-body); margin-top: 0;">
+      이차함수 \(f(x)=px^2+qx+r\)에 대하여 \(x\)의 값을 \(a\)에서 <b>\(f'(a)\)의 부호의 반대 방향</b>으로 이동시키면 함숫값이 더 작아진다.
+    </div>
+    <p class="cap-sm" style="margin: 0;">방주 — \(p&lt;0\)인 경우에도 \(x\)의 값을 \(a\)에서 \(f'(a)\)의 부호의 반대 방향으로 이동시키면 함숫값이 더 작아진다.</p>
+
+    <div class="three">
+      <div><b>양의 방향</b> = 오른쪽 = \(x\) 증가</div>
+      <div>\(f'(a)&lt;0\) (내리막) → 이쪽으로</div>
+      <div>예: \(f'(2)=-2\)</div>
+      <div><b>음의 방향</b> = 왼쪽 = \(x\) 감소</div>
+      <div>\(f'(a)>0\) (오르막) → 이쪽으로</div>
+      <div>예: \(f'(3)=6\)</div>
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>숫자로 확인</b> — \(f(x)=x^2\), \(f'(3)=6>0\), \(h=1\): &nbsp;\(f(2)=4&lt;f(3)=9&lt;f(4)=16\) → 음의 방향(왼쪽)으로 가야 작아진다.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>흔한 실수</b> — “미분계수가 양수니까 양의 방향으로.” <span class="kw-danger">반대다.</span> 목표는 함숫값을 <b>작게</b> 하는 것, 즉 <b>내리막 쪽</b>이다.
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">교과서 143쪽 결론 문장과 방주. 표의 세 열을 왼쪽에서 오른쪽으로 읽는다: 양의 방향은 오른쪽, x를 증가시키는 것과 같은 말이다(지도서 190쪽 ②). 미분계수가 음수(내리막)이면 그쪽으로 간다. 첫 단계는 지도서 190쪽 ①의 '구체적인 h로 보이기'다. 둘째 단계는 지도서가 짚은 오개념이다. 비유: 경사계(기울기 측정기)가 '오른쪽이 높다(+)'고 알려 주면, 골짜기로 가려는 사람은 왼쪽으로 간다. 방주의 p&lt;0: 위로 볼록한 포물선에서도 같은 규칙이 성립한다. 다만 그때는 꼭짓점이 가장 높은 점이라 계속 내려가면 꼭짓점에서 멀어진다. 다음 장 「더 깊이」에서 두 경우를 직접 움직여 본다.</aside>
+  </section>
+
+  <!-- 9. 더 깊이 — 포물선 위의 화살표 -->
+  <section class="tight" data-prevent-swipe>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 직접 움직여 보기</div>
+    <h2>어느 점에서든 화살표는 내리막을 가리킨다</h2>
+
+    <div class="row" data-prevent-swipe>
+      <div>
+        <div class="chart" id="cArr" data-w="820" data-h="600" data-x="-5,2,1" data-y="-5,10,5"></div>
+        <div class="axis-cap" id="arrCap">빨강: 접선 · 초록 화살표: 함숫값이 작아지는 방향</div>
+      </div>
+      <div class="ctrl" data-prevent-swipe>
+        <div class="btnrow">
+          <button class="anim-btn fnbtn on" data-fn="A">문제 3 ⑵ \(x^2+3x-2\)</button>
+          <button class="anim-btn fnbtn" data-fn="B">문제 3 ⑴ \(-2x^2-x+3\)</button>
+        </div>
+        <div class="param-slider-group"><label for="sA">\(a\)</label>
+          <input type="range" id="sA" min="-18" max="6" step="1" value="2"><span class="val-display" id="vA">0.5</span></div>
+        <div class="readout">
+          <span class="mono"><i>f</i>′(<i>a</i>) = <span id="rF">…</span> = <span class="big" id="rD">…</span></span><br>
+          <span id="rSign">…</span><br>
+          → <span class="dirtxt" id="rDir">…</span><br>
+          <span class="mono ineq" id="rIneq">…</span>
+        </div>
+        <p class="cap-sm" style="margin-top: var(--lm-space-2);">마지막 줄은 \(h=0.1\)일 때 \(f(a-h)\), \(f(a)\), \(f(a+h)\)의 값이다.</p>
+      </div>
+    </div>
+    <aside class="notes">교과서 밖 보조 활동이다. 함수는 문제 3의 두 이차함수를 그대로 쓴다. 학생을 불러 슬라이더로 a를 옮기게 한다. 확인할 것 세 가지. 1) 아래로 볼록한 x²+3x−2에서 a가 꼭짓점(−1.5)의 오른쪽이면 미분계수가 양수, 화살표는 왼쪽. 왼쪽이면 음수, 화살표는 오른쪽. 어느 쪽이든 화살표는 꼭짓점 쪽을 향한다. 2) a=−1.5(꼭짓점)에서는 미분계수가 0, 접선이 수평이고 어느 쪽으로 가도 작아지지 않는다(최솟값). 3) 위로 볼록한 −2x²−x+3(p&lt;0, 방주)으로 바꾸면 규칙은 같지만 화살표가 꼭짓점에서 '멀어지는' 쪽을 가리킨다. 그래도 함숫값은 작아진다. 마지막 줄의 세 값으로 부등식 (i), (ii)가 실제로 성립하는 것을 숫자로 본다. 손실함수는 아래로 볼록한 경우(p&gt;0)만 나오므로, 경사하강법에서는 화살표가 늘 최솟값 쪽을 가리킨다.</aside>
+  </section>
+
+  <!-- 10. 문제 4 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 143쪽 문제 4</div>
+    <h2>어느 방향으로 이동시켜야 할까</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;"><b>문제 4</b> 미분계수 \(f'(a)\)가 다음과 같을 때, \(f(a)\)보다 더 작은 함숫값을 찾으려면 \(x\)의 값을 \(a\)에서 어느 방향으로 이동시켜야 하는지 말하시오.</p>
+    <ul class="qlist">
+      <li><b>⑴</b> \(f'(2)=-2\)
+        <div class="ans">\(f'(2)=-2&lt;0\)이므로 \(x\)의 값을 \(2\)에서 <b>양의 방향</b>으로 이동시켜야 한다.</div></li>
+      <li><b>⑵</b> \(f'(1)=3\)
+        <div class="ans">\(f'(1)=3>0\)이므로 \(x\)의 값을 \(1\)에서 <b>음의 방향</b>으로 이동시켜야 한다.</div></li>
+    </ul>
+    <aside class="notes">교과서 143쪽 문제 4. 정답및풀이 190쪽: (1) 양의 방향 (2) 음의 방향. 답을 열기 전에 손으로 방향을 가리키게 한다(오른쪽/왼쪽). '오른쪽'이나 'x를 증가'라고 답해도 정답으로 인정한다(지도서 190쪽 ②). 함수식이 주어지지 않았는데도 답할 수 있다는 점을 강조한다. 미분계수 하나만 알면 그래프 없이 방향이 정해진다. 이것이 다음 시간 경사하강법의 둘째 단계(이동 방향 찾기)다.</aside>
+  </section>
+
+  <!-- 11. 연결 — 생각 열기와 꼭짓점 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 연결 · 4-4-1 생각 열기 · 4-3 손실함수</div>
+    <h2>꼭짓점에서는 미분계수가 \(0\)이다</h2>
+
+    <div class="twin">
+      <div class="card2">
+        <div class="hd">생각 열기(140쪽)를 그래프 없이</div>
+        <div class="bd">
+          \(a\le x\le b\) (꼭짓점 왼쪽): 미분계수 \(&lt;0\) → 양의 방향 = \(x\) <b>증가</b><br>
+          \(c\le x\le d\) (꼭짓점 오른쪽): 미분계수 \(>0\) → 음의 방향 = \(x\) <b>감소</b><br>
+          지난 시간 그래프를 보고 한 답을 이제 <b>부호만으로</b> 말할 수 있다.
+        </div>
+      </div>
+      <div class="card2">
+        <div class="hd">4-3 손실함수의 최솟값 자리</div>
+        <div class="bd">
+          함께하기(136쪽) \(L(a)=\dfrac{880a^2-1672a+830}{5}\)의 꼭짓점 \(a=0.95\)에서 공식을 쓰면
+          <div style="text-align: center; margin: var(--lm-space-2) 0;">\(\dfrac{2\times880\times0.95-1672}{5}=\dfrac{1672-1672}{5}=0\)</div>
+          꼭짓점에서는 접선이 <b>수평</b>, 미분계수가 \(0\)이다.
+        </div>
+      </div>
+    </div>
+    <div class="info-box" style="font-size: var(--lm-slide-small);">
+      그러니 미분계수를 따라 내려가다가 미분계수가 \(0\)에 가까워지면 — <b>거의 바닥에 왔다</b>는 뜻이다.
+    </div>
+    <aside class="notes">교과서 밖 연결 장이다. 왼쪽: 지난 시간 생각 열기(140쪽)의 답을 오늘 배운 규칙으로 다시 말한다. 꼭짓점 왼쪽은 내리막이라 미분계수가 음수, 그래서 양의 방향(x 증가). 오른쪽은 반대. 오른쪽: 4-3-2 함께하기의 손실함수(136쪽, 연료–작동 시간)를 다시 꺼낸다. 이차함수 공식에서 p=880/5, q=−1672/5이므로 a=0.95에서의 미분계수는 (2×880×0.95−1672)÷5=0이다. 2×880×0.95=1672이므로 정확히 0이다(python 검산). 꼭짓점이 최적 추세선의 기울기였으니, 최적 추세선에서는 손실함수의 미분계수가 0이다. 아래 상자의 문장이 다음 시간 145쪽 방주(|L'(a)|&lt;0.001이면 멈춘다)의 복선이다. 손실함수의 변수 a와 미분계수를 구하는 점 a가 같은 글자라는 점은 다음 시간에 교과서가 L'(t)로 정리한다. 여기서는 말로만 짚는다.</aside>
+  </section>
+
+  <!-- 12. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>미분계수의 부호와 반대로 움직이면 함숫값이 작아진다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">이차함수의 미분계수 (142쪽)</div>
+        <div class="what">\(f'(a)=2pa+q\)</div>
+      </div>
+      <div class="side">
+        <div class="where">함숫값이 작아지는 방향 (143쪽)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(f'(a)>0\) → 음의 방향<br>\(f'(a)&lt;0\) → 양의 방향</div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-small);">
+      다음 시간 예고 — <b>방향은 알았다. 그럼 얼마나 움직일까?</b> → 경사하강법과 학습률
+    </div>
+    <aside class="notes">오늘 한 줄을 학생이 따라 말하게 한다. 예고 문장을 그대로 읽는다(다음 시간 '지난 시간' 장이 이 문장으로 시작한다). 다음 시간(4-4-3, 144쪽)은 무대가 일반 함수 f(x)에서 손실함수 L(a)로 바뀐다. 오늘 배운 방향 규칙에 '얼마나'(학습률 r)를 더하면 경사하강법이 된다. 미리 질문을 던진다: 방향을 알았다고 아주 멀리 가면 어떻게 될까? 반대편 언덕으로 넘어가 더 높아질 수도 있다(145쪽 '주의').</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 좌표평면 — SVG에는 도형과 눈금 숫자만 넣는다(수식은 .ov HTML 덧씌우기).
+     data-x, data-y : "최소,최대,눈금간격"   data-w, data-h : 픽셀 크기
+     data-noticks : 눈금·격자 없이 축만(모식도)
+     만든 뒤 el._p 에 그리기 도구(curve, line, pt, arrow …)를 붙여 둔다.
+     JS 문자열에는 TeX를 넣지 않는다(백슬래시 이스케이프 사고 방지). */
+  window.LMPlot = (function () {
+    const NS = 'http://www.w3.org/2000/svg';
+    const MINUS = String.fromCharCode(0x2212);
+    function mk(tag, attrs, parent) {
+      const e = document.createElementNS(NS, tag);
+      Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k]));
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+    function nums(s) { return String(s).split(',').map(Number); }
+    function tickTxt(v) { return String(Number(v.toFixed(6))).replace('-', MINUS); }
+    let uid = 0;
+
+    function make(el) {
+      const W = Number(el.dataset.w || 800), H = Number(el.dataset.h || 480);
+      const [x0, x1, xs] = nums(el.dataset.x), [y0, y1, ys] = nums(el.dataset.y);
+      const bare = !!el.dataset.noticks;
+      const L = bare ? 24 : 64, R = 20, T = 20, B = bare ? 24 : 44;
+      const sx = x => L + (x - x0) / (x1 - x0) * (W - L - R);
+      const sy = y => T + (y1 - y) / (y1 - y0) * (H - T - B);
+      el.style.width = W + 'px';
+      const svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMid meet' });
+      el.insertBefore(svg, el.firstChild);
+      const id = 'pl' + (++uid);
+      const defs = mk('defs', {}, svg);
+      const cp = mk('clipPath', { id: id + 'c' }, defs);
+      mk('rect', { x: L, y: T, width: W - L - R, height: H - T - B }, cp);
+      ['acc', 'dan', 'inf', 'suc', 'ink'].forEach(c => {
+        const m = mk('marker', { id: id + c, viewBox: '0 0 10 10', refX: 8, refY: 5,
+                                 markerWidth: 4.5, markerHeight: 4.5, orient: 'auto-start-reverse' }, defs);
+        mk('path', { d: 'M0,0 L10,5 L0,10 z', class: 'mk-' + c }, m);
+      });
+
+      const ax0 = (x0 <= 0 && x1 >= 0) ? 0 : x0, ay0 = (y0 <= 0 && y1 >= 0) ? 0 : y0;
+      if (!bare) {
+        const g = mk('g', { class: 'grid' }, svg), tk = mk('g', {}, svg);
+        for (let i = 0, n = Math.round((y1 - y0) / ys); i <= n; i++) {
+          const v = y0 + i * ys;
+          mk('line', { x1: L, x2: W - R, y1: sy(v), y2: sy(v) }, g);
+          const t = mk('text', { x: L - 12, y: sy(v) + 8, 'text-anchor': 'end', class: 'tick' }, tk);
+          t.textContent = tickTxt(v);
+        }
+        for (let i = 0, n = Math.round((x1 - x0) / xs); i <= n; i++) {
+          const v = x0 + i * xs;
+          mk('line', { x1: sx(v), x2: sx(v), y1: T, y2: H - B }, g);
+          const t = mk('text', { x: sx(v), y: H - B + 30, 'text-anchor': 'middle', class: 'tick' }, tk);
+          t.textContent = tickTxt(v);
+        }
+      }
+      const ax = mk('g', { class: 'axis' }, svg);
+      mk('line', { x1: L, x2: W - R, y1: sy(ay0), y2: sy(ay0) }, ax);
+      mk('line', { x1: sx(ax0), x2: sx(ax0), y1: T, y2: H - B }, ax);
+      if (bare) {
+        mk('path', { d: 'M' + (W - R) + ' ' + sy(ay0) + ' l-16 -8 v16 z' }, ax);
+        mk('path', { d: 'M' + sx(ax0) + ' ' + T + ' l-8 16 h16 z' }, ax);
+      }
+      const plot = mk('g', { 'clip-path': 'url(#' + id + 'c)' }, svg);
+      const top = mk('g', {}, svg);
+
+      const api = {
+        W: W, H: H, x0: x0, x1: x1, y0: y0, y1: y1, sx: sx, sy: sy, svg: svg, plot: plot, top: top,
+        group(cls, layer) { return mk('g', { class: cls || '' }, layer || plot); },
+        curve(f, cls, xa, xb, layer) {
+          const a = xa === undefined ? x0 : xa, b = xb === undefined ? x1 : xb;
+          let d = '';
+          for (let i = 0; i <= 300; i++) {
+            const x = a + (b - a) * i / 300, y = f(x);
+            const yy = Math.max(-5000, Math.min(5000, sy(y)));
+            d += (i ? 'L' : 'M') + sx(x).toFixed(1) + ',' + yy.toFixed(1);
+          }
+          return mk('path', { d: d, class: 'curve ' + (cls || '') }, layer || plot);
+        },
+        line(xa, ya, xb, yb, cls, layer) {
+          return mk('line', { x1: sx(xa), y1: sy(ya), x2: sx(xb), y2: sy(yb), class: cls || '' }, layer || plot);
+        },
+        setLine(e, xa, ya, xb, yb) {
+          e.setAttribute('x1', sx(xa)); e.setAttribute('y1', sy(ya));
+          e.setAttribute('x2', sx(xb)); e.setAttribute('y2', sy(yb));
+        },
+        pt(x, y, cls, r, layer) {
+          return mk('circle', { cx: sx(x), cy: sy(y), r: r || 10, class: 'pt ' + (cls || '') }, layer || plot);
+        },
+        movePt(e, x, y) { e.setAttribute('cx', sx(x)); e.setAttribute('cy', sy(y)); },
+        arrow(xa, ya, xb, yb, color, cls, layer) {
+          return mk('line', { x1: sx(xa), y1: sy(ya), x2: sx(xb), y2: sy(yb),
+                              class: 'arw ' + color + ' ' + (cls || ''), 'marker-end': 'url(#' + id + color + ')' }, layer || plot);
+        },
+        arc(pts, color, cls, layer) {
+          let d = '';
+          pts.forEach((p, i) => { d += (i ? 'L' : 'M') + sx(p[0]).toFixed(1) + ',' + sy(p[1]).toFixed(1); });
+          return mk('path', { d: d, class: 'arw ' + color + ' ' + (cls || ''), 'marker-end': 'url(#' + id + color + ')' }, layer || plot);
+        },
+        clear(g) { while (g.firstChild) g.removeChild(g.firstChild); },
+        place(o, x, y) {
+          if (x === undefined) { const v = nums(o.dataset.at); x = v[0]; y = v[1]; }
+          o.style.left = (sx(x) / W * 100) + '%';
+          o.style.top = (sy(y) / H * 100) + '%';
+        }
+      };
+      el.querySelectorAll('.ov[data-at]').forEach(o => api.place(o));
+      el._p = api;
+      return api;
+    }
+    document.querySelectorAll('.chart[data-x]').forEach(make);
+    return { make: make, mk: mk, nums: nums, MINUS: MINUS };
+  })();
+
+  /* 표시용 숫자: 유효숫자 7자리, 끝의 0 생략, 음수는 − (교과서 147쪽 방주 규칙) */
+  window.fmt7 = function (x) {
+    if (!isFinite(x)) return '—';
+    if (Math.abs(x) < 1e-9) return '0';
+    const v = Number(x.toPrecision(7));
+    if (Math.abs(v) >= 1e7) return '매우 큼';
+    let s = String(v);
+    if (s.indexOf('e') >= 0) s = v.toFixed(9).replace(/0+$/, '').replace(/\.$/, '');
+    return s.replace('-', window.LMPlot.MINUS);
+  };
+</script>
+
+<script>
+  /* 4-4-2 정적 그림: (i) 오르막 접선, (ii) 내리막 접선 */
+  (function () {
+    function draw(id, f, df, a, h) {
+      const c = document.getElementById(id)._p;
+      c.curve(f, '', 0.4, 9.6);
+      [a - h, a, a + h].forEach(x => { c.line(x, 0, x, f(x), 'dash'); c.pt(x, f(x), x === a ? 'p' : 'q', x === a ? 9 : 7); });
+      const m = df(a);
+      c.line(0, f(a) - m * a, 10, f(a) + m * (10 - a), 'tan');
+    }
+    draw('cUp', x => 0.13 * (x - 1.2) * (x - 1.2) + 1.2, x => 0.26 * (x - 1.2), 5.6, 2);
+    draw('cDown', x => 0.13 * (x - 8.8) * (x - 8.8) + 1.2, x => 0.26 * (x - 8.8), 4.4, 2);
+  })();
+</script>
+
+<script>
+  /* 4-4-2 「더 깊이」: 포물선 위의 점에서 접선과 내리막 화살표 (문제 3의 두 이차함수) */
+  (function () {
+    const el = document.getElementById('cArr');
+    const sA = document.getElementById('sA'), vA = document.getElementById('vA');
+    const M = window.LMPlot.MINUS;
+    const show = v => String(Number(v.toFixed(6))).replace('-', M);
+    const FN = {
+      A: { p: 1, q: 3, r: -2, x: '-5,2,1', y: '-6,10,2', min: -18, max: 6, v0: 2,
+           txt: '2 × <i>a</i> + 3' },
+      B: { p: -2, q: -1, r: 3, x: '-2.5,2,0.5', y: '-8,4,2', min: -8, max: 7, v0: 2,
+           txt: '−4 × <i>a</i> − 1' }
+    };
+    let cur = 'A', c, tan, pt, ar1, ar2, gq;
+
+    function build() {
+      const F = FN[cur];
+      const old = el.querySelector('svg'); if (old) old.remove();
+      el.dataset.x = F.x; el.dataset.y = F.y;
+      c = window.LMPlot.make(el);
+      const f = x => F.p * x * x + F.q * x + F.r;
+      c.curve(f, '');
+      gq = c.group('');
+      tan = c.line(0, 0, 1, 1, 'tan');
+      pt = c.pt(0, 0, 'p', 11);
+      sA.min = F.min; sA.max = F.max; sA.value = F.v0;
+      update();
+    }
+    function update() {
+      const F = FN[cur], a = Number(sA.value) / 4;
+      const f = x => F.p * x * x + F.q * x + F.r;
+      const m = 2 * F.p * a + F.q;
+      vA.textContent = show(a);
+      c.setLine(tan, c.x0, f(a) + m * (c.x0 - a), c.x1, f(a) + m * (c.x1 - a));
+      c.movePt(pt, a, f(a));
+      c.clear(gq);
+      const span = (c.x1 - c.x0) / 7;
+      if (m !== 0) {
+        const s = m > 0 ? -1 : 1, pts = [];
+        for (let k = 1; k <= 6; k++) { const x = a + s * span * (0.15 + 0.85 * k / 6); pts.push([x, f(x) + (c.y1 - c.y0) * 0.035]); }
+        c.arc(pts, 'suc', '', gq);
+        c.arrow(a, c.y0 + (c.y1 - c.y0) * 0.04, a + s * span * 1.1, c.y0 + (c.y1 - c.y0) * 0.04, 'suc', '', gq);
+      }
+      document.getElementById('rF').innerHTML = F.txt.replace('<i>a</i>', show(a).indexOf(M) === 0 ? '(' + show(a) + ')' : show(a));
+      document.getElementById('rD').textContent = show(m);
+      const sign = document.getElementById('rSign'), dir = document.getElementById('rDir');
+      if (m > 0) { sign.innerHTML = '양수 — 접선이 오른쪽 위로 (오르막)'; dir.textContent = '음의 방향(왼쪽, x 감소)으로 가면 작아진다'; }
+      else if (m < 0) { sign.innerHTML = '음수 — 접선이 오른쪽 아래로 (내리막)'; dir.textContent = '양의 방향(오른쪽, x 증가)으로 가면 작아진다'; }
+      else { sign.innerHTML = '0 — 접선이 수평 (꼭짓점)'; dir.textContent = F.p > 0 ? '어느 쪽으로 가도 작아지지 않는다 (최솟값)' : '어느 쪽으로 가도 작아진다 (꼭대기)'; }
+      const v1 = Number(f(a - 0.1).toFixed(6)), v2 = Number(f(a).toFixed(6)), v3 = Number(f(a + 0.1).toFixed(6));
+      const cmp = (u, v) => u < v ? ' &lt; ' : (u > v ? ' &gt; ' : ' = ');
+      document.getElementById('rIneq').innerHTML =
+        '<i>f</i>(' + show(a - 0.1) + ') = ' + show(v1) + cmp(v1, v2) + '<i>f</i>(' + show(a) + ') = ' + show(v2) +
+        cmp(v2, v3) + '<i>f</i>(' + show(a + 0.1) + ') = ' + show(v3);
+    }
+    sA.addEventListener('input', update);
+    el.closest('section').querySelectorAll('.fnbtn').forEach(b => b.addEventListener('click', () => {
+      cur = b.dataset.fn;
+      el.closest('section').querySelectorAll('.fnbtn').forEach(x => x.classList.toggle('on', x === b));
+      build();
+    }));
+    build();
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
