@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>극한과 미분계수 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+    .note-badge { display: inline-block; background: var(--lm-warning-tint); color: var(--lm-ink);
+                  border: var(--lm-border-thin) solid var(--lm-warning); font-size: var(--lm-slide-caption);
+                  font-weight: 700; padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                  margin-right: var(--lm-space-2); }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+    .ox { display: inline-block; min-width: 1.4em; text-align: center; font-weight: 700; }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+    .row { display: flex; gap: var(--lm-space-6); align-items: flex-start; margin-top: var(--lm-space-3); }
+    .row > .grow { flex: 1; min-width: 0; }
+
+    /* ── 좌표평면 (JS가 data-* 로 SVG를 만든다. 수식 라벨은 .ov HTML 덧씌우기) ── */
+    .chart { position: relative; flex: none; }
+    .chart svg { display: block; width: 100%; height: auto; overflow: hidden; }
+    .chart .grid line { stroke: var(--lm-rule); stroke-width: 1.5; }
+    .chart .axis line { stroke: var(--lm-ink-3); stroke-width: 2.5; }
+    .chart .axis path { fill: var(--lm-ink-3); }
+    .chart .tick { fill: var(--lm-ink-3); font-size: 24px; font-family: var(--lm-font-sans); }
+    .chart .curve { fill: none; stroke: var(--lm-ink); stroke-width: 4; }
+    .chart .pt { fill: var(--lm-accent); stroke: var(--lm-page); stroke-width: 2; }
+    .chart .pt.p { fill: var(--lm-danger); }
+    .chart .pt.q { fill: var(--lm-info); }
+    .chart .dash { stroke: var(--lm-ink-3); stroke-width: 2; stroke-dasharray: 6 6; }
+    .chart .sec { stroke: var(--lm-info); stroke-width: 4; }
+    .chart .sec.faint { stroke-width: 2; opacity: 0.55; }
+    .chart .tan { stroke: var(--lm-danger); stroke-width: 4; }
+    .chart .tan.dashed { stroke-dasharray: 14 9; }
+    .chart .arw { stroke-width: 4; fill: none; }
+    .chart .arw.acc { stroke: var(--lm-accent); }
+    .chart .arw.dan { stroke: var(--lm-danger); }
+    .chart .arw.inf { stroke: var(--lm-info); }
+    .chart .arw.suc { stroke: var(--lm-success); }
+    .chart .mk-acc { fill: var(--lm-accent); }
+    .chart .mk-dan { fill: var(--lm-danger); }
+    .chart .mk-inf { fill: var(--lm-info); }
+    .chart .mk-suc { fill: var(--lm-success); }
+    .chart .mk-ink { fill: var(--lm-ink-2); }
+    .chart .ov { position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+                 font-size: var(--lm-slide-caption); color: var(--lm-ink-2); line-height: 1.2; }
+    .chart .ov.r { transform: translate(8px, -50%); }
+    .chart .ov.l { transform: translate(calc(-100% - 8px), -50%); }
+    .chart .ov.a { transform: translate(-50%, calc(-100% - 8px)); }
+    .chart .ov.b { transform: translate(-50%, 8px); }
+    .chart .ov.dan { color: var(--lm-danger); font-weight: 700; }
+    .chart .ov.inf { color: var(--lm-info); font-weight: 700; }
+    .chart .ov.acc { color: var(--lm-accent); font-weight: 700; }
+    .chart .fade { transition: opacity 0.35s; }
+    .axis-cap { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); text-align: center;
+                margin-top: var(--lm-space-1); }
+
+    .datatbl { border-collapse: collapse; font-size: var(--lm-slide-small); }
+    .datatbl th, .datatbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                               padding: 2px var(--lm-space-4); text-align: center; }
+    .datatbl th { background: var(--lm-paper-tint); font-weight: 700; }
+    .datatbl td.num { font-variant-numeric: tabular-nums; }
+    .datatbl td.hl { color: var(--lm-danger); font-weight: 700; }
+    .datatbl tr[data-s] { visibility: hidden; }
+    .datatbl tr[data-s].visible { visibility: visible; }
+
+    .ctrl { flex: 1; min-width: 0; }
+    .ctrl .param-slider-group label { min-width: 4em; }
+    .ctrl .param-slider-group input[type=range] { height: 36px; }
+    .btnrow { display: flex; flex-wrap: wrap; gap: var(--lm-space-2); margin: var(--lm-space-2) 0; }
+    .btnrow .anim-btn { padding: var(--lm-space-1) var(--lm-space-4); }
+    .anim-btn.on { outline: 4px solid var(--lm-info); outline-offset: 2px; }
+    .readout { margin-top: var(--lm-space-3); border: var(--lm-border-thin) solid var(--lm-accent);
+               border-radius: var(--lm-radius-md); background: var(--lm-page);
+               padding: var(--lm-space-3) var(--lm-space-4); font-size: var(--lm-slide-small);
+               line-height: 1.6; }
+    .readout .big { color: var(--lm-info); font-weight: 700; font-size: var(--lm-slide-body); }
+    .readout .msg { color: var(--lm-danger); font-weight: 700; }
+    .mono { font-variant-numeric: tabular-nums; }
+
+    /* 4-4-1 전용: 생각 열기 방향 화살표 · 할선이 좁혀지는 단계 */
+    .chart .dir { opacity: 0; }
+    section:has(.s-dir.visible) .chart .dir { opacity: 1; }
+    .chart .sq { opacity: 0; }
+    section:has(.s-sq.visible) .chart .sq { opacity: 1; }
+    .chart .tg { opacity: 0; }
+    section:has(.s-tg.visible) .chart .tg { opacity: 1; }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-4 경사하강법 · 1차시</div>
+    <h1>극한과 미분계수</h1>
+    <p class="slide-sub">두 점을 한없이 붙이면 할선이 접선이 된다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 140~142쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄이다. 할선의 두 점을 한없이 붙이면 접선이 되고, 그 접선의 기울기가 미분계수다. 4-4 경사하강법 단원의 첫 시간이다. 성취기준 해설이 "극한 개념과 미분계수는 직관적으로 이해하게 한다"고 정했으므로, 오늘은 그래프와 표, 화살표로만 극한을 본다. 좌극한·우극한, 연속 같은 말은 꺼내지 않는다. 「더 깊이」 장 두 개(할선 기울기 표, 할선이 접선으로 도는 장면)는 교과서 밖 보강이며 화면에 그렇게 표시해 두었다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>꼭짓점 공식이 없으면? 미분으로 내려간다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">4-3 손실함수 — 지금까지</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(L(a)\)가 이차함수 → <b>꼭짓점</b>이 최적의 \(a\)</div>
+      </div>
+      <div class="side">
+        <div class="where">공학 도구 — 지난 시간</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(a\)를 \(0.1\)씩 바꿔 가며 <b>찾아보기</b></div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      그런데 꼭짓점 공식이 없는 손실함수라면? 칸을 하나하나 다 계산해 보는 대신,
+      <b>지금 서 있는 자리에서 어느 쪽이 내리막인지</b> 알려 주는 도구가 필요하다. 그 도구가 <span class="kw">미분</span>이다.
+    </p>
+    <aside class="notes">지난 시간(4-3-4) 마지막 문장 "꼭짓점 공식이 없으면? 미분으로 내려간다"를 그대로 다시 읽는다. 지난 시간에는 공학 도구에서 기울기 a를 0.1 간격으로 바꿔 가며 손실함수의 값이 가장 작은 자리를 눈으로 찾았다. 칸을 촘촘히 할수록 계산이 늘어난다는 문제도 함께 확인했다. 비유: 안개 낀 산에서 골짜기를 찾을 때, 산 전체 지도를 다 그리는 대신 발밑의 경사만 느껴도 내려갈 방향은 안다. 발밑 경사를 숫자로 재는 법이 오늘 배우는 미분계수다. 오늘은 '경사를 재는 법'까지만, 실제로 내려가는 것은 4-4-3에서 한다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>그래프를 이용하여 함수의 <span class="kw">극한값</span>을 구할 수 있다.</span></li>
+      <li><span class="num">2</span><span>할선이 <span class="kw">접선</span>에 한없이 가까워지는 과정을 설명할 수 있다.</span></li>
+      <li><span class="num">3</span><span>정의를 이용하여 한 점에서의 <span class="kw">미분계수</span>를 구할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">할선의 두 점을 한없이 붙이면 접선이 되고, 그 기울기가 미분계수다.</span>
+    </div>
+    <aside class="notes">교과서 140쪽의 학습 목표는 "경사하강법을 이해하고 최적화된 예측을 위한 인공지능의 학습 방법을 설명할 수 있다"이다. 이 목표는 4차시 전체의 목표이고, 오늘은 그 첫 도구(극한과 미분계수)만 다룬다. 목표 2는 교과서 141쪽 그림을 움직이는 장면으로 보강한다. 수학Ⅱ를 아직 배우지 않은 학생이 많다는 전제로, 기호 lim은 '한없이 가까워질 때의 값'이라는 뜻으로만 읽게 한다.</aside>
+  </section>
+
+  <!-- 4. 생각 열기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 140쪽 · 생각 열기</div>
+    <h2>어느 쪽으로 가야 \(f(x)\)가 작아질까</h2>
+
+    <div class="row">
+      <div class="grow">
+        <p class="prob-stmt sm" style="margin-top: 0;">오른쪽 그림은 함수 \(y=f(x)\)의 그래프이다.
+          \(a\le x\le b\)와 \(c\le x\le d\)에서 \(f(x)\)의 값을 감소시키려면 \(x\)의 값을 증가시켜야 하는지, 감소시켜야 하는지 말해 보자.</p>
+        <div class="step-box s-dir" data-s style="font-size: var(--lm-slide-small);">
+          \(a\le x\le b\)에서는 \(x\)의 값을 <b>증가</b>시켜야, \(c\le x\le d\)에서는 \(x\)의 값을 <b>감소</b>시켜야 \(f(x)\)의 값이 감소한다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          함숫값이 감소하도록 \(x\)의 값을 조금씩 조정해 가는 방법은 인공지능이 <b>손실함수를 최적화</b>할 때 매우 유용하게 사용된다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          주어진 \(x\)의 값 근처에서 함숫값이 감소하는 방향을 알아볼 때, <b>함수의 미분</b>을 이용한다.
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 3</span>
+        </div>
+      </div>
+      <div>
+        <div class="chart" id="cOpen" data-w="720" data-h="520" data-x="0,10,1" data-y="0,10,1" data-noticks="1">
+          <div class="ov b" data-at="1.5,0">\(a\)</div>
+          <div class="ov b" data-at="4,0">\(b\)</div>
+          <div class="ov b" data-at="6,0">\(c\)</div>
+          <div class="ov b" data-at="8.5,0">\(d\)</div>
+          <div class="ov l" data-at="0,0">O</div>
+          <div class="ov l" data-at="7.6,9.4">\(y=f(x)\)</div>
+        </div>
+        <div class="axis-cap">초록 화살표: 함숫값이 작아지는 쪽</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 140쪽 생각 열기. 먼저 학생에게 묻고 답을 들은 뒤 '다음'을 누른다. 첫 단계에서 그래프에 초록 화살표가 나타난다. a에서 b 쪽(오른쪽)으로 가면 그래프가 내려가고, d에서 c 쪽(왼쪽)으로 가도 내려간다. 즉 꼭짓점의 왼쪽에서는 오른쪽으로, 오른쪽에서는 왼쪽으로 가야 한다. 교과서는 이어서 "a≤x≤b에서는 x=b일 때 f(b)가 가장 작고, c≤x≤d에서는 x=c일 때 f(c)가 가장 작다"고 정리한다. 두 번째 단계가 이 단원 전체의 질문이다: 그래프를 보지 않고도 어느 쪽이 내리막인지 알 수 있을까? 그 답이 미분이며, 오늘 시작해 다음 시간(4-4-2)에 완성된다.</aside>
+  </section>
+
+  <!-- 5. 함수의 극한 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 140쪽 · 1. 함수의 극한</div>
+    <h2>한없이 가까워지는 값 — 극한값</h2>
+
+    <div class="row">
+      <div class="grow">
+        <div class="definition-box" style="font-size: var(--lm-slide-small); margin-top: 0;">
+          함수 \(f(x)\)에서 \(x\)의 값이 \(a\)가 아니면서 \(a\)에 한없이 가까워질 때 \(f(x)\)의 값이 일정한 수 \(L\)에 한없이 가까워지면, 함수 \(f(x)\)는 \(L\)에 <b>수렴</b>한다고 한다.<br>
+          또, \(L\)을 함수 \(f(x)\)의 \(x=a\)에서의 <b>극한값</b> 또는 <b>극한</b>이라 하며, 기호로 다음과 같이 나타낸다.
+          <div style="font-size: var(--lm-slide-body); margin-top: var(--lm-space-2); text-align: center;">
+            \(\displaystyle\lim_{x\to a}f(x)=L\) &nbsp;&nbsp;또는&nbsp;&nbsp; \(x\to a\)일 때 \(f(x)\to L\)
+          </div>
+        </div>
+        <p class="cap-sm" style="margin: 0;">방주 — 기호 \(\lim\)은 극한을 뜻하는 limit의 약자이며, ‘리미트’라고 읽는다. &nbsp;\(x\to a\)는 \(x\ne a\)이면서 \(x\)의 값이 \(a\)에 한없이 가까워짐을 뜻한다.</p>
+        <p class="cap-sm" style="margin: var(--lm-space-2) 0 0;"><span class="note-badge">글자 주의</span>여기의 \(L\)은 <b>극한값</b>을 나타내는 글자다. 4-4-3부터 나오는 손실함수 \(L(a)\)와는 다른 뜻이다.</p>
+      </div>
+      <div>
+        <div class="chart" id="cLim" data-w="560" data-h="470" data-x="0,10,1" data-y="0,10,1" data-noticks="1">
+          <div class="ov b" data-at="6.5,0">\(a\)</div>
+          <div class="ov l" id="limL" data-at="0,6.2">\(L\)</div>
+          <div class="ov l" data-at="0,0">O</div>
+          <div class="ov l" data-at="7.4,9.3">\(y=f(x)\)</div>
+        </div>
+        <div class="axis-cap">\(x\)가 양쪽에서 \(a\)로 → \(f(x)\)가 \(L\)로</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 140쪽 정의를 함께 읽는다. 핵심은 두 가지다. 첫째, x는 a에 '도착하지 않는다'(x≠a). 가까이 가기만 한다. 둘째, 그때 f(x)가 어떤 한 값 L에 가까워지면 그 값을 극한값이라 부른다. 그림의 파란 화살표는 x축 위에서 x가 a로 다가가는 모습, 빨간 화살표는 그때 곡선 위의 점이 높이 L로 다가가는 모습이다. 성취기준 해설에 따라 직관적으로만 다룬다. 양쪽에서 다가간다는 그림은 교과서 그림 그대로이며, 좌극한·우극한이라는 말은 쓰지 않는다. 글자 주의: L은 limit의 극한값이다. 다음 주에 손실함수 L(a)가 나오면 같은 글자를 다른 뜻으로 쓰게 되므로 지금 한 번 짚어 둔다.</aside>
+  </section>
+
+  <!-- 6. 예제 1 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 141쪽 · 예제 1</div>
+    <h2>그래프로 극한값 구하기</h2>
+
+    <div class="row">
+      <div class="grow">
+        <div class="example-box" style="font-size: var(--lm-slide-small); margin-top: 0;">
+          함수의 그래프를 이용하여 \(\displaystyle\lim_{x\to1}2x^2\)의 값을 구하시오.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(f(x)=2x^2\)이라 하면 함수 \(y=f(x)\)의 그래프는 오른쪽 그림과 같다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(x\)의 값이 \(1\)이 아니면서 \(1\)에 한없이 가까워질 때, \(f(x)\)의 값이 \(2\)에 한없이 가까워지므로
+          <div style="text-align: center; font-size: var(--lm-slide-body); margin-top: var(--lm-space-2);">\(\displaystyle\lim_{x\to1}2x^2=2\)</div>
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 2</span>
+        </div>
+      </div>
+      <div>
+        <div class="chart" id="cEx1" data-w="600" data-h="560" data-x="-1.5,2,0.5" data-y="0,5,1">
+          <div class="ov l" data-at="0.6,4.4">\(y=2x^2\)</div>
+        </div>
+        <div class="axis-cap">\(x\to1\)일 때 \(2x^2\to2\)</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 141쪽 예제 1. 답은 2다. 그래프에서 x가 1의 왼쪽과 오른쪽 양쪽에서 1로 다가갈 때(파란 화살표), 곡선 위의 점은 높이 2인 점으로 다가간다(빨간 화살표). 학생이 "그냥 1을 넣으면 2잖아요"라고 하면 칭찬한다. 이렇게 그래프가 끊기지 않은 이차함수에서는 극한값과 함숫값이 같다. 다만 극한은 '1을 넣는 것'이 아니라 '1에 가까이 갈 때'라는 생각이라는 점을 다시 강조한다. 이 생각이 미분계수에서 꼭 필요하다. 거기서는 h=0을 넣으면 0÷0이 되어 넣을 수가 없기 때문이다.</aside>
+  </section>
+
+  <!-- 7. 문제 1 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 141쪽 문제 1</div>
+    <h2>그래프를 그려 극한값을 구하자</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;"><b>문제 1</b> 함수의 그래프를 이용하여 다음 극한값을 구하시오.</p>
+    <ul class="qlist">
+      <li><b>⑴</b> \(\displaystyle\lim_{x\to0}(x+3)\)
+        <div class="ans">\(y=x+3\)의 그래프에서 \(x\)의 값이 \(0\)이 아니면서 \(0\)에 한없이 가까워질 때, \(f(x)\)의 값이 \(3\)에 한없이 가까워지므로 \(\displaystyle\lim_{x\to0}(x+3)=\mathbf{3}\)</div></li>
+      <li><b>⑵</b> \(\displaystyle\lim_{x\to1}(-2x^2-x+1)\)
+        <div class="ans">\(y=-2x^2-x+1\)의 그래프에서 \(x\)의 값이 \(1\)이 아니면서 \(1\)에 한없이 가까워질 때, \(f(x)\)의 값이 \(-2\)에 한없이 가까워지므로 \(\displaystyle\lim_{x\to1}(-2x^2-x+1)=\mathbf{-2}\)</div></li>
+    </ul>
+    <aside class="notes">교과서 141쪽 문제 1. 정답및풀이 190쪽: (1) 3 (2) −2. 공책에 대략의 그래프를 그리게 한다. (1)은 기울기 1, y절편 3인 직선, (2)는 위로 볼록한 포물선으로 y절편 1, x절편 −1과 1/2이다(정답및풀이 그림). 두 문항 모두 그래프가 끊기지 않으므로 x에 해당 값을 넣은 함숫값과 같다: 0+3=3, −2−1+1=−2. 그래프를 그리지 않고 대입만 한 학생에게는 "그래프에서 화살표 두 개로 설명해 보라"고 한 번 더 요구한다.</aside>
+  </section>
+
+  <!-- 8. 할선에서 접선으로 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 141쪽 · 2. 함수의 미분계수</div>
+    <h2>점 Q를 점 P로 한없이 가까이</h2>
+
+    <div class="row">
+      <div class="grow">
+        <p class="prob-stmt sm" style="margin-top: 0;">함수 \(y=f(x)\)의 그래프 위의 두 점 \(\mathrm{P}(a,\ f(a))\)와 \(\mathrm{Q}(a+h,\ f(a+h))\)에 대하여</p>
+        <div class="step-box s-sq" data-s style="font-size: var(--lm-slide-small);">
+          \(h\to0\)이면 점 Q는 곡선 \(y=f(x)\)를 따라 점 P에 한없이 가까워진다. 또, 직선 PQ는 점 P를 지나는 일정한 직선 PT에 한없이 가까워진다.
+        </div>
+        <div class="step-box s-tg" data-s style="font-size: var(--lm-slide-small);">
+          이 직선 PT를 곡선 \(y=f(x)\) 위의 점 P에서의 ‘<b>접선</b>’이라 하고, 점 P를 이 접선의 ‘<b>접점</b>’이라고 한다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          <div style="text-align: center;">\((\text{직선 PQ의 기울기})=\dfrac{f(a+h)-f(a)}{(a+h)-a}=\dfrac{f(a+h)-f(a)}{h}\)</div>
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(h\to0\)이면 직선 PQ의 기울기가 접선 PT의 기울기에 한없이 가까워지므로
+          <div style="text-align: center;">\(\displaystyle(\text{접선 PT의 기울기})=\lim_{h\to0}\frac{f(a+h)-f(a)}{h}\)</div>
+        </div>
+        <div class="stepper">
+          <button class="anim-btn step-next">다음</button>
+          <button class="anim-btn step-reset">처음부터</button>
+          <span class="step-counter">0 / 4</span>
+        </div>
+      </div>
+      <div>
+        <div class="chart" id="cSec" data-w="640" data-h="540" data-x="0,10,1" data-y="0,10,1" data-noticks="1">
+          <div class="ov l" data-at="0,0">O</div>
+          <div class="ov b" data-at="3.5,0">\(a\)</div>
+          <div class="ov b" data-at="7.5,0">\(a+h\)</div>
+          <div class="ov l" data-at="0,2.4">\(f(a)\)</div>
+          <div class="ov l" data-at="0,8.0">\(f(a+h)\)</div>
+          <div class="ov a" data-at="3.5,2.6">P</div>
+          <div class="ov l" data-at="7.5,8.3">Q</div>
+          <div class="ov r tg fade dan" data-at="8.9,6.4">T</div>
+          <div class="ov l" data-at="6.4,9.5">\(y=f(x)\)</div>
+        </div>
+        <div class="axis-cap">파랑: 직선 PQ(할선) · 빨강: 접선 PT</div>
+      </div>
+    </div>
+    <aside class="notes">교과서 141쪽. 그림의 Q가 P 쪽으로 미끄러져 내려오는 장면을 상상하게 한다. 첫 단계에서 Q를 점점 P에 가깝게 잡은 직선들(옅은 파랑)이 나타나고, 둘째 단계에서 빨간 접선이 나타난다. 직선들이 접선 쪽으로 '돈다'는 것을 손으로 그려 보여 준다. 셋째 단계의 분모 (a+h)−a=h는 '가로로 간 거리', 분자는 '세로로 오른 높이'다. 기울기 = 높이÷거리. 넷째 단계가 오늘의 핵심 식이다. 할선(두 점을 지나는 직선)이라는 말은 교과서 본문에는 없고 '직선 PQ'라고만 쓰지만, 수업에서 '할선'이라고 불러도 좋다(지도서 용어). 다음 장에서 이 극한값에 이름을 붙인다.</aside>
+  </section>
+
+  <!-- 9. 미분계수의 정의 -->
+  <section>
+    <div class="chapter-tag">교과서 142쪽</div>
+    <h2>미분계수 = 접선의 기울기</h2>
+
+    <div class="definition-box" style="font-size: var(--lm-slide-body);">
+      앞의 극한값을 함수 \(f(x)\)의 \(x=a\)에서의 <b>미분계수</b>라 하고, 이것을 기호로 \(f'(a)\)와 같이 나타낸다. 즉,
+      <div style="text-align: center; margin: var(--lm-space-3) 0;">\(\displaystyle f'(a)=\lim_{h\to0}\frac{f(a+h)-f(a)}{h}\)</div>
+      이고, 함수 \(y=f(x)\)의 \(x=a\)에서의 미분계수 \(f'(a)\)는 곡선 \(y=f(x)\) 위의 점 \((a,\ f(a))\)에서의 <b>접선의 기울기</b>와 같다.
+    </div>
+
+    <div class="info-box" style="font-size: var(--lm-slide-small);">
+      읽는 법 — \(f'(a)\)는 ‘에프 프라임 에이’. 뜻은 “\(x=a\)에서 그래프가 얼마나 가파른가”. 양수면 오르막, 음수면 내리막이다.
+    </div>
+    <aside class="notes">교과서 142쪽 정의. 상자 안 문장을 학생이 소리 내어 읽게 한다. 지도서 189쪽 유의점: 미분계수는 이차함수에 한하여 접선의 기울기로 직관적으로 이해하게 한다. 정의 식을 외우게 하기보다 "직선 PQ의 기울기에서 Q를 P에 붙인 것"이라는 그림을 먼저 떠올리게 한다. 아래 참고 상자의 '양수면 오르막, 음수면 내리막'은 다음 시간 143쪽 내용을 미리 한 줄로 말한 것이다. 여기서는 말로만 짚고 넘어간다. 1단원 회수: 1-1-3차시 활성화함수 카드에서 "계단함수는 미분이 막혀 학습에 제한이 있다"고 했다. 그 '미분'이 바로 오늘 정의한 것이다. 왜 막히면 안 되는지는 4-4-3에서 갚는다.</aside>
+  </section>
+
+  <!-- 10. 예제 2 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 142쪽 · 예제 2</div>
+    <h2>\(f(x)=x^2\)의 \(x=3\)에서의 미분계수</h2>
+
+    <div class="example-box" style="font-size: var(--lm-slide-small); margin-top: 0;">
+      함수 \(f(x)=x^2\)의 \(x=3\)에서의 미분계수를 구하시오.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-body);">
+      \(\displaystyle f'(3)=\lim_{h\to0}\frac{f(3+h)-f(3)}{h}=\lim_{h\to0}\frac{(3+h)^2-3^2}{h}\)
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-body);">
+      \(\displaystyle \phantom{f'(3)}=\lim_{h\to0}\frac{h^2+6h}{h}=\lim_{h\to0}(h+6)=6\)
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>왜 \(h\)로 나눌 수 있나?</b> \(h\to0\)은 \(h\)가 \(0\)에 가까워질 뿐 \(h\ne0\)이므로, \(\dfrac{h^2+6h}{h}=h+6\)으로 <b>약분할 수 있다</b>. \(0\)으로 나누는 것이 아니다.
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 3</span>
+    </div>
+    <aside class="notes">교과서 142쪽 예제 2. 답 6. (3+h)²−9를 전개하면 9+6h+h²−9=h²+6h이다. 셋째 단계는 지도서 189쪽 유의점 ④를 화면에 올린 것이다. 학생들이 가장 많이 걸려 넘어지는 자리가 "h로 나누면 0으로 나누는 것 아니에요?"다. h→0은 h가 0이 '아니면서' 0에 가까워진다는 뜻이므로(140쪽 방주와 같은 말) h로 나눌 수 있다. 약분이 끝난 h+6에서는 h가 0에 가까워지면 값이 6에 가까워진다. 즉 y=x² 위의 점 (3, 9)에서 접선의 기울기가 6이다. 다음 두 장에서 이 6을 숫자표와 움직이는 그림으로 확인한다.</aside>
+  </section>
+
+  <!-- 11. 더 깊이 — 표로 보는 극한 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 예제 2를 숫자로</div>
+    <h2>\(h\)를 줄이면 직선 PQ의 기울기는 \(6\)으로 다가간다</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;">예제 2의 \(f(x)=x^2\), \(\mathrm{P}(3,\ 9)\)에서 \(h\)를 점점 작게 하며 직선 PQ의 기울기 \(\dfrac{f(3+h)-f(3)}{h}\)를 계산해 보자.</p>
+    <div class="row" style="gap: var(--lm-space-5); align-items: center;">
+      <table class="datatbl">
+        <tr><th>\(h\)</th><th>\(3+h\)</th><th>\(f(3+h)\)</th><th>\(f(3+h)-f(3)\)</th><th>직선 PQ의 기울기</th></tr>
+        <tr data-s><td class="num">\(0.1\)</td><td class="num">\(3.1\)</td><td class="num">\(9.61\)</td><td class="num">\(0.61\)</td><td class="num hl">\(6.1\)</td></tr>
+        <tr data-s><td class="num">\(0.01\)</td><td class="num">\(3.01\)</td><td class="num">\(9.0601\)</td><td class="num">\(0.0601\)</td><td class="num hl">\(6.01\)</td></tr>
+        <tr data-s><td class="num">\(0.001\)</td><td class="num">\(3.001\)</td><td class="num">\(9.006001\)</td><td class="num">\(0.006001\)</td><td class="num hl">\(6.001\)</td></tr>
+        <tr data-s><td class="num">\(-0.1\)</td><td class="num">\(2.9\)</td><td class="num">\(8.41\)</td><td class="num">\(-0.59\)</td><td class="num hl">\(5.9\)</td></tr>
+        <tr data-s><td class="num">\(-0.01\)</td><td class="num">\(2.99\)</td><td class="num">\(8.9401\)</td><td class="num">\(-0.0599\)</td><td class="num hl">\(5.99\)</td></tr>
+        <tr data-s><td class="num">\(-0.001\)</td><td class="num">\(2.999\)</td><td class="num">\(8.994001\)</td><td class="num">\(-0.005999\)</td><td class="num hl">\(5.999\)</td></tr>
+      </table>
+      <div class="grow">
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          \(h\)가 양수일 때도, 음수일 때도 기울기는 <b>\(6\)에 한없이 가까워진다.</b>
+          표의 기울기는 모두 \(6+h\) — 예제 2의 \(\lim\limits_{h\to0}(h+6)\)에서 \(h\)만 남은 것이다.
+        </div>
+        <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+          그래서 \(f'(3)=6\). 표는 \(h\)를 아무리 작게 해도 끝나지 않지만, 극한은 그 끝에 있는 값을 <b>한 번에</b> 말해 준다.
+        </div>
+      </div>
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 8</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 극한을 '눈으로' 보게 하는 표다. '다음'을 누를 때마다 한 줄씩 나타난다. 계산기를 주고 첫 줄(h=0.1)은 학생이 직접 계산하게 한다: 3.1²=9.61, 9.61−9=0.61, 0.61÷0.1=6.1. 이어서 h=0.01, 0.001로 가며 6.01, 6.001이 나오는 것을 본다. 아래 세 줄은 h가 음수일 때다. Q가 P의 왼쪽에 있을 때도 기울기가 5.9, 5.99, 5.999로 6에 다가간다. '양쪽에서 같은 값으로'라는 그림만 보여 주고 좌극한·우극한이라는 용어는 쓰지 않는다(지도서 188쪽 내용 연구 ②). 모든 값은 python으로 검산했다(표의 기울기는 정확히 6+h). 마지막 단계의 메시지: 표는 끝없이 이어지지만 극한은 그 끝의 값 6을 계산 한 번으로 준다. 이것이 예제 2의 약분 계산이 하는 일이다.</aside>
+  </section>
+
+  <!-- 12. 더 깊이 — 할선이 접선으로 -->
+  <section class="tight" data-prevent-swipe>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 직접 움직여 보기</div>
+    <h2>\(h\)가 작아지면 직선 PQ가 접선으로 돈다</h2>
+
+    <div class="row" data-prevent-swipe>
+      <div>
+        <div class="chart" id="cRot" data-w="800" data-h="620" data-x="0,5,1" data-y="0,30,5">
+          <div class="ov a" data-at="3,9.6">P</div>
+          <div class="ov l" data-at="4.75,26.5">\(y=x^2\)</div>
+          <div class="ov l" id="qLab" data-at="4,16" style="color: var(--lm-info); font-weight: 700;">Q</div>
+        </div>
+        <div class="axis-cap">파랑: 직선 PQ · 빨간 점선: 점 P\((3,\ 9)\)에서의 접선(기울기 \(6\))</div>
+      </div>
+      <div class="ctrl" data-prevent-swipe>
+        <div class="param-slider-group"><label for="sH">\(h\)</label>
+          <input type="range" id="sH" min="-200" max="200" step="1" value="100"><span class="val-display" id="vH">1</span></div>
+        <div class="btnrow">
+          <button class="anim-btn hbtn" data-h="2">2</button>
+          <button class="anim-btn hbtn on" data-h="1">1</button>
+          <button class="anim-btn hbtn" data-h="0.5">0.5</button>
+          <button class="anim-btn hbtn" data-h="0.1">0.1</button>
+          <button class="anim-btn hbtn" data-h="0.01">0.01</button>
+          <button class="anim-btn hbtn" data-h="0.001">0.001</button>
+        </div>
+        <div class="btnrow">
+          <button class="anim-btn hbtn" data-h="-1">−1</button>
+          <button class="anim-btn hbtn" data-h="-0.1">−0.1</button>
+          <button class="anim-btn hbtn" data-h="-0.01">−0.01</button>
+        </div>
+        <div class="readout">
+          <span class="mono"><i>h</i> = <span id="rH">1</span></span><br>
+          <span class="mono">Q(<span id="rQx">4</span>, <span id="rQy">16</span>)</span><br>
+          직선 PQ의 기울기 = <span class="big mono" id="rS">7</span><br>
+          <span class="cap-sm" id="rMsg">접선의 기울기 <i>f</i>′(3) = 6과 비교해 보자.</span>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">교과서 밖 보조 활동이다. 학생 한 명을 불러 버튼을 큰 수에서 작은 수 순서로 누르게 한다. h=2이면 Q(5, 25), 기울기 8이다. h=1이면 기울기 7, 0.5이면 6.5, 0.1이면 6.1, 0.01이면 6.01이다. h가 0.1보다 작아지면 파란 직선이 빨간 접선과 거의 겹쳐 화면에서 구별되지 않는다. 바로 이 장면이 141쪽 그림의 "직선 PQ는 점 P를 지나는 일정한 직선 PT에 한없이 가까워진다"이다. 음수 버튼을 누르면 Q가 P의 왼쪽으로 가고 기울기는 5, 5.9, 5.99가 된다. 슬라이더를 0까지 끌면 h=0인 경우가 되는데, 이때는 Q와 P가 같은 점이 되어 직선 하나를 정할 수 없다는 메시지가 뜬다. 그래서 h는 0이 '아니면서' 0에 가까워져야 한다(140쪽 방주). 기울기 값은 정확히 6+h로 표시된다(부동소수 오차를 숨기려고 반올림).</aside>
+  </section>
+
+  <!-- 13. 문제 2 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 142쪽 문제 2</div>
+    <h2>\(x=2\)에서의 미분계수를 구하자</h2>
+
+    <p class="prob-stmt sm" style="margin-top: 0;"><b>문제 2</b> 다음 함수의 \(x=2\)에서의 미분계수를 구하시오.</p>
+    <ul class="qlist">
+      <li><b>⑴</b> \(f(x)=2x-3\)
+        <div class="ans">\(\displaystyle f'(2)=\lim_{h\to0}\frac{2(2+h)-3-(2\times2-3)}{h}=\lim_{h\to0}\frac{2h}{h}=\mathbf{2}\)</div></li>
+      <li><b>⑵</b> \(f(x)=-x^2+3x\)
+        <div class="ans">\(\displaystyle f'(2)=\lim_{h\to0}\frac{-(2+h)^2+3(2+h)-(-2^2+3\times2)}{h}=\lim_{h\to0}\frac{-h^2-h}{h}=\lim_{h\to0}(-h-1)=\mathbf{-1}\)</div></li>
+    </ul>
+    <aside class="notes">교과서 142쪽 문제 2. 정답및풀이 190쪽: (1) 2 (2) −1. 예제 2와 같은 순서로 쓰게 한다: ① 정의 식에 넣기 ② 분자 정리 ③ h로 약분 ④ h를 0에 가깝게. (1)은 직선이므로 어느 점에서나 접선이 자기 자신이고, 미분계수는 직선의 기울기 2 그대로다. 학생이 이 사실을 스스로 발견하면 크게 칭찬한다. (2)는 분자 전개가 관건이다: −(4+4h+h²)+6+3h−2=−h²−h. 미분계수가 음수이므로 x=2에서 그래프가 내리막이다. 다음 시간 이 부호의 뜻을 본격적으로 다룬다.</aside>
+  </section>
+
+  <!-- 14. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>할선의 두 점을 한없이 붙이면 접선이 되고, 그 기울기가 미분계수다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">함수의 극한</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(\displaystyle\lim_{x\to a}f(x)=L\)</div>
+      </div>
+      <div class="side">
+        <div class="where">미분계수 = 접선의 기울기</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">\(\displaystyle f'(a)=\lim_{h\to0}\frac{f(a+h)-f(a)}{h}\)</div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-small);">
+      다음 시간 예고 — 매번 극한을 계산해야 할까? <b>공식 하나면 모든 이차함수의 미분계수를 바로 얻는다. 그리고 그 부호가 내려갈 방향을 알려 준다.</b>
+    </div>
+    <p class="cap-sm">1단원 1-1-3차시의 “계단함수는 미분이 막힌다” — 그 ‘미분’이 오늘 정의한 미분계수다. 왜 막히면 안 되는지는 4-4-3에서.</p>
+    <aside class="notes">오늘 한 줄을 학생이 따라 말하게 한다. 예고 문장을 그대로 읽는다(다음 시간 '지난 시간' 장이 이 문장으로 시작한다). 다음 시간(4-4-2)은 142쪽 아래의 이차함수 공식 f'(a)=2pa+q와 143쪽 '미분계수의 부호와 함숫값의 증가·감소'다. 오늘 생각 열기에서 그래프를 보고 답한 질문(어느 쪽으로 가야 작아지나)을 다음 시간에는 그래프 없이 미분계수의 부호만으로 답하게 된다. 4-3 회수 한마디: 손실함수 포물선의 꼭짓점에서는 접선이 수평이다. 즉 기울기가 0이다. 다음 시간에 확인한다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 좌표평면 — SVG에는 도형과 눈금 숫자만 넣는다(수식은 .ov HTML 덧씌우기).
+     data-x, data-y : "최소,최대,눈금간격"   data-w, data-h : 픽셀 크기
+     data-noticks : 눈금·격자 없이 축만(모식도)
+     만든 뒤 el._p 에 그리기 도구(curve, line, pt, arrow …)를 붙여 둔다.
+     JS 문자열에는 TeX를 넣지 않는다(백슬래시 이스케이프 사고 방지). */
+  window.LMPlot = (function () {
+    const NS = 'http://www.w3.org/2000/svg';
+    const MINUS = String.fromCharCode(0x2212);
+    function mk(tag, attrs, parent) {
+      const e = document.createElementNS(NS, tag);
+      Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k]));
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+    function nums(s) { return String(s).split(',').map(Number); }
+    function tickTxt(v) { return String(Number(v.toFixed(6))).replace('-', MINUS); }
+    let uid = 0;
+
+    function make(el) {
+      const W = Number(el.dataset.w || 800), H = Number(el.dataset.h || 480);
+      const [x0, x1, xs] = nums(el.dataset.x), [y0, y1, ys] = nums(el.dataset.y);
+      const bare = !!el.dataset.noticks;
+      const L = bare ? 24 : 64, R = 20, T = 20, B = bare ? 24 : 44;
+      const sx = x => L + (x - x0) / (x1 - x0) * (W - L - R);
+      const sy = y => T + (y1 - y) / (y1 - y0) * (H - T - B);
+      el.style.width = W + 'px';
+      const svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMid meet' });
+      el.insertBefore(svg, el.firstChild);
+      const id = 'pl' + (++uid);
+      const defs = mk('defs', {}, svg);
+      const cp = mk('clipPath', { id: id + 'c' }, defs);
+      mk('rect', { x: L, y: T, width: W - L - R, height: H - T - B }, cp);
+      ['acc', 'dan', 'inf', 'suc', 'ink'].forEach(c => {
+        const m = mk('marker', { id: id + c, viewBox: '0 0 10 10', refX: 8, refY: 5,
+                                 markerWidth: 4.5, markerHeight: 4.5, orient: 'auto-start-reverse' }, defs);
+        mk('path', { d: 'M0,0 L10,5 L0,10 z', class: 'mk-' + c }, m);
+      });
+
+      const ax0 = (x0 <= 0 && x1 >= 0) ? 0 : x0, ay0 = (y0 <= 0 && y1 >= 0) ? 0 : y0;
+      if (!bare) {
+        const g = mk('g', { class: 'grid' }, svg), tk = mk('g', {}, svg);
+        for (let i = 0, n = Math.round((y1 - y0) / ys); i <= n; i++) {
+          const v = y0 + i * ys;
+          mk('line', { x1: L, x2: W - R, y1: sy(v), y2: sy(v) }, g);
+          const t = mk('text', { x: L - 12, y: sy(v) + 8, 'text-anchor': 'end', class: 'tick' }, tk);
+          t.textContent = tickTxt(v);
+        }
+        for (let i = 0, n = Math.round((x1 - x0) / xs); i <= n; i++) {
+          const v = x0 + i * xs;
+          mk('line', { x1: sx(v), x2: sx(v), y1: T, y2: H - B }, g);
+          const t = mk('text', { x: sx(v), y: H - B + 30, 'text-anchor': 'middle', class: 'tick' }, tk);
+          t.textContent = tickTxt(v);
+        }
+      }
+      const ax = mk('g', { class: 'axis' }, svg);
+      mk('line', { x1: L, x2: W - R, y1: sy(ay0), y2: sy(ay0) }, ax);
+      mk('line', { x1: sx(ax0), x2: sx(ax0), y1: T, y2: H - B }, ax);
+      if (bare) {
+        mk('path', { d: 'M' + (W - R) + ' ' + sy(ay0) + ' l-16 -8 v16 z' }, ax);
+        mk('path', { d: 'M' + sx(ax0) + ' ' + T + ' l-8 16 h16 z' }, ax);
+      }
+      const plot = mk('g', { 'clip-path': 'url(#' + id + 'c)' }, svg);
+      const top = mk('g', {}, svg);
+
+      const api = {
+        W: W, H: H, x0: x0, x1: x1, y0: y0, y1: y1, sx: sx, sy: sy, svg: svg, plot: plot, top: top,
+        group(cls, layer) { return mk('g', { class: cls || '' }, layer || plot); },
+        curve(f, cls, xa, xb, layer) {
+          const a = xa === undefined ? x0 : xa, b = xb === undefined ? x1 : xb;
+          let d = '';
+          for (let i = 0; i <= 300; i++) {
+            const x = a + (b - a) * i / 300, y = f(x);
+            const yy = Math.max(-5000, Math.min(5000, sy(y)));
+            d += (i ? 'L' : 'M') + sx(x).toFixed(1) + ',' + yy.toFixed(1);
+          }
+          return mk('path', { d: d, class: 'curve ' + (cls || '') }, layer || plot);
+        },
+        line(xa, ya, xb, yb, cls, layer) {
+          return mk('line', { x1: sx(xa), y1: sy(ya), x2: sx(xb), y2: sy(yb), class: cls || '' }, layer || plot);
+        },
+        setLine(e, xa, ya, xb, yb) {
+          e.setAttribute('x1', sx(xa)); e.setAttribute('y1', sy(ya));
+          e.setAttribute('x2', sx(xb)); e.setAttribute('y2', sy(yb));
+        },
+        pt(x, y, cls, r, layer) {
+          return mk('circle', { cx: sx(x), cy: sy(y), r: r || 10, class: 'pt ' + (cls || '') }, layer || plot);
+        },
+        movePt(e, x, y) { e.setAttribute('cx', sx(x)); e.setAttribute('cy', sy(y)); },
+        arrow(xa, ya, xb, yb, color, cls, layer) {
+          return mk('line', { x1: sx(xa), y1: sy(ya), x2: sx(xb), y2: sy(yb),
+                              class: 'arw ' + color + ' ' + (cls || ''), 'marker-end': 'url(#' + id + color + ')' }, layer || plot);
+        },
+        arc(pts, color, cls, layer) {
+          let d = '';
+          pts.forEach((p, i) => { d += (i ? 'L' : 'M') + sx(p[0]).toFixed(1) + ',' + sy(p[1]).toFixed(1); });
+          return mk('path', { d: d, class: 'arw ' + color + ' ' + (cls || ''), 'marker-end': 'url(#' + id + color + ')' }, layer || plot);
+        },
+        clear(g) { while (g.firstChild) g.removeChild(g.firstChild); },
+        place(o, x, y) {
+          if (x === undefined) { const v = nums(o.dataset.at); x = v[0]; y = v[1]; }
+          o.style.left = (sx(x) / W * 100) + '%';
+          o.style.top = (sy(y) / H * 100) + '%';
+        }
+      };
+      el.querySelectorAll('.ov[data-at]').forEach(o => api.place(o));
+      el._p = api;
+      return api;
+    }
+    document.querySelectorAll('.chart[data-x]').forEach(make);
+    return { make: make, mk: mk, nums: nums, MINUS: MINUS };
+  })();
+
+  /* 표시용 숫자: 유효숫자 7자리, 끝의 0 생략, 음수는 − (교과서 147쪽 방주 규칙) */
+  window.fmt7 = function (x) {
+    if (!isFinite(x)) return '—';
+    if (Math.abs(x) < 1e-9) return '0';
+    const v = Number(x.toPrecision(7));
+    if (Math.abs(v) >= 1e7) return '매우 큼';
+    let s = String(v);
+    if (s.indexOf('e') >= 0) s = v.toFixed(9).replace(/0+$/, '').replace(/\.$/, '');
+    return s.replace('-', window.LMPlot.MINUS);
+  };
+</script>
+
+<script>
+  /* 4-4-1 정적 그림들 */
+  (function () {
+    /* 생각 열기: 아래로 볼록한 곡선, a·b·c·d */
+    const o = document.getElementById('cOpen')._p;
+    const fo = x => 0.36 * (x - 5) * (x - 5) + 1.6;
+    o.curve(fo, '', 0.3, 9.7);
+    [1.5, 4, 6, 8.5].forEach(x => { o.line(x, 0, x, fo(x), 'dash'); o.pt(x, fo(x), 'p', 9); });
+    const d = o.group('dir fade');
+    o.arc([[1.7, fo(1.7)], [2.4, fo(2.4)], [3.1, fo(3.1)], [3.75, fo(3.75)]].map(p => [p[0], p[1] + 0.45]), 'suc', '', d);
+    o.arc([[8.3, fo(8.3)], [7.6, fo(7.6)], [6.9, fo(6.9)], [6.25, fo(6.25)]].map(p => [p[0], p[1] + 0.45]), 'suc', '', d);
+    o.arrow(1.5, 0.35, 4, 0.35, 'suc', '', d);
+    o.arrow(8.5, 0.35, 6, 0.35, 'suc', '', d);
+
+    /* 함수의 극한: 매끈한 곡선, x→a 와 f(x)→L */
+    const l = document.getElementById('cLim')._p;
+    const fl = x => 0.06 * Math.pow(x - 5, 3) + 0.25 * (x - 5) + 5.6;
+    l.curve(fl, '', 0.6, 9.6);
+    const A = 6.5, LL = fl(A);
+    l.line(A, 0, A, LL, 'dash'); l.line(0, LL, A, LL, 'dash');
+    l.pt(A, LL, 'p', 9);
+    l.arrow(4.6, 0.4, 6.2, 0.4, 'inf'); l.arrow(8.4, 0.4, 6.8, 0.4, 'inf');
+    l.arc([[5.0, fl(5.0) + 0.1], [5.6, fl(5.6) + 0.1], [6.2, fl(6.2) + 0.1]], 'dan');
+    l.arc([[8.0, fl(8.0) - 0.05], [7.4, fl(7.4) - 0.05], [6.8, fl(6.8) - 0.05]], 'dan');
+    l.place(document.getElementById('limL'), 0, LL);
+
+    /* 예제 1: y=2x^2 */
+    const e = document.getElementById('cEx1')._p;
+    e.curve(x => 2 * x * x, '', -1.6, 1.6);
+    e.line(1, 0, 1, 2, 'dash'); e.line(0, 2, 1, 2, 'dash');
+    e.pt(1, 2, 'p', 9);
+    e.arrow(0.45, 0.18, 0.9, 0.18, 'inf'); e.arrow(1.55, 0.18, 1.1, 0.18, 'inf');
+    e.arc([[0.65, 2 * 0.65 * 0.65 + 0.1], [0.8, 2 * 0.8 * 0.8 + 0.1], [0.93, 2 * 0.93 * 0.93 + 0.1]], 'dan');
+    e.arc([[1.3, 2 * 1.3 * 1.3 - 0.1], [1.17, 2 * 1.17 * 1.17 - 0.1], [1.06, 2 * 1.06 * 1.06 - 0.1]], 'dan');
+
+    /* 할선 → 접선 모식도 */
+    const s = document.getElementById('cSec')._p;
+    const fs = x => 0.1 * x * x + 1.2;
+    s.curve(fs, '', 0, 9.8);
+    const a = 3.5, qx = 7.5, m = 0.2 * a;
+    s.line(a, 0, a, fs(a), 'dash'); s.line(0, fs(a), a, fs(a), 'dash');
+    s.line(qx, 0, qx, fs(qx), 'dash'); s.line(0, fs(qx), qx, fs(qx), 'dash');
+    const secAt = (x2, cls, layer) => {
+      const k = (fs(x2) - fs(a)) / (x2 - a);
+      return s.line(0, fs(a) - k * a, 10, fs(a) + k * (10 - a), cls, layer);
+    };
+    secAt(qx, 'sec');
+    const g1 = s.group('sq fade');
+    [6.3, 5.2, 4.3].forEach(x2 => { secAt(x2, 'sec faint', g1); s.pt(x2, fs(x2), 'q', 6, g1); });
+    const g2 = s.group('tg fade');
+    s.line(0, fs(a) - m * a, 10, fs(a) + m * (10 - a), 'tan', g2);
+    s.pt(a, fs(a), 'p', 9);
+    s.pt(qx, fs(qx), 'q', 9);
+    s.arrow(7.2, 0.35, 4.2, 0.35, 'inf', 'sq fade');
+  })();
+</script>
+
+<script>
+  /* 4-4-1 「더 깊이」: h를 바꾸면 직선 PQ가 접선 쪽으로 돈다 (y=x², P(3, 9)) */
+  (function () {
+    const el = document.getElementById('cRot'), c = el._p;
+    const f = x => x * x;
+    c.curve(f, '', 0, 5);
+    c.line(1.5, 0, 5, 21, 'tan dashed');          /* 접선 y=6x-9 */
+    const sec = c.line(0, 0, 1, 1, 'sec');
+    const gq = c.line(4, 0, 4, 16, 'dash');
+    c.pt(3, 9, 'p', 10);
+    const q = c.pt(4, 16, 'q', 10);
+    const sH = document.getElementById('sH'), vH = document.getElementById('vH');
+    const rH = document.getElementById('rH'), rQx = document.getElementById('rQx'), rQy = document.getElementById('rQy');
+    const rS = document.getElementById('rS'), rMsg = document.getElementById('rMsg');
+    const qLab = document.getElementById('qLab');
+    const M = window.LMPlot.MINUS;
+    const show = v => String(Number(v.toFixed(6))).replace('-', M);
+    const msgDefault = rMsg.innerHTML;
+
+    function draw(h) {
+      rH.textContent = show(h); vH.textContent = show(h);
+      if (Math.abs(h) < 1e-12) {
+        sec.style.opacity = 0; q.style.opacity = 0.4;
+        rQx.textContent = '3'; rQy.textContent = '9'; rS.textContent = '?';
+        rMsg.innerHTML = '<span class="msg">h = 0이면 Q가 P와 같은 점 — 직선이 하나로 정해지지 않는다.</span>';
+        return;
+      }
+      sec.style.opacity = 1; q.style.opacity = 1;
+      const qx = 3 + h, k = Number((6 + h).toFixed(6));
+      c.setLine(sec, 0, 9 - 3 * k, 5, 9 + 2 * k);
+      c.movePt(q, qx, f(qx));
+      c.setLine(gq, qx, 0, qx, f(qx));
+      c.place(qLab, qx, f(qx) + 1.6);
+      qLab.className = 'ov ' + (h > 0 ? 'l' : 'r');
+      qLab.style.color = 'var(--lm-info)'; qLab.style.fontWeight = 700;
+      rQx.textContent = show(qx); rQy.textContent = show(Number(f(qx).toFixed(6)));
+      rS.textContent = show(k);
+      rMsg.innerHTML = msgDefault;
+    }
+    function setBtn(h) {
+      el.closest('section').querySelectorAll('.hbtn').forEach(b => b.classList.toggle('on', Number(b.dataset.h) === h));
+    }
+    sH.addEventListener('input', () => { const h = Number(sH.value) / 100; setBtn(h); draw(h); });
+    el.closest('section').querySelectorAll('.hbtn').forEach(b => b.addEventListener('click', () => {
+      const h = Number(b.dataset.h);
+      sH.value = Math.round(h * 100) || (h > 0 ? 1 : -1);
+      setBtn(h); draw(h);
+    }));
+    draw(1);
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
