@@ -20,7 +20,7 @@
       options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
       startup: {
         typeset: false,
-        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; }
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
       },
       chtml: { scale: 1.0 }
     };
