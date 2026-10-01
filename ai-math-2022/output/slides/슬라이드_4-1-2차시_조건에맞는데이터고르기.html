@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>조건에 맞는 데이터 고르기 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+
+    .maptbl { border-collapse: collapse; margin: var(--lm-space-2) auto 0;
+              font-size: var(--lm-slide-small); }
+    .maptbl th, .maptbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: var(--lm-space-1) var(--lm-space-4); text-align: center; }
+    .maptbl th { background: var(--lm-paper-tint); font-weight: 700; }
+    .maptbl td.hl { color: var(--lm-accent); font-weight: 700; }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+
+    /* 4-1-x — 교과서 데이터 표. 분자 칸 = 분홍(교과서의 분홍 동그라미), 분모 칸 = 노랑 */
+    .dt { border-collapse: collapse; margin: var(--lm-space-2) auto 0; font-size: var(--lm-slide-small); }
+    .dt th, .dt td { border: var(--lm-border-thin) solid var(--lm-rule); padding: 3px var(--lm-space-4);
+                     text-align: center; min-width: 92px; }
+    .dt th { background: var(--lm-paper-tint); font-weight: 700; }
+    .dt td.num { background: var(--lm-danger-tint); color: var(--lm-danger); font-weight: 700; }
+    .dt td.den { background: var(--lm-warning-tint); font-weight: 700; }
+    .dt tr.sum th, .dt tr.sum td { border-top: 3px solid var(--lm-ink-3); font-weight: 700; }
+    .dt caption { caption-side: top; text-align: right; font-size: var(--lm-slide-caption);
+                  color: var(--lm-ink-3); }
+    .dt.sm { font-size: var(--lm-slide-caption); }
+    .dt.sm th, .dt.sm td { min-width: 80px; padding: 2px var(--lm-space-3); }
+
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-6); margin-top: var(--lm-space-2); }
+    .pair .lab { font-size: var(--lm-slide-small); color: var(--lm-ink-2); line-height: 1.45; }
+    .pair .step-box { font-size: var(--lm-slide-body); }
+
+    .plist { list-style: none; padding: 0; margin: var(--lm-space-4) 0 0; font-size: var(--lm-slide-body); }
+    .plist li { margin: var(--lm-space-2) 0; }
+    .plist li b { color: var(--lm-accent); }
+    .legend-sw { display: inline-block; width: 26px; height: 26px; border-radius: 4px; vertical-align: middle;
+                 margin: 0 var(--lm-space-2) 0 var(--lm-space-4); border: 2px solid var(--lm-rule); }
+    .legend-sw.num { background: var(--lm-danger-tint); border-color: var(--lm-danger); }
+    .legend-sw.den { background: var(--lm-warning-tint); border-color: var(--lm-warning); }
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅳ-1 확률을 이용한 예측 · 2차시</div>
+    <h1>조건에 맞는 데이터 고르기</h1>
+    <p class="slide-sub">같은 ‘부산 방문’이라도 조건이 다르면 세는 표가 다르다</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 121~122쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄 — 똑같이 '부산을 방문할 확률'이라도 조건이 다르면 세는 표(분모)가 달라진다. 121쪽 여행사 표 하나로 네 확률 pA, pB, pC, pD를 차례로 구하고, 문제 1로 확인한다. 「더 깊이」 장(같은 분자, 다른 분모)은 교과서 밖 보강이다. 범위 주의: 성취기준 해설에 따라 이 차시의 계산을 부르는 특별한 용어와 기호는 쓰지 않는다. 교과서처럼 말로 풀어 쓴다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>많이 반복하면 상대도수가 한 값에 모이고, 그 값이 확률이다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">동전 — 실험할 수 있다</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">상대도수 → \(0.5\)</div>
+      </div>
+      <div class="side">
+        <div class="where">실험할 수 없는 사건</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">데이터의 상대도수를 확률로</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 문장 — <b>“다음 시간에는 여행사 회원 데이터에서 조건에 맞는 칸을 골라 확률을 구한다.”</b>
+    </p>
+    <p class="prob-stmt sm">\(p=\dfrac{(\text{어떤 사건이 일어나는 경우의 수})}{(\text{일어나는 모든 경우의 수})}\) — 오늘은 이 ‘모든 경우’가 무엇인지가 핵심이다.</p>
+    <aside class="notes">지난 시간 결론과 마지막 문장을 확인한다. 120쪽 공식(해당하는 경우 ÷ 모든 경우)을 다시 적어 두고, 오늘은 분모인 '모든 경우'가 조건에 따라 바뀐다는 것을 배운다고 예고한다. 준비 학습 ①(3/5)도 같은 꼴이었다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>주어진 조건에 해당하는 <span class="kw">데이터만 골라</span> 표로 정리할 수 있다.</span></li>
+      <li><span class="num">2</span><span>정리한 표에서 <span class="kw">분모(조건에 맞는 전체)</span>와 <span class="kw">분자(그중 사건이 일어난 수)</span>를 찾아 확률을 구할 수 있다.</span></li>
+      <li><span class="num">3</span><span>같은 사건이라도 <span class="kw">조건이 다르면 확률이 다름</span>을 설명할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">같은 ‘부산 방문’이라도 조건이 다르면 세는 표가 다르다.</span>
+    </div>
+    <aside class="notes">세 목표가 오늘의 순서다. 표 고르기 → 분모·분자 찾기 → 조건이 다르면 값이 다르다. 가장 흔한 실수(지도서 174쪽 오개념)는 분모에 전체 321명을 그대로 쓰는 것이다. 이것을 오늘 내내 경계한다.</aside>
+  </section>
+
+  <!-- 4. 121쪽 원본 표 -->
+  <section>
+    <div class="chapter-tag">교과서 121쪽</div>
+    <h2>여행사 회원 데이터</h2>
+    <p class="prob-stmt sm" style="margin-top: 0;">어느 여행사의 회원을 대상으로 제주, 부산, 속초, 전주 중에서 방문한 지역 한 곳을 성별과 계절별로 조사한 데이터이다.</p>
+
+    <table class="dt">
+      <caption>(단위: 명)</caption>
+      <tr><th>성별</th><th>계절</th><th>제주</th><th>부산</th><th>속초</th><th>전주</th></tr>
+      <tr><th rowspan="2">남</th><th>여름</th><td>28</td><td>31</td><td>29</td><td>27</td></tr>
+      <tr><th>겨울</th><td>19</td><td>15</td><td>16</td><td>17</td></tr>
+      <tr><th rowspan="2">여</th><th>여름</th><td>32</td><td>29</td><td>33</td><td>31</td></tr>
+      <tr><th>겨울</th><td>4</td><td>5</td><td>2</td><td>3</td></tr>
+    </table>
+
+    <ul class="plist">
+      <li>\(p_A=\)(<b>여름에 여행하는 남성</b> 회원이 부산을 방문할 확률)</li>
+      <li>\(p_B=\)(<b>남성</b> 회원이 부산을 방문할 확률)</li>
+      <li>\(p_C=\)(<b>여름에 여행하는</b> 회원이 부산을 방문할 확률)</li>
+      <li>\(p_D=\)(회원이 부산을 방문할 확률)</li>
+    </ul>
+    <aside class="notes">121쪽 첫 문장 "이제 주어진 데이터를 이용하여 어떤 사건이 일어날 확률을 구하는 방법에 대하여 알아보자"가 지난 시간과의 전환점이다. 회원은 실험할 수 없으니 데이터의 상대도수를 확률로 쓴다. 네 확률은 모두 '부산을 방문할 확률'인데, 굵은 글씨의 조건이 다르다. 학생에게 "네 개의 값이 같을까 다를까?"를 먼저 묻는다. 조건이 점점 풀려서 pD는 조건이 없다.</aside>
+  </section>
+
+  <!-- 5. pA, pB -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 121쪽</div>
+    <h2>\(p_A\)와 \(p_B\) — 조건에 맞는 줄만 남긴다</h2>
+    <p class="cap-sm" style="margin: 0;"><span class="legend-sw num"></span>분자(부산을 방문한 회원 수) <span class="legend-sw den"></span>분모(조건에 맞는 회원 수)</p>
+
+    <div class="pair">
+      <div>
+        <div class="lab">① \(p_A\)는 ‘여름’과 ‘남성’이라는 조건을 고려해야 하므로, 남성 회원의 여름에 해당하는 데이터를 정리한다.</div>
+        <table class="dt sm">
+          <caption>(단위: 명)</caption>
+          <tr><th>성별</th><th>계절</th><th>제주</th><th>부산</th><th>속초</th><th>전주</th><th>합계</th></tr>
+          <tr><th>남</th><th>여름</th><td>28</td><td class="num">31</td><td>29</td><td>27</td><td class="den">115</td></tr>
+        </table>
+        <div class="step-box" data-s>이때 \(p_A=\dfrac{31}{115}\)이다.</div>
+      </div>
+      <div>
+        <div class="lab">② \(p_B\)는 ‘남성’이라는 조건을 고려해야 하므로, 남성 회원에 해당하는 데이터를 정리한다.</div>
+        <table class="dt sm">
+          <caption>(단위: 명)</caption>
+          <tr><th>성별</th><th>계절</th><th>제주</th><th>부산</th><th>속초</th><th>전주</th><th>합계</th></tr>
+          <tr><th rowspan="2">남</th><th>여름</th><td>28</td><td>31</td><td>29</td><td>27</td><td>115</td></tr>
+          <tr><th>겨울</th><td>19</td><td>15</td><td>16</td><td>17</td><td>67</td></tr>
+          <tr class="sum"><th colspan="2">합계</th><td>47</td><td class="num">46</td><td>45</td><td>44</td><td class="den">182</td></tr>
+        </table>
+        <div class="step-box" data-s>이때 \(p_B=\dfrac{46}{182}=\dfrac{23}{91}\)이다.</div>
+      </div>
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">121쪽 ①②다. 분홍 칸이 분자(부산을 방문한 회원 수), 노란 칸이 분모(조건에 맞는 회원 수)로 교과서의 두 동그라미 색과 같다. pA는 한 줄(합계 115), pB는 남성 두 줄을 세로로 더한 합계 줄(47, 46, 45, 44, 182)을 쓴다. 182 = 115 + 67임을 확인시킨다. pB는 교과서가 23/91까지 약분했다. pA의 31/115는 기약분수라 그대로 둔다. '다음'을 누르기 전에 학생이 먼저 분수를 말하게 한다.</aside>
+  </section>
+
+  <!-- 6. pC, pD -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 122쪽</div>
+    <h2>\(p_C\)와 \(p_D\) — 조건이 풀릴수록 표가 커진다</h2>
+
+    <div class="pair">
+      <div>
+        <div class="lab">③ \(p_C\)는 ‘여름’이라는 조건을 고려해야 하므로, 여름에 해당하는 데이터를 정리한다.</div>
+        <table class="dt sm">
+          <caption>(단위: 명)</caption>
+          <tr><th>성별</th><th>계절</th><th>제주</th><th>부산</th><th>속초</th><th>전주</th><th>합계</th></tr>
+          <tr><th>남</th><th rowspan="2">여름</th><td>28</td><td>31</td><td>29</td><td>27</td><td>115</td></tr>
+          <tr><th>여</th><td>32</td><td>29</td><td>33</td><td>31</td><td>125</td></tr>
+          <tr class="sum"><th colspan="2">합계</th><td>60</td><td class="num">60</td><td>62</td><td>58</td><td class="den">240</td></tr>
+        </table>
+        <div class="step-box" data-s>이때 \(p_C=\dfrac{60}{240}=\dfrac{1}{4}\)이다.</div>
+      </div>
+      <div>
+        <div class="lab">④ \(p_D\)는 성별과 계절에 대한 조건을 고려하지 않으므로, 전체 데이터를 정리한다.</div>
+        <table class="dt sm">
+          <caption>(단위: 명)</caption>
+          <tr><th>성별</th><th>계절</th><th>제주</th><th>부산</th><th>속초</th><th>전주</th><th>합계</th></tr>
+          <tr><th rowspan="2">남</th><th>여름</th><td>28</td><td>31</td><td>29</td><td>27</td><td>115</td></tr>
+          <tr><th>겨울</th><td>19</td><td>15</td><td>16</td><td>17</td><td>67</td></tr>
+          <tr><th rowspan="2">여</th><th>여름</th><td>32</td><td>29</td><td>33</td><td>31</td><td>125</td></tr>
+          <tr><th>겨울</th><td>4</td><td>5</td><td>2</td><td>3</td><td>14</td></tr>
+          <tr class="sum"><th colspan="2">합계</th><td>83</td><td class="num">80</td><td>80</td><td>78</td><td class="den">321</td></tr>
+        </table>
+        <div class="step-box" data-s>이때 \(p_D=\dfrac{80}{321}\)이다.</div>
+      </div>
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">122쪽 ③④다. pC는 여름 두 줄(남 115 + 여 125 = 240), pD는 네 줄 전체(321)다. 강조되는 줄이 pA부터 1 → 2 → 2 → 4줄로 늘어난다는 것을 지난 장과 이어서 보여 준다. pC=60/240=1/4은 교과서가 약분한 값이다. pD의 80/321은 기약분수다.</aside>
+  </section>
+
+  <!-- 7. 정리 -->
+  <section>
+    <div class="chapter-tag">교과서 122쪽 · 정리</div>
+    <h2>네 확률 모두 ‘부산 방문’ — 그런데 값이 다르다</h2>
+
+    <table class="maptbl" style="margin-top: var(--lm-space-4); font-size: var(--lm-slide-body);">
+      <tr><th>확률</th><th>조건</th><th>분모(조건에 맞는 회원)</th><th>분자(그중 부산)</th><th>값</th></tr>
+      <tr><td>\(p_A\)</td><td>여름 · 남성</td><td>\(115\)</td><td>\(31\)</td><td class="hl">\(\dfrac{31}{115}\)</td></tr>
+      <tr><td>\(p_B\)</td><td>남성</td><td>\(182\)</td><td>\(46\)</td><td class="hl">\(\dfrac{23}{91}\)</td></tr>
+      <tr><td>\(p_C\)</td><td>여름</td><td>\(240\)</td><td>\(60\)</td><td class="hl">\(\dfrac{1}{4}\)</td></tr>
+      <tr><td>\(p_D\)</td><td>없음</td><td>\(321\)</td><td>\(80\)</td><td class="hl">\(\dfrac{80}{321}\)</td></tr>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      네 확률 \(p_A,\ p_B,\ p_C,\ p_D\)는 모두 부산을 방문할 사건의 확률이지만 각 사건에 주어진 조건이 다르므로
+      <span class="kw-success">조건에 맞는 데이터를 사용하여 확률을 구해야 한다.</span>
+    </div>
+    <aside class="notes">122쪽 정리 문장을 그대로 읽는다. 표의 '분모'와 '분자' 열 이름은 지도서 내용 연구를 따랐다 — 분모는 조건에 맞는 회원 수, 분자는 그중 부산을 방문한 회원 수. 소수로 바꾸면 pA≈0.27, pB≈0.25, pC=0.25, pD≈0.25로, 여름 남성 회원이 부산을 조금 더 많이 간다는 것을 읽어 낼 수 있다(소수 값은 교사 참고용).</aside>
+  </section>
+
+  <!-- 8. 더 깊이 — 어느 표, 어느 분모 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 어느 표, 어느 분모</div>
+    <h2>분자가 같아도 분모가 다르면 다른 질문이다</h2>
+    <p class="prob-stmt sm" style="margin-top: 0;">분자는 모두 <b>여름에 부산을 방문한 남성 회원 31명</b>이다. 분모를 무엇으로 하느냐에 따라 묻는 말이 바뀐다.</p>
+
+    <table class="maptbl" style="margin-top: var(--lm-space-3); font-size: var(--lm-slide-small);">
+      <tr><th>분모(누구 중에서?)</th><th>이 분수가 답하는 질문</th><th>값</th></tr>
+      <tr><td>\(115\) — 여름에 여행한 남성 회원</td><td>여름에 여행하는 남성 회원이 부산을 방문할 확률 \((p_A)\)</td><td class="hl">\(\frac{31}{115}=0.269\cdots\)</td></tr>
+      <tr><td>\(182\) — 남성 회원</td><td>남성 회원이 ‘여름에 부산’을 방문할 확률</td><td>\(\frac{31}{182}=0.170\cdots\)</td></tr>
+      <tr><td>\(240\) — 여름에 여행한 회원</td><td>여름에 여행하는 회원이 ‘남성이면서 부산’일 확률</td><td>\(\frac{31}{240}=0.129\cdots\)</td></tr>
+      <tr><td>\(321\) — 전체 회원</td><td>회원이 ‘여름 · 남성 · 부산’일 확률</td><td>\(\frac{31}{321}=0.096\cdots\)</td></tr>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      분모는 <b>조건에 맞는 전체</b>, 분자는 <b>그중 사건이 일어난 수</b>. 조건을 읽고 → 표를 고르고 → 그 표의 합계를 분모로.
+    </div>
+    <div class="warning-box">\(p_A\)를 \(\dfrac{31}{321}\)로 쓰면 ‘여름 · 남성’이라는 조건을 분모에 반영하지 않은 것이다.</div>
+    <aside class="notes">교과서 밖 보강이다. 분자 31을 고정하고 분모만 바꾸면 값이 0.27에서 0.10까지 달라진다. 각 분수가 무엇을 묻는지를 말로 읽게 하는 것이 목적이다 — 분모가 '누구 중에서'를 정한다. 지도서 174쪽 오개념: "조건이 주어진 사건의 확률은 그 조건에 해당하는 데이터만을 기준으로 생각해야 한다." 가장 흔한 실수는 분모에 321을 그대로 쓰는 것이다. 지난 시간 「더 깊이」와 연결: 한 표 안에서 네 지역의 확률을 모두 더하면 1이 된다(예: 28+31+29+27=115이므로 pA 줄의 네 확률 합은 1). 검산 도구로 쓰게 한다. (교사 참고: 이 차시 계산의 정식 명칭은 조건부확률이지만, 성취기준 해설에 따라 용어와 기호는 다루지 않는다. 학생에게 말하지 않는다.)</aside>
+  </section>
+
+  <!-- 9. 확인 활동 — 문제 1 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 122쪽 문제 1</div>
+    <h2>121쪽의 데이터를 이용하여 확률을 구하시오</h2>
+
+    <table class="dt sm">
+      <caption>(단위: 명)</caption>
+      <tr><th>성별</th><th>계절</th><th>제주</th><th>부산</th><th>속초</th><th>전주</th></tr>
+      <tr><th rowspan="2">남</th><th>여름</th><td>28</td><td>31</td><td>29</td><td>27</td></tr>
+      <tr><th>겨울</th><td>19</td><td>15</td><td>16</td><td>17</td></tr>
+      <tr><th rowspan="2">여</th><th>여름</th><td>32</td><td>29</td><td>33</td><td>31</td></tr>
+      <tr><th>겨울</th><td>4</td><td>5</td><td>2</td><td>3</td></tr>
+    </table>
+
+    <ul class="qlist" id="qList1">
+      <li><b>⑴</b> 여성 회원이 제주를 방문할 확률
+        <div class="ans">여성 회원은 \(125+14=139\)(명), 이 중에서 제주를 방문한 여성 회원은 \(32+4=36\)(명)이므로 \(\dfrac{36}{139}\)</div></li>
+      <li><b>⑵</b> 여름에 여행하는 여성 회원이 속초 또는 전주를 방문할 확률
+        <div class="ans">여름에 네 지역을 방문한 여성 회원은 \(125\)명, 이 중에서 속초 또는 전주를 방문한 여성 회원은 \(33+31=64\)(명)이므로 \(\dfrac{64}{125}\)</div></li>
+    </ul>
+    <aside class="notes">문항을 눌러 답을 연다(정답및풀이 188쪽: ⑴ 36/139, ⑵ 64/125). ⑴의 분모는 여성 두 줄의 합 139다(여름 125 + 겨울 14). ⑵의 함정 두 가지: '또는'이므로 속초와 전주 두 칸을 더한다(33+31). 분모는 여름 여성 125명이지 여름 전체 240명이 아니다. 답을 열기 전에 학생에게 "어느 줄을 남기나?"부터 말하게 한다.</aside>
+  </section>
+
+  <!-- 10. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄 · 다음 시간 예고</div>
+    <h2>같은 ‘부산 방문’이라도 조건이 다르면 세는 표가 다르다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">분모</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">조건에 맞는 전체</div>
+      </div>
+      <div class="side known">
+        <div class="where">분자</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">그중 사건이 일어난 수</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      다음 시간에는 이 확률로 인공지능이 <b>무엇을 예측하는지</b> 알아본다.
+    </p>
+    <aside class="notes">오늘의 한 줄을 다시 읽는다. 준비 학습 ①(3/5)과 같은 꼴 '해당 ÷ 전체'인데, 오늘은 '전체'가 조건에 따라 달라졌다. 예고 질문: "새로 가입한 남성 회원은 어디로 갈까? 100명이 가입하면 그중 몇 명이 제주로 갈까?" — 다음 시간 123쪽.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
