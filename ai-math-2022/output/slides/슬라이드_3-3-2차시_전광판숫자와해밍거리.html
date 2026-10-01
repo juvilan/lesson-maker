@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>다른 칸을 세면 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    /* 전광판 — 교과서 지면처럼 검은 판 위의 둥근 전구. 켜짐=노랑, 꺼짐=짙은 회색
+       (픽셀 칠은 실제 색값을 쓴다 — 설계 5절 규격) */
+    .led { display: inline-grid; gap: 6px; background: rgb(0, 0, 0); padding: 8px;
+           border-radius: var(--lm-radius-sm); outline: 3px solid var(--lm-ink-3);
+           outline-offset: 4px; vertical-align: middle; }
+    .led i { display: block; border-radius: 50%; background: rgb(72, 74, 72); }
+    .led i.on { background: rgb(255, 230, 117); }
+    .led i.mark { box-shadow: 0 0 0 3px var(--lm-paper), 0 0 0 7px var(--lm-danger); position: relative; z-index: 1; }
+    .led i.ov { box-shadow: 0 0 0 3px var(--lm-paper), 0 0 0 7px var(--lm-info); position: relative; z-index: 1; }
+
+    /* 흑백 이미지(검정=0, 흰색=1) — 107~108쪽의 칸 그림 */
+    .bw { display: inline-grid; gap: 0; border: 2px solid var(--lm-ink-4);
+          vertical-align: middle; }
+    .bw i { display: block; border: 1px solid rgb(160, 160, 160); }
+
+    /* 행렬 — HTML 표로 그린다(7×5 를 TeX 로 쓰면 JS 이스케이프·높이 모두 위험) */
+    .mtx { display: inline-table; border-collapse: separate; border-spacing: 0;
+           border-left: 3px solid var(--lm-ink); border-right: 3px solid var(--lm-ink);
+           border-radius: 22px; padding: 4px 10px; vertical-align: middle;
+           font-family: 'Times New Roman', serif; font-size: var(--lm-slide-small); }
+    .mtx td { min-width: 1.35em; padding: 1px 4px; text-align: center; line-height: 1.25; }
+    .mtx td.hl { background: var(--lm-info-tint); color: var(--lm-info); font-weight: 700; }
+    .mtx td.mark { background: var(--lm-danger-tint); color: var(--lm-danger); font-weight: 700;
+                   box-shadow: inset 0 0 0 2px var(--lm-danger); }
+    .mtx.sm { font-size: var(--lm-slide-caption); }
+    .fr { display: inline-flex; flex-direction: column; align-items: center;
+          font-size: 0.72em; line-height: 1.05; vertical-align: middle; }
+    .fr span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 2px; }
+
+    /* 칸 비교 그림 — 두 0·1 행렬을 겹쳐 네 종류의 칸으로 나눈다 */
+    .cmp { display: inline-grid; gap: 3px; vertical-align: middle; }
+    .cmp i { display: flex; align-items: center; justify-content: center; font-style: normal;
+             font-size: 22px; font-weight: 700; border-radius: 4px;
+             border: 2px solid var(--lm-rule); }
+    .cmp i.c11 { background: var(--lm-success); color: var(--lm-paper); border-color: var(--lm-success); }
+    .cmp i.c10 { background: var(--lm-warning); color: var(--lm-paper); border-color: var(--lm-warning); }
+    .cmp i.c01 { background: var(--lm-info); color: var(--lm-paper); border-color: var(--lm-info); }
+    .cmp i.c00 { background: var(--lm-page); color: var(--lm-ink-4); }
+    .legend { display: flex; flex-direction: column; gap: var(--lm-space-2);
+              font-size: var(--lm-slide-small); }
+    .legend span.sw { display: inline-block; width: 26px; height: 26px; border-radius: 4px;
+                      vertical-align: middle; margin-right: var(--lm-space-2); border: 2px solid; }
+    .sw.c11 { background: var(--lm-success); border-color: var(--lm-success); }
+    .sw.c10 { background: var(--lm-warning); border-color: var(--lm-warning); }
+    .sw.c01 { background: var(--lm-info); border-color: var(--lm-info); }
+    .sw.c00 { background: var(--lm-page); border-color: var(--lm-rule); }
+
+    .trio { display: flex; gap: var(--lm-space-5); justify-content: center;
+            align-items: center; margin-top: var(--lm-space-3); }
+    .trio .col { text-align: center; }
+    .trio .col .cap { font-size: var(--lm-slide-small); font-weight: 700;
+                      margin-bottom: var(--lm-space-2); }
+    .trio .col .sub { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                      margin-top: var(--lm-space-2); }
+    .trio .arrow { font-size: 40px; color: var(--lm-ink-3); }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+    .side.lost { border-color: var(--lm-danger); }
+    .side.lost .what { color: var(--lm-danger); }
+    .mats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-4);
+            margin-top: var(--lm-space-3); }
+    .mats .side .what { font-size: var(--lm-slide-body); }
+
+    .maptbl { border-collapse: collapse; margin: var(--lm-space-2) auto 0;
+              font-size: var(--lm-slide-small); }
+    .maptbl th, .maptbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: var(--lm-space-1) var(--lm-space-4); text-align: center; }
+    .maptbl th { background: var(--lm-paper-tint); font-weight: 700; }
+    .maptbl td.hl { color: var(--lm-accent); font-weight: 700; }
+    .maptbl td.win { color: var(--lm-success); font-weight: 700; background: var(--lm-success-tint); }
+    .maptbl td.lose { color: var(--lm-danger); font-weight: 700; }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+    .qlist.compact { margin-top: var(--lm-space-2); }
+    .qlist.compact li { margin-bottom: var(--lm-space-1); }
+    .ans-row { display: flex; align-items: center; gap: var(--lm-space-5); flex-wrap: wrap; }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+    .row-gap { display: flex; gap: var(--lm-space-5); align-items: center; justify-content: center;
+               flex-wrap: wrap; }
+    /* 3-3-2 전용 — 다른 칸 표시는 해당 단계(.gate)가 펼쳐진 뒤에만 보인다 */
+    .reveal section:has(.gate:not(.visible)) .led i.mark { box-shadow: none; }
+    .reveal section:has(.gate:not(.visible)) .mtx td.mark { background: none; color: inherit;
+                                                            box-shadow: none; font-weight: 400; }
+    .digit-row { display: flex; gap: 14px; justify-content: center; margin-top: var(--lm-space-4); }
+    .digit-row .col { text-align: center; font-size: var(--lm-slide-caption); color: var(--lm-ink-3); }
+    .digit-row .col .led { margin-bottom: var(--lm-space-3); }
+    .bio { display: grid; grid-template-columns: 1fr 360px; gap: var(--lm-space-5); align-items: start; }
+    .deriv { font-size: var(--lm-slide-small); line-height: 1.5; }
+    .deriv .step-box { margin: var(--lm-space-2) 0; }
+
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅲ-3 이미지 데이터 분석 · 2차시</div>
+    <h1>다른 칸을 세면</h1>
+    <p class="slide-sub">전광판 숫자와 해밍 거리</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 104~106쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄 — 다른 칸이 몇 개인지 세면 닮은 정도가 나온다. 지난 시간에 "인공지능은 이미지를 어떻게 분류할까"를 말로만 했다면, 오늘부터는 행렬로 직접 센다. 「더 깊이」라고 표시된 장은 교과서 밖 보강이고, 시험 범위는 교과서 장이라고 처음에 말해 둔다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>특징을 일일이 적어 주는 데는 한계가 있다</h2>
+
+    <div class="sides">
+      <div class="side lost">
+        <div class="where">사람이 기준을 적어 준다</div>
+        <div class="what">기준이 너무 많다</div>
+      </div>
+      <div class="side known">
+        <div class="where">정답이 붙은 데이터로 학습시킨다</div>
+        <div class="what">가중치를 스스로 찾는다</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 문장 — <b>“다음 시간에는 숫자 이미지를 행렬로 바꾸고, 다른 칸이 몇 개인지 세어
+      닮은 정도를 잰다.”</b>
+    </p>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      지난 시간 끝의 전광판 — <span class="kw-info">0일까, 6일까?</span> 오늘 숫자로 답한다.
+    </div>
+    <aside class="notes">지난 시간 마지막에 보여 준 전광판(교과서 105쪽 X)을 기억하는지 묻는다. 그때 손을 든 결과를 다시 확인하고, 오늘은 '느낌'이 아니라 '세는 방법'으로 판정한다고 말한다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>전광판 숫자 이미지를 <span class="kw">0과 1로 된 행렬</span>로 나타낼 수 있다.</span></li>
+      <li><span class="num">2</span><span>두 행렬의 <span class="kw">해밍 거리</span>를 구할 수 있다.</span></li>
+      <li><span class="num">3</span><span>해밍 거리를 이용하여 <span class="kw">이미지를 분류</span>할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">다른 칸이 몇 개인지 세면 닮은 정도가 나온다.</span>
+    </div>
+    <aside class="notes">목표 1은 3-1의 복습(이미지 → 행렬)이고, 목표 2·3이 새 내용이다. 해밍 거리는 계산이라기보다 '세기'라서 어렵지 않다. 대신 같은 위치끼리 비교한다는 원칙을 끝까지 지키게 한다.</aside>
+  </section>
+
+  <!-- 4. 전광판 숫자 -->
+  <section>
+    <div class="chapter-tag">교과서 104쪽 · 인공지능이 이미지를 분류하는 원리</div>
+    <h2>해상도 \(5\times7\) 전광판의 숫자</h2>
+
+    <div class="digit-row">
+      <div class="col"><div class="led" data-c="22" data-m="01110;10001;11001;10101;10011;10001;01110"></div>0</div>
+      <div class="col"><div class="led" data-c="22" data-m="00100;01100;00100;00100;00100;00100;01110"></div>1</div>
+      <div class="col"><div class="led" data-c="22" data-m="01110;10001;00001;00010;00100;01000;11111"></div>2</div>
+      <div class="col"><div class="led" data-c="22" data-m="11111;00001;00010;00110;00001;10001;01110"></div>3</div>
+      <div class="col"><div class="led" data-c="22" data-m="00010;00110;01010;10010;11111;00010;00010"></div>4</div>
+      <div class="col"><div class="led" data-c="22" data-m="11111;10000;11110;00001;00001;10001;01110"></div>5</div>
+      <div class="col"><div class="led" data-c="22" data-m="01110;10001;10000;11110;10001;10001;01110"></div>6</div>
+      <div class="col"><div class="led" data-c="22" data-m="11111;00001;00010;00100;01000;01000;01000"></div>7</div>
+      <div class="col"><div class="led" data-c="22" data-m="01110;10001;10001;01110;10001;10001;01110"></div>8</div>
+      <div class="col"><div class="led" data-c="22" data-m="01110;10001;10001;01111;00001;10001;01110"></div>9</div>
+    </div>
+
+    <div class="definition-box" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-small);">
+      불이 꺼진 픽셀을 <b>검은색</b>, 불이 켜진 픽셀을 <b>흰색</b>으로 하여 흑백 이미지로 나타낸 후
+      검은색을 \(0\), 흰색을 \(1\)로 정하면 각 숫자 이미지를 <b>\(7\times5\) 행렬</b>로 변환하여 나타낼 수 있다.
+    </div>
+    <p class="cap-sm" style="margin: var(--lm-space-2) 0 0;">교과서 방주 — 여기서는 검은색과 흰색으로만 이루어진 흑백 이미지의 색상 정보를 각각 \(0\)과 \(1\)로 표현하기로 한다.</p>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      3-1-2차시의 함정 — 해상도는 <b>가로 × 세로</b>(\(5\times7\)), 행렬은 <b>행 × 열</b>(\(7\times5\)).
+    </div>
+    <aside class="notes">교과서 104쪽 위의 전광판 열 장을 그대로 옮겼다. 3-1에서는 흑백값이 0~255였는데, 여기서는 켜짐/꺼짐 둘뿐이라 0과 1만 쓴다는 점을 방주로 짚는다. 해상도 5×7과 행렬 7×5의 순서 차이를 학생 입으로 말하게 한다.</aside>
+  </section>
+
+  <!-- 5. 숫자 1 → 행렬 -->
+  <section>
+    <div class="chapter-tag">교과서 104쪽</div>
+    <h2>숫자 1을 \(7\times5\) 행렬로</h2>
+
+    <div class="trio">
+      <div class="col">
+        <div class="cap">전광판</div>
+        <div class="led" data-c="34" data-m="00100;01100;00100;00100;00100;00100;01110"></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="col step-box" data-s>
+        <div class="cap">흑백 이미지</div>
+        <div class="bw" data-c="38" data-m="00100;01100;00100;00100;00100;00100;01110"></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="col step-box" data-s>
+        <div class="cap">행렬</div>
+        <table class="mtx" data-hl="1" data-m="00100;01100;00100;00100;00100;00100;01110"></table>
+      </div>
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">켜진 칸 → 흰색 → 1의 순서로 두 번 바꾼다. 행렬에서 1이 있는 칸을 색칠해 두면 숫자 1 모양이 그대로 보인다(교과서도 하늘색으로 칠해 두었다). 1행부터 한 줄씩 읽어 "0 0 1 0 0"처럼 소리 내어 확인한다.</aside>
+  </section>
+
+  <!-- 6. 문제 1 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 104쪽 문제 1</div>
+    <h2>숫자 7을 행렬로 나타내 보자</h2>
+
+    <div class="row-gap" style="justify-content: flex-start; margin-top: var(--lm-space-3);">
+      <div class="led" data-c="34" data-m="11111;00001;00010;00100;01000;01000;01000"></div>
+      <ul class="qlist" id="qList1" style="flex: 1; margin-top: 0;">
+        <li><b>문제 1</b> 전광판에 표시된 숫자 7의 이미지를 \(7\times5\) 행렬로 변환하여 나타내시오.
+          <div class="ans">
+            <table class="mtx" data-hl="1" data-m="11111;00001;00010;00100;01000;01000;01000"></table>
+          </div></li>
+      </ul>
+    </div>
+    <aside class="notes">공책에 7행 5열의 틀부터 그리게 한다. 1행은 다섯 칸이 모두 켜져 11111이다. 대각선으로 내려오는 부분(2~4행)에서 열 위치를 틀리기 쉬우니 한 줄씩 짚는다. 정답및풀이 184쪽과 같다.</aside>
+  </section>
+
+  <!-- 7. A와 B -->
+  <section>
+    <div class="chapter-tag">교과서 104쪽</div>
+    <h2>숫자 0의 이미지 A, 숫자 6의 이미지 B</h2>
+
+    <div class="trio" style="gap: var(--lm-space-6);">
+      <div class="col">
+        <div class="cap">A (숫자 0)</div>
+        <div class="led" data-c="32" data-m="01110;10001;11001;10101;10011;10001;01110"></div>
+      </div>
+      <div class="col">
+        <div class="cap">\(A\)</div>
+        <table class="mtx" data-hl="1" data-m="01110;10001;11001;10101;10011;10001;01110"></table>
+      </div>
+      <div class="col">
+        <div class="cap">B (숫자 6)</div>
+        <div class="led" data-c="32" data-m="01110;10001;10000;11110;10001;10001;01110"></div>
+      </div>
+      <div class="col">
+        <div class="cap">\(B\)</div>
+        <table class="mtx" data-hl="1" data-m="01110;10001;10000;11110;10001;10001;01110"></table>
+      </div>
+    </div>
+
+    <p class="cap-sm" style="margin-top: var(--lm-space-4);">이미지의 이름은 바로 선 글자(A, B), 행렬의 이름은 기울어진 글자(\(A\), \(B\))로 쓴다 — 교과서 표기 그대로.</p>
+    <aside class="notes">교과서의 0은 가운데에 사선이 있는 0이다(숫자 O와 구분하려는 모양). 두 행렬에서 같은 칸과 다른 칸을 눈으로 먼저 찾아보게 한다 — 3·4행이 크게 다르다. 이미지 A와 행렬 A의 글자 모양이 다르다는 것은 가볍게만 짚는다.</aside>
+  </section>
+
+  <!-- 8. 잘못 표시된 X -->
+  <section>
+    <div class="chapter-tag">교과서 105쪽</div>
+    <h2>전광판에 잘못 표시된 숫자 X</h2>
+
+    <div class="trio" style="gap: var(--lm-space-6);">
+      <div class="col">
+        <div class="cap">X</div>
+        <div class="led" data-c="34" data-m="01110;10001;11000;00110;10001;10001;01110"></div>
+      </div>
+      <div class="col">
+        <div class="cap">\(X\)</div>
+        <table class="mtx" data-hl="1" data-m="01110;10001;11000;00110;10001;10001;01110"></table>
+      </div>
+    </div>
+
+    <p class="prob-stmt sm">
+      이미지 X가 나타내는 숫자가 \(0\) 또는 \(6\)이라 할 때, 인공지능이 이미지 X를 숫자 \(0\)의 이미지 A와
+      숫자 \(6\)의 이미지 B 중에서 어느 것으로 분류하는지 <b>두 가지 방법</b>으로 알아보자.
+    </p>
+    <div class="sides" style="margin-top: var(--lm-space-3);">
+      <div class="side known"><div class="where">오늘</div><div class="what">1. 해밍 거리</div></div>
+      <div class="side"><div class="where">다음 두 시간</div><div class="what">2. 퍼셉트론</div></div>
+    </div>
+    <aside class="notes">먼저 손을 들어 0인지 6인지 투표한다. 오른쪽 위(3행 5열)가 꺼져 있어 6처럼 보이기도 하고, 아래 고리는 0처럼 보이기도 한다. 교과서는 이 X를 두 방법으로 판정하는데, 오늘은 첫째 방법인 해밍 거리다.</aside>
+  </section>
+
+  <!-- 9. 해밍 거리 정의 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 105쪽 · 1. 해밍 거리를 이용하여 분류하기</div>
+    <h2>같은 자리에서 값이 다른 성분의 개수</h2>
+
+    <div class="bio">
+      <div>
+        <div class="definition-box" style="font-size: var(--lm-slide-small);">
+          두 이미지 A와 B를 변환하여 나타낸 행렬이
+          \(A=\begin{pmatrix}a_{11}&\cdots&a_{1n}\\ \vdots&\ddots&\vdots\\ a_{m1}&\cdots&a_{mn}\end{pmatrix}\),
+          \(B=\begin{pmatrix}b_{11}&\cdots&b_{1n}\\ \vdots&\ddots&\vdots\\ b_{m1}&\cdots&b_{mn}\end{pmatrix}\)
+          일 때, 두 이미지 A와 B의 <span class="kw">해밍 거리</span>(Hamming distance)를 기호 \(H(\mathrm{A},\ \mathrm{B})\)로 나타내고<br>
+          \(H(\mathrm{A},\ \mathrm{B})=\)(두 행렬 \(A\)와 \(B\)에서 같은 위치에 있고, 값이 서로 다른 성분의 개수)<br>
+          와 같이 정한다.
+        </div>
+        <div class="result-box" style="margin-top: var(--lm-space-4);">
+          해밍 거리가 <span class="kw-success">작을수록</span> 두 이미지가 유사하다고 판단한다.
+        </div>
+      </div>
+      <div class="plain-card">
+        <h4>해밍</h4>
+        <p>Hamming, R. W. (1915~1998)</p>
+        <p>미국의 수학자로, 해밍 코드를 만들고, 전산학과 통신 이론 등 컴퓨터 공학 발전에 이바지하였다.</p>
+      </div>
+    </div>
+    <aside class="notes">정의의 핵심 두 단어는 "같은 위치"와 "서로 다른"이다. 다른 칸이 적을수록 닮았으니, 거리라는 이름처럼 작을수록 가깝다. 해밍 코드는 통신 중 0과 1이 몇 개 뒤집혔는지 알아내 고치는 방법이다 — 해밍 거리가 원래 거기서 나왔다고 덧붙이면 좋다.</aside>
+  </section>
+
+  <!-- 10. 보기 -->
+  <section>
+    <div class="chapter-tag">교과서 105쪽 · 보기</div>
+    <h2>가장 유사한 두 이미지는?</h2>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-3);">
+      \(P=\begin{pmatrix}1&0\\1&1\end{pmatrix},\quad Q=\begin{pmatrix}1&0\\0&1\end{pmatrix},\quad R=\begin{pmatrix}0&1\\1&1\end{pmatrix}\)
+    </div>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      \(H(\mathrm{P},\ \mathrm{Q})=1\) — \((2,\ 1)\) 성분만 다르다
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      \(H(\mathrm{Q},\ \mathrm{R})=3\) — \((1,\ 1)\), \((1,\ 2)\), \((2,\ 1)\) 성분이 다르다
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      \(H(\mathrm{R},\ \mathrm{P})=2\) — \((1,\ 1)\), \((1,\ 2)\) 성분이 다르다
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      따라서 해밍 거리가 가장 작은 두 이미지 <b>P와 Q</b>가 가장 유사하다.
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 4</span>
+    </div>
+    <aside class="notes">세 쌍을 빠짐없이 비교해야 한다는 점을 먼저 말한다(PQ, QR, RP). 각 쌍에서 다른 칸의 위치를 학생이 먼저 말하고 버튼으로 맞춘다. 교과서 105쪽 보기의 값 그대로다.</aside>
+  </section>
+
+  <!-- 11. 더 깊이 — 해밍 거리의 성질 -->
+  <section>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 해밍 거리의 성질</div>
+    <h2>거리라고 부를 만한 까닭</h2>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>① 순서를 바꿔도 같다</b> &nbsp; \(H(\mathrm{A},\ \mathrm{B})=H(\mathrm{B},\ \mathrm{A})\)
+      — “\(a_{ij}\)와 \(b_{ij}\)가 다르다”와 “\(b_{ij}\)와 \(a_{ij}\)가 다르다”는 같은 말이다.
+      보기에서 \(H(\mathrm{R},\ \mathrm{P})\)를 \(H(\mathrm{P},\ \mathrm{R})\)로 구해도 \(2\).
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>② \(0\)이면 같은 행렬이다</b> &nbsp; \(H(\mathrm{A},\ \mathrm{B})=0\) \(\iff\) 모든 \((i,\ j)\)에서 \(a_{ij}=b_{ij}\) \(\iff\) \(A=B\)
+      — 공통수학1의 “두 행렬이 서로 같을 조건” 그대로다.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>③ 가장 커도 성분의 개수</b> &nbsp; \(m\times n\) 행렬이면 \(0\le H\le mn\).
+      \(7\times5\) 전광판이면 \(0\)부터 \(35\)까지.
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 3</span>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      학교에서 우리 집까지의 거리와 우리 집에서 학교까지의 거리는 같고, 거리가 \(0\)이면 같은 곳이다 — 해밍 거리도 그렇다.
+    </div>
+    <aside class="notes">교과서 밖 보강이다. ①은 "그래서 세 쌍만 비교하면 된다(PQ와 QP를 따로 셀 필요 없다)"로 연결한다. ②는 85쪽 준비 학습 ①(두 행렬이 서로 같을 조건)을 다시 쓰는 장이다 — 해밍 거리 0은 '같은 위치의 성분이 모두 같다'는 말과 똑같다. ③은 다음 장의 전광판에서 H가 0~35 사이라는 감각을 준다.</aside>
+  </section>
+
+  <!-- 12. 함께하기 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 106쪽 · 함께하기</div>
+    <h2>\(H(\mathrm{X},\ \mathrm{A})\)와 \(H(\mathrm{X},\ \mathrm{B})\)를 세자</h2>
+
+    <div class="trio" style="gap: var(--lm-space-6); margin-top: var(--lm-space-2);">
+      <div class="col">
+        <div class="cap">A (숫자 0)</div>
+        <div class="led" data-c="30" data-mark="3-5 4-1 4-4 4-5 5-4" data-m="01110;10001;11001;10101;10011;10001;01110"></div>
+      </div>
+      <div class="col">
+        <div class="cap">X</div>
+        <div class="led" data-c="30" data-m="01110;10001;11000;00110;10001;10001;01110"></div>
+      </div>
+      <div class="col">
+        <div class="cap">B (숫자 6)</div>
+        <div class="led" data-c="30" data-mark="3-2 4-1 4-2" data-m="01110;10001;10000;11110;10001;10001;01110"></div>
+      </div>
+    </div>
+
+    <div class="step-box gate" data-s style="font-size: var(--lm-slide-small);">
+      <b>❶</b> 두 행렬 \(X\)와 \(A\)는 \((3,\ 5)\), \((4,\ 1)\), \((4,\ 4)\), \((4,\ 5)\), \((5,\ 4)\) 성분이 서로 다르므로 \(H(\mathrm{X},\ \mathrm{A})=5\)<br>
+      두 행렬 \(X\)와 \(B\)는 \((3,\ 2)\), \((4,\ 1)\), \((4,\ 2)\) 성분이 서로 다르므로 \(H(\mathrm{X},\ \mathrm{B})=3\)
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>❷</b> \(H(\mathrm{X},\ \mathrm{A})&gt;H(\mathrm{X},\ \mathrm{B})\)이므로 인공지능은 이미지 X가 이미지 A보다 이미지 B와 더 유사하다고 판단한다.
+      즉, X가 나타내는 숫자를 <b>\(6\)으로 분류</b>한다.
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">❶을 열기 전에 짝끼리 X와 A, X와 B를 한 칸씩 비교해 다른 칸을 세게 한다. ❶을 열면 A와 B에서 X와 다른 칸에 붉은 테두리가 나타난다. A 쪽은 사선 부분과 4행 오른쪽이라 5개, B 쪽은 3·4행 왼쪽이라 3개. 정답및풀이 185쪽과 같다. 눈으로는 0처럼 보이던 학생도 있었을 텐데, 세어 보면 6이 더 가깝다.</aside>
+  </section>
+
+  <!-- 13. 더 깊이 — 겹침으로 해밍 거리 세기 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 0과 1만 있는 행렬의 해밍 거리</div>
+    <h2>겹치는 1의 개수로 해밍 거리를 센다</h2>
+
+    <div class="row-gap" style="justify-content: flex-start; gap: var(--lm-space-6); margin-top: var(--lm-space-2);">
+      <div style="text-align: center;">
+        <div class="cmp" data-c="46" data-x="01110;10001;11000;00110;10001;10001;01110" data-k="01110;10001;11001;10101;10011;10001;01110"></div>
+        <div class="cap-sm" style="margin-top: var(--lm-space-1);">견본 \(K\) 자리에 \(A\)를 놓았다 · 칸의 글자 = (\(X\)의 값)·(\(A\)의 값)</div>
+      </div>
+      <div class="legend">
+        <div class="formula-box" style="margin: 0 0 var(--lm-space-2);">\(H(\mathrm{X},\ \mathrm{K})=|X|+|K|-2\times(\text{겹치는 1의 개수})\)</div>
+        <div><span class="sw c11"></span>둘 다 \(1\) — 겹치는 1: <b>15개</b></div>
+        <div><span class="sw c10"></span>\(X\)에만 \(1\): <b>1개</b></div>
+        <div><span class="sw c01"></span>\(A\)에만 \(1\): <b>4개</b></div>
+        <div><span class="sw c00"></span>둘 다 \(0\): 15개</div>
+        <div class="deriv" style="margin-top: var(--lm-space-2);">
+          \(|X|\) = \(X\)의 1의 개수 \(=15+1=16\)<br>
+          \(|A|\) = \(A\)의 1의 개수 \(=15+4=19\)
+        </div>
+      </div>
+    </div>
+
+    <div class="deriv">
+      <div class="step-box" data-s>
+        다른 칸 = (\(X\)에만 1) + (\(A\)에만 1) \(=(|X|-15)+(|A|-15)=|X|+|A|-2\times15\)
+      </div>
+      <div class="step-box" data-s>
+        \(H(\mathrm{X},\ \mathrm{A})=16+19-30=5\) &nbsp;·&nbsp; \(B\)와는 겹침 \(15\), \(|B|=17\)이므로 \(H(\mathrm{X},\ \mathrm{B})=16+17-30=3\) — 함께하기와 같다
+      </div>
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 두 0·1 행렬을 겹치면 칸은 네 종류뿐이다 — 둘 다 1, X에만 1, A에만 1, 둘 다 0. 해밍 거리는 가운데 두 종류(색이 옅은 칸)의 개수다. X의 1의 개수 16 안에는 겹치는 15개가 들어 있으므로 X에만 1인 칸은 16−15, A에만 1인 칸은 19−15. 그래서 H = |X| + |A| − 2×(겹치는 1). |X|는 '1의 개수'라는 이 수업만의 약속이다(절댓값이 아니다). 이 식은 다음 두 시간 동안 퍼셉트론과 비교할 때 다시 쓴다 — 핵심 재료는 '겹치는 1의 개수'다.</aside>
+  </section>
+
+  <!-- 14. 문제 2 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 106쪽 문제 2</div>
+    <h2>가장 유사한 두 이미지를 고르자</h2>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-3);">
+      \(P=\begin{pmatrix}1&1&0\\1&0&1\\1&0&1\end{pmatrix},\quad Q=\begin{pmatrix}0&1&1\\0&0&1\\1&0&0\end{pmatrix},\quad R=\begin{pmatrix}1&0&1\\1&0&1\\1&1&1\end{pmatrix}\)
+    </div>
+
+    <ul class="qlist compact" id="qList2">
+      <li><b>문제 2</b> 세 이미지 P, Q, R을 변환하여 나타낸 행렬이 위와 같을 때, 해밍 거리를 이용하여 가장 유사한 이미지 두 개를 고르시오.
+        <div class="ans">
+          \(P,\ Q\): \((1,\ 1)\), \((1,\ 3)\), \((2,\ 1)\), \((3,\ 3)\) → \(H(\mathrm{P},\ \mathrm{Q})=4\)<br>
+          \(Q,\ R\): \((1,\ 1)\), \((1,\ 2)\), \((2,\ 1)\), \((3,\ 2)\), \((3,\ 3)\) → \(H(\mathrm{Q},\ \mathrm{R})=5\)<br>
+          \(R,\ P\): \((1,\ 2)\), \((1,\ 3)\), \((3,\ 2)\) → \(H(\mathrm{R},\ \mathrm{P})=3\)<br>
+          따라서 해밍 거리가 가장 작은 두 이미지 <b>R과 P</b>가 가장 유사하다.
+        </div></li>
+    </ul>
+    <aside class="notes">보기와 같은 방법이지만 3×3이라 칸이 9개다. 세 쌍을 모두 비교했는지 확인한다. 「더 깊이」 식으로 검산하고 싶은 학생에게는 |P|=6, |Q|=4, |R|=7과 겹치는 1의 개수를 세게 한다. 예를 들어 P와 R은 겹치는 1이 5개라 6+7−2×5=3으로 직접 센 값과 같다. 정답및풀이 184쪽: H(P,Q)=4, H(Q,R)=5, H(R,P)=3, 가장 유사한 것은 R과 P.</aside>
+  </section>
+
+  <!-- 15. 문제 3 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 106쪽 문제 3</div>
+    <h2>해상도 \(3\times4\) 전광판의 X는 A일까 B일까</h2>
+
+    <div class="trio" style="gap: var(--lm-space-6); margin-top: var(--lm-space-2);">
+      <div class="col"><div class="cap">A</div><div class="led" data-c="30" data-m="110;111;011;111"></div></div>
+      <div class="col"><div class="cap">B</div><div class="led" data-c="30" data-m="110;100;101;011"></div></div>
+      <div class="col"><div class="cap">X</div><div class="led" data-c="30" data-m="110;110;011;011"></div></div>
+    </div>
+
+    <ul class="qlist compact" id="qList3">
+      <li><b>⑴</b> 검은색을 \(0\), 흰색을 \(1\)로 할 때, 세 이미지를 행렬 \(A\), \(B\), \(X\)로 변환하여 나타내시오.
+        <div class="ans ans-row">
+          <span>\(A=\)<table class="mtx sm" data-m="110;111;011;111"></table></span>
+          <span>\(B=\)<table class="mtx sm" data-m="110;100;101;011"></table></span>
+          <span>\(X=\)<table class="mtx sm" data-m="110;110;011;011"></table></span>
+          <span style="font-weight: 400; color: var(--lm-ink-3);">해상도 \(3\times4\) → \(4\times3\) 행렬</span>
+        </div></li>
+      <li><b>⑵</b> 해밍 거리를 이용하여 이미지 X가 두 이미지 A와 B 중에서 어느 것으로 분류되는지 판단하시오.
+        <div class="ans">\(X,\ A\): \((2,\ 3)\), \((4,\ 1)\) → \(H(\mathrm{X},\ \mathrm{A})=2\) &nbsp;·&nbsp;
+          \(X,\ B\): \((2,\ 2)\), \((3,\ 1)\), \((3,\ 2)\) → \(H(\mathrm{X},\ \mathrm{B})=3\)<br>
+          \(H(\mathrm{X},\ \mathrm{A})&lt;H(\mathrm{X},\ \mathrm{B})\)이므로 이미지 X는 <b>이미지 A로 분류</b>된다.</div></li>
+    </ul>
+    <aside class="notes">⑴에서 해상도 3×4는 가로 3, 세로 4이므로 행렬은 4×3이다 — 오늘 두 번째로 나오는 함정이다. ⑵는 함께하기와 반대로 A가 이긴다. 이 문제는 3-3-4차시에 문제 5로 다시 돌아온다(그때는 퍼셉트론으로 판정). 답을 공책에 꼭 적어 두라고 말해 둔다. 정답및풀이 185쪽: H(X,A)=2, H(X,B)=3, A.</aside>
+  </section>
+
+  <!-- 16. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>다른 칸이 몇 개인지 세면 닮은 정도가 나온다</h2>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-4);">
+      \(H(\mathrm{A},\ \mathrm{B})=\)(두 행렬 \(A\)와 \(B\)에서 같은 위치에 있고, 값이 서로 다른 성분의 개수)
+    </div>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">함께하기 — \(H(\mathrm{X},\ \mathrm{A})=5\), \(H(\mathrm{X},\ \mathrm{B})=3\)</div>
+        <div class="what">X는 6</div>
+      </div>
+      <div class="side known">
+        <div class="where">문제 3 — \(H(\mathrm{X},\ \mathrm{A})=2\), \(H(\mathrm{X},\ \mathrm{B})=3\)</div>
+        <div class="what">X는 A</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      다음 시간에는 <b>견본 이미지를 가중치로 바꿔, 퍼셉트론이 닮은 정도에 점수를 매기게</b> 한다.
+    </p>
+    <aside class="notes">해밍 거리는 작을수록 유사하다는 것을 한 번 더 말하고 닫는다. 다음 시간은 둘째 방법 — 퍼셉트론이다. 1단원에서 배운 퍼셉트론이 이미지 분류기로 돌아온다고 예고한다. 마지막 문장을 다음 차시 '지난 시간' 장에서 그대로 다시 읽는다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 격자·행렬 그리기 — 모두 HTML 만 만든다(수식 문자열을 JS 에 두지 않는다).
+     data-m   : 행은 ';' 로, 성분은 한 글자씩(또는 ',' 로) 나눈다.
+     data-mark: 표시할 칸 "행-열 행-열 …" (1부터 센다) */
+  (function () {
+    function rowsOf(s) {
+      return s.split(';').map(r => (r.indexOf(',') >= 0 ? r.split(',') : r.split('')).map(v => v.trim()));
+    }
+    function marksOf(el, key) {
+      const s = el.dataset[key] || '';
+      return new Set(s.split(/\s+/).filter(Boolean));
+    }
+    function cellsGrid(el, rows, c) {
+      el.style.gridTemplateColumns = 'repeat(' + rows[0].length + ', ' + c + 'px)';
+    }
+
+    /* 전광판 */
+    document.querySelectorAll('.led[data-m]').forEach(el => {
+      const rows = rowsOf(el.dataset.m), c = Number(el.dataset.c || 30);
+      const mk = marksOf(el, 'mark'), ov = marksOf(el, 'ov');
+      cellsGrid(el, rows, c);
+      rows.forEach((r, i) => r.forEach((v, j) => {
+        const cell = document.createElement('i');
+        const key = (i + 1) + '-' + (j + 1);
+        cell.style.width = c + 'px'; cell.style.height = c + 'px';
+        if (v === '1') cell.classList.add('on');
+        if (mk.has(key)) cell.classList.add('mark');
+        if (ov.has(key)) cell.classList.add('ov');
+        el.appendChild(cell);
+      }));
+    });
+
+    /* 흑백 칸 그림: 0 = 검정, 1 = 흰색 */
+    document.querySelectorAll('.bw[data-m]').forEach(el => {
+      const rows = rowsOf(el.dataset.m), c = Number(el.dataset.c || 48);
+      cellsGrid(el, rows, c);
+      rows.forEach(r => r.forEach(v => {
+        const cell = document.createElement('i');
+        cell.style.width = c + 'px'; cell.style.height = c + 'px';
+        cell.style.background = v === '1' ? 'rgb(255, 255, 255)' : 'rgb(35, 31, 32)';
+        el.appendChild(cell);
+      }));
+    });
+
+    /* 행렬 */
+    document.querySelectorAll('table.mtx[data-m]').forEach(el => {
+      const rows = rowsOf(el.dataset.m), mk = marksOf(el, 'mark');
+      const hl = el.dataset.hl, den = el.dataset.frac;
+      rows.forEach((r, i) => {
+        const tr = document.createElement('tr');
+        r.forEach((v, j) => {
+          const td = document.createElement('td');
+          if (den && v === '1') {
+            td.innerHTML = '<span class="fr"><span>1</span><span>' + den + '</span></span>';
+          } else {
+            td.textContent = v;
+          }
+          if (hl && v === hl) td.classList.add('hl');
+          if (mk.has((i + 1) + '-' + (j + 1))) td.classList.add('mark');
+          tr.appendChild(td);
+        });
+        el.appendChild(tr);
+      });
+    });
+
+    /* 칸 비교: data-x, data-k 를 겹쳐 네 종류로 칠한다 */
+    document.querySelectorAll('.cmp[data-x]').forEach(el => {
+      const X = rowsOf(el.dataset.x), K = rowsOf(el.dataset.k), c = Number(el.dataset.c || 44);
+      cellsGrid(el, X, c);
+      X.forEach((r, i) => r.forEach((v, j) => {
+        const k = K[i][j];
+        const cell = document.createElement('i');
+        cell.style.width = c + 'px'; cell.style.height = c + 'px';
+        cell.className = 'c' + v + k;
+        cell.textContent = (v === '0' && k === '0') ? '' : v + '·' + k;
+        el.appendChild(cell);
+      }));
+    });
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>

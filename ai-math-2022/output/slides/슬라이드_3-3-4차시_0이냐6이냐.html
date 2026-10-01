@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>0이냐 6이냐 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    /* 전광판 — 교과서 지면처럼 검은 판 위의 둥근 전구. 켜짐=노랑, 꺼짐=짙은 회색
+       (픽셀 칠은 실제 색값을 쓴다 — 설계 5절 규격) */
+    .led { display: inline-grid; gap: 6px; background: rgb(0, 0, 0); padding: 8px;
+           border-radius: var(--lm-radius-sm); outline: 3px solid var(--lm-ink-3);
+           outline-offset: 4px; vertical-align: middle; }
+    .led i { display: block; border-radius: 50%; background: rgb(72, 74, 72); }
+    .led i.on { background: rgb(255, 230, 117); }
+    .led i.mark { box-shadow: 0 0 0 3px var(--lm-paper), 0 0 0 7px var(--lm-danger); position: relative; z-index: 1; }
+    .led i.ov { box-shadow: 0 0 0 3px var(--lm-paper), 0 0 0 7px var(--lm-info); position: relative; z-index: 1; }
+
+    /* 흑백 이미지(검정=0, 흰색=1) — 107~108쪽의 칸 그림 */
+    .bw { display: inline-grid; gap: 0; border: 2px solid var(--lm-ink-4);
+          vertical-align: middle; }
+    .bw i { display: block; border: 1px solid rgb(160, 160, 160); }
+
+    /* 행렬 — HTML 표로 그린다(7×5 를 TeX 로 쓰면 JS 이스케이프·높이 모두 위험) */
+    .mtx { display: inline-table; border-collapse: separate; border-spacing: 0;
+           border-left: 3px solid var(--lm-ink); border-right: 3px solid var(--lm-ink);
+           border-radius: 22px; padding: 4px 10px; vertical-align: middle;
+           font-family: 'Times New Roman', serif; font-size: var(--lm-slide-small); }
+    .mtx td { min-width: 1.35em; padding: 1px 4px; text-align: center; line-height: 1.25; }
+    .mtx td.hl { background: var(--lm-info-tint); color: var(--lm-info); font-weight: 700; }
+    .mtx td.mark { background: var(--lm-danger-tint); color: var(--lm-danger); font-weight: 700;
+                   box-shadow: inset 0 0 0 2px var(--lm-danger); }
+    .mtx.sm { font-size: var(--lm-slide-caption); }
+    .fr { display: inline-flex; flex-direction: column; align-items: center;
+          font-size: 0.72em; line-height: 1.05; vertical-align: middle; }
+    .fr span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 2px; }
+
+    /* 칸 비교 그림 — 두 0·1 행렬을 겹쳐 네 종류의 칸으로 나눈다 */
+    .cmp { display: inline-grid; gap: 3px; vertical-align: middle; }
+    .cmp i { display: flex; align-items: center; justify-content: center; font-style: normal;
+             font-size: 22px; font-weight: 700; border-radius: 4px;
+             border: 2px solid var(--lm-rule); }
+    .cmp i.c11 { background: var(--lm-success); color: var(--lm-paper); border-color: var(--lm-success); }
+    .cmp i.c10 { background: var(--lm-warning); color: var(--lm-paper); border-color: var(--lm-warning); }
+    .cmp i.c01 { background: var(--lm-info); color: var(--lm-paper); border-color: var(--lm-info); }
+    .cmp i.c00 { background: var(--lm-page); color: var(--lm-ink-4); }
+    .legend { display: flex; flex-direction: column; gap: var(--lm-space-2);
+              font-size: var(--lm-slide-small); }
+    .legend span.sw { display: inline-block; width: 26px; height: 26px; border-radius: 4px;
+                      vertical-align: middle; margin-right: var(--lm-space-2); border: 2px solid; }
+    .sw.c11 { background: var(--lm-success); border-color: var(--lm-success); }
+    .sw.c10 { background: var(--lm-warning); border-color: var(--lm-warning); }
+    .sw.c01 { background: var(--lm-info); border-color: var(--lm-info); }
+    .sw.c00 { background: var(--lm-page); border-color: var(--lm-rule); }
+
+    .trio { display: flex; gap: var(--lm-space-5); justify-content: center;
+            align-items: center; margin-top: var(--lm-space-3); }
+    .trio .col { text-align: center; }
+    .trio .col .cap { font-size: var(--lm-slide-small); font-weight: 700;
+                      margin-bottom: var(--lm-space-2); }
+    .trio .col .sub { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                      margin-top: var(--lm-space-2); }
+    .trio .arrow { font-size: 40px; color: var(--lm-ink-3); }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+    .side.lost { border-color: var(--lm-danger); }
+    .side.lost .what { color: var(--lm-danger); }
+    .mats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-4);
+            margin-top: var(--lm-space-3); }
+    .mats .side .what { font-size: var(--lm-slide-body); }
+
+    .maptbl { border-collapse: collapse; margin: var(--lm-space-2) auto 0;
+              font-size: var(--lm-slide-small); }
+    .maptbl th, .maptbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: var(--lm-space-1) var(--lm-space-4); text-align: center; }
+    .maptbl th { background: var(--lm-paper-tint); font-weight: 700; }
+    .maptbl td.hl { color: var(--lm-accent); font-weight: 700; }
+    .maptbl td.win { color: var(--lm-success); font-weight: 700; background: var(--lm-success-tint); }
+    .maptbl td.lose { color: var(--lm-danger); font-weight: 700; }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+    .qlist.compact { margin-top: var(--lm-space-2); }
+    .qlist.compact li { margin-bottom: var(--lm-space-1); }
+    .ans-row { display: flex; align-items: center; gap: var(--lm-space-5); flex-wrap: wrap; }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+    .row-gap { display: flex; gap: var(--lm-space-5); align-items: center; justify-content: center;
+               flex-wrap: wrap; }
+    /* 3-3-4 전용 — 겹친 칸 표시는 해당 단계(.gate)가 펼쳐진 뒤에만 보인다 */
+    .reveal section:has(.gate:not(.visible)) .led i.ov { box-shadow: none; }
+    .wmats { display: flex; gap: var(--lm-space-6); justify-content: center; align-items: center;
+             margin-top: var(--lm-space-3); font-size: var(--lm-slide-small); }
+    .wmats .mtx { font-size: 36px; }
+    .wmats .mtx td { min-width: 1.5em; padding: 2px 5px; }
+    .note-box { border-left: var(--lm-border-accent) solid var(--lm-info); background: var(--lm-info-tint);
+                padding: var(--lm-space-3) var(--lm-space-4); font-size: var(--lm-slide-small);
+                margin-top: var(--lm-space-3); }
+    .duo { display: grid; grid-template-columns: auto auto 1fr; gap: var(--lm-space-6);
+           align-items: center; margin-top: var(--lm-space-3); }
+    .duo .col { text-align: center; font-size: var(--lm-slide-small); }
+
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅲ-3 이미지 데이터 분석 · 4차시</div>
+    <h1>0이냐 6이냐</h1>
+    <p class="slide-sub">두 퍼셉트론으로 분류하기, 그리고 두 잣대가 갈리는 순간</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 108~109쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄 — 두 퍼셉트론에 넣고 점수가 큰 쪽으로 분류한다. 105쪽의 X를 이번에는 퍼셉트론으로 판정하고, 해밍 거리와 나란히 놓는다. 오늘의 정점은 109쪽 방주 "결과가 서로 다를 수 있다"를 문제 5로 직접 확인하는 장면이다. 「더 깊이」 장은 교과서 밖 보강이다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>견본을 가중치로 만들면 퍼셉트론이 점수를 매긴다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">\(W_{\mathrm{K}}=\frac{1}{(K\text{의 모든 성분의 합})}\times K\)</div>
+        <div class="what" style="font-size: var(--lm-slide-body);">출력값이 클수록 유사</div>
+      </div>
+      <div class="side">
+        <div class="where">「더 깊이」 — 출력값 \(=\dfrac{\text{겹치는 1의 개수}}{|K|}\)</div>
+        <div class="what" style="font-size: var(--lm-slide-small);">X가 견본 밖에 켠 칸은 보지 못한다</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 문장 — <b>“다음 시간에는 두 퍼셉트론 \(\mathrm{P}_{\mathrm{A}}\), \(\mathrm{P}_{\mathrm{B}}\)에 X를 넣어 0이냐 6이냐를 가린다.”</b>
+    </p>
+    <aside class="notes">지난 시간의 세 가지 — 가중치 행렬, 같은 자리끼리 곱해 더하는 가중합, 클수록 유사 — 를 짧게 확인한다. 오른쪽 카드(「더 깊이」)는 오늘 후반부의 열쇠이니 한 번 소리 내어 읽게 한다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>두 이미지의 가중치 행렬 \(W_{\mathrm{A}}\), \(W_{\mathrm{B}}\)로 <span class="kw">퍼셉트론 두 개</span>를 만들 수 있다.</span></li>
+      <li><span class="num">2</span><span>출력값을 비교하여 <span class="kw">이미지를 분류</span>할 수 있다.</span></li>
+      <li><span class="num">3</span><span>해밍 거리와 퍼셉트론의 분류 결과가 <span class="kw">다를 수 있음</span>을 설명할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">두 퍼셉트론에 넣고 점수가 큰 쪽으로 분류한다.</span>
+    </div>
+    <aside class="notes">목표 3이 오늘의 클라이맥스다. 교과서는 방주 한 줄로만 말하지만, 문제 5가 정확히 그 경우다. 끝까지 가면 2-3-4차시에서 세 유사도의 답이 갈렸던 것과 같은 교훈에 도착한다.</aside>
+  </section>
+
+  <!-- 4. 문제 상황 -->
+  <section>
+    <div class="chapter-tag">교과서 108쪽</div>
+    <h2>이번엔 퍼셉트론으로 X를 판정하자</h2>
+
+    <div class="trio" style="gap: var(--lm-space-7);">
+      <div class="col"><div class="cap">A (숫자 0)</div><div class="led" data-c="30" data-m="01110;10001;11001;10101;10011;10001;01110"></div></div>
+      <div class="col"><div class="cap">X</div><div class="led" data-c="30" data-m="01110;10001;11000;00110;10001;10001;01110"></div></div>
+      <div class="col"><div class="cap">B (숫자 6)</div><div class="led" data-c="30" data-m="01110;10001;10000;11110;10001;10001;01110"></div></div>
+    </div>
+
+    <p class="prob-stmt sm">
+      이제 퍼셉트론을 이용하여 인공지능이 105쪽의 이미지 X가 나타내는 숫자를 104쪽의 두 이미지 A와 B가
+      나타내는 숫자 \(0\)과 \(6\) 중에서 어느 것으로 분류하는지 알아보자.
+    </p>
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      해밍 거리로는 \(H(\mathrm{X},\ \mathrm{A})=5\), \(H(\mathrm{X},\ \mathrm{B})=3\) → <b>6</b>이었다. 퍼셉트론도 6이라고 할까?
+    </div>
+    <aside class="notes">교과서 108쪽 마지막 단락이다. 해밍 거리 결과를 먼저 떠올리게 하고, 퍼셉트론도 같은 답을 낼지 예상을 받는다. 지난 시간 함께하기에서는 두 방법이 같은 답을 냈다는 것도 상기시킨다.</aside>
+  </section>
+
+  <!-- 5. W_A, W_B -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 109쪽</div>
+    <h2>가중치 행렬 \(W_{\mathrm{A}}\)와 \(W_{\mathrm{B}}\) — 분모가 다르다</h2>
+
+    <div class="wmats">
+      <span>\(W_{\mathrm{A}}=\dfrac{1}{19}A=\)</span>
+      <table class="mtx" data-hl="1" data-frac="19" data-m="01110;10001;11001;10101;10011;10001;01110"></table>
+      <span>\(W_{\mathrm{B}}=\dfrac{1}{17}B=\)</span>
+      <table class="mtx" data-hl="1" data-frac="17" data-m="01110;10001;10000;11110;10001;10001;01110"></table>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      \(A\)의 모든 성분의 합(흰 칸의 개수)은 \(19\), \(B\)는 \(17\) — 흰 칸 하나에 돌아가는 몫이 \(\frac{1}{19}\)과 \(\frac{1}{17}\)로 다르다.
+    </div>
+    <aside class="notes">교과서 109쪽 위의 두 행렬이다. 학생에게 A와 B의 1의 개수를 먼저 세게 한다. 19와 17이 나오면 분모로 쓴다. 칸마다 분수가 들어 있지만 사실 '흰 칸마다 1/19씩', '흰 칸마다 1/17씩'일 뿐이다.</aside>
+  </section>
+
+  <!-- 6. 출력값 -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 109쪽</div>
+    <h2>\(\mathrm{P}_{\mathrm{A}}\)의 출력값과 \(\mathrm{P}_{\mathrm{B}}\)의 출력값</h2>
+
+    <div class="trio" style="gap: var(--lm-space-7); margin-top: var(--lm-space-2);">
+      <div class="col"><div class="cap">A 위에 X가 켠 칸</div>
+        <div class="led" data-c="28" data-ov="1-2 1-3 1-4 2-1 2-5 3-1 3-2 4-3 5-1 5-5 6-1 6-5 7-2 7-3 7-4" data-m="01110;10001;11001;10101;10011;10001;01110"></div></div>
+      <div class="col"><div class="cap">B 위에 X가 켠 칸</div>
+        <div class="led" data-c="28" data-ov="1-2 1-3 1-4 2-1 2-5 3-1 4-3 4-4 5-1 5-5 6-1 6-5 7-2 7-3 7-4" data-m="01110;10001;10000;11110;10001;10001;01110"></div></div>
+    </div>
+
+    <div class="step-box gate" data-s style="font-size: var(--lm-slide-small);">
+      X와 겹쳐 켜진 칸이 \(A\)에서도 \(15\)개, \(B\)에서도 \(15\)개 →
+      \(\mathrm{P}_{\mathrm{A}}\)의 출력값 \(=15\times\frac{1}{19}=0.78\cdots\), &nbsp;
+      \(\mathrm{P}_{\mathrm{B}}\)의 출력값 \(=15\times\frac{1}{17}=0.88\cdots\)
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      따라서 (퍼셉트론 \(\mathrm{P}_{\mathrm{A}}\)의 출력값)\(&lt;\)(퍼셉트론 \(\mathrm{P}_{\mathrm{B}}\)의 출력값)이므로
+      인공지능은 이미지 X가 이미지 A보다 이미지 B와 더 유사하다고 판단한다. 즉, X가 나타내는 숫자를 <b>\(6\)으로 분류</b>한다.
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">교과서 109쪽 도식(X와 W를 나란히 놓고 15×1/19)을 전광판으로 다시 그렸다. 파란 고리가 견본의 흰 칸 중 X도 켠 칸이다 — 가중치가 0이 아닌 칸에서 X도 1인 자리만 1/19(또는 1/17)씩 보탠다. 학생과 함께 고리를 세어 15가 두 번 나오는 것을 확인한다. 0.78…과 0.88…은 교과서가 쓴 표기 그대로다.</aside>
+  </section>
+
+  <!-- 7. 묘미 -->
+  <section>
+    <div class="chapter-tag">교과서 109쪽 · 다시 보기</div>
+    <h2>겹친 칸은 똑같이 15개 — 갈린 것은 분모</h2>
+
+    <div class="sides">
+      <div class="side">
+        <div class="where">\(\mathrm{P}_{\mathrm{A}}\) — 견본의 흰 칸 \(19\)개 중 \(15\)개</div>
+        <div class="what">\(\frac{15}{19}=0.78\cdots\)</div>
+      </div>
+      <div class="side known">
+        <div class="where">\(\mathrm{P}_{\mathrm{B}}\) — 견본의 흰 칸 \(17\)개 중 \(15\)개</div>
+        <div class="what">\(\frac{15}{17}=0.88\cdots\)</div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      같은 15개가 맞아도 <span class="kw-success">흰 칸이 적은(성긴) 견본 쪽 점수가 높다</span> — 퍼셉트론은 “견본을 몇 할 채웠나”를 잰다.
+    </div>
+    <aside class="notes">설계 메모가 '이 차시의 묘미'라고 한 대목이다. 시험 점수에 비유하면 좋다 — 19문제 중 15개 맞힌 것과 17문제 중 15개 맞힌 것. 맞힌 개수는 같아도 비율은 다르다. 퍼셉트론 출력값이 바로 그 비율이다.</aside>
+  </section>
+
+  <!-- 8. 두 방법 나란히 -->
+  <section>
+    <div class="chapter-tag">정리 · 두 가지 방법</div>
+    <h2>해밍 거리와 퍼셉트론, 이번에는 같은 답</h2>
+
+    <table class="maptbl" style="margin-top: var(--lm-space-4); font-size: var(--lm-slide-body);">
+      <tr><th></th><th>A (숫자 0)</th><th>B (숫자 6)</th><th>판단 기준</th><th>분류</th></tr>
+      <tr><th>해밍 거리</th><td>\(5\)</td><td class="win">\(3\)</td><td>작을수록 유사</td><td class="win">6</td></tr>
+      <tr><th>퍼셉트론 출력값</th><td>\(0.78\cdots\)</td><td class="win">\(0.88\cdots\)</td><td>클수록 유사</td><td class="win">6</td></tr>
+    </table>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      부등호 방향이 반대다 — 거리는 <b>작을수록</b>, 점수는 <b>클수록</b>. 2-3-3차시의 유클리드 거리(작을수록)와 코사인 유사도(클수록)와 같은 구조.
+    </div>
+
+    <div class="note-box">
+      교과서 109쪽 방주 — “이미지를 해밍 거리와 퍼셉트론을 이용하여 분류한 결과는 <b>서로 다를 수 있다</b>.”
+    </div>
+    <aside class="notes">두 방법을 표로 나란히 놓는다. 이번에는 둘 다 6이다. 그런데 교과서 방주는 결과가 다를 수 있다고 경고한다 — "그럼 언제 달라질까?"를 질문으로 던지고, 다음 「더 깊이」 두 장에서 답한다.</aside>
+  </section>
+
+  <!-- 9. 더 깊이 — 언제 같고 언제 갈리나 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 방주를 식으로 설명하기</div>
+    <h2>견본의 1의 개수 \(|K|\)가 갈림길이다</h2>
+
+    <div class="sides" style="margin-top: var(--lm-space-2);">
+      <div class="side"><div class="where">해밍 거리 (작을수록 유사)</div><div class="what" style="font-size: var(--lm-slide-body);">\(H=|X|+|K|-2o\)</div></div>
+      <div class="side"><div class="where">퍼셉트론 출력값 (클수록 유사)</div><div class="what" style="font-size: var(--lm-slide-body);">\(\dfrac{o}{|K|}\)</div></div>
+    </div>
+    <p class="cap-sm" style="margin: var(--lm-space-2) 0 0;">\(o\) = 겹치는 1의 개수. <b>같은 X</b>를 여러 견본과 비교하므로 \(|X|\)는 모든 견본에 공통이다.</p>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>① \(|K|\)가 모든 견본에서 같으면</b> — \(H\)는 \(o\)가 클수록 작아지고, 출력값은 \(o\)가 클수록 커진다.
+      둘 다 <b>겹침 \(o\)만으로</b> 순위가 정해지므로 <span class="kw-success">두 방법은 언제나 같은 답</span>을 낸다.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>② \(|K|\)가 견본마다 다르면</b> — 해밍은 \(|K|\)를 <b>더하고</b>(빼기 \(2o\)), 퍼셉트론은 \(|K|\)로 <b>나눈다</b>.
+      겹침과 \(|K|\)를 저울질하는 방식이 달라 <span class="kw-danger">답이 갈릴 수 있다.</span>
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 두 식은 지난 두 시간의 「더 깊이」에서 만든 것이다. 중요한 전제: 한 X를 여러 견본(A, B)과 비교하므로 |X|는 공통이다. 그래서 견본의 1의 개수 |K|까지 같으면 남는 변수는 겹침 o 하나뿐이고, 두 잣대가 같은 순위를 낸다. (주의: 한 견본에 여러 X를 넣는 지난 시간 상황에서는 |X|가 달라서 이 논리가 그대로 성립하지 않는다 — 문제 4에서 Y2와 Y3가 해밍으로는 비겼던 것이 그 예다.) |K|가 다르면 해밍은 견본의 흰 칸 하나마다 1을 더하고, 퍼셉트론은 비율로 나누므로 저울이 다르다.</aside>
+  </section>
+
+  <!-- 10. 더 깊이 — 0이냐 6이냐에 적용 -->
+  <section>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 0이냐 6이냐에 적용</div>
+    <h2>겹침이 같으면 \(|K|\)가 작은 쪽이 둘 다 이긴다</h2>
+
+    <table class="maptbl" style="margin-top: var(--lm-space-4); font-size: var(--lm-slide-body);">
+      <tr><th>견본</th><th>\(|K|\)</th><th>겹침 \(o\)</th><th>\(H=16+|K|-2o\)</th><th>출력값 \(\frac{o}{|K|}\)</th></tr>
+      <tr><td>A (숫자 0)</td><td>\(19\)</td><td>\(15\)</td><td>\(16+19-30=5\)</td><td>\(\frac{15}{19}=0.78\cdots\)</td></tr>
+      <tr><td>B (숫자 6)</td><td>\(17\)</td><td>\(15\)</td><td class="win">\(16+17-30=3\)</td><td class="win">\(\frac{15}{17}=0.88\cdots\)</td></tr>
+    </table>
+    <p class="cap-sm" style="margin: var(--lm-space-2) 0 0;">\(|X|=16\)</p>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      겹침이 \(15\)로 같으니 \(|K|\)가 작은 B가 해밍에서도(더하는 수가 작다), 퍼셉트론에서도(나누는 수가 작다) 이긴다 —
+      <span class="kw-success">이번엔 일치.</span>
+    </div>
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      그렇다면 겹침도 \(|K|\)도 다르면? — 교과서 문제 5가 바로 그 경우다.
+    </div>
+    <aside class="notes">교과서 밖 보강이다. |K|가 19와 17로 달라서 갈릴 '가능성'은 있었지만, 겹침이 똑같이 15라서 두 잣대 모두 |K|가 작은 B를 골랐다. 갈리려면 겹침이 많은 쪽과 |K|가 작은 쪽이 서로 달라야 한다 — 다음 장의 문제 5가 그렇다.</aside>
+  </section>
+
+  <!-- 11. 문제 5 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 109쪽 문제 5</div>
+    <h2>106쪽 문제 3을 퍼셉트론으로 다시</h2>
+
+    <div class="trio" style="gap: var(--lm-space-6); margin-top: var(--lm-space-2);">
+      <div class="col"><div class="cap">A</div><div class="led" data-c="28" data-m="110;111;011;111"></div></div>
+      <div class="col"><div class="cap">B</div><div class="led" data-c="28" data-m="110;100;101;011"></div></div>
+      <div class="col"><div class="cap">X</div><div class="led" data-c="28" data-m="110;110;011;011"></div></div>
+    </div>
+
+    <ul class="qlist compact" id="qList5">
+      <li><b>문제 5</b> 106쪽의 문제 3에서 퍼셉트론을 이용하여 이미지 X가 두 이미지 A와 B 중에서 어느 것으로 분류되는지 판단하시오.
+        <div class="ans">
+          \(W_{\mathrm{A}}=\frac{1}{10}A\) → \(\mathrm{P}_{\mathrm{A}}\)의 출력값 \(\frac{8}{10}=0.8\) &nbsp;·&nbsp;
+          \(W_{\mathrm{B}}=\frac{1}{7}B\) → \(\mathrm{P}_{\mathrm{B}}\)의 출력값 \(\frac{6}{7}=0.85\cdots\)<br>
+          (\(\mathrm{P}_{\mathrm{A}}\)의 출력값)\(&lt;\)(\(\mathrm{P}_{\mathrm{B}}\)의 출력값)이므로 이미지 X는 <b>이미지 B로 분류</b>된다.
+        </div></li>
+      <li><b>비교</b> 106쪽 문제 3에서 해밍 거리로는 어느 쪽이었나?
+        <div class="ans">\(H(\mathrm{X},\ \mathrm{A})=2&lt;H(\mathrm{X},\ \mathrm{B})=3\) → <b>A</b>. &nbsp;같은 X인데 <span class="kw-danger">해밍은 A, 퍼셉트론은 B</span> — 방주의 “서로 다를 수 있다”가 실제로 일어났다.</div></li>
+    </ul>
+    <aside class="notes">먼저 지난 차시 공책에 적어 둔 문제 3의 답(해밍 거리 → A)을 확인한다. 그다음 문제 5를 푼다 — A의 흰 칸 10개, B는 7개. 겹침은 A와 8칸, B와 6칸. 정답및풀이 185쪽: P_A 출력값 0.8, P_B 출력값 6/7=0.85…, B로 분류. 둘째 항목을 열 때가 오늘의 정점이다 — 학생들의 반응을 기다린다. "어느 쪽이 맞아요?"라는 질문이 나오면 다음 장으로 간다.</aside>
+  </section>
+
+  <!-- 12. 더 깊이 — 왜 갈렸나 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 문제 5는 왜 갈렸나</div>
+    <h2>퍼셉트론은 X가 견본 밖에 켠 칸을 보지 못한다</h2>
+
+    <div class="duo">
+      <div class="col">
+        <div class="cmp" data-c="50" data-x="110;110;011;011" data-k="110;111;011;111"></div>
+        <div style="margin-top: var(--lm-space-1);">X와 A</div>
+      </div>
+      <div class="col">
+        <div class="cmp" data-c="50" data-x="110;110;011;011" data-k="110;100;101;011"></div>
+        <div style="margin-top: var(--lm-space-1);">X와 B</div>
+      </div>
+      <div class="legend" style="font-size: var(--lm-slide-caption);">
+        <div><span class="sw c11"></span>둘 다 1 (겹침)</div>
+        <div><span class="sw c10"></span>X에만 1 — <b>퍼셉트론은 못 본다</b></div>
+        <div><span class="sw c01"></span>견본에만 1</div>
+        <div class="cap-sm">칸의 글자 = (X의 값)·(견본의 값)</div>
+      </div>
+    </div>
+
+    <table class="maptbl" style="margin-top: var(--lm-space-3);">
+      <tr><th>견본</th><th>\(|K|\)</th><th>겹침 \(o\)</th><th>X에만 1</th><th>견본에만 1</th><th>\(H\)</th><th>출력값</th></tr>
+      <tr><td>A</td><td>\(10\)</td><td>\(8\)</td><td>\(0\)</td><td>\(2\)</td><td class="win">\(2\)</td><td>\(\frac{8}{10}=0.8\)</td></tr>
+      <tr><td>B</td><td>\(7\)</td><td>\(6\)</td><td class="lose">\(2\)</td><td>\(1\)</td><td>\(3\)</td><td class="win">\(\frac{6}{7}=0.85\cdots\)</td></tr>
+    </table>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      B는 견본의 흰 칸을 더 많이 채웠지만(\(\frac67\)), X가 B 밖에 켠 <b>두 칸</b>을 해밍은 세고 퍼셉트론은 무시한다 —
+      그래서 <span class="kw-success">해밍은 A, 퍼셉트론은 B.</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 칸을 네 종류로 나누면 원인이 그대로 보인다. A 쪽은 X에만 켜진 칸이 없고 A에만 켜진 칸이 2개라 H=2, 출력값은 10칸 중 8칸이라 0.8. B 쪽은 B에만 켜진 칸이 1개뿐이라 출력값이 6/7로 더 높지만, X가 B 밖에 켠 칸 (2,2), (3,2) 두 개를 해밍은 벌점으로 센다(H=3). 퍼셉트론은 그 자리의 가중치가 0이라 아예 보지 못한다 — 지난 시간 '주의'(출력값 1이어도 같은 이미지가 아닐 수 있다)와 같은 원인이다. 어느 쪽이 '맞다'가 아니라, 두 잣대가 서로 다른 것을 잰다는 것이 결론이다. 2-3-4차시에서 유클리드·코사인·자카드의 답이 갈렸던 것과 같은 교훈.</aside>
+  </section>
+
+  <!-- 13. 확인하기 -->
+  <section>
+    <div class="chapter-tag">확인 활동 · 교과서 109쪽 확인하기</div>
+    <h2>옳으면 ○, 옳지 않으면 ×</h2>
+
+    <ul class="qlist" id="qListOX">
+      <li><b>⑴</b> 두 이미지의 해밍 거리가 작을수록 두 이미지가 유사하다고 판단한다.
+        <div class="ans">○ &nbsp;— 같은 위치에서 값이 다른 성분이 적을수록 유사하다 (105쪽)</div></li>
+      <li><b>⑵</b> 두 이미지의 퍼셉트론의 출력값이 작을수록 두 이미지가 유사하다고 판단한다.
+        <div class="ans">× &nbsp;— 출력값이 <b>클수록</b> 유사하다고 판단한다 (108쪽 (ⅳ))</div></li>
+    </ul>
+    <aside class="notes">두 문항 모두 오늘의 '부등호 방향'을 겨냥한다. 손을 들어 ○× 투표를 받은 뒤 문항을 눌러 확인한다. 정답및풀이 185쪽: ⑴ ○, ⑵ ×.</aside>
+  </section>
+
+  <!-- 14. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄 · Ⅲ단원 마무리</div>
+    <h2>두 퍼셉트론에 넣고 점수가 큰 쪽으로 분류한다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">0이냐 6이냐 — \(0.78\cdots&lt;0.88\cdots\)</div>
+        <div class="what">X는 6 (해밍과 일치)</div>
+      </div>
+      <div class="side lost">
+        <div class="where">문제 5 — \(0.8&lt;0.85\cdots\)</div>
+        <div class="what">X는 B (해밍은 A)</div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-5);">
+      1단원에서 만난 <span class="kw-success">퍼셉트론이 여기서 실제 분류기</span>가 되었다 — 견본을 가중치로 삼아, 닮은 정도에 점수를 매긴다.
+    </div>
+
+    <p class="prob-stmt">
+      다음 시간부터는 Ⅳ단원 <b>예측과 최적화</b> — 데이터로 확률을 구해 앞일을 예측한다.
+    </p>
+    <aside class="notes">Ⅲ단원 차시 수업을 닫는 장이다. 1-1-3차시에서 "학습 = 가중치를 찾는 과정"이라 했고, 오늘은 견본으로 가중치를 직접 만들어 분류기를 세웠다. 실제 인공지능은 이 가중치를 데이터로 스스로 찾는다(3-3-1의 지도학습 3단계)고 연결해 주면 단원 전체가 하나로 묶인다. 대단원 마무리(110~116쪽)는 별도 시간에 다룬다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 격자·행렬 그리기 — 모두 HTML 만 만든다(수식 문자열을 JS 에 두지 않는다).
+     data-m   : 행은 ';' 로, 성분은 한 글자씩(또는 ',' 로) 나눈다.
+     data-mark: 표시할 칸 "행-열 행-열 …" (1부터 센다) */
+  (function () {
+    function rowsOf(s) {
+      return s.split(';').map(r => (r.indexOf(',') >= 0 ? r.split(',') : r.split('')).map(v => v.trim()));
+    }
+    function marksOf(el, key) {
+      const s = el.dataset[key] || '';
+      return new Set(s.split(/\s+/).filter(Boolean));
+    }
+    function cellsGrid(el, rows, c) {
+      el.style.gridTemplateColumns = 'repeat(' + rows[0].length + ', ' + c + 'px)';
+    }
+
+    /* 전광판 */
+    document.querySelectorAll('.led[data-m]').forEach(el => {
+      const rows = rowsOf(el.dataset.m), c = Number(el.dataset.c || 30);
+      const mk = marksOf(el, 'mark'), ov = marksOf(el, 'ov');
+      cellsGrid(el, rows, c);
+      rows.forEach((r, i) => r.forEach((v, j) => {
+        const cell = document.createElement('i');
+        const key = (i + 1) + '-' + (j + 1);
+        cell.style.width = c + 'px'; cell.style.height = c + 'px';
+        if (v === '1') cell.classList.add('on');
+        if (mk.has(key)) cell.classList.add('mark');
+        if (ov.has(key)) cell.classList.add('ov');
+        el.appendChild(cell);
+      }));
+    });
+
+    /* 흑백 칸 그림: 0 = 검정, 1 = 흰색 */
+    document.querySelectorAll('.bw[data-m]').forEach(el => {
+      const rows = rowsOf(el.dataset.m), c = Number(el.dataset.c || 48);
+      cellsGrid(el, rows, c);
+      rows.forEach(r => r.forEach(v => {
+        const cell = document.createElement('i');
+        cell.style.width = c + 'px'; cell.style.height = c + 'px';
+        cell.style.background = v === '1' ? 'rgb(255, 255, 255)' : 'rgb(35, 31, 32)';
+        el.appendChild(cell);
+      }));
+    });
+
+    /* 행렬 */
+    document.querySelectorAll('table.mtx[data-m]').forEach(el => {
+      const rows = rowsOf(el.dataset.m), mk = marksOf(el, 'mark');
+      const hl = el.dataset.hl, den = el.dataset.frac;
+      rows.forEach((r, i) => {
+        const tr = document.createElement('tr');
+        r.forEach((v, j) => {
+          const td = document.createElement('td');
+          if (den && v === '1') {
+            td.innerHTML = '<span class="fr"><span>1</span><span>' + den + '</span></span>';
+          } else {
+            td.textContent = v;
+          }
+          if (hl && v === hl) td.classList.add('hl');
+          if (mk.has((i + 1) + '-' + (j + 1))) td.classList.add('mark');
+          tr.appendChild(td);
+        });
+        el.appendChild(tr);
+      });
+    });
+
+    /* 칸 비교: data-x, data-k 를 겹쳐 네 종류로 칠한다 */
+    document.querySelectorAll('.cmp[data-x]').forEach(el => {
+      const X = rowsOf(el.dataset.x), K = rowsOf(el.dataset.k), c = Number(el.dataset.c || 44);
+      cellsGrid(el, X, c);
+      X.forEach((r, i) => r.forEach((v, j) => {
+        const k = K[i][j];
+        const cell = document.createElement('i');
+        cell.style.width = c + 'px'; cell.style.height = c + 'px';
+        cell.className = 'c' + v + k;
+        cell.textContent = (v === '0' && k === '0') ? '' : v + '·' + k;
+        el.appendChild(cell);
+      }));
+    });
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>

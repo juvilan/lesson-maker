@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>견본을 가중치로 | 인공지능수학 2학년</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        packages: { '[+]': ['boldsymbol', 'ams'] },
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+      startup: {
+        typeset: false,
+        ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; MathJax.startup.promise.then(() => { if (window.safeTypeset) window.safeTypeset(); }); }
+      },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="../../../_shared/templates/design-tokens.css">
+  <link rel="stylesheet" href="../../../_shared/templates/slide-system.css">
+
+  <style>
+    html, body { background: var(--lm-paper); }
+    .reveal-viewport { background: var(--lm-paper); }
+
+    .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
+                 line-height: 1.6; margin: var(--lm-space-3) 0 0; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+
+    .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
+                  border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
+    .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+                    line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .plain-card p:last-child { margin-bottom: 0; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장. 학생이 시험 범위를 가를 수 있게 눈에 띄게 */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
+    .aux-badge { display: inline-block; border: var(--lm-border-thin) dashed var(--lm-ink-3);
+                 color: var(--lm-ink-3); font-size: var(--lm-slide-caption); font-weight: 600;
+                 padding: 0 var(--lm-space-2); border-radius: var(--lm-radius-sm);
+                 margin-right: var(--lm-space-2); vertical-align: middle; }
+
+    /* 전광판 — 교과서 지면처럼 검은 판 위의 둥근 전구. 켜짐=노랑, 꺼짐=짙은 회색
+       (픽셀 칠은 실제 색값을 쓴다 — 설계 5절 규격) */
+    .led { display: inline-grid; gap: 6px; background: rgb(0, 0, 0); padding: 8px;
+           border-radius: var(--lm-radius-sm); outline: 3px solid var(--lm-ink-3);
+           outline-offset: 4px; vertical-align: middle; }
+    .led i { display: block; border-radius: 50%; background: rgb(72, 74, 72); }
+    .led i.on { background: rgb(255, 230, 117); }
+    .led i.mark { box-shadow: 0 0 0 3px var(--lm-paper), 0 0 0 7px var(--lm-danger); position: relative; z-index: 1; }
+    .led i.ov { box-shadow: 0 0 0 3px var(--lm-paper), 0 0 0 7px var(--lm-info); position: relative; z-index: 1; }
+
+    /* 흑백 이미지(검정=0, 흰색=1) — 107~108쪽의 칸 그림 */
+    .bw { display: inline-grid; gap: 0; border: 2px solid var(--lm-ink-4);
+          vertical-align: middle; }
+    .bw i { display: block; border: 1px solid rgb(160, 160, 160); }
+
+    /* 행렬 — HTML 표로 그린다(7×5 를 TeX 로 쓰면 JS 이스케이프·높이 모두 위험) */
+    .mtx { display: inline-table; border-collapse: separate; border-spacing: 0;
+           border-left: 3px solid var(--lm-ink); border-right: 3px solid var(--lm-ink);
+           border-radius: 22px; padding: 4px 10px; vertical-align: middle;
+           font-family: 'Times New Roman', serif; font-size: var(--lm-slide-small); }
+    .mtx td { min-width: 1.35em; padding: 1px 4px; text-align: center; line-height: 1.25; }
+    .mtx td.hl { background: var(--lm-info-tint); color: var(--lm-info); font-weight: 700; }
+    .mtx td.mark { background: var(--lm-danger-tint); color: var(--lm-danger); font-weight: 700;
+                   box-shadow: inset 0 0 0 2px var(--lm-danger); }
+    .mtx.sm { font-size: var(--lm-slide-caption); }
+    .fr { display: inline-flex; flex-direction: column; align-items: center;
+          font-size: 0.72em; line-height: 1.05; vertical-align: middle; }
+    .fr span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 2px; }
+
+    /* 칸 비교 그림 — 두 0·1 행렬을 겹쳐 네 종류의 칸으로 나눈다 */
+    .cmp { display: inline-grid; gap: 3px; vertical-align: middle; }
+    .cmp i { display: flex; align-items: center; justify-content: center; font-style: normal;
+             font-size: 22px; font-weight: 700; border-radius: 4px;
+             border: 2px solid var(--lm-rule); }
+    .cmp i.c11 { background: var(--lm-success); color: var(--lm-paper); border-color: var(--lm-success); }
+    .cmp i.c10 { background: var(--lm-warning); color: var(--lm-paper); border-color: var(--lm-warning); }
+    .cmp i.c01 { background: var(--lm-info); color: var(--lm-paper); border-color: var(--lm-info); }
+    .cmp i.c00 { background: var(--lm-page); color: var(--lm-ink-4); }
+    .legend { display: flex; flex-direction: column; gap: var(--lm-space-2);
+              font-size: var(--lm-slide-small); }
+    .legend span.sw { display: inline-block; width: 26px; height: 26px; border-radius: 4px;
+                      vertical-align: middle; margin-right: var(--lm-space-2); border: 2px solid; }
+    .sw.c11 { background: var(--lm-success); border-color: var(--lm-success); }
+    .sw.c10 { background: var(--lm-warning); border-color: var(--lm-warning); }
+    .sw.c01 { background: var(--lm-info); border-color: var(--lm-info); }
+    .sw.c00 { background: var(--lm-page); border-color: var(--lm-rule); }
+
+    .trio { display: flex; gap: var(--lm-space-5); justify-content: center;
+            align-items: center; margin-top: var(--lm-space-3); }
+    .trio .col { text-align: center; }
+    .trio .col .cap { font-size: var(--lm-slide-small); font-weight: 700;
+                      margin-bottom: var(--lm-space-2); }
+    .trio .col .sub { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                      margin-top: var(--lm-space-2); }
+    .trio .arrow { font-size: 40px; color: var(--lm-ink-3); }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5);
+             margin-top: var(--lm-space-4); }
+    .side { border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
+            background: var(--lm-page); padding: var(--lm-space-3) var(--lm-space-4);
+            text-align: center; }
+    .side .where { font-size: var(--lm-slide-small); color: var(--lm-ink-3); }
+    .side .what { font-size: var(--lm-slide-h3); font-weight: 700; margin-top: var(--lm-space-2); }
+    .side.known { border-color: var(--lm-accent); }
+    .side.known .what { color: var(--lm-accent); }
+    .side.lost { border-color: var(--lm-danger); }
+    .side.lost .what { color: var(--lm-danger); }
+    .mats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--lm-space-4);
+            margin-top: var(--lm-space-3); }
+    .mats .side .what { font-size: var(--lm-slide-body); }
+
+    .maptbl { border-collapse: collapse; margin: var(--lm-space-2) auto 0;
+              font-size: var(--lm-slide-small); }
+    .maptbl th, .maptbl td { border: var(--lm-border-thin) solid var(--lm-rule);
+                             padding: var(--lm-space-1) var(--lm-space-4); text-align: center; }
+    .maptbl th { background: var(--lm-paper-tint); font-weight: 700; }
+    .maptbl td.hl { color: var(--lm-accent); font-weight: 700; }
+    .maptbl td.win { color: var(--lm-success); font-weight: 700; background: var(--lm-success-tint); }
+    .maptbl td.lose { color: var(--lm-danger); font-weight: 700; }
+
+    .qlist { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0; }
+    .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
+                border-radius: var(--lm-radius-md); background: var(--lm-page);
+                padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
+                cursor: pointer; font-size: var(--lm-slide-small);
+                line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
+    .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
+                     padding-top: var(--lm-space-2);
+                     border-top: 1px solid transparent; color: var(--lm-accent);
+                     font-weight: 600; }
+    .qlist li.revealed { border-color: var(--lm-accent); }
+    .qlist li.revealed .ans { visibility: visible; border-top-color: var(--lm-rule); }
+    .qlist.compact { margin-top: var(--lm-space-2); }
+    .qlist.compact li { margin-bottom: var(--lm-space-1); }
+    .ans-row { display: flex; align-items: center; gap: var(--lm-space-5); flex-wrap: wrap; }
+
+    .stepper { margin-top: var(--lm-space-2); }
+    .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                    margin-left: var(--lm-space-3); }
+    .reveal .slides section .cap-sm { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+                                      line-height: 1.4; }
+    .row-gap { display: flex; gap: var(--lm-space-5); align-items: center; justify-content: center;
+               flex-wrap: wrap; }
+    /* 3-3-3 전용 — 퍼셉트론 도식 */
+    .pk { display: flex; align-items: center; justify-content: center; gap: var(--lm-space-4);
+          margin-top: var(--lm-space-3); font-size: var(--lm-slide-small); }
+    .pk .node { width: 150px; height: 150px; border-radius: 50%; border: 4px dashed var(--lm-ink-3);
+                display: flex; align-items: center; justify-content: center; flex-direction: column;
+                background: var(--lm-page); }
+    .pk .node small { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); }
+    .pk .out { width: 150px; height: 150px; border-radius: 50%; background: var(--lm-info-tint);
+               border: 4px solid var(--lm-info); display: flex; align-items: center;
+               justify-content: center; font-weight: 700; color: var(--lm-info); }
+    .pk .arrow { font-size: 40px; color: var(--lm-ink-3); }
+    .pk .lbl { text-align: center; }
+    .pk .lbl .cap { font-size: var(--lm-slide-caption); color: var(--lm-ink-3); margin-top: var(--lm-space-1); }
+    .vs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lm-space-5); margin-top: var(--lm-space-3); }
+    .vs .plain-card { font-size: var(--lm-slide-small); }
+    .vs .plain-card.bad { border-color: var(--lm-danger); }
+    .vs .plain-card.good { border-color: var(--lm-success); }
+    .imgs { display: flex; gap: var(--lm-space-6); justify-content: center; margin-top: var(--lm-space-3); }
+    .imgs .col { text-align: center; font-size: var(--lm-slide-small); }
+    .imgs .col .bw { margin-bottom: var(--lm-space-2); }
+    .props { font-size: var(--lm-slide-small); line-height: 1.5; }
+    .props div { margin: var(--lm-space-1) 0; }
+
+  </style>
+</head>
+<body class="lm-narrow" data-subject="ai_math">
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. 타이틀 -->
+  <section class="title-slide">
+    <div class="chapter-tag">Ⅲ-3 이미지 데이터 분석 · 3차시</div>
+    <h1>견본을 가중치로</h1>
+    <p class="slide-sub">가중치 행렬과 퍼셉트론</p>
+    <div class="title-meta">
+      <span>2학년 인공지능수학</span>
+      <span>교과서 107~108쪽</span>
+    </div>
+    <aside class="notes">오늘의 결론은 한 줄 — 견본을 가중치로 만들면 퍼셉트론이 점수를 매긴다. 교과서 107쪽 "2. 퍼셉트론을 이용하여 분류하기"의 앞부분이다. 1단원의 퍼셉트론이 이미지 분류 도구로 돌아온다. 「더 깊이」 장은 교과서 밖 보강이다.</aside>
+  </section>
+
+  <!-- 2. 지난 시간 -->
+  <section>
+    <div class="chapter-tag">지난 시간</div>
+    <h2>다른 칸이 몇 개인지 세면 닮은 정도가 나온다</h2>
+
+    <div class="sides">
+      <div class="side known">
+        <div class="where">\(H(\mathrm{X},\ \mathrm{A})=5\), \(H(\mathrm{X},\ \mathrm{B})=3\)</div>
+        <div class="what">X는 6 (작을수록 유사)</div>
+      </div>
+      <div class="side">
+        <div class="where">「더 깊이」 — 0·1 행렬이면</div>
+        <div class="what" style="font-size: var(--lm-slide-small);">\(H=|X|+|K|-2\times(\text{겹치는 1의 개수})\)</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      지난 시간 마지막 문장 — <b>“다음 시간에는 견본 이미지를 가중치로 바꿔, 퍼셉트론이 닮은 정도에 점수를 매기게 한다.”</b>
+    </p>
+    <aside class="notes">해밍 거리로 X를 6으로 분류한 결과를 다시 확인한다. 오늘은 두 번째 방법 — 퍼셉트론이다. 해밍 거리가 '다른 칸 세기'였다면, 퍼셉트론은 '견본과 겹치는 정도에 점수 매기기'다. 오른쪽 카드의 '겹치는 1의 개수'가 오늘 다시 등장한다.</aside>
+  </section>
+
+  <!-- 3. 학습 목표 -->
+  <section>
+    <div class="chapter-tag">학습 목표</div>
+    <h2>오늘 도착할 곳</h2>
+    <ul class="objective-list">
+      <li><span class="num">1</span><span>흑백 이미지의 <span class="kw">가중치 행렬</span> \(W_{\mathrm{K}}\)를 구할 수 있다.</span></li>
+      <li><span class="num">2</span><span>퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)의 <span class="kw">출력값</span>을 구할 수 있다 — 가중합은 행렬의 곱이 아니다.</span></li>
+      <li><span class="num">3</span><span>퍼셉트론의 출력값으로 <span class="kw">유사한 정도를 판단</span>할 수 있다.</span></li>
+    </ul>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      핵심 한 줄 — <span class="kw-danger">견본을 가중치로 만들면 퍼셉트론이 점수를 매긴다.</span>
+    </div>
+    <aside class="notes">목표 2의 뒷부분이 오늘의 함정이다. 지난 단원(3-2)에서 행렬의 곱을 막 배웠기 때문에 '가중치를 곱한다'는 말을 행렬의 곱으로 오해하기 쉽다. 그 구분에 장 하나를 따로 쓴다.</aside>
+  </section>
+
+  <!-- 4. 가중치 행렬 -->
+  <section>
+    <div class="chapter-tag">교과서 107쪽 · 2. 퍼셉트론을 이용하여 분류하기</div>
+    <h2>가중치 행렬 \(W_{\mathrm{K}}\)</h2>
+
+    <div class="definition-box" style="font-size: var(--lm-slide-small);">
+      해상도가 \(n\times m\)인 흑백 이미지 K를 변환하여 나타낸 \(m\times n\) 행렬 \(K\)에 대하여
+      \(m\times n\) 행렬 \(W_{\mathrm{K}}\)를 다음과 같이 정하고, 이것을 이미지 K의 <span class="kw">가중치 행렬</span>이라고 한다.
+      \[ W_{\mathrm{K}}=\frac{1}{(\text{행렬 }K\text{의 모든 성분의 합})}\times K \]
+    </div>
+
+    <div class="row-gap" style="margin-top: var(--lm-space-4); gap: var(--lm-space-6);">
+      <div style="text-align: center;">
+        <div class="bw" data-c="56" data-m="010;101"></div>
+        <div style="font-size: var(--lm-slide-small); margin-top: var(--lm-space-1);">K</div>
+      </div>
+      <div style="font-size: var(--lm-slide-body);">
+        \(K=\begin{pmatrix}0&1&0\\1&0&1\end{pmatrix},\quad W_{\mathrm{K}}=\frac{1}{3}K=\begin{pmatrix}0&\frac{1}{3}&0\\\frac{1}{3}&0&\frac{1}{3}\end{pmatrix}\)
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-4);">
+      성분이 \(0\)과 \(1\)뿐이므로 <b>모든 성분의 합 = 흰 칸(1)의 개수</b>. 흰 칸이 3개라서 \(\frac{1}{3}\)을 곱한다.
+    </div>
+    <aside class="notes">K는 견본 이미지다. 견본의 흰 칸마다 같은 몫(1/3)을 나눠 준 것이 가중치 행렬이다 — "견본과 겹치는 칸의 비율"을 잴 준비를 한 것이라고 읽어 주면 충분하다. 왜 하필 성분의 합으로 나누는지(정규화)는 깊이 파지 않는다. 흰 칸 세 개에 1/3씩, 모두 더하면 1이 된다는 것만 짚는다.</aside>
+  </section>
+
+  <!-- 5. 퍼셉트론 P_K -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 107쪽 · 퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)</div>
+    <h2>입력값 \(X\), 가중치 \(W_{\mathrm{K}}\), 활성화함수 \(\sigma\)</h2>
+
+    <p class="prob-stmt sm">
+      입력값 \(X\)에 대한 가중치가 \(W_{\mathrm{K}}\)이고 활성화함수가
+      \(\sigma(x)=\begin{cases}x & (x\ge0)\\ 0 & (x&lt;0)\end{cases}\)인 퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)를 다음과 같이 구성할 수 있다.
+    </p>
+
+    <div class="pk">
+      <div class="lbl">\(\begin{pmatrix}x_{11}&\cdots&x_{1n}\\ \vdots&x_{ij}&\vdots\\ x_{m1}&\cdots&x_{mn}\end{pmatrix}\)<div class="cap">\(X\)</div></div>
+      <div class="lbl">\(\begin{pmatrix}w_{11}&\cdots&w_{1n}\\ \vdots&w_{ij}&\vdots\\ w_{m1}&\cdots&w_{mn}\end{pmatrix}\)<div class="cap">\(W_{\mathrm{K}}\)</div></div>
+      <div class="arrow">→</div>
+      <div class="node">\(x\)<small>가중합</small></div>
+      <div class="arrow">→</div>
+      <div class="node">\(\sigma(x)\)<small>활성화함수</small></div>
+      <div class="arrow">→</div>
+      <div class="out">출력값</div>
+    </div>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-3);">
+      가중합 \(x=x_{11}w_{11}+x_{12}w_{12}+\cdots+x_{ij}w_{ij}+\cdots+x_{mn}w_{mn}\)
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      이 \(\sigma\)는 1-1-3차시에서 본 <span class="kw-success">ReLU</span> — “음수는 싹 지우고, 양수는 그대로”.
+    </div>
+    <aside class="notes">교과서 107쪽 도식이다. 교과서는 가중합을 x라는 글자로 적고 바로 σ(x)에 넣는다. 성분 x_ij와 가중합 x가 같은 글자라 헷갈리면 "아래첨자가 없는 x는 다 더한 값"이라고 짚는다. 활성화함수는 1-1-3차시 마지막에 본 ReLU 그래프 그대로다 — 0 이상이면 그대로 내보내고 음수면 0. 1단원 퍼셉트론(입력 두세 개)과 달라진 점은 입력이 행렬 전체(35개 성분)라는 것뿐이다.</aside>
+  </section>
+
+  <!-- 6. 가중합 ≠ 행렬의 곱 -->
+  <section class="tight">
+    <div class="chapter-tag">⚠️ 혼동 주의 · 3-2-3차시와 비교</div>
+    <h2>여기서의 가중합은 행렬의 곱이 아니다</h2>
+
+    <div class="vs">
+      <div class="plain-card bad">
+        <h4>행렬의 곱 (3-2-3차시)</h4>
+        <p>앞 행렬의 <b>행</b>과 뒤 행렬의 <b>열</b>을 곱해 더한다.</p>
+        <p>\((m\times n)\) 행렬과 \((n\times p)\) 행렬 → 결과는 <b>\(m\times p\) 행렬</b></p>
+        <p>\(2\times3\) 행렬끼리는 곱할 수 <b>없다</b> (앞의 열 3 ≠ 뒤의 행 2)</p>
+      </div>
+      <div class="plain-card good">
+        <h4>퍼셉트론의 가중합 (오늘)</h4>
+        <p><b>같은 자리끼리</b> 곱해서 <b>전부 더한다</b>.</p>
+        <p>크기가 같은 두 행렬 → 결과는 <b>수 하나</b></p>
+        <p>\(2\times3\) 행렬끼리도 언제나 계산된다</p>
+      </div>
+    </div>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <span class="aux-badge">보조 예시</span>
+      \(X=\begin{pmatrix}0&1&1\\1&0&1\end{pmatrix}\), 위의 \(W_{\mathrm{K}}=\begin{pmatrix}0&\frac13&0\\\frac13&0&\frac13\end{pmatrix}\) 이면
+      \(x=0\cdot0+1\cdot\frac13+1\cdot0+1\cdot\frac13+0\cdot0+1\cdot\frac13=1\) &nbsp;→&nbsp; \(\sigma(1)=1\)
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">계산 보기</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 1</span>
+    </div>
+    <aside class="notes">설계 메모가 따로 한 장을 쓰라고 한 장이다. 3-2에서 행렬의 곱을 막 배운 직후라 학생은 'X와 W를 곱한다'를 행렬의 곱으로 계산하려 든다. 교과서 예시처럼 둘 다 2×3이면 행렬의 곱은 아예 정의되지 않는다는 점을 먼저 보여 주면 혼동이 끊긴다. 보조 예시는 교과서에 없는 X다 — 같은 자리 여섯 쌍을 차례로 곱해 더하는 손동작을 함께 한다. 결과가 행렬이 아니라 수 하나라는 점을 강조한다.</aside>
+  </section>
+
+  <!-- 7. 함께하기 ❶ -->
+  <section>
+    <div class="chapter-tag">교과서 107쪽 · 함께하기</div>
+    <h2>네 흑백 이미지 K, X₁, X₂, X₃</h2>
+
+    <div class="imgs">
+      <div class="col"><div class="bw" data-c="48" data-m="101;011"></div><div>K</div></div>
+      <div class="col"><div class="bw" data-c="48" data-m="100;000"></div><div>X₁</div></div>
+      <div class="col"><div class="bw" data-c="48" data-m="100;010"></div><div>X₂</div></div>
+      <div class="col"><div class="bw" data-c="48" data-m="101;010"></div><div>X₃</div></div>
+    </div>
+
+    <div class="formula-box" style="margin-top: var(--lm-space-3);">
+      \(K=\begin{pmatrix}1&0&1\\0&1&1\end{pmatrix},\ X_1=\begin{pmatrix}1&0&0\\0&0&0\end{pmatrix},\ X_2=\begin{pmatrix}1&0&0\\0&1&0\end{pmatrix},\ X_3=\begin{pmatrix}1&0&1\\0&1&0\end{pmatrix}\)
+    </div>
+
+    <p class="prob-stmt sm"><b>❶</b> 이미지 K의 가중치 행렬 \(W_{\mathrm{K}}\)를 구해 보자.</p>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      \(K\)의 모든 성분의 합은 \(4\)이므로 \(W_{\mathrm{K}}=\frac{1}{4}\begin{pmatrix}1&0&1\\0&1&1\end{pmatrix}=\begin{pmatrix}\frac14&0&\frac14\\0&\frac14&\frac14\end{pmatrix}\)
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">답 보기</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 1</span>
+    </div>
+    <aside class="notes">그림(검은색 0, 흰색 1)과 행렬을 한 번씩 대조한다. 그림은 교과서 108쪽 위에 있다. ❶은 학생이 먼저 구하게 한다 — K의 흰 칸이 4개라 1/4. 정답및풀이 185쪽과 같다.</aside>
+  </section>
+
+  <!-- 8. 함께하기 ❷ -->
+  <section class="tight">
+    <div class="chapter-tag">교과서 107쪽 · 함께하기</div>
+    <h2>세 입력값의 출력값</h2>
+
+    <p class="prob-stmt sm"><b>❷</b> 가중치가 \(W_{\mathrm{K}}\)이고 활성화함수가 \(\sigma\)인 퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)에서 세 행렬 \(X_1,\ X_2,\ X_3\)을 각각 입력값으로 할 때, 출력값을 구해 보자.
+      &nbsp;\(\left(W_{\mathrm{K}}=\begin{pmatrix}\frac14&0&\frac14\\0&\frac14&\frac14\end{pmatrix}\right)\)</p>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      \(X_1\): \(1\times\frac14+0\times0+0\times\frac14+0\times0+0\times\frac14+0\times\frac14=\frac14\)
+      &nbsp;→ 출력값 \(\sigma\!\left(\frac14\right)=\frac14\)
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      \(X_2\): \(1\times\frac14+0\times0+0\times\frac14+0\times0+1\times\frac14+0\times\frac14=\frac12\)
+      &nbsp;→ 출력값 \(\frac12\)
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      \(X_3\): \(1\times\frac14+0\times0+1\times\frac14+0\times0+1\times\frac14+0\times\frac14=\frac34\)
+      &nbsp;→ 출력값 \(\frac34\)
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 3</span>
+    </div>
+
+    <div class="info-box" style="margin-top: var(--lm-space-3);">
+      가중합이 \(0\) 이상이므로 \(\sigma\)는 값을 <b>그대로</b> 내보낸다 — 가중합이 곧 출력값이다.
+    </div>
+    <aside class="notes">곱셈 순서는 1행 왼쪽부터 오른쪽, 그다음 2행 — 정답및풀이 185쪽의 식 순서 그대로다. X1을 같이 하고 X2, X3는 학생이 먼저 계산한다. 0이 곱해지는 칸이 대부분이라는 것을 눈치채는 학생이 있으면 칭찬한다 — 그것이 잠시 뒤 「더 깊이」의 열쇠다.</aside>
+  </section>
+
+  <!-- 9. 108쪽 — 해밍 거리와 비교 -->
+  <section>
+    <div class="chapter-tag">교과서 108쪽</div>
+    <h2>해밍 거리로도 \(X_3\), 출력값으로도 \(X_3\)</h2>
+
+    <table class="maptbl" style="margin-top: var(--lm-space-4); font-size: var(--lm-slide-body);">
+      <tr><th></th><th>\(X_1\)</th><th>\(X_2\)</th><th>\(X_3\)</th></tr>
+      <tr><th>해밍 거리 \(H(\mathrm{X}_i,\ \mathrm{K})\)</th><td>\(3\)</td><td>\(2\)</td><td class="win">\(1\)</td></tr>
+      <tr><th>\(\mathrm{P}_{\mathrm{K}}\)의 출력값</th><td>\(\frac14\)</td><td>\(\frac12\)</td><td class="win">\(\frac34\)</td></tr>
+    </table>
+
+    <p class="prob-stmt sm">
+      이미지 K와 가장 유사한 이미지는 \(\mathrm{X}_3\)임을 알 수 있다. 한편, 행렬 \(X_3\)을 입력값으로 할 때
+      퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)의 출력값도 가장 크다는 것을 알 수 있다.
+    </p>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-3);">
+      해밍 거리는 <b>작을수록</b>, 출력값은 <b>클수록</b> 유사하다. 이번에는 두 잣대가 같은 답을 냈다 —
+      <span class="kw-danger">늘 그럴까?</span>
+    </div>
+    <aside class="notes">교과서 108쪽 첫 단락이다. 부등호 방향이 반대라는 것을 먼저 확인한다. 마지막 질문 "늘 그럴까?"는 답하지 않고 남겨 둔다 — 오늘 문제 4와 다음 시간 문제 5에서 답이 나온다. 여기서 "두 방법은 같다"고 단정하지 않는 것이 중요하다.</aside>
+  </section>
+
+  <!-- 10. 더 깊이 — 출력값 = 겹침 / |K| -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 출력값의 정체</div>
+    <h2>출력값 \(=\dfrac{\text{겹치는 1의 개수}}{|K|}\)</h2>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>①</b> \(w_{ij}=\dfrac{k_{ij}}{|K|}\)이므로 \(x_{ij}w_{ij}=\dfrac{x_{ij}k_{ij}}{|K|}\). &nbsp;
+      \(x_{ij}k_{ij}\)는 <b>두 칸이 모두 \(1\)일 때만 \(1\)</b>, 나머지는 \(0\).
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>②</b> 그래서 가중합 \(x=\dfrac{(\text{겹치는 1의 개수})}{|K|}\). &nbsp;
+      모든 성분이 \(0\) 이상이니 \(x\ge0\), \(\sigma\)는 그대로 통과 → <b>출력값 \(=x\)</b>
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>③</b> 함께하기로 확인 — \(|K|=4\), 겹치는 1은 \(X_1\): 1개, \(X_2\): 2개, \(X_3\): 3개
+      → \(\frac14,\ \frac24,\ \frac34\) ✓
+    </div>
+
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 3</span>
+    </div>
+
+    <div class="sides" style="margin-top: var(--lm-space-3);">
+      <div class="side"><div class="where">해밍 거리 (지난 시간)</div><div class="what" style="font-size: var(--lm-slide-small);">\(|X|+|K|-2\times(\text{겹침})\)</div></div>
+      <div class="side known"><div class="where">퍼셉트론 출력값 (오늘)</div><div class="what" style="font-size: var(--lm-slide-small);">\(\dfrac{\text{겹침}}{|K|}\)</div></div>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. |K|는 K의 1의 개수(= 모든 성분의 합)라는 지난 시간의 약속을 다시 쓴다. 핵심은 ①의 한 줄 — 0을 곱하면 0이니, 두 칸이 모두 1인 자리만 1/|K|씩 보탠다. 결국 퍼셉트론은 "견본의 흰 칸 중 몇 할을 X가 켜 주었나"를 잰다. ReLU가 하는 일은 여기서 없다(음수가 나올 수 없다). 두 식 모두 재료가 '겹치는 1의 개수'라는 점을 마지막 카드에서 강조한다.</aside>
+  </section>
+
+  <!-- 11. 더 깊이 — 자카드와 나란히 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 2-3-4차시 자카드 유사도</div>
+    <h2>같은 재료(겹침)를 다른 분모로</h2>
+
+    <table class="maptbl" style="margin-top: var(--lm-space-3);">
+      <tr><th>잣대</th><th>식 (0·1 행렬)</th><th>유사하면</th></tr>
+      <tr><td>자카드 \(J\) (2-3-4차시)</td><td>\(\dfrac{\text{겹침}}{\text{합집합}}=\dfrac{\text{겹침}}{|X|+|K|-\text{겹침}}\)</td><td>클수록</td></tr>
+      <tr><td>퍼셉트론 출력값</td><td>\(\dfrac{\text{겹침}}{|K|}\)</td><td>클수록</td></tr>
+      <tr><td>해밍 거리 \(H\)</td><td>\(|X|+|K|-2\times\text{겹침}\)</td><td>작을수록</td></tr>
+    </table>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      함께하기의 \(X_1,\ X_2,\ X_3\)은 켜진 칸이 모두 \(K\) 안에 있다 → 합집합 \(=|K|\) → <b>자카드 \(=\) 출력값</b>
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <span class="aux-badge">보조 예시</span> 여섯 칸이 모두 켜진 \(X=\begin{pmatrix}1&1&1\\1&1&1\end{pmatrix}\):
+      겹침 \(4\), \(|X|=6\) → 출력값 \(\frac44=1\), 자카드 \(\frac46=\frac23\), \(H=6+4-8=2\)
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 2</span>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-2);">
+      퍼셉트론의 분모에는 <b>\(|X|\)가 없다</b> — X가 견본 밖에 켠 칸은 점수에 들어가지 않는다.
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 2-3-4차시의 자카드 유사도 J = n(P∩Q)/n(P∪Q)를 떠올린다. 0·1 행렬에서 '1이 있는 자리의 집합'으로 보면 교집합 = 겹치는 1, 합집합 = |X|+|K|−겹침. 세 잣대 모두 겹침을 재료로 쓰지만 나누는 것(또는 빼는 것)이 다르다. 보조 예시(교과서에 없는 X)가 핵심 — 다 켜 버린 X도 퍼셉트론 점수는 만점 1이다. 자카드와 해밍은 X가 견본 밖에 켠 두 칸을 벌점으로 세지만, 퍼셉트론은 그 칸의 가중치가 0이라 보지 못한다. 다음 장의 「주의」가 바로 이 현상이다.</aside>
+  </section>
+
+  <!-- 12. 일반 성질과 주의 -->
+  <section>
+    <div class="chapter-tag">교과서 108쪽</div>
+    <h2>퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)의 출력값에 대하여</h2>
+
+    <div class="definition-box props">
+      흑백 이미지 K와 해상도가 같은 흑백 이미지 X에 대하여
+      <div>(ⅰ) 이미지 X가 이미지 K와 동일한 경우, 퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)의 출력값은 \(1\)이다.</div>
+      <div>(ⅱ) 두 이미지 X와 K에서 같은 위치에 있는 픽셀의 색이 모두 다른 경우, 퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)의 출력값은 \(0\)이다.</div>
+      <div>(ⅲ) 퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)의 출력값은 \(0\) 이상 \(1\) 이하이다.</div>
+      <div>(ⅳ) 이미지 X가 이미지 K와 유사할수록 퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)의 출력값은 커진다.</div>
+    </div>
+
+    <div class="warning-box" style="margin-top: var(--lm-space-4);">
+      <b>주의</b> &nbsp;(ⅰ)의 역은 성립하지 않는다. 즉, 퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)의 출력값이 \(1\)이더라도
+      두 이미지가 동일하지 않은 경우가 있다.
+    </div>
+    <aside class="notes">교과서 108쪽 상자와 주의를 그대로 옮겼다. 주의는 앞 장의 보조 예시(다 켠 X → 출력값 1)가 정확히 그런 경우다. "출력값 1이면 같은 이미지다"가 거짓이라는 것을 학생 말로 다시 하게 한다. 다음 장에서 네 성질을 「더 깊이」 식으로 한 줄씩 확인한다.</aside>
+  </section>
+
+  <!-- 13. 더 깊이 — 식으로 읽는 네 성질 -->
+  <section class="tight">
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 출력값 \(=\frac{\text{겹침}}{|K|}\)로 읽으면</div>
+    <h2>네 성질과 주의가 한 식에서 나온다</h2>
+
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      (ⅰ) \(X=K\)이면 겹침 \(=|K|\) → \(\frac{|K|}{|K|}=1\) &nbsp;·&nbsp;
+      (ⅱ) 모든 픽셀이 다르면 겹침 \(=0\) → \(0\) &nbsp;·&nbsp;
+      (ⅲ) \(0\le\) 겹침 \(\le|K|\) → \(0\le\) 출력값 \(\le1\)
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      (ⅳ) 여기서 ‘유사하다’는 <b>견본 K의 흰 칸을 X가 많이 켜 줄수록</b>이다 — 겹침이 늘면 출력값이 커진다.
+    </div>
+    <div class="step-box" data-s style="font-size: var(--lm-slide-small);">
+      <b>주의</b> 출력값 \(1\) ⇔ 겹침 \(=|K|\) ⇔ <b>K의 흰 칸을 X가 모두 켰다</b>.
+      그 밖의 칸을 X가 더 켜도 가중치가 \(0\)이라 출력값은 그대로 \(1\) — 그래서 역이 성립하지 않는다.
+    </div>
+    <div class="stepper">
+      <button class="anim-btn step-next">다음</button>
+      <button class="anim-btn step-reset">처음부터</button>
+      <span class="step-counter">0 / 3</span>
+    </div>
+
+    <div class="sides" style="margin-top: var(--lm-space-3);">
+      <div class="side"><div class="where">해밍 거리</div><div class="what" style="font-size: var(--lm-slide-small);">X가 견본 밖에 켠 칸도 센다</div></div>
+      <div class="side lost"><div class="where">퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)</div><div class="what" style="font-size: var(--lm-slide-small);">X가 견본 밖에 켠 칸은 보지 못한다</div></div>
+    </div>
+    <aside class="notes">교과서 밖 보강이다. 교과서의 네 성질과 주의를 '출력값 = 겹침/|K|' 하나로 모두 설명한다. (ⅳ)의 '유사'가 해밍 거리의 '유사'와 뜻이 조금 다르다는 것이 핵심 — 퍼셉트론은 견본의 흰 칸만 본다. 이 차이가 다음 시간 109쪽 방주 "두 방법의 결과는 서로 다를 수 있다"의 원인이다. 마지막 두 카드를 다음 시간 클라이맥스까지 기억하게 한다.</aside>
+  </section>
+
+  <!-- 14. 문제 4 -->
+  <section class="tight">
+    <div class="chapter-tag">확인 활동 · 교과서 108쪽 문제 4</div>
+    <h2>K와 가장 유사한 이미지는?</h2>
+
+    <div class="imgs" style="margin-top: var(--lm-space-2);">
+      <div class="col"><div class="bw" data-c="44" data-m="010;100"></div><div>Y₁</div></div>
+      <div class="col"><div class="bw" data-c="44" data-m="100;011"></div><div>Y₂</div></div>
+      <div class="col"><div class="bw" data-c="44" data-m="101;111"></div><div>Y₃</div></div>
+      <div class="col" style="color: var(--lm-ink-3);"><div class="bw" data-c="44" data-m="101;011"></div><div>(견본 K)</div></div>
+    </div>
+
+    <ul class="qlist compact" id="qList4">
+      <li><b>문제 4</b> 함께하기의 퍼셉트론 \(\mathrm{P}_{\mathrm{K}}\)에서 세 흑백 이미지 \(\mathrm{Y}_1,\ \mathrm{Y}_2,\ \mathrm{Y}_3\)을 검은색을 \(0\), 흰색을 \(1\)로 하여 변환해 나타낸 행렬 \(Y_1,\ Y_2,\ Y_3\)을 각각 입력값으로 할 때, 출력값을 구하시오. 또, 이미지 K와 가장 유사한 이미지가 무엇인지 말하시오.
+        <div class="ans">
+          \(Y_1=\begin{pmatrix}0&1&0\\1&0&0\end{pmatrix},\ Y_2=\begin{pmatrix}1&0&0\\0&1&1\end{pmatrix},\ Y_3=\begin{pmatrix}1&0&1\\1&1&1\end{pmatrix}\)<br>
+          출력값: \(Y_1\) → \(0\), &nbsp;\(Y_2\) → \(\frac34\), &nbsp;\(Y_3\) → \(1\) &nbsp;⇒ 출력값이 가장 큰 <b>이미지 \(\mathrm{Y}_3\)</b>
+        </div></li>
+      <li><span class="deep-badge" style="font-size: var(--lm-slide-caption);">「더 깊이」</span> \(H(\mathrm{Y}_2,\ \mathrm{K})\)와 \(H(\mathrm{Y}_3,\ \mathrm{K})\)를 비교하면?
+        <div class="ans">둘 다 \(1\)로 같다. \(\mathrm{Y}_2\)는 K의 흰 칸 하나를 놓쳤고(\(\frac34\)), \(\mathrm{Y}_3\)는 K의 흰 칸을 모두 켜고 견본 밖 한 칸을 더 켰다(\(1\)).
+          해밍 거리로는 비기지만 퍼셉트론은 \(\mathrm{Y}_3\)를 고른다. \(\mathrm{Y}_3\ne\mathrm{K}\)인데 출력값 \(1\) — 바로 <b>주의</b>의 예.</div></li>
+    </ul>
+    <aside class="notes">첫 문항이 교과서 문제 4다. 정답및풀이 185쪽: Y1 출력값 0, Y2 3/4, Y3 1, 가장 유사한 것은 Y3. 오른쪽 흐린 그림은 비교용 견본 K다(교과서 108쪽 위 그림). 둘째 문항은 「더 깊이」 — 해밍 거리로는 Y2와 Y3가 1로 비기는데 퍼셉트론은 Y3에 만점을 준다. Y3는 K와 다른 이미지인데도 출력값이 1이라 교과서 주의의 실제 예가 된다. 시간이 없으면 둘째 문항은 건너뛴다.</aside>
+  </section>
+
+  <!-- 15. 오늘 한 줄 -->
+  <section>
+    <div class="chapter-tag">오늘 한 줄</div>
+    <h2>견본을 가중치로 만들면 퍼셉트론이 점수를 매긴다</h2>
+
+    <div class="mats">
+      <div class="side known">
+        <div class="where">가중치 행렬</div>
+        <div class="what" style="font-size: var(--lm-slide-small);">\(W_{\mathrm{K}}=\frac{1}{(K\text{의 모든 성분의 합})}\times K\)</div>
+      </div>
+      <div class="side known">
+        <div class="where">가중합</div>
+        <div class="what" style="font-size: var(--lm-slide-small);">같은 자리끼리 곱해 모두 더한다<br>(행렬의 곱 아님)</div>
+      </div>
+      <div class="side known">
+        <div class="where">판단</div>
+        <div class="what" style="font-size: var(--lm-slide-small);">출력값이 클수록 유사</div>
+      </div>
+    </div>
+
+    <p class="prob-stmt">
+      다음 시간에는 <b>두 퍼셉트론 \(\mathrm{P}_{\mathrm{A}}\), \(\mathrm{P}_{\mathrm{B}}\)에 X를 넣어 0이냐 6이냐를 가린다.</b>
+    </p>
+    <aside class="notes">세 카드를 학생이 채우게 하며 닫는다. 다음 시간은 105쪽의 X를 퍼셉트론으로 다시 판정한다 — 해밍 거리로는 6이었다. 퍼셉트론도 6이라고 할지 예상을 받아 두고 마친다. 마지막 문장을 다음 차시 '지난 시간' 장에서 그대로 다시 읽는다.</aside>
+  </section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0.04, minScale: 0.2, maxScale: 1.0,
+    center: false, hash: true, controls: true, controlsLayout: 'bottom-right',
+    progress: true, slideNumber: 'c/t',
+    transition: 'fade', transitionSpeed: 'default', backgroundTransition: 'fade',
+    touch: true,
+    plugins: [RevealNotes]
+  });
+
+  window.safeTypeset = function (elements) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      return MathJax.typesetPromise(elements ? [].concat(elements) : undefined);
+    }
+    return Promise.resolve();
+  };
+
+  Reveal.on('slidechanged', () => window.safeTypeset());
+  Reveal.on('ready', () => window.safeTypeset());
+</script>
+
+<script>
+  /* 격자·행렬 그리기 — 모두 HTML 만 만든다(수식 문자열을 JS 에 두지 않는다).
+     data-m   : 행은 ';' 로, 성분은 한 글자씩(또는 ',' 로) 나눈다.
+     data-mark: 표시할 칸 "행-열 행-열 …" (1부터 센다) */
+  (function () {
+    function rowsOf(s) {
+      return s.split(';').map(r => (r.indexOf(',') >= 0 ? r.split(',') : r.split('')).map(v => v.trim()));
+    }
+    function marksOf(el, key) {
+      const s = el.dataset[key] || '';
+      return new Set(s.split(/\s+/).filter(Boolean));
+    }
+    function cellsGrid(el, rows, c) {
+      el.style.gridTemplateColumns = 'repeat(' + rows[0].length + ', ' + c + 'px)';
+    }
+
+    /* 전광판 */
+    document.querySelectorAll('.led[data-m]').forEach(el => {
+      const rows = rowsOf(el.dataset.m), c = Number(el.dataset.c || 30);
+      const mk = marksOf(el, 'mark'), ov = marksOf(el, 'ov');
+      cellsGrid(el, rows, c);
+      rows.forEach((r, i) => r.forEach((v, j) => {
+        const cell = document.createElement('i');
+        const key = (i + 1) + '-' + (j + 1);
+        cell.style.width = c + 'px'; cell.style.height = c + 'px';
+        if (v === '1') cell.classList.add('on');
+        if (mk.has(key)) cell.classList.add('mark');
+        if (ov.has(key)) cell.classList.add('ov');
+        el.appendChild(cell);
+      }));
+    });
+
+    /* 흑백 칸 그림: 0 = 검정, 1 = 흰색 */
+    document.querySelectorAll('.bw[data-m]').forEach(el => {
+      const rows = rowsOf(el.dataset.m), c = Number(el.dataset.c || 48);
+      cellsGrid(el, rows, c);
+      rows.forEach(r => r.forEach(v => {
+        const cell = document.createElement('i');
+        cell.style.width = c + 'px'; cell.style.height = c + 'px';
+        cell.style.background = v === '1' ? 'rgb(255, 255, 255)' : 'rgb(35, 31, 32)';
+        el.appendChild(cell);
+      }));
+    });
+
+    /* 행렬 */
+    document.querySelectorAll('table.mtx[data-m]').forEach(el => {
+      const rows = rowsOf(el.dataset.m), mk = marksOf(el, 'mark');
+      const hl = el.dataset.hl, den = el.dataset.frac;
+      rows.forEach((r, i) => {
+        const tr = document.createElement('tr');
+        r.forEach((v, j) => {
+          const td = document.createElement('td');
+          if (den && v === '1') {
+            td.innerHTML = '<span class="fr"><span>1</span><span>' + den + '</span></span>';
+          } else {
+            td.textContent = v;
+          }
+          if (hl && v === hl) td.classList.add('hl');
+          if (mk.has((i + 1) + '-' + (j + 1))) td.classList.add('mark');
+          tr.appendChild(td);
+        });
+        el.appendChild(tr);
+      });
+    });
+
+    /* 칸 비교: data-x, data-k 를 겹쳐 네 종류로 칠한다 */
+    document.querySelectorAll('.cmp[data-x]').forEach(el => {
+      const X = rowsOf(el.dataset.x), K = rowsOf(el.dataset.k), c = Number(el.dataset.c || 44);
+      cellsGrid(el, X, c);
+      X.forEach((r, i) => r.forEach((v, j) => {
+        const k = K[i][j];
+        const cell = document.createElement('i');
+        cell.style.width = c + 'px'; cell.style.height = c + 'px';
+        cell.className = 'c' + v + k;
+        cell.textContent = (v === '0' && k === '0') ? '' : v + '·' + k;
+        el.appendChild(cell);
+      }));
+    });
+  })();
+</script>
+
+<script>
+  /* 단계 펼치기 — 장마다 따로 동작한다 (한 장의 버튼이 다른 장을 펼치지 않게) */
+  (function () {
+    document.querySelectorAll('.reveal .slides section').forEach(sec => {
+      const items = Array.from(sec.querySelectorAll('[data-s]'));
+      const next = sec.querySelector('.step-next');
+      if (!items.length || !next) return;
+      const reset = sec.querySelector('.step-reset');
+      const cnt = sec.querySelector('.step-counter');
+      let i = 0;
+      function render() {
+        items.forEach((el, k) => el.classList.toggle('visible', k < i));
+        if (cnt) cnt.textContent = i + ' / ' + items.length;
+        window.safeTypeset(items.slice(0, i));
+      }
+      next.addEventListener('click', () => { if (i < items.length) { i++; render(); } });
+      if (reset) reset.addEventListener('click', () => { i = 0; render(); });
+      render();
+    });
+  })();
+</script>
+
+<script>
+  /* 확인 활동 — 문항을 누르면 답이 펼쳐진다 */
+  (function () {
+    document.querySelectorAll('.qlist li').forEach(li => {
+      li.addEventListener('click', () => {
+        li.classList.toggle('revealed');
+        window.safeTypeset([li]);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
