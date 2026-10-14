@@ -1,0 +1,7 @@
+{
+  "skillOverrides": {
+    "frontend-slides": "off",
+    "brainstorming": "off",
+    "writing-plans": "off"
+  }
+}
