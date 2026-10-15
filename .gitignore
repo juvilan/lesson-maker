@@ -47,3 +47,6 @@ Claude outputs/
 _q2*.svg
 _k_block.txt
 ai-math/book/_pg-*.png
+
+# 시험지·정답해설은 공개 레포에 올리지 않는다 (2026-10-16)
+**/output/exam/
