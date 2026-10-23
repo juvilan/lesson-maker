@@ -40,7 +40,7 @@
     .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
                   border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
     .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
-    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-body);
                     line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
     .plain-card p:last-child { margin-bottom: 0; }
 
@@ -53,7 +53,7 @@
     .mtx.c2 { grid-template-columns: repeat(2, 92px); }
     .mtx.c2 b { height: 62px; line-height: 62px; }
     .mtx.c4 { grid-template-columns: repeat(4, 86px); }
-    .mtx.c4 b { height: 60px; line-height: 60px; }
+    .mtx.c4 b { height: 80px; line-height: 80px; }
     .mtx b.hit { background: var(--lm-accent); color: #fff; }
 
     .chan-row { display: flex; gap: var(--lm-space-5); justify-content: center;
@@ -67,10 +67,10 @@
     .chan.k .lab { color: var(--lm-ink); }
 
     /* 무채색 사진 격자 */
-    .gray-grid { display: grid; grid-template-columns: repeat(4, 74px); gap: 3px;
+    .gray-grid { display: grid; grid-template-columns: repeat(4, 80px); gap: 3px;
                  background: var(--lm-rule); padding: 3px;
                  border-radius: var(--lm-radius-sm); width: max-content; }
-    .gray-grid i { display: block; height: 62px; }
+    .gray-grid i { display: block; height: 80px; }
 
     /* 흑백 7x4 — 켜진 칸이 흰색이라 밝은 슬라이드 바탕에서는 묻힌다.
        격자 뒤에 어두운 판을 깔고, 격자선은 중간 톤으로 두어
@@ -78,11 +78,11 @@
     .bw-board { background: var(--lm-ink-2); padding: 10px;
                 border-radius: var(--lm-radius-md); width: max-content;
                 margin: var(--lm-space-4) auto 0; }
-    .bw-grid { display: grid; grid-template-columns: repeat(7, 62px); gap: 3px;
+    .bw-grid { display: grid; grid-template-columns: repeat(7, 80px); gap: 3px;
                background: var(--lm-ink-4); padding: 3px;
                border-radius: var(--lm-radius-sm); width: max-content; }
-    .bw-grid i { display: block; height: 62px; cursor: pointer;
-                 font-size: var(--lm-slide-small); font-weight: 700;
+    .bw-grid i { display: block; height: 80px; cursor: pointer;
+                 font-size: var(--lm-slide-body); font-weight: 700;
                  display: flex; align-items: center; justify-content: center;
                  font-variant-numeric: tabular-nums; }
 
@@ -106,11 +106,30 @@
                   opacity: 0; transition: opacity .2s ease; }
     .ox li.revealed .why { opacity: 1; }
 
+    /* 문제 2 색상표 (교과서 90쪽) */
+    .q2-row { display: flex; gap: var(--lm-space-6); justify-content: center; align-items: center;
+              margin-top: var(--lm-space-3); }
+    .q2-qs { list-style: none; padding: 0; margin: var(--lm-space-3) 0 0;
+             font-size: var(--lm-slide-body); color: var(--lm-ink-2); line-height: 1.3; }
+    .ctab { border-collapse: collapse; font-size: var(--lm-slide-body);
+            font-variant-numeric: tabular-nums; }
+    .ctab th, .ctab td { border: var(--lm-border-thin) solid var(--lm-rule-strong);
+                         padding: 0 var(--lm-space-3); text-align: center; line-height: 1.35; }
+    .ctab th { background: var(--lm-paper-tint); color: var(--lm-ink-2); }
+
+    /* 문제 3 행렬로 적기 */
+    .p3-row { display: flex; gap: var(--lm-space-6); justify-content: center; align-items: center;
+              margin-top: var(--lm-space-4); }
+    .p3-row .bw-board { margin: 0; }
+    .p3-mtx { font-size: var(--lm-slide-body); opacity: 0; transition: opacity .3s ease; }
+    .p3-mtx.visible { opacity: 1; }
+
     /* 픽셀 아트 */
-    .art-grid { display: grid; grid-template-columns: repeat(12, 26px); gap: 1px;
+    .art-cap { font-size: var(--lm-slide-small); color: var(--lm-ink-3); margin: var(--lm-space-2) 0 var(--lm-space-4); }
+    .art-grid { display: grid; grid-template-columns: repeat(12, 34px); gap: 1px;
                 background: var(--lm-rule); padding: 2px;
                 border-radius: var(--lm-radius-sm); width: max-content; }
-    .art-grid i { display: block; height: 26px; }
+    .art-grid i { display: block; height: 34px; }
   </style>
 </head>
 
@@ -127,7 +146,7 @@
       <span>2학년 인공지능수학</span>
       <span>교과서 90~91쪽</span>
     </div>
-    <aside class="notes">Ⅲ-1을 닫는 차시다. 오늘 배우는 흑백 행렬 K가 Ⅲ-2와 Ⅲ-3 전체를 지탱한다 — 뒤로 가면 컬러는 거의 나오지 않고 K 하나로만 계산한다. 왜 흑백으로 줄이는지를 여기서 납득시켜 두어야 뒤가 편하다.</aside>
+    <aside class="notes">Ⅲ-1을 닫는 차시다. 오늘 배우는 흑백 행렬 K가 Ⅲ-2와 Ⅲ-3 전체를 지탱한다 — 뒤로 가면 주로 K 하나로 계산한다(3-2-2차시는 컬러를 흑백으로 바꾸는 차시). 왜 흑백으로 줄이는지를 여기서 납득시켜 두어야 뒤가 편하다.</aside>
   </section>
 
   <!-- 2. 지난 시간 -->
@@ -135,7 +154,7 @@
     <div class="chapter-tag">지난 시간 · 교과서 88~89쪽</div>
     <h2>컬러 이미지 한 장 = 행렬 세 개</h2>
 
-    <div class="two-col" style="margin-top: var(--lm-space-4);">
+    <div class="three-col" style="margin-top: var(--lm-space-4);">
       <div class="plain-card">
         <h4>해상도</h4>
         <p>가로 \(n\), 세로 \(m\) → \(n\times m\)</p>
@@ -144,42 +163,66 @@
         <h4>행렬</h4>
         <p>세 개의 \(m\times n\) 행렬 \(R,\ G,\ B\)</p>
       </div>
+      <div class="plain-card">
+        <h4>무채색</h4>
+        <p>\((63,\ 63,\ 63)\) → \(K=63\)</p>
+      </div>
     </div>
 
     <div class="warning-box" style="margin-top: var(--lm-space-5);">
       다시 한번 —
       <span class="kw-danger">해상도와 행렬은 가로세로 순서가 반대다.</span>
-      해상도 \(3\times2\) → 행렬 \(2\times3\)
+      해상도 \(5\times4\) → 행렬 \(4\times5\)
     </div>
-    <aside class="notes">지난 시간 10장 「해상도는 가로부터, 행렬은 세로부터」를 그대로 되짚는다. 다음 장 문제 2가 정확히 이걸 묻기 때문에 여기서 한 번 더 확인하고 넘어간다. 학생에게 "행렬이 3×2면 해상도는?" 하고 소리 내어 답하게 하면 좋다.</aside>
+
+    <p class="prob-stmt" style="margin-top: var(--lm-space-4);">
+      지난 시간 마지막 질문 — 무채색 <b>픽셀 하나</b>는 \(K\) 하나로 적었다.
+      그렇다면 <span class="kw">흑백 이미지 전체</span>는 행렬 몇 개면 될까?
+    </p>
+    <aside class="notes">질문은 오늘 5~6장에서 답한다. 학생이 "하나"라고 먼저 말하면 받아 두고 넘어간다. 지난 시간 10장 「해상도는 가로부터, 행렬은 세로부터」를 그대로 되짚는다. 다음 장 문제 2가 정확히 이걸 묻기 때문에 여기서 한 번 더 확인하고 넘어간다. 학생에게 "행렬이 3×2면 해상도는?" 하고 소리 내어 답하게 하면 좋다.</aside>
   </section>
 
   <!-- 3. 문제 2 -->
   <section>
     <div class="chapter-tag">교과서 90쪽 · 문제 2</div>
-    <h2>먼저 지난 시간 것부터</h2>
+    <h2>먼저 지난 시간 내용부터</h2>
 
-    <p class="prob-stmt">
-      어떤 컬러 이미지를 세 행렬로 변환한 것이 아래와 같다.
-    </p>
-
-    <div class="chan-row">
-      <div class="chan r"><div class="lab">\(R\)</div><div class="mtx c2" id="q2R"></div></div>
-      <div class="chan g"><div class="lab">\(G\)</div><div class="mtx c2" id="q2G"></div></div>
-      <div class="chan b"><div class="lab">\(B\)</div><div class="mtx c2" id="q2B"></div></div>
+    <div class="q2-row">
+      <div>
+        <div class="chan-row" style="margin-top: 0;">
+          <div class="chan r"><div class="lab">\(R\)</div><div class="mtx c2" id="q2R"></div></div>
+          <div class="chan g"><div class="lab">\(G\)</div><div class="mtx c2" id="q2G"></div></div>
+          <div class="chan b"><div class="lab">\(B\)</div><div class="mtx c2" id="q2B"></div></div>
+        </div>
+        <ol class="q2-qs">
+          <li>⑴ 어떤 컬러 이미지를 세 행렬로 바꾼 것이다. 해상도는?</li>
+          <li>⑵ \((2,1)\) 성분과 \((3,2)\) 성분에 대응하는 픽셀의 색상 정보는?</li>
+          <li>⑶ ⑵의 픽셀의 색은? (오른쪽 표)</li>
+        </ol>
+      </div>
+      <table class="ctab">
+        <tr><th>색</th><th>색상 정보</th></tr>
+        <tr><td>빨강</td><td>(255, 0, 0)</td></tr>
+        <tr><td>주황</td><td>(255, 128, 0)</td></tr>
+        <tr><td>노랑</td><td>(255, 255, 0)</td></tr>
+        <tr><td>초록</td><td>(32, 128, 32)</td></tr>
+        <tr><td>파랑</td><td>(0, 0, 255)</td></tr>
+        <tr><td>남색</td><td>(0, 32, 128)</td></tr>
+        <tr><td>보라</td><td>(128, 0, 192)</td></tr>
+      </table>
     </div>
 
     <div class="anim-controls" style="margin-top: var(--lm-space-4);">
       <button class="anim-btn" id="q2a">⑴ 해상도는?</button>
-      <button class="anim-btn" id="q2b">⑵ (2,1) 성분</button>
-      <button class="anim-btn" id="q2c">⑵ (3,2) 성분</button>
+      <button class="anim-btn" id="q2b">⑵⑶ (2,1) 성분</button>
+      <button class="anim-btn" id="q2c">⑵⑶ (3,2) 성분</button>
       <button class="anim-btn" id="q2r">지우기</button>
     </div>
 
     <div class="result-box" style="margin-top: var(--lm-space-4);" id="q2out">
       먼저 스스로 풀어 보자.
     </div>
-    <aside class="notes">⑴이 함정이다. 행렬이 3×2이니 해상도도 3×2라고 쓰는 학생이 반드시 나온다. 답은 2×3이다. ⑵는 세 행렬의 같은 자리를 짚는 연습으로, 지난 시간 11장(고양이 사진 5×5)에서 해 본 그대로다. ⑶의 색 이름(남색·보라)은 90쪽 오른쪽 색상표를 보고 찾게 한다.</aside>
+    <aside class="notes">⑴이 함정이다. 행렬이 3×2이니 해상도도 3×2라고 쓰는 학생이 반드시 나온다. 답은 2×3이다. ⑵는 세 행렬의 같은 자리를 짚는 연습으로, 지난 시간 11장(고양이 사진 5×5)에서 해 본 그대로다. ⑶의 색 이름(남색·보라)은 화면 오른쪽 색상표(교과서 90쪽 그대로)에서 찾게 한다. ⑵와 ⑶은 버튼 하나로 함께 답이 나온다.</aside>
   </section>
 
   <!-- 4. 오늘 도착할 곳 -->
@@ -208,7 +251,7 @@
     </div>
 
     <p class="prob-stmt">
-      1차시에서 배웠다 — 무채색은 <b>세 채널값이 모두 같은</b> 색이다.
+      앞에서 배웠다 — 무채색은 <b>세 채널값이 모두 같은</b> 색이다.
       그렇다면 흑백 이미지에서는 세 행렬 \(R,\ G,\ B\)가 어떻게 될까?
     </p>
 
@@ -251,8 +294,9 @@
     </div>
 
     <p class="prob-stmt">
-      계산할 것이 <span class="kw">3분의 1</span>로 줄었다.
-      Ⅲ-2와 Ⅲ-3에서 대부분 흑백으로 다루는 이유다.
+      적을 수가 <span class="kw">3분의 1</span>로 줄었다.
+      해상도 \(400\times300\) 컬러 이미지는 \(3\times400\times300=360000\) byte(360 KB),
+      흑백이면 120 KB다. <span style="color: var(--lm-ink-3);">(지도서 읽기 자료)</span>
     </p>
     <aside class="notes">"왜 흑백만 하나요?"라는 질문이 나오는 자리다. 답은 계산량이다 — 원리는 컬러도 같지만 세 번 반복해야 한다. 실제 인공지능도 색이 판단에 중요하지 않으면 흑백으로 바꿔 쓴다는 점을 덧붙이면 좋다. Ⅲ-2-2차시에서 컬러를 흑백으로 바꾸는 방법을 직접 배운다.</aside>
   </section>
@@ -292,19 +336,30 @@
       검은색은 \(0\), 흰색은 \(255\). 칸을 눌러 값을 확인해 보자.
     </p>
 
-    <div class="bw-board">
-      <div class="bw-grid" id="bwBoard"></div>
+    <div class="p3-row">
+      <div class="bw-board">
+        <div class="bw-grid" id="bwBoard"></div>
+      </div>
+      <div class="p3-mtx" id="p3Mtx">
+        \[ \begin{pmatrix}
+          0 & 0 & 255 & 255 & 255 & 0 & 0\\
+          0 & 255 & 0 & 255 & 0 & 255 & 0\\
+          0 & 255 & 255 & 0 & 255 & 255 & 0\\
+          0 & 255 & 255 & 255 & 255 & 255 & 0
+        \end{pmatrix} \]
+      </div>
     </div>
 
     <div class="anim-controls" style="margin-top: var(--lm-space-4);">
       <button class="anim-btn" id="btnBw">값 모두 보이기</button>
+      <button class="anim-btn" id="btnBwMtx">행렬로 적기</button>
       <button class="anim-btn" id="btnBwHide">감추기</button>
     </div>
 
-    <div class="info-box" style="margin-top: var(--lm-space-4);">
+    <div class="info-box p3-mtx" id="p3Note" style="margin-top: var(--lm-space-4);">
       가로 7 · 세로 4이므로 행렬은 <span class="kw-info">\(4\times7\)</span>이다.
     </div>
-    <aside class="notes">해상도 7×4에서 행렬이 4×7이 된다는 것을 다시 확인시킨다. 이 문제는 값이 0과 255뿐이라 계산이 없고 자리만 맞추면 된다. 학생이 공책에 옮겨 적게 한 뒤 "값 모두 보이기"로 맞춰 본다. Ⅲ-3에서는 이 0과 255가 0과 1로 바뀐다는 것을 미리 말해 두어도 좋다.</aside>
+    <aside class="notes">해상도 7×4에서 행렬이 4×7이 된다는 것을 다시 확인시킨다. 이 문제는 값이 0과 255뿐이라 계산이 없고 자리만 맞추면 된다. 학생이 공책에 옮겨 적게 한 뒤 "값 모두 보이기"로 칸을 맞춰 보고, "행렬로 적기"로 정답(정답및풀이와 같은 4×7 행렬)을 띄운다. Ⅲ-3에서는 이 0과 255가 0과 1로 바뀐다는 것을 미리 말해 두어도 좋다(지도서: 0/1만 쓰는 이진 이미지와 0~255 회색조 이미지의 구분).</aside>
   </section>
 
   <!-- 9. 확인하기 -->
@@ -326,16 +381,19 @@
         <span class="mark">○</span>
       </li>
     </ul>
-    <aside class="notes">⑴은 1차시, ⑵는 2차시 내용이라 Ⅲ-1 전체를 훑는 문항이다. 항목을 누르면 답과 이유가 함께 나온다. ⑵에서 해상도와 행렬의 순서를 한 번 더 못 박는다 — 이 단원에서 가장 자주 틀리는 지점이므로 세 번째 반복이다.</aside>
+    <aside class="notes">⑴은 1차시, ⑵는 2차시 내용이라 Ⅲ-1 전체를 훑는 문항이다. 항목을 누르면 답과 이유가 함께 나온다. ⑵에서 해상도와 행렬의 순서를 한 번 더 못 박는다 — 이 단원에서 가장 자주 틀리는 지점이라 2·3·8장에 이어 또 반복이다.</aside>
   </section>
 
   <!-- 10. 인공지능 이야기 -->
   <section>
     <div class="chapter-tag">교과서 91쪽 · 인공지능 이야기</div>
-    <h2>픽셀 아트 — 칸이 적어서 생긴 예술</h2>
+    <h2>희소성이 가치가 되는 픽셀 아트</h2>
 
     <div class="pair" style="align-items: flex-start;">
-      <div class="art-grid" id="artGrid"></div>
+      <div>
+        <div class="art-grid" id="artGrid"></div>
+        <div class="art-cap">교과서 밖 — 12×12 칸으로 그린 예시</div>
+      </div>
       <div>
         <p class="prob-stmt" style="margin-top:0">
           픽셀을 기반으로 이미지를 표현하는 그래픽 방식을 <b>픽셀 아트</b>라고 한다.
@@ -347,14 +405,15 @@
         </div>
         <div class="result-box" style="margin-top: var(--lm-space-4);">
           <b>크립토펑크</b> — 해상도 \(24\times24\)인 아바타 1만 개.<br>
-          그중 외계인은 <span class="kw-success">9개뿐</span>이다.
+          남성 6,039 · 여성 3,840 · 좀비 88 · 유인원 24 ·
+          외계인은 <span class="kw-success">9개뿐</span>이다.
         </div>
       </div>
     </div>
 
     <p class="prob-stmt">
       한계에서 나온 방식이 지금은 하나의 양식이 되었다.
-      2021년에는 이 중 한 점이 <b>1,180만 달러</b>에 팔렸다.
+      2021년에는 외계인 한 점('코비드 에일리언')이 <b>1,180만 달러</b>에 팔렸다.
     </p>
     <aside class="notes">가볍게 읽는 장이다. 해상도가 낮다는 것이 무엇을 뜻하는지 2차시 5장과 이어 주면 좋다 — 칸이 크면 각져 보이는데, 그것을 오히려 양식으로 삼은 것이 픽셀 아트다. NFT나 가격 이야기는 흥미 유발까지만 하고 깊이 들어가지 않는다. 발행 수량이 적을수록 비싸다는 것 정도.</aside>
   </section>
@@ -577,9 +636,18 @@
     if (b1) b1.addEventListener('click', function () {
       cells.forEach(function (c) { c.textContent = c.dataset.v; });
     });
+    var mtx = document.getElementById('p3Mtx');
+    var b3 = document.getElementById('btnBwMtx');
+    var note = document.getElementById('p3Note');
+    if (b3 && mtx) b3.addEventListener('click', function () {
+      mtx.classList.add('visible');
+      if (note) note.classList.add('visible');
+    });
     var b2 = document.getElementById('btnBwHide');
     if (b2) b2.addEventListener('click', function () {
       cells.forEach(function (c) { c.textContent = ''; });
+      if (mtx) mtx.classList.remove('visible');
+      if (note) note.classList.remove('visible');
     });
   })();
 </script>
