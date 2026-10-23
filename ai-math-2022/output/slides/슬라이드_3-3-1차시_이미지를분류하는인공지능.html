@@ -36,12 +36,12 @@
 
     .prob-stmt { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
                  line-height: 1.6; margin: var(--lm-space-3) 0 0; }
-    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-small); line-height: 1.5; }
+    .reveal .slides section .prob-stmt.sm { font-size: var(--lm-slide-body); line-height: 1.5; }
 
     .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
                   border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
     .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
-    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-body);
                     line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
     .plain-card p:last-child { margin-bottom: 0; }
 
@@ -138,7 +138,7 @@
     .qlist li { border: var(--lm-border-thin) solid var(--lm-rule);
                 border-radius: var(--lm-radius-md); background: var(--lm-page);
                 padding: var(--lm-space-2) var(--lm-space-4); margin-bottom: var(--lm-space-2);
-                cursor: pointer; font-size: var(--lm-slide-small);
+                cursor: pointer; font-size: var(--lm-slide-body);
                 line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
     .qlist li .ans { visibility: hidden; margin-top: var(--lm-space-2);
                      padding-top: var(--lm-space-2);
@@ -162,7 +162,7 @@
                  font-size: var(--lm-slide-small); background: var(--lm-page);
                  border: var(--lm-border-thin) solid var(--lm-rule); border-radius: var(--lm-radius-md);
                  padding: var(--lm-space-3) var(--lm-space-5); margin-top: var(--lm-space-3); }
-    .tally { border-collapse: collapse; margin-top: var(--lm-space-3); font-size: var(--lm-slide-small); }
+    .tally { border-collapse: collapse; margin-top: var(--lm-space-3); font-size: var(--lm-slide-body); }
     .tally th, .tally td { border: var(--lm-border-thin) solid var(--lm-rule);
                            padding: var(--lm-space-2) var(--lm-space-4); text-align: center; }
     .tally th { background: var(--lm-paper-tint); }
@@ -198,6 +198,7 @@
     .nn-l { stroke: var(--lm-ink-4); stroke-width: 1.5; }
     .nn-svg { overflow: hidden; display: block; margin: 0 auto; }
 
+    .lm-narrow .reveal .slides section > ul#qListCheck { max-width: none; }
   </style>
 </head>
 <body class="lm-narrow" data-subject="ai_math">
@@ -233,7 +234,7 @@
     </div>
 
     <p class="prob-stmt">
-      지난 시간 마지막 문장 — <b>“다음 시간부터는 이미지를 바꾸는 것이 아니라 알아보는 일이다.
+      지난 시간 마지막 문장 — <b>“다음 시간부터는 이미지를 바꾸는 것이 아니라 알아보는 일이다 — Ⅲ-3 이미지를 분류하는 인공지능.
       특징을 일일이 적어 주는 데는 한계가 있다.”</b>
     </p>
 
@@ -304,7 +305,7 @@
     </ul>
 
     <div class="plain-card" style="margin-top: var(--lm-space-4);">
-      <h4><span class="aux-badge">1단원 다시 보기</span>이 규칙, 어디서 봤을까?</h4>
+      <h4><span class="aux-badge">1단원 다시 보기 · 교과서 밖</span>이 규칙, 어디서 봤을까?</h4>
       <p>특징 네 개에 각각 \(1\)을 곱해 더하고(가중합), <b>임곗값 \(h=3\)</b>을 넘는지로 판정한다.</p>
       <p>\(\sigma(x)=1\ (x\ge3),\ \ 0\ (x&lt;3)\) — 1단원에서 만난 <b>퍼셉트론</b>과 같은 모양이다.
         85쪽 준비 학습 ③의 활성화함수도 같은 꼴이었다.</p>
@@ -469,7 +470,7 @@
 
   <!-- 10. 1단원 회수 -->
   <section>
-    <div class="chapter-tag">1단원 · 3-1 다시 보기</div>
+    <div class="chapter-tag">1단원 · 3-1 다시 보기 · 교과서 밖 연결</div>
     <h2>다섯 단계 안에 우리가 배운 것이 있다</h2>
 
     <div class="two-col" style="margin-top: var(--lm-space-4);">
@@ -501,8 +502,11 @@
 
     <ul class="qlist" id="qListCheck">
       <li><b>⑴</b> 다음을 지도학습으로 이미지를 분류하는 순서대로 나열하시오.<br>
-        (가) 은닉층의 퍼셉트론이 가중치를 최적화한다 &nbsp; (나) 정답이 대응된 학습용 데이터를 확보한다<br>
-        (다) 새로운 이미지를 입력한다 &nbsp; (라) 행렬의 각 성분을 입력층에 입력한다 &nbsp; (마) 인공지능이 스스로 분류한다
+        <span style="display:grid; grid-template-columns: 1fr 1fr; column-gap: var(--lm-space-5);">
+          <span>(가) 은닉층의 퍼셉트론이 가중치를 최적화한다</span><span>(나) 정답이 대응된 학습용 데이터를 확보한다</span>
+          <span>(다) 새로운 이미지를 입력한다</span><span>(라) 행렬의 각 성분을 입력층에 입력한다</span>
+          <span>(마) 인공지능이 스스로 분류한다</span>
+        </span>
         <div class="ans">(나) → (라) → (가) → (다) → (마) &nbsp;— 교과서 103쪽 ❶~❺</div></li>
       <li><b>⑵</b> 분류 기준을 사람이 모두 알고리즘으로 만들기 어려운 까닭은 무엇인가?
         <div class="ans">이미지의 종류가 다양하면 고려해야 할 분류 기준이 수없이 많아지기 때문이다. → 딥러닝으로 인공신경망을 학습시켜 극복한다.</div></li>
@@ -528,12 +532,12 @@
       </div>
     </div>
 
-    <div class="row-gap" style="margin-top: var(--lm-space-5);">
-      <div class="led" data-c="26" data-m="01110;10001;11000;00110;10001;10001;01110"></div>
-      <div style="font-size: var(--lm-slide-body); color: var(--lm-ink-2);">이 전광판의 숫자는 <b>0</b>일까, <b>6</b>일까?</div>
+    <div class="row-gap" style="margin-top: var(--lm-space-5); gap: var(--lm-space-7);">
+      <div class="led" data-c="44" data-m="01110;10001;11000;00110;10001;10001;01110"></div>
+      <div style="font-size: var(--lm-slide-h3); color: var(--lm-ink); font-weight: 600;">이 전광판의 숫자는<br><b>0</b>일까, <b>6</b>일까?</div>
     </div>
 
-    <p class="prob-stmt">
+    <p class="prob-stmt" style="margin-top: var(--lm-space-6);">
       다음 시간에는 <b>숫자 이미지를 행렬로 바꾸고, 다른 칸이 몇 개인지 세어</b> 닮은 정도를 잰다.
     </p>
     <aside class="notes">오른쪽 전광판은 교과서 105쪽의 '잘못 표시된 숫자 이미지 X'다. 학생에게 0인지 6인지 손을 들게 하고 답은 주지 않는다 — 다음 시간에 해밍 거리로 직접 가린다. 마지막 문장을 다음 차시 '지난 시간' 장에서 그대로 다시 읽는다.</aside>
