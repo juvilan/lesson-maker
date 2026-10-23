@@ -40,7 +40,7 @@
     .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
                   border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
     .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
-    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-body);
                     line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
     .plain-card p:last-child { margin-bottom: 0; }
 
@@ -50,9 +50,9 @@
              border-radius: var(--lm-radius-sm); width: max-content;
              outline: 6px solid var(--lm-ink-2); margin: 0 auto; }
     .kgrid.g4 { grid-template-columns: repeat(4, 52px); }
-    .kgrid.g4 i { display: block; height: 52px; }
-    .kgrid i.on { background: #ffffff; }
-    .kgrid i.off { background: #111111; }
+    .kgrid i { display: block; aspect-ratio: 1; }
+    .kgrid i.on { background: var(--lm-page); }
+    .kgrid i.off { background: var(--lm-ink); }
 
     .trio { display: flex; gap: var(--lm-space-5); justify-content: center;
             align-items: center; margin-top: var(--lm-space-3); }
@@ -143,7 +143,7 @@
 
   <!-- 3. 생각 열기 -->
   <section>
-    <div class="chapter-tag">교과서 95쪽 · 생각 열기</div>
+    <div class="chapter-tag">교과서 95쪽</div>
     <h2>한 칸 옆으로</h2>
 
     <p class="prob-stmt">
@@ -154,19 +154,19 @@
     <div class="trio">
       <div class="col">
         <div class="cap">원래</div>
-        <div class="kgrid" style="grid-template-columns: repeat(6, 46px);">
-          <i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i>
-          <i class="off" style="height:46px"></i><i class="on" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i>
-          <i class="off" style="height:46px"></i><i class="on" style="height:46px"></i><i class="on" style="height:46px"></i><i class="on" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i>
+        <div class="kgrid" style="grid-template-columns: repeat(6, 64px);">
+          <i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i>
+          <i class="off"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i>
+          <i class="off"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i>
         </div>
       </div>
       <div class="arrow">→</div>
       <div class="col">
         <div class="cap">옮긴 뒤</div>
-        <div class="kgrid" style="grid-template-columns: repeat(6, 46px);">
-          <i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i>
-          <i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="on" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="off" style="height:46px"></i>
-          <i class="off" style="height:46px"></i><i class="off" style="height:46px"></i><i class="on" style="height:46px"></i><i class="on" style="height:46px"></i><i class="on" style="height:46px"></i><i class="off" style="height:46px"></i>
+        <div class="kgrid" style="grid-template-columns: repeat(6, 64px);">
+          <i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i>
+          <i class="off"></i><i class="off"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i>
+          <i class="off"></i><i class="off"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i>
         </div>
       </div>
     </div>
@@ -184,19 +184,19 @@
     <ul class="objective-list">
       <li><span class="num">1</span><span><span class="kw">행렬의 곱</span>을 정의대로 계산할 수 있다.</span></li>
       <li><span class="num">2</span><span>\(S_n\)과 \(T_n\)을 <span class="kw">오른쪽에서 곱해</span> 이미지를 좌우로 옮길 수 있다.</span></li>
-      <li><span class="num">3</span><span><span class="kw">곱하는 쪽이 달라지면</span> 결과도 달라짐을 설명할 수 있다.</span></li>
+      <li><span class="num">3</span><span><span class="kw">앞에서 곱하느냐 뒤에서 곱하느냐</span>에 따라 이동 방향이 달라짐을 설명할 수 있다.</span></li>
     </ul>
 
     <div class="warning-box" style="margin-top: var(--lm-space-4);">
       목표 3번이 오늘의 핵심이다 —
-      <span class="kw-danger">행렬의 곱은 순서를 바꾸면 결과가 달라진다.</span>
+      <span class="kw-danger">곱하는 자리(앞·뒤)가 그림이 움직이는 방향을 정한다.</span>
     </div>
-    <aside class="notes">교환법칙이 성립하지 않는다는 말을 여기서 미리 던져 둔다. 수의 곱셈에서는 3×5와 5×3이 같지만 행렬은 다르다. 그것을 추상적으로 외우게 하지 말고 12장에서 그림이 다른 방향으로 움직이는 것으로 체감시킨다.</aside>
+    <aside class="notes">오늘 쓰는 S₄·T₄(뒤)와 S₃·T₃(앞)는 크기가 다른 행렬이고, K(3×4)에 S₄를 앞에서 곱하는 것은 크기가 맞지 않아 아예 정의되지 않는다. 그러니 "같은 행렬을 앞뒤로 바꿔 곱했다"고 말하지 않도록 주의한다. 오늘의 요점은 "곱하는 자리가 방향을 정한다"이고, 12장에서 그림이 위아래로 움직이는 것으로 체감시킨다. 행렬의 곱에서 교환법칙이 일반적으로 성립하지 않는다는 사실은 공통수학1에서 배운 것으로 짧게만 상기시킨다.</aside>
   </section>
 
   <!-- 5. 행렬의 곱 정의 -->
   <section>
-    <div class="chapter-tag">교과서 96쪽 · 정의</div>
+    <div class="chapter-tag">교과서 96쪽</div>
     <h2>행 하나와 열 하나를 맞물린다</h2>
 
     <div class="definition-box">
@@ -206,13 +206,16 @@
       <span class="kw">\(A\)와 \(B\)의 곱</span>이라 하고 \(AB\)로 쓴다.
     </div>
 
-    <div class="result-box" style="margin-top: var(--lm-space-4);">
-      \(m\times k\) 행렬과 \(k\times n\) 행렬의 곱은 <b>\(m\times n\) 행렬</b>이다.
+    <div class="formula-box" style="margin-top: var(--lm-space-3); font-size: var(--lm-slide-small); padding-top: var(--lm-space-2); padding-bottom: var(--lm-space-2);">
+      예: \(A=\begin{pmatrix}a_{11}&a_{12}&a_{13}\\a_{21}&a_{22}&a_{23}\end{pmatrix}\),
+      \(B=\begin{pmatrix}b_{11}&b_{12}\\b_{21}&b_{22}\\b_{31}&b_{32}\end{pmatrix}\) 이면
+      \[ AB=\begin{pmatrix}a_{11}b_{11}+a_{12}b_{21}+a_{13}b_{31} & a_{11}b_{12}+a_{12}b_{22}+a_{13}b_{32}\\
+      a_{21}b_{11}+a_{22}b_{21}+a_{23}b_{31} & a_{21}b_{12}+a_{22}b_{22}+a_{23}b_{32}\end{pmatrix} \]
     </div>
 
-    <div class="warning-box" style="margin-top: var(--lm-space-3);">
-      가운데 \(k\)가 <b>맞아야</b> 곱할 수 있다.
-      앞 행렬의 <span class="kw-danger">열의 수</span>와 뒤 행렬의 <span class="kw-danger">행의 수</span>가 같아야 한다.
+    <div class="result-box" style="margin-top: var(--lm-space-3);">
+      \(m\times k\) 행렬과 \(k\times n\) 행렬의 곱은 <b>\(m\times n\) 행렬</b>이다.
+      가운데 \(k\)(앞 행렬의 <b>열의 수</b> = 뒤 행렬의 <b>행의 수</b>)가 맞아야 곱할 수 있다.
     </div>
     <aside class="notes">크기 조건을 먼저 확인하는 습관을 들인다. 곱을 계산하기 전에 "곱할 수 있나"부터 묻는 것이다. 결과의 크기가 바깥 두 수(m과 n)로 정해진다는 것도 손가락으로 짚어 주면 기억에 남는다.</aside>
   </section>
@@ -272,7 +275,7 @@
           \(\begin{pmatrix}-11\\-1\\2\\4\end{pmatrix}\)</div></li>
     </ul>
 
-    <aside class="notes">계산하기 전에 결과의 크기부터 적어 두라고 일러 준다 — ⑴은 3×2, ⑵는 4×1이다. 크기를 먼저 적어 두면 성분을 몇 개 구해야 하는지가 분명해져 실수가 준다. ⑵는 뒤가 열 하나뿐이라 결과도 열 하나인데, 이 모양이 다음 단원의 인공신경망에서 계속 나온다. 시간이 부족하면 ⑴만 하고 ⑵는 숙제로 돌린다.</aside>
+    <aside class="notes">계산하기 전에 결과의 크기부터 적어 두라고 일러 준다 — ⑴은 3×2, ⑵는 4×1이다. 크기를 먼저 적어 두면 성분을 몇 개 구해야 하는지가 분명해져 실수가 준다. ⑵는 뒤가 열 하나뿐이라 결과도 열 하나다. 시간이 부족하면 ⑴만 하고 ⑵는 숙제로 돌린다.</aside>
   </section>
 
   <!-- 8. 그림 1과 K -->
@@ -325,19 +328,19 @@
     <div class="trio">
       <div class="col">
         <div class="cap">[그림 1]</div>
-        <div class="kgrid g4" style="grid-template-columns: repeat(4, 40px);">
-          <i class="off" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i>
-          <i class="off" style="height:40px"></i><i class="on" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i>
-          <i class="off" style="height:40px"></i><i class="on" style="height:40px"></i><i class="on" style="height:40px"></i><i class="off" style="height:40px"></i>
+        <div class="kgrid g4" style="grid-template-columns: repeat(4, 60px);">
+          <i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i>
+          <i class="off"></i><i class="on"></i><i class="off"></i><i class="off"></i>
+          <i class="off"></i><i class="on"></i><i class="on"></i><i class="off"></i>
         </div>
       </div>
       <div class="arrow">→</div>
       <div class="col">
         <div class="cap">\(KS_4\)</div>
-        <div class="kgrid g4" style="grid-template-columns: repeat(4, 40px);">
-          <i class="off" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i>
-          <i class="off" style="height:40px"></i><i class="off" style="height:40px"></i><i class="on" style="height:40px"></i><i class="off" style="height:40px"></i>
-          <i class="off" style="height:40px"></i><i class="off" style="height:40px"></i><i class="on" style="height:40px"></i><i class="on" style="height:40px"></i>
+        <div class="kgrid g4" style="grid-template-columns: repeat(4, 60px);">
+          <i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i>
+          <i class="off"></i><i class="off"></i><i class="on"></i><i class="off"></i>
+          <i class="off"></i><i class="off"></i><i class="on"></i><i class="on"></i>
         </div>
         <div class="sub"><span class="kw-success">오른쪽</span>으로 한 픽셀</div>
       </div>
@@ -363,19 +366,19 @@
     <div class="trio">
       <div class="col">
         <div class="cap">[그림 1]</div>
-        <div class="kgrid g4" style="grid-template-columns: repeat(4, 40px);">
-          <i class="off" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i>
-          <i class="off" style="height:40px"></i><i class="on" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i>
-          <i class="off" style="height:40px"></i><i class="on" style="height:40px"></i><i class="on" style="height:40px"></i><i class="off" style="height:40px"></i>
+        <div class="kgrid g4" style="grid-template-columns: repeat(4, 60px);">
+          <i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i>
+          <i class="off"></i><i class="on"></i><i class="off"></i><i class="off"></i>
+          <i class="off"></i><i class="on"></i><i class="on"></i><i class="off"></i>
         </div>
       </div>
       <div class="arrow">→</div>
       <div class="col">
         <div class="cap">\(KT_4\)</div>
-        <div class="kgrid g4" style="grid-template-columns: repeat(4, 40px);">
-          <i class="off" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i>
-          <i class="on" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i>
-          <i class="on" style="height:40px"></i><i class="on" style="height:40px"></i><i class="off" style="height:40px"></i><i class="off" style="height:40px"></i>
+        <div class="kgrid g4" style="grid-template-columns: repeat(4, 60px);">
+          <i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i>
+          <i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i>
+          <i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i>
         </div>
         <div class="sub"><span class="kw-success">왼쪽</span>으로 한 픽셀</div>
       </div>
@@ -385,7 +388,7 @@
 
   <!-- 11. 정리 -->
   <section>
-    <div class="chapter-tag">여기까지 정리</div>
+    <div class="chapter-tag">여기까지 정리 · 생각해 보기</div>
     <h2>뒤에서 곱하면 좌우로 움직인다</h2>
 
     <div class="sides">
@@ -424,16 +427,16 @@
     <ul class="qlist compact" id="qList4">
       <li><b>⑴ \(S_3K\)</b> — 계산하고 그림으로 그려 보자.
         <div class="ans">\(\begin{pmatrix}0&255&0&0\\0&255&255&0\\0&0&0&0\end{pmatrix}\)
-          &nbsp;→&nbsp; <b>위쪽</b>으로 한 픽셀</div></li>
+          &nbsp;→&nbsp; <span class="kgrid" style="display:inline-grid; vertical-align:middle; grid-template-columns: repeat(4, 44px); grid-auto-rows: 44px;"><i class="off"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></span> &nbsp;<b>위쪽</b>으로 한 픽셀</div></li>
       <li><b>⑵ \(T_3K\)</b> — 계산하고 그림으로 그려 보자.
         <div class="ans">\(\begin{pmatrix}0&0&0&0\\0&0&0&0\\0&255&0&0\end{pmatrix}\)
-          &nbsp;→&nbsp; <b>아래쪽</b>으로 한 픽셀</div></li>
+          &nbsp;→&nbsp; <span class="kgrid" style="display:inline-grid; vertical-align:middle; grid-template-columns: repeat(4, 44px); grid-auto-rows: 44px;"><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="on"></i><i class="off"></i><i class="off"></i></span> &nbsp;<b>아래쪽</b>으로 한 픽셀</div></li>
     </ul>
 
     <div class="info-box" style="margin-top: var(--lm-space-2);">
       <b>먼저 직접 계산한 뒤에</b> 문항을 눌러 답을 확인하자.
     </div>
-    <aside class="notes">답을 미리 열지 않는다. 학생이 계산해서 위아래로 움직인다는 것을 스스로 발견하는 것이 이 문제의 설계다. 힌트가 필요하면 "S3의 1행은 (0,1,0)이니 K의 몇 행을 데려올까"만 물어 준다. 다 하고 나서 11장의 예상과 맞춰 본다.</aside>
+    <aside class="notes">답을 미리 열지 않는다. 학생이 계산해서 위아래로 움직인다는 것을 스스로 발견하는 것이 이 문제의 설계다. 힌트가 필요하면 "S3의 1행은 (0,1,0)이니 K의 몇 행을 데려올까"만 물어 준다. 다 하고 나서 11장의 예상과 맞춰 본다. 시간이 빠듯하면 ⑴은 함께 풀고 ⑵는 짝 활동이나 숙제로 돌린다 — "1행은 K의 몇 행을 데려오나?"만 짚어 주면 된다.</aside>
   </section>
 
   <!-- 13. 오늘 한 줄 -->
@@ -453,14 +456,14 @@
     </div>
 
     <div class="result-box" style="margin-top: var(--lm-space-4);">
-      같은 행렬을 곱해도 <span class="kw-success">앞이냐 뒤냐에 따라 결과가 다르다.</span>
-      행렬의 곱은 순서를 바꿀 수 없다.
+      <span class="kw-success">곱하는 자리가 방향을 정한다</span> — \(K\)의 뒤에 곱한 \(S_4,\ T_4\)는 좌우로,
+      앞에 곱한 \(S_3,\ T_3\)는 위아래로 그림을 옮겼다.
     </div>
 
     <p class="prob-stmt">
       다음 시간에는 그림을 <b>뒤집는다</b> — 대칭이동과 전치행렬이다.
     </p>
-    <aside class="notes">교환법칙이 성립하지 않는다는 추상적 사실을 오늘은 그림이 다른 방향으로 움직이는 것으로 배웠다. 그 점을 한 번 더 말해 주고 닫는다. 다음 차시의 F 행렬과 전치행렬도 같은 방식으로, 곱하는 자리에 따라 결과가 달라진다.</aside>
+    <aside class="notes">"곱하는 자리가 방향을 정한다"를 한 번 더 말해 주고 닫는다. 주의: 뒤에 곱한 S₄와 앞에 곱한 S₃는 서로 다른 행렬이다(크기가 다르다). 다음 차시의 대칭이동 행렬 F도 앞에 곱하느냐 뒤에 곱하느냐로 상하·좌우가 갈린다. 전치행렬은 곱셈이 아니라 행과 열을 바꾸는 것이다.</aside>
   </section>
 
 </div>
