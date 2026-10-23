@@ -40,18 +40,22 @@
     .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
                   border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
     .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
-    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-body);
                     line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
     .plain-card p:last-child { margin-bottom: 0; }
 
     /* 페이드 카드 */
-    .fade-row { display: flex; gap: var(--lm-space-4); justify-content: center;
+    .fade-row { display: flex; gap: var(--lm-space-6); justify-content: center;
                 margin-top: var(--lm-space-4); }
     .fade-card { text-align: center; }
-    .fade-card b { display: block; width: 158px; height: 110px;
+    .fade-dir { display: flex; justify-content: space-between; width: 1170px; margin: var(--lm-space-3) auto 0;
+                font-size: var(--lm-slide-body); font-weight: 700; color: var(--lm-accent); }
+    .fade-ans { opacity: 0; transition: opacity .3s ease; }
+    .fade-ans.visible { opacity: 1; }
+    .fade-card b { display: block; width: 260px; height: 170px;
                    border: var(--lm-border-thin) solid var(--lm-rule);
                    border-radius: var(--lm-radius-sm); margin-bottom: var(--lm-space-2); }
-    .fade-card span { font-size: var(--lm-slide-small); color: var(--lm-ink-2);
+    .fade-card span { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
                       font-variant-numeric: tabular-nums; }
 
     /* 행렬 */
@@ -89,15 +93,26 @@
     .kctl .v { text-align: right; font-weight: 700; color: var(--lm-accent);
                font-variant-numeric: tabular-nums; }
 
+    /* 8장 컬러 예시 — 고양이 5×5 조각의 실수배 */
+    .pk-row { display: flex; gap: var(--lm-space-6); align-items: flex-end; }
+    .pk { text-align: center; font-size: var(--lm-slide-body); }
+    .pk-grid { display: grid; grid-template-columns: repeat(5, 42px); grid-auto-rows: 42px; gap: 0;
+               border: var(--lm-border-thin) solid var(--lm-rule); margin-bottom: var(--lm-space-2); }
+    .pk-grid i { display: block; }
+    .pk-cap { font-size: var(--lm-slide-body); color: var(--lm-ink-2); margin-top: var(--lm-space-2); }
+
     /* 문제 1 */
-    .q1 { display: flex; gap: var(--lm-space-6); justify-content: center;
-          margin-top: var(--lm-space-4); }
-    .q1 .item { text-align: center; cursor: pointer; }
-    .q1 .item .kv { font-size: var(--lm-slide-body); font-weight: 700;
-                    margin-bottom: var(--lm-space-2); }
-    .q1 .item .why { font-size: var(--lm-slide-small); color: var(--lm-ink-3);
-                     margin-top: var(--lm-space-2); opacity: 0; transition: opacity .2s; }
-    .q1 .item.on .why { opacity: 1; }
+    .q1-top { display: flex; gap: var(--lm-space-6); align-items: center; margin-top: var(--lm-space-3); }
+    .q1-cap { font-size: var(--lm-slide-body); color: var(--lm-ink-2); margin-top: var(--lm-space-2); }
+    .q1m { width: 1080px; margin: var(--lm-space-4) auto 0; }
+    .q1-row { display: grid; grid-template-columns: repeat(3, 1fr); justify-items: center; text-align: center; }
+    .q1-lab { font-size: var(--lm-slide-body-lg); }
+    .q1m svg { display: block; width: 1080px; height: 100px; overflow: hidden; }
+    .q1m svg .dot { fill: var(--lm-ink); }
+    .q1m svg .link { stroke: var(--lm-accent); stroke-width: 4; opacity: 0; transition: opacity .3s ease; }
+    .q1m .why { font-size: var(--lm-slide-body); color: var(--lm-ink-2); margin-top: var(--lm-space-2);
+                opacity: 0; transition: opacity .3s ease; }
+    .q1m.revealed svg .link, .q1m.revealed .why { opacity: 1; }
   </style>
 </head>
 
@@ -153,9 +168,14 @@
       경복궁을 찍은 영상의 일부다. 표시된 부분의 한 픽셀의 색상 정보가 이렇게 바뀌었다.
     </p>
 
+    <div class="fade-dir"><span>← 페이드 인</span><span>페이드 아웃 →</span></div>
     <div class="fade-row" id="fadeRow"></div>
 
-    <div class="two-col" style="margin-top: var(--lm-space-5);">
+    <div class="anim-controls" style="margin-top: var(--lm-space-4);">
+      <button class="anim-btn" id="btnFade">답 보기</button>
+    </div>
+
+    <div class="two-col fade-ans" id="fadeAns" style="margin-top: var(--lm-space-4);">
       <div class="plain-card">
         <h4>페이드 인 <span style="color:var(--lm-ink-3)">(어두움 → 밝음)</span></h4>
         <p>세 채널값이 모두 <b>255에 가까워진다</b></p>
@@ -165,7 +185,7 @@
         <p>세 채널값이 모두 <b>0에 가까워진다</b></p>
       </div>
     </div>
-    <aside class="notes">네 색상 정보를 소리 내어 읽게 한다. 248 → 156 → 90 → 47로 줄어드는 것이 보이면 답은 저절로 나온다. 교과서는 오른쪽에서 왼쪽이 페이드 인, 왼쪽에서 오른쪽이 페이드 아웃이다. 화면에서는 왼쪽이 밝은 것부터 놓았으니 방향을 헷갈리지 않게 짚어 준다.</aside>
+    <aside class="notes">네 색상 정보를 소리 내어 읽게 한다. 248 → 156 → 90 → 47로 줄어드는 것이 보이면 답은 저절로 나온다. 교과서는 오른쪽에서 왼쪽이 페이드 인, 왼쪽에서 오른쪽이 페이드 아웃이다. 화면도 교과서처럼 왼쪽이 밝은 것부터이고, 그 위에 "← 페이드 인 / 페이드 아웃 →" 화살표를 붙였다. 아래 두 카드는 학생이 답한 뒤 "답 보기"로 띄운다.</aside>
   </section>
 
   <!-- 4. 오늘 도착할 곳 -->
@@ -230,7 +250,7 @@
     </div>
 
     <p class="prob-stmt">
-      ②가 뜻하는 것 — <b>아무리 크게 곱해도 흰색보다 밝아질 수는 없다.</b>
+      ②가 뜻하는 것 <span style="color:var(--lm-ink-3)">(해석, 교과서 밖)</span> — <b>아무리 크게 곱해도 흰색보다 밝아질 수는 없다.</b>
     </p>
     <aside class="notes">이 규칙을 모르고 다음 장으로 가면 2K의 첫 성분에서 반드시 막힌다. 400이라고 답하는 학생이 나오면 오히려 좋다 — 그 자리에서 방주를 읽어 주면 기억에 남는다. ②의 해석("흰색보다 밝을 수는 없다")은 교과서에 없지만 직관을 잡아 준다.</aside>
   </section>
@@ -280,21 +300,31 @@
 
     <div class="formula-box" style="margin-top: var(--lm-space-4); text-align: left;">
       <b>(ⅰ)</b> \(0&lt;k&lt;1\)인 경우 : 이미지 \(\mathrm{P}_k\)는 이미지 \(\mathrm{P}\)보다
-      <span class="kw">어두워진다.</span><br><br>
+      <span class="kw">어두워진다.</span><br>
       <b>(ⅱ)</b> \(k&gt;1\)인 경우 : 이미지 \(\mathrm{P}_k\)는 이미지 \(\mathrm{P}\)보다
       <span class="kw">밝아진다.</span>
     </div>
 
-    <div class="info-box" style="margin-top: var(--lm-space-4);">
-      컬러도 마찬가지다. <b>세 행렬에 똑같이 \(k\)를 곱하면</b> 된다 —
-      세 채널이 같은 비율로 변하므로 색은 유지되고 밝기만 바뀐다.
+    <div style="display:flex; gap: var(--lm-space-6); align-items: center; margin-top: var(--lm-space-4);">
+      <div>
+        <div class="pk-row">
+          <div class="pk"><div class="pk-grid" data-k="0.5"></div>\(\mathrm{P}_{0.5}\)</div>
+          <div class="pk"><div class="pk-grid" data-k="1"></div>\(\mathrm{P}\)</div>
+          <div class="pk"><div class="pk-grid" data-k="1.5"></div>\(\mathrm{P}_{1.5}\)</div>
+        </div>
+        <div class="pk-cap">교과서의 새(鳥) 사진 대신 3-1-2 고양이 사진 조각(5×5)으로 계산 (교과서 밖)</div>
+      </div>
+      <div class="info-box" style="margin: 0; flex: 1;">
+        컬러도 마찬가지다. <b>세 행렬에 똑같이 \(k\)를 곱하면</b> 된다 —
+        세 채널이 같은 비율로 변하므로 색은 유지되고 밝기만 바뀐다.
+      </div>
     </div>
-    <aside class="notes">흑백으로 익힌 것을 컬러로 넓히는 장이다. "색이 유지된다"는 점을 짚어 주면 좋다 — 세 값의 비율이 그대로이기 때문이다. 교과서 93쪽 아래 새 사진 세 장이 그 예시다. k=1이면 아무 변화가 없다는 것도 물어보면 재미있다.</aside>
+    <aside class="notes">흑백으로 익힌 것을 컬러로 넓히는 장이다. "색이 유지된다"는 점을 짚어 주면 좋다 — 세 값의 비율이 그대로이기 때문이다. 교과서 93쪽 아래 새(鳥) 사진 세 장이 그 예시인데, 화면에는 사진 대신 3-1-2차시 고양이 사진 조각(교과서 89쪽 값)에 0.5, 1, 1.5를 곱한 결과를 그렸다 — 학생에게 교과서 사진도 함께 보게 한다. k=1이면 아무 변화가 없다는 것도 물어보면 재미있다.</aside>
   </section>
 
   <!-- 9. k 조절 -->
   <section>
-    <div class="chapter-tag">직접 해 보기</div>
+    <div class="chapter-tag">직접 해 보기 · 교과서 밖</div>
     <h2>\(k\)를 움직여 보자</h2>
 
     <div class="trio" style="margin-top: var(--lm-space-3);">
@@ -318,7 +348,7 @@
     <div class="result-box" style="margin-top: var(--lm-space-4);" id="kSay">
       \(k=1\) — 원본 그대로다.
     </div>
-    <aside class="notes">슬라이더를 0.1부터 3.0까지 움직인다. k를 키우면 성분이 하나씩 255에 도달해 붉게 표시되는데, 계속 키워도 더는 밝아지지 않는 순간이 온다 — 앞 장에서 말한 "흰색보다 밝아질 수 없다"가 눈앞에서 확인된다. k를 0에 가깝게 하면 검은색으로 수렴한다.</aside>
+    <aside class="notes">슬라이더를 0부터 3.0까지 움직인다. k를 키우면 성분이 하나씩 255에 도달해 붉게 표시되는데, 그 칸은 계속 키워도 더는 밝아지지 않는다(가장 작은 83은 k=3에서도 249라 모든 칸이 255가 되지는 않는다) — 앞 장에서 말한 "흰색보다 밝아질 수 없다"가 눈앞에서 확인된다. k를 0에 가깝게 하면 검은색으로 수렴한다.</aside>
   </section>
 
   <!-- 10. 문제 1 -->
@@ -326,37 +356,41 @@
     <div class="chapter-tag">교과서 93쪽 · 문제 1</div>
     <h2>어느 것이 어느 것일까</h2>
 
-    <p class="prob-stmt">
-      왼쪽이 원본 \(K\)다. \(k=0.5,\ 2,\ 3\)일 때의 이미지를 골라 보자. 눌러서 확인.
-    </p>
-
-    <div class="q1" id="q1">
-      <div class="item" data-k="1">
-        <div class="kv" style="color:var(--lm-ink-3)">원본 \(K\)</div>
-        <div class="kgrid q1g"></div>
-        <div class="why">기준</div>
-      </div>
-      <div class="item" data-k="0.5">
-        <div class="kv">\(k=0.5\)</div>
-        <div class="kgrid q1g"></div>
-        <div class="why">\(0&lt;k&lt;1\) — 어두워진다</div>
-      </div>
-      <div class="item" data-k="2">
-        <div class="kv">\(k=2\)</div>
-        <div class="kgrid q1g"></div>
-        <div class="why">\(k&gt;1\) — 밝아진다</div>
-      </div>
-      <div class="item" data-k="3">
-        <div class="kv">\(k=3\)</div>
-        <div class="kgrid q1g"></div>
-        <div class="why">\(2&lt;3\) — \(2K\)보다 더 밝다</div>
+    <div class="q1-top">
+      <p class="prob-stmt" style="margin:0; flex:1;">
+        오른쪽 흑백 이미지를 변환한 행렬 \(K\)에 대하여 양수 \(k\)의 값과
+        행렬 \(kK\)가 나타내는 이미지로 가장 적절한 것끼리 선으로 연결하시오.
+      </p>
+      <div style="text-align:center;">
+        <div class="kgrid" id="q1K"></div>
+        <div class="q1-cap">\(K\) (값은 그림 밝기로 어림, 교과서 밖)</div>
       </div>
     </div>
 
-    <div class="info-box" style="margin-top: var(--lm-space-4);">
-      \(2&lt;3\)이므로 \(3K\)가 나타내는 이미지가 \(2K\)보다 <span class="kw-info">더 밝다.</span>
+    <div class="q1m" id="q1m">
+      <div class="q1-row q1-lab">
+        <span>\(k=0.5\)</span><span>\(k=2\)</span><span>\(k=3\)</span>
+      </div>
+      <svg viewBox="0 0 1080 100" preserveAspectRatio="xMidYMid meet">
+        <line class="link" x1="180" y1="12" x2="540" y2="88"/>
+        <line class="link" x1="540" y1="12" x2="900" y2="88"/>
+        <line class="link" x1="900" y1="12" x2="180" y2="88"/>
+        <circle class="dot" cx="180" cy="12" r="8"/><circle class="dot" cx="540" cy="12" r="8"/><circle class="dot" cx="900" cy="12" r="8"/>
+        <circle class="dot" cx="180" cy="88" r="8"/><circle class="dot" cx="540" cy="88" r="8"/><circle class="dot" cx="900" cy="88" r="8"/>
+      </svg>
+      <div class="q1-row">
+        <div><div class="kgrid q1g" data-k="3"></div><div class="why">\(3K\) — 가장 밝다</div></div>
+        <div><div class="kgrid q1g" data-k="0.5"></div><div class="why">\(0.5K\) — 어두워진다</div></div>
+        <div><div class="kgrid q1g" data-k="2"></div><div class="why">\(2K\) — 밝아진다</div></div>
+      </div>
     </div>
-    <aside class="notes">교과서는 선으로 잇는 문제인데, 화면에서는 순서를 섞지 않고 왼쪽부터 어두운 순으로 놓았다. 학생이 스스로 순서를 말하게 한 뒤 눌러 확인시킨다. k=2와 k=3의 차이가 잘 안 보이면 이미 255에 닿은 칸이 있기 때문이다 — 그 점을 물어보면 좋은 토론이 된다.</aside>
+
+    <div class="anim-controls" style="margin-top: var(--lm-space-4);">
+      <button class="anim-btn" id="btnQ1">정답 연결</button>
+    </div>
+    <aside class="notes">교과서 그대로 위에 k 세 개, 아래에 이미지 셋을 섞어 놓았다(교과서와 같은 순서). 학생이 먼저 짚어 답하게 한 뒤 "정답 연결"을 누른다 — 정답및풀이와 같은 선이다: 0.5 → 가운데, 2 → 오른쪽, 3 → 왼쪽.
+    풀이 논리(정답및풀이): 0&lt;0.5&lt;1이라 어두워지고, 2와 3은 밝아지는데 2&lt;3이므로 3K가 더 밝다. 왼쪽 그림에서 하얗게 된 두 칸은 255를 넘어 잘린 칸이다 — 6장 규칙의 복습.
+    교과서는 K의 값을 주지 않는다. 화면의 K = (56 56 56 / 56 105 105)는 교과서 그림의 밝기를 재어 어림한 값이며, 0.5K·2K·3K 그림의 밝기도 이 값과 맞는다.</aside>
   </section>
 
   <!-- 11. 오늘 한 줄 -->
@@ -549,22 +583,51 @@
 </script>
 
 <script>
-  /* 10장 — 문제 1 */
+  /* 3장 — 답 보기 */
   (function () {
-    var box = document.getElementById('q1');
-    if (!box) return;
-    box.querySelectorAll('.item').forEach(function (it) {
-      var k = parseFloat(it.dataset.k);
-      var g = it.querySelector('.q1g');
-      scale(K92, k).forEach(function (row) {
+    var b = document.getElementById('btnFade'), a = document.getElementById('fadeAns');
+    if (b && a) b.addEventListener('click', function () { a.classList.toggle('visible'); });
+  })();
+
+  /* 8장 — 컬러 예시: 교과서 89쪽 고양이 5x5의 R, G, B에 같은 k를 곱한다 */
+  (function () {
+    var CAT = [
+      [[77,82,86,71,68],[75,80,65,59,70],[85,90,81,52,73],[79,84,70,60,77],[80,85,61,72,74]],
+      [[67,72,80,64,59],[58,66,60,48,54],[70,74,61,50,63],[69,73,62,51,67],[64,71,49,60,58]],
+      [[57,63,71,59,48],[50,59,52,37,42],[63,67,45,38,48],[54,61,56,52,57],[51,60,50,45,48]]
+    ];
+    document.querySelectorAll('.pk-grid').forEach(function (g) {
+      var k = parseFloat(g.dataset.k);
+      var S = CAT.map(function (M) { return scale(M, k); });
+      for (var r = 0; r < 5; r++) {
+        for (var c = 0; c < 5; c++) {
+          var el = document.createElement('i');
+          el.style.background = 'rgb(' + S[0][r][c] + ',' + S[1][r][c] + ',' + S[2][r][c] + ')';
+          g.appendChild(el);
+        }
+      }
+    });
+  })();
+
+  /* 10장 — 문제 1 (교과서 93쪽, K는 그림 밝기로 어림한 값) */
+  (function () {
+    var KQ = [[56, 56, 56], [56, 105, 105]];
+    function paint(g, M) {
+      M.forEach(function (row) {
         row.forEach(function (v) {
           var el = document.createElement('i');
           el.style.background = 'rgb(' + v + ',' + v + ',' + v + ')';
           g.appendChild(el);
         });
       });
-      it.addEventListener('click', function () { it.classList.toggle('on'); });
+    }
+    var kg = document.getElementById('q1K');
+    if (kg) paint(kg, KQ);
+    document.querySelectorAll('#q1m .q1g').forEach(function (g) {
+      paint(g, scale(KQ, parseFloat(g.dataset.k)));
     });
+    var m = document.getElementById('q1m'), btn = document.getElementById('btnQ1');
+    if (m && btn) btn.addEventListener('click', function () { m.classList.toggle('revealed'); });
   })();
 </script>
 
