@@ -44,15 +44,46 @@
                     line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
     .plain-card p:last-child { margin-bottom: 0; }
 
-    /* ── 픽셀 격자 (생각 열기) ─────────────────────────────── */
-    .grid-wrap { display: flex; gap: var(--lm-space-7); align-items: center;
-                 margin-top: var(--lm-space-5); }
-    .px-grid { display: grid; grid-template-columns: repeat(13, 48px);
-               gap: 3px; background: var(--lm-rule); padding: 3px;
-               border-radius: var(--lm-radius-sm); flex: none; }
-    .px-grid i { display: block; width: 48px; height: 48px; background: #1d2b3a;
-                 cursor: pointer; transition: background .18s ease; }
-    .px-grid i.on { background: #ffe9a8; }
+    /* ── 픽셀 격자 (생각 열기) — 교과서 86쪽 18×8, 창문 144개 ── */
+    .grid-wrap { display: flex; gap: var(--lm-space-7); align-items: flex-start;
+                 margin-top: var(--lm-space-4); }
+    .grid-wrap figure { margin: 0; }
+    .grid-wrap figcaption { font-size: var(--lm-slide-small); color: var(--lm-ink-3);
+                            margin-top: var(--lm-space-2); }
+    .facade, .px-grid { display: grid; grid-template-columns: repeat(18, 34px);
+                        grid-auto-rows: 40px; gap: 4px; padding: 8px; flex: none;
+                        border-radius: var(--lm-radius-sm); }
+    .facade { background: var(--lm-ink); }
+    .facade i { display: block; background: var(--lm-ink-2); }
+    .facade i.on { background: var(--lm-paper); }
+    .px-grid { background: var(--lm-rule-strong); }
+    .px-grid i { display: block; background: var(--lm-page); cursor: pointer;
+                 transition: background .18s ease; }
+    .px-grid i.on { background: var(--lm-accent); }
+
+    /* ── 채널값 막대 (교과서 87쪽) ────────────────────────── */
+    .bars { display: grid; grid-template-columns: 6em 1fr; gap: var(--lm-space-3) var(--lm-space-4);
+            align-items: center; font-size: var(--lm-slide-body); color: var(--lm-ink-2); }
+    .bars b { display: block; height: 40px; border-radius: var(--lm-radius-sm); }
+    .bars .ends { grid-column: 2; display: flex; justify-content: space-between;
+                  font-size: var(--lm-slide-small); color: var(--lm-ink-3);
+                  font-variant-numeric: tabular-nums; }
+
+    /* ── 문제 1 연결하기 ─────────────────────────────────── */
+    .match { width: 1080px; margin: var(--lm-space-4) auto 0; }
+    .match-row { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center;
+                 font-size: var(--lm-slide-body-lg); font-variant-numeric: tabular-nums; }
+    .match-row .chip-sq { display: block; width: 110px; height: 110px; margin: 0 auto;
+                          border: var(--lm-border-thin) solid var(--lm-rule);
+                          border-radius: var(--lm-radius-sm); }
+    .match svg { display: block; width: 1080px; height: 170px; overflow: hidden; }
+    .match svg .dot { fill: var(--lm-ink); }
+    .match svg .link { stroke: var(--lm-accent); stroke-width: 4; opacity: 0;
+                       transition: opacity .3s ease; }
+    .match.revealed svg .link { opacity: 1; }
+    .match-why { font-size: var(--lm-slide-small); color: var(--lm-ink-2); margin-top: var(--lm-space-2);
+                 opacity: 0; transition: opacity .3s ease; line-height: var(--lm-slide-line-tight); }
+    .match.revealed .match-why { opacity: 1; }
 
     /* ── 색 견본 ──────────────────────────────────────────── */
     .swatch-row { display: flex; gap: var(--lm-space-5); justify-content: center;
@@ -90,8 +121,11 @@
     .qlist li .ans { margin-left: auto; opacity: 0; transition: opacity .2s ease;
                      font-weight: 700; color: var(--lm-accent); }
     .qlist li.revealed .ans { opacity: 1; }
-    .qlist li .chipbox { width: 58px; height: 58px; border-radius: var(--lm-radius-sm);
-                         border: var(--lm-border-thin) solid var(--lm-rule); flex: none; }
+
+    /* 「더 깊이」 — 교과서 밖 보강 장 (3-3-4·4-4-2와 같은 표시) */
+    .deep-badge { display: inline-block; background: var(--lm-info); color: var(--lm-paper);
+                  font-weight: 700; letter-spacing: 0.04em; text-transform: none;
+                  padding: 2px var(--lm-space-3); border-radius: var(--lm-radius-sm); }
   </style>
 </head>
 
@@ -161,7 +195,7 @@
       </div>
       <div class="plain-card">
         <h4>3 · 활성화함수</h4>
-        <p>\(w_1=3\), \(w_2=2\), \(\sigma(x)=1\ (x\ge3)\)</p>
+        <p>\(w_1=3\), \(w_2=2\), \(\sigma(x)=\begin{cases}1 & (x\ge3)\\ 0 & (x&lt;3)\end{cases}\)</p>
         <p><span class="chip chip-accent">Ⅲ-3에서 다시</span></p>
       </div>
     </div>
@@ -200,19 +234,28 @@
     </p>
 
     <div class="grid-wrap">
-      <div class="px-grid" id="heartGrid"></div>
-      <div style="flex:1">
-        <div class="anim-controls" style="margin-bottom: var(--lm-space-4);">
-          <button class="anim-btn" id="btnHeart">조명 켜기</button>
-          <button class="anim-btn" id="btnClear">지우기</button>
-        </div>
-        <div class="info-box">
-          칸을 직접 눌러 켜고 끌 수 있다.<br>
-          <span class="kw-info">창문 = 칸 하나.</span> 이 칸이 오늘의 주인공이다.
-        </div>
+      <figure>
+        <div class="facade" id="facade"></div>
+        <figcaption>건물 정면 — 교과서 86쪽 사진을 단순화한 그림</figcaption>
+      </figure>
+      <figure>
+        <div class="px-grid" id="heartGrid"></div>
+        <figcaption>칸을 눌러 켜고 끌 수 있다</figcaption>
+      </figure>
+    </div>
+
+    <div style="display:flex; gap: var(--lm-space-5); align-items: center; margin-top: var(--lm-space-4);">
+      <div class="anim-controls" style="margin: 0; flex: none;">
+        <button class="anim-btn" id="btnHeart">정답 보기</button>
+        <button class="anim-btn" id="btnClear">지우기</button>
+      </div>
+      <div class="info-box" style="margin: 0; flex: 1;">
+        가로 18칸 · 세로 8칸 — 창문 <b>144개</b>가 곧 <span class="kw-info">144칸짜리 화면</span>이다.
       </div>
     </div>
-    <aside class="notes">교과서 활동을 화면에서 그대로 한다. 학생을 한 명 불러 몇 칸 켜 보게 한 뒤 "조명 켜기"로 완성형을 보여 주면 좋다. 요점은 하트가 아니라 "건물이 격자였다"는 알아챔이다. 창문 하나가 켜지거나 꺼지거나 — 그 최소 단위가 다음 장의 픽셀이다.</aside>
+    <aside class="notes">교과서 활동을 화면에서 그대로 한다. 왼쪽 건물 그림(교과서 사진을 단순화한 것)을 보고 학생 한 명이 오른쪽 격자에 몇 칸 켜 보게 한 뒤 "정답 보기"로 완성형(정답지와 같은 68칸)을 보여 준다. 요점은 하트가 아니라 "건물이 격자였다"는 알아챔이다.
+    배경 이야기(지도서): 2001년 독일 해커 그룹 카오스 컴퓨터 클럽(CCC)이 이 건물 8개 층, 유리창 144개에 램프를 달고 컴퓨터로 켜고 꺼서 건물 전체를 거대한 흑백 화면으로 만들었다. 이름은 '블링켄라이트(Blinkenlights)'. 하트뿐 아니라 애니메이션, 퐁 게임, 문자 메시지까지 띄웠다 — "건물이 모니터가 됐다"고 말해 주면 반응이 좋다.
+    가로 18·세로 8을 세어 보게만 한다. 다음 시간 해상도(가로×세로)를 배울 때 "그 건물은 18×8이었다"고 떠올리게 하면 좋다.</aside>
   </section>
 
   <!-- 6. 픽셀 -->
@@ -271,7 +314,7 @@
         <span>(231, 168, 24)</span>
       </div>
     </div>
-    <aside class="notes">교과서 86쪽 오른쪽의 케이크 사진을 확대하면 나오는 픽셀이 이 색이다. R 231, G 168, B 24. 물감의 삼원색과 빛의 삼원색이 다르다는 점을 묻는 학생이 꼭 있는데, 빛은 섞을수록 밝아진다는 것만 말해 주면 충분하다. 왜 하필 255인지는 다음 단원에서도 안 다룬다 — 궁금해하면 8비트로 표현할 수 있는 수가 256개라고만.</aside>
+    <aside class="notes">교과서 86쪽 오른쪽의 케이크 사진을 확대하면 나오는 픽셀이 이 색이다. R 231, G 168, B 24. 물감의 삼원색과 빛의 삼원색이 다르다는 점을 묻는 학생이 꼭 있는데, 빛은 섞을수록 밝아진다는 것만 말해 주면 충분하다. "왜 하필 255까지?"라는 질문이 나오면 뒤의 「더 깊이」 장에서 답한다고 미뤄 둔다.</aside>
   </section>
 
   <!-- 8. 세 기본색 -->
@@ -294,18 +337,26 @@
       </div>
     </div>
 
-    <div class="info-box" style="margin-top: var(--lm-space-6);">
-      세 채널값이 모두 <b>255에 가까워질수록</b> 흰색에 가까운
-      <span class="kw-info">밝은</span> 색이 되고,<br>
-      모두 <b>0에 가까워질수록</b> 검은색에 가까운
-      <span class="kw-info">어두운</span> 색이 된다.
+    <div class="two-col" style="margin-top: var(--lm-space-6); align-items: center;">
+      <div class="info-box" style="margin: 0;">
+        세 채널값이 모두 <b>255에 가까워질수록</b> 흰색에 가까운
+        <span class="kw-info">밝은</span> 색이 되고,
+        모두 <b>0에 가까워질수록</b> 검은색에 가까운
+        <span class="kw-info">어두운</span> 색이 된다.
+      </div>
+      <div class="bars">
+        <span>R 채널값</span><b style="background: linear-gradient(to right, rgb(0,0,0), rgb(255,0,0));"></b>
+        <span>G 채널값</span><b style="background: linear-gradient(to right, rgb(0,0,0), rgb(0,255,0));"></b>
+        <span>B 채널값</span><b style="background: linear-gradient(to right, rgb(0,0,0), rgb(0,0,255));"></b>
+        <span class="ends"><span>0</span><span>255</span></span>
+      </div>
     </div>
-    <aside class="notes">순서쌍을 읽는 연습을 시킨다. "이 색은 몇 번째 숫자가 큰가"를 물으면 대부분 바로 답한다. 아래 문장은 다음 두 장에서 직접 확인할 내용이라 여기서는 읽고 넘어간다.</aside>
+    <aside class="notes">순서쌍을 읽는 연습을 시킨다. "이 색은 몇 번째 숫자가 큰가"를 물으면 대부분 바로 답한다. 오른쪽 막대는 교과서 87쪽 그림이다 — 한 채널값이 0이면 검은색, 255면 가장 밝은 그 색. 왼쪽 문장은 다음 두 장에서 직접 확인할 내용이라 여기서는 읽고 넘어간다.</aside>
   </section>
 
   <!-- 9. 색 만들기 -->
   <section>
-    <div class="chapter-tag">직접 해 보기</div>
+    <div class="chapter-tag">직접 해 보기 · 교과서 밖 활동</div>
     <h2>숫자 세 개로 색을 만들어 보자</h2>
 
     <div class="mixer">
@@ -342,7 +393,7 @@
       <button class="anim-btn preset" data-c="0,0,0">검은색</button>
       <button class="anim-btn preset" data-c="127,127,127">회색</button>
     </div>
-    <aside class="notes">교사가 몇 개 만들어 보이고 학생에게 주문을 받는다. "노란색을 만들어 봐" 하면 빨강과 초록을 함께 올려야 한다는 것을 발견하게 된다 — 물감과 반대라 놀란다. 세 슬라이더를 같은 값에 맞추면 오른쪽 표시가 '무채색'으로 바뀌는데, 11장의 복선이다. 미리 말하지 말고 학생이 우연히 만들면 그때 짚는다.</aside>
+    <aside class="notes">교사가 몇 개 만들어 보이고 학생에게 주문을 받는다. "노란색을 만들어 봐" 하면 빨강과 초록을 함께 올려야 한다는 것을 발견하게 된다 — 물감과 반대라 놀란다. 세 슬라이더를 같은 값에 맞추면 오른쪽 표시가 '무채색'으로 바뀌는데, 12장의 복선이다. 미리 말하지 말고 학생이 우연히 만들면 그때 짚는다.</aside>
   </section>
 
   <!-- 10. 보기 -->
@@ -368,12 +419,48 @@
     <p class="prob-stmt" style="margin-top: var(--lm-space-6);">
       가운데는 세 값이 모두 <b>240 이상</b>이라 거의 흰색에 가깝고,
       오른쪽은 모두 <b>100 미만</b>이라 어둡다.
-      <span class="kw">값의 크기가 곧 밝기다.</span>
+      <span class="kw">세 값이 모두 클수록 밝고, 모두 작을수록 어둡다.</span>
     </p>
     <aside class="notes">앞 장에서 읽은 규칙을 여기서 적용시킨다. 세 색을 가리며 "이건 밝을까 어두울까"를 먼저 묻고 답을 보이는 편이 낫다. 왼쪽 노랑이 빨강과 초록의 합이라는 것도 9장의 슬라이더와 연결해 짚어 준다.</aside>
   </section>
 
-  <!-- 11. 무채색 -->
+  <!-- 11. 문제 1 -->
+  <section>
+    <div class="chapter-tag">교과서 87쪽 · 문제 1</div>
+    <h2>색상 정보와 색을 이어 보자</h2>
+
+    <p class="prob-stmt">픽셀의 색상 정보와 그 픽셀의 색으로 가장 적절한 것끼리 선으로 연결하시오.</p>
+
+    <div class="match" id="match1">
+      <div class="match-row">
+        <span>(230, 250, 210)</span>
+        <span>(255, 0, 255)</span>
+        <span>(70, 30, 40)</span>
+      </div>
+      <svg viewBox="0 0 1080 170" preserveAspectRatio="xMidYMid meet">
+        <line class="link" x1="180" y1="20" x2="900" y2="150"/>
+        <line class="link" x1="540" y1="20" x2="180" y2="150"/>
+        <line class="link" x1="900" y1="20" x2="540" y2="150"/>
+        <circle class="dot" cx="180" cy="20" r="8"/><circle class="dot" cx="540" cy="20" r="8"/><circle class="dot" cx="900" cy="20" r="8"/>
+        <circle class="dot" cx="180" cy="150" r="8"/><circle class="dot" cx="540" cy="150" r="8"/><circle class="dot" cx="900" cy="150" r="8"/>
+      </svg>
+      <div class="match-row">
+        <div><span class="chip-sq" style="background: rgb(255,0,255);"></span>
+             <div class="match-why">R과 B만 최대, G는 0</div></div>
+        <div><span class="chip-sq" style="background: rgb(70,30,40);"></span>
+             <div class="match-why">세 값이 모두 100 미만 — 어둡다</div></div>
+        <div><span class="chip-sq" style="background: rgb(230,250,210);"></span>
+             <div class="match-why">세 값이 모두 200 이상 — 아주 밝다</div></div>
+      </div>
+    </div>
+
+    <div class="anim-controls" style="margin-top: var(--lm-space-4);">
+      <button class="anim-btn" id="btnMatch">정답 연결</button>
+    </div>
+    <aside class="notes">교과서 그대로, 위에 색상 정보 셋·아래에 색 셋을 섞어 놓았다. 먼저 학생들이 손가락으로 짚어 답하게 한 뒤 "정답 연결"을 누른다(정답및풀이와 같은 선). 단서는 두 가지다 — 큰 값이 어느 채널인가(색상), 값이 전체적으로 큰가 작은가(밝기). 가운데 (255, 0, 255)가 관건이다. 학생이 머뭇거리면 9장 슬라이더로 G를 0, R과 B를 255로 맞춰 직접 만들어 보인다 — 자홍(마젠타)이 나온다.</aside>
+  </section>
+
+  <!-- 12. 무채색 -->
   <section>
     <div class="chapter-tag">교과서 87쪽 · 무채색</div>
     <h2>세 값이 같아지면 색이 사라진다</h2>
@@ -400,37 +487,42 @@
         <p>세 값이 같으면서 1부터 254까지면 모두 <b>회색</b></p>
       </div>
     </div>
-    <aside class="notes">9장 슬라이더로 돌아가 세 값을 같게 맞춰 보이면 색이 빠지는 것이 눈에 보인다. "색상이나 채도는 없고 명도의 차이만 갖는 색"이라는 교과서 방주를 읽어 준다. 여기서 값이 하나로 줄어든다는 점이 다음 차시 흑백 이미지와 행렬 K의 뿌리다 — 예고는 마지막 장에서 한다.</aside>
+    <aside class="notes">9장 슬라이더로 돌아가 세 값을 같게 맞춰 보이면 색이 빠지는 것이 눈에 보인다. "색상이나 채도는 없고 명도의 차이만 갖는 색"이라는 교과서 방주를 읽어 준다. 여기서 값이 하나로 줄어든다는 점이 3-1-3차시 흑백 이미지와 행렬 K의 뿌리다 — 바로 다음 「더 깊이」 장에서 개수로 확인한다.</aside>
   </section>
 
-  <!-- 12. 확인 활동 -->
+  <!-- 13. 더 깊이 — 몇 가지 색인가 -->
   <section>
-    <div class="chapter-tag">교과서 87쪽 · 문제 1</div>
-    <h2>색상 정보와 색을 맞춰 보자</h2>
+    <div class="chapter-tag"><span class="deep-badge">「더 깊이」</span> 교과서 밖 · 지도서 내용 연구</div>
+    <h2>왜 255까지일까, 색은 모두 몇 가지일까</h2>
 
-    <p class="prob-stmt">각 항목을 누르면 답이 나타난다. 먼저 스스로 골라 볼 것.</p>
+    <p class="prob-stmt">각 질문을 누르면 답이 나타난다. 먼저 경우의 수로 따져 볼 것.</p>
 
-    <ul class="qlist" id="qList">
+    <ul class="qlist" id="qDeep">
       <li>
-        <span class="chipbox" style="background: rgb(230,250,210);"></span>
-        <span>(230, 250, 210)</span>
-        <span class="ans">세 값이 모두 210 이상 — 아주 밝은 연두</span>
+        <span>채널값 하나가 가질 수 있는 값은 몇 가지?</span>
+        <span class="ans">\(0\)부터 \(255\)까지 \(256=2^8\)가지 — 8비트(1바이트)</span>
       </li>
       <li>
-        <span class="chipbox" style="background: rgb(255,0,255);"></span>
-        <span>(255, 0, 255)</span>
-        <span class="ans">R과 B만 최대 — 자홍(마젠타)</span>
+        <span>색상 정보 \((R,\ G,\ B)\)는 모두 몇 가지?</span>
+        <span class="ans">\(256\times256\times256=256^3=16{,}777{,}216\)가지</span>
       </li>
       <li>
-        <span class="chipbox" style="background: rgb(70,30,40);"></span>
-        <span>(70, 30, 40)</span>
-        <span class="ans">세 값이 모두 100 미만 — 어두운 자주</span>
+        <span>그중 무채색은 몇 가지?</span>
+        <span class="ans">세 값이 같아야 하므로 \(256\)가지뿐</span>
       </li>
     </ul>
-    <aside class="notes">교과서는 선으로 잇는 문제인데 화면에서는 순서쌍을 먼저 보이고 색을 맞히게 하는 편이 낫다. 두 번째가 관건이다 — 초록을 0으로 두고 빨강과 파랑을 끝까지 올리면 무슨 색이 되는지 9장 슬라이더로 직접 만들어 확인시키면 확실히 남는다.</aside>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);">
+      컬러는 숫자 <b>세 개</b>가 있어야 약 1,677만 색을 가린다.
+      무채색은 세 값이 같으니 <span class="kw-success">숫자 하나면 충분하다.</span>
+    </div>
+    <aside class="notes">교과서 밖 보강이다(지도서 141~142쪽 내용 연구). 시험 범위가 아님을 말해 준다.
+    1번: 컴퓨터는 0과 1(비트)로 저장하고, 8비트 = 1바이트로 나타낼 수 있는 수가 2⁸ = 256개라서 0~255다. 사람이 구분하는 밝기 단계가 약 200~250단계라 256단계면 충분하다는 것도 지도서가 든 이유다.
+    2번: 곱의 법칙. 지도서는 "약 1,670만"이라고 적었는데 정확한 값은 16,777,216이다.
+    3번이 3-1-3차시(흑백 이미지와 행렬 K)로 가는 다리다 — 무채색은 정수 K 하나로 적는다(교과서 88쪽 첫 줄 K=63, 90쪽 행렬 K).</aside>
   </section>
 
-  <!-- 13. 오늘 한 줄 -->
+  <!-- 14. 오늘 한 줄 -->
   <section>
     <div class="chapter-tag">오늘 한 줄</div>
     <h2>색은 숫자 세 개다</h2>
@@ -452,14 +544,15 @@
 
     <div class="result-box" style="margin-top: var(--lm-space-5); font-size: var(--lm-slide-body-lg);">
       픽셀 하나는 <span class="kw-success">수 세 개</span>다.<br>
-      그런데 사진 한 장에는 픽셀이 수십만 개 있다.
+      그런데 화면 한 장(가로 1920 · 세로 1080, 교과서 밖 예시)에는 픽셀이 <b>2,073,600개</b>,
+      수로는 <b>6,220,800개</b>다.<br>
       <b>그 많은 수를 어떻게 정리해서 적을 것인가?</b>
     </div>
 
     <p class="prob-stmt" style="margin-top: var(--lm-space-4);">
       다음 시간 — <span class="kw">해상도와 행렬</span>. 픽셀을 가로세로로 줄 세운다.
     </p>
-    <aside class="notes">오늘 배운 세 낱말을 확인하고, 다음 차시의 질문을 던지며 닫는다. "수십만 개"라는 말이 실감 나게 하려면 9장 슬라이더 하나를 만드는 데 걸린 시간을 떠올리게 하면 된다. 이 질문의 답이 행렬이고, 그것이 Ⅲ단원 전체를 관통한다.</aside>
+    <aside class="notes">오늘 배운 세 낱말을 확인하고, 다음 차시의 질문을 던지며 닫는다. 1920×1080은 교과서 밖 예시로, 지금 이 슬라이드 화면의 크기다(1920×1080×3 = 6,220,800). 수가 실감 나게 하려면 5장 건물 144칸과 비교시킨다 — 이 화면은 그 건물 14,400채 분량이다. 이 질문의 답이 행렬이고, 그것이 Ⅲ단원 전체를 관통한다.</aside>
   </section>
 
 </div>
@@ -489,31 +582,34 @@
 </script>
 
 <script>
-  /* 5장 — 픽셀 격자 (13 x 10) */
+  /* 5장 — 생각 열기: 교과서 86쪽 격자 18 x 8 (창문 144개) */
   (function () {
-    var COLS = 13, ROWS = 10;
+    var COLS = 18, ROWS = 8;
     var grid = document.getElementById('heartGrid');
-    if (!grid) return;
+    var facade = document.getElementById('facade');
+    if (!grid || !facade) return;
 
-    /* 하트 모양 — 켜질 칸의 (행, 열) 0부터 */
+    /* 행마다 켜진 창문의 열 번호(0부터) — 정답및풀이 생각 열기 그림과 같다. 모두 68칸 */
     var HEART = [
-      [1,3],[1,4],[1,9],[1,10],
-      [2,2],[2,3],[2,4],[2,5],[2,8],[2,9],[2,10],[2,11],
-      [3,1],[3,2],[3,3],[3,4],[3,5],[3,6],[3,7],[3,8],[3,9],[3,10],[3,11],
-      [4,1],[4,2],[4,3],[4,4],[4,5],[4,6],[4,7],[4,8],[4,9],[4,10],[4,11],
-      [5,2],[5,3],[5,4],[5,5],[5,6],[5,7],[5,8],[5,9],[5,10],
-      [6,3],[6,4],[6,5],[6,6],[6,7],[6,8],[6,9],
-      [7,4],[7,5],[7,6],[7,7],[7,8],
-      [8,5],[8,6],[8,7]
+      [5, 6, 7, 11, 12, 13],
+      [4, 5, 6, 7, 8, 10, 11, 12, 13, 14],
+      [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+      [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+      [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+      [5, 6, 7, 8, 9, 10, 11, 12, 13],
+      [7, 8, 9, 10, 11],
+      [9]
     ];
-    var key = function (r, c) { return r + ',' + c; };
-    var heartSet = {};
-    HEART.forEach(function (p) { heartSet[key(p[0], p[1])] = true; });
+    var isLit = function (r, c) { return HEART[r].indexOf(c) !== -1; };
 
     for (var r = 0; r < ROWS; r++) {
       for (var c = 0; c < COLS; c++) {
+        var win = document.createElement('i');
+        if (isLit(r, c)) win.className = 'on';
+        facade.appendChild(win);
+
         var cell = document.createElement('i');
-        cell.dataset.k = key(r, c);
+        cell.dataset.lit = isLit(r, c) ? '1' : '';
         cell.addEventListener('click', function () { this.classList.toggle('on'); });
         grid.appendChild(cell);
       }
@@ -523,7 +619,7 @@
     var btnC = document.getElementById('btnClear');
     if (btnH) btnH.addEventListener('click', function () {
       grid.querySelectorAll('i').forEach(function (el) {
-        el.classList.toggle('on', !!heartSet[el.dataset.k]);
+        el.classList.toggle('on', el.dataset.lit === '1');
       });
     });
     if (btnC) btnC.addEventListener('click', function () {
@@ -571,11 +667,15 @@
 </script>
 
 <script>
-  /* 12장 — 확인 활동 */
+  /* 11장 — 문제 1 정답 연결 · 13장 — 「더 깊이」 질문 */
   (function () {
-    var list = document.getElementById('qList');
-    if (!list) return;
-    list.querySelectorAll('li').forEach(function (li) {
+    var match = document.getElementById('match1');
+    var btn = document.getElementById('btnMatch');
+    if (match && btn) btn.addEventListener('click', function () {
+      match.classList.toggle('revealed');
+    });
+
+    document.querySelectorAll('.qlist li').forEach(function (li) {
       li.addEventListener('click', function () {
         li.classList.toggle('revealed');
         window.safeTypeset([li]);
