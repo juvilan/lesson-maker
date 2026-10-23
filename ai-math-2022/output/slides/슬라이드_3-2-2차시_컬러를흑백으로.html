@@ -40,7 +40,7 @@
     .plain-card { background: var(--lm-page); border: var(--lm-border-thin) solid var(--lm-rule);
                   border-radius: var(--lm-radius-md); padding: var(--lm-space-3) var(--lm-space-4); }
     .plain-card h4 { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-h3); }
-    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-small);
+    .plain-card p { margin: 0 0 var(--lm-space-2); font-size: var(--lm-slide-body);
                     line-height: var(--lm-slide-line-tight); color: var(--lm-ink-2); }
     .plain-card p:last-child { margin-bottom: 0; }
 
@@ -54,15 +54,15 @@
     .kgrid { display: grid; gap: 3px; background: var(--lm-ink-4); padding: 3px;
              border-radius: var(--lm-radius-sm); width: max-content;
              outline: 8px solid var(--lm-ink-2); margin: 0 auto; }
-    .kgrid.g3 { grid-template-columns: repeat(3, 74px); }
-    .kgrid i { display: block; height: 74px; }
+    .kgrid.g3 { grid-template-columns: repeat(3, 110px); }
+    .kgrid i { display: block; height: 110px; }
 
     .trio { display: flex; gap: var(--lm-space-6); justify-content: center;
             align-items: flex-start; margin-top: var(--lm-space-4); }
     .trio .col { text-align: center; }
     .trio .col .cap { font-size: var(--lm-slide-body); font-weight: 700;
                       margin-bottom: var(--lm-space-2); }
-    .trio .col .sub { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
+    .trio .col .sub { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
                       margin-top: var(--lm-space-2); }
     .trio .arrow { align-self: center; font-size: 44px; color: var(--lm-ink-3); }
 
@@ -70,9 +70,10 @@
     .moods { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--lm-space-3);
              margin-top: var(--lm-space-4); }
     .mood { text-align: center; }
-    .mood .sw { height: 92px; border-radius: var(--lm-radius-sm);
+    .mood .sw { display: block; width: 100%; height: auto; border-radius: var(--lm-radius-sm);
                 border: var(--lm-border-thin) solid var(--lm-rule); }
-    .mood .nm { font-size: var(--lm-slide-caption); color: var(--lm-ink-2);
+    .mood-cap { font-size: var(--lm-slide-small); color: var(--lm-ink-3); margin: var(--lm-space-2) 0 0; }
+    .mood .nm { font-size: var(--lm-slide-body); color: var(--lm-ink-2);
                 margin-top: var(--lm-space-2); }
     .mood.here .nm { color: var(--lm-accent); font-weight: 700; }
     .mood.here .sw { border-color: var(--lm-accent); border-width: 3px; }
@@ -91,13 +92,22 @@
     .qlist li.revealed { border-color: var(--lm-accent); }
     .qlist li.revealed .ans { visibility: visible;
                               border-top-color: var(--lm-rule); }
-    /* 9장은 행렬 세 개가 자리를 많이 먹는다. 폰트를 줄이는 대신
+    /* 11장은 행렬 세 개가 자리를 많이 먹는다. 폰트를 줄이는 대신
        문항 사이 간격만 좁힌다 (994px 상한 맞춤) */
     .qlist.compact { margin-top: var(--lm-space-2); }
     .qlist.compact li { margin-bottom: var(--lm-space-1); }
 
     .step-counter { font-size: var(--lm-slide-caption); color: var(--lm-ink-3);
                     margin-left: var(--lm-space-3); }
+    /* 5장·8장 — 교과서 94~95쪽 수박 13×13 */
+    .wm-wrap { display: flex; gap: var(--lm-space-6); align-items: center; justify-content: center;
+               margin-top: var(--lm-space-4); }
+    .wm-fig { text-align: center; font-size: var(--lm-slide-body); }
+    .wm { display: grid; grid-template-columns: repeat(13, 27px); grid-auto-rows: 27px; gap: 1px; width: max-content;
+          background: var(--lm-rule); padding: 1px; margin-bottom: var(--lm-space-2); }
+    .wm i { display: block; cursor: pointer; }
+    .wm i.hit { outline: 3px solid var(--lm-accent); outline-offset: -3px; }
+    .wm-arrow { font-size: var(--lm-slide-h2); color: var(--lm-accent); }
   </style>
 </head>
 <body class="lm-narrow" data-subject="ai_math">
@@ -113,7 +123,7 @@
       <span>2학년 인공지능수학</span>
       <span>교과서 94~95쪽</span>
     </div>
-    <aside class="notes">계산은 평균 하나뿐이라 가볍게 지나간다. 오늘의 무게는 10장이다 — 파랑과 빨강이 흑백에서는 거의 같은 회색이 된다는 것, 즉 흑백으로 바꾸면 정보가 사라진다는 사실을 숫자로 보여 주는 자리다. 거기에 시간을 남겨 두고 앞을 빠르게 넘긴다.</aside>
+    <aside class="notes">계산은 평균 하나뿐이라 가볍게 지나간다. 오늘의 무게는 12장이다 — 파랑과 빨강이 흑백에서는 거의 같은 회색이 된다는 것, 즉 흑백으로 바꾸면 정보가 사라진다는 사실을 숫자로 보여 주는 자리다. 거기에 시간을 남겨 두고 앞을 빠르게 넘긴다.</aside>
   </section>
 
   <!-- 2. 지난 시간 -->
@@ -127,7 +137,7 @@
     </p>
 
     <div class="warning-box" style="margin-top: var(--lm-space-4);">
-      그런데 밝기가 바뀌어도 <b>색은 그대로</b>였다.
+      그런데 밝기가 바뀌어도 (255에 닿지 않는 한) <b>색은 그대로</b>였다.
       빨강은 여전히 빨강이고 파랑은 여전히 파랑이다.
     </div>
 
@@ -151,36 +161,37 @@
     <div class="info-box" style="margin-top: var(--lm-space-4);">
       목표 3번이 오늘의 핵심이다. 계산은 <b>평균 한 번</b>이면 끝난다.
     </div>
-    <aside class="notes">목표 3번을 미리 걸어 두면 10장에서 회수된다. 계산이 쉬운 차시일수록 "그래서 무슨 일이 일어나는가"에 시간을 써야 한다.</aside>
+    <aside class="notes">목표 3번을 미리 걸어 두면 12장에서 회수된다. 계산이 쉬운 차시일수록 "그래서 무슨 일이 일어나는가"에 시간을 써야 한다.</aside>
   </section>
 
-  <!-- 4. 생각 열기 -->
+  <!-- 4. 도입 -->
   <section>
-    <div class="chapter-tag">교과서 94쪽 · 생각 열기</div>
+    <div class="chapter-tag">교과서 94쪽 · 도입</div>
     <h2>같은 사진, 다섯 가지 느낌</h2>
 
     <div class="moods">
       <div class="mood">
-        <div class="sw" style="background: linear-gradient(160deg, #2f7fd8, #e03b2f 60%, #f2c200);"></div>
+        <canvas class="sw" data-f="vivid" width="300" height="150"></canvas>
         <div class="nm">선명한 느낌</div>
       </div>
       <div class="mood">
-        <div class="sw" style="background: linear-gradient(160deg, #9fc4e4, #dba49e 60%, #ecdca6);"></div>
+        <canvas class="sw" data-f="faded" width="300" height="150"></canvas>
         <div class="nm">빛바랜 느낌</div>
       </div>
       <div class="mood">
-        <div class="sw" style="background: linear-gradient(160deg, #4a90d9, #d9534f 60%, #e8c341);"></div>
+        <canvas class="sw" data-f="orig" width="300" height="150"></canvas>
         <div class="nm">원본</div>
       </div>
       <div class="mood">
-        <div class="sw" style="background: linear-gradient(160deg, #7ea6c8, #e0663f 60%, #f0d089);"></div>
+        <canvas class="sw" data-f="warm" width="300" height="150"></canvas>
         <div class="nm">따뜻한 느낌</div>
       </div>
       <div class="mood here">
-        <div class="sw" style="background: linear-gradient(160deg, #8e8e8e, #6f6f6f 60%, #c8c8c8);"></div>
+        <canvas class="sw" data-f="gray" width="300" height="150"></canvas>
         <div class="nm">흑백</div>
       </div>
     </div>
+    <p class="mood-cap">교과서 열기구 사진 대신 코드로 그린 풍경의 세 채널값을 손본 것 (교과서 밖)</p>
 
     <p class="prob-stmt">
       사진은 하나인데 느낌이 다섯이다. 다른 사진을 찍은 것이 아니라
@@ -190,10 +201,28 @@
     <div class="info-box" style="margin-top: var(--lm-space-3);">
       오늘은 이 중 <span class="kw-info">맨 오른쪽 하나</span>만 한다. 나머지도 원리는 같다.
     </div>
-    <aside class="notes">교과서에는 열기구 사진 다섯 장이 실려 있다. 실제 사진을 띄울 수 있으면 그것이 낫다. 학생들에게 "무엇이 달라졌느냐"고 물으면 대개 "색감"이라고 답하는데, 그것이 곧 채널값이라는 점을 이어 준다.</aside>
+    <aside class="notes">교과서에는 열기구 사진 다섯 장이 실려 있다. 화면은 그 대신 코드로 그린 풍경의 R, G, B를 다섯 가지로 손본 것이다 — 선명(평균에서 더 멀리), 빛바램(평균 쪽으로 + 밝게), 따뜻함(R 올리고 B 내림), 흑백(세 값의 평균). 교과서 사진도 함께 보게 한다. 학생들에게 "무엇이 달라졌느냐"고 물으면 대개 "색감"이라고 답하는데, 그것이 곧 채널값이라는 점을 이어 준다.</aside>
   </section>
 
-  <!-- 5. 흑백의 조건 -->
+  <!-- 5. 수박 그림 (컬러) -->
+  <section>
+    <div class="chapter-tag">교과서 94쪽</div>
+    <h2>컬러 이미지를 세 행렬로</h2>
+
+    <p class="prob-stmt" style="margin-top: var(--lm-space-2);">
+      교과서의 \(13\times13\) 수박 그림을 세 행렬 \(R,\ G,\ B\)로 변환한 것이다.
+      칸을 누르면 그 자리의 세 성분이 보인다.
+    </p>
+
+    <div class="wm-wrap">
+      <div class="wm-fig"><div class="wm" id="wmColor0"></div>컬러 — \(R,\ G,\ B\)</div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);" id="wmOut0">칸을 눌러 보자.</div>
+    <aside class="notes">교과서 94쪽 수박 그림과 세 행렬이다(값은 교과서 그대로). 몇 칸을 눌러 세 값을 읽게 한다 — 빨강 과육 (251, 2, 0), 껍질 초록 (62, 199, 59) 등. 그리고 묻는다: "이걸 흑백으로 바꾸려면 세 값을 어떻게 해야 할까?" 다음 장에서 흑백의 조건을 되짚는다.</aside>
+  </section>
+
+  <!-- 6. 흑백의 조건 -->
   <section>
     <div class="chapter-tag">지난 차시 회수 · 교과서 90쪽</div>
     <h2>흑백이란 무엇이었나</h2>
@@ -215,13 +244,13 @@
     <aside class="notes">3-1-3차시에서 정한 무채색 정의를 그대로 가져온다. 여기서 문제가 "어떻게 같게 만드나"로 좁혀지는 것이 중요하다. 학생이 "그럼 아무 값이나 같게 하면 되느냐"고 물으면 좋은 질문이다 — 원래 밝기를 살려야 하므로 아무 값이나는 안 된다고 답하고 다음 장으로 넘어간다.</aside>
   </section>
 
-  <!-- 6. 평균 -->
+  <!-- 7. 평균 -->
   <section>
-    <div class="chapter-tag">교과서 95쪽 · 정의</div>
-    <h2>세 값의 한가운데를 고른다</h2>
+    <div class="chapter-tag">교과서 95쪽</div>
+    <h2>세 값의 평균을 구한다</h2>
 
     <p class="prob-stmt">
-      셋을 같게 만들되 원래 밝기를 살리려면, 세 값의 <b>평균</b>을 쓰면 된다.
+      각 픽셀마다 세 채널값이 서로 같아지도록, 교과서는 세 값의 <b>평균</b>을 쓴다.
     </p>
 
     <div class="formula-box">
@@ -242,10 +271,30 @@
     <div class="info-box" style="margin-top: var(--lm-space-3);">
       지난 시간의 실수배에 <b>덧셈</b>이 하나 얹혔을 뿐이다.
     </div>
-    <aside class="notes">R+G+B는 성분끼리 더하는 것이지 세 이미지를 겹치는 것이 아니라는 점을 확인시킨다. 결과 행렬 K는 R·G·B와 같은 크기다. 왜 하필 평균인지 물으면, 사람 눈은 초록에 더 민감해서 실제 프로그램은 가중평균을 쓰기도 한다고만 덧붙인다 — 교과서 범위 밖이다.</aside>
+    <aside class="notes">R+G+B는 성분끼리 더하는 것이지 세 이미지를 겹치는 것이 아니라는 점을 확인시킨다. 결과 행렬 K는 R·G·B와 같은 크기다. 왜 하필 평균인지 물으면, 사람 눈은 초록에 더 민감해서 실제 프로그램은 가중평균을 쓰기도 한다고만 덧붙인다 — 교과서 범위 밖이다. 근거(지도서 3-2 지도 자료): 국제 표준 Rec. 601의 가중 평균 방법 K=0.299R+0.587G+0.114B.</aside>
   </section>
 
-  <!-- 7. 성분 하나 -->
+  <!-- 8. 수박 그림 -->
+  <section>
+    <div class="chapter-tag">교과서 95쪽</div>
+    <h2>수박 그림 전체를 흑백으로</h2>
+
+    <p class="prob-stmt" style="margin-top: var(--lm-space-2);">
+      앞의 수박 그림에서 \(K=\frac{1}{3}(R+G+B)\)를 구하면 오른쪽 흑백 이미지가 된다(교과서 95쪽).
+      칸을 눌러 보자.
+    </p>
+
+    <div class="wm-wrap">
+      <div class="wm-fig"><div class="wm" id="wmColor"></div>컬러 — \(R,\ G,\ B\)</div>
+      <div class="wm-arrow">→</div>
+      <div class="wm-fig"><div class="wm" id="wmGray"></div>흑백 — \(K\)</div>
+    </div>
+
+    <div class="result-box" style="margin-top: var(--lm-space-4);" id="wmOut">칸을 눌러 보자.</div>
+    <aside class="notes">교과서 94쪽 R, G, B 세 행렬과 95쪽 K를 그대로 옮겨 칠했다(169칸 모두 평균을 반올림하면 교과서 K와 같다는 것을 확인함). 몇 칸을 눌러 보게 한다 — 빨강 과육(251, 2, 0) → 84, 초록 껍질(62, 199, 59) → 107, 연두(0, 132, 0) → 44. 다음 장에서 그중 한 칸을 손으로 천천히 따라간다.</aside>
+  </section>
+
+  <!-- 9. 성분 하나 -->
   <section class="tight">
     <div class="chapter-tag">교과서 94~95쪽 · 성분 하나로 확인</div>
     <h2>한 칸만 따라가 보자</h2>
@@ -274,10 +323,10 @@
       <button class="anim-btn" id="stepReset">처음부터</button>
       <span class="step-counter" id="stepCnt">0 / 4</span>
     </div>
-    <aside class="notes">169개 칸을 다 계산할 수는 없으니 한 칸만 손으로 따라간다. 옆칸(1행 11열)도 빠르게 확인시키면 좋다 — R=0, G=132, B=0이라 132÷3=44로 나누어떨어진다. 한 칸이 되면 나머지는 같은 일의 반복이라는 것을 납득시키는 것이 목적이다.</aside>
+    <aside class="notes">169개 칸을 다 계산할 수는 없으니 한 칸만 손으로 따라간다. 옆칸(1행 11열)도 빠르게 확인시키면 좋다 — R=0, G=132, B=0이라 132÷3=44로 나누어떨어진다. 한 칸이 되면 나머지는 같은 일의 반복이라는 것을 납득시키는 것이 목적이다. 3단계의 반올림 규칙은 다음 장에서 정리한다.</aside>
   </section>
 
-  <!-- 8. 반올림 -->
+  <!-- 10. 반올림 -->
   <section>
     <div class="chapter-tag">교과서 92쪽 방주 · 규칙</div>
     <h2>나누어떨어지지 않으면</h2>
@@ -307,7 +356,7 @@
     <aside class="notes">두 규칙 중 반올림만 오늘 쓰이고 255 자르기는 쓰이지 않는다. 그 이유를 학생에게 물어보면 좋다 — 평균은 최댓값을 넘을 수 없기 때문이다. 지난 차시의 실수배에서는 넘쳤지만 평균에서는 구조적으로 넘지 않는다는 대비가 남는다.</aside>
   </section>
 
-  <!-- 9. 확인 활동 -->
+  <!-- 11. 확인 활동 -->
   <section class="tight">
     <div class="chapter-tag">확인 활동 · 교과서 95쪽 문제 2</div>
     <h2>직접 해 보자</h2>
@@ -330,10 +379,10 @@
       <li><b>답</b> — 행렬 \(K\)로 적으면?
         <div class="ans">\(K=\begin{pmatrix}111&111&111\\111&104&111\\111&111&111\end{pmatrix}\)</div></li>
     </ul>
-    <aside class="notes">바깥 여덟 칸이 모두 같은 값이라는 것을 먼저 알아채면 계산이 두 번으로 끝난다. 그것을 알아채지 못하고 아홉 번 계산하는 학생이 많으니, 표를 보고 "같은 것끼리 묶어라"고 한마디 해 주면 좋다. 332÷3에서 반올림이 실제로 쓰인다.</aside>
+    <aside class="notes">바깥 여덟 칸이 모두 같은 값이라는 것을 먼저 알아채면 계산이 두 번으로 끝난다. 그것을 알아채지 못하고 아홉 번 계산하는 학생이 많으니, 행렬을 보고 "같은 것끼리 묶어라"고 한마디 해 주면 좋다. 332÷3에서 반올림이 실제로 쓰인다.</aside>
   </section>
 
-  <!-- 10. 눈여겨볼 것 -->
+  <!-- 12. 눈여겨볼 것 -->
   <section>
     <div class="chapter-tag">눈여겨볼 것 <span class="badge">교과서 밖 보조</span></div>
     <h2>111과 104는 거의 같은 회색이다</h2>
@@ -367,7 +416,7 @@
     <aside class="notes">오늘의 정점이다. 실제로 화면에서 오른쪽 가운데 칸을 찾아보라고 하면 잘 못 찾는다. 색맹 검사표가 이 원리를 뒤집어 쓴 것이라고 덧붙이면 이해가 빠르다 — 밝기는 같고 색만 다르게 만들어 색을 못 보는 사람에게는 숨겨지게 한 것이다. 그래서 흑백 변환은 되돌릴 수 없다. 세 수를 한 수로 줄였으니 잃어버린 둘은 복구되지 않는다.</aside>
   </section>
 
-  <!-- 11. 오늘 한 줄 -->
+  <!-- 13. 오늘 한 줄 -->
   <section>
     <div class="chapter-tag">오늘 한 줄</div>
     <h2>평균을 내면 색이 빠진다</h2>
@@ -416,7 +465,7 @@
 </script>
 
 <script>
-  /* 7장 — 단계별 전개 */
+  /* 9장 — 단계별 전개 */
   (function () {
     const items = Array.from(document.querySelectorAll('[data-s]'));
     if (!items.length) return;
@@ -436,7 +485,7 @@
 </script>
 
 <script>
-  /* 9장 — 문항을 누르면 답이 펼쳐진다 */
+  /* 11장 — 문항을 누르면 답이 펼쳐진다 */
   (function () {
     const list = document.getElementById('qList');
     if (!list) return;
@@ -445,6 +494,106 @@
         li.classList.toggle('revealed');
         window.safeTypeset([li]);
       });
+    });
+  })();
+</script>
+
+<script>
+  /* 5장·8장 — 교과서 94~95쪽 수박 13x13 (R, G, B, K 모두 교과서 값) */
+  (function () {
+    var D = {"R":[[255,255,255,255,255,255,255,255,255,62,0,255,255],[255,255,255,255,255,255,255,255,251,250,62,0,255],[255,255,255,255,255,255,255,251,251,250,250,62,0],[255,255,255,255,255,255,251,251,0,251,255,62,0],[255,255,255,255,255,251,251,251,251,251,255,62,0],[255,255,255,255,251,251,251,0,251,251,255,62,0],[255,255,255,251,251,251,251,251,251,251,255,62,0],[255,255,251,251,251,0,251,251,251,250,255,62,0],[255,251,251,0,251,251,251,251,251,255,62,0,255],[62,250,250,251,251,251,251,250,255,62,0,0,255],[0,62,250,255,255,255,255,255,62,0,0,255,255],[255,0,62,62,62,62,62,62,0,0,255,255,255],[255,255,255,0,0,0,0,0,255,255,255,255,255]],"G":[[255,255,255,255,255,255,255,255,255,199,132,255,255],[255,255,255,255,255,255,255,255,2,146,199,132,255],[255,255,255,255,255,255,255,2,2,146,146,199,132],[255,255,255,255,255,255,2,2,0,2,232,199,132],[255,255,255,255,255,2,2,2,2,2,232,199,132],[255,255,255,255,2,2,2,0,2,2,232,199,132],[255,255,255,2,2,2,2,2,2,2,232,199,132],[255,255,2,2,2,0,2,2,2,146,232,199,132],[255,2,2,0,2,2,2,2,2,232,199,132,255],[199,146,146,2,2,2,2,146,232,199,132,132,255],[132,199,146,232,232,232,232,232,199,132,132,255,255],[255,132,199,199,199,199,199,199,132,132,255,255,255],[255,255,255,132,132,132,132,132,255,255,255,255,255]],"B":[[255,255,255,255,255,255,255,255,255,59,0,255,255],[255,255,255,255,255,255,255,255,0,153,59,0,255],[255,255,255,255,255,255,255,0,0,153,153,59,0],[255,255,255,255,255,255,0,0,0,0,201,59,0],[255,255,255,255,255,0,0,0,0,0,201,59,0],[255,255,255,255,0,0,0,0,0,0,201,59,0],[255,255,255,0,0,0,0,0,0,0,201,59,0],[255,255,0,0,0,0,0,0,0,153,201,59,0],[255,0,0,0,0,0,0,0,0,201,59,0,255],[59,153,153,0,0,0,0,153,201,59,0,0,255],[0,59,153,201,201,201,201,201,59,0,0,255,255],[255,0,59,59,59,59,59,59,0,0,255,255,255],[255,255,255,0,0,0,0,0,255,255,255,255,255]],"K":[[255,255,255,255,255,255,255,255,255,107,44,255,255],[255,255,255,255,255,255,255,255,84,183,107,44,255],[255,255,255,255,255,255,255,84,84,183,183,107,44],[255,255,255,255,255,255,84,84,0,84,229,107,44],[255,255,255,255,255,84,84,84,84,84,229,107,44],[255,255,255,255,84,84,84,0,84,84,229,107,44],[255,255,255,84,84,84,84,84,84,84,229,107,44],[255,255,84,84,84,0,84,84,84,183,229,107,44],[255,84,84,0,84,84,84,84,84,229,107,44,255],[107,183,183,84,84,84,84,183,229,107,44,44,255],[44,107,183,229,229,229,229,229,107,44,44,255,255],[255,44,107,107,107,107,107,107,44,44,255,255,255],[255,255,255,44,44,44,44,44,255,255,255,255,255]]};
+    var cg = document.getElementById('wmColor'), gg = document.getElementById('wmGray');
+    var out = document.getElementById('wmOut');
+    if (!cg || !gg || !out) return;
+    var cells = [];
+    var c0 = document.getElementById('wmColor0'), out0 = document.getElementById('wmOut0');
+    if (c0 && out0) {
+      var cells0 = [];
+      for (var r0 = 0; r0 < 13; r0++) {
+        for (var q0 = 0; q0 < 13; q0++) {
+          var e0 = document.createElement('i');
+          e0.style.background = 'rgb(' + D.R[r0][q0] + ',' + D.G[r0][q0] + ',' + D.B[r0][q0] + ')';
+          e0.dataset.r = r0; e0.dataset.c = q0;
+          e0.addEventListener('click', function () {
+            var r = +this.dataset.r, c = +this.dataset.c;
+            cells0.forEach(function (el) { el.classList.toggle('hit', +el.dataset.r === r && +el.dataset.c === c); });
+            out0.innerHTML = '(' + (r + 1) + ', ' + (c + 1) + ') 성분 &nbsp; \\(R\\): ' + D.R[r][c] +
+              ' &nbsp; \\(G\\): ' + D.G[r][c] + ' &nbsp; \\(B\\): ' + D.B[r][c];
+            window.safeTypeset([out0]);
+          });
+          c0.appendChild(e0); cells0.push(e0);
+        }
+      }
+    }
+    function pick(r, c) {
+      cells.forEach(function (el) { el.classList.toggle('hit', +el.dataset.r === r && +el.dataset.c === c); });
+      var v = [D.R[r][c], D.G[r][c], D.B[r][c]], s = v[0] + v[1] + v[2];
+      out.innerHTML = '(' + (r + 1) + ', ' + (c + 1) + ') 성분 &nbsp; (' + v.join(', ') + ') → ' +
+        v.join(' + ') + ' = ' + s + ', ' + s + ' ÷ 3 → <b>' + D.K[r][c] + '</b>';
+    }
+    for (var r = 0; r < 13; r++) {
+      for (var c = 0; c < 13; c++) {
+        [cg, gg].forEach(function (g, gi) {
+          var el = document.createElement('i'), k = D.K[r][c];
+          el.style.background = gi === 0 ? 'rgb(' + D.R[r][c] + ',' + D.G[r][c] + ',' + D.B[r][c] + ')'
+                                         : 'rgb(' + k + ',' + k + ',' + k + ')';
+          el.dataset.r = r; el.dataset.c = c;
+          el.addEventListener('click', function () { pick(+this.dataset.r, +this.dataset.c); });
+          g.appendChild(el); cells.push(el);
+        });
+      }
+    }
+    window.pickWm = pick;
+  })();
+</script>
+
+<script>
+  /* 4장 — 같은 풍경, 다섯 가지 느낌 (교과서 열기구 사진 대신, 교과서 밖) */
+  (function () {
+    function ridge(u) {
+      return 0.40 - 0.13 * Math.exp(-Math.pow((u - 0.30) / 0.11, 2))
+                  - 0.09 * Math.exp(-Math.pow((u - 0.60) / 0.09, 2))
+                  - 0.06 * Math.exp(-Math.pow((u - 0.86) / 0.07, 2))
+                  + 0.012 * Math.sin(u * 47);
+    }
+    function treeTop(u) { return 0.58 - 0.05 * Math.abs(Math.sin(u * 140)) * (0.6 + 0.4 * Math.sin(u * 9)); }
+    function colorAt(u, v) {
+      var m = ridge(u);
+      if (v < m) {                                   /* 하늘 */
+        var t = v / m;
+        var cloud = Math.exp(-Math.pow((u - 0.22) / 0.09, 2) - Math.pow((v - 0.12) / 0.04, 2)) +
+                    Math.exp(-Math.pow((u - 0.70) / 0.12, 2) - Math.pow((v - 0.08) / 0.035, 2));
+        var c = [60 + 120 * t, 120 + 90 * t, 200 + 40 * t];
+        return c.map(function (x) { return x + (250 - x) * Math.min(1, cloud); });
+      }
+      if (v < treeTop(u)) {                          /* 산 */
+        return v < m + 0.025 ? [235, 235, 240] : [125 - 60 * (v - m), 110 - 40 * (v - m), 130 - 50 * (v - m)];
+      }
+      if (v < 0.70) {                                /* 숲 */
+        var s = 0.5 + 0.5 * Math.sin(u * 300);
+        return [30 + 20 * s, 75 + 30 * s, 40 + 10 * s];
+      }
+      var w = (v - 0.70) / 0.30;                     /* 호수 */
+      return [40 + 30 * w, 100 + 40 * w, 170 + 40 * w];
+    }
+    function clip(v) { return Math.max(0, Math.min(255, Math.round(v))); }
+    var F = {
+      orig:  function (c) { return c; },
+      vivid: function (c) { var m = (c[0] + c[1] + c[2]) / 3; return c.map(function (v) { return m + 1.6 * (v - m); }); },
+      faded: function (c) { var m = (c[0] + c[1] + c[2]) / 3; return c.map(function (v) { return 0.8 * (m + 0.45 * (v - m)) + 45; }); },
+      warm:  function (c) { return [c[0] * 1.2, c[1] * 1.03, c[2] * 0.78]; },
+      gray:  function (c) { var m = (c[0] + c[1] + c[2]) / 3; return [m, m, m]; }
+    };
+    document.querySelectorAll('.mood .sw').forEach(function (cv) {
+      var fn = F[cv.dataset.f], W = cv.width, H = cv.height;
+      var ctx = cv.getContext('2d'), img = ctx.createImageData(W, H);
+      for (var y = 0; y < H; y++) {
+        for (var x = 0; x < W; x++) {
+          var c = fn(colorAt((x + 0.5) / W, (y + 0.5) / H)), p = (y * W + x) * 4;
+          img.data[p] = clip(c[0]); img.data[p + 1] = clip(c[1]); img.data[p + 2] = clip(c[2]); img.data[p + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
     });
   })();
 </script>
